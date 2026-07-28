@@ -60,9 +60,9 @@ elif rv.group(1) != cv.group(1):
     errors.append(f"version mismatch: README {rv.group(1)} vs CHANGELOG {cv.group(1)}")
 
 # ste-pack submodule pin: the tag checked out at tools/ste-pack must match
-# the version declared in the README ("ste-pack vX.Y").
+# the version declared in the README ("ste-pack vX.Y[.Z]").
 import subprocess
-sv = re.search(r"ste-pack v(\d+\.\d+)", readme)
+sv = re.search(r"ste-pack v(\d+(?:\.\d+)*)", readme)
 sub = ROOT / "tools" / "ste-pack"
 if not sv:
     errors.append("could not parse declared ste-pack version from README")
