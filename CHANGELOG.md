@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.18.1 — 2026-07-29
+- Test audit: two-suite reality modeled. The audit subjects are the
+  hand-written unit tests; the pack-generated domain tests act as the
+  sound reference suite, never re-judged. New CONFIG field `Reference
+  suite`, new hard rule 9, `matrix-coverage.json` loaded as coverage
+  evidence, `weak-redundant` proposes deletion (not rewrite) when the
+  reference suite covers the cell, cell classes count reference coverage,
+  checker verifies deletion proposals against the coverage map.
+
 ## v1.18 — 2026-07-29
 - New stage prompt `prompts/07-test-audit.md`: test-suite audit against the
   decided matrix. Main goal: weak tests that bind to implementation instead

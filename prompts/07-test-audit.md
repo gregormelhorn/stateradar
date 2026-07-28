@@ -6,7 +6,8 @@
 
 ```text
 Analysis directory:   <domain-analysis/<component>/>
-Test paths:           <dirs or globs of the suite under audit>
+Test paths:           <dirs or globs of the unit-test suite under audit>
+Reference suite:      <path of the pack-generated domain tests, or "none">
 Exclude:              <generated or vendored test dirs>
 ```
 
@@ -26,10 +27,11 @@ You audit a test suite against the decided domain model of one stateful componen
 6. Deletion and weakening are human decisions. Every such proposal becomes a decision-record draft, marked `proposed`.
 7. Checks are executed code. You emit `check_test_coverage.py`, run it, and paste the output.
 8. Scenario tests overlap cell tests by design. Never mark a scenario test as a duplicate of a cell test.
+9. The reference suite is sound by construction. The pack generated it from the matrix. Do not re-judge it. Use it as coverage evidence only.
 
 ### Step 1 — Load the decided model
 
-Read `disposition-matrix.md`, `event-catalogue.md`, `seam.md`, and `open-questions.md` from the analysis directory. Verify the analysis state: the matrix exists, and every hole cell carries a `→ Q-nn`. If the matrix does not exist, stop. The pilot must run first.
+Read `disposition-matrix.md`, `event-catalogue.md`, `seam.md`, and `open-questions.md` from the analysis directory. Verify the analysis state: the matrix exists, and every hole cell carries a `→ Q-nn`. If the matrix does not exist, stop. The pilot must run first. When the reference suite exists, load `matrix-coverage.json`. Its entries name the cells that the reference suite covers with sound tests.
 
 ### Step 2 — Restate the seam
 
@@ -48,7 +50,7 @@ For each test, answer one question: what does this test observe? Use these weakn
 Assign exactly one class per test:
 
 * `sound`: asserts through the seam only.
-* `weak-redundant`: structure-bound, and the targeted behaviour is observable through the seam. Propose a rewrite to seam assertions. Propose deletion when an equivalent seam test exists.
+* `weak-redundant`: structure-bound, and the targeted behaviour is observable through the seam. Propose a rewrite to seam assertions when the test is the only coverage. Propose deletion when an equivalent seam test exists, in the reference suite or in the audited suite.
 * `weak-seam-gap`: structure-bound because the seam does not expose the behaviour. This is a seam-gap finding. It becomes a new `Q-nn`: extend the projection?
 * `weak-incidental`: asserts detail with no behavioural relevance. Deletion candidate.
 * `equivalent-duplicate`: sound, but it matches another test in cells, assertions, and expected values. Redundancy candidate. Propose which test to keep: the one with more SYS-invariant assertions.
@@ -57,14 +59,14 @@ Assign exactly one class per test:
 
 ### Step 4 — Classify every cell
 
-* `covered`: at least one `sound` test.
-* `weakly-covered`: only weak tests. The cell needs a seam-bound test. Note it in the report.
+* `covered`: at least one `sound` test, in the audited suite or in the reference suite.
+* `weakly-covered`: no `sound` test anywhere, only weak tests. The cell needs a seam-bound test. Note it in the report.
 * `uncovered`: no test at all. A coverage gap.
 * `contested`: a `deviating` test exists. The deviation decides the follow-up, never the auditor.
 
 ### Step 5 — Emit and run the checker
 
-Write `check_test_coverage.py` into the analysis directory. It verifies totality: every test carries a class, every cell carries a class, no item is unclassified. It prints the counts per class. Run it. Paste the output into the report.
+Write `check_test_coverage.py` into the analysis directory. It verifies totality: every test carries a class, every cell carries a class, no item is unclassified. When a reference suite is configured, it also verifies that every deletion proposal cites a covering cell from `matrix-coverage.json`. It prints the counts per class. Run it. Paste the output into the report.
 
 ### Step 6 — Report
 
