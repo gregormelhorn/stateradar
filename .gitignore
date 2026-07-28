@@ -9,9 +9,9 @@ __pycache__/
 # Agent session artifacts
 .pi-subagents/
 
-# Private/licensed data — never enters the repository (ASD copyright, see STYLE.md)
-private-ste-overlay.zip
+# Private/licensed data — never enters the repository (ASD copyright, see STYLE.md).
+# Source of truth lives outside the repo in ~/ste-private/.
 
-# Generated STE dictionaries (rebuild with tools/build_ste_dictionary.py)
-styles/STEDict/*.dic
-styles/STEDict/*.aff
+# Built STE dictionaries: symlinked from ~/ste-private/ (rebuild with
+# tools/build_ste_dictionary.py)
+styles/config/dictionaries/
