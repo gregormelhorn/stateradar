@@ -5,6 +5,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { submodules: true }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
+      - run: pip install jsonschema
       - run: python tools/check_pack_consistency.py
+      - name: dsc_check selftest
+        run: python tools/dsc_check.py tools/selftest/analysis

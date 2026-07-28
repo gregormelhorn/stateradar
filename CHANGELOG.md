@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.16 — 2026-07-28
+- Split: the language layer is extracted into its own repository, the **ste-pack v1.0** (STYLE.md, Vale styles STE/DTK/STEDict, the three lang-ste prompts, the language checkers incl. the new license-free German catalog `dtk-rules.json`, ste-rules-map.json, selftests). This pack consumes it as a pinned git submodule at `tools/ste-pack/`; the consistency checker verifies the pin against the version declared in the README. The pack's `.vale.ini` now resolves its StylesPath through the submodule. The statechart project dictionary moves from STYLE.md into the README ("Language policy"). Vale gate enabled on this pack's own prompts (strict at error; baseline: 131 errors queued for the ste-pack rewrite pass).
+
 ## v1.15 — 2026-07-27
 - German adaptation (DTK layer): opt-in Vale style `styles/DTK/` with the machinable subset for German technical writing — Passiv (both word orders, distance-tolerant, single alternated pattern: Vale concatenates `raw` items), Konjunktiv/Modalverben, Füllwörter substitutions, Satzlänge, Nominalstil density, Schachtelsatz; verified on a violation-packed sample (9 flags across all six rules). STYLE.md documents the adaptation path: checkers and prompts are data-agnostic; rules come from a privately licensed tekom Leitlinie via an adapted extractor; the dictionary layer becomes a project termbase (Vorzugsbenennungen + deprecated-synonym substitutions, lemma level, agent handles inflection).
 

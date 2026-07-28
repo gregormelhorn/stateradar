@@ -37,9 +37,6 @@ ARTIFACTS = {  # filename -> prompts that define/produce it
     "guard-results.txt": ["02-pilot.md"],
     "analysis.json": ["02-pilot.md"],
     "manifest.json": ["06-reconcile.md"],
-    "ste-sense-report.json": ["lang-ste-sense.md"],
-    "ste-rules-report.json": ["lang-ste-rules.md"],
-    "ste-rewrite-report.json": ["lang-ste-rewrite.md"],
     "to-be.machine.mmd": ["03-resolution.md"],
     "matrix-coverage.json": ["04-testgen.md"],
     "deviation-report.md": ["04-testgen.md"],
@@ -62,8 +59,23 @@ if not rv or not cv:
 elif rv.group(1) != cv.group(1):
     errors.append(f"version mismatch: README {rv.group(1)} vs CHANGELOG {cv.group(1)}")
 
+# ste-pack submodule pin: the tag checked out at tools/ste-pack must match
+# the version declared in the README ("ste-pack vX.Y").
+import subprocess
+sv = re.search(r"ste-pack v(\d+\.\d+)", readme)
+sub = ROOT / "tools" / "ste-pack"
+if not sv:
+    errors.append("could not parse declared ste-pack version from README")
+elif not (sub / ".git").exists():
+    errors.append("ste-pack submodule not checked out at tools/ste-pack")
+else:
+    tag = subprocess.run(["git", "-C", str(sub), "describe", "--tags"],
+                         capture_output=True, text=True).stdout.strip()
+    if tag != f"v{sv.group(1)}":
+        errors.append(f"ste-pack pin mismatch: README declares v{sv.group(1)}, submodule at {tag or 'no tag'}")
+
 if errors:
     print("PACK CONSISTENCY: FAIL")
     for e in errors: print(" -", e)
     sys.exit(1)
-print(f"PACK CONSISTENCY: OK ({len(ARTIFACTS)} artifacts, vocab x2, version {rv.group(1)})")
+print(f"PACK CONSISTENCY: OK ({len(ARTIFACTS)} artifacts, vocab x2, version {rv.group(1)}, ste-pack {sv.group(1)})")
