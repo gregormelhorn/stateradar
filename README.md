@@ -27,6 +27,16 @@ formats/        analysis.schema.json — the sidecar contract
 
 The pack is **stateless**: all analysis artifacts (`domain-analysis/<component>/`) and generated tests live in the consuming repository, never here.
 
+## Running the checkers locally
+
+System Python on macOS is PEP-668 externally managed. Run the checkers through uv, which supplies `jsonschema` (schema validation in `dsc_check`) without touching the system environment:
+
+```bash
+uv run --with jsonschema python3 tools/dsc_check.py <analysis-dir>
+```
+
+Without `jsonschema`, `dsc_check` degrades to structural checks only (it prints a note). CI installs the package with pip instead.
+
 ## Language policy (ste-pack dependency)
 
 The language layer is a separate pack: **ste-pack v1.0**, consumed as a git submodule at `tools/ste-pack/`. It holds STYLE.md (strictness per text class), the Vale styles (STE English, DTK German, STEDict dictionary check), the language agent passes, and the language checkers. This pack's `.vale.ini` points its `StylesPath` into the submodule; `tools/check_pack_consistency.py` verifies that the checked-out submodule tag matches the version declared here.
