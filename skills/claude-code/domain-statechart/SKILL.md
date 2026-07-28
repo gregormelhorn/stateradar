@@ -1,6 +1,6 @@
 ---
 name: domain-statechart
-description: "Use when you analyze, modify, test, or review stateful components — lifecycles, connections, sessions, protocols, state machines, retries, timeouts, cancellation, recovery, queues, concurrent coordination — or when the user mentions a disposition matrix, decision records, domain-analysis/, open questions, or the statechart method. Enforces the domain-statechart discipline: model first, no silent domain decisions, checker-verified matrices, one test per matrix cell."
+description: "Use when you analyze, modify, test, or review stateful components (lifecycles, connections, sessions, protocols, state machines, retries, timeouts, cancellation, recovery, queues, concurrent coordination), or when the user mentions a disposition matrix, decision records, domain-analysis/, open questions, or the statechart method. Enforces the domain-statechart discipline: model first, no silent domain decisions, checker-verified matrices, one test per matrix cell."
 ---
 
 # Domain Statechart Discipline
@@ -13,14 +13,14 @@ Always load `00-methods-reference.md` as context first.
 
 Determine the state of the component in question and follow the matching prompt:
 
-1. **No component is chosen yet** (the user asks which component to analyze, or
+1. **No component chosen yet** (the user asks which component to analyze, or
    no candidate exists) → run `01-scout.md`. The scout ranks stateful components
    and generates the CONFIG block that the pilot consumes.
 2. **No `domain-analysis/<component>/` exists** and the user wants analysis or
    is about to make behavioural changes to a stateful component →
    run `02-pilot.md`.
 3. **Pilot exists, `open-questions.md` has answered questions** → run `03-resolution.md`.
-   If questions are unanswered, present them to the human — never answer them yourself.
+   If questions stay unanswered, present them to the human. Never answer them yourself.
 4. **To-be model and updated matrix exist, no cell tests yet** → run `04-testgen.md`.
 5. **The component is already analyzed and the task is a code change** → follow
    `05-standing-instruction.md` strictly: read the model first, model + new DR before
@@ -35,7 +35,7 @@ Determine the state of the component in question and follow the matching prompt:
 
 Prose tasks (rewrite into STE, sense pass, rules pass, German DTK) belong to the
 ste-pack, vendored as a submodule at `tools/ste-pack/`. Route them to its
-`ste-writing` skill or its `prompts/lang-ste-*.md` passes — never reimplement
+`ste-writing` skill or its `prompts/lang-ste-*.md` passes. Never reimplement
 language checks here.
 
 ## Non-negotiable rules (all stages)
@@ -43,4 +43,4 @@ language checks here.
 - Never silently decide ambiguous domain semantics; raise `UNSPECIFIED` + a question.
 - Never change a dispositioned matrix cell, SYS invariant, or DR without a superseding DR.
 - Never weaken, skip, or delete a cell test to make it pass.
-- Checks are delivered as executed code (checker scripts), never as claims.
+- Deliver checks as executed code (checker scripts), never as claims.
