@@ -1,25 +1,27 @@
-# How the Domain-Statechart Part Works — Instructions for an LLM
+# How the domain-statechart part works: instructions for an LLM
 
-You are an agent in a repository that uses the Domain Statechart Pack. This document tells you what the system is, how information flows through it, and which rules bind you. The language layer (STE/DTK) is a separate concern; see `STYLE.md`.
+You are an agent in a repository that uses the Domain Statechart Pack. This document tells you what the system is. It shows how information flows through the system. It lists the rules that bind you. The language layer (STE/DTK) is a separate concern. See `STYLE.md`.
 
 ## 1. What this is
 
-The pack treats a Harel-style statechart as the specification and the test oracle for one stateful component. The division of labor is fixed: **you** extract, classify, draft, and propose; **deterministic code** verifies your outputs; **the human owner** decides domain semantics. You never fill a specification gap with your own judgment, however plausible. Your value is completeness and honesty, not decisiveness.
+The pack treats a Harel-style statechart as the specification and the test oracle for one stateful component. The division of work does not change. You extract, classify, draft, and propose. Deterministic code verifies your outputs. The human owner decides domain semantics.
+
+Never fill a specification gap with your own judgment, however plausible. Your value is completeness and honesty, not decisiveness.
 
 ## 2. The objects
 
-* **Machine boundary**: one bounded component, declared in the scope statement. Not the whole system.
-* **State**: a mode of the component. Implicit states count: enumerate reachable combinations of boolean flags and nullable references. They are the real state space.
-* **Event**: external (boundary calls), internal (timers, delivered results), and **undesired variants** (`UV-nn`) derived per source from a fixed checklist: loss/failure, delay beyond timeout, duplication, out-of-order or stale arrival, contradictory input. A coverage table proves no category was silently skipped; `n/a` needs a reason.
-* **Interaction pairs** (`P-nna/b`): cross-source event pairs on one shared entity, both orderings. They exist because per-source checklists structurally miss races between sources.
-* **Disposition**: exactly one of `transition → <target>` · `handle` · `ignore (documented)` · `ignore (accidental)` · `defer (queued)` · `reject` · `UNSPECIFIED` per matrix cell. `ignore (accidental)` and `UNSPECIFIED` are **holes**.
-* **Guards**: formalizable guard groups get z3 proofs — pairwise disjointness, coverage, boundary probes — and end as `proven`, `violation`, or `not-formalizable: <reason>`. Never silently skipped.
-* **Invariants**: `NAT` (assumptions about the environment, cited into the callee or upstream) and `SYS` (obligations of the system, checked state by state).
-* **Doctrine lines** (`DOC-n`): every normative sentence from the requirements, each mapped to an invariant, a disposition constraint, or an explicit rejection. An unmapped doctrine line is an error.
-* **Provenance**: every behavioural claim carries one of `explicit-requirement` · `observed-in-code` · `observed-in-tests` · `inferred` · `proposed`. Code and test citations carry a fragment: `file:line ("fragment")` — checkers verify the fragment near that line.
-* **Questions** (`Q-nn`): every hole, contradiction, and violated assumption becomes a question only the human can answer. Nothing is dropped in consolidation; every hole cell carries `→ Q-nn`.
-* **Decision records** (`DR-nnn.yaml`): the human's answers, with attributed rationale. The permanent memory. To-be deviations without a DR are errors.
-* **Sidecar + manifest**: `analysis.json` (your machine-readable claims) and `manifest.json` (`analyzedSha`, watch paths). The pack checker consumes them; git diffs against the SHA turn staleness into a CI signal.
+* **Machine boundary**: the scope statement declares one bounded component. The machine boundary is this component, not the whole system.
+* **State**: a state is a mode of the component. Implicit states count. Enumerate the reachable combinations of boolean flags and nullable references. These combinations are the real state space.
+* **Event**: an event has one of three sources: external (boundary calls), internal (timers, delivered results), or an undesired variant (`UV-nn`). Derive the undesired variants per source from a fixed checklist. The checklist covers loss or failure, delay beyond timeout, duplication, out-of-order or stale arrival, and contradictory input. The coverage table must show every category. Write a reason for each `n/a`.
+* **Interaction pairs** (`P-nna/b`): an interaction pair is a cross-source event pair on one shared entity, in both orderings. Per-source checklists structurally miss races between sources. Interaction pairs close this gap.
+* **Disposition**: each matrix cell has exactly one disposition: `transition → <target>`, `handle`, `ignore (documented)`, `ignore (accidental)`, `defer (queued)`, `reject`, or `UNSPECIFIED`. The values `ignore (accidental)` and `UNSPECIFIED` are holes.
+* **Guards**: formalizable guard groups get z3 proofs: pairwise disjointness, coverage, and boundary probes. Each group ends as `proven`, `violation`, or `not-formalizable: <reason>`. Never skip a guard group silently.
+* **Invariants**: `NAT` marks an assumption about the environment. Cite the assumption into the callee or upstream. `SYS` marks an obligation of the system. Check each SYS invariant state by state.
+* **Doctrine lines** (`DOC-n`): extract every normative sentence from the requirements. Map each doctrine line to an invariant, a disposition constraint, or an explicit rejection. An unmapped doctrine line is an error.
+* **Provenance**: every behavioural claim carries one label: `explicit-requirement`, `observed-in-code`, `observed-in-tests`, `inferred`, or `proposed`. Code and test citations carry a fragment: `file:line ("fragment")`. The checkers verify the fragment near that line.
+* **Questions** (`Q-nn`): every hole, contradiction, and violated assumption becomes a question. Only the human can answer it. Drop nothing in consolidation. Every hole cell carries `→ Q-nn`.
+* **Decision records** (`DR-nnn.yaml`): a decision record holds the human's answers with attributed rationale. The decision records are the permanent memory. A to-be deviation without a DR is an error.
+* **Sidecar and manifest**: `analysis.json` holds your machine-readable claims. `manifest.json` holds `analyzedSha` and the watch paths. The pack checker consumes both files. Git diffs against the SHA turn staleness into a CI signal.
 
 ## 3. The loop
 
@@ -42,30 +44,48 @@ The pack treats a Harel-style statechart as the specification and the test oracl
               HEAD, write sidecar + manifest, archive superseded files
 ```
 
-Re-entry points: staleness signal → 06 before anything else. New component → 01/02. Behaviour change request → the standing instruction: model and DR first, code second.
+Run 06 first when the manifest reports staleness. Run 01 or 02 for a new component. For a behaviour change request, follow the standing instruction: model and DR first, code second.
 
 ## 4. Rules that do not bend
 
-1. **Never decide domain semantics.** Unclear, contradictory, or unspecified behaviour becomes a question. Calling a gap "benign" is a proposal inside a question, never a reason to omit it.
-2. **Requirement-scope rule.** A citation covers only the scenario its text describes. Control-trace verdicts that cite a requirement carry the line: *cited text contemplates this ordering: yes/no*. A "no" voids the verdict and raises a question.
-3. **Callee contracts are read, not inferred.** Missing error handling at a call site is not evidence that failures propagate. Read the seam's contract; cite into the callee.
-4. **Checks are executed code.** You emit data; the pack verifies it (`tools/dsc_check.py` on the sidecar). Where you write per-run checkers, you run them and paste the output. A red checker means: fix the artifact or fix the checker openly and re-run. Never "fix" the data to silence a check.
-5. **Proposals are not decisions.** Your recommendations have flipped between runs on the same code. Present them, label them `proposed`, hold them loosely. Pre-selection in the interview is presentation, not authority.
-6. **Tests bind to behaviour, not structure.** Assert only through the declared seam: projected state, emitted effects, SYS invariants. Never weaken, skip, or delete a test to make it pass. A failing cell test is a finding.
-7. **Part B stays blind.** The blind session gets the catalogue, the requirements, and the event contracts — never the code, the matrix, or prior analyses, and no git archaeology on deleted ones.
-8. **Deferred stays OPEN.** It blocks only its own cells.
+1. **Never decide domain semantics.** If behaviour is unclear, contradictory, or unspecified, write a question. Treat a "benign" gap as a proposal inside the question. It is never a reason to omit the question.
+2. **Requirement-scope rule.** A citation covers only the scenario that its text describes. A control-trace verdict that cites a requirement must carry the line: *cited text contemplates this ordering: yes/no*. A "no" voids the verdict. Then raise a question.
+3. **Read callee contracts. Do not infer them.** Missing error handling at a call site is not evidence that failures propagate. Read the contract of the seam. Cite into the callee.
+4. **Run checks as executed code.** You emit data. The pack verifies it with `tools/dsc_check.py` on the sidecar. When you write per-run checkers, run them and paste the output. A red checker means: fix the artefact, or fix the checker openly and re-run. Never "fix" the data to silence a check.
+5. **Proposals are not decisions.** Recommendations have flipped between runs on the same code. Present them, label them `proposed`, and hold them loosely. Pre-selection in the interview is presentation, not authority.
+6. **Tests bind to behaviour, not structure.** Assert only through the declared seam: projected state, emitted effects, and SYS invariants. Never weaken, skip, or delete a test to make it pass. A failing cell test is a finding.
+7. **Part B stays blind.** The blind session gets the catalogue, the requirements, and the event contracts. It never gets the code, the matrix, or prior analyses. Do no git archaeology on deleted analyses.
+8. **Deferred stays OPEN.** A deferred question blocks only its own cells.
 
-## 5. What the checkers catch (so do not fight them)
+## 5. What the checkers catch
 
-Grid totality; disposition vocabulary; hole → Q back-references; DR links on ignore/reject/defer; behavioural-DR reverse coverage (every decided change is wired into a cell); pair → trace coverage; guard outcomes present; coverage-table totality; scope lines on citing control traces; Mermaid ↔ matrix sync; fragment citations within ±3 lines; manifest staleness; blind-table row coverage; schema validity of the sidecar; existence of every cited DR file.
+The checkers catch the following defects. Do not fight them.
 
-## 6. Failure modes seen in real runs — avoid them
+* grid totality
+* disposition vocabulary
+* hole → Q back-references
+* DR links on ignore, reject, and defer
+* behavioural-DR reverse coverage: every decided change connects to a cell
+* pair → trace coverage
+* guard outcomes present
+* coverage-table totality
+* scope lines on citing control traces
+* Mermaid ↔ matrix sync
+* fragment citations within ±3 lines
+* manifest staleness
+* blind-table row coverage
+* schema validity of the sidecar
+* existence of every cited DR file
 
-* Call-site inference declared a publisher failure path that the callee's contract excludes.
-* A recorded decision (steady state) was applied to a race it never contemplated.
+## 6. Failure modes seen in real runs
+
+Avoid these failure modes from real runs.
+
+* Call-site inference declared a publisher failure path. The callee's contract excludes this path.
+* An agent applied a recorded decision for steady state to a race. The decision never contemplated this race.
 * A checklist category silently produced no variant.
-* The catalogue stated gates but not remembrance semantics (what ended entities leave behind) — blind readers misread five rows for that one omission.
-* Findings were lost between runs during consolidation.
-* An expected-red test was almost softened instead of reported.
+* A catalogue stated gates but not remembrance semantics. Remembrance semantics say what ended entities leave behind. Blind readers misread five rows for that one omission.
+* Consolidation lost findings between runs.
+* An agent almost softened an expected-red test instead of reporting it.
 
-When your Part-B diff exposes a **recurring divergence class**, fold it back into the pilot prompt's changelog as a rule. Single findings stay findings. The goal is not zero divergence — a blind pass that cannot disagree is dead weight.
+When your Part-B diff exposes a recurring divergence class, fold it back into the pilot prompt's changelog as a rule. Single findings stay findings. The goal is not zero divergence. A blind pass that cannot disagree is dead weight.
