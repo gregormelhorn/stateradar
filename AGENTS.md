@@ -42,6 +42,8 @@ Never fill a specification gap with your own judgment, however plausible. Your v
               reminds you); tests are read-only
 06 Reconcile  after green: promote to-be → as-is, refresh citations at
               HEAD, write sidecar + manifest, archive superseded files
+07 Test audit off-cycle: weak tests first (structure over function),
+              then redundancy, deviations, gaps; propose, never delete
 ```
 
 Run 06 first when the manifest reports staleness. Run 01 or 02 for a new component. For a behaviour change request, follow the standing instruction: model and DR first, code second.

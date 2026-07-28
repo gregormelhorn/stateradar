@@ -41,6 +41,9 @@ ARTIFACTS = {  # filename -> prompts that define/produce it
     "matrix-coverage.json": ["04-testgen.md"],
     "deviation-report.md": ["04-testgen.md"],
     "seam.md": ["04-testgen.md"],
+    "test-coverage-map.md": ["07-test-audit.md"],
+    "coverage-diff-report.md": ["07-test-audit.md"],
+    "check_test_coverage.py": ["07-test-audit.md"],
 }
 all_texts = {f.name: f.read_text(encoding="utf-8") for f in sorted(P.glob("*.md"))}
 for artifact, producers in ARTIFACTS.items():

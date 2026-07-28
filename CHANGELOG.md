@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.18 — 2026-07-29
+- New stage prompt `prompts/07-test-audit.md`: test-suite audit against the
+  decided matrix. Main goal: weak tests that bind to implementation instead
+  of behaviour (rule 6 operationalized). Five weakness signals, seven test
+  classes (`sound`, `weak-redundant`, `weak-seam-gap`, `weak-incidental`,
+  `equivalent-duplicate`, `deviating`, `unmapped-behavioural`), four cell
+  classes, mandatory executed checker (`check_test_coverage.py`), artifacts
+  `test-coverage-map.md` + `coverage-diff-report.md`. Deletion and weakening
+  stay human decisions via DR proposals. Wired in: consistency checker
+  (18 artifacts), `commands/domain-test-audit.md`, skill routing rule 7,
+  loop diagrams in methods reference and AGENTS.md.
+
 ## v1.17 — 2026-07-28
 - Prompts 00–05 rewritten through the ste-pack rewrite pass (mechanical round: Vale gate at zero errors, strict class). Rewrite-integrity proofs green per file (code, identifiers, paths, numbers, URLs verified verbatim). No method changes: rules, format tokens, and controlled vocabulary unchanged. Literal tokens adjusted where they tripped the gate: the trace marker "none — control trace" is now "none - control trace", the summary statement in 03 is reworded active, and the disposition/divergence lists use `: ` instead of ` — `. ste_lint deltas:
 

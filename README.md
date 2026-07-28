@@ -1,6 +1,6 @@
 # Domain Statechart Pack
 
-**Version 1.17.** Statecharts as domain specification and test oracle for AI-coding-agent workflows, as a pure prompt pack. No tooling to install; the prompts themselves bootstrap the deterministic layer (generated checker scripts, cell tests, CI wiring).
+**Version 1.18.** Statecharts as domain specification and test oracle for AI-coding-agent workflows, as a pure prompt pack. No tooling to install; the prompts themselves bootstrap the deterministic layer (generated checker scripts, cell tests, CI wiring).
 
 > The agent may propose and challenge behaviour, but must not silently decide it — and the tests come from the specification, not from the code.
 
@@ -15,6 +15,7 @@ prompts/        canonical source of truth (harness-neutral Markdown)
   04-testgen.md             one test per matrix cell + checkers in CI
   05-standing-instruction.md  block for the consumer repo's CLAUDE.md/AGENTS.md
   06-reconcile.md           close the loop: promote, refresh citations, pin the SHA
+  07-test-audit.md          audit a suite against the matrix: weak tests first
 skills/         thin harness packagings (Claude Code skill)
 commands/       optional Claude Code slash commands
 examples/       reference runs (see examples/README.md before publishing any)

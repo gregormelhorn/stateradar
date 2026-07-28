@@ -31,6 +31,9 @@ Do not use it for: pure calculations, stateless transformations, formatting, val
    instruction  inside the discipline; checker + cell tests enforce it in CI
 06 Reconcile    after implementation: to-be becomes the new as-is,
                 citations refresh at HEAD, manifest pins the analyzed SHA
+07 Test audit   off-cycle: judge an existing suite against the decided
+                matrix; weak tests (structure-bound) first, then
+                redundancy, deviations, gaps; propose, never delete
 ```
 
 ## Core principle

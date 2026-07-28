@@ -31,6 +31,10 @@ Determine the state of the component in question and follow the matching prompt:
    changed since `analyzedSha`) → run `06-reconcile.md` before any new analysis
    or model-first change.
 
+7. **The user asks about weak, redundant, or superfluous tests** on an analyzed
+   component → run `07-test-audit.md`. The audit classifies every test and cell.
+   Deletion and weakening stay human decisions.
+
 ## Language work
 
 Prose tasks (rewrite into STE, sense pass, rules pass, German DTK) belong to the
