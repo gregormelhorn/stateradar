@@ -39,7 +39,7 @@ Without `jsonschema`, `dsc_check` degrades to structural checks only (it prints 
 
 ## Language policy (ste-pack dependency)
 
-The language layer is a separate pack: **ste-pack v1.0**, consumed as a git submodule at `tools/ste-pack/`. It holds STYLE.md (strictness per text class), the Vale styles (STE English, DTK German, STEDict dictionary check), the language agent passes, and the language checkers. This pack's `.vale.ini` points its `StylesPath` into the submodule; `tools/check_pack_consistency.py` verifies that the checked-out submodule tag matches the version declared here.
+The language layer is a separate pack: **ste-pack v1.1.1**, consumed as a git submodule at `tools/ste-pack/`. It holds STYLE.md (strictness per text class), the Vale styles (STE English, DTK German, STEDict dictionary check), the language agent passes, and the language checkers. This pack's `.vale.ini` points its `StylesPath` into the submodule; `tools/check_pack_consistency.py` verifies that the checked-out submodule tag matches the version declared here.
 
 After a fresh clone, recreate the dictionary symlinks if you use `STEDict` (the data is private and gitignored; see ste-pack STYLE.md, "Data placement"):
 
