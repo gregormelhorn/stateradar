@@ -132,7 +132,7 @@ Produce concrete, numbered event sequences of two kinds:
 1. **Systematic:** one trace per interaction-pair ordering from the Step-3 pairs table (`P-01a`, `P-01b`, …). Each trace ends in an explicit disposition or a raised question. No pair stays untraced.
 2. **Free probes (at least 10):** unexpected ordering; delayed responses that arrive after cancellation or shutdown; duplicates; cancellation races; restart mid-operation; simultaneous external events; deliberate NAT violations.
 
-For each trace give (a) the sequence, (b) what the code appears to do, with provenance, and (c) the domain question it raises. For a control trace, write "none - control trace" instead of a question. A control-trace verdict that rests on a cited requirement or recorded decision must add one line with a short quote. The line: **"cited text contemplates this ordering: yes/no"**. A "no" voids the control verdict and raises a question. This is the requirement-scope rule made mechanical.
+For each trace give (a) the sequence, (b) what the code appears to do, with provenance, and (c) the domain question it raises. For a control trace, write `none — control trace` instead of a question. A control-trace verdict that rests on a cited requirement or recorded decision must add one line with a short quote. The line: **"cited text contemplates this ordering: yes/no"**. A "no" voids the control verdict and raises a question. This is the requirement-scope rule made mechanical.
 
 → `adversarial-traces.md`
 
