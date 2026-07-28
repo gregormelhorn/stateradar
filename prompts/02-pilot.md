@@ -45,11 +45,11 @@ Read the component, its tests, and its docs. Output a short scope statement: the
 
 ### Step 1 — Extraction (with provenance)
 
-Extract and list, each item with provenance and location: states — include implicit states in boolean flags, nullable references, and enum-plus-flag mixtures (enumerate the reachable combinations; they are the real state space) — external events, internal events, transitions, guards and conditions, actions and side effects, timeouts and timers, retry behaviour and limits, cancellation paths, failure modes, apparent invariants, contradictions between code, tests and docs, and behaviour you cannot determine.
+Extract and list, each item with provenance and location: states, external events, internal events, transitions, guards and conditions, actions and side effects. Also: timeouts and timers, retry behaviour and limits, cancellation paths, failure modes, apparent invariants. Also: contradictions between code, tests and docs, and behaviour you cannot determine. Include implicit states in boolean flags, nullable references, and enum-plus-flag mixtures. Enumerate the reachable combinations; they are the real state space.
 
-**Doctrine-line sweep.** Extract every normative sentence from the requirements and docs. Principle lines such as "identity is sacred", "no lost X", "failures must be loud" go into a numbered list `DOC-1..n` with their source. Step 5 must classify each doctrine line: adopted as an invariant, adopted as a disposition constraint, or explicitly rejected as non-binding. A silently unused doctrine line is an error.
+**Doctrine-line sweep.** Extract every normative sentence from the requirements and docs. Principle lines such as "identity stays sacred", "no lost X", "failures must be loud" go into a numbered list `DOC-1..n` with their source. Step 5 must classify each doctrine line: adopted as an invariant, adopted as a disposition constraint, or explicitly rejected as non-binding. A silently unused doctrine line is an error.
 
-**Seam-contract sweep.** For every external seam the component invokes (publisher or bus, classifier or model client, scheduler, executor, storage): read the callee's contract. Record its failure semantics — raises what, never raises, timeout behaviour — as NAT candidates with citations into the callee. Missing error handling at a call site is **not** evidence that failures propagate. To declare an invoked-operation failure path a hole without reading the callee's contract is an unproven inference. Label it as such.
+**Seam-contract sweep.** For every external seam the component invokes (publisher or bus, classifier or model client, scheduler, executor, storage): read the callee's contract. Record its failure semantics (raises what, never raises, timeout behaviour) as NAT candidates with citations into the callee. Missing error handling at a call site is **not** evidence that failures propagate. To declare an invoked-operation failure path a hole without reading the callee's contract is an unproven inference. Label it as such.
 
 → `extraction.md`
 
@@ -63,13 +63,13 @@ Then validate the model against the existing tests. Walk each relevant test scen
 
 ### Step 3 — Event catalogue incl. undesired variants and interaction pairs
 
-List every event with name, source, external/internal, payload gist, and where it is produced and consumed.
+List every event with name, source, external/internal, payload gist, and where the code produces and consumes it.
 
-**Gate-type annotation.** For each event whose handling branches, state the gate: payload content, or service-side state. A reader of the catalogue alone — including the Part-B pass — must not have to guess.
+**Gate-type annotation.** For each event whose handling branches, state the gate: payload content, or service-side state. A reader of the catalogue alone, including the Part-B pass, must not have to guess.
 
-**Remembrance semantics.** For every event family whose entities can end (episodes, sessions, connections): state what an ended entity leaves behind. What is remembered, in what bound (size or duration), and what a late reference to it resolves to. Transition behaviour without end-of-life memory semantics is exactly where blind readers and late-arrival dispositions go wrong.
+**Remembrance semantics.** For every event family whose entities can end (episodes, sessions, connections): state what an ended entity leaves behind. What the component remembers, in what bound (size or duration), and what a late reference to it resolves to. Transition behaviour without end-of-life memory semantics is exactly where blind readers and late-arrival dispositions go wrong.
 
-For every external event source, derive undesired variants with this checklist: loss or failure of the source; delay beyond a timeout; duplication; out-of-order or stale arrival (above all after cancellation or shutdown); contradictory simultaneous inputs. Add the variants to the catalogue. They receive matrix columns like any other event.
+For every external event source, derive undesired variants with this checklist: loss or failure of the source; delay beyond a timeout; duplication. Also: out-of-order or stale arrival, above all after cancellation or shutdown. Also: contradictory simultaneous inputs. Add the variants to the catalogue. They receive matrix columns like any other event.
 
 **Upstream-guard annotation.** For every external event, state which validations happen upstream of this boundary (with citations into the upstream code) and which are absent here. Do this per deployment topology when more than one exists. A guard the catalogue does not mention will be re-invented or falsely assumed by every blind reader.
 
@@ -83,19 +83,29 @@ For every external event source, derive undesired variants with this checklist: 
 
 Build a Markdown table: rows = leaf states of the as-is model; columns = all catalogue events including undesired variants. Every cell gets exactly one value:
 
-* `transition → <target>` — with provenance
-* `handle` — stays in the state, does something; with provenance
-* `ignore (documented)` — intent has evidence; cite it (the requirement-scope rule applies)
-* `ignore (accidental)` — nothing happens only by omission or fall-through; **counts as a hole**, however harmless it looks
-* `defer (queued)` — the code buffers the event; cite where
-* `reject` — with provenance
-* `UNSPECIFIED` — you cannot determine the behaviour; **counts as a hole**
+* `transition → <target>`: with provenance
+* `handle`: stays in the state, does something; with provenance
+* `ignore (documented)`: intent has evidence; cite it (the requirement-scope rule applies)
+* `ignore (accidental)`: nothing happens only by omission or fall-through; **counts as a hole**, however harmless it looks
+* `defer (queued)`: the code buffers the event; cite where
+* `reject`: with provenance
+* `UNSPECIFIED`: you cannot determine the behaviour; **counts as a hole**
 
 For each (state, event) with guarded transitions, add a guard note that lists the guards and the boundary values.
 
-**Guard proofs (mandatory where formalizable).** Formalize every such guard group as predicates over typed context variables (Int / Real / Bool / enum sorts; domains from the NAT invariants, for example `0 <= retryCount <= maxRetries`, `confidence in [0,1]`). Write `check_guards.py` with z3 (`pip install z3-solver`) and execute it. For each group establish, under the declared NAT assumptions: (a) **pairwise disjointness** — `g_i AND g_j` unsatisfiable for every pair; (b) **coverage** — `NOT (g_1 OR ... OR g_n)` unsatisfiable, or an explicit else-branch exists; (c) **boundary probes** — for every comparison, evaluate below, exactly at, and above the limit, and record which branch takes each. Every result cites the assumptions it used. A guard you cannot formalize (external calls, unstructured payload content) gets the mark `not-formalizable: <reason>` and keeps its inspection reasoning, labelled unproven. Every guard group must end as `proven`, `violation` (a finding), or `not-formalizable`. To skip a group silently is an error. Write the outcomes to `guard-results.txt` and back into the matrix's guard notes.
+**Guard proofs (mandatory where formalizable).** Formalize every such guard group as predicates over typed context variables. Use Int / Real / Bool / enum sorts, with domains from the NAT invariants (for example `0 <= retryCount <= maxRetries`, `confidence in [0,1]`). Write `check_guards.py` with z3 (`pip install z3-solver`) and execute it.
 
-**Mechanical self-check (mandatory).** Write `check_matrix.py` in the output directory and execute it. The catalogue must carry a machine-readable id declaration (`<!-- event-ids: ... -->`) and the matrix a state declaration (`<!-- states: ... -->`). Checkers parse these declarations, never prose. Stage 1 (after this step): every state row contains exactly one disposition per catalogue event column; no catalogue column is missing; every `ignore (documented)` and `reject` cell carries a citation; the `undesired-coverage` table is total (no empty cells). Stage 2 (after Step 7, re-run): every hole cell (`UNSPECIFIED` or `ignore (accidental)`) carries a `→ Q-nn` back-reference that exists in `open-questions.md`; every interaction pair `P-nn` appears in at least one trace in `adversarial-traces.md`; every guard group has an outcome from `check_guards.py`; every control-trace verdict that cites a requirement or decision carries the scope line ("cited text contemplates this ordering: yes/no"). Also emit the machine-readable sidecar `analysis.json` (schema: pack `formats/analysis.schema.json`): states, events, cells with dispositions and links, pairs with traces, guard outcomes, the coverage table, questions, behavioural DRs. Run the pack checker `tools/dsc_check.py <output-dir> --repo . --model as-is.machine.mmd` in addition to the two per-run scripts. Include all outputs in `summary.md`. Deliver checks as executed code, never as claims.
+For each group establish, under the declared NAT assumptions: (a) **pairwise disjointness**: `g_i AND g_j` unsatisfiable for every pair. (b) **coverage**: `NOT (g_1 OR ... OR g_n)` unsatisfiable, or an explicit else-branch exists. (c) **boundary probes**: for every comparison, evaluate below, exactly at, and above the limit, and record which branch takes each. Every result cites the assumptions it used.
+
+A guard you cannot formalize (external calls, unstructured payload content) gets the mark `not-formalizable: <reason>` and keeps its inspection reasoning, labelled unproven. Every guard group must end as `proven`, `violation` (a finding), or `not-formalizable`. To skip a group silently is an error. Write the outcomes to `guard-results.txt` and back into the matrix's guard notes.
+
+**Mechanical self-check (mandatory).** Write `check_matrix.py` in the output directory and execute it. The catalogue must carry a machine-readable id declaration (`<!-- event-ids: ... -->`) and the matrix a state declaration (`<!-- states: ... -->`). Checkers parse these declarations, never prose.
+
+Stage 1 (after this step): every state row contains exactly one disposition per catalogue event column. No catalogue column is missing. Every `ignore (documented)` and `reject` cell carries a citation. The `undesired-coverage` table is total (no empty cells).
+
+Stage 2 (after Step 7, re-run): every hole cell (`UNSPECIFIED` or `ignore (accidental)`) carries a `→ Q-nn` back-reference that exists in `open-questions.md`. Every interaction pair `P-nn` appears in at least one trace in `adversarial-traces.md`. Every guard group has an outcome from `check_guards.py`. Every control-trace verdict that cites a requirement or decision carries the scope line ("cited text contemplates this ordering: yes/no").
+
+Also emit the machine-readable sidecar `analysis.json` (schema: pack `formats/analysis.schema.json`). Contents: states, events, cells with dispositions and links, pairs with traces, guard outcomes, the coverage table, questions, behavioural DRs. Run the pack checker `tools/dsc_check.py <output-dir> --repo . --model as-is.machine.mmd` in addition to the two per-run scripts. Include all outputs in `summary.md`. Deliver checks as executed code, never as claims.
 
 → `disposition-matrix.md`, `check_matrix.py`, `check_guards.py`
 
@@ -122,13 +132,15 @@ Produce concrete, numbered event sequences of two kinds:
 1. **Systematic:** one trace per interaction-pair ordering from the Step-3 pairs table (`P-01a`, `P-01b`, …). Each trace ends in an explicit disposition or a raised question. No pair stays untraced.
 2. **Free probes (at least 10):** unexpected ordering; delayed responses that arrive after cancellation or shutdown; duplicates; cancellation races; restart mid-operation; simultaneous external events; deliberate NAT violations.
 
-For each trace give: (a) the sequence, (b) what the code appears to do, with provenance, (c) the domain question it raises, or "none — control trace". A control-trace verdict that rests on a cited requirement or recorded decision must add one line, with a short quote: **"cited text contemplates this ordering: yes/no"**. A "no" voids the control verdict and raises a question. This is the requirement-scope rule made mechanical.
+For each trace give (a) the sequence, (b) what the code appears to do, with provenance, and (c) the domain question it raises. For a control trace, write "none - control trace" instead of a question. A control-trace verdict that rests on a cited requirement or recorded decision must add one line with a short quote. The line: **"cited text contemplates this ordering: yes/no"**. A "no" voids the control verdict and raises a question. This is the requirement-scope rule made mechanical.
 
 → `adversarial-traces.md`
 
 ### Step 7 — Open domain questions (primary deliverable)
 
-Consolidate every hole, contradiction, accidental ignore, invariant violation, unmapped-doctrine finding, lint finding, and adversarial question into a numbered list of decisions that only a human can make. **Nothing gets dropped in consolidation.** Every hole cell maps to exactly one Q. To group related cells into one Q is fine. To omit one is not. Write the mapping back into the matrix (`→ Q-nn` per hole cell), so that the Stage-2 checker can verify it. Format each question as a proposed decision record:
+Consolidate every hole, contradiction, accidental ignore, invariant violation, unmapped-doctrine finding, lint finding, and adversarial question into a numbered list. These are decisions that only a human can make. **Nothing gets dropped in consolidation.** Every hole cell maps to exactly one Q. To group related cells into one Q is fine. To omit one is not.
+
+Write the mapping back into the matrix (`→ Q-nn` per hole cell), so that the Stage-2 checker can verify it. Format each question as a proposed decision record:
 
 ```text
 Q-07
@@ -147,17 +159,17 @@ Do not resolve these questions. End with a summary count: states / events incl. 
 
 ## PART B — Blind adversarial pass (separate, fresh session)
 
-Run this in a **new** agent session with no access to the as-is model, the matrix, the traces, or the code. Provide only: `event-catalogue.md` (with gate-type annotations, upstream-guard annotations, and the pairs table), the prose requirements, and the **normative contract text of every event the component emits or consumes** (contract docstrings, schema descriptions — requirements-level material, never component code):
+Run this in a **new** agent session with no access to the as-is model, the matrix, the traces, or the code. Provide only these inputs. First: `event-catalogue.md`, with gate-type annotations, upstream-guard annotations, and the pairs table. Second: the prose requirements. Third: the **normative contract text of every event the component emits or consumes**. Contract text means contract docstrings and schema descriptions: requirements-level material, never component code.
 
-> Here is the event catalogue of a component, and its requirements. For every event — including undesired variants and both orderings of every interaction pair — state in which situations it should be handled, ignored, or rejected, and what should happen. Describe situations in requirement terms. If you must assume a lifecycle state the requirements do not name, label it `assumed-state:`. You have no access to the implementation. Be concrete. Produce a table keyed by the catalogue's event ids. End with a coverage checklist: every catalogue event id, listed once, ticked. A missing row must be impossible to miss.
+> Here is the event catalogue of a component, and its requirements. For every event — including undesired variants and both orderings of every interaction pair — state in which situations the component should handle, ignore, or reject it, and what should happen. Describe situations in requirement terms. If you must assume a lifecycle state the requirements do not name, label it `assumed-state:`. You have no access to the implementation. Be concrete. Produce a table keyed by the catalogue's event ids. End with a coverage checklist: every catalogue event id, listed once, ticked. A missing row must be impossible to miss.
 
 Then diff its table against `disposition-matrix.md` (an agent that sees both may do this diff). Before you classify: verify blind-table coverage mechanically. Every catalogue event id has exactly one row. Report any miscount. Then classify **every** row of the blind table into exactly one class:
 
-* `convergent` — the blind pass reproduces the documented disposition: agreement, no gap, no action
-* `convergent-hole` — the blind pass independently flags a gap that pass A found: this strengthens the finding; note it on the existing Q
-* `divergence` — different expected behaviour: a blind spot of pass A, or a genuine open question. **Every divergence must end as a new Q or as a reasoned fold into an existing Q. The Stage-2 checker treats an unclosed divergence as a failure.**
-* `artefact` — catalogue phrasing caused it, not behaviour: repair the catalogue entry (usually a missing gate-type, remembrance, or upstream annotation), so the artefact class cannot recur
-* `pass-B-blind-spot` — pass A saw something pass B did not: note it, no action
+* `convergent`: the blind pass reproduces the documented disposition: agreement, no gap, no action
+* `convergent-hole`: the blind pass independently flags a gap that pass A found: this strengthens the finding; note it on the existing Q
+* `divergence`: different expected behaviour: a blind spot of pass A, or a genuine open question. **Every divergence must end as a new Q or as a reasoned fold into an existing Q. The Stage-2 checker treats an unclosed divergence as a failure.**
+* `artefact`: catalogue phrasing caused it, not behaviour: repair the catalogue entry (usually a missing gate-type, remembrance, or upstream annotation), so the artefact class cannot recur
+* `pass-B-blind-spot`: pass A saw something pass B did not: note it, no action
 
 → `part-b-diff.md`
 

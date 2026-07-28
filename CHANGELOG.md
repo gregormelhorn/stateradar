@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.17 — 2026-07-28
+- Prompts 00–05 rewritten through the ste-pack rewrite pass (mechanical round: Vale gate at zero errors, strict class). Rewrite-integrity proofs green per file (code, identifiers, paths, numbers, URLs verified verbatim). No method changes: rules, format tokens, and controlled vocabulary unchanged. Literal tokens adjusted where they tripped the gate: the trace marker "none — control trace" is now "none - control trace", the summary statement in 03 is reworded active, and the disposition/divergence lists use `: ` instead of ` — `. ste_lint deltas:
+
+| file | before | after | delta |
+| --- | --- | --- | --- |
+| 00-methods-reference.md | 4.11 | 1.35 | −67% |
+| 01-scout.md | 2.05 | 1.75 | −15% |
+| 02-pilot.md | 4.38 | 2.37 | −46% |
+| 03-resolution.md | 2.11 | 1.06 | −50% |
+| 04-testgen.md | 3.52 | 2.25 | −36% |
+| 05-standing-instruction.md | 1.58 | 0.96 | −39% |
+
 ## v1.16 — 2026-07-28
 - Split: the language layer is extracted into its own repository, the **ste-pack v1.0** (STYLE.md, Vale styles STE/DTK/STEDict, the three lang-ste prompts, the language checkers incl. the new license-free German catalog `dtk-rules.json`, ste-rules-map.json, selftests). This pack consumes it as a pinned git submodule at `tools/ste-pack/`; the consistency checker verifies the pin against the version declared in the README. The pack's `.vale.ini` now resolves its StylesPath through the submodule. The statechart project dictionary moves from STYLE.md into the README ("Language policy"). Vale gate enabled on this pack's own prompts (strict at error; baseline: 131 errors queued for the ste-pack rewrite pass).
 

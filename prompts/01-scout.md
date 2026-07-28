@@ -41,7 +41,7 @@ Record every hit with file:line.
 
 ### Step 2 — Risk and pain evidence
 
-Use git history if it is available. For the strongest hits, gather: bug-fix density (`git log --oneline -- <path>`, filtered for fix, race, deadlock, timeout, leak, hang, stuck, retry), churn over the last 12 months, TODO/FIXME/HACK/XXX comments in the files, and defensive oddities (broad exception handlers that mutate state, "should never happen" branches). Summarize per candidate with evidence. If there is no git history, note that and skip this step.
+Use git history if it is available. For the strongest hits, gather the bug-fix density and the churn over the last 12 months. Use `git log --oneline -- <path>`, filtered for fix, race, deadlock, timeout, leak, hang, stuck, retry. Collect TODO/FIXME/HACK/XXX comments and defensive oddities (broad exception handlers that mutate state, "should never happen" branches). Summarize per candidate with evidence. If there is no git history, note that and skip this step.
 
 ### Step 3 — Deep inspection and scoring
 
@@ -50,7 +50,7 @@ Inspect at most the configured number of candidates in depth. Score each dimensi
 * **Temporal richness.** Count states (explicit plus enumerated implicit flag combinations), events, timers, retry paths, and cancellation paths. Mark each count as measured or estimated.
 * **Hole likelihood.** Look for contradictions, accidental fall-throughs, undocumented flag combinations, missing timeouts, unbounded retries, and absent cancellation handling.
 * **Pain evidence.** Use the Step-2 results.
-* **Seam quality.** Judge how feasible the later conformance seam is: a state-projection function, serialized single-event dispatch, and an injectable clock. 3 means a clean seam exists. 0 means state is smeared across globals, threads, or processes. Name the concrete projection you would use.
+* **Seam quality.** Judge how feasible the later conformance seam is: a state-projection function, serialized single-event dispatch, and an injectable clock. 3 means a clean seam exists. 0 means the code smears state across globals, threads, or processes. Name the concrete projection you would use.
 * **Boundedness.** The component must fit one bounded context and one pilot run. If it is too large, propose a sub-boundary and score that.
 
 ### Step 4 — Report

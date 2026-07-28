@@ -1,6 +1,6 @@
 # Domain Statechart Method — Reference
 
-This is the methodology behind the prompt pack: Harel-style statecharts as explicit domain-behaviour specification and test oracle for software that AI coding agents write or modify. It condenses the full product handoff document (rev. 2) into a tooling-free form. Generated, executed checker scripts and normal test infrastructure (pytest + CI) do the work of the deterministic tooling described there.
+This is the methodology behind the prompt pack. It uses Harel-style statecharts as explicit domain-behaviour specification and test oracle for software that AI coding agents write or modify. It condenses the full product handoff document (rev. 2) into a tooling-free form. Generated, executed checker scripts and normal test infrastructure (pytest + CI) do the work of the deterministic tooling described there.
 
 Give this file to agents as context when running the pack prompts.
 
@@ -15,7 +15,7 @@ The objective is not to control the coding agent. The objective is to bring **ap
 
 Use the method for behaviour involving: lifecycles, connection management, protocol phases, asynchronous events, timeouts, retries, cancellation, recovery, sessions, mutually exclusive modes, concurrent coordination.
 
-Do not use it for: pure calculations, stateless transformations, formatting, validation, ordinary CRUD without temporal behaviour. Statefulness alone does not qualify; *temporal* behaviour does. One machine per bounded context — never one global machine.
+Do not use it for: pure calculations, stateless transformations, formatting, validation, ordinary CRUD without temporal behaviour. Statefulness alone does not qualify; *temporal* behaviour does. One machine per bounded context, never one global machine.
 
 ## The loop
 
@@ -42,7 +42,7 @@ explicit-requirement | observed-in-code (file:line) |
 observed-in-tests (file:line) | inferred | proposed
 ```
 
-The human makes the genuine domain decisions. Each one becomes a decision record, never chat history. Deliver checks as **executed code**, never as claims: agents write and run small verification scripts (matrix grid completeness, DR-link presence, z3 guard checks) instead of asserting correctness in prose.
+The human makes the genuine domain decisions. Each one becomes a decision record, never chat history. Deliver checks as **executed code**, never as claims. Agents write and run small verification scripts (matrix grid completeness, DR-link presence, z3 guard checks) instead of asserting correctness in prose.
 
 ## Artifact set
 
@@ -84,7 +84,7 @@ transition → <target>   | handle          | ignore (documented)
 ignore (accidental)*    | defer (queued)  | reject | UNSPECIFIED*
 ```
 
-Values marked * count as specification holes. "Nothing happens" is never accepted implicitly — it is either a documented, DR-linked ignore, or a hole. Dispositions may be stated at compound-state level and inherited by substates; inherited cells are marked with their source, and only unresolved leaf cells count as holes. In the to-be matrix, every `ignore` / `reject` / `defer` cell carries its DR link, and `ignore (accidental)` may no longer appear.
+Values marked * count as specification holes. Never accept "nothing happens" implicitly: it is either a documented, DR-linked ignore, or a hole. State dispositions at compound-state level; substates inherit them. Mark inherited cells with their source. Only unresolved leaf cells count as holes. In the to-be matrix, every `ignore` / `reject` / `defer` cell carries its DR link, and `ignore (accidental)` may no longer appear.
 
 ## Event catalogue and undesired variants
 
@@ -107,7 +107,7 @@ NAT  assumption about the environment   e.g. 0 <= retryCount <= maxRetries
 SYS  obligation of the system           e.g. Streaming implies Authenticated
 ```
 
-Analysis may assume NAT; tests must not — adversarial traces deliberately violate NAT and require explicit robustness dispositions. Every generated test asserts **all SYS invariants after every delivered event**: the cheapest, strongest oracle in the method.
+Analysis may assume NAT; tests must not. Adversarial traces deliberately violate NAT and require explicit robustness dispositions. Every generated test asserts **all SYS invariants after every delivered event**: the cheapest, strongest oracle in the method.
 
 ## Decision records
 
@@ -123,14 +123,14 @@ links: ["matrix: stopped x connection.opened"]
 status: accepted
 ```
 
-Governance rules: every to-be deviation from as-is traces to a DR; no dispositioned cell, SYS invariant, or existing DR changes without a superseding DR; agents raise `UNSPECIFIED` + question instead of deciding. Enforcement is the checker test (`test_matrix_discipline`) plus the cell suite in CI — breaking the discipline breaks the build.
+Governance rules: every to-be deviation from as-is traces to a DR. No dispositioned cell, SYS invariant, or existing DR changes without a superseding DR. Agents raise `UNSPECIFIED` + question instead of deciding. Enforcement is the checker test (`test_matrix_discipline`) plus the cell suite in CI: breaking the discipline breaks the build.
 
 ## Semantics conventions
 
-* One external event at a time, processed to completion, before the next is delivered. Real implementations need a serializing dispatch seam per machine instance for tests to be meaningful.
+* Deliver one external event at a time, processed to completion, before the next arrives. Real implementations need a serializing dispatch seam per machine instance for tests to be meaningful.
 * Observable output of a step = projected state + ordered emitted effects. Internals are invisible to tests (anti-mirroring rule).
-* Time is controlled: an injectable clock / fake timer; timers are the only permitted source of time dependence. Delay scenarios advance the fake clock.
-* `defer` means an explicit, observable queue with re-delivery on the dequeuing state entry — never implicit buffering.
+* Control time: an injectable clock / fake timer; timers are the only permitted source of time dependence. Delay scenarios advance the fake clock.
+* `defer` means an explicit, observable queue with re-delivery on the dequeuing state entry, never implicit buffering.
 * Late, duplicate, and stale events are never undefined; they are catalogue variants with dispositions.
 
 ## Testing conventions
@@ -140,13 +140,13 @@ Governance rules: every to-be deviation from as-is traces to a DR; no dispositio
 * **Boundary tests** for every guarded pair: below, exactly at (`==`), above the limit.
 * **Scenario tests** from decided adversarial traces, SYS invariants asserted at every step.
 * `matrix-coverage.json` maps every cell to its test or a reasoned `untestable-via-seam` entry; the checker verifies the map.
-* A failing test is a **finding** (code deviates from the approved model), never a defect of the test. Tests are never weakened, skipped, or deleted to pass; deviations are fixed in code, or — with human approval — in model + superseding DR.
+* A failing test is a **finding** (code deviates from the approved model), never a defect of the test. Never weaken, skip, or delete tests to pass. Fix deviations in code or, with human approval, in the model plus a superseding DR.
 * Optional honesty probe: run a mutation tool (`mutmut`, `cosmic-ray`, Stryker) over the lifecycle code; surviving mutants are weak spots of the suite.
 * Calibration probe for the method itself: run the pilot twice on the same component in fresh sessions and diff the matrices. Divergence measures how much you can trust a single unverified run.
 
 ## Method rules (PA-1 … PA-16, condensed)
 
-Settled by prior art; agents must not relitigate them without a DR. "Analyzer/tooling" duties are discharged in pack mode by generated checker scripts, explicit reasoning marked unproven, and the CI-wired test suite.
+Settled by prior art; agents must not relitigate them without a DR. In pack mode, generated checker scripts, explicit reasoning marked unproven, and the CI-wired test suite discharge the "Analyzer/tooling" duties.
 
 ```text
 PA-1  guards per (state,event) pairwise disjoint — order must never decide
@@ -174,7 +174,11 @@ PA-16 render complex guards as AND/OR tables for human review
 
 ## Lineage (why this works)
 
-The mechanisms are not novel; they descend from tabular requirements methods for safety-critical software: the A-7E requirements document and Heninger's method paper (tabular specification made completeness checkable while staying reviewable — pilots found errors by inspection); the SCR formalization (automated disjointness/coverage checking, one-input assumption, mode classes); Gargantini–Heitmeyer test generation from table cells; the Jaffe–Leveson completeness criteria; RSML/TCAS II (hierarchical state machines + AND/OR guard tables, the closest architectural relative). The lineage is methodological, not a certification claim.
+The mechanisms are not novel. They descend from tabular requirements methods for safety-critical software. The A-7E requirements document and Heninger's method paper made completeness checkable while staying reviewable; pilots found errors by inspection.
+
+The SCR formalization added automated disjointness and coverage checking, the one-input assumption, and mode classes. Gargantini–Heitmeyer generated tests from table cells. The Jaffe–Leveson criteria define completeness. RSML/TCAS II (hierarchical state machines + AND/OR guard tables) is the closest architectural relative.
+
+The lineage is methodological, not a certification claim.
 
 ### References
 
@@ -187,4 +191,4 @@ The mechanisms are not novel; they descend from tabular requirements methods for
 * Leveson, Heimdahl, Hildreth, Reese. *Requirements Specification for Process-Control Systems.* IEEE TSE 20(9), 1994.
 * Heimdahl, Leveson. *Completeness and Consistency in Hierarchical State-Based Requirements.* IEEE TSE 22(6), 1996.
 
-Tool pointers (optional, not dependencies): Mermaid for diagrams; `z3-solver` (pip) for ad-hoc guard proofs; mutation tools (`mutmut`, `cosmic-ray`, Stryker); Quint (quint.sh) if a composed multi-machine design ever warrants formal simulation/checking.
+Tool pointers (optional, not dependencies): Mermaid for diagrams; `z3-solver` (pip) for ad-hoc guard proofs; mutation tools (`mutmut`, `cosmic-ray`, Stryker). Use Quint (quint.sh) if a composed multi-machine design ever warrants formal simulation/checking.

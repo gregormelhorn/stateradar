@@ -29,14 +29,14 @@ You turn human decisions into an approved to-be behavioural model. You specify. 
 Collect the owner's decisions one question at a time, with the recorded options as selectable choices and the proposal pre-selected. Never decide for the owner.
 
 1. Read every OPEN question first. If the kickoff carries a **question-set amendments** block: apply it (add or adjust options and questions) before you interview.
-2. Ask strictly one question per round, in id order. Announce progress ("Q-04 — 4 of 17"). Before each choice, print a compact context card: the question, the current behaviour with its key citation, why it matters (the finding or doctrine at stake), and the Part-B status. No walls of text.
+2. Ask strictly one question per round, in id order. Announce progress ("Q-04: 4 of 17"). Before each choice, print a compact context card: the question, the current behaviour with its key citation, why it matters (the finding or doctrine at stake), and the Part-B status. No walls of text.
 3. Present the choice with the harness's interactive question tool (Claude Code: `AskUserQuestion`). One question per call. Multi-select off. **List the recommended option first and label it "(recommended)". In Claude Code's picker the first option is the Enter-default. That implements the pre-selection.** Give every option a one-line consequence description. The built-in free-text field accepts an alternative decision, or `defer` to leave the question OPEN. Harness fallback without an interactive tool: numbered text menu, "1 = recommended, Enter = 1".
 4. Capture the rationale with honest attribution. Recommended option accepted → `Rationale: proposal rationale adopted (owner-confirmed)`. Any other option or free text → ask one short follow-up for a rationale. If the owner skips it, record `Rationale: none given (owner decision)`. Never invent a rationale.
 5. **Write through after every answer.** Update that question in `open-questions.md` at once: `Decision:`, `Rationale:`, `Status: ANSWERED — pending decision record`, `Decided-via: interactive interview <date>`. An aborted session must lose nothing.
 6. Light live conflict check: an answer can directly contradict an earlier answer of this session or a SYS invariant. Say so and re-ask once. The full conflict analysis stays in Step 1.
 7. End of interview: print a summary table (Q → decision; mark deviations from the recommendation) and the answered/deferred counts. If CONFIG says `Chain into resolution: yes`: continue with Step 1. Otherwise stop.
 
-Rules that do not bend: the interviewer never answers a question itself. Pre-selection is presentation, not authority — the record must show that the owner acted. A deferred question stays OPEN and blocks only its own cells.
+Rules that do not bend: the interviewer never answers a question itself. Pre-selection is presentation, not authority: the record must show that the owner acted. A deferred question stays OPEN and blocks only its own cells.
 
 ### Step 1 — Intake check
 
@@ -62,10 +62,10 @@ Maintain `decisions/INDEX.md`: Q-ids mapped to DR-ids, with one-line summaries.
 
 ### Step 3 — To-be model
 
-Start from `as-is.machine.mmd`. Apply the accepted DRs — nothing else. Produce:
+Start from `as-is.machine.mmd`. Apply the accepted DRs and nothing else. Produce:
 
-* `to-be.machine.mmd` — Mermaid `stateDiagram-v2`; a changed or added element carries the DR id in the transition label or a comment
-* `to-be-diff.md` — the semantic diff as-is → to-be: added, removed, and changed states, transitions, guards, actions. Every line cites its DR. A diff line without a DR citation is an error. Fix it before you finish.
+* `to-be.machine.mmd`: Mermaid `stateDiagram-v2`; a changed or added element carries the DR id in the transition label or a comment
+* `to-be-diff.md`: the semantic diff as-is → to-be, listing added, removed, and changed states, transitions, guards, actions. Every line cites its DR. A diff line without a DR citation is an error. Fix it before you finish.
 
 ### Step 4 — Matrix update
 
@@ -77,7 +77,7 @@ Regenerate `disposition-matrix.md` for the to-be model: rows = to-be leaf states
 
 ### Step 5 — Invariants and lints
 
-A decision can add or strengthen SYS invariants. Extract those and add them to `invariants-and-lints.md` with their DR link. Then re-check every SYS invariant against the to-be model, state by state, and re-run the lint checklist from the pilot (timeouts on waiting states, retry limits, failure outcomes, cancellation, terminal-state meaning, startup and shutdown, capacity). A new finding becomes a new question in `open-questions.md`.
+A decision can add or strengthen SYS invariants. Extract those and add them to `invariants-and-lints.md` with their DR link. Then re-check every SYS invariant against the to-be model, state by state. Re-run the lint checklist from the pilot: timeouts on waiting states, retry limits, failure outcomes, cancellation, terminal-state meaning, startup and shutdown, capacity. A new finding becomes a new question in `open-questions.md`.
 
 ### Step 6 — Mechanical self-check
 
@@ -85,4 +85,4 @@ Update and execute `check_matrix.py` against the new matrix: grid completeness; 
 
 ### Step 7 — Summary
 
-Update `summary.md`: DRs written, questions still open, conflicts raised, new questions from Step 5, diff statistics (transitions added, removed, changed). End with the explicit statement: **implementation has not been touched; the deviation between to-be and current code is established by the test-generation step (04), not here.**
+Update `summary.md`: DRs written, questions still open, conflicts raised, new questions from Step 5, diff statistics (transitions added, removed, changed). End with the explicit statement: **the implementation remains untouched. The test-generation step (04), not this step, establishes the deviation between to-be and current code.**

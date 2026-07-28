@@ -1,6 +1,6 @@
 # Domain Statechart Pack
 
-**Version 1.16.** Statecharts as domain specification and test oracle for AI-coding-agent workflows — as a pure prompt pack. No tooling to install; the deterministic layer is bootstrapped by the prompts themselves (generated checker scripts, cell tests, CI wiring).
+**Version 1.17.** Statecharts as domain specification and test oracle for AI-coding-agent workflows — as a pure prompt pack. No tooling to install; the deterministic layer is bootstrapped by the prompts themselves (generated checker scripts, cell tests, CI wiring).
 
 > The agent may propose and challenge behaviour, but must not silently decide it — and the tests come from the specification, not from the code.
 

@@ -1,6 +1,6 @@
 # Test Generation Prompt — One Test per Matrix Cell
 
-**How to use:** run after resolution (03), when a to-be model and an updated matrix exist. Fill in CONFIG. Then paste this file into your coding agent at the repository root. The model is the oracle. The code is under test — not the other way around. The examples use Python and pytest. Adapt them mechanically to the project's language and test framework.
+**How to use:** run after resolution (03), when a to-be model and an updated matrix exist. Fill in CONFIG. Then paste this file into your coding agent at the repository root. The model is the oracle; the code is under test, not the other way around. The examples use Python and pytest. Adapt them mechanically to the project's language and test framework.
 
 ## CONFIG — fill in before running
 
@@ -30,7 +30,9 @@ You generate a conformance test suite from an approved behavioural model.
 
 ### Step 1 — Seam
 
-Identify how to: initialize a known state and context; deliver exactly one event at a time; observe the resulting state through a state-projection function; observe emitted effects in order (fake transport, fake bus, spies); control time through an injectable clock or fake timer. Document the seam in `seam.md`: the projection, the fakes, the clock mechanism. If no adequate seam exists: under "propose only", write the minimal behaviour-preserving change and stop after Step 2; under "yes", implement it behaviour-preserving and note it in `seam.md`.
+Identify how to initialize a known state and context. Identify how to deliver exactly one event at a time. Observe the resulting state through a state-projection function. Observe emitted effects in order (fake transport, fake bus, spies). Control time through an injectable clock or fake timer.
+
+Document the seam in `seam.md`: the projection, the fakes, the clock mechanism. If no adequate seam exists: under "propose only", write the minimal behaviour-preserving change and stop after Step 2. Under "yes", implement it behaviour-preserving and note it in `seam.md`.
 
 ### Step 2 — Cell tests
 
@@ -55,7 +57,7 @@ Convert each adversarial trace from `adversarial-traces.md` whose question has a
 
 ### Step 4 — Coverage map and checker
 
-Write `matrix-coverage.json`: every matrix cell → test id, or `untestable-via-seam: <reason>`. Extend `domain-analysis/<component>/check_matrix.py` with two checks: every non-UNSPECIFIED cell has a mapped test or a reasoned untestable entry; every ignore/reject/defer cell has a DR link. Then wire both checkers into the suite:
+Write `matrix-coverage.json`: every matrix cell → test id, or `untestable-via-seam: <reason>`. Extend `domain-analysis/<component>/check_matrix.py` with two checks. Every non-UNSPECIFIED cell has a mapped test or a reasoned untestable entry. Every ignore/reject/defer cell has a DR link. Then wire both checkers into the suite:
 
 ```python
 def test_matrix_discipline():
@@ -71,4 +73,4 @@ Run the full suite. Write `deviation-report.md`: every failing test is a deviati
 
 ### Step 6 — Summary
 
-Update `summary.md`: cells total / tested / untestable / UNSPECIFIED-skipped; scenarios converted / skipped; the suite result; the deviations found (and fixed, if permitted); the checker status. Optional honesty probe, if a mutation tool is available (`mutmut`, `cosmic-ray`, Stryker): run it on the component's lifecycle code and report surviving mutants as weak spots of the suite.
+Update `summary.md`: cells total / tested / untestable / UNSPECIFIED-skipped; scenarios converted / skipped; the suite result; the deviations found (and fixed, if permitted); the checker status. Optional honesty probe, if a mutation tool is available (`mutmut`, `cosmic-ray`, Stryker). Run it on the component's lifecycle code. Report surviving mutants as weak spots of the suite.
