@@ -1,0 +1,24 @@
+{
+  "formatVersion": "1.0",
+  "component": "tools/selftest/src/mini.py",
+  "packVersion": "1.9",
+  "analyzedSha": "WORKTREE",
+  "watchPaths": ["tools/selftest/src/"],
+  "states": ["S0", "S1"],
+  "events": [{"id": "E1"}, {"id": "UV1", "undesired": true}],
+  "cells": [
+    {"state": "S0", "event": "E1", "disposition": "transition", "target": "S1",
+     "citation": {"file": "tools/selftest/src/mini.py", "line": 3, "fragment": "self.state = \"S1\""}},
+    {"state": "S0", "event": "UV1", "disposition": "UNSPECIFIED", "q": "Q-01"},
+    {"state": "S1", "event": "E1", "disposition": "handle",
+     "citation": {"file": "tools/selftest/src/mini.py", "line": 6, "fragment": "return \"pong\""}},
+    {"state": "S1", "event": "UV1", "disposition": "ignore (documented)", "dr": "DR-001"}
+  ],
+  "pairs": [{"id": "P-01a", "trace": "T-01"}],
+  "guardGroups": [{"id": "GG-1", "outcome": "proven"}],
+  "coverage": {"src": {"loss": "n/a: single in-process source", "delay": ["UV1"],
+    "duplication": "n/a: keyed upstream", "out-of-order": "n/a: synchronous",
+    "contradiction": "n/a: single writer"}},
+  "questions": [{"id": "Q-01", "status": "OPEN"}],
+  "behaviouralDrs": ["DR-001"]
+}

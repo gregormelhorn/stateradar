@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Domain Statechart Pack — analysis sidecar",
+  "type": "object",
+  "required": ["formatVersion", "component", "states", "events", "cells"],
+  "properties": {
+    "formatVersion": { "const": "1.0" },
+    "component": { "type": "string" },
+    "packVersion": { "type": "string" },
+    "analyzedSha": { "type": "string", "description": "git SHA or WORKTREE" },
+    "watchPaths": { "type": "array", "items": { "type": "string" } },
+    "states": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "events": { "type": "array", "items": { "type": "object",
+      "required": ["id"], "properties": {
+        "id": { "type": "string" }, "undesired": { "type": "boolean" } } } },
+    "cells": { "type": "array", "items": { "type": "object",
+      "required": ["state", "event", "disposition"], "properties": {
+        "state": { "type": "string" }, "event": { "type": "string" },
+        "disposition": { "enum": ["transition", "handle", "ignore (documented)",
+          "ignore (accidental)", "defer (queued)", "reject", "UNSPECIFIED"] },
+        "target": { "type": "string" }, "dr": { "type": "string" },
+        "q": { "type": "string" },
+        "citation": { "type": "object", "required": ["file", "line"],
+          "properties": { "file": { "type": "string" },
+            "line": { "type": "integer" }, "fragment": { "type": "string" } } } } } },
+    "pairs": { "type": "array", "items": { "type": "object",
+      "required": ["id", "trace"], "properties": {
+        "id": { "type": "string" }, "trace": { "type": "string" } } } },
+    "guardGroups": { "type": "array", "items": { "type": "object",
+      "required": ["id", "outcome"], "properties": { "id": { "type": "string" },
+        "outcome": { "enum": ["proven", "violation", "not-formalizable"] } } } },
+    "coverage": { "type": "object", "additionalProperties": { "type": "object" } },
+    "questions": { "type": "array", "items": { "type": "object",
+      "required": ["id", "status"] } },
+    "behaviouralDrs": { "type": "array", "items": { "type": "string" } }
+  }
+}

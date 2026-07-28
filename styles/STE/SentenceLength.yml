@@ -1,0 +1,6 @@
+extends: occurrence
+message: "Sentence has more than 24 words. Split it (STYLE.md rule 1)."
+level: warning
+scope: sentence
+max: 24
+token: \b(\w+)\b

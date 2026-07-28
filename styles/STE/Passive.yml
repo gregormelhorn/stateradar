@@ -1,0 +1,6 @@
+extends: existence
+message: "Passive voice ('%s'): use the active voice (STYLE.md rule 2)."
+level: warning
+ignorecase: true
+raw:
+  - \b(am|are|were|being|is|been|was|be)\b\s*(\w+ed|awoken|born|beat|begun|bent|bound|bitten|blown|broken|brought|built|caught|chosen|cut|dealt|done|drawn|driven|eaten|found|forgotten|frozen|given|gone|held|hidden|kept|known|laid|led|lost|made|meant|paid|proven|put|read|run|said|seen|sent|set|shown|shut|sold|spent|split|taken|taught|thrown|told|understood|withdrawn|written)\b

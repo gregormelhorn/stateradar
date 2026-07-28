@@ -1,0 +1,17 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Agent session artifacts
+.pi-subagents/
+
+# Private/licensed data — never enters the repository (ASD copyright, see STYLE.md)
+private-ste-overlay.zip
+
+# Generated STE dictionaries (rebuild with tools/build_ste_dictionary.py)
+styles/STEDict/*.dic
+styles/STEDict/*.aff

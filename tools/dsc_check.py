@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""Pack-shipped analysis checker. The agent emits data (analysis.json);
+the pack verifies it. Replaces the generic parts of per-run checkers.
+
+Usage:
+  python3 tools/dsc_check.py <analysis-dir> [--repo ROOT] [--model FILE.mmd]
+
+Checks: grid totality, disposition vocabulary, hole->Q mapping, DR links,
+pair traces, guard outcomes, coverage-table totality, behavioural-DR
+reverse coverage, question statuses, Mermaid<->matrix sync, fragment
+citations, and manifest staleness (git). Exit 0 = OK, 1 = violations.
+"""
+from __future__ import annotations
+import json, re, subprocess, sys
+from functools import lru_cache
+from pathlib import Path
+
+VOCAB = {"transition", "handle", "ignore (documented)", "ignore (accidental)",
+         "defer (queued)", "reject", "UNSPECIFIED"}
+HOLES = {"UNSPECIFIED", "ignore (accidental)"}
+CATEGORIES = ["loss", "delay", "duplication", "out-of-order", "contradiction"]
+GUARD_OUTCOMES = {"proven", "violation", "not-formalizable"}
+Q_STATUS = {"OPEN", "ANSWERED", "RESOLVED", "CONFLICT"}
+
+def main() -> int:
+    args = sys.argv[1:]
+    if not args:
+        print(__doc__); return 2
+    adir = Path(args[0])
+    repo = Path(args[args.index("--repo") + 1]) if "--repo" in args else None
+    model = adir / args[args.index("--model") + 1] if "--model" in args else None
+    errors: list[str] = []
+    E = errors.append
+
+    data = json.loads((adir / "analysis.json").read_text(encoding="utf-8"))
+
+    # Contract validation: execute the schema, do not just ship it.
+    schema_path = Path(__file__).resolve().parent.parent / "formats" / "analysis.schema.json"
+    if schema_path.exists():
+        try:
+            import jsonschema
+            v = jsonschema.Draft202012Validator(json.loads(schema_path.read_text()))
+            for err in sorted(v.iter_errors(data), key=str):
+                E(f"schema: {'/'.join(str(x) for x in err.path) or '<root>'}: {err.message}")
+        except ImportError:
+            print("note: jsonschema not installed - structural checks only", file=sys.stderr)
+    states = data["states"]
+    events = [e["id"] for e in data["events"]]
+    qids = {q["id"] for q in data.get("questions", [])}
+
+    # Grid totality + vocabulary + targets
+    seen: dict[tuple[str, str], int] = {}
+    for c in data["cells"]:
+        key = (c["state"], c["event"])
+        seen[key] = seen.get(key, 0) + 1
+        if c["disposition"] not in VOCAB:
+            E(f"cell {key}: unknown disposition {c['disposition']!r}")
+        if c["disposition"] == "transition" and c.get("target") not in states:
+            E(f"cell {key}: transition target {c.get('target')!r} is not a state")
+        if c["disposition"] in HOLES and c.get("q") not in qids:
+            E(f"cell {key}: hole without a valid Q reference")
+        if c["disposition"] in {"ignore (documented)", "reject", "defer (queued)"}:
+            if not (c.get("dr") or c.get("citation")):
+                E(f"cell {key}: {c['disposition']} needs a DR or a citation")
+    for s in states:
+        for ev in events:
+            n = seen.get((s, ev), 0)
+            if n != 1:
+                E(f"grid: ({s}, {ev}) has {n} cells, expected exactly 1")
+
+    # Pairs, guard groups, coverage table, questions
+    for p in data.get("pairs", []):
+        if not p.get("trace"):
+            E(f"pair {p.get('id')}: no trace")
+    for g in data.get("guardGroups", []):
+        if g.get("outcome") not in GUARD_OUTCOMES:
+            E(f"guard group {g.get('id')}: outcome {g.get('outcome')!r} invalid")
+    for src, cats in data.get("coverage", {}).items():
+        for cat in CATEGORIES:
+            v = cats.get(cat)
+            if v is None or v == [] or v == "":
+                E(f"coverage: {src}/{cat} is empty (variant ids or 'n/a: reason')")
+    for q in data.get("questions", []):
+        if q.get("status", "").split(" ")[0] not in Q_STATUS:
+            E(f"question {q.get('id')}: status {q.get('status')!r} invalid")
+
+    # Behavioural-DR reverse coverage
+    cited = {c.get("dr") for c in data["cells"] if c.get("dr")}
+    for dr in data.get("behaviouralDrs", []):
+        if dr not in cited:
+            E(f"behavioural {dr}: cited by no matrix cell")
+
+    # Mermaid <-> matrix sync
+    if model and model.exists():
+        text = model.read_text(encoding="utf-8")
+        edges = set(re.findall(r"^\s*(\w+)\s*-->\s*(\w+)", text, re.M))
+        mstates = {a for a, _ in edges} | {b for _, b in edges}
+        mstates.discard("["); mstates = {s for s in mstates if s != "[*]"}
+        missing = set(states) - mstates
+        if missing:
+            E(f"model sync: states missing from diagram: {sorted(missing)}")
+        for c in data["cells"]:
+            if c["disposition"] == "transition" and c["state"] in states:
+                if (c["state"], c["target"]) not in edges and c["state"] != c["target"]:
+                    E(f"model sync: no edge {c['state']} --> {c['target']} for cell ({c['state']}, {c['event']})")
+
+    # Fragment citations (file reads cached: the profiler, not the compiler)
+    @lru_cache(maxsize=None)
+    def _lines(path: str) -> tuple[str, ...] | None:
+        f = repo / path
+        if not f.exists():
+            return None
+        return tuple(f.read_text(encoding="utf-8", errors="replace").splitlines())
+
+    if repo:
+        for c in data["cells"]:
+            cit = c.get("citation")
+            if not cit:
+                continue
+            cached = _lines(cit["file"])
+            if cached is None:
+                E(f"citation: {cit['file']} does not exist"); continue
+            lines = list(cached)
+            lo = max(0, cit["line"] - 4); hi = min(len(lines), cit["line"] + 3)
+            window = "\n".join(lines[lo:hi])
+            if cit.get("fragment") and cit["fragment"] not in window:
+                E(f"citation: fragment {cit['fragment']!r} not near {cit['file']}:{cit['line']}")
+
+    # Referential integrity: every cited DR exists as a decision file.
+    ddir = adir / "decisions"
+    if ddir.is_dir():
+        have = {f.stem for f in ddir.glob("DR-*.yaml")}
+        for dr in sorted(cited | set(data.get("behaviouralDrs", []))):
+            if dr not in have:
+                E(f"decisions: {dr} is cited but {dr}.yaml does not exist")
+
+    # Staleness (manifest + git)
+    mf = adir / "manifest.json"
+    if mf.exists():
+        m = json.loads(mf.read_text(encoding="utf-8"))
+        for key in ("component", "watchPaths", "analyzedSha"):
+            if key not in m:
+                E(f"manifest: required key {key!r} missing")
+    if repo and mf.exists():
+        m = json.loads(mf.read_text(encoding="utf-8"))
+        sha = m.get("analyzedSha", "WORKTREE")
+        if sha != "WORKTREE":
+            try:
+                out = subprocess.run(
+                    ["git", "-C", str(repo), "diff", "--name-only", f"{sha}..HEAD", "--"]
+                    + m.get("watchPaths", []),
+                    capture_output=True, text=True, check=True).stdout.strip()
+                if out:
+                    E("stale: watched paths changed since analyzedSha:\n  " + out.replace("\n", "\n  "))
+            except subprocess.CalledProcessError as ex:
+                E(f"staleness check failed: {ex.stderr.strip()}")
+
+    if errors:
+        print("DSC CHECK: FAIL")
+        for e in errors:
+            print(" -", e)
+        return 1
+    print(f"DSC CHECK: OK ({len(states)} states x {len(events)} events, "
+          f"{len(data['cells'])} cells, {len(data.get('guardGroups', []))} guard groups)")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,6 @@
+extends: existence
+message: "Passiv ('%s'): Aktiv verwenden, Handelnden nennen."
+level: warning
+ignorecase: true
+raw:
+  - (\b(wird|werden|wurde|wurden|worden)\s+(?:\w+\s+){0,6}?(\w*ge\w+t|\w*ge\w+en|\w+iert)\b|\b(\w*ge\w+t|\w*ge\w+en|\w+iert)\s+(werden|worden|wird|wurde|wurden)\b)
