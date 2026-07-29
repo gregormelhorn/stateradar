@@ -1,6 +1,6 @@
 # Test Audit — Weak Tests and Coverage Prompt
 
-**How to use:** fill in the CONFIG block. Then paste this file into your coding agent at the repository root. The agent audits an existing test suite against the decided disposition matrix of one analyzed component. Its main goal: find weak tests that bind to implementation instead of behaviour. It also finds redundant tests, coverage gaps, and deviations. It never changes, deletes, or weakens a test.
+**How to use:** fill in the CONFIG block. Then paste this file into your coding agent at the repository root. The agent audits an existing test suite against the decided disposition matrix of one analyzed component. Its main goal: improve test and software quality. It finds weak tests that bind to implementation instead of behaviour. It finds redundant tests, coverage gaps, and deviations. It never changes, deletes, or weakens a test.
 
 ## CONFIG — fill in before running
 
@@ -28,6 +28,7 @@ You audit a test suite against the decided domain model of one stateful componen
 7. Checks are executed code. You emit `check_test_coverage.py`, run it, and paste the output.
 8. Scenario tests overlap cell tests by design. Never mark a scenario test as a duplicate of a cell test.
 9. The reference suite is sound by construction. The pack generated it from the matrix. Do not re-judge it. Use it as coverage evidence only.
+10. Maximize test quality. Prefer rewrite to deletion. A reference test proves cell coverage. It does not prove boundary coverage. Never propose deletion when the audited test covers boundary cases that the reference test does not cover.
 
 ### Step 1 — Load the decided model
 
@@ -76,5 +77,5 @@ Write `test-coverage-map.md`: one line per test with class, mapped cells, and ci
 2. **Redundancy candidates.** Each `equivalent-duplicate` pair with the keep-proposal and the reason.
 3. **Deviations.** Each `deviating` test with the contradicted disposition.
 4. **Coverage.** `weakly-covered` and `uncovered` cells.
-5. **DR proposals.** One draft per deletion or weakening: the question, numbered options with the recommended option first, the evidence.
+5. **DR proposals.** One draft per deletion or weakening: the question, numbered options with the quality-maximizing option first, the evidence. Prefer rewrite over deletion when boundary coverage is at stake.
 6. **Questions.** New `Q-nn` entries for seam gaps and matrix gaps, appended to `open-questions.md` as proposals, marked `proposed`.
