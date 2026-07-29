@@ -50,7 +50,7 @@ For each test, answer one question: what does this test observe? Use these weakn
 Assign exactly one class per test:
 
 * `sound`: asserts through the seam only.
-* `weak-redundant`: structure-bound, and the targeted behaviour is observable through the seam. Propose a rewrite to seam assertions when the test is the only coverage. Propose deletion when an equivalent seam test exists, in the reference suite or in the audited suite.
+* `weak-redundant`: structure-bound, and the targeted behaviour is observable through the seam. Propose a rewrite to seam assertions when the test is the only coverage. When an equivalent seam test exists (in the reference suite or the audited suite), compare the boundary coverage: the weak test and the reference test. If the weak test asserts edge cases the reference test does not, the higher-quality outcome is a rewrite, not a deletion. Propose deletion only when the reference test already covers every boundary the weak test exercises. The standard is test quality, not test count.
 * `weak-seam-gap`: structure-bound because the seam does not expose the behaviour. This is a seam-gap finding. It becomes a new `Q-nn`: extend the projection?
 * `weak-incidental`: asserts detail with no behavioural relevance. Deletion candidate.
 * `equivalent-duplicate`: sound, but it matches another test in cells, assertions, and expected values. Redundancy candidate. Propose which test to keep: the one with more SYS-invariant assertions.
