@@ -26,6 +26,13 @@
 - The rebuild command in the README and `technical-names.txt` points at
   the issue-9 list.
 
+## v1.20.2 — README explains why Part B exists (2026-08-05)
+
+The README gained a "Why Part B exists" section: the mirroring trust
+problem, the three blind inputs, the five diff classes, why blindness
+is the mechanism, and the dobby trigger-service worked example (the
+independently re-derived DR-035).
+
 ## v1.20.1 — Part-B inputs carry the disposition vocabulary (2026-08-05)
 
 A blind pass without the seven-value vocabulary applies `reject` and

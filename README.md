@@ -106,6 +106,59 @@ Once 04 has run, the discipline is CI-enforced in the consuming repo. Breaking a
 
 Calibration tip: run the pilot twice on the same component in fresh sessions and diff the two matrices. The divergence tells you how much to trust any single unverified run.
 
+## Why Part B exists (the blind pass)
+
+Pass A (the pilot) builds the matrix from the code. That creates a
+trust problem. Where the matrix agrees with the code, you cannot tell
+whether it records a requirement or rationalizes an implementation
+accident. The analysis agent read the code, so its model matches by
+construction. This failure mode has the name mirroring, and the matrix
+alone cannot reveal it.
+
+Part B attacks it by independent re-derivation. A FRESH agent session
+receives exactly three inputs and nothing else. No access to the code,
+the matrix, or the traces:
+
+1. the event catalogue (events, undesired variants, interaction pairs,
+   gate annotations),
+2. the prose requirements,
+3. the normative contract text of every event type.
+
+From these alone it must state, for every event: when should the
+component handle, ignore, or reject it, and what should happen. An
+agent that sees both sides then diffs the blind table against the
+matrix, row by row:
+
+- **convergent** — both independently agree. The behaviour is
+  derivable from the requirements, not a code accident. The strongest
+  cheap trust signal.
+- **convergent-hole** — the blind pass flags the same gap pass A
+  found. The finding gains weight.
+- **divergence** — different expectation. A real finding: a blind spot
+  in pass A, an ambiguous catalogue, or a genuine open question. Every
+  divergence must end as a question or a reasoned fold, never closed
+  silently.
+- **artefact** — the catalogue phrasing caused it. Repair the
+  catalogue input, not the model.
+- **pass-B-blind-spot** — pass A saw something the blind pass missed.
+  Noted, no action.
+
+The blindness is the mechanism, not a ritual. An agent that knows the
+matrix cannot un-know it. Fresh session, exactly three inputs, nothing
+else.
+
+Worked example (dobby trigger-service, 2026-08-05). The pilot found
+the code contradicting its own docstring ("highlight ALWAYS" vs an
+early return for uncalibrated sources). The owner decided for the code
+(DR-035). The blind pass knew none of this and still derived from
+"highlight on VALIDATED receipt" that uncalibrated sources get no
+highlight. Three independent sources agreed: code, owner decision,
+requirements derivation. All 23 events and all 12 pair orderings
+converged, zero divergences.
+
+Cost: one subagent run. Benefit: the matrix stops being a claim by the
+analysis agent alone.
+
 ## Adopting the pack in an existing project
 
 Brownfield adoption runs in maturity levels per component
