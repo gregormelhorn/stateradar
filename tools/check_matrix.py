@@ -79,6 +79,23 @@ def main() -> int:
             f"expected {len(events)} per row"
         )
 
+    # Stage 1: undesired-coverage totality, when the catalogue carries
+    # the table (an empty cell is an error — a checklist category must
+    # never silently produce no variant).
+    if "## Undesired-coverage" in cat:
+        cov = cat.split("## Undesired-coverage")[1].split("##")[0]
+        for line in cov.split("\n"):
+            if (
+                line.strip().startswith("|")
+                and "**" not in line
+                and "---" not in line
+                and "source" not in line.lower()
+            ):
+                cells = [c.strip() for c in line.split("|")[1:-1]]
+                for c in cells[1:]:
+                    if not c:
+                        errors.append(f"coverage: empty cell in {cells[0]}")
+
     # Stage 2: hole cells carry Q refs present in open-questions.md
     oq_path = adir / "open-questions.md"
     oq = oq_path.read_text(encoding="utf-8") if oq_path.is_file() else ""
