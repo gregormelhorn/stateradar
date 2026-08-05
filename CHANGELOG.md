@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.20.3 — GR-7/GR-8 Vale rules active (2026-08-05)
+
+- ste-pack pinned v1.4.0 → v1.5.0: the Issue-9 general recommendations
+  are now Vale rules. `STE.GenderNeutral` (warning, GR-7) finds
+  gender-specific pronouns and man/woman; `STE.Possessive` (suggestion,
+  GR-8) finds the Saxon genitive and defers the correctness judgment to
+  the writer. On this pack's prose: zero GR-7 findings, 25 GR-8
+  suggestions on correct possessives — informational, the gate stays
+  0 errors.
+
 ## v1.20.2 — language layer on ASD-STE100 Issue 9 (2026-08-05)
 
 - ste-pack pinned v1.3.1 → v1.4.0: Issue-9 alignment. Issue 9 renames
