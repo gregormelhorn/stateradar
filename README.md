@@ -23,8 +23,10 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 checker), gen_analysis_sidecar (emits the sidecar from
                 the matrices), part_b_pack (assembles and coverage-checks
                 the Part-B blind inputs), refresh_citations (the
-                06-reconcile citation refresh), templates/ (the CI gate
-                file)
+                06-reconcile citation refresh), gen_matrix_scaffold
+                (empty matrix grids), dsc_compose (cross-model report),
+                templates/ (the CI gate file)
+.benchmarks/    golden cases + runner — the falsifiable layer for the tools
 tools/ste-pack/ the language layer, consumed as a pinned submodule (v1.0)
 formats/        analysis.schema.json + manifest.schema.json — the sidecar
                 and manifest contracts

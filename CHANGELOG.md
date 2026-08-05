@@ -26,6 +26,24 @@
 - The rebuild command in the README and `technical-names.txt` points at
   the issue-9 list.
 
+## v1.22 — scaffold, composition report, benchmarks (2026-08-05)
+
+The mid-layer from the next-steps review:
+
+- **tools/gen_matrix_scaffold.py** (new): emits the empty matrix grid
+  (sub-table split for wide event sets) from the state list and the
+  catalogue's id declaration. The LLM fills cells; it never holds the
+  table structure.
+- **tools/dsc_compose.py** (new): cross-model composition report —
+  event names wired across models, and model links where a matrix
+  hands behaviour to a neighbour (untestable-via-seam reasons naming
+  another component). Report-only by design; a gate needs more models.
+- **.benchmarks/** (new): the falsifiable layer. Golden mini cases with
+  expected outputs; the runner executes the pack tools against them
+  (green cases prove the gates pass, red cases prove they catch
+  violations). Includes the manual pilot-convergence protocol for the
+  LLM-in-the-loop calibration claim.
+
 ## v1.21 — the low-friction tool layer (2026-08-05)
 
 Four low-impact additions from the next-steps review:
