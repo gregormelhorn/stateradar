@@ -1,31 +1,5 @@
 # Changelog
 
-## v1.20.3 — GR-7/GR-8 Vale rules active (2026-08-05)
-
-- ste-pack pinned v1.4.0 → v1.5.0: the Issue-9 general recommendations
-  are now Vale rules. `STE.GenderNeutral` (warning, GR-7) finds
-  gender-specific pronouns and man/woman; `STE.Possessive` (suggestion,
-  GR-8) finds the Saxon genitive and defers the correctness judgment to
-  the writer. On this pack's prose: zero GR-7 findings, 25 GR-8
-  suggestions on correct possessives — informational, the gate stays
-  0 errors.
-
-## v1.20.2 — language layer on ASD-STE100 Issue 9 (2026-08-05)
-
-- ste-pack pinned v1.3.1 → v1.4.0: Issue-9 alignment. Issue 9 renames
-  "technical name" to **"technical noun"**; STYLE.md, the language
-  prompts, and this pack's README and `technical-names.txt` header
-  follow. The lintable limits are unchanged (20/25 words, six
-  sentences), so the Vale gate is identical.
-- Dictionary data rebuilt from the Issue-9 word lists
-  (`ste-core-words-issue9.txt`: Issue-9 headwords + [TN] alternatives,
-  union of the Issue-7 forms minus newly unapproved words). Notable for
-  this pack's prose: `file`, `could`, `want`, `activate` are now
-  approved; `required`, `switch`, `consult`, `separately` are newly
-  unapproved and will flag.
-- The rebuild command in the README and `technical-names.txt` points at
-  the issue-9 list.
-
 ## v1.24 — fake-timer semantics, checker wrapper, typed suites, bulk-edit guidance (2026-08-05)
 
 Learnings from the dobby refactoring round (check_matrix dedup, strict
@@ -116,6 +90,32 @@ The README gained a "Why Part B exists" section: the mirroring trust
 problem, the three blind inputs, the five diff classes, why blindness
 is the mechanism, and the dobby trigger-service worked example (the
 independently re-derived DR-035).
+
+## v1.20.3 — GR-7/GR-8 Vale rules active (2026-08-05)
+
+- ste-pack pinned v1.4.0 → v1.5.0: the Issue-9 general recommendations
+  are now Vale rules. `STE.GenderNeutral` (warning, GR-7) finds
+  gender-specific pronouns and man/woman; `STE.Possessive` (suggestion,
+  GR-8) finds the Saxon genitive and defers the correctness judgment to
+  the writer. On this pack's prose: zero GR-7 findings, 25 GR-8
+  suggestions on correct possessives — informational, the gate stays
+  0 errors.
+
+## v1.20.2 — language layer on ASD-STE100 Issue 9 (2026-08-05)
+
+- ste-pack pinned v1.3.1 → v1.4.0: Issue-9 alignment. Issue 9 renames
+  "technical name" to **"technical noun"**; STYLE.md, the language
+  prompts, and this pack's README and `technical-names.txt` header
+  follow. The lintable limits are unchanged (20/25 words, six
+  sentences), so the Vale gate is identical.
+- Dictionary data rebuilt from the Issue-9 word lists
+  (`ste-core-words-issue9.txt`: Issue-9 headwords + [TN] alternatives,
+  union of the Issue-7 forms minus newly unapproved words). Notable for
+  this pack's prose: `file`, `could`, `want`, `activate` are now
+  approved; `required`, `switch`, `consult`, `separately` are newly
+  unapproved and will flag.
+- The rebuild command in the README and `technical-names.txt` points at
+  the issue-9 list.
 
 ## v1.20.1 — Part-B inputs carry the disposition vocabulary (2026-08-05)
 

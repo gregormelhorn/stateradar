@@ -1,6 +1,6 @@
 # Domain Statechart Pack
 
-**Version 1.20.** Statecharts as domain specification and test oracle for AI-coding-agent workflows, as a pure prompt pack. No tooling to install; the prompts themselves bootstrap the deterministic layer (generated checker scripts, cell tests, CI wiring).
+**Version 1.24.** Statecharts as domain specification and test oracle for AI-coding-agent workflows, as a pure prompt pack. No tooling to install; the prompts themselves bootstrap the deterministic layer (generated checker scripts, cell tests, CI wiring).
 
 > The agent may propose and challenge behaviour, but must not silently decide it — and the tests come from the specification, not from the code.
 
@@ -27,9 +27,9 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 (empty matrix grids), dsc_compose (cross-model report),
                 check_matrix (the generic per-component checker),
                 dsc_stamp (validate + pin the manifest), templates/
-                (the CI gate file)
+                (the CI gate file + the per-component checker wrapper)
 .benchmarks/    golden cases + runner — the falsifiable layer for the tools
-tools/ste-pack/ the language layer, consumed as a pinned submodule (v1.0)
+tools/ste-pack/ the language layer, consumed as a pinned submodule (v1.5.0)
 formats/        analysis.schema.json + manifest.schema.json — the sidecar
                 and manifest contracts
 .vale.ini       the pack's own prose gate; StylesPath into tools/ste-pack/
