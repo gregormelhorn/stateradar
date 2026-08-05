@@ -221,6 +221,7 @@ The lineage is methodological, not a certification claim.
 
 ### References
 
+<!-- vale off — bibliography: proper names and citation titles are not prose -->
 * Heninger, Kallander, Parnas, Shore. *Software Requirements for the A-7E Aircraft.* NRL 3876, 1978.
 * Heninger. *Specifying Software Requirements for Complex Systems.* IEEE TSE SE-6(1), 1980.
 * Parnas, Madey. *Functional Documents for Computer Systems.* SCP 25(1), 1995.
@@ -229,5 +230,6 @@ The lineage is methodological, not a certification claim.
 * Jaffe, Leveson, Heimdahl, Melhart. *Software Requirements Analysis for Real-Time Process-Control Systems.* IEEE TSE 17(3), 1991.
 * Leveson, Heimdahl, Hildreth, Reese. *Requirements Specification for Process-Control Systems.* IEEE TSE 20(9), 1994.
 * Heimdahl, Leveson. *Completeness and Consistency in Hierarchical State-Based Requirements.* IEEE TSE 22(6), 1996.
+<!-- vale on -->
 
 Tool pointers (optional, not dependencies): Mermaid for diagrams; `z3-solver` (pip) for ad-hoc guard proofs; mutation tools (`mutmut`, `cosmic-ray`, Stryker). Use Quint (quint.sh) if a composed multi-machine design ever warrants formal simulation/checking.

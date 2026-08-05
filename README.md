@@ -49,18 +49,19 @@ uv run --with jsonschema python3 tools/selftest/run_selftest.py
 
 ## Language policy (ste-pack dependency)
 
-The language layer is a separate pack: **ste-pack v1.1.1**, consumed as a git submodule at `tools/ste-pack/`. It holds STYLE.md (strictness per text class) and the Vale styles (STE English, DTK German, STEDict dictionary check). It also holds the language agent passes and the language checkers. This pack's `.vale.ini` points its `StylesPath` into the submodule; `tools/check_pack_consistency.py` verifies that the checked-out submodule tag matches the version declared here.
+The language layer is a separate pack: **ste-pack v1.3.1**, consumed as a git submodule at `tools/ste-pack/`. It holds STYLE.md (strictness per text class) and the Vale styles (STE English, DTK German, STEDict dictionary check). It also holds the language agent passes and the language checkers. This pack's `.vale.ini` points its `StylesPath` into the submodule; `tools/check_pack_consistency.py` verifies that the checked-out submodule tag matches the version declared here.
 
-After a fresh clone, recreate the dictionary symlinks if you use `STEDict` (the data is private and gitignored; see ste-pack STYLE.md, "Data placement"):
+This pack's approved technical names — its project dictionary in the sense of ste-pack STYLE.md — live in `technical-names.txt`, one name per line. Add a name there before you use it in strict-mode text, then rebuild the dictionary.
+
+After a fresh clone, recreate the dictionary symlinks if you use `STEDict` (the data is private and gitignored; see ste-pack STYLE.md, "Data placement"), then rebuild so the technical names flow in:
 
 ```bash
 mkdir -p tools/ste-pack/styles/config/dictionaries
 ln -sf ~/ste-private/ste.dic ~/ste-private/ste.aff tools/ste-pack/styles/config/dictionaries/
+python3 tools/ste-pack/tools/build_ste_dictionary.py \
+  --wordlist ~/ste-private/ste-core-words-issue7.txt \
+  --names technical-names.txt
 ```
-
-<!-- vale off -->
-This pack's approved technical names (its project dictionary in the sense of ste-pack STYLE.md): statechart · state · event · transition · guard · disposition (the seven matrix values) · matrix · cell · hole · invariant · NAT (environment assumption) · SYS (system obligation) · doctrine line · episode · fold · seam · provenance · decision record / DR · blind pass · convergent · convergent-hole · divergence · artefact · pass-B-blind-spot · conformance · vector · trace · interaction pair · boundary · clamp · TTL · replay · digest · idempotent · disjoint · coverage · satisfiable · not-formalizable · write-through · remembrance semantics.
-<!-- vale on -->
 
 ## Using the pack in a repository
 
