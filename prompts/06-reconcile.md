@@ -40,6 +40,14 @@ Rename `to-be.machine.mmd` to `as-is.machine.mmd`. Remove the to-be framing from
 
 ### Step 3 — Citation refresh
 
+Bulk edits first: a mechanical pass over many watched files (a repo-wide
+formatting run, an annotation sweep, a shared-fixture extraction) stales
+every manifest at once. Do NOT bulk-shift citation line numbers by hand —
+a blanket `+N` over-shifts fragment-pinned citations and re-breaks them
+(dobby, 2026-08-05). Run `tools/refresh_citations.py` (content-anchored,
+reports what it cannot resolve), fix its unresolved list manually with
+the fragment as the guide, then stamp with `tools/dsc_stamp.py`.
+
 Re-resolve every `observed-in-code` and `observed-in-tests` citation in the artifacts against HEAD. Fix drifted line numbers. Add a fragment to every citation that has none. Behaviour that the implementation added gets new citations: each behavioural DR now has an `observed-in-code` anchor.
 
 ### Step 4 — Sidecar and manifest

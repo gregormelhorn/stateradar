@@ -63,7 +63,7 @@ Convert each adversarial trace from `adversarial-traces.md` whose question has a
 
 ### Step 4 — Coverage map and checker
 
-Write `matrix-coverage.json`: every matrix cell → test id, or `untestable-via-seam: <reason>`. Extend `domain-analysis/<component>/check_matrix.py` with two checks. Every non-UNSPECIFIED cell has a mapped test or a reasoned untestable entry. Every ignore/reject/defer cell has a DR link. Then wire both checkers into the suite:
+Write `matrix-coverage.json`: every matrix cell → test id, or `untestable-via-seam: <reason>`. Keep the generated suite type-clean: the cell suite must pass the repo's static type gate — typed seams make assertions machine-checkable, and untyped fixture helpers are where construction bugs hide (dobby found ~8 real construction bugs the first time the domain suite was type-gated, 2026-08-05). Extend `domain-analysis/<component>/check_matrix.py` with two checks. Every non-UNSPECIFIED cell has a mapped test or a reasoned untestable entry. Every ignore/reject/defer cell has a DR link. Then wire both checkers into the suite:
 
 ```python
 def test_matrix_discipline():

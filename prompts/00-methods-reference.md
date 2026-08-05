@@ -168,7 +168,7 @@ Governance rules: every to-be deviation from as-is traces to a DR. No dispositio
 
 * Deliver one external event at a time, processed to completion, before the next arrives. Real implementations need a serializing dispatch seam per machine instance for tests to be meaningful.
 * Observable output of a step = projected state + ordered emitted effects. Internals are invisible to tests (anti-mirroring rule).
-* Control time: an injectable clock / fake timer; timers are the only permitted source of time dependence. Delay scenarios advance the fake clock.
+* Control time: an injectable clock / fake timer; timers are the only permitted source of time dependence. Delay scenarios advance the fake clock. A correct fake timer carries TWO values per entry: the scheduling delay (what tests assert via pending lists and exact-delay fires) and an absolute due offset (what decides the next fire). With only stored delays, long-horizon scenarios break silently — fifteen 20 s rechecks in front of a 300 s TTL starve the TTL forever and the test hangs instead of failing (dobby trigger-service, 2026-08-05). When the horizon exceeds one fire, assert on the sequence of fires, not on a single delay.
 * `defer` means an explicit, observable queue with re-delivery on the dequeuing state entry, never implicit buffering.
 * Late, duplicate, and stale events are never undefined; they are catalogue variants with dispositions.
 

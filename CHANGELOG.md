@@ -26,6 +26,25 @@
 - The rebuild command in the README and `technical-names.txt` points at
   the issue-9 list.
 
+## v1.24 — fake-timer semantics, checker wrapper, typed suites, bulk-edit guidance (2026-08-05)
+
+Learnings from the dobby refactoring round (check_matrix dedup, strict
+typing of the domain suites, shared-fake consolidation):
+
+- **Fake-timer semantics** (00-methods-reference): a fake timer needs
+  both the scheduling delay and an absolute due offset per entry. With
+  only stored delays, horizon-spanning scenarios starve long timers
+  silently (15 rechecks in front of a TTL → hang, not failure).
+- **tools/templates/check_matrix.py** (new): the per-component wrapper
+  for the generic checker. 02-pilot now points at it instead of
+  "write check_matrix.py" — component-specific checks only when the
+  generic one does not cover them, never ~90% logic copies.
+- **04-testgen**: the generated cell suite must pass the repo's static
+  type gate (typed seams make assertions machine-checkable).
+- **06-reconcile**: bulk mechanical edits call for
+  refresh_citations.py + dsc_stamp.py, never manual blanket line
+  shifts (a blanket +N over-shifts fragment-pinned citations).
+
 ## v1.23 — polish from the consumer loop (2026-08-05)
 
 Six learnings from a full week of consumer work (19 governed
