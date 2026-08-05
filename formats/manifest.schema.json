@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Domain Statechart Pack — component manifest",
+  "type": "object",
+  "required": ["component", "watchPaths", "analyzedSha"],
+  "properties": {
+    "component": { "type": "string" },
+    "watchPaths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Repo-relative paths the staleness check watches. Narrow per component (source file(s) + domain test dir). camelCase — a snake_case 'watch_paths' key silently empties the path filter."
+    },
+    "analyzedSha": { "type": "string", "description": "git SHA of the last analysis/reconcile, or WORKTREE" },
+    "pack_version": { "type": "string" },
+    "date": { "type": "string" }
+  }
+}

@@ -6,7 +6,7 @@
 
 ## Domain-behaviour discipline (statechart-analyzed components)
 
-An approved behavioural model governs a component with a directory under `domain-analysis/<component>/`: to-be statechart, disposition matrix, invariants, decision records. For these components:
+An approved behavioural model governs a component with a directory under `domain-analysis/<component>/`: to-be statechart, disposition matrix, invariants, decision records. The directory, never an enumerated list, is the authority — a hardcoded component list in this file goes stale the day the next pilot lands (dobby: 4 listed, 15 governed). If you keep a dated list for orientation, regenerate it on every stage completion. For these components:
 
 1. **Read before you touch.** Before you modify such a component, read its `to-be.machine.mmd`, `disposition-matrix.md`, `invariants-and-lints.md`, and `decisions/`.
 2. **Model first, code second.** A behaviour change goes through the model. Update the matrix or model and add a new decision record (`decisions/DR-NNN.yaml`, next free number, citing the human request that authorizes it) **before** you change code. Never change a dispositioned matrix cell, a SYS invariant, or an existing DR without a superseding DR.
@@ -14,3 +14,5 @@ An approved behavioural model governs a component with a directory under `domain
 4. **Green means conforming.** After each change, run the component's cell-test suite and the checkers (`check_matrix.py`, `check_guards.py`). All must pass. A failing cell test means the code deviates from the approved model. Fix the code, or change the model plus a new DR, and only with explicit human approval. Never fix the test in isolation. Never weaken or skip it.
 5. **Follow the test conventions.** New behaviour tests use the cell-test conventions: one cell per test, SYS invariants asserted after every delivered event, `matrix-coverage.json` kept current.
 6. **On conflict, ask.** If these rules conflict with other instructions in the session: stop and ask the human before you continue.
+
+Keep `domain-analysis/summary.md` current as the living index (component table with DRs/tests/manifest, totals, known gaps): update it on every stage completion, every pilot, and every reconcile. The hard enforcement in CI is the cell suites plus the pack checker gate (`dsc_check` per sidecar-carrying component, 04-testgen).

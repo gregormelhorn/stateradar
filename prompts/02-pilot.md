@@ -41,7 +41,7 @@ You perform a domain-behaviour analysis of one stateful component. You analyze. 
 
 ### Step 0 — Scope statement
 
-Read the component, its tests, and its docs. Output a short scope statement: the machine boundary you will model (one bounded context, not the whole system), the actors, and what you exclude. Continue without waiting for confirmation. Put scope doubts into the open questions.
+Read the component, its tests, and its docs. Output a short scope statement: the machine boundary you will model (one bounded context, not the whole system), the actors, and what you exclude. Include **model links**: which already-modelled neighbouring component owns behaviour that surfaces in this matrix but lives elsewhere (a later untestable-via-seam cell cites the owning model, not a local defect). Continue without waiting for confirmation. Put scope doubts into the open questions.
 
 ### Step 1 — Extraction (with provenance)
 
@@ -56,6 +56,8 @@ Extract and list, each item with provenance and location: states, external event
 ### Step 2 — As-is statechart
 
 Produce a Mermaid `stateDiagram-v2` of the current behaviour. Rules: do not idealize. Where the code contradicts itself: model the dominant path and record the contradiction as a finding. Use hierarchy where the code's structure supports it.
+
+Every matrix state must exist in the diagram (PA-14 round-trippability; the pack checker verifies it). A state that no event transition reaches still needs presence: add a **documenting edge** labelled with its entry semantics — `active --> retired: operator (manual status)` for operator-set states, `partial --> invalid: deque length mismatch (guard)` for guard-condition states. The edge documents; it does not claim an event.
 
 Then validate the model against the existing tests. Walk each relevant test scenario through the model. A test the model cannot accept means a modelling error or undocumented behaviour. Report which one, with provenance.
 
@@ -81,12 +83,12 @@ For every external event source, derive undesired variants with this checklist: 
 
 ### Step 4 — Disposition matrix
 
-Build a Markdown table: rows = leaf states of the as-is model; columns = all catalogue events including undesired variants. Every cell gets exactly one value:
+Build a Markdown table: rows = leaf states of the as-is model; columns = all catalogue events including undesired variants. When the event set outgrows one readable table (~10 columns), split into sub-tables with one header each (00-methods-reference, "Wide matrices"); state rows repeat in full. Every cell gets exactly one value:
 
 * `transition → <target>`: with provenance
 * `handle`: stays in the state, does something; with provenance
-* `ignore (documented)`: intent has evidence; cite it (the requirement-scope rule applies)
-* `ignore (accidental)`: nothing happens only by omission or fall-through; **counts as a hole**, however harmless it looks
+* `ignore (documented)`: intent has evidence; cite it (the requirement-scope rule applies). Citations are cheapest at matrix-writing time — a `file:line ("fragment")` per cell now beats a backfill pass later.
+* `ignore (accidental)`: nothing happens only by omission or fall-through; **counts as a hole**, however harmless it looks. It carries a hole reference like any hole: `ignore (accidental) → Q-03`.
 * `defer (queued)`: the code buffers the event; cite where
 * `reject`: with provenance
 * `UNSPECIFIED`: you cannot determine the behaviour; **counts as a hole**

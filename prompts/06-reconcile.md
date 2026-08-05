@@ -28,6 +28,8 @@ You close the analysis loop. The approved model becomes the new as-is. The artif
 
 Run: the project baseline suite, the cell suite, the scenario suite, `check_matrix.py` (stage 2), `check_guards.py`, and the pack checker `tools/dsc_check.py`. All must pass. The deviation report must contain zero open items. If a precondition fails: stop and report. Do not promote.
 
+There is no reconcile-lite. A promotion without `analysis.json` and a green `dsc_check` leaves the component below L4 (00-methods-reference, "Maturity levels"): the staleness anchor, the citation checks, and the CI gate all need the sidecar. An archive-plus-manifest bump without it does not reconcile anything — and it lets unverified "steady states" enter the record (dobby session, 2026-08-05).
+
 ### Step 1 — Archive
 
 Create `archive/<date>/`. Move into it: the old `as-is.machine.mmd`, `to-be-diff.md`, and the resolved `deviation-report.md`. The `decisions/` directory never moves. It is the permanent memory.

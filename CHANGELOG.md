@@ -1,5 +1,43 @@
 # Changelog
 
+## v1.19 — brownfield adoption: maturity levels, sidecar generator, checker hardening (2026-08-05)
+
+Learnings folded back from a full consumer session (dobby: scout → pilot
+→ resolution on a 15-component brownfield repo, plus sidecar
+backfill):
+
+- **Maturity levels (L1–L5)** defined in 00-methods-reference and the
+  README adoption section: descriptive → decided → enforced → verified
+  → steady state. Brownfield "light loops" now have a name and a floor;
+  skipping levels silently is called out as the drift source it is.
+- **No reconcile-lite.** 06-reconcile step 0: a promotion without
+  `analysis.json` and a green `dsc_check` is bookkeeping, not a
+  reconcile.
+- **tools/gen_analysis_sidecar.py** (new): the sidecar is generated
+  from the matrices, never hand-written. Handles multi-table matrices
+  (wide event sets, sub-tables with own headers), compound row labels,
+  hole→Q extraction for both hole classes, DECIDED→RESOLVED status
+  mapping. Per-project extras via `domain-analysis/sidecar-overlay.yaml`
+  (skip list, question aliases, backfill citations).
+- **dsc_check hardened**: friendly exit when the sidecar is missing
+  (was a traceback); loud failure on snake_case `watch_paths` and on an
+  empty `watchPaths` (both ran the staleness diff unfiltered and
+  false-staled everything).
+- **formats/manifest.schema.json** (new): the manifest contract
+  (`component`, camelCase `watchPaths`, `analyzedSha`).
+- **Wide matrices** documented (00-methods-reference, 02-pilot):
+  sub-tables with per-table headers, state rows repeat.
+- **Documenting edges** for event-unreachable states (02-pilot step 2):
+  operator-set and guard-condition states need diagram presence.
+- **Model links** (00-methods-reference, 02-pilot step 0, 04-testgen):
+  cross-component behaviour ownership; a high untestable-via-seam share
+  is a boundary signal, not a test gap.
+- **Question status vocabulary** pinned: OPEN / ANSWERED / RESOLVED /
+  CONFLICT (00-methods-reference); DECIDED maps to RESOLVED.
+- **05-standing-instruction**: never enumerate the governed components
+  (the directory is the authority); keep domain-analysis/summary.md as
+  the living index; the CI gate is the cell suites plus dsc_check.
+
 ## v1.18.1 — 2026-07-29
 - Test audit: two-suite reality modeled. The audit subjects are the
   hand-written unit tests; the pack-generated domain tests act as the

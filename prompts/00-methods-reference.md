@@ -78,6 +78,40 @@ archive/<date>/          superseded artifacts after a reconcile
 
 Mermaid (`stateDiagram-v2`) is the visual notation. The matrix, not the diagram, is the primary review and authority surface. The diagram cannot carry dispositions, guards, or DR links. The matrix can.
 
+**Wide matrices.** When the event set outgrows one readable table (rule of thumb: more than ~10 columns), split the matrix into sub-tables, each with its own header row and its share of the event columns; the state rows repeat in full. A sub-table header is a normal markdown table header whose first cell names the state column. Checkers and the sidecar generator parse the declarations and headers per sub-table and treat the union as one grid (dobby trigger-service, 2026-08-05: 23 columns across four sub-tables).
+
+## Maturity levels
+
+Brownfield consumers adopt the discipline in levels. Each level names
+its minimum artifact set; a level is complete only with everything
+below it. Skipping levels silently is how matrices without DR links,
+phantom question ids, and untested "steady states" happen (dobby
+session, 2026-08-05).
+
+```text
+L1 descriptive   extraction.md + as-is.machine.mmd + disposition-matrix.md
+L2 decided       + open-questions.md, DRs for decided cells, hole→Q links
+L3 enforced      + tests/domain/<component>/ cell tests + matrix-coverage.json
+L4 verified      + analysis.json sidecar, dsc_check OK, CI gate wired
+L5 steady state  + reconciled manifest at HEAD, standing instruction active
+```
+
+A component below L3 is analysis, not governance: the standing
+instruction's "green means conforming" does not apply to it yet. Say so
+in its summary.md. Promotion to L5 requires the sidecar and a green
+dsc_check — there is no "reconcile-lite" (06-reconcile step 0).
+
+## Model links
+
+One machine per bounded context means behaviour surfaces in one model
+but lives in another (dobby: the mqtt-consumer's replaying state was
+untestable because replay belongs to session-recovery). The scope
+statement names these links: which neighbouring component owns the
+behaviour this matrix can only reference. A matrix cell left
+`untestable-via-seam` for that reason cites the owning model, not a
+local defect. A high untestable ratio is a boundary signal, not a test
+gap (04-testgen).
+
 ## The disposition matrix
 
 Rows = leaf states of the model; columns = every catalogue event **including undesired variants**. Every cell has exactly one value:
@@ -125,6 +159,8 @@ rationale: Shutdown is operator-initiated and final.
 links: ["matrix: stopped x connection.opened"]
 status: accepted
 ```
+
+**Question status vocabulary.** A question's status starts with exactly one of: `OPEN`, `ANSWERED`, `RESOLVED`, `CONFLICT`. The checker validates the first word against this set. Consumer vocabularies map onto it (`DECIDED` reads as `RESOLVED`; the sidecar generator maps it). Do not invent new first words.
 
 Governance rules: every to-be deviation from as-is traces to a DR. No dispositioned cell, SYS invariant, or existing DR changes without a superseding DR. Agents raise `UNSPECIFIED` + question instead of deciding. Enforcement is the checker test (`test_matrix_discipline`) plus the cell suite in CI: breaking the discipline breaks the build.
 

@@ -24,7 +24,7 @@ You generate a conformance test suite from an approved behavioural model.
 
 1. Tests assert only through the declared observation points: the projected state, the emitted effects (through fakes and spies), and the SYS invariants. Never assert on implementation internals or code structure. Tests specify behaviour, not code. This is the anti-mirroring rule.
 2. Never weaken, skip, or delete a test to make it pass. A failing test against current code is a **finding**: the code deviates from the approved model. It is not a defect of the test.
-3. If the seam cannot observe a cell's expected outcome: mark the cell `untestable-via-seam` in the coverage map and give the reason. Do not fake a passing test.
+3. If the seam cannot observe a cell's expected outcome: mark the cell `untestable-via-seam` in the coverage map and give the reason. Do not fake a passing test. A reasoned untestable cell is a valid outcome. A high untestable share (rule of thumb: a third or more of the grid) is a boundary signal — the behaviour may belong to a neighbouring model. Record that as a model link and, when the link is new, as a question; do not grind out shallow tests to make the ratio look better (dobby mqtt-consumer: 6 of 12 cells untestable because replay belongs to session-recovery).
 4. Respect the CONFIG switches. Under "propose only", write down the minimal seam or code change and stop. Do not perform it.
 5. Every test cites its matrix cell. If a DR fixed the disposition, the test cites the DR too.
 
@@ -66,6 +66,8 @@ def test_matrix_discipline():
 ```
 
 This puts the model discipline itself into CI. Whoever breaks a disposition, a DR link, a guard proof, or coverage breaks the build.
+
+For components with an `analysis.json` sidecar, also wire the pack checker as a parametrized test over every sidecar-carrying component (`dsc_check.py <dir> --repo . --model as-is.machine.mmd` per component; pass no `--model` for compound-state matrices whose diagram uses the flat leaf names). One test function per component keeps failures attributable.
 
 ### Step 5 — Run and report
 

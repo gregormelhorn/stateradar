@@ -32,7 +32,13 @@ def main() -> int:
     errors: list[str] = []
     E = errors.append
 
-    data = json.loads((adir / "analysis.json").read_text(encoding="utf-8"))
+    sidecar = adir / "analysis.json"
+    if not sidecar.is_file():
+        print(f"DSC CHECK: no analysis.json in {adir}")
+        print("  Emit the sidecar (02-pilot step 4 / 06-reconcile step 4) —")
+        print("  tools/gen_analysis_sidecar.py generates it from the disposition matrix.")
+        return 2
+    data = json.loads(sidecar.read_text(encoding="utf-8"))
 
     # Contract validation: execute the schema, do not just ship it.
     schema_path = Path(__file__).resolve().parent.parent / "formats" / "analysis.schema.json"
@@ -134,15 +140,22 @@ def main() -> int:
             if dr not in have:
                 E(f"decisions: {dr} is cited but {dr}.yaml does not exist")
 
-    # Staleness (manifest + git)
+    # Staleness (manifest + git).  Key discipline: an empty or
+    # wrongly-cased watchPaths runs the diff UNFILTERED and false-stales
+    # everything — fail loudly instead (dobby session, 2026-08-05).
     mf = adir / "manifest.json"
+    m: dict = {}
     if mf.exists():
         m = json.loads(mf.read_text(encoding="utf-8"))
         for key in ("component", "watchPaths", "analyzedSha"):
             if key not in m:
                 E(f"manifest: required key {key!r} missing")
-    if repo and mf.exists():
-        m = json.loads(mf.read_text(encoding="utf-8"))
+        if "watch_paths" in m and "watchPaths" not in m:
+            E("manifest: key is 'watch_paths' (snake_case) — the pack key is "
+              "camelCase 'watchPaths'; rename it (empty lookups skip the path filter)")
+        if "watchPaths" in m and not m["watchPaths"]:
+            E("manifest: watchPaths is empty — the staleness diff would run unfiltered")
+    if repo and mf.exists() and m.get("watchPaths") and "watch_paths" not in m:
         sha = m.get("analyzedSha", "WORKTREE")
         if sha != "WORKTREE":
             try:

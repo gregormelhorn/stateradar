@@ -1,6 +1,6 @@
 # Domain Statechart Pack
 
-**Version 1.18.1.** Statecharts as domain specification and test oracle for AI-coding-agent workflows, as a pure prompt pack. No tooling to install; the prompts themselves bootstrap the deterministic layer (generated checker scripts, cell tests, CI wiring).
+**Version 1.19.** Statecharts as domain specification and test oracle for AI-coding-agent workflows, as a pure prompt pack. No tooling to install; the prompts themselves bootstrap the deterministic layer (generated checker scripts, cell tests, CI wiring).
 
 > The agent may propose and challenge behaviour, but must not silently decide it — and the tests come from the specification, not from the code.
 
@@ -19,10 +19,13 @@ prompts/        canonical source of truth (harness-neutral Markdown)
 skills/         thin harness packagings (Claude Code skill)
 commands/       optional Claude Code slash commands
 examples/       reference runs (see examples/README.md before publishing any)
-tools/          consistency checker and dsc_check (the pack-shipped sidecar
-                checker: the agent emits analysis.json, the pack verifies)
+tools/          consistency checker, dsc_check (the pack-shipped sidecar
+                checker: the agent emits analysis.json, the pack verifies),
+                and gen_analysis_sidecar (emits the sidecar from the
+                matrices; per-project overlays via sidecar-overlay.yaml)
 tools/ste-pack/ the language layer, consumed as a pinned submodule (v1.0)
-formats/        analysis.schema.json — the sidecar contract
+formats/        analysis.schema.json + manifest.schema.json — the sidecar
+                and manifest contracts
 .vale.ini       the pack's own prose gate; StylesPath into tools/ste-pack/
 ```
 
@@ -82,17 +85,56 @@ Other harnesses: paste the prompts directly, or wire them into your harness's sk
 ## Workflow
 
 ```text
-01 Scout ──► pick a component (use its generated CONFIG block)
-02 Pilot ──► answer the questions (edit the file, or let 03 interview you)   ◄── you
-03 Resolution ──► DRs + to-be model + updated matrix
-04 Testgen ──► cell tests + check_matrix.py + check_guards.py + deviation report
-05 Standing instruction ──► future agent sessions stay disciplined
-06 Reconcile ──► the approved model becomes the new as-is; manifest pins HEAD
+DISCOVER   01 Scout ──► pick a component (use its generated CONFIG block)
+MODEL      02 Pilot ──► answer the questions (edit the file, or let 03 interview you)   ◄── you
+           03 Resolution ──► DRs + to-be model + updated matrix
+           Part B ──► blind adversarial pass in a fresh session (02-pilot, PART B)
+ENFORCE    04 Testgen ──► cell tests + check_matrix.py + check_guards.py + deviation report
+           05 Standing instruction ──► future agent sessions stay disciplined
+MAINTAIN   06 Reconcile ──► the approved model becomes the new as-is; manifest pins HEAD
+           07 Test audit ──► off-cycle: judge the suite against the decided matrix
 ```
 
 Once 04 has run, the discipline is CI-enforced in the consuming repo. Breaking a disposition, a DR link, a guard proof, or coverage breaks the build.
 
 Calibration tip: run the pilot twice on the same component in fresh sessions and diff the two matrices. The divergence tells you how much to trust any single unverified run.
+
+## Adopting the pack in an existing project
+
+Brownfield adoption runs in maturity levels per component
+(00-methods-reference has the full definitions). Each level needs
+everything below it:
+
+```text
+L1 descriptive   extraction + as-is statechart + disposition matrix
+L2 decided       + open questions, DRs for decided cells, hole→Q links
+L3 enforced      + one cell test per matrix cell + matrix-coverage.json
+L4 verified      + analysis.json sidecar, dsc_check OK, CI gate wired
+L5 steady state  + reconciled manifest at HEAD, standing instruction active
+```
+
+Rules of thumb from consumer experience:
+
+- **The directory is the authority.** Any component with
+  `domain-analysis/<component>/` is governed at its level. Never
+  hardcode the component list in the standing instruction — it goes
+  stale at the next pilot.
+- **No reconcile-lite.** A manifest bump without the sidecar and a
+  green `dsc_check` is bookkeeping, not a reconcile (06-reconcile
+  step 0). Unverified "steady states" corrupt the record.
+- **Keep the living index current.** `domain-analysis/summary.md`
+  (component table, totals, known gaps) updates on every stage
+  completion.
+- **Generate sidecars; never hand-write them.**
+  `tools/gen_analysis_sidecar.py` parses the matrices (single- and
+  multi-table, compound states) and emits `analysis.json`. Per-project
+  extras (question aliases, backfill citations, a skip list) live in
+  `domain-analysis/sidecar-overlay.yaml`. Fix the matrix, regenerate
+  the sidecar.
+- **Manifests use the pack keys.** `formats/manifest.schema.json`:
+  `component`, `watchPaths` (camelCase, narrow per component),
+  `analyzedSha`. A snake_case `watch_paths` silently empties the
+  staleness filter; `dsc_check` fails loudly on it.
 
 ## Versioning
 
