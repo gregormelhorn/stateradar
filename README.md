@@ -25,7 +25,9 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 the Part-B blind inputs), refresh_citations (the
                 06-reconcile citation refresh), gen_matrix_scaffold
                 (empty matrix grids), dsc_compose (cross-model report),
-                templates/ (the CI gate file)
+                check_matrix (the generic per-component checker),
+                dsc_stamp (validate + pin the manifest), templates/
+                (the CI gate file)
 .benchmarks/    golden cases + runner — the falsifiable layer for the tools
 tools/ste-pack/ the language layer, consumed as a pinned submodule (v1.0)
 formats/        analysis.schema.json + manifest.schema.json — the sidecar

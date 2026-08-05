@@ -26,6 +26,27 @@
 - The rebuild command in the README and `technical-names.txt` points at
   the issue-9 list.
 
+## v1.23 — polish from the consumer loop (2026-08-05)
+
+Six learnings from a full week of consumer work (19 governed
+components, 4 blind passes, 47 DRs in dobby):
+
+- **tools/check_matrix.py** (new): the generic per-component matrix
+  checker. Every pilot had duplicated ~90% of it per component; this
+  is the shared version (declarations, grid, citations, hole→Q,
+  pair→trace).
+- **tools/dsc_stamp.py** (new): validate first, then pin the manifest
+  at HEAD — the two-commit manifest-bump pattern, mechanized.
+- **part_b_pack learns the doctrine**: doctrine lines (DOC-n) are
+  auto-extracted from extraction.md into the blind inputs (both
+  Part-B artefacts traced to a missing doctrine line). New
+  `--for-dispatch` mode prepends the anti-placeholder header.
+- **02-pilot**: event-catalogue.md must be its own file (Part B reads
+  it verbatim); dispatch notes — a blind pass refusing contaminated
+  context is the control working.
+- **04-testgen**: test-file naming convention (unique basenames,
+  `test_<component>.py`) after three pytest collection collisions.
+
 ## v1.22 — scaffold, composition report, benchmarks (2026-08-05)
 
 The mid-layer from the next-steps review:

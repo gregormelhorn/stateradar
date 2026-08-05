@@ -49,6 +49,12 @@ For each (state, event) with guarded transitions, add boundary tests: below the 
 
 → `tests/domain/<component>/test_cells_*.py`
 
+Name test files `test_<component>.py` (one per component) — pytest
+collection requires unique basenames across the domain suite, and
+`test_cells.py` / `test_router.py` collide the moment a second
+component adopts the same name (dobby, 2026-08-05: three collisions in
+one week).
+
 ### Step 3 — Scenario tests
 
 Convert each adversarial trace from `adversarial-traces.md` whose question has a DR into a multi-event scenario test. Assert the decided outcome and the SYS invariants at every step. Skip undecided traces and list them.

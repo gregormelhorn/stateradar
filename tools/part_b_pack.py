@@ -110,6 +110,22 @@ def _read_contracts(spec: str, repo: Path) -> str:
     return "\n\n".join(out)
 
 
+def _extract_doctrine(extraction: str) -> str:
+    """The doctrine-line section of an extraction (DOC-n bullets)."""
+    lines: list[str] = []
+    in_section = False
+    for line in extraction.split("\n"):
+        s = line.strip()
+        if s.lower().startswith("## doctrine") or s.lower().startswith("## doctrine-line"):
+            in_section = True
+            continue
+        if in_section and s.startswith("## "):
+            break
+        if in_section and s.startswith("- DOC-"):
+            lines.append(s)
+    return "\n".join(lines)
+
+
 def _part_b_instruction(pack_root: Path) -> str:
     """The canonical blind-pass instruction from prompts/02-pilot.md."""
     pilot = (pack_root / "prompts" / "02-pilot.md").read_text(encoding="utf-8")
@@ -130,6 +146,16 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     events, pairs = _catalogue_ids(catalogue)
 
     blocks: list[tuple[str, str]] = [("INPUT 1: EVENT CATALOGUE (verbatim)", catalogue)]
+
+    # Doctrine lines travel with the requirements: every artefact in the
+    # dobby Part-B runs (G2 storm guard, trigger-lane policy) traced to a
+    # doctrine line missing from the blind input.
+    extraction_path = adir / "extraction.md"
+    if extraction_path.is_file():
+        ext = extraction_path.read_text(encoding="utf-8")
+        doctrine = _extract_doctrine(ext)
+        if doctrine:
+            blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", doctrine))
     for spec in args.requirements:
         blocks.append((f"INPUT 2: REQUIREMENTS ({spec})", _read_requirements(spec, repo)))
     for spec in args.contracts:
@@ -165,6 +191,16 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
         "impossible to miss."
     )
     package = "\n".join(parts)
+
+    if args.for_dispatch:
+        header = (
+            "DISPATCH THIS PACKAGE VERBATIM, IN FULL, AS THE TASK TEXT.\n"
+            "A Part-B dispatch with placeholder inputs is the known failure "
+            "mode (twice in dobby, 2026-08-05): the blind agent MUST refuse "
+            "it — that refusal is the control working.\n"
+            "Package: %d chars, %d events, %d pair orderings.\n\n"
+        ) % (len(package), len(events), len(pairs))
+        package = header + package
 
     out = Path(args.out) if args.out else None
     if out:
@@ -211,6 +247,9 @@ def main() -> int:
     parser.add_argument("--out", help="write the package here (default: stdout)")
     parser.add_argument("--check", metavar="BLIND_OUTPUT.md",
                         help="validate a blind table's coverage instead of assembling")
+    parser.add_argument("--for-dispatch", action="store_true",
+                        help="print the package with a dispatch header that warns "
+                             "against placeholder dispatches")
     args = parser.parse_args()
     pack_root = Path(__file__).resolve().parent.parent
     if args.check:

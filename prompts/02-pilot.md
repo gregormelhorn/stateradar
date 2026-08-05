@@ -80,7 +80,10 @@ For every external event source, derive undesired variants with this checklist: 
 
 **Cross-source interaction pairs.** Enumerate every pair of *external* events from *different* sources that reference the same entity (room, session, stream, id) and can plausibly arrive near-simultaneously. Both orderings of each pair get an id (`P-01a`, `P-01b`, …) in a pairs table. The per-source checklist covers single-source orderings. This table exists because a per-source checklist structurally misses the races *between* sources.
 
-→ `event-catalogue.md`
+→ `event-catalogue.md` — always its own file, never a section inside
+`extraction.md`: the Part-B blind pass consumes it verbatim, and a
+catalogue buried in another artifact has to be re-extracted first
+(dobby appliance-client, 2026-08-05).
 
 ### Step 4 — Disposition matrix
 
@@ -177,7 +180,14 @@ Run this in a **new** agent session with no access to the as-is model, the matri
 >
 > The disposition vocabulary you must use (from the methods reference): `transition → <target>` | `handle` (stays in the state, does something) | `ignore (documented)` | `ignore (accidental)` | `defer (queued)` | `reject` (a declared refusal signal: error, diagnostic, nack) | `UNSPECIFIED`. Without these definitions a blind pass applies `reject` and `handle` to identical semantics interchangeably (dobby trigger-service, 2026-08-05: four vocabulary-only "divergences").
 
-Then diff its table against `disposition-matrix.md` (an agent that sees both may do this diff). Before you classify: verify blind-table coverage mechanically. Every catalogue event id has exactly one row. Report any miscount. Then classify **every** row of the blind table into exactly one class:
+Then diff its table against `disposition-matrix.md` (an agent that sees both may do this diff).
+
+Dispatch notes (learned the hard way, dobby 2026-08-05): inline the
+inputs VERBATIM in the dispatch — a placeholder payload is the known
+failure, and `tools/part_b_pack.py --for-dispatch` exists so it cannot
+happen silently. If the blind agent refuses to run because its context
+is contaminated, that refusal IS the control working: fix the inputs
+or the context, never the agent. Before you classify: verify blind-table coverage mechanically. Every catalogue event id has exactly one row. Report any miscount. Then classify **every** row of the blind table into exactly one class:
 
 * `convergent`: the blind pass reproduces the documented disposition: agreement, no gap, no action
 * `convergent-hole`: the blind pass independently flags a gap that pass A found: this strengthens the finding; note it on the existing Q
