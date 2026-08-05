@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.20.2 — language layer on ASD-STE100 Issue 9 (2026-08-05)
+
+- ste-pack pinned v1.3.1 → v1.4.0: Issue-9 alignment. Issue 9 renames
+  "technical name" to **"technical noun"**; STYLE.md, the language
+  prompts, and this pack's README and `technical-names.txt` header
+  follow. The lintable limits are unchanged (20/25 words, six
+  sentences), so the Vale gate is identical.
+- Dictionary data rebuilt from the Issue-9 word lists
+  (`ste-core-words-issue9.txt`: Issue-9 headwords + [TN] alternatives,
+  union of the Issue-7 forms minus newly unapproved words). Notable for
+  this pack's prose: `file`, `could`, `want`, `activate` are now
+  approved; `required`, `switch`, `consult`, `separately` are newly
+  unapproved and will flag.
+- The rebuild command in the README and `technical-names.txt` points at
+  the issue-9 list.
+
 ## v1.20.1 — Part-B inputs carry the disposition vocabulary (2026-08-05)
 
 A blind pass without the seven-value vocabulary applies `reject` and
