@@ -26,6 +26,32 @@
 - The rebuild command in the README and `technical-names.txt` points at
   the issue-9 list.
 
+## v1.21 — the low-friction tool layer (2026-08-05)
+
+Four low-impact additions from the next-steps review:
+
+- **tools/part_b_pack.py** (new): assembles the Part-B blind-pass input
+  package (catalogue + requirements + contract texts) with a length
+  guard against dropped payloads, and validates the blind table's
+  coverage mechanically — every catalogue event id and pair ordering
+  must appear exactly once in a table row. The instruction block is
+  extracted live from `prompts/02-pilot.md`.
+- **tools/refresh_citations.py** (new): the 06-reconcile citation
+  refresh, mechanized. Content-anchor first (language-agnostic), Python
+  def-map fallback, bare-basename resolution against src/. Unresolvable
+  citations are reported for human review, never guessed (dobby
+  trigger-service: 190 mechanical + 6 manual after the DR
+  implementation).
+- **not-formalizable needs a categorized reason.** `dsc_check` and the
+  sidecar schema now require guardGroups with outcome
+  `not-formalizable` to carry a `reason` starting with `external-call |
+  dynamic-state | clock | unstructured-payload`. The outcome is a
+  judgment call; the category makes it reviewable. The pilot prompt
+  documents the vocabulary.
+- **tools/templates/test_dsc_check.py** (new): the CI gate file that
+  04-testgen describes — copy into the consuming repo and point
+  PACK_CHECKER at your pack location.
+
 ## v1.20.4 — README explains why Part B exists (2026-08-05)
 
 The README gained a "Why Part B exists" section: the mirroring trust

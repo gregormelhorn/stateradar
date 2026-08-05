@@ -20,9 +20,11 @@ skills/         thin harness packagings (Claude Code skill)
 commands/       optional Claude Code slash commands
 examples/       reference runs (see examples/README.md before publishing any)
 tools/          consistency checker, dsc_check (the pack-shipped sidecar
-                checker: the agent emits analysis.json, the pack verifies),
-                and gen_analysis_sidecar (emits the sidecar from the
-                matrices; per-project overlays via sidecar-overlay.yaml)
+                checker), gen_analysis_sidecar (emits the sidecar from
+                the matrices), part_b_pack (assembles and coverage-checks
+                the Part-B blind inputs), refresh_citations (the
+                06-reconcile citation refresh), templates/ (the CI gate
+                file)
 tools/ste-pack/ the language layer, consumed as a pinned submodule (v1.0)
 formats/        analysis.schema.json + manifest.schema.json — the sidecar
                 and manifest contracts

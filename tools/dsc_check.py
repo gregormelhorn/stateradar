@@ -20,6 +20,7 @@ VOCAB = {"transition", "handle", "ignore (documented)", "ignore (accidental)",
 HOLES = {"UNSPECIFIED", "ignore (accidental)"}
 CATEGORIES = ["loss", "delay", "duplication", "out-of-order", "contradiction"]
 GUARD_OUTCOMES = {"proven", "violation", "not-formalizable"}
+NF_REASONS = ("external-call", "dynamic-state", "clock", "unstructured-payload")
 Q_STATUS = {"OPEN", "ANSWERED", "RESOLVED", "CONFLICT"}
 
 def main() -> int:
@@ -103,6 +104,13 @@ def main() -> int:
     for g in data.get("guardGroups", []):
         if g.get("outcome") not in GUARD_OUTCOMES:
             E(f"guard group {g.get('id')}: outcome {g.get('outcome')!r} invalid")
+            continue
+        if g["outcome"] == "not-formalizable":
+            reason = g.get("reason") or ""
+            if not reason.startswith(NF_REASONS):
+                E(f"guard group {g.get('id')}: not-formalizable needs a reason "
+                  f"starting with one of {NF_REASONS} — the outcome is a "
+                  f"judgment call, the category makes it reviewable")
     for src, cats in data.get("coverage", {}).items():
         for cat in CATEGORIES:
             v = cats.get(cat)
