@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.20.1 — Part-B inputs carry the disposition vocabulary (2026-08-05)
+
+A blind pass without the seven-value vocabulary applies `reject` and
+`handle` to identical semantics (four vocabulary-only "divergences" in
+the dobby trigger-service Part B). The Part-B input block in
+`02-pilot.md` now includes the disposition definitions verbatim.
+
 ## v1.20 — the deterministic layer stops passing silently (2026-08-05)
 
 The prompts demanded discipline the checkers could not see. Five gaps let
