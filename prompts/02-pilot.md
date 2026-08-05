@@ -1,8 +1,9 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.7.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.10.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.10 — asserted absence: an empty `pairs`, `guardGroups`, or `coverage` section needs a reason in the sidecar's `completeness` block. Silence used to pass the checker, so a skipped step and a genuinely empty one looked the same.
 * v1.9 — fragment citations for observed-in-* provenance (`file:line ("fragment")`, checker-verified); the analysis emits a machine-readable sidecar (`analysis.json`, pack schema) that the pack-shipped checker `tools/dsc_check.py` verifies — generic checks move to the pack, per-run scripts keep only the component-specific guard encodings.
 * v1.7 — language: rewritten to STYLE.md strict mode; rules unchanged.
 * v1.4 — feedback from the third run: remembrance semantics required in the catalogue vocabulary (what ended entities leave behind, in what bound, what late references resolve to — the one recurring Part-B artefact class); guard outcomes standardized into `guard-results.txt`; machine-readable id/state declaration markers so checkers parse declarations, never prose.
@@ -108,6 +109,15 @@ Stage 1 (after this step): every state row contains exactly one disposition per 
 Stage 2 (after Step 7, re-run): every hole cell (`UNSPECIFIED` or `ignore (accidental)`) carries a `→ Q-nn` back-reference that exists in `open-questions.md`. Every interaction pair `P-nn` appears in at least one trace in `adversarial-traces.md`. Every guard group has an outcome from `check_guards.py`. Every control-trace verdict that cites a requirement or decision carries the scope line ("cited text contemplates this ordering: yes/no").
 
 Also emit the machine-readable sidecar `analysis.json` (schema: pack `formats/analysis.schema.json`). Contents: states, events, cells with dispositions and links, pairs with traces, guard outcomes, the coverage table, questions, behavioural DRs. Run the pack checker `tools/dsc_check.py <output-dir> --repo . --model as-is.machine.mmd` in addition to the two per-run scripts. Include all outputs in `summary.md`. Deliver checks as executed code, never as claims.
+
+**Assert every absence.** An empty `pairs`, `guardGroups`, or `coverage` section is a claim, not a silence: it says this component has no interaction pairs, no formalizable guard groups, or no external sources. State it in the `completeness` block with a reason, or the checker fails the sidecar:
+
+```json
+"completeness": { "guardGroups": { "count": 0,
+  "reason": "no branch in this component compares context values" } }
+```
+
+Omitting a section you simply did not produce is the failure this block exists to prevent. It used to read as a pass.
 
 → `disposition-matrix.md`, `check_matrix.py`, `check_guards.py`
 

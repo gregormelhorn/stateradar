@@ -1,0 +1,150 @@
+{
+ "formatVersion": "1.0",
+ "component": "gate",
+ "packVersion": "",
+ "analyzedSha": "WORKTREE",
+ "watchPaths": [],
+ "states": [
+  "open idle",
+  "open busy",
+  "closed"
+ ],
+ "events": [
+  {
+   "id": "E1",
+   "undesired": false
+  },
+  {
+   "id": "E2",
+   "undesired": false
+  },
+  {
+   "id": "UV-E1",
+   "undesired": true
+  },
+  {
+   "id": "E3",
+   "undesired": false
+  }
+ ],
+ "cells": [
+  {
+   "disposition": "transition",
+   "target": "open busy",
+   "citation": {
+    "file": "src/gate.ts",
+    "line": 12
+   },
+   "state": "open idle",
+   "event": "E1"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "dr": "DR-001",
+   "state": "open idle",
+   "event": "E2"
+  },
+  {
+   "disposition": "defer (queued)",
+   "dr": "DR-001",
+   "state": "open busy",
+   "event": "E1"
+  },
+  {
+   "disposition": "transition",
+   "target": "open idle",
+   "citation": {
+    "file": "src/gate.ts",
+    "line": 20
+   },
+   "state": "open busy",
+   "event": "E2"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "src/gate.ts",
+    "line": 28
+   },
+   "state": "closed",
+   "event": "E1"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "closed",
+   "event": "E2"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02",
+   "state": "open idle",
+   "event": "UV-E1"
+  },
+  {
+   "disposition": "transition",
+   "target": "closed",
+   "citation": {
+    "file": "src/gate.ts",
+    "line": 28
+   },
+   "state": "open idle",
+   "event": "E3"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02",
+   "state": "open busy",
+   "event": "UV-E1"
+  },
+  {
+   "disposition": "transition",
+   "target": "closed",
+   "citation": {
+    "file": "src/gate.ts",
+    "line": 28
+   },
+   "state": "open busy",
+   "event": "E3"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "dr": "DR-001",
+   "state": "closed",
+   "event": "UV-E1"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "dr": "DR-001",
+   "state": "closed",
+   "event": "E3"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN — human decision required"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN — human decision required"
+  }
+ ],
+ "behaviouralDrs": [
+  "DR-001"
+ ],
+ "completeness": {
+  "pairs": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from adversarial-traces.md before the component claims L4."
+  },
+  "guardGroups": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from guard-results.txt before the component claims L4."
+  },
+  "coverage": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from event-catalogue.md before the component claims L4."
+  }
+ }
+}

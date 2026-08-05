@@ -1,6 +1,6 @@
 # Domain Statechart Pack
 
-**Version 1.19.** Statecharts as domain specification and test oracle for AI-coding-agent workflows, as a pure prompt pack. No tooling to install; the prompts themselves bootstrap the deterministic layer (generated checker scripts, cell tests, CI wiring).
+**Version 1.20.** Statecharts as domain specification and test oracle for AI-coding-agent workflows, as a pure prompt pack. No tooling to install; the prompts themselves bootstrap the deterministic layer (generated checker scripts, cell tests, CI wiring).
 
 > The agent may propose and challenge behaviour, but must not silently decide it — and the tests come from the specification, not from the code.
 
@@ -39,7 +39,13 @@ System Python on macOS is PEP-668 externally managed. Run the checkers through u
 uv run --with jsonschema python3 tools/dsc_check.py <analysis-dir>
 ```
 
-Without `jsonschema`, `dsc_check` degrades to structural checks only (it prints a note). CI installs the package with pip instead.
+Without `jsonschema`, `dsc_check` cannot validate the sidecar contract and fails with that reason. Pass `--allow-no-schema` to accept structural checks only — a deliberate reduction in coverage, never a silent one. CI installs the package with pip instead.
+
+The pack's own deterministic layer has a selftest that runs the checker red as well as green (silent omission, drifted citations, a diagram out of sync with the matrix, a snake_case manifest key — each must fail):
+
+```bash
+uv run --with jsonschema python3 tools/selftest/run_selftest.py
+```
 
 ## Language policy (ste-pack dependency)
 

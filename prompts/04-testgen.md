@@ -67,7 +67,7 @@ def test_matrix_discipline():
 
 This puts the model discipline itself into CI. Whoever breaks a disposition, a DR link, a guard proof, or coverage breaks the build.
 
-For components with an `analysis.json` sidecar, also wire the pack checker as a parametrized test over every sidecar-carrying component (`dsc_check.py <dir> --repo . --model as-is.machine.mmd` per component; pass no `--model` for compound-state matrices whose diagram uses the flat leaf names). One test function per component keeps failures attributable.
+For components with an `analysis.json` sidecar, also wire the pack checker as a parametrized test over every sidecar-carrying component (`dsc_check.py <dir> --repo . --model as-is.machine.mmd` per component). Always pass `--model`: the checker resolves Mermaid container states (`state open { idle --> busy }`) against compound matrix labels (`open idle`), so a hierarchical diagram no longer needs the check switched off. One test function per component keeps failures attributable.
 
 ### Step 5 — Run and report
 

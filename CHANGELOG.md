@@ -1,5 +1,43 @@
 # Changelog
 
+## v1.20 — the deterministic layer stops passing silently (2026-08-05)
+
+The prompts demanded discipline the checkers could not see. Five gaps let
+a sidecar skip the pack's distinctive checks and still print `OK`. Each
+fix ships with a selftest case that asserts the *red* result, because a
+checker only ever run against passing input is a checker nobody tested.
+
+- **Asserted absence.** An empty or missing `pairs`, `guardGroups`, or
+  `coverage` section now fails unless the sidecar's new `completeness`
+  block states a reason (`formats/analysis.schema.json`, min length
+  enforced). Stripping all three used to return `DSC CHECK: OK` — the
+  exact silent skip 00-methods-reference calls an error.
+- **Model sync works on compound states.** The edge pattern was `\w+`,
+  which can never match a compound label (`open idle`), so the check was
+  dead for the most complex matrices. It now resolves Mermaid containers
+  (`state open { idle --> busy }`) against compound rows and inherits
+  container edges to leaves. The 04-testgen workaround ("pass no
+  `--model` for compound-state matrices") is withdrawn.
+- **The generator declares what it cannot derive.** `gen_analysis_sidecar.py`
+  never emitted the three sections above, so "generate, never hand-write"
+  plus silent-pass meant generated sidecars could not fail those checks.
+  It now emits `completeness` reasons naming the source artifact, and
+  preserves hand-merged sections on regeneration.
+- **Any implementation language.** The generator indexed `src/**.py`
+  only; every other layout silently dropped citations, which then failed
+  the "needs a DR or a citation" check with a misleading message. Roots
+  and extensions now cover the common layouts and are overridable
+  (`sidecar-overlay.yaml`: `src_roots`, `src_exts`).
+- **No silent schema degradation.** A missing `jsonschema` printed a note
+  and exited 0. Contract validation is now required unless
+  `--allow-no-schema` is passed explicitly.
+- **CI exercises the real paths.** `tools/selftest/run_selftest.py` (11
+  assertions, red and green) replaces the single green invocation, which
+  ran without `--repo` or `--model` and so never touched citation checks,
+  diagram sync, or staleness. New fixture `tools/selftest/compound/`:
+  multi-table matrix, compound rows, hierarchical diagram, TypeScript
+  source.
+
 ## v1.19 — brownfield adoption: maturity levels, sidecar generator, checker hardening (2026-08-05)
 
 Learnings folded back from a full consumer session (dobby: scout → pilot

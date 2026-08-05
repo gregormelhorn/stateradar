@@ -41,6 +41,9 @@ def main() -> int:
     data = json.loads(sidecar.read_text(encoding="utf-8"))
 
     # Contract validation: execute the schema, do not just ship it.
+    # Degrading to structural-only checks is a real reduction in coverage,
+    # so it must be chosen (--allow-no-schema), never silently inherited
+    # from whichever interpreter happened to run the checker.
     schema_path = Path(__file__).resolve().parent.parent / "formats" / "analysis.schema.json"
     if schema_path.exists():
         try:
@@ -49,6 +52,12 @@ def main() -> int:
             for err in sorted(v.iter_errors(data), key=str):
                 E(f"schema: {'/'.join(str(x) for x in err.path) or '<root>'}: {err.message}")
         except ImportError:
+            if "--allow-no-schema" not in args:
+                print("DSC CHECK: FAIL\n - jsonschema is not installed, so the sidecar "
+                      "contract cannot be validated.\n   Install it (uv run --with jsonschema "
+                      "python3 tools/dsc_check.py ...) or\n   pass --allow-no-schema to accept "
+                      "structural checks only.")
+                return 1
             print("note: jsonschema not installed - structural checks only", file=sys.stderr)
     states = data["states"]
     events = [e["id"] for e in data["events"]]
@@ -74,6 +83,19 @@ def main() -> int:
             if n != 1:
                 E(f"grid: ({s}, {ev}) has {n} cells, expected exactly 1")
 
+    # Asserted absence: an empty or missing section is only OK when the
+    # sidecar says so with a reason.  Silence used to read as success —
+    # an agent that skipped guard proofs, pair traces, and the coverage
+    # table got a green check (the exact failure the pack exists to stop).
+    completeness = data.get("completeness", {})
+    for section in ("pairs", "guardGroups", "coverage"):
+        if data.get(section):
+            continue
+        stated = completeness.get(section)
+        if not stated:
+            E(f"{section}: empty or absent, and completeness.{section} does not "
+              f"say why — assert the absence (count: 0, reason: ...) or emit the section")
+
     # Pairs, guard groups, coverage table, questions
     for p in data.get("pairs", []):
         if not p.get("trace"):
@@ -96,12 +118,52 @@ def main() -> int:
         if dr not in cited:
             E(f"behavioural {dr}: cited by no matrix cell")
 
-    # Mermaid <-> matrix sync
+    # Mermaid <-> matrix sync.  State ids may carry spaces (compound row
+    # labels, 'fam leaf'); a \w+ pattern silently never matched them, so
+    # the check was dead for exactly the most complex matrices.  Mermaid
+    # ends the edge at ':' (the label) — everything before it is the id.
     if model and model.exists():
         text = model.read_text(encoding="utf-8")
-        edges = set(re.findall(r"^\s*(\w+)\s*-->\s*(\w+)", text, re.M))
+        # Track the enclosing 'state fam { ... }' container so edges written
+        # with bare leaf names resolve to the matrix's 'fam leaf' labels.
+        def qualify(name: str, fam: str | None) -> str:
+            """A bare leaf inside 'state fam { ... }' is the matrix's 'fam leaf'."""
+            name = name.strip()
+            if fam and name != "[*]" and f"{fam} {name}" in states:
+                return f"{fam} {name}"
+            return name
+
+        def expand(name: str) -> set[str]:
+            """A container stands for every leaf row beneath it."""
+            leaves = {s for s in states if s.startswith(f"{name} ")}
+            return leaves or {name}
+
+        edges: set[tuple[str, str]] = set()
+        containers: list[str] = []
+        stack: list[str] = []
+        for line in text.splitlines():
+            opened = re.match(r"\s*state\s+\"?([\w -]+?)\"?\s*(?:as\s+(\w+)\s*)?\{", line)
+            if opened:
+                fam = (opened.group(2) or opened.group(1)).strip()
+                stack.append(fam)
+                containers.append(fam)
+                continue
+            if line.strip() == "}":
+                if stack:
+                    stack.pop()
+                continue
+            m = re.match(r"\s*([^:\-\n]+?)\s*-->\s*([^:\n]+?)\s*(?::|$)", line)
+            if m:
+                enclosing = stack[-1] if stack else None
+                edges.add((qualify(m.group(1), enclosing), qualify(m.group(2), enclosing)))
         mstates = {a for a, _ in edges} | {b for _, b in edges}
-        mstates.discard("["); mstates = {s for s in mstates if s != "[*]"}
+        mstates = {s for s in mstates if s != "[*]"}
+        # A container covers its leaves, for presence and edge inheritance.
+        for container in containers:
+            mstates |= expand(container)
+        inherited = {(a, b) for src, dst in edges
+                     for a in expand(src) for b in expand(dst)}
+        edges |= inherited
         missing = set(states) - mstates
         if missing:
             E(f"model sync: states missing from diagram: {sorted(missing)}")

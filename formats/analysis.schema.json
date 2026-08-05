@@ -32,6 +32,26 @@
     "coverage": { "type": "object", "additionalProperties": { "type": "object" } },
     "questions": { "type": "array", "items": { "type": "object",
       "required": ["id", "status"] } },
-    "behaviouralDrs": { "type": "array", "items": { "type": "string" } }
+    "behaviouralDrs": { "type": "array", "items": { "type": "string" } },
+    "completeness": {
+      "type": "object",
+      "description": "Asserted absence. A section that is empty or missing must say so here with a reason; otherwise the checker cannot distinguish 'nothing to report' from 'the step was skipped'.",
+      "additionalProperties": false,
+      "properties": {
+        "pairs": { "$ref": "#/$defs/absence" },
+        "guardGroups": { "$ref": "#/$defs/absence" },
+        "coverage": { "$ref": "#/$defs/absence" }
+      }
+    }
+  },
+  "$defs": {
+    "absence": {
+      "type": "object",
+      "required": ["count", "reason"],
+      "properties": {
+        "count": { "const": 0 },
+        "reason": { "type": "string", "minLength": 12 }
+      }
+    }
   }
 }

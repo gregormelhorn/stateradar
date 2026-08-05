@@ -24,5 +24,8 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install jsonschema
       - run: python tools/check_pack_consistency.py
-      - name: dsc_check selftest
-        run: python tools/dsc_check.py tools/selftest/analysis
+      # The selftest runs the checker red as well as green: it asserts that
+      # silent omission, drifted citations, an out-of-sync diagram, and a
+      # snake_case manifest key each FAIL. A green-only run proves nothing.
+      - name: deterministic-layer selftest
+        run: python tools/selftest/run_selftest.py

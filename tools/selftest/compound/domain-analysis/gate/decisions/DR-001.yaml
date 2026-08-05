@@ -1,0 +1,9 @@
+id: DR-001
+date: 2026-08-05
+source_question: Q-00
+question: Does the gate admit more than one arrival at a time?
+options: [serialize via queue, reject the second, run concurrently]
+decision: serialize via queue
+rationale: Selftest fixture decision; the gate is single-slot by contract.
+links: ["matrix: open busy x E1", "matrix: closed x UV-E1"]
+status: accepted

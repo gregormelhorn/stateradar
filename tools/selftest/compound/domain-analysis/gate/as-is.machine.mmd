@@ -1,0 +1,7 @@
+stateDiagram-v2
+    [*] --> open
+    state open {
+        idle --> busy : E1
+        busy --> idle : E2
+    }
+    open --> closed : E3

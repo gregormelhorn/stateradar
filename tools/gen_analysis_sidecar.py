@@ -40,16 +40,33 @@ import sys
 from pathlib import Path
 
 
-def _src_index(root: Path) -> dict[str, str]:
-    """Basename → repo-relative path for every src file (best effort)."""
+SRC_ROOTS = ["src", "lib", "app", "pkg", "internal"]
+SRC_EXTS = [".py", ".ts", ".tsx", ".js", ".jsx", ".go", ".rs", ".java", ".kt",
+            ".rb", ".cs", ".swift", ".c", ".h", ".cc", ".cpp", ".hpp", ".m"]
+SKIP_DIRS = {".git", "node_modules", "dist", "build", "target", "vendor",
+             "__pycache__", ".venv", "venv"}
+
+
+def _src_index(root: Path, overlay: dict) -> dict[str, str]:
+    """Basename → repo-relative path for every source file (best effort).
+
+    The pack claims any implementation language works, so the index must
+    not be Python-and-src/-only: a missed file silently drops the cell's
+    citation, and the cell then fails the 'needs a DR or a citation'
+    check with a misleading message.  Roots and extensions are
+    overridable per project (sidecar-overlay.yaml: src_roots, src_exts).
+    """
     index: dict[str, str] = {}
-    src = root / "src"
-    if not src.is_dir():
-        return index
-    for dirpath, _, files in os.walk(src):
-        for f in files:
-            if f.endswith(".py"):
-                index.setdefault(f, str(Path(dirpath, f).relative_to(root)))
+    roots = overlay.get("src_roots") or SRC_ROOTS
+    exts = tuple(overlay.get("src_exts") or SRC_EXTS)
+    bases = [root / r for r in roots if (root / r).is_dir()] or [root]
+    for base in bases:
+        for dirpath, dirnames, files in os.walk(base):
+            dirnames[:] = [d for d in dirnames
+                           if d not in SKIP_DIRS and not d.startswith(".")]
+            for f in files:
+                if f.endswith(exts):
+                    index.setdefault(f, str(Path(dirpath, f).relative_to(root)))
     return index
 
 
@@ -110,7 +127,7 @@ def _parse_cell(
 
     if dr:
         cell["dr"] = dr.group(0)
-    cit = re.search(r"([A-Za-z_/]+\.py):(\d+)", raw)
+    cit = re.search(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw)
     if cit:
         path = src_index.get(Path(cit.group(1)).name)
         if path:
@@ -140,20 +157,24 @@ def _parse_questions(path: Path) -> list[dict]:
 
 def _load_overlay(analysis_root: Path) -> dict:
     """sidecar-overlay.yaml — skip list, question aliases, citations."""
+    empty = {"skip": {}, "question_aliases": {}, "extra_citations": [],
+             "src_roots": [], "src_exts": []}
     path = analysis_root / "sidecar-overlay.yaml"
     if not path.is_file():
-        return {"skip": {}, "question_aliases": {}, "extra_citations": []}
+        return empty
     try:
         import yaml
 
         data = yaml.safe_load(path.read_text()) or {}
     except ImportError:
         print("note: pyyaml missing — overlay ignored", file=sys.stderr)
-        return {"skip": {}, "question_aliases": {}, "extra_citations": []}
+        return empty
     return {
         "skip": data.get("skip") or {},
         "question_aliases": data.get("question_aliases") or {},
         "extra_citations": data.get("extra_citations") or [],
+        "src_roots": data.get("src_roots") or [],
+        "src_exts": data.get("src_exts") or [],
     }
 
 
@@ -248,7 +269,7 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
     manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
     watch = manifest.get("watchPaths") or manifest.get("watch_paths") or []
     cited_drs = sorted({c["dr"] for c in cells if c.get("dr")})
-    return {
+    data = {
         "formatVersion": "1.0",
         "component": component,
         "packVersion": str(manifest.get("pack_version", "")),
@@ -260,6 +281,36 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         "questions": questions,
         "behaviouralDrs": cited_drs,
     }
+
+    # The matrix does not carry pairs, guard outcomes, or the coverage
+    # table — they live in adversarial-traces.md, guard-results.txt, and
+    # event-catalogue.md.  Omitting them silently would let a generated
+    # sidecar pass those checks by construction, so declare the absence
+    # instead: dsc_check demands a stated reason for every empty section.
+    absent = ("the sidecar generator derives cells from disposition-matrix.md "
+              "only; this section is not in the matrix. Merge it from {src} "
+              "before the component claims L4.")
+    data["completeness"] = {
+        "pairs": {"count": 0, "reason": absent.format(src="adversarial-traces.md")},
+        "guardGroups": {"count": 0, "reason": absent.format(src="guard-results.txt")},
+        "coverage": {"count": 0, "reason": absent.format(src="event-catalogue.md")},
+    }
+
+    # A hand-merged sidecar keeps its real sections: never regress one to
+    # an absence assertion just because this run could not derive it.
+    out = adir / "analysis.json"
+    if out.is_file():
+        try:
+            prior = json.loads(out.read_text())
+        except json.JSONDecodeError:
+            prior = {}
+        for section in ("pairs", "guardGroups", "coverage"):
+            if prior.get(section):
+                data[section] = prior[section]
+                data["completeness"].pop(section, None)
+        if not data["completeness"]:
+            data.pop("completeness")
+    return data
 
 
 def main() -> int:
@@ -274,8 +325,8 @@ def main() -> int:
     args = parser.parse_args()
     root = Path(args.root).resolve()
     analysis_root = root / args.analysis_dir
-    src_index = _src_index(root)
     overlay = _load_overlay(analysis_root)
+    src_index = _src_index(root, overlay)
 
     wanted = args.components or [
         d
