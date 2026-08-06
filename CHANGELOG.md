@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.33 — remove ste-pack dependency, standalone StateRadar
+
+- Removed ste-pack submodule, .vale.ini, technical-names.txt, and all
+  language-layer infrastructure. StateRadar is now a standalone pack
+  with zero submodule dependencies.
+- CI: simplified checkout, no recursive submodule init.
+- README: removed Language Policy section and ste-pack references.
+- 11 pilots, 3 Oracle-confirmed benchmarks, 24 methodology rules.
+
 ## v1.32 — PA-21 lifecycle disagreement, PA-22 requirement-to-cell mapping
 
 - 00-methods-reference: PA-21 (lifecycle disagreement pattern),
