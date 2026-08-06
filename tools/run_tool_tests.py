@@ -2,7 +2,7 @@
 """Benchmark suite runner — the falsifiable layer for the pack tools.
 
 The LLM stages (pilot, resolution) cannot run deterministically in CI;
-the TOOL layer can. Each `.benchmarks/<case>/` holds a golden mini
+the TOOL layer can. Each `tests/<case>/` holds a golden mini
 repository layout (domain-analysis/, src/, expected outputs). The
 runner executes the pack tools against the fixtures and asserts the
 expected results:
@@ -14,7 +14,7 @@ expected results:
 - `refresh_citations`: citations remap per `expected/refresh.txt`
   (`old -> new` line pairs)
 
-Usage: python3 .benchmarks/run_benchmarks.py [--case NAME]
+Usage: python3 tools/run_tool_tests.py [--case NAME]
 """
 
 from __future__ import annotations

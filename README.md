@@ -146,7 +146,7 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 dsc_blind (blind-pass assembly + diff),
                 dsc_cross_check (reviewer cross-check), templates/
                 (the CI gate file + the per-component checker wrapper)
-.benchmarks/    golden cases + runner — the falsifiable layer for the tools
+tests/          tool regression + Oracle benchmark evidence
 formats/        analysis.schema.json + manifest.schema.json — the sidecar
                 and manifest contracts
 ```
