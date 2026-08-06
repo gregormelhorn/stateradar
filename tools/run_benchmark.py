@@ -8,7 +8,9 @@ The runner clones the repo at the pinned commit, runs Part A
 are present in the generated analysis.json.
 
 This is deterministic — no AI call needed. It validates that the
-StateRadar tooling still correctly identifies known lifecycle defects.
+StateRadar tooling still correctly reads the pre-generated matrices
+and validates that the expected UNSPECIFIED cells and questions
+are preserved in the generated analysis.json.
 
 Usage:
   # Run all benchmarks
