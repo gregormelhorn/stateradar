@@ -22,3 +22,15 @@ verifies all states are reachable from the initial state and that
 terminal states are marked. Selftest red case, CI-wired on golden-mini.
 Full reachability over hierarchy/parallel regions is deferred until
 needed — the `formats/analysis.schema.json` carries enough data.
+
+## 4. Rules registry (single source for method rules)
+
+**Status:** ✅ Shipped in v1.35. `formats/rules.toml` (vocab + F-xx
+fault catalogue + rules with class/enforcement/checker_ref/
+selftest_ref) is rendered by `tools/gen_rules.py` into the PA list in
+00, the Step-5 lints and vocabularies in 02, AGENTS §5, and the README
+finds list; drift fails CI. The VOCAB-x2 sync check is gone by
+construction. Open follow-ups surface as registry warnings: selftest
+backlog (TODO refs), five checker candidates (PA-4/7/10/17/22), ODC
+backfill over the eleven pilot manifests
+(`docs/plan-rules-registry.md` has the details).
