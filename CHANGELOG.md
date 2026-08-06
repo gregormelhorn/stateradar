@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.32 — PA-21 lifecycle disagreement, PA-22 requirement-to-cell mapping
+
+- 00-methods-reference: PA-21 (lifecycle disagreement pattern),
+  PA-22 (requirement-to-cell mapping). PA-19 (runtime boundary),
+  PA-20 (API contract vs. state machine).
+- 02-pilot v1.13: Step 8 finding verification; lifecycle disagreement
+  and user-model-gap lints; requirement-to-cell validation after the
+  doctrine sweep.
+- Proven on valkey-glide #5803: the (CallerTimedOut, release_permit)
+  cell being UNSPECIFIED matched the production bug exactly.
+- Proven on python-websockets #1527: the (ClosurePending,
+  CloseDeadlineExpired) cell being UNSPECIFIED matched the production
+  bug exactly.
+- README repositioned as StateRadar: "Find the missing transition."
+
 ## v1.31 — PA-18 checker support, standing instruction foldback (2026-08-06)
 
 - gen_analysis_sidecar.py: terminal state auto-generation via

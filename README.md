@@ -1,8 +1,122 @@
-# Domain Statechart Pack
+# StateRadar
 
-**Version 1.31.** Statecharts as domain specification and test oracle for AI-coding-agent workflows, as a pure prompt pack. No tooling to install; the prompts themselves bootstrap the deterministic layer (generated checker scripts, cell tests, CI wiring).
+**Find the missing transition.**
 
-> The agent may propose and challenge behaviour, but must not silently decide it — and the tests come from the specification, not from the code.
+**Open-source lifecycle contract verification for stateful software.**
+
+StateRadar reconstructs independently (1) what behaviour the
+requirements and documented contracts demand, (2) what state model the
+implementation actually realizes, and (3) where the two disagree. It
+finds missing transitions, incomplete timeout paths, blocked terminal
+states, wrongly coupled lifecycles, unhandled State/Event
+combinations, and missing tests.
+
+> Model-based testing checks code against a model.
+> StateRadar first checks whether the model deserves to be the oracle.
+
+The pack is a pure prompt pack for AI-coding-agent workflows. No
+tooling to install; the prompts themselves bootstrap the deterministic
+layer (generated checker scripts, cell tests, CI wiring). The agent
+may propose and challenge behaviour, but must not silently decide it —
+and the tests come from the specification, not from the code.
+
+**Version 1.32.**
+
+## The problem
+
+Defects in asynchronous, stateful components rarely live in a single
+function. The real behaviour is distributed across timers, callbacks,
+futures and tasks, locks, reference counting, resource ownership,
+retry loops, transport states, and caller-vs-internal lifecycles.
+Ordinary code review inspects individual control flows. StateRadar
+analyzes the complete lifecycle contract instead.
+
+## How it works
+
+### Part A — code-informed analysis
+
+An agent reads the requirements, the code, and the tests of ONE
+bounded component and reconstructs the implemented state model:
+states, events, guards, a disposition matrix, invariants, adversarial
+traces, and open questions.
+
+### Part B — blind run
+
+A second, independent session receives only the requirements and the
+event catalogue — never the code, the matrix, or the traces. From
+these alone it must state, for every event, when the component should
+handle, ignore, or reject it. Because Part B never saw the
+implementation, it cannot rationalize implementation accidents as
+desired behaviour.
+
+### Blind diff
+
+The two models are compared cell by cell. Every difference is
+classified: convergent, convergent-hole, divergence (must end as a
+question), artefact (repair the catalogue input), or
+pass-B-blind-spot. The blindness is the mechanism, not a ritual — an
+agent that knows the matrix cannot un-know it.
+
+## What StateRadar finds
+
+* missing State/Event transitions and `UNSPECIFIED` matrix cells;
+* timeout events without guaranteed progress;
+* caller operations blocked after a terminal event;
+* internal requests holding resources after a caller timeout;
+* unbounded waits;
+* invalid recovery or reconnect paths;
+* wrongly coupled lifecycle regions (caller vs. internal);
+* lost or overwritten failure causes;
+* missing idempotency in cleanup and release;
+* requirements without a complete execution path;
+* implementation paths without a documented contract;
+* tests that assert internal states but not caller-visible behaviour.
+
+## Proven pilot cases
+
+Both findings were frozen before the known upstream issues were
+revealed, then confirmed by the real bug reports.
+
+### valkey-glide — missing transition `CallerTimedOut → PermitReleased`
+
+A concrete defect (issue #5803): requests retained shared in-flight
+capacity after the user-facing timeout had fired. One unresponsive
+cluster node exhausted the permit limit for all healthy nodes.
+StateRadar identified the missing timeout-release transition, the
+wrong coupling between caller and internal request lifecycles, and
+the need for an immediate, idempotent release — from six neutral
+requirements alone.
+
+### python-websockets — missing transition `CloseDeadlineExpired → ClosureObservable`
+
+After `close_timeout` expired, the implementation closed the transport
+but then waited again for the `connection_lost()` event-loop callback.
+With Wi-Fi off, no TCP reset arrives, `connection_lost()` never
+fires, and the server stayed silent for minutes instead of raising
+`ConnectionClosedError` (issue #1527). StateRadar found the missing
+progress after deadline expiry, the faulty dependence on the
+event-loop callback, and the gap between protocol, transport, and
+caller lifecycles.
+
+Earlier pilots on eight real-world components (reconnecting-websocket,
+gobreaker, recws, recloser, cenkalti/backoff, tungstenite-rs,
+tenacity) reached 93% tracker-bug coverage and surfaced eight new
+bugs, two of them critical and reported upstream.
+
+## Scope
+
+Use for lifecycles, connections, protocols, async workflows, retries,
+timeouts, cancellation, recovery, sessions, mutually exclusive modes.
+Typical scope: one bounded component, roughly 200–1,500 LOC of
+relevant lifecycle code, with requirements in README, docstrings, API
+contracts, or tests. Do not use for pure calculations, stateless
+transforms, formatting, validation, or CRUD without temporal
+behaviour.
+
+StateRadar is not a general AI code-review bot, a static linter, a
+security scanner, a UML diagram tool, a classical model checker, a
+formal proof, or a replacement for tests and human review. It is a
+verification workflow for lifecycle contracts.
 
 ## Repository layout
 
@@ -26,10 +140,12 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 06-reconcile citation refresh), gen_matrix_scaffold
                 (empty matrix grids), dsc_compose (cross-model report),
                 check_matrix (the generic per-component checker),
-                dsc_stamp (validate + pin the manifest), templates/
+                dsc_stamp (validate + pin the manifest),
+                dsc_blind (blind-pass assembly + diff),
+                dsc_cross_check (reviewer cross-check), templates/
                 (the CI gate file + the per-component checker wrapper)
 .benchmarks/    golden cases + runner — the falsifiable layer for the tools
-tools/ste-pack/ the language layer, consumed as a pinned submodule (v1.5.0)
+tools/ste-pack/ the language layer, consumed as a pinned submodule (v1.6.1)
 formats/        analysis.schema.json + manifest.schema.json — the sidecar
                 and manifest contracts
 .vale.ini       the pack's own prose gate; StylesPath into tools/ste-pack/
@@ -55,7 +171,7 @@ uv run --with jsonschema python3 tools/selftest/run_selftest.py
 
 ## Language policy (ste-pack dependency)
 
-The language layer is a separate pack: **ste-pack v1.6.1****, consumed as a git submodule at `tools/ste-pack/`. It holds STYLE.md (strictness per text class) and the Vale styles (STE English, DTK German, STEDict dictionary check). It also holds the language agent passes and the language checkers. This pack's `.vale.ini` points its `StylesPath` into the submodule; `tools/check_pack_consistency.py` verifies that the checked-out submodule tag matches the version declared here. The word data follows ASD-STE100 **Issue 9** (2025-01-15).
+The language layer is a separate pack: **ste-pack v1.6.1**, consumed as a git submodule at `tools/ste-pack/`. It holds STYLE.md (strictness per text class) and the Vale styles (STE English, DTK German, STEDict dictionary check). It also holds the language agent passes and the language checkers. This pack's `.vale.ini` points its `StylesPath` into the submodule; `tools/check_pack_consistency.py` verifies that the checked-out submodule tag matches the version declared here. The word data follows ASD-STE100 **Issue 9** (2025-01-15).
 
 This pack's approved technical nouns and verbs (Issue 9 term; Issue 7 called them technical names) — its project dictionary in the sense of ste-pack STYLE.md — live in `technical-names.txt`, one name per line. Add a name there before you use it in strict-mode text, then rebuild the dictionary.
 
@@ -75,10 +191,10 @@ python3 tools/ste-pack/tools/build_ste_dictionary.py \
 
 ```bash
 git submodule add <this-repo-url> tools/prompt-pack
-git -C tools/prompt-pack checkout v1.16
+git -C tools/prompt-pack checkout v1.32
 ```
 
-Updating later: `git -C tools/prompt-pack fetch --tags && git -C tools/prompt-pack checkout v1.17`. One place, no drift. The submodule brings its own `tools/ste-pack/` submodule; init recursively (`git submodule update --init --recursive`).
+Updating later: `git -C tools/prompt-pack fetch --tags && git -C tools/prompt-pack checkout <newer-tag>`. One place, no drift. The submodule brings its own `tools/ste-pack/` submodule; init recursively (`git submodule update --init --recursive`).
 
 **Option B: vendored copy (for repos that avoid submodules).** copy `prompts/` to `tools/prompt-pack/prompts/` and record the tag in `tools/prompt-pack/VERSION`. You are responsible for updating it; the version you copied is the version your analyses claim. If you want the prose lint, vendor the ste-pack the same way and copy its `consumer.vale.ini` to your repo root as `.vale.ini`.
 
@@ -204,11 +320,22 @@ Rules of thumb from consumer experience:
 
 ## Versioning
 
-Pack versions are git tags (`v1.16`) mirrored in `CHANGELOG.md`. The pilot prompt also carries the method's feedback-loop changelog at its top. It folds divergence *classes* found by Part-B blind passes back into rules there. Consumers pin a tag; an analysis directory should note the pack version used to produce it. The submodule pins the ste-pack dependency by tag; the declaration lives in "Language policy" above.
+Pack versions are git tags (`v1.32`) mirrored in `CHANGELOG.md`. The pilot prompt also carries the method's feedback-loop changelog at its top. It folds divergence *classes* found by Part-B blind passes back into rules there. Consumers pin a tag; an analysis directory should note the pack version used to produce it. The submodule pins the ste-pack dependency by tag; the declaration lives in "Language policy" above.
 
-## Scope
+## Claims
 
-Use for lifecycles, connections, protocols, async workflows, retries, timeouts, cancellation, recovery, sessions, mutually exclusive modes. Do not use for pure calculations, stateless transforms, formatting, validation, or CRUD without temporal behaviour.
+StateRadar currently claims credibly:
+
+* Detects missing lifecycle transitions in real-world asynchronous components.
+* Separates requirement-level defects from implementation mechanisms.
+* Identifies incorrect coupling between caller-visible and internal lifecycles.
+* Detects unspecified, untested, or unimplemented State/Event combinations.
+* Produces traceable findings before known upstream bug information is revealed.
+* Turns approved lifecycle decisions into executable tests and CI checks.
+
+It does not claim to find all software defects, to guarantee
+correctness, to replace code review, to provide formal proofs, to have
+no false positives, or to work without usable requirements.
 
 ## License
 
