@@ -71,9 +71,11 @@ def sidecar(tmp: Path, src: Path) -> Path:
 def main() -> int:
     try:
         import jsonschema  # noqa: F401
-    except ImportError:
-        print("selftest needs jsonschema: uv run --with jsonschema python3 "
-              "tools/selftest/run_selftest.py", file=sys.stderr)
+        import z3  # noqa: F401
+    except ImportError as exc:
+        print(f"selftest needs the dev dependencies ({exc.name}): "
+              "uv run --with-requirements tools/requirements-dev.txt "
+              "python3 tools/selftest/run_selftest.py", file=sys.stderr)
         return 2
 
     with tempfile.TemporaryDirectory() as td:
@@ -246,6 +248,43 @@ def main() -> int:
                            "| M1 | handle |\n| M2 | reject |\n")
         expect("blind table missing row", True, *pbp(partial),
                needle="missing row: UV-M1-dup")
+
+    print("guard proofs (z3, PA-1/PA-2)")
+    sys.path.insert(0, str(ROOT / "tools"))
+    import guard_proofs
+    import z3
+
+    x = z3.Int("x")
+    nat = [x >= 0, x <= 10]
+    ok = guard_proofs.check_group(
+        "clean", [("low", x < 5), ("high", x >= 5)], assumptions=nat)
+    expect("disjoint covering group", ok.outcome != "proven",
+           0, "\n".join(ok.findings))
+    # PA-1 red: overlapping guards must come back as a violation
+    ov = guard_proofs.check_group(
+        "overlap", [("a", x < 5), ("b", x < 10)], assumptions=nat)
+    expect("overlapping guards (PA-1)", True,
+           1 if ov.outcome == "violation" else 0,
+           "\n".join(ov.findings), needle="PA-1 overlap")
+    # PA-2 red: a domain gap without an else must come back as a violation
+    gap = guard_proofs.check_group(
+        "gap", [("a", x < 5), ("b", x > 7)], assumptions=nat)
+    expect("coverage gap (PA-2)", True,
+           1 if gap.outcome == "violation" else 0,
+           "\n".join(gap.findings), needle="PA-2 gap")
+    # has_else discharges coverage but never disjointness
+    still = guard_proofs.check_group(
+        "else-overlap", [("a", x < 5), ("b", x < 10)],
+        assumptions=nat, has_else=True)
+    expect("has_else keeps disjointness red", True,
+           1 if still.outcome == "violation" else 0,
+           "\n".join(still.findings), needle="PA-1 overlap")
+    probes = guard_proofs.boundary_probe(
+        [("low", x < 5), ("high", x >= 5)], [{x: 4}, {x: 5}, {x: 6}])
+    if [labels for _, labels in probes] != [["low"], ["high"], ["high"]]:
+        failures.append(f"boundary probe misassigned branches: {probes}")
+    else:
+        print("  ok  boundary probes assign below/at/above correctly")
 
     print("reachability")
     # Red: an unreachable state in the matrix must FAIL.

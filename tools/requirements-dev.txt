@@ -1,0 +1,8 @@
+# Dev/CI dependencies for the pack's deterministic layer.
+# Policy (2026-08-07): the layer is not restricted to stdlib-Python —
+# use the best tool for the job, pin it here, wire it into CI.
+# Consumer-facing checkers must keep degrading LOUDLY (never silently)
+# when an optional dependency is missing — see dsc_check's
+# --allow-no-schema pattern.
+jsonschema>=4.21
+z3-solver>=4.12

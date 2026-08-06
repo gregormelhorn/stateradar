@@ -275,8 +275,8 @@ title = "guard disjointness"
 class = "wellformedness"
 statement = "guards per (state,event) pairwise disjoint — order must never decide"
 enforcement = "checker"
-checker_ref = "check_guards.py (per-run z3); outcome presence via tools/dsc_check.py"
-selftest_ref = "TODO"  # per-run z3 proof; pack-side selftest needs a z3 dev-dependency
+checker_ref = "tools/guard_proofs.py check_group (via per-run check_guards.py); outcome presence via tools/dsc_check.py"
+selftest_ref = "tools/selftest/run_selftest.py"
 lineage = ["heitmeyer-tosem-1996"]
 added_by = "v1.0"
 
@@ -286,8 +286,8 @@ title = "guard coverage"
 class = "wellformedness"
 statement = "guards jointly exhaustive, or an explicit else exists; gap = hole"
 enforcement = "checker"
-checker_ref = "check_guards.py (per-run z3); outcome presence via tools/dsc_check.py"
-selftest_ref = "TODO"
+checker_ref = "tools/guard_proofs.py check_group (via per-run check_guards.py); outcome presence via tools/dsc_check.py"
+selftest_ref = "tools/selftest/run_selftest.py"
 lineage = ["heitmeyer-tosem-1996"]
 added_by = "v1.0"
 

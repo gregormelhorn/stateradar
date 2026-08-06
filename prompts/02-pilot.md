@@ -1,8 +1,13 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.14.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.15.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.15 — check_guards.py delegates the proof procedures (disjointness,
+  coverage, boundary probes) to the pack library `tools/guard_proofs.py`
+  instead of reimplementing z3 boilerplate per component — the same
+  consolidation check_matrix.py brought in v1.23. The library carries
+  its own red selftests (an overlapping and a gapping group must fail).
 * v1.14 — rules registry: the closed vocabularies, the undesired-variant
   checklist, and the Step-5 lint list are now generated from
   `formats/rules.toml` (single source; `tools/gen_rules.py`). The
@@ -176,7 +181,7 @@ Build a Markdown table: rows = leaf states of the as-is model; columns = all cat
 
 For each (state, event) with guarded transitions, add a guard note that lists the guards and the boundary values.
 
-**Guard proofs (mandatory where formalizable).** Formalize every such guard group as predicates over typed context variables. Use Int / Real / Bool / enum sorts, with domains from the NAT invariants (for example `0 <= retryCount <= maxRetries`, `confidence in [0,1]`). Write `check_guards.py` with z3 (`pip install z3-solver`) and execute it.
+**Guard proofs (mandatory where formalizable).** Formalize every such guard group as predicates over typed context variables. Use Int / Real / Bool / enum sorts, with domains from the NAT invariants (for example `0 <= retryCount <= maxRetries`, `confidence in [0,1]`). Write `check_guards.py` that encodes the component's variables, NAT domains, and guard expressions, and delegates the proof procedure to the pack library `tools/guard_proofs.py` (`check_group` for disjointness and coverage, `boundary_probe` for the limits, `render` for `guard-results.txt`; dependencies: `tools/requirements-dev.txt`). Never reimplement the proof loop per component. Execute it.
 
 For each group establish, under the declared NAT assumptions: (a) **pairwise disjointness**: `g_i AND g_j` unsatisfiable for every pair. (b) **coverage**: `NOT (g_1 OR ... OR g_n)` unsatisfiable, or an explicit else-branch exists. (c) **boundary probes**: for every comparison, evaluate below, exactly at, and above the limit, and record which branch takes each. Every result cites the assumptions it used.
 

@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.36 — dependency policy, z3 guard-proof library
+
+- Policy: the deterministic layer is no longer restricted to
+  stdlib-Python — use the best tool for the job. Dev/CI dependencies
+  are pinned in tools/requirements-dev.txt (jsonschema, z3-solver);
+  consumer-facing checkers keep degrading loudly, never silently,
+  when an optional dependency is missing.
+- tools/guard_proofs.py: pack-shipped proof procedures for guard
+  groups — pairwise disjointness (PA-1), coverage (PA-2), boundary
+  probes, guard-results.txt rendering. Per-run check_guards.py
+  scripts contribute only the component-specific encodings and
+  delegate the proof loop (02-pilot v1.15, mirroring the check_matrix
+  consolidation of v1.23). Red selftests: an overlapping group, a
+  gapping group, and has_else-keeps-disjointness must each fail. The
+  registry's selftest backlog is now empty.
+- CI: workflow_dispatch trigger for manual runs; dependencies from
+  tools/requirements-dev.txt.
+
 ## v1.35 — rules registry: single source for method rules
 
 - formats/rules.toml: machine-readable registry — closed vocabularies,

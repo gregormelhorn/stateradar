@@ -16,12 +16,16 @@ combinations, and missing tests.
 
 The pack is a prompt pack for AI-coding-agent workflows. No build
 step — the prompts themselves bootstrap the deterministic layer
-(generated checker scripts, cell tests, CI wiring). Checkers are
-stdlib-Python plus jsonschema. The agent
+(generated checker scripts, cell tests, CI wiring). Checker
+dependencies are pinned in `tools/requirements-dev.txt` (jsonschema
+for the sidecar contract, z3-solver for the guard-proof layer) — the
+pack uses the best tool for the job rather than staying stdlib-only,
+and consumer-facing checkers degrade loudly, never silently, when an
+optional dependency is missing. The agent
 may propose and challenge behaviour, but must not silently decide it —
 and the tests come from the specification, not from the code.
 
-**Version 1.35.**
+**Version 1.36.**
 
 ## The problem
 
@@ -157,7 +161,11 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 dsc_blind (blind-pass assembly + diff),
                 dsc_cross_check (reviewer cross-check), gen_rules
                 (renders the rules registry into the prompts, AGENTS
-                and README generated blocks), templates/
+                and README generated blocks), guard_proofs (z3 proof
+                procedures — disjointness, coverage, boundary — that
+                per-run check_guards.py scripts delegate to),
+                requirements-dev.txt (pinned dev/CI dependencies),
+                templates/
                 (the CI gate file + the per-component checker wrapper)
 formats/        analysis.schema.json + manifest.schema.json — the sidecar
                 and manifest contracts; rules.toml — the rules registry
@@ -168,18 +176,18 @@ The pack is **stateless**: all analysis artifacts (`domain-analysis/<component>/
 
 ## Running the checkers locally
 
-System Python on macOS is PEP-668 externally managed. Run the checkers through uv, which supplies `jsonschema` (schema validation in `dsc_check`) without touching the system environment:
+System Python on macOS is PEP-668 externally managed. Run the checkers through uv, which supplies the pinned dev dependencies (`tools/requirements-dev.txt`: jsonschema, z3-solver) without touching the system environment:
 
 ```bash
-uv run --with jsonschema python3 tools/dsc_check.py <analysis-dir>
+uv run --with-requirements tools/requirements-dev.txt python3 tools/dsc_check.py <analysis-dir>
 ```
 
-Without `jsonschema`, `dsc_check` cannot validate the sidecar contract and fails with that reason. Pass `--allow-no-schema` to accept structural checks only — a deliberate reduction in coverage, never a silent one. CI installs the package with pip instead.
+Without `jsonschema`, `dsc_check` cannot validate the sidecar contract and fails with that reason. Pass `--allow-no-schema` to accept structural checks only — a deliberate reduction in coverage, never a silent one. CI installs the packages with pip instead.
 
-The pack's own deterministic layer has a selftest that runs the checker red as well as green (silent omission, drifted citations, a diagram out of sync with the matrix, a snake_case manifest key — each must fail):
+The pack's own deterministic layer has a selftest that runs the checkers red as well as green (silent omission, drifted citations, a diagram out of sync with the matrix, a snake_case manifest key, overlapping or gapping guard groups — each must fail):
 
 ```bash
-uv run --with jsonschema python3 tools/selftest/run_selftest.py
+uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py
 ```
 
 ## Using the pack in a repository

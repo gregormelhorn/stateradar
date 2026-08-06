@@ -9,10 +9,12 @@ is not part of "stdlib-Python plus jsonschema"). Generator/checker:
 
 Remaining follow-ups, tracked as registry warnings (not silent):
 
-* Selftest backlog: PA-1/PA-2 only (the z3 guard proofs are per-run
-  artifacts; a pack-side red case needs a z3 dev-dependency). The other
-  twelve TODO refs were discharged on 2026-08-07 with red cases in
-  `tools/selftest/run_selftest.py`.
+* Selftest backlog: empty since v1.36. The twelve dsc_check/
+  check_matrix/part_b_pack TODO refs were discharged with red cases in
+  `tools/selftest/run_selftest.py`; PA-1/PA-2 followed once the
+  stdlib-only policy was dropped — `tools/guard_proofs.py` is the
+  pack-shipped proof procedure with its own red cases, z3-solver is a
+  pinned dev dependency (`tools/requirements-dev.txt`).
 * Six `checker_candidate` rules: PA-4, PA-7, PA-10, PA-17, PA-22, and
   R-REQUIREMENT-SCOPE — the last one downgraded from a false
   enforcement claim: AGENTS §5 advertised a scope-line checker that no

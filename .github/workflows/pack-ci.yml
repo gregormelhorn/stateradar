@@ -1,5 +1,8 @@
 name: pack-ci
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 jobs:
   consistency:
     runs-on: ubuntu-latest
@@ -8,7 +11,7 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install jsonschema
+      - run: pip install -r tools/requirements-dev.txt
       - run: python tools/check_pack_consistency.py
       # The rules-registry selftest proves gen_rules --check can go red:
       # a checker rule without a selftest, an unknown fault id, and a
