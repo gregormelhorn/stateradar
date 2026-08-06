@@ -176,9 +176,9 @@ git submodule add <this-repo-url> tools/prompt-pack
 git -C tools/prompt-pack checkout v1.32
 ```
 
-Updating later: `git -C tools/prompt-pack fetch --tags && git -C tools/prompt-pack checkout <newer-tag>`. One place, no drift. The submodule brings its own `tools/ste-pack/` submodule; init recursively (`git submodule update --init --recursive`).
+Updating later: `git -C tools/prompt-pack fetch --tags && git -C tools/prompt-pack checkout <newer-tag>`. One place, no drift.
 
-**Option B: vendored copy (for repos that avoid submodules).** copy `prompts/` to `tools/prompt-pack/prompts/` and record the tag in `tools/prompt-pack/VERSION`. You are responsible for updating it; the version you copied is the version your analyses claim. If you want the prose lint, vendor the ste-pack the same way and copy its `consumer.vale.ini` to your repo root as `.vale.ini`.
+**Option B: vendored copy (for repos that avoid submodules).** copy `prompts/` to `tools/prompt-pack/prompts/` and record the tag in `tools/prompt-pack/VERSION`. You are responsible for updating it; the version you copied is the version your analyses claim.
 
 **Standing instruction without drift:** do not paste the whole of `05-standing-instruction.md` into `CLAUDE.md`. Use an import so the rules update with the pack:
 
@@ -302,7 +302,7 @@ Rules of thumb from consumer experience:
 
 ## Versioning
 
-Pack versions are git tags (`v1.32`) mirrored in `CHANGELOG.md`. The pilot prompt also carries the method's feedback-loop changelog at its top. It folds divergence *classes* found by Part-B blind passes back into rules there. Consumers pin a tag; an analysis directory should note the pack version used to produce it. The submodule pins the ste-pack dependency by tag; the declaration lives in "Language policy" above.
+Pack versions are git tags (`v1.32`) mirrored in `CHANGELOG.md`. The pilot prompt also carries the method's feedback-loop changelog at its top. It folds divergence *classes* found by Part-B blind passes back into rules there. Consumers pin a tag; an analysis directory should note the pack version used to produce it.
 
 ## Claims
 
