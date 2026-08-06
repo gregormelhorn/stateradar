@@ -22,10 +22,10 @@ import sys
 from pathlib import Path
 
 
-def load_graph(analysis_dir: Path) -> tuple[set[str], set[str], dict[str, set[str]], set[str], set[str]]:
+def load_graph(analysis_dir: Path) -> tuple[set[str], str, set[str], dict[str, set[str]], set[str], set[str]]:
     """Load states, events, transitions, and terminal states from analysis.json.
 
-    Returns (states, events, adjacency, terminals, events_with_transitions).
+    Returns (states, initial, events, adjacency, terminals, events_with_transitions).
     """
     sidecar = analysis_dir / "analysis.json"
     if not sidecar.is_file():
@@ -62,7 +62,7 @@ def load_graph(analysis_dir: Path) -> tuple[set[str], set[str], dict[str, set[st
                 adjacency.setdefault(src, set()).add(tgt)
                 events_with_transitions.add(c.get("event", ""))
 
-    return states, events, adjacency, terminals, events_with_transitions
+    return states, initial, events, adjacency, terminals, events_with_transitions
 
 
 def reachable_from(start: str, adjacency: dict[str, set[str]]) -> set[str]:
@@ -86,28 +86,24 @@ def main() -> int:
         return 1
 
     adir = Path(sys.argv[1])
-    states, events, adjacency, terminals, events_with_transitions = load_graph(adir)
+    states, initial, events, adjacency, terminals, events_with_transitions = load_graph(adir)
 
-    # The first state in the sidecar's ordered list is the initial state.
-    adir_path = adir / "analysis.json"
-    state_list = json.loads(adir_path.read_text(encoding="utf-8")).get("states", [])
-    initial = state_list[0] if state_list else None
+    if initial is None:
+        print("REACHABILITY CHECK: FAIL — no states in sidecar")
+        return 1
 
     errors: list[str] = []
 
     # 1. Reachability from initial state
-    # The first state in the list is conventionally the initial state.
-    initial = next(iter(states)) if states else None
-    if initial:
-        reached = reachable_from(initial, adjacency)
-        unreachable = states - reached - {"[*]"}
-        # Terminal states declared via <!-- terminal: ... --> don't need
-        # outbound transitions — they are sinks by design.
-        for s in sorted(unreachable):
-            if s not in terminals:
-                errors.append(
-                    f"state '{s}' is unreachable from initial state '{initial}'"
-                )
+    reached = reachable_from(initial, adjacency)
+    unreachable = states - reached - {"[*]"}
+    # Terminal states declared via <!-- terminal: ... --> don't need
+    # outbound transitions — they are sinks by design.
+    for s in sorted(unreachable):
+        if s not in terminals:
+            errors.append(
+                f"state '{s}' is unreachable from initial state '{initial}'"
+            )
 
     # 2. Dead events: no transition from any state
     dead_events = events - events_with_transitions

@@ -19,3 +19,9 @@ jobs:
       # fixtures and asserts expected output. Hard-fails on zero cases.
       - name: tool regression tests
         run: python tools/run_tool_tests.py
+      # The reachability checker runs semantic analysis on the sidecar.
+      # It verifies all states are reachable and terminal states are marked.
+      - name: reachability check (golden-mini)
+        run: |
+          python tools/gen_analysis_sidecar.py --root . --analysis-dir tests/golden-mini/domain-analysis mini
+          python tools/check_reachability.py tests/golden-mini/domain-analysis/mini

@@ -1,6 +1,7 @@
 # Disposition matrix — mini
 
 <!-- states: idle open closed -->
+<!-- terminal: closed -->
 
 | state | M1 | M2 | UV-M1-dup |
 |---|---|---|---|

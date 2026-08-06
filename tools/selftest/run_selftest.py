@@ -29,6 +29,23 @@ def dsc(adir: Path, *extra: str) -> tuple[int, str]:
     return r.returncode, (r.stdout + r.stderr).strip()
 
 
+def chk(adir: Path) -> tuple[int, str]:
+    """Run check_reachability.py and return (rc, output)."""
+    r = subprocess.run([sys.executable, str(ROOT / "tools" / "check_reachability.py"), str(adir)],
+                       capture_output=True, text=True)
+    return r.returncode, (r.stdout + r.stderr).strip()
+
+
+def gen_sidecar(adir: Path) -> None:
+    """Generate analysis.json by running gen_analysis_sidecar in the parent."""
+    # adir is domain-analysis/component; --root is the parent of domain-analysis
+    root = adir.parent.parent
+    comp = adir.name
+    subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                    "--root", str(root), "--analysis-dir", "domain-analysis", comp],
+                   capture_output=True, text=True)
+
+
 def expect(name: str, want_fail: bool, rc: int, out: str, needle: str = "") -> None:
     failed = rc != 0
     if failed != want_fail:
@@ -132,6 +149,26 @@ def main() -> int:
         (d4 / "manifest.json").write_text(json.dumps(
             {"component": "mini", "watch_paths": ["tools/selftest/src/"], "analyzedSha": "WORKTREE"}))
         expect("snake_case watchPaths", True, *dsc(d4, "--repo", str(ROOT)), needle="camelCase")
+
+    print("reachability")
+    # Red: an unreachable state in the matrix must FAIL.
+    # Build a minimal fixture with an unreachable 'dead' state.
+    unr = tmp / "reach-red"
+    adir = unr / "domain-analysis" / "gate"
+    adir.mkdir(parents=True)
+    (adir / "disposition-matrix.md").write_text(
+        "<!-- states: idle, open, closed, dead -->\n"
+        "<!-- terminal: closed -->\n"
+        "| state | connect | close | tick |\n"
+        "| **idle** | transition → open | ignore (documented) | ignore (documented) |\n"
+        "| **open** | ignore (documented) | transition → closed | handle |\n"
+        "| **closed** | ignore (documented) | ignore (documented) | handle |\n"
+        "| **dead** | ignore (documented) | ignore (documented) | ignore (documented) |\n"
+    )
+    gen_sidecar(adir)
+    expect("unreachable state must fail", True,
+           *chk(adir),
+           needle="unreachable")
 
     if failures:
         print("\nSELFTEST: FAIL")
