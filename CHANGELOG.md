@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.24.1 — docs alignment, order-proof version check (2026-08-06)
+
+- README and AGENTS aligned with the codebase: pack version 1.24,
+  ste-pack pin v1.5.0 in the layout, `templates/` describes both files
+  (CI gate + checker wrapper), the language-layer pointer is
+  `tools/ste-pack/STYLE.md`. The CHANGELOG itself is back to
+  descending order.
+- `check_pack_consistency.py`: the README↔CHANGELOG version check now
+  takes the highest version in the file, not the first entry. A
+  mis-ordered CHANGELOG no longer silences the check — the hole the
+  v1.20.3/v1.20.2 misorder had opened.
+
 ## v1.24 — fake-timer semantics, checker wrapper, typed suites, bulk-edit guidance (2026-08-05)
 
 Learnings from the dobby refactoring round (check_matrix dedup, strict

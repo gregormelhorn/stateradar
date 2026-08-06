@@ -5,7 +5,7 @@ Verifies:
   1. The seven-value disposition vocabulary appears in both 00 and 02.
   2. Artifact filenames referenced across prompts are defined by the
      producing prompts (02 or 04).
-  3. README version matches the newest CHANGELOG entry.
+  3. README version matches the newest (highest) CHANGELOG entry.
 Exit code 0 = OK, 1 = violations (printed).
 """
 from pathlib import Path
@@ -56,11 +56,16 @@ for artifact, producers in ARTIFACTS.items():
 readme = (ROOT / "README.md").read_text(encoding="utf-8")
 changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 rv = re.search(r"\*\*Version (\d+\.\d+)", readme)
-cv = re.search(r"^## v(\d+\.\d+)", changelog, re.M)
+# Newest = the highest version anywhere in the file, not the first
+# entry. A mis-ordered CHANGELOG must not silence this check (the
+# v1.20.3/v1.20.2 entries sat above v1.24 and did exactly that).
+entries = [(int(m.group(1)), int(m.group(2))) for m in
+           re.finditer(r"^## v(\d+)\.(\d+)", changelog, re.M)]
+cv = max(entries) if entries else None
 if not rv or not cv:
     errors.append("could not parse versions from README/CHANGELOG")
-elif rv.group(1) != cv.group(1):
-    errors.append(f"version mismatch: README {rv.group(1)} vs CHANGELOG {cv.group(1)}")
+elif tuple(int(p) for p in rv.group(1).split(".")) != cv:
+    errors.append(f"version mismatch: README {rv.group(1)} vs CHANGELOG {cv[0]}.{cv[1]}")
 
 # ste-pack submodule pin: the tag checked out at tools/ste-pack must match
 # the version declared in the README ("ste-pack vX.Y[.Z]").
