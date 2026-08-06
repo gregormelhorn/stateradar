@@ -20,4 +20,5 @@ Two kinds of measurement live here, on purpose kept apart:
    change is a regression signal for the change.
 
 Current cases: `golden-mini` (valid input, all gates green),
-`red-mini` (deliberate violations, the gates must catch them).
+`red-mini` (deliberate violations, the gates must catch them),
+`device-connection` (synthetic component for convergence calibration).
