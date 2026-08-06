@@ -1,0 +1,12 @@
+Commit: 4d229bf9f583d593aa103287aee0a77c9fbc3a79
+Timestamp: 2026-08-06T13:46:59Z
+External bug info: NOT consulted
+Status: FROZEN
+
+Primary finding: Q-C1 - CloseDeadlineExpired does not force caller-visible termination
+Secondary finding: recv_exc race condition masking keepalive timeout cause
+Invariant violations: INV-02, INV-03, INV-04, INV-05, INV-08
+
+Part A: 13 states, 21 events, 1 critical finding, 5 invariant violations
+Part B: 12 states, 2 requirement holes, 1 underspecified requirement
+Diff: 3x Class E (possible defect), 1x Class A, 1x Class D, 1x Class F

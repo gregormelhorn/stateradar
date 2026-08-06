@@ -1,0 +1,349 @@
+{
+ "formatVersion": "1.0",
+ "component": "inflight",
+ "packVersion": "",
+ "analyzedSha": "WORKTREE",
+ "watchPaths": [],
+ "states": [
+  "CapacityAvailable",
+  "NoCapacity",
+  "RequestPending",
+  "CallerTimedOut",
+  "RequestCompleted",
+  "RequestAbandoned",
+  "PermitReleased"
+ ],
+ "events": [
+  {
+   "id": "reserve_request",
+   "undesired": false
+  },
+  {
+   "id": "command_completes",
+   "undesired": false
+  },
+  {
+   "id": "timeout_fires",
+   "undesired": false
+  },
+  {
+   "id": "release_permit",
+   "undesired": false
+  },
+  {
+   "id": "internal_cleanup",
+   "undesired": false
+  },
+  {
+   "id": "reserve_fails",
+   "undesired": false
+  }
+ ],
+ "cells": [
+  {
+   "disposition": "transition",
+   "target": "RequestPending",
+   "citation": {
+    "file": "glide-core/tests/utilities/mod.rs",
+    "line": 908
+   },
+   "state": "CapacityAvailable",
+   "event": "reserve_request"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "CapacityAvailable",
+   "event": "command_completes"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "CapacityAvailable",
+   "event": "timeout_fires"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "CapacityAvailable",
+   "event": "release_permit"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "CapacityAvailable",
+   "event": "internal_cleanup"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "glide-core/tests/utilities/mod.rs",
+    "line": 914
+   },
+   "state": "CapacityAvailable",
+   "event": "reserve_fails"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "glide-core/tests/utilities/mod.rs",
+    "line": 914
+   },
+   "state": "NoCapacity",
+   "event": "reserve_request"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoCapacity",
+   "event": "command_completes"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoCapacity",
+   "event": "timeout_fires"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoCapacity",
+   "event": "release_permit"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoCapacity",
+   "event": "internal_cleanup"
+  },
+  {
+   "disposition": "handle",
+   "state": "NoCapacity",
+   "event": "reserve_fails"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestPending",
+   "event": "reserve_request"
+  },
+  {
+   "disposition": "transition",
+   "target": "RequestCompleted",
+   "state": "RequestPending",
+   "event": "command_completes"
+  },
+  {
+   "disposition": "transition",
+   "target": "CallerTimedOut",
+   "citation": {
+    "file": "glide-core/tests/utilities/mod.rs",
+    "line": 565
+   },
+   "state": "RequestPending",
+   "event": "timeout_fires"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-02",
+   "state": "RequestPending",
+   "event": "release_permit"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestPending",
+   "event": "internal_cleanup"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestPending",
+   "event": "reserve_fails"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "CallerTimedOut",
+   "event": "reserve_request"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-03",
+   "state": "CallerTimedOut",
+   "event": "command_completes"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "CallerTimedOut",
+   "event": "timeout_fires"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-04",
+   "state": "CallerTimedOut",
+   "event": "release_permit"
+  },
+  {
+   "disposition": "transition",
+   "target": "RequestAbandoned",
+   "state": "CallerTimedOut",
+   "event": "internal_cleanup"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "CallerTimedOut",
+   "event": "reserve_fails"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestCompleted",
+   "event": "reserve_request"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestCompleted",
+   "event": "command_completes"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestCompleted",
+   "event": "timeout_fires"
+  },
+  {
+   "disposition": "transition",
+   "target": "PermitReleased",
+   "citation": {
+    "file": "glide-core/tests/utilities/mod.rs",
+    "line": 920
+   },
+   "state": "RequestCompleted",
+   "event": "release_permit"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestCompleted",
+   "event": "internal_cleanup"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestCompleted",
+   "event": "reserve_fails"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestAbandoned",
+   "event": "reserve_request"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestAbandoned",
+   "event": "command_completes"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestAbandoned",
+   "event": "timeout_fires"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-02",
+   "state": "RequestAbandoned",
+   "event": "release_permit"
+  },
+  {
+   "disposition": "transition",
+   "target": "PermitReleased",
+   "state": "RequestAbandoned",
+   "event": "internal_cleanup"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "RequestAbandoned",
+   "event": "reserve_fails"
+  },
+  {
+   "disposition": "transition",
+   "target": "RequestPending",
+   "state": "PermitReleased",
+   "event": "reserve_request"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "PermitReleased",
+   "event": "command_completes"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "PermitReleased",
+   "event": "timeout_fires"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "glide-core/tests/utilities/mod.rs",
+    "line": 921
+   },
+   "state": "PermitReleased",
+   "event": "release_permit"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "PermitReleased",
+   "event": "internal_cleanup"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "PermitReleased",
+   "event": "reserve_fails"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN"
+  }
+ ],
+ "behaviouralDrs": [],
+ "completeness": {
+  "pairs": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from adversarial-traces.md before the component claims L4."
+  },
+  "guardGroups": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from guard-results.txt before the component claims L4."
+  },
+  "coverage": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from event-catalogue.md before the component claims L4."
+  }
+ }
+}
