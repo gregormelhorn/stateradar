@@ -189,6 +189,13 @@ Omitting a section you simply did not produce is the failure this block exists t
 
 Propose invariants as checkable predicates over state and context, classified `NAT` (assumption about the environment) or `SYS` (obligation of the system). Check every SYS invariant against the as-is model, state by state. Violations are findings. **Close the doctrine sweep:** map every `DOC-n` line from Step 1 to an invariant, a disposition constraint, or an explicit rejection with reason. An unmapped doctrine line is an error.
 
+**Map requirements to cells (PA-22).** For each mapped doctrine line that
+prescribes behaviour ("X must happen when Y"): find the matrix cell
+(Y_state, X_event). If that cell is `UNSPECIFIED` or has a contradictory
+disposition, the requirement is **violated** — the code does not
+implement what the requirements demand. If no cell maps to the
+requirement, the requirement is **unimplemented** — raise a Q.
+
 Then run this checklist against the model and report violations with provenance:
 
 * waiting, connecting, or stopping states without timeout behaviour
@@ -206,6 +213,13 @@ Then run this checklist against the model and report violations with provenance:
   failure cycle. Flag every external-event-triggered reset whose effect is
   to reduce a limit or a delay. The reset may be correct in isolation;
   the lint flags it so the adversarial traces can model the aggregate.
+* **lifecycle disagreement (PA-21):** a state variable (counter, lock,
+  flag) accessed from more than one independent lifecycle (caller vs.
+  internal request, public API vs. background goroutine, user action vs.
+  system cleanup). Model each lifecycle as a separate track. A terminal
+  state in one lifecycle that does not trigger a cleanup transition in
+  the shared resource track is a coupling bug. Flag terminal states
+  missing cross-lifecycle cleanup transitions.
 
 **Multi-instance assumption (NAT-SYS).** When N > 1 instances of this
 component share one external resource (server, broker, queue, peer mesh)

@@ -78,6 +78,42 @@ When a finding involves the API contract, ask: is this a state machine
 issue (wrong transition), or an API design issue (wrong return value)?
 Only the former belongs in the matrix.
 
+### Lifecycle disagreement pattern (PA-21)
+
+When two independent lifecycles share a resource, a terminal state in one
+lifecycle must trigger a transition in the other:
+
+| Pattern | Example | Bug |
+|---|---|---|
+| Caller vs. internal request | Timeout fires → caller done, but permit still held by internal request | valkey-glide #5803: stalled node exhausts shared capacity |
+| Public vs. background goroutine | Connection closed → user state terminal, but reconnect goroutine still holds lock | reconnecting-websocket Q-01: `_connectLock` leaked after maxRetries |
+| User API vs. system cleanup | User calls `close()` but pending timer callback still mutates state | Common in async libraries |
+
+**Detection rule:** When you extract a state variable (counter, lock, flag)
+that is accessed from more than one lifecycle context, model each lifecycle
+as a separate track. A terminal state in one track that does not have a
+corresponding transition in the other track's cleanup state is a coupling
+bug. The fix is always the same: the terminal transition must trigger the
+cleanup transition in the shared resource track.
+
+### Requirement-to-cell mapping (PA-22)
+
+Every numbered requirement from the doctrine sweep (DOC-n) must map to at
+least one matrix cell. Validate mechanically:
+
+1. For each DOC-n, find the (state, event) cell that implements it.
+2. If the cell is `UNSPECIFIED` or has a contradictory disposition, the
+   requirement is **violated** — the code does not implement what the
+   requirements demand.
+3. If no cell maps to the requirement, the requirement is **unimplemented**.
+   Raise a Q.
+
+This turns the doctrine sweep from documentation into a verifiable
+compliance check. The valkey-glide pilot (2026-08-06) demonstrated this:
+Requirement 3 ("release immediately on timeout") maps to the cell
+(CallerTimedOut, release_permit). That cell was `UNSPECIFIED` in the
+as-is matrix — a direct match to the production bug (#5803).
+
 ## The loop
 
 ```text
