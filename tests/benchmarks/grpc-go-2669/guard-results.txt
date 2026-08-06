@@ -1,0 +1,31 @@
+group G-01 connect-state-dispatch: proven
+group G-02 tryUpdateAddrs-dispatch: proven
+group G-03 getReadyTransport-dispatch: proven
+group G-04 dial-deadline-max: proven
+group G-05 updateConnectivityState-terminality: violation
+  - SYS-1: write guard (s_new != s_cur) admits transitions out of Shutdown — witness s_cur=4, s_new=0 (clientconn.go:936-942 has no terminal guard; contrast clientconn.go:340-342). Reached via cell (Shutdown, UV08) -> Q-01.
+group G-06 reportHealth-dispatch: proven
+group G-07 adjustParams-dispatch: proven
+group G-08 health-managing-gate: proven
+group G-09 reqHandshake-mode-dispatch: proven
+group G-10 backoff-first-retry: proven
+group G-11 envconfig-requirehandshake-parse: not-formalizable
+  - unstructured-payload: env-string switch (internal/envconfig/envconfig.go:58-68); inspection: case "on" has an empty body, so "on" -> zero value Hybrid while unset -> On; contradicts envconfig.go:41-43 -> Q-05. Unproven inspection reasoning.
+group G-12 backoff-select-ordering: not-formalizable
+  - dynamic-state: select over timer.C / resetBackoff / ctx.Done (clientconn.go:1133-1143) depends on runtime channel readiness; dispositions carried by cells (TransientFailure_Backoff, E11/E05/E02) and pair P-02.
+
+boundary probes:
+  G-03 {'state': 2, 'transportSet': True} -> ['ready-with-transport']
+  G-03 {'state': 2, 'transportSet': False} -> ['else->nil']
+  G-03 {'state': 0, 'transportSet': False} -> ['idle->connect']
+  G-03 {'state': 4, 'transportSet': False} -> ['else->nil']
+  G-04 {'backoffForSec': 19.9, 'minConnectTimeoutSec': 20.0} -> ['min-wins']
+  G-04 {'backoffForSec': 20.0, 'minConnectTimeoutSec': 20.0} -> ['min-wins']
+  G-04 {'backoffForSec': 20.1, 'minConnectTimeoutSec': 20.0} -> ['backoff-wins']
+  G-07 {'goAwayReason': 2, 'twoXKeepalive': 9.0, 'mkpTime': 10.0} -> ['too-many-pings-nobump']
+  G-07 {'goAwayReason': 2, 'twoXKeepalive': 10.0, 'mkpTime': 10.0} -> ['too-many-pings-nobump']
+  G-07 {'goAwayReason': 2, 'twoXKeepalive': 11.0, 'mkpTime': 10.0} -> ['too-many-pings-bump']
+  G-07 {'goAwayReason': 1, 'twoXKeepalive': 11.0, 'mkpTime': 10.0} -> ['other-reason-noop']
+  G-10 {'retries': 0} -> ['first->baseDelay']
+  G-10 {'retries': 1} -> ['later->exponential']
+  G-10 {'retries': 2} -> ['later->exponential']

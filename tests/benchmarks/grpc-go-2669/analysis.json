@@ -1,0 +1,2054 @@
+{
+ "formatVersion": "1.0",
+ "component": "addrconn",
+ "packVersion": "1.34",
+ "analyzedSha": "a02b0774206b209466313a0b525d2c738fe407eb",
+ "watchPaths": [
+  "clientconn.go",
+  "balancer_conn_wrappers.go",
+  "connectivity/connectivity.go",
+  "internal/backoff/backoff.go",
+  "internal/envconfig/envconfig.go"
+ ],
+ "states": [
+  "Idle",
+  "Connecting_Dialing",
+  "Connecting_HealthChecking",
+  "Ready",
+  "TransientFailure_Backoff",
+  "TransientFailure_ServerUnhealthy",
+  "Shutdown"
+ ],
+ "events": [
+  {
+   "id": "E01",
+   "undesired": false
+  },
+  {
+   "id": "E02",
+   "undesired": false
+  },
+  {
+   "id": "E03",
+   "undesired": false
+  },
+  {
+   "id": "E17",
+   "undesired": false
+  },
+  {
+   "id": "E04",
+   "undesired": false
+  },
+  {
+   "id": "E05",
+   "undesired": false
+  },
+  {
+   "id": "E06",
+   "undesired": false
+  },
+  {
+   "id": "E16",
+   "undesired": false
+  },
+  {
+   "id": "E07",
+   "undesired": false
+  },
+  {
+   "id": "E08",
+   "undesired": false
+  },
+  {
+   "id": "E09",
+   "undesired": false
+  },
+  {
+   "id": "E10",
+   "undesired": false
+  },
+  {
+   "id": "E11",
+   "undesired": false
+  },
+  {
+   "id": "E12",
+   "undesired": false
+  },
+  {
+   "id": "E13",
+   "undesired": false
+  },
+  {
+   "id": "E14",
+   "undesired": false
+  },
+  {
+   "id": "E15",
+   "undesired": false
+  },
+  {
+   "id": "UV01",
+   "undesired": false
+  },
+  {
+   "id": "UV02",
+   "undesired": false
+  },
+  {
+   "id": "UV03",
+   "undesired": false
+  },
+  {
+   "id": "UV04",
+   "undesired": false
+  },
+  {
+   "id": "UV05",
+   "undesired": false
+  },
+  {
+   "id": "UV06",
+   "undesired": false
+  },
+  {
+   "id": "UV07",
+   "undesired": false
+  },
+  {
+   "id": "UV08",
+   "undesired": false
+  },
+  {
+   "id": "UV09",
+   "undesired": false
+  }
+ ],
+ "cells": [
+  {
+   "disposition": "transition",
+   "target": "Connecting_Dialing",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 676,
+    "fragment": "if ac.state != connectivity.Idle"
+   },
+   "state": "Idle",
+   "event": "E01"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "Idle",
+   "event": "E02"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 705
+   },
+   "state": "Idle",
+   "event": "E03"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "balancer_conn_wrappers.go",
+    "line": 285
+   },
+   "state": "Idle",
+   "event": "E17"
+  },
+  {
+   "disposition": "transition",
+   "target": "Connecting_Dialing",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1310
+   },
+   "state": "Idle",
+   "event": "E04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1291
+   },
+   "state": "Idle",
+   "event": "E05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 676
+   },
+   "state": "Connecting_Dialing",
+   "event": "E01"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "Connecting_Dialing",
+   "event": "E02"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 705
+   },
+   "state": "Connecting_Dialing",
+   "event": "E03"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 705
+   },
+   "state": "Connecting_Dialing",
+   "event": "E17"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1304
+   },
+   "state": "Connecting_Dialing",
+   "event": "E04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1294
+   },
+   "state": "Connecting_Dialing",
+   "event": "E05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 676
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E01"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E02"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 705
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E03"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "balancer_conn_wrappers.go",
+    "line": 285
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E17"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1304
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1291
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 676
+   },
+   "state": "Ready",
+   "event": "E01"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "Ready",
+   "event": "E02"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 709
+   },
+   "state": "Ready",
+   "event": "E03"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 717
+   },
+   "state": "Ready",
+   "event": "E17"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1304
+   },
+   "state": "Ready",
+   "event": "E04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1294
+   },
+   "state": "Ready",
+   "event": "E05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 676
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E01"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1140
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E02"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 705
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E03"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "balancer_conn_wrappers.go",
+    "line": 285
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E17"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1304
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E04"
+  },
+  {
+   "disposition": "transition",
+   "target": "Connecting_Dialing",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1138,
+    "fragment": "case <-b:"
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 676
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E01"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E02"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 705
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E03"
+  },
+  {
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "balancer_conn_wrappers.go",
+    "line": 285
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E17"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1304
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1294
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E05"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 672,
+    "fragment": "return errConnClosing"
+   },
+   "state": "Shutdown",
+   "event": "E01"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1328
+   },
+   "state": "Shutdown",
+   "event": "E02"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 698,
+    "fragment": "ac.addrs = addrs"
+   },
+   "state": "Shutdown",
+   "event": "E03"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 698
+   },
+   "state": "Shutdown",
+   "event": "E17"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1304
+   },
+   "state": "Shutdown",
+   "event": "E04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1291
+   },
+   "state": "Shutdown",
+   "event": "E05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 966
+   },
+   "state": "Idle",
+   "event": "E06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 966
+   },
+   "state": "Idle",
+   "event": "E16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 966
+   },
+   "state": "Idle",
+   "event": "E07"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "Idle",
+   "event": "E08"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "Idle",
+   "event": "E09"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1176
+   },
+   "state": "Idle",
+   "event": "E10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1129
+   },
+   "state": "Idle",
+   "event": "E11"
+  },
+  {
+   "disposition": "transition",
+   "target": "Ready",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1026
+   },
+   "state": "Connecting_Dialing",
+   "event": "E06"
+  },
+  {
+   "disposition": "transition",
+   "target": "Connecting_HealthChecking",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1039
+   },
+   "state": "Connecting_Dialing",
+   "event": "E16"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1054
+   },
+   "state": "Connecting_Dialing",
+   "event": "E07"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "Connecting_Dialing",
+   "event": "E08"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1198
+   },
+   "state": "Connecting_Dialing",
+   "event": "E09"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1176
+   },
+   "state": "Connecting_Dialing",
+   "event": "E10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1129
+   },
+   "state": "Connecting_Dialing",
+   "event": "E11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E07"
+  },
+  {
+   "disposition": "transition",
+   "target": "TransientFailure_Backoff",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E08"
+  },
+  {
+   "disposition": "transition",
+   "target": "TransientFailure_Backoff",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1170
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E09"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1176
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1129
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "Ready",
+   "event": "E06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "Ready",
+   "event": "E16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "Ready",
+   "event": "E07"
+  },
+  {
+   "disposition": "transition",
+   "target": "TransientFailure_Backoff",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 954
+   },
+   "state": "Ready",
+   "event": "E08"
+  },
+  {
+   "disposition": "transition",
+   "target": "TransientFailure_Backoff",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "Ready",
+   "event": "E09"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1176
+   },
+   "state": "Ready",
+   "event": "E10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1129
+   },
+   "state": "Ready",
+   "event": "E11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1133
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1133
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1133
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E07"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 954
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E08"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E09"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1176
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E10"
+  },
+  {
+   "disposition": "transition",
+   "target": "Connecting_Dialing",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1136,
+    "fragment": "ac.backoffIdx++"
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E07"
+  },
+  {
+   "disposition": "transition",
+   "target": "TransientFailure_Backoff",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E08"
+  },
+  {
+   "disposition": "transition",
+   "target": "TransientFailure_Backoff",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E09"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1176
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1129
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 982
+   },
+   "state": "Shutdown",
+   "event": "E06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 982
+   },
+   "state": "Shutdown",
+   "event": "E16"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1221
+   },
+   "state": "Shutdown",
+   "event": "E07"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 954
+   },
+   "state": "Shutdown",
+   "event": "E08"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "Shutdown",
+   "event": "E09"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1176
+   },
+   "state": "Shutdown",
+   "event": "E10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1140
+   },
+   "state": "Shutdown",
+   "event": "E11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1045
+   },
+   "state": "Idle",
+   "event": "E12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1045
+   },
+   "state": "Idle",
+   "event": "E13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1045
+   },
+   "state": "Idle",
+   "event": "E14"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 684
+   },
+   "state": "Idle",
+   "event": "E15"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 592
+   },
+   "state": "Idle",
+   "event": "UV01"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "Idle",
+   "event": "UV02"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "Connecting_Dialing",
+   "event": "E12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "Connecting_Dialing",
+   "event": "E13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1045
+   },
+   "state": "Connecting_Dialing",
+   "event": "E14"
+  },
+  {
+   "disposition": "transition",
+   "target": "TransientFailure_Backoff",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1125,
+    "fragment": "ac.updateConnectivityState(connectivity.TransientFailure)"
+   },
+   "state": "Connecting_Dialing",
+   "event": "E15"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "Connecting_Dialing",
+   "event": "UV01"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "Connecting_Dialing",
+   "event": "UV02"
+  },
+  {
+   "disposition": "transition",
+   "target": "Ready",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1265
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E12"
+  },
+  {
+   "disposition": "transition",
+   "target": "TransientFailure_ServerUnhealthy",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1272,
+    "fragment": "ac.updateConnectivityState(connectivity.TransientFailure)"
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E13"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1276
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E14"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "E15"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "UV01"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "UV02"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 936
+   },
+   "state": "Ready",
+   "event": "E12"
+  },
+  {
+   "disposition": "transition",
+   "target": "TransientFailure_ServerUnhealthy",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1271
+   },
+   "state": "Ready",
+   "event": "E13"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1276
+   },
+   "state": "Ready",
+   "event": "E14"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "Ready",
+   "event": "E15"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "Ready",
+   "event": "UV01"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "Ready",
+   "event": "UV02"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1071
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1071
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E14"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1133
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "E15"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "UV01"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 954
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "UV02"
+  },
+  {
+   "disposition": "transition",
+   "target": "Ready",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1270,
+    "fragment": "ac.updateConnectivityState(connectivity.Ready)"
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E12"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 936
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E13"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1276
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E14"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1070
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "E15"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "UV01"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "UV02"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "Shutdown",
+   "event": "E12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "Shutdown",
+   "event": "E13"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1276
+   },
+   "state": "Shutdown",
+   "event": "E14"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1121
+   },
+   "state": "Shutdown",
+   "event": "E15"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "Shutdown",
+   "event": "UV01"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 954
+   },
+   "state": "Shutdown",
+   "event": "UV02"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 966
+   },
+   "state": "Idle",
+   "event": "UV03"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 966
+   },
+   "state": "Idle",
+   "event": "UV04"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "Idle",
+   "event": "UV05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1275
+   },
+   "state": "Idle",
+   "event": "UV06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "Idle",
+   "event": "UV07"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "Idle",
+   "event": "UV08"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1045
+   },
+   "state": "Idle",
+   "event": "UV09"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1192
+   },
+   "state": "Connecting_Dialing",
+   "event": "UV03"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1181
+   },
+   "state": "Connecting_Dialing",
+   "event": "UV04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "Connecting_Dialing",
+   "event": "UV05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1275
+   },
+   "state": "Connecting_Dialing",
+   "event": "UV06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "Connecting_Dialing",
+   "event": "UV07"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "Connecting_Dialing",
+   "event": "UV08"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1045
+   },
+   "state": "Connecting_Dialing",
+   "event": "UV09"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1202
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "UV03"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1026
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "UV04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "UV05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1275
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "UV06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "UV07"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "Connecting_HealthChecking",
+   "event": "UV08"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "state": "Connecting_HealthChecking",
+   "event": "UV09"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1202
+   },
+   "state": "Ready",
+   "event": "UV03"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1026
+   },
+   "state": "Ready",
+   "event": "UV04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "Ready",
+   "event": "UV05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1275
+   },
+   "state": "Ready",
+   "event": "UV06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "Ready",
+   "event": "UV07"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "Ready",
+   "event": "UV08"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1259
+   },
+   "state": "Ready",
+   "event": "UV09"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1133
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "UV03"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1133
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "UV04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "UV05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1275
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "UV06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "UV07"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "UV08"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1071
+   },
+   "state": "TransientFailure_Backoff",
+   "event": "UV09"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1202
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "UV03"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1026
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "UV04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1163
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "UV05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1275
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "UV06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "UV07"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1326
+   },
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "UV08"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "state": "TransientFailure_ServerUnhealthy",
+   "event": "UV09"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 982
+   },
+   "state": "Shutdown",
+   "event": "UV03"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 982
+   },
+   "state": "Shutdown",
+   "event": "UV04"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1023
+   },
+   "state": "Shutdown",
+   "event": "UV05"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1275
+   },
+   "state": "Shutdown",
+   "event": "UV06"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1262
+   },
+   "state": "Shutdown",
+   "event": "UV07"
+  },
+  {
+   "disposition": "transition",
+   "target": "Ready",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1051,
+    "fragment": "ac.updateConnectivityState(connectivity.Ready)"
+   },
+   "state": "Shutdown",
+   "event": "UV08"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "clientconn.go",
+    "line": 1071
+   },
+   "state": "Shutdown",
+   "event": "UV09"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-05",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-06",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-07",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-08",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-09",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-10",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-11",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-12",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-13",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-14",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-15",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-16",
+   "status": "OPEN"
+  }
+ ],
+ "behaviouralDrs": [],
+ "pairs": [
+  {
+   "id": "P-01a",
+   "trace": "adversarial-traces.md P-01a: teardown then stale dial success -> Shutdown resurrected to Ready (Q-01)"
+  },
+  {
+   "id": "P-01b",
+   "trace": "adversarial-traces.md P-01b: dial success then teardown -> clean shutdown (control)"
+  },
+  {
+   "id": "P-02a",
+   "trace": "adversarial-traces.md P-02a: reset.backoff before TF entry -> stale backoffFor sleep (Q-03)"
+  },
+  {
+   "id": "P-02b",
+   "trace": "adversarial-traces.md P-02b: reset.backoff during sleep -> immediate retry (control)"
+  },
+  {
+   "id": "P-03a",
+   "trace": "adversarial-traces.md P-03a: ResetConnectBackoff vs state update -> lock-order deadlock (Q-02)"
+  },
+  {
+   "id": "P-03b",
+   "trace": "adversarial-traces.md P-03b: serialized -> fine (control)"
+  },
+  {
+   "id": "P-04a",
+   "trace": "adversarial-traces.md P-04a: update.addrs keep then close -> reconnect over new list (control)"
+  },
+  {
+   "id": "P-04b",
+   "trace": "adversarial-traces.md P-04b: close then update.addrs -> teardown+recreate from top (control, V-11)"
+  },
+  {
+   "id": "P-05a",
+   "trace": "adversarial-traces.md P-05a: goaway then close -> idempotent reconnect (control)"
+  },
+  {
+   "id": "P-05b",
+   "trace": "adversarial-traces.md P-05b: close then late goaway -> monotonic adjustParams (control)"
+  },
+  {
+   "id": "P-06a",
+   "trace": "adversarial-traces.md P-06a: health not-serving then close -> TF_Backoff (control)"
+  },
+  {
+   "id": "P-06b",
+   "trace": "adversarial-traces.md P-06b: close then stale report -> guarded by transport identity (control)"
+  },
+  {
+   "id": "P-07a",
+   "trace": "adversarial-traces.md P-07a: teardown then connect -> errConnClosing (control)"
+  },
+  {
+   "id": "P-07b",
+   "trace": "adversarial-traces.md P-07b: connect then teardown -> dial aborted via ctx (control)"
+  }
+ ],
+ "guardGroups": [
+  {
+   "id": "G-01 connect-state-dispatch",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-02 tryUpdateAddrs-dispatch",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-03 getReadyTransport-dispatch",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-04 dial-deadline-max",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-05 updateConnectivityState-terminality",
+   "outcome": "violation",
+   "reason": "write guard admits Shutdown->any; witness s_cur=4,s_new=0 (guard-results.txt) -> Q-01"
+  },
+  {
+   "id": "G-06 reportHealth-dispatch",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-07 adjustParams-dispatch",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-08 health-managing-gate",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-09 reqHandshake-mode-dispatch",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-10 backoff-first-retry",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-11 envconfig-requirehandshake-parse",
+   "outcome": "not-formalizable",
+   "reason": "unstructured-payload: env-string switch; 'on' falls to zero value Hybrid (envconfig.go:58-68) -> Q-05"
+  },
+  {
+   "id": "G-12 backoff-select-ordering",
+   "outcome": "not-formalizable",
+   "reason": "dynamic-state: runtime channel readiness decides (clientconn.go:1133-1143); covered by cells and P-02"
+  }
+ ],
+ "coverage": {
+  "balancer-clientconn-api": {
+   "loss": "n/a: in-process method calls; absence leaves current state",
+   "delay": "n/a: delayed call is an ordinary call in a later state; all rows dispose E01-E04",
+   "duplication": "n/a: covered by base grid (Connecting_Dialing,E01), (Shutdown,E02)",
+   "out-of-order": "n/a: covered by base grid (Shutdown,E01/E03/E17) + P-07a",
+   "contradiction": [
+    "P-04a",
+    "P-04b",
+    "P-07a",
+    "P-07b"
+   ],
+   "commission": "n/a: every balancer call is legitimate under its contract; no request pairing",
+   "value": "n/a: empty list rejected upstream (balancer_conn_wrappers.go:280-283); membership split E03/E17"
+  },
+  "user-api-resetbackoff": {
+   "loss": "n/a: optional API, nothing depends on its arrival",
+   "delay": [
+    "P-02a",
+    "P-02b"
+   ],
+   "duplication": "n/a: each call swaps a fresh channel (clientconn.go:1293-1295)",
+   "out-of-order": "n/a: covered by base grid (Shutdown,E05) -> Q-09",
+   "contradiction": [
+    "P-03a",
+    "P-03b"
+   ],
+   "commission": "n/a: reset without outage only zeroes backoffIdx (clientconn.go:1294)",
+   "value": "n/a: no payload"
+  },
+  "transport-seam": {
+   "loss": [
+    "UV03"
+   ],
+   "delay": [
+    "UV04"
+   ],
+   "duplication": [
+    "UV02"
+   ],
+   "out-of-order": [
+    "UV01",
+    "UV08"
+   ],
+   "contradiction": [
+    "UV05"
+   ],
+   "commission": "n/a: callbacks are closures created with the transport (clientconn.go:1163-1179)",
+   "value": "n/a: unknown GoAwayReason values fall through the switch (clientconn.go:955-963)"
+  },
+  "health-service": {
+   "loss": [
+    "UV09"
+   ],
+   "delay": [
+    "UV09"
+   ],
+   "duplication": "n/a: equal repeated reports are no-ops (clientconn.go:936-938)",
+   "out-of-order": [
+    "UV07"
+   ],
+   "contradiction": "n/a: alternating reports serialize under ac.mu, last write wins (clientconn.go:1259-1274)",
+   "commission": [
+    "UV06"
+   ],
+   "value": [
+    "UV07"
+   ]
+  }
+ }
+}

@@ -1,0 +1,36 @@
+stateDiagram-v2
+    %% grpc-go v1.18.0 addrConn lifecycle — as-is model.
+    %% States per PA-17: connectivity API enum names, condition-named sub-states.
+    %% The matrix (disposition-matrix.md) is the authority surface.
+
+    [*] --> Idle: newAddrConn (clientconn.go 592-622)
+
+    Idle --> Connecting_Dialing: E01 connect / E04 getReadyTransport(Idle)
+    Idle --> Shutdown: E02 teardown / E03,E17 update.addrs (wrapper recreate)
+
+    Connecting_Dialing --> Connecting_Dialing: E07 dial err — next address (Hybrid emits TF blip, Q-14)
+    Connecting_Dialing --> Ready: E06 dial ok, health gate false
+    Connecting_Dialing --> Connecting_HealthChecking: E16 dial ok, health gate true
+    Connecting_Dialing --> TransientFailure_Backoff: E15 address list exhausted
+    Connecting_Dialing --> Shutdown: E02 teardown / E03,E17 update.addrs
+
+    Connecting_HealthChecking --> Ready: E12 health serving
+    Connecting_HealthChecking --> TransientFailure_ServerUnhealthy: E13 health not-serving
+    Connecting_HealthChecking --> TransientFailure_Backoff: E08 goaway / E09 transport closed
+    Connecting_HealthChecking --> Shutdown: E02 teardown / E03,E17 update.addrs
+
+    Ready --> TransientFailure_Backoff: E08 goaway / E09 transport closed
+    Ready --> TransientFailure_ServerUnhealthy: E13 health not-serving
+    Ready --> Shutdown: E02 teardown / E17 update.addrs dropping current
+
+    TransientFailure_Backoff --> Connecting_Dialing: E11 backoff timer / E05 resetConnectBackoff
+    TransientFailure_Backoff --> Shutdown: E02 teardown / E03,E17 update.addrs
+
+    TransientFailure_ServerUnhealthy --> Ready: E12 health serving (violates DOC-6 legal table, Q-07)
+    TransientFailure_ServerUnhealthy --> TransientFailure_Backoff: E08 goaway / E09 transport closed
+    TransientFailure_ServerUnhealthy --> Shutdown: E02 teardown / E03,E17 update.addrs
+
+    %% Defect edge (as-is, not idealized): stale dial success re-publishes
+    %% the transport and sets Ready on a torn-down ac — no Shutdown guard
+    %% between clientconn.go 1025 and 1052 (Q-01, SYS-1/SYS-3 violation).
+    Shutdown --> Ready: UV08 dial result after teardown (BUG, Q-01)
