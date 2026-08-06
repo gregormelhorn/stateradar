@@ -150,7 +150,6 @@ id = "F-18"
 name = "subtle value fault"
 shard = "value (subtle)"
 
-
 [[faults]]
 id = "F-19"
 name = "unimplemented requirement"
@@ -172,34 +171,43 @@ source = "07-test-audit"
 # and AGENTS §2 via generation.
 # ---------------------------------------------------------------------------
 
+# `key` is the sidecar coverage-table column name; tools/dsc_check.py
+# loads the required category set from this list.
+
 [[uv_categories]]
 fault = "F-12"
+key = "loss"
 label = "loss or failure of the source"
 
 [[uv_categories]]
 fault = "F-13"
+key = "delay"
 label = "delay beyond timeout"
 
 [[uv_categories]]
 fault = "F-14"
+key = "duplication"
 label = "duplication"
 
 [[uv_categories]]
 fault = "F-15"
+key = "out-of-order"
 label = "out-of-order or stale arrival, especially after cancellation or shutdown"
 
 [[uv_categories]]
 fault = "F-16"
+key = "contradiction"
 label = "contradictory simultaneous inputs"
 
 [[uv_categories]]
 fault = "F-17"
+key = "commission"
 label = "spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push)"
 
 [[uv_categories]]
 fault = "F-18"
+key = "value"
 label = "subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter)"
-
 
 # ---------------------------------------------------------------------------
 # README "What StateRadar finds" (generated list; order = file order)
@@ -241,7 +249,6 @@ text = "lost or overwritten failure causes (*output faults*)"
 fault = "F-08"
 text = "missing idempotency in cleanup and release"
 
-
 [[readme_finds]]
 fault = "F-04"
 text = "events accepted where the specification says ignore or reject (*sneak paths*)"
@@ -269,7 +276,7 @@ class = "wellformedness"
 statement = "guards per (state,event) pairwise disjoint — order must never decide"
 enforcement = "checker"
 checker_ref = "check_guards.py (per-run z3); outcome presence via tools/dsc_check.py"
-selftest_ref = "TODO"
+selftest_ref = "TODO"  # per-run z3 proof; pack-side selftest needs a z3 dev-dependency
 lineage = ["heitmeyer-tosem-1996"]
 added_by = "v1.0"
 
@@ -291,7 +298,7 @@ class = "wellformedness"
 statement = "guard checks state their assumptions; z3 proofs via a generated check_guards.py where formalizable"
 enforcement = "checker"
 checker_ref = "tools/dsc_check.py (guard outcomes present)"
-selftest_ref = "TODO"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "guard outcomes present"
 catches_order = 7
 lineage = ["heitmeyer-tosem-1996"]
@@ -304,7 +311,7 @@ class = "process"
 statement = "unformalizable guards keep inspection-only reasoning, labelled `not-formalizable: <category>` from the closed vocabulary"
 enforcement = "checker"
 checker_ref = "tools/dsc_check.py (not-formalizable category vocabulary)"
-selftest_ref = "TODO"
+selftest_ref = "tools/selftest/run_selftest.py"
 added_by = "02:v1.2"
 
 [[rules]]
@@ -414,8 +421,8 @@ title = "undesired-variant obligation"
 class = "completeness"
 statement = "undesired-event checklist applied to every external source; the coverage table is total"
 enforcement = "checker"
-checker_ref = "tools/check_matrix.py (undesired-coverage totality)"
-selftest_ref = "TODO"
+checker_ref = "tools/check_matrix.py (markdown table totality) + tools/dsc_check.py (sidecar category keys from this registry)"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "coverage-table totality"
 catches_order = 8
 lineage = ["jaffe-leveson-1991"]
@@ -602,16 +609,18 @@ statement = "unclear, contradictory, or unspecified behaviour becomes a question
 enforcement = "prompt"
 added_by = "v1.0"
 
+# Downgraded from enforcement=checker on 2026-08-07: no pack checker
+# implements the scope-line check (grep "contemplates" over tools/ is
+# empty) — the old AGENTS §5 line was a false enforcement claim the
+# registry constraints exposed. The rule is a mandatory prompt duty
+# (02 Step 6) until a checker exists.
 [[rules]]
 id = "R-REQUIREMENT-SCOPE"
 title = "requirement-scope rule"
 class = "process"
 statement = "a citation covers only the scenario its text describes; control-trace verdicts carry the 'cited text contemplates this ordering' line"
-enforcement = "checker"
-checker_ref = "tools/check_matrix.py (scope lines on citing control traces)"
-selftest_ref = "TODO"
-catches = "scope lines on citing control traces"
-catches_order = 9
+enforcement = "prompt"
+checker_candidate = true
 added_by = "02:v1.1"
 
 [[rules]]
@@ -671,7 +680,7 @@ class = "completeness"
 statement = "every state row has exactly one disposition per catalogue event column"
 enforcement = "checker"
 checker_ref = "tools/check_matrix.py + tools/dsc_check.py"
-selftest_ref = "TODO"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "grid totality"
 catches_order = 1
 lineage = ["heninger-1980"]
@@ -684,7 +693,7 @@ class = "wellformedness"
 statement = "every cell value comes from the seven-value closed vocabulary"
 enforcement = "checker"
 checker_ref = "tools/dsc_check.py (VOCAB)"
-selftest_ref = "TODO"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "disposition vocabulary"
 catches_order = 2
 added_by = "v1.0"
@@ -696,7 +705,7 @@ class = "wellformedness"
 statement = "every hole cell carries a `→ Q-nn` reference that exists in open-questions.md"
 enforcement = "checker"
 checker_ref = "tools/check_matrix.py + tools/dsc_check.py"
-selftest_ref = "TODO"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "hole → Q back-references"
 catches_order = 3
 added_by = "02:v1.1"
@@ -720,7 +729,7 @@ class = "wellformedness"
 statement = "every decided behavioural change connects to a matrix cell"
 enforcement = "checker"
 checker_ref = "tools/dsc_check.py"
-selftest_ref = "TODO"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "behavioural-DR reverse coverage: every decided change connects to a cell"
 catches_order = 5
 added_by = "pack:v1.30"
@@ -732,7 +741,7 @@ class = "completeness"
 statement = "cross-source event pairs on one shared entity get both orderings (P-nna/b) and each ordering gets a trace"
 enforcement = "checker"
 checker_ref = "tools/check_matrix.py (pair → trace links)"
-selftest_ref = "TODO"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "pair → trace coverage"
 catches_order = 6
 detects = ["F-15", "F-16"]
@@ -768,8 +777,8 @@ title = "blind-table row coverage"
 class = "completeness"
 statement = "every catalogue event id has exactly one row in the blind table before classification"
 enforcement = "checker"
-checker_ref = "tools/part_b_pack.py + tools/dsc_blind.py"
-selftest_ref = "TODO"
+checker_ref = "tools/part_b_pack.py --check (row/duplicate detection)"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "blind-table row coverage"
 catches_order = 13
 added_by = "02:v1.3"
@@ -781,7 +790,7 @@ class = "wellformedness"
 statement = "analysis.json validates against formats/analysis.schema.json"
 enforcement = "checker"
 checker_ref = "tools/dsc_check.py (jsonschema)"
-selftest_ref = "TODO"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "schema validity of the sidecar"
 catches_order = 14
 added_by = "02:v1.9"
@@ -793,7 +802,7 @@ class = "wellformedness"
 statement = "every DR cited anywhere resolves to an existing decisions/DR-nnn.yaml"
 enforcement = "checker"
 checker_ref = "tools/dsc_check.py"
-selftest_ref = "TODO"
+selftest_ref = "tools/selftest/run_selftest.py"
 catches = "existence of every cited DR file"
 catches_order = 15
 added_by = "pack:v1.30"
@@ -934,7 +943,6 @@ statement = "off-cycle audit judges the suite against the decided matrix: weak (
 enforcement = "prompt"
 detects = ["F-21"]
 added_by = "pack:v1.20"
-
 
 [[rules]]
 id = "R-ODC-FIELDS"

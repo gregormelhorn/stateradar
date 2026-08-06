@@ -128,13 +128,13 @@ List every event with name, source, external/internal, payload gist, and where t
 For every external event source, derive undesired variants with this checklist (each category carries its fault-class id from `formats/rules.toml`):
 
 <!-- generated:rules key=uv-categories -->
-* loss or failure of the source (F-12)
-* delay beyond timeout (F-13)
-* duplication (F-14)
-* out-of-order or stale arrival, especially after cancellation or shutdown (F-15)
-* contradictory simultaneous inputs (F-16)
-* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17)
-* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18)
+* loss or failure of the source (F-12, sidecar key: `loss`)
+* delay beyond timeout (F-13, sidecar key: `delay`)
+* duplication (F-14, sidecar key: `duplication`)
+* out-of-order or stale arrival, especially after cancellation or shutdown (F-15, sidecar key: `out-of-order`)
+* contradictory simultaneous inputs (F-16, sidecar key: `contradiction`)
+* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17, sidecar key: `commission`)
+* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18, sidecar key: `value`)
 <!-- /generated:rules -->
 
 Add the variants to the catalogue. They receive matrix columns like any other event.

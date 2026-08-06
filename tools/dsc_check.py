@@ -18,7 +18,23 @@ from pathlib import Path
 VOCAB = {"transition", "handle", "ignore (documented)", "ignore (accidental)",
          "defer (queued)", "reject", "UNSPECIFIED"}
 HOLES = {"UNSPECIFIED", "ignore (accidental)"}
-CATEGORIES = ["loss", "delay", "duplication", "out-of-order", "contradiction"]
+
+# The undesired-variant categories come from the rules registry
+# (formats/rules.toml, uv_categories[].key) so the coverage check and
+# the 02-pilot checklist cannot drift apart. The literal list is the
+# fallback for interpreters without tomllib (< 3.11) or a stripped-down
+# vendored copy without the registry.
+CATEGORIES = ["loss", "delay", "duplication", "out-of-order", "contradiction",
+              "commission", "value"]
+_registry = Path(__file__).resolve().parent.parent / "formats" / "rules.toml"
+if _registry.exists():
+    try:
+        import tomllib
+        CATEGORIES = [c["key"] for c in
+                      tomllib.loads(_registry.read_text(encoding="utf-8"))
+                      ["uv_categories"]]
+    except ImportError:
+        pass
 GUARD_OUTCOMES = {"proven", "violation", "not-formalizable"}
 NF_REASONS = ("external-call", "dynamic-state", "clock", "unstructured-payload")
 Q_STATUS = {"OPEN", "ANSWERED", "RESOLVED", "CONFLICT"}

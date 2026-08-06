@@ -21,6 +21,23 @@
   trigger) on every finding.
 - 00-methods-reference: doctrine-mapping enforcement claim corrected
   (lint, checker candidate); Binder, SHARD, ODC added to references.
+- tools/dsc_check.py: the undesired-variant category set now loads from
+  the registry (was a hardcoded five-category list — the checker and
+  the checklist could drift). BREAKING for consumer sidecars with a
+  coverage section: the two new categories (`commission`, `value`) need
+  an entry or an explicit `n/a: <reason>` per source.
+- Registry honesty finding: AGENTS §5 claimed a "scope lines on citing
+  control traces" checker that no tool implements (grep "contemplates"
+  over tools/ is empty). R-REQUIREMENT-SCOPE downgraded to
+  prompt-enforced + checker candidate; the §5 line is gone.
+- tools/selftest/run_selftest.py: 14 new red cases discharge the
+  registry's selftest backlog — disposition vocabulary, grid totality,
+  hole→Q, guard outcomes, not-formalizable categories, pair traces,
+  behavioural-DR reverse coverage, DR-file existence, sidecar schema,
+  coverage-category totality (dsc_check); coverage-table totality
+  (check_matrix); blind-row coverage (part_b_pack). Selftest backlog:
+  19 → 8 warnings (PA-1/PA-2 z3 proofs + six checker candidates).
+- docs/plan-rules-registry.md: the design document and stage plan.
 
 ## v1.34 — tests consolidation, reachability checker, evidence repositioning
 

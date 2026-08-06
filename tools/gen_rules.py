@@ -100,8 +100,9 @@ def render_partb_vocab(reg: dict) -> str:
 
 
 def render_uv_categories(reg: dict) -> str:
-    return "\n".join(f"* {c['label']} ({c['fault']})"
-                     for c in reg["uv_categories"])
+    return "\n".join(
+        f"* {c['label']} ({c['fault']}, sidecar key: `{c['key']}`)"
+        for c in reg["uv_categories"])
 
 
 def render_checker_catalogue(reg: dict) -> str:

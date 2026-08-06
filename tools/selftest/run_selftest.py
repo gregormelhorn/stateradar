@@ -150,6 +150,103 @@ def main() -> int:
             {"component": "mini", "watch_paths": ["tools/selftest/src/"], "analyzedSha": "WORKTREE"}))
         expect("snake_case watchPaths", True, *dsc(d4, "--repo", str(ROOT)), needle="camelCase")
 
+        # Red cases for the registry's selftest backlog (formats/rules.toml:
+        # every rule with enforcement=checker cites its red proof here).
+        print("registry-backed dsc red cases")
+
+        def mutated(name: str, fn, needle: str) -> None:
+            """Copy the flat fixture, apply fn to the sidecar dict, expect FAIL."""
+            d = sidecar(tmp, FLAT)
+            raw = json.loads((d / "analysis.json").read_text())
+            fn(raw)
+            (d / "analysis.json").write_text(json.dumps(raw))
+            expect(name, True, *dsc(d), needle=needle)
+
+        # R-DISPOSITION-VOCAB
+        mutated("unknown disposition",
+                lambda r: r["cells"][0].update(disposition="maybe"), "maybe")
+        # R-GRID-TOTALITY
+        mutated("missing grid cell",
+                lambda r: r["cells"].pop(0), "expected exactly 1")
+        # R-HOLE-Q
+        mutated("hole without Q",
+                lambda r: (r["cells"][0].update(disposition="UNSPECIFIED"),
+                           r["cells"][0].pop("q", None)),
+                "hole without a valid Q")
+        # PA-3a
+        mutated("guard outcome invalid",
+                lambda r: r["guardGroups"][0].update(outcome="skipped"), "skipped")
+        # PA-3b
+        mutated("not-formalizable without category",
+                lambda r: r["guardGroups"][0].update(
+                    outcome="not-formalizable", reason="too hard"),
+                "not-formalizable")
+        # R-INTERACTION-PAIRS (sidecar side)
+        mutated("pair without trace",
+                lambda r: r["pairs"][0].pop("trace"), "trace")
+        # R-DR-REVERSE
+        mutated("uncited behavioural DR",
+                lambda r: r["behaviouralDrs"].append("DR-777"),
+                "cited by no matrix cell")
+        # R-DR-FILE-EXISTS
+        def _rewire_dr(r):
+            for c in r["cells"]:
+                if c.get("dr"):
+                    c["dr"] = "DR-002"
+        mutated("cited DR file missing", _rewire_dr, "does not exist")
+        # R-SIDECAR-SCHEMA
+        mutated("schema violation", lambda r: r.update(states="notalist"),
+                "schema:")
+        # PA-13a — a checklist category (here: a SHARD-added one) that
+        # silently produces no entry must fail, per source
+        mutated("missing checklist category",
+                lambda r: r["coverage"]["src"].pop("commission"),
+                "src/commission")
+
+        print("matrix checker (markdown side)")
+
+        def cmx(adir: Path) -> tuple[int, str]:
+            r = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "check_matrix.py"), str(adir)],
+                capture_output=True, text=True)
+            return r.returncode, (r.stdout + r.stderr).strip()
+
+        gm = ROOT / "tests" / "golden-mini" / "domain-analysis" / "mini"
+        d5 = tmp / "cm-green"
+        shutil.copytree(gm, d5)
+        expect("check_matrix green on golden-mini", False, *cmx(d5))
+        # PA-13a (markdown table side): an empty coverage cell must fail
+        d6 = tmp / "cm-red"
+        shutil.copytree(gm, d6)
+        with (d6 / "event-catalogue.md").open("a", encoding="utf-8") as f:
+            f.write("\n## Undesired-coverage\n\n"
+                    "| source | loss | delay |\n|---|---|---|\n"
+                    "| operator | UV-M1-dup |  |\n")
+        expect("empty coverage cell", True, *cmx(d6), needle="empty cell")
+
+        print("part-B row coverage")
+
+        def pbp(blind: Path) -> tuple[int, str]:
+            r = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "part_b_pack.py"),
+                 "domain-analysis/mini",
+                 "--repo", str(ROOT / "tests" / "golden-mini"),
+                 "--check", str(blind)],
+                capture_output=True, text=True)
+            return r.returncode, (r.stdout + r.stderr).strip()
+
+        full = tmp / "blind-full.md"
+        full.write_text("| id | disposition |\n|---|---|\n"
+                        "| M1 | handle |\n| M2 | reject |\n"
+                        "| UV-M1-dup | ignore (documented) |\n")
+        expect("blind table complete", False, *pbp(full))
+        # R-BLIND-ROW-COVERAGE: a missing catalogue row must fail
+        partial = tmp / "blind-partial.md"
+        partial.write_text("| id | disposition |\n|---|---|\n"
+                           "| M1 | handle |\n| M2 | reject |\n")
+        expect("blind table missing row", True, *pbp(partial),
+               needle="missing row: UV-M1-dup")
+
     print("reachability")
     # Red: an unreachable state in the matrix must FAIL.
     # Build a minimal fixture with an unreachable 'dead' state.

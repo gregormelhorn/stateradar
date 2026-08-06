@@ -261,13 +261,13 @@ Values marked * count as specification holes. Never accept "nothing happens" imp
 Every event lists: name, source, external/internal, payload gist, where produced and consumed. For every external source, derive undesired variants by checklist (each category carries its fault-class id from `formats/rules.toml`):
 
 <!-- generated:rules key=uv-categories -->
-* loss or failure of the source (F-12)
-* delay beyond timeout (F-13)
-* duplication (F-14)
-* out-of-order or stale arrival, especially after cancellation or shutdown (F-15)
-* contradictory simultaneous inputs (F-16)
-* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17)
-* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18)
+* loss or failure of the source (F-12, sidecar key: `loss`)
+* delay beyond timeout (F-13, sidecar key: `delay`)
+* duplication (F-14, sidecar key: `duplication`)
+* out-of-order or stale arrival, especially after cancellation or shutdown (F-15, sidecar key: `out-of-order`)
+* contradictory simultaneous inputs (F-16, sidecar key: `contradiction`)
+* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17, sidecar key: `commission`)
+* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18, sidecar key: `value`)
 <!-- /generated:rules -->
 
 Each variant receives a matrix column and a disposition (or an explicit `not applicable` with reason). This is the systematic counter to "completeness only holds relative to the catalogue".

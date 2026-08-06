@@ -15,13 +15,13 @@ Never fill a specification gap with your own judgment, however plausible. Your v
 * **Event**: an event has one of three sources: external (boundary calls), internal (timers, delivered results), or an undesired variant (`UV-nn`). Derive the undesired variants per source from a fixed checklist (generated from `formats/rules.toml`):
 
 <!-- generated:rules key=uv-categories -->
-* loss or failure of the source (F-12)
-* delay beyond timeout (F-13)
-* duplication (F-14)
-* out-of-order or stale arrival, especially after cancellation or shutdown (F-15)
-* contradictory simultaneous inputs (F-16)
-* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17)
-* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18)
+* loss or failure of the source (F-12, sidecar key: `loss`)
+* delay beyond timeout (F-13, sidecar key: `delay`)
+* duplication (F-14, sidecar key: `duplication`)
+* out-of-order or stale arrival, especially after cancellation or shutdown (F-15, sidecar key: `out-of-order`)
+* contradictory simultaneous inputs (F-16, sidecar key: `contradiction`)
+* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17, sidecar key: `commission`)
+* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18, sidecar key: `value`)
 <!-- /generated:rules -->
 
   The coverage table must show every category. Write a reason for each `n/a`.
@@ -84,7 +84,6 @@ The checkers catch the following defects. Do not fight them. (Generated from `fo
 * pair → trace coverage
 * guard outcomes present
 * coverage-table totality
-* scope lines on citing control traces
 * Mermaid ↔ matrix sync
 * fragment citations within ±3 lines
 * manifest staleness
