@@ -93,6 +93,9 @@ The checkers catch the following defects. Do not fight them. (Generated from `fo
 * reachable states and terminal-state marking
 * state names follow PA-17 (PascalCase segments or ALL-CAPS API enums)
 * doctrine-line mapping totality (DOC-n → cell / invariant / rejected)
+* event classification present per catalogue event (PA-4)
+* abstraction statement in the matrix (PA-10)
+* scope lines on citing control traces
 <!-- /generated:rules -->
 
 ## 6. Failure modes seen in real runs

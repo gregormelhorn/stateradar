@@ -6,3 +6,4 @@
 |---|---|---|---|---|---|---|
 | M1 | open | operator | external | id | op | svc |
 | M2 | close | operator | external | id | op | svc |
+| UV-M1-dup | duplicate open | operator | external | id | op | svc |

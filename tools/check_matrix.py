@@ -132,13 +132,63 @@ def main() -> int:
         elif q.group(0) not in qids:
             errors.append(f"hole cell: {q.group(0)} not in open-questions.md")
 
-    # Stage 2: every pair id appears in the traces
+    # PA-10: completeness is relative to a declared abstraction —
+    # the matrix must state it (a line starting "Abstraction").
+    if not re.search(r"^Abstraction", matrix, re.M):
+        errors.append(
+            "matrix: no abstraction statement (PA-10) — add a line "
+            "starting 'Abstraction' declaring what completeness is "
+            "relative to (hierarchy inheritance, guard predicates)")
+
+    # PA-4: every catalogue event carries an external/internal
+    # classification in the events table. An undesired variant may
+    # inherit it by referencing a classified base event in its row
+    # (the UV table's base/source column).
+    cat_rows = [ln.strip() for ln in cat.split("\n")
+                if ln.strip().startswith("|")]
+
+    def rows_for(ev: str) -> list[str]:
+        return [r for r in cat_rows
+                if re.match(rf"\|\s*\*{{0,2}}{re.escape(ev)}(?![\w-])", r)]
+
+    classified = {ev for ev in events
+                  if any(re.search(r"\b(external|internal)\b", r)
+                         for r in rows_for(ev))}
+    for ev in events:
+        if ev in classified:
+            continue
+        inherits = any(
+            re.search(rf"(?<![\w-]){re.escape(base)}(?![\w-])", r)
+            for r in rows_for(ev) for base in classified)
+        if not inherits:
+            errors.append(
+                f"event {ev}: no external/internal classification in the "
+                f"catalogue table, and no classified base event referenced "
+                f"(PA-4)")
+
+    # Stage 2: every pair id appears in the traces; control-trace
+    # verdicts that cite a requirement or decision carry the scope
+    # line (requirement-scope rule): "cited text contemplates this
+    # ordering: yes/no". Blocks are split on bold trace headers.
     traces_path = adir / "adversarial-traces.md"
     if traces_path.is_file():
         traces = traces_path.read_text(encoding="utf-8")
         for pair in sorted(set(re.findall(r"P-\d+[ab]", cat))):
             if pair not in traces:
                 errors.append(f"pair {pair} missing from adversarial-traces.md")
+        blocks = re.split(r"\n(?=\*\*[PTM]-)", traces)
+        for block in blocks:
+            header = block.split("\n", 1)[0][:40]
+            flat = " ".join(block.split())  # scope lines wrap across lines
+            if "control trace" not in flat:
+                continue
+            if not re.search(r"\b(DOC-\d|DR-\d)", flat):
+                continue
+            if "contemplates this ordering" not in flat:
+                errors.append(
+                    f"control trace {header!r} cites a requirement/decision "
+                    f"but carries no 'cited text contemplates this "
+                    f"ordering: yes/no' scope line")
 
     if errors:
         print("CHECK MATRIX: FAIL")

@@ -1,6 +1,9 @@
 # Disposition matrix — mini
 
 <!-- states: Idle Open Closed -->
+
+Abstraction: flat leaf states, no hierarchy; completeness is relative
+to the three-event catalogue.
 <!-- terminal: Closed -->
 
 | state | M1 | M2 | UV-M1-dup |

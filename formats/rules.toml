@@ -319,8 +319,11 @@ id = "PA-4"
 title = "event classification"
 class = "wellformedness"
 statement = "events classified: monitored input | controlled output | internal"
-enforcement = "prompt"
-checker_candidate = true
+enforcement = "checker"
+checker_ref = "tools/check_matrix.py (external/internal per catalogue event, UV inheritance via base)"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "event classification present per catalogue event (PA-4)"
+catches_order = 19
 lineage = ["parnas-madey-1995"]
 added_by = "v1.0"
 
@@ -356,7 +359,10 @@ title = "bindings in the spec"
 class = "wellformedness"
 statement = "bindings (abstract action → concrete symbol) are part of the spec"
 enforcement = "prompt"
-checker_candidate = true
+# decision 2026-08-07: NOT a checker candidate — bindings are
+# discharged by the fragment-citation discipline (every cell cites
+# file:line ("fragment") of its concrete symbol, checker-verified);
+# a separate bindings-section check would duplicate that.
 lineage = ["heninger-1980"]
 added_by = "v1.0"
 
@@ -391,8 +397,11 @@ id = "PA-10"
 title = "declared abstraction"
 class = "completeness"
 statement = "completeness is relative to a declared abstraction (hierarchy inheritance, guard predicates) — state it in the matrix header"
-enforcement = "prompt"
-checker_candidate = true
+enforcement = "checker"
+checker_ref = "tools/check_matrix.py (Abstraction statement present)"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "abstraction statement in the matrix (PA-10)"
+catches_order = 20
 lineage = ["heimdahl-leveson-1996"]
 added_by = "v1.0"
 
@@ -614,18 +623,19 @@ statement = "unclear, contradictory, or unspecified behaviour becomes a question
 enforcement = "prompt"
 added_by = "v1.0"
 
-# Downgraded from enforcement=checker on 2026-08-07: no pack checker
-# implements the scope-line check (grep "contemplates" over tools/ is
-# empty) — the old AGENTS §5 line was a false enforcement claim the
-# registry constraints exposed. The rule is a mandatory prompt duty
-# (02 Step 6) until a checker exists.
+# 2026-08-07: briefly downgraded from a false checker claim (AGENTS §5
+# advertised a scope-line checker no tool implemented); implemented
+# for real in check_matrix the same day, with red selftests.
 [[rules]]
 id = "R-REQUIREMENT-SCOPE"
 title = "requirement-scope rule"
 class = "process"
 statement = "a citation covers only the scenario its text describes; control-trace verdicts carry the 'cited text contemplates this ordering' line"
-enforcement = "prompt"
-checker_candidate = true
+enforcement = "checker"
+checker_ref = "tools/check_matrix.py (scope line on citing control traces)"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "scope lines on citing control traces"
+catches_order = 21
 added_by = "02:v1.1"
 
 [[rules]]

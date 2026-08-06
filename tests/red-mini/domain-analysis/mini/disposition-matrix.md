@@ -2,6 +2,9 @@
 
 <!-- states: Idle Open Closed -->
 
+Abstraction: flat leaf states, no hierarchy; completeness is relative
+to the three-event catalogue.
+
 | state | M1 | M2 | UV-M1-dup |
 |---|---|---|---|
 | **Idle** | transition →Open `mini.py:10` | ignore (documented) `mini.py:20` | handle (counted) `mini.py:30` |

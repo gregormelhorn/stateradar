@@ -245,6 +245,41 @@ def main() -> int:
             "<!-- states: Idle Open Closed -->",
             "<!-- states: Idle open_pending Closed -->"))
         expect("PA-17 naming violation", True, *cmx(d7), needle="PA-17")
+        # PA-10: a matrix without an abstraction statement must fail
+        d8 = tmp / "cm-pa10"
+        shutil.copytree(gm, d8)
+        mx = d8 / "disposition-matrix.md"
+        mx.write_text("\n".join(ln for ln in mx.read_text().splitlines()
+                                if not ln.startswith("Abstraction")) + "\n")
+        expect("missing abstraction statement (PA-10)", True, *cmx(d8),
+               needle="PA-10")
+        # PA-4: an event with neither classification nor classified base
+        d9 = tmp / "cm-pa4"
+        shutil.copytree(gm, d9)
+        ec = d9 / "event-catalogue.md"
+        ec.write_text(ec.read_text().replace(
+            "| UV-M1-dup | duplicate open | operator | external | id | op | svc |",
+            "| UV-M1-dup | duplicate open | operator |  | id | op | svc |"))
+        expect("unclassified event (PA-4)", True, *cmx(d9), needle="PA-4")
+        # requirement-scope rule: a control trace citing a requirement
+        # without the scope line must fail
+        d10 = tmp / "cm-scope"
+        shutil.copytree(gm, d10)
+        (d10 / "adversarial-traces.md").write_text(
+            "# Traces\n\n**T-01** duplicate open in Open.\n"
+            "(a) M1; UV-M1-dup.\n(b) counted, no transition.\n"
+            "(c) none — control trace. Cites DOC-1.\n")
+        expect("citing control trace without scope line", True, *cmx(d10),
+               needle="scope line")
+        # and WITH the scope line it passes
+        d11 = tmp / "cm-scope-ok"
+        shutil.copytree(gm, d11)
+        (d11 / "adversarial-traces.md").write_text(
+            "# Traces\n\n**T-01** duplicate open in Open.\n"
+            "(a) M1; UV-M1-dup.\n(b) counted, no transition.\n"
+            "(c) none — control trace. Cites DOC-1. Cited text contemplates\n"
+            "this ordering: yes.\n")
+        expect("scope line satisfied (wrapped across lines)", False, *cmx(d11))
 
         print("part-B row coverage")
 

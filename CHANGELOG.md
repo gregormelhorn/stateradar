@@ -1,6 +1,22 @@
 # Changelog
 
-## v1.37 — PA-22 doctrine-mapping checker
+## v1.37 — PA-22 doctrine-mapping checker; candidate backlog emptied
+
+- check_matrix gains three checks, each with red selftests: PA-10
+  (abstraction statement present in the matrix), PA-4 (external/
+  internal classification per catalogue event; undesired variants may
+  inherit via a classified base-event reference), and the
+  requirement-scope rule (a control trace citing DOC-n/DR-nnn must
+  carry the "cited text contemplates this ordering" line; whitespace-
+  normalized, so wrapped lines match). PA-7 resolved by decision:
+  bindings are discharged by the fragment-citation discipline, a
+  separate section check would duplicate it. **The registry's
+  checker-candidate backlog is empty — every rule is now enforced by
+  a checker with a red proof, a test, a lint, or a documented
+  decision.**
+- Fixture repairs the new checks forced: golden/red-mini catalogues
+  never listed UV-M1-dup in the events table; both matrices lacked an
+  abstraction statement.
 
 - PA-22 graduates from lint to checker: invariants-and-lints.md
   carries a `<!-- doc-ids: ... -->` declaration plus a machine-readable
