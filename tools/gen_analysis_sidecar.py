@@ -259,6 +259,27 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
             cell["event"] = event["id"]
             cells.append(cell)
 
+    # PA-18 terminal states: <!-- terminal: A, B, C --> auto-generates
+    # ignore (documented) cells for every event, eliminating repetitive
+    # rows (cenkalti/backoff 2026-08-06: 5 states × 14 events = 70 cells).
+    tm = re.search(r"<!--\s*terminal:\s*(.+?) -->", text)
+    terminal_states: list[str] = []
+    if tm:
+        terminal_states = [s.strip() for s in tm.group(1).split(",")]
+        for ts in terminal_states:
+            if ts not in states:
+                states.append(ts)
+        # Add cells for terminal states that don't already have rows
+        existing = {(c["state"], c["event"]) for c in cells}
+        default_cit = {"citation": {"file": "disposition-matrix.md",
+                        "line": 0, "fragment": "terminal state declaration"}}
+        for ts in terminal_states:
+            for ev in events:
+                if (ts, ev["id"]) not in existing:
+                    cells.append({"state": ts, "event": ev["id"],
+                                  "disposition": "ignore (documented)",
+                                  **default_cit})
+
     # Overlay citations for cells whose matrix text carries neither.
     for cell in cells:
         if (

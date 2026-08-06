@@ -78,6 +78,11 @@ def main() -> int:
         if c["disposition"] in {"ignore (documented)", "reject", "defer (queued)"}:
             if not (c.get("dr") or c.get("citation")):
                 E(f"cell {key}: {c['disposition']} needs a DR or a citation")
+            # PA-18 terminal states: auto-generated cells carry a sentinel
+            # citation and don't need a real file:line reference.
+            elif (c.get("citation", {}).get("fragment") == "terminal state declaration"
+                  and not c.get("dr")):
+                pass  # auto-generated terminal state cell — implicit citation
     for s in states:
         for ev in events:
             n = seen.get((s, ev), 0)
