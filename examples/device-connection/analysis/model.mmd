@@ -1,0 +1,31 @@
+stateDiagram-v2
+    [*] --> DISCONNECTED
+
+    DISCONNECTED --> CONNECTING : connect()
+    CONNECTING --> CONNECTED : connection_succeeds
+    CONNECTING --> RECONNECTING : connection_fails
+    CONNECTING --> RECONNECTING : connection_timeout
+    CONNECTING --> DISCONNECTED : disconnect()
+    CONNECTING --> FAILED : max_retries_exhausted
+
+    CONNECTED --> DISCONNECTED : disconnect()
+
+    RECONNECTING --> CONNECTING : backoff_elapsed
+    RECONNECTING --> CONNECTED : connection_succeeds (next iteration)
+    RECONNECTING --> RECONNECTING : connection_fails
+    RECONNECTING --> RECONNECTING : connection_timeout
+    RECONNECTING --> DISCONNECTED : disconnect()
+    RECONNECTING --> FAILED : max_retries_exhausted
+
+    FAILED --> CONNECTING : connect() [retry_count NOT reset → stuck]
+    FAILED --> DISCONNECTED : disconnect() [violates R-05 permanent]
+
+    note right of FAILED
+        Q-02: R-05 says FAILED is permanent.
+        disconnect() transitions to DISCONNECTED
+        without checking FAILED.
+        connect() from ex-FAILED starts
+        _connect_loop which exits immediately
+        because retry_count >= max_retries,
+        leaving state stuck in CONNECTING.
+    end note
