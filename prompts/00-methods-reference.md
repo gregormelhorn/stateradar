@@ -38,6 +38,46 @@ The method produces artifacts that serve three purposes:
    table more than they need the source code (cenkalti/backoff #185,
    2026-08-06).
 
+### Runtime boundary (PA-19)
+
+The statechart models **discrete state transitions** triggered by **events**.
+This leaves several behavioural layers outside its scope:
+
+* **Language runtime state.** `sys.exc_info()`, traceback chaining, garbage
+  collection, JIT behaviour, memory model details. These affect observable
+  behaviour but are not statechart-modelable events (tenacity #534,
+  2026-08-06: two Retrying blocks interacting via unittest's exception
+  machinery).
+* **OS-level behaviour.** Signal handling, OOM killer, scheduler preemption,
+  page faults. Assume these are captured by NAT invariants or excluded.
+* **Performance/deadline behaviour.** The statechart models *what* happens,
+  not *how fast*. A timeout is an event; whether the timeout fires at 99ms
+  or 101ms is a runtime concern.
+
+If a finding depends on any of these, it is **not verifiable from the
+statechart alone**. Flag it as `unverifiable-runtime` and require a
+separate test or inspection.
+
+### API contract vs. state machine (PA-20)
+
+The statechart models **internal behavioural state** — what the component
+does in response to events. The **public API contract** — what values
+methods return, what exceptions they raise, what guarantees they make to
+callers — is a separate layer.
+
+* A method that returns stale data after a state transition is an API
+  contract violation, not a state machine bug (tenacity #517,
+  2026-08-06: `statistics` dict persisting after retry completes is a
+  documented API contract, not a state leak).
+* A method whose behaviour varies between decorator and context-manager
+  usage is two different entry points into the same state machine — the
+  machine is the same, the API surface differs (tenacity #511,
+  2026-08-06: `fn=None` in context manager, non-None in decorator).
+
+When a finding involves the API contract, ask: is this a state machine
+issue (wrong transition), or an API design issue (wrong return value)?
+Only the former belongs in the matrix.
+
 ## The loop
 
 ```text

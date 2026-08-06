@@ -308,9 +308,12 @@ step verifies them carefully before the matrix is finalized.
 
 4. **Severity recalibration.** For each finding: is this a bug
    (incorrect behavior), a design observation (correct but surprising),
-   or a documentation gap (correct but undocumented)? Reclassify. A
-   lock-free CAS that silently drops a transition is correct design,
-   not a bug — the ring buffer already recorded the contribution.
+   a documentation gap (correct but undocumented), a runtime concern
+   (`unverifiable-runtime`: depends on `sys.exc_info()`, traceback chaining,
+   GC, or memory model — outside statechart scope, requires separate test),
+   or an API contract issue (wrong return value, not wrong transition)?
+   Reclassify. A lock-free CAS that silently drops a transition is correct
+   design, not a bug — the ring buffer already recorded the contribution.
 
 Update the open questions, matrix dispositions, and summary to reflect
 any reclassifications. A finding downgraded from bug to documentation
