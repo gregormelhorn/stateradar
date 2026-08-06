@@ -14,7 +14,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-PACK = Path(__file__).resolve().parents[3] / "StateRadar" / "tools" / "check_matrix.py"
+PACK = Path(__file__).resolve().parents[3] / "stateradar" / "tools" / "check_matrix.py"
 ADIR = Path(__file__).resolve().parent
 
 if __name__ == "__main__":
