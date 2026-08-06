@@ -140,8 +140,10 @@ Each variant receives a matrix column and a disposition (or an explicit `not app
 Checkable predicates over (state, context), classified:
 
 ```text
-NAT  assumption about the environment   e.g. 0 <= retryCount <= maxRetries
-SYS  obligation of the system           e.g. Streaming implies Authenticated
+NAT     assumption about the environment   e.g. 0 <= retryCount <= maxRetries
+NAT-SYS assumption about N>1 instances     e.g. all instances observe the same
+        sharing one external resource          server degradation simultaneously
+SYS     obligation of the system           e.g. Streaming implies Authenticated
 ```
 
 Analysis may assume NAT; tests must not. Adversarial traces deliberately violate NAT and require explicit robustness dispositions. Every generated test asserts **all SYS invariants after every delivered event**: the cheapest, strongest oracle in the method.

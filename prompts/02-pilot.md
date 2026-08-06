@@ -3,6 +3,17 @@
 **Version 1.10.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.11 — multi-instance synchronization probes: a state reset triggered by
+  an external event that N instances observe simultaneously (connection
+  opened, heartbeat, leader elected) removes backpressure. The
+  per-component checklists and adversarial traces are single-instance by
+  construction. A new Step-6 probe class ("Multi-instance probes", at
+  least 3) models the aggregate load on the shared external resource over
+  failure/recovery cycles, and a new Step-5 lint item flags
+  synchronized-reset points. Divergence class from the
+  pladaria/reconnecting-websocket Part-B diff (2026-08-06): a
+  thundering-herd cascade from `retryCount→0` on `ws.open`, confirmed by
+  issue #200 (T3.chat production outage).
 * v1.10 — asserted absence: an empty `pairs`, `guardGroups`, or `coverage` section needs a reason in the sidecar's `completeness` block. Silence used to pass the checker, so a skipped step and a genuinely empty one looked the same.
 * v1.9 — fragment citations for observed-in-* provenance (`file:line ("fragment")`, checker-verified); the analysis emits a machine-readable sidecar (`analysis.json`, pack schema) that the pack-shipped checker `tools/dsc_check.py` verifies — generic checks move to the pack, per-run scripts keep only the component-specific guard encodings.
 * v1.7 — language: rewritten to STYLE.md strict mode; rules unchanged.
@@ -137,6 +148,23 @@ Then run this checklist against the model and report violations with provenance:
 * terminal or error states without documented meaning or diagnostic
 * undefined startup or shutdown behaviour
 * unbounded queues or buffers, unhandled overload
+* **synchronized reset points:** a state reset triggered by an external
+  event that multiple instances observe simultaneously — connection
+  opened, heartbeat received, leader elected, cooldown expired. If the
+  reset removes backpressure (retryCount→0, cooldown→false, penalty→clear),
+  the aggregate can overwhelm the shared external resource on the next
+  failure cycle. Flag every external-event-triggered reset whose effect is
+  to reduce a limit or a delay. The reset may be correct in isolation;
+  the lint flags it so the adversarial traces can model the aggregate.
+
+**Multi-instance assumption (NAT-SYS).** When N > 1 instances of this
+component share one external resource (server, broker, queue, peer mesh)
+and that resource degrades, the instances observe the degradation
+near-simultaneously. State transitions that depend on external events will
+synchronize across instances unless the component actively decorrelates
+them. A NAT-SYS is not an obligation on this component — it is an
+environment assumption the adversarial traces use to model aggregate
+behaviour.
 
 → `invariants-and-lints.md`
 
@@ -146,6 +174,10 @@ Produce concrete, numbered event sequences of two kinds:
 
 1. **Systematic:** one trace per interaction-pair ordering from the Step-3 pairs table (`P-01a`, `P-01b`, …). Each trace ends in an explicit disposition or a raised question. No pair stays untraced.
 2. **Free probes (at least 10):** unexpected ordering; delayed responses that arrive after cancellation or shutdown; duplicates; cancellation races; restart mid-operation; simultaneous external events; deliberate NAT violations.
+3. **Multi-instance probes (at least 3 when the component connects to a shared external resource — server, broker, queue, peer mesh).** Model N instances of this component observing the same external event near-simultaneously:
+   * **Shared-fate reset.** All N instances reset internal state on the same external signal (for example connection opened). Does this create a synchronization cascade? Trace the aggregate load on the external resource over 3 failure/recovery cycles.
+   * **Backoff dispersion.** If backoff windows share the same random seed, the same min/max bounds, and the same reset trigger — do they converge or diverge over time?
+   * **Degraded-recovery herd.** The external resource recovers partially. Instance A connects, resets its state, then the resource fails again. Instance B connects, resets, fails. Do they amplify the degradation?
 
 For each trace give (a) the sequence, (b) what the code appears to do, with provenance, and (c) the domain question it raises. For a control trace, write `none — control trace` instead of a question. A control-trace verdict that rests on a cited requirement or recorded decision must add one line with a short quote. The line: **"cited text contemplates this ordering: yes/no"**. A "no" voids the control verdict and raises a question. This is the requirement-scope rule made mechanical.
 
