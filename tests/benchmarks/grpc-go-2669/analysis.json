@@ -1870,6 +1870,168 @@
   }
  ],
  "behaviouralDrs": [],
+ "docLines": [
+  {
+   "id": "DOC-1",
+   "mapping": "structural",
+   "target": "states declaration = the five connectivity API states plus condition sub-states; enforced by matrix\u2194mermaid sync and reachability"
+  },
+  {
+   "id": "DOC-14",
+   "mapping": "structural",
+   "target": "state names carry the API enum spellings; enforced by the PA-17 naming check"
+  },
+  {
+   "id": "DOC-20",
+   "mapping": "guard",
+   "target": "G-11"
+  },
+  {
+   "id": "DOC-2",
+   "mapping": "cell",
+   "target": "Connecting_Dialing x E06"
+  },
+  {
+   "id": "DOC-2",
+   "mapping": "cell",
+   "target": "Connecting_Dialing x E16"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "cell",
+   "target": "TransientFailure_Backoff x E11"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "cell",
+   "target": "TransientFailure_ServerUnhealthy x UV09"
+  },
+  {
+   "id": "DOC-4",
+   "mapping": "cell",
+   "target": "Ready x E08"
+  },
+  {
+   "id": "DOC-5",
+   "mapping": "invariant",
+   "target": "SYS-1"
+  },
+  {
+   "id": "DOC-5",
+   "mapping": "cell",
+   "target": "Shutdown x UV08"
+  },
+  {
+   "id": "DOC-6",
+   "mapping": "cell",
+   "target": "Shutdown x UV08"
+  },
+  {
+   "id": "DOC-6",
+   "mapping": "cell",
+   "target": "TransientFailure_ServerUnhealthy x E12"
+  },
+  {
+   "id": "DOC-7",
+   "mapping": "cell",
+   "target": "Connecting_Dialing x E07"
+  },
+  {
+   "id": "DOC-8",
+   "mapping": "rejected",
+   "target": "non-binding here: channel-level API (model link: ClientConn model)"
+  },
+  {
+   "id": "DOC-9",
+   "mapping": "rejected",
+   "target": "non-binding here: channel-level API (model link: ClientConn model)"
+  },
+  {
+   "id": "DOC-10",
+   "mapping": "cell",
+   "target": "Connecting_Dialing x UV04"
+  },
+  {
+   "id": "DOC-11",
+   "mapping": "constraint",
+   "target": "NAT-1"
+  },
+  {
+   "id": "DOC-12",
+   "mapping": "constraint",
+   "target": "NAT-SYS-1"
+  },
+  {
+   "id": "DOC-13",
+   "mapping": "invariant",
+   "target": "SYS-6"
+  },
+  {
+   "id": "DOC-15",
+   "mapping": "cell",
+   "target": "TransientFailure_Backoff x E05"
+  },
+  {
+   "id": "DOC-15",
+   "mapping": "cell",
+   "target": "TransientFailure_ServerUnhealthy x E05"
+  },
+  {
+   "id": "DOC-15",
+   "mapping": "cell",
+   "target": "Connecting_Dialing x E05"
+  },
+  {
+   "id": "DOC-16",
+   "mapping": "invariant",
+   "target": "SYS-2"
+  },
+  {
+   "id": "DOC-16",
+   "mapping": "invariant",
+   "target": "SYS-3"
+  },
+  {
+   "id": "DOC-17",
+   "mapping": "cell",
+   "target": "Connecting_Dialing x E01"
+  },
+  {
+   "id": "DOC-17",
+   "mapping": "cell",
+   "target": "Connecting_HealthChecking x E01"
+  },
+  {
+   "id": "DOC-17",
+   "mapping": "cell",
+   "target": "Ready x E01"
+  },
+  {
+   "id": "DOC-17",
+   "mapping": "cell",
+   "target": "TransientFailure_Backoff x E01"
+  },
+  {
+   "id": "DOC-17",
+   "mapping": "cell",
+   "target": "TransientFailure_ServerUnhealthy x E01"
+  },
+  {
+   "id": "DOC-17",
+   "mapping": "cell",
+   "target": "Shutdown x E01"
+  },
+  {
+   "id": "DOC-18",
+   "mapping": "cell",
+   "target": "Ready x E03"
+  },
+  {
+   "id": "DOC-19",
+   "mapping": "constraint",
+   "target": "NAT-1"
+  }
+ ],
  "pairs": [
   {
    "id": "P-01a",

@@ -36,7 +36,54 @@
 | SYS-6 | `backoffIdx==0` only after a server-accepted connection (DOC-13) or an explicit reset | **VIOLATED in Off mode** — clientconn.go:1104-1114 resets on transport death without any preface (Q-04); the reset-at-death timing also leaves `backoffFor` stale (Q-03) |
 | SYS-7 | one global lock order over {ac.mu, cc.mu} | **VIOLATED** — cc.mu→ac.mu (clientconn.go:843-849→1292) vs ac.mu→cc.mu (clientconn.go:949→578; 998-1001). → Q-02 |
 
-## Doctrine mapping (Step-5 closure of the DOC sweep; PA-22 cell check)
+## Doctrine mapping
+
+<!-- doc-ids: DOC-1 DOC-2 DOC-3 DOC-4 DOC-5 DOC-6 DOC-7 DOC-8 DOC-9 DOC-10 DOC-11 DOC-12 DOC-13 DOC-14 DOC-15 DOC-16 DOC-17 DOC-18 DOC-19 DOC-20 -->
+
+Machine-readable closure of the DOC sweep (PA-22, retrofit). Rows
+restate the prose table in the next section 1:1 — the notes column
+carries the tie-back; no mapping was added or changed. DOC-1/DOC-14
+use the `structural` kind (realized by the model's structure, reason
+names the enforcing check); DOC-20 uses `guard` (discharged by a
+guard-group proof) — the vocabulary was widened for exactly these
+three after the retrofit exposed the gap (2026-08-07).
+
+| id | mapping | target | notes (prose-table tie-back) |
+|---|---|---|---|
+| DOC-1 | structural | states declaration = the five connectivity API states plus condition sub-states; enforced by matrix↔mermaid sync and reachability | prose: adopted (state space) |
+| DOC-14 | structural | state names carry the API enum spellings; enforced by the PA-17 naming check | prose: adopted (naming) |
+| DOC-20 | guard | G-11 | prose: adopted then found contradicted — env parse "on" yields Hybrid (Q-05) |
+| DOC-2 | cell | Connecting_Dialing x E06 | On mode waits for preface clientconn.go:1190-1201 — conforms in On; Off reaches Ready without handshake → part of Q-04 |
+| DOC-2 | cell | Connecting_Dialing x E16 | same constraint, health-managed dial result (prose: E06/E16) |
+| DOC-3 | cell | TransientFailure_Backoff x E11 | invariant "TF eventually → Connecting" — conforms for TF_Backoff |
+| DOC-3 | cell | TransientFailure_ServerUnhealthy x UV09 | hole from the same prose row: no path out on a silent health stream → Q-08 |
+| DOC-4 | cell | Ready x E08 | requirement (GOAWAY → Idle) unimplemented at this boundary: GOAWAY → TF/reconnect, not Idle; ac never re-enters Idle → Q-06 (F-19) |
+| DOC-5 | invariant | SYS-1 | Shutdown terminal — **violated** → Q-01 |
+| DOC-5 | cell | Shutdown x UV08 | the violating cell (z3 witness in G-05) |
+| DOC-6 | cell | Shutdown x UV08 | legal-transition table constrains every transition cell; this row is violation 1: Shutdown→Ready → Q-01 |
+| DOC-6 | cell | TransientFailure_ServerUnhealthy x E12 | violation 2: TransientFailure→Ready — cited text contemplates health checking: no → Q-07 |
+| DOC-7 | cell | Connecting_Dialing x E07 | On skips the CONNECTING→TF→CONNECTING blip per failed address (V-05); Hybrid emits it (clientconn.go:1097) → Q-14 |
+| DOC-8 | rejected | non-binding here: channel-level API (model link: ClientConn model) | out of scope, noted |
+| DOC-9 | rejected | non-binding here: channel-level API (model link: ClientConn model) | out of scope, noted |
+| DOC-10 | cell | Connecting_Dialing x UV04 | guard G-04 — conforms (proven) |
+| DOC-11 | constraint | NAT-1 | backoff constants backoff.go:41-48, clientconn.go:52-54 — conforms |
+| DOC-12 | constraint | NAT-SYS-1 | dispersal obligation; multi-instance traces M-01..M-03; ResetConnectBackoff is a synchronized reset point → Q-13 |
+| DOC-13 | invariant | SYS-6 | reset sites clientconn.go:1084/1112 — **violated in Off mode** (Q-04); reset-at-death timing → stale backoffFor (Q-03) |
+| DOC-15 | cell | TransientFailure_Backoff x E05 | conforms |
+| DOC-15 | cell | TransientFailure_ServerUnhealthy x E05 | does NOT reconnect — partial violation → Q-15 |
+| DOC-15 | cell | Connecting_Dialing x E05 | keeps stale sleep → Q-03 |
+| DOC-16 | invariant | SYS-2 | transport field writes — holds |
+| DOC-16 | invariant | SYS-3 | **violated** (Q-01) |
+| DOC-17 | cell | Connecting_Dialing x E01 | connect() no-op on non-Idle (prose: cited on all (non-Idle, E01) cells) — conforms |
+| DOC-17 | cell | Connecting_HealthChecking x E01 | conforms |
+| DOC-17 | cell | Ready x E01 | conforms |
+| DOC-17 | cell | TransientFailure_Backoff x E01 | conforms |
+| DOC-17 | cell | TransientFailure_ServerUnhealthy x E01 | conforms |
+| DOC-17 | cell | Shutdown x E01 | conforms (Shutdown → error) |
+| DOC-18 | cell | Ready x E03 | conforms; Shutdown branch undocumented → Q-09 |
+| DOC-19 | constraint | NAT-1 | Backoff(retries) semantics — conforms |
+
+## Doctrine sweep prose detail (Step-5 closure of the DOC sweep; PA-22 cell check)
 
 | DOC | classification | mapping / cell | verdict |
 |---|---|---|---|

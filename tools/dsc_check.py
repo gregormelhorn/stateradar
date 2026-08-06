@@ -185,9 +185,13 @@ def main() -> int:
                     if not re.match(r"(SYS|NAT)", tgt):
                         E(f"doctrine: {did} maps to {kind} {tgt!r} — "
                           f"expected a SYS-/NAT- id")
-                elif kind == "rejected":
+                elif kind == "guard":
+                    if not re.match(r"G-\d", tgt):
+                        E(f"doctrine: {did} maps to guard {tgt!r} — "
+                          f"expected a G-nn guard-group id")
+                elif kind in ("rejected", "structural"):
                     if len(tgt) < 10:
-                        E(f"doctrine: {did} rejected without a reviewable "
+                        E(f"doctrine: {did} {kind} without a reviewable "
                           f"reason")
                 else:
                     E(f"doctrine: {did} has unknown mapping {kind!r}")

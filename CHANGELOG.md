@@ -12,7 +12,15 @@
   build" claim — corrected to lint-only in v1.35 — is true again, now
   with a checker behind it. Checker-candidate backlog: 4.
 - grpc-go-2669 dogfoods the mechanism: its 20 prose-mapped DOC lines
-  are retrofitted as the machine-readable table.
+  are retrofitted as the machine-readable table. The retrofit exposed
+  a vocabulary gap — doctrine lines realized by model structure
+  (state space, naming) or discharged by a guard-group proof had no
+  mapping kind; `structural` (reviewable reason naming the enforcing
+  check) and `guard` (G-nn target) added, 20/20 totality reached.
+- docs/roadmap.md: five literature-driven entries (ensemble
+  convergence, benchmark dating protocol, matrix mutation checker,
+  ACH-style fault-class mutants, GEPA experiment) plus the SDD
+  positioning note.
 
 ## v1.36 — dependency policy, z3 guard-proof library
 
