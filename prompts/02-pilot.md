@@ -3,6 +3,15 @@
 **Version 1.10.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.13 — finding verification step (Step 8): every bug claim, invariant
+  violation, and lint finding gets a second pass against the code before
+  finalizing the matrix. Concurrency claims must cite memory ordering;
+  sentinel values must distinguish literal from computed; line numbers
+  are re-verified; severity is recalibrated. Divergence class from the
+  lerouxrgd/recloser pilot (2026-08-06): three of four bug claims were
+  correct lock-free design or correct memory ordering, not bugs. A
+  mandatory verification step would have caught them before the matrix
+  was finalized.
 * v1.12 — lock-discipline in catalogue, user-model-legibility lint, reviewer
   cross-check (Step 7a). Divergence class from the sony/gobreaker comparison
   (2026-08-06): two real open bugs (#37 OnStateChange deadlock, #72 count
@@ -256,6 +265,40 @@ finds practical bugs and API surprises; the statechart systematizes them
 into the matrix; the matrix gains additional provenance. A finding that
 the statechart missed is a gap in the model. A finding the reviewer
 missed is a gap in inspection. They are complementary, not redundant.
+
+### Step 8 — Finding verification (mandatory, after open questions)
+
+Re-read every bug claim, invariant violation, and lint finding against
+the code with heightened scrutiny. The pilot writes claims quickly; this
+step verifies them carefully before the matrix is finalized.
+
+1. **Concurrency claims.** Every finding that asserts a race condition,
+   lost update, or silent failure must cite the actual memory ordering
+   or synchronization primitive — `Acquire`/`Release`, `SeqCst`, mutex
+   lock site. If the ordering guarantees correctness, the finding is NOT
+   a bug. Downgrade to a documentation question or drop it.
+
+2. **Sentinel values.** A sentinel that is a literal constant (`-1.0`)
+   is safe. A sentinel that is the result of a computation is fragile.
+   Check which one applies. Reclassify accordingly.
+
+3. **Line-number accuracy.** Re-read every cited `file:line`. Does the
+   code at that line actually do what the finding claims? Off-by-one
+   citations or misread logic must be corrected before the matrix is
+   finalized.
+
+4. **Severity recalibration.** For each finding: is this a bug
+   (incorrect behavior), a design observation (correct but surprising),
+   or a documentation gap (correct but undocumented)? Reclassify. A
+   lock-free CAS that silently drops a transition is correct design,
+   not a bug — the ring buffer already recorded the contribution.
+
+Update the open questions, matrix dispositions, and summary to reflect
+any reclassifications. A finding downgraded from bug to documentation
+gap stays in `open-questions.md`; a finding that was simply wrong is
+removed with a note in the summary.
+
+→ (no new file — updates existing artifacts)
 
 ---
 
