@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.25 — multi-instance sync probes, thundering-herd class (2026-08-06)
+
+- 02-pilot v1.11: new lint item "synchronized reset points", NAT-SYS
+  assumption type, and Step-6 Multi-instance probe class (shared-fate
+  reset, backoff dispersion, degraded-recovery herd). Prompt improvement
+  driven by the pladaria/reconnecting-websocket Part-B diff: a
+  thundering-herd cascade from `retryCount→0` on `ws.open`, confirmed by
+  issue #200 (T3.chat production outage).
+
 ## v1.24.1 — docs alignment, order-proof version check (2026-08-06)
 
 - README and AGENTS aligned with the codebase: pack version 1.24,
