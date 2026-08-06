@@ -1,0 +1,25 @@
+stateDiagram-v2
+    [*] --> Usable
+
+    Usable --> FailureDetected : EV-07 ProtocolFailureRequested
+    FailureDetected --> ClosurePending : EV-08 CloseFrameOrEOFQueued
+    ClosurePending --> ClosureObservable : EV-13 TransportLost
+    ClosurePending --> TransportHalfClosing : EV-12 TransportCloseRequested
+    ClosurePending --> ClosurePending : EV-11 CloseDeadlineExpired
+    TransportHalfClosing --> TransportLost : EV-13 TransportLost
+    ClosureObservable --> ClosureObservable : EV-16 ReceiveWaiterReleased
+    ClosureObservable --> ClosureObservable : EV-17 ConnectionClosedObserved
+
+    ProtocolOpen --> ProtocolClosing : EV-07 ProtocolFailureRequested
+    ProtocolClosing --> ProtocolClosed : EV-13 TransportLost
+    ProtocolClosed --> ProtocolClosed : EV-08 CloseFrameOrEOFQueued
+
+    HeartbeatSleeping --> HeartbeatAwaitingPong : EV-03 PingIntervalElapsed
+    HeartbeatAwaitingPong --> HeartbeatExpired : EV-06 PingTimeoutElapsed
+    HeartbeatExpired --> ProtocolClosing : EV-07 ProtocolFailureRequested
+    HeartbeatAwaitingPong --> HeartbeatStopped : EV-18 KeepaliveTaskCancelled
+    HeartbeatExpired --> HeartbeatStopped : EV-18 KeepaliveTaskCancelled
+    HeartbeatSleeping --> HeartbeatStopped : EV-18 KeepaliveTaskCancelled
+
+    TransportOpen --> TransportHalfClosing : EV-12 TransportCloseRequested
+    TransportHalfClosing --> TransportLost : EV-13 TransportLost

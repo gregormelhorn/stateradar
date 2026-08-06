@@ -1,0 +1,23 @@
+stateDiagram-v2
+    [*] --> CallerCreated
+
+    CallerCreated --> AdmissionSubmitting : EV-02 PermitRequested
+    AdmissionSubmitting --> StoredAndEligible : EV-04 SchedulerReceivesAdmissionRequest
+    StoredAndEligible --> Granted : EV-10 WaitingRequestSelected
+    StoredAndEligible --> Evicted : EV-11 WaitingRequestRejected
+    StoredAndEligible --> GrantedDead : EV-14 PermitDeliveryFailed
+    StoredAndEligible --> StoredAndEligible : EV-26 QueueEntryCeasesToBeEligible
+
+    Waiting --> PermitReceived : EV-13 PermitReceivedByCaller
+    Waiting --> Waiting : EV-20 WaitingCallerCancelled
+    Waiting --> Rejected : EV-21 WaitAgeLimitExceeded
+
+    PermitReceived --> Executing
+    Executing --> Completed : EV-16 SearchExecutionFinished
+    Executing --> Returned : EV-17 ExecutingCallerCancelled
+
+    CapacityUnit --> Held : EV-05 ExecutionSlotAvailable
+    Held --> ReleasePending : EV-18 PermitReleaseRequested
+    Held --> Returned : EV-17 ExecutingCallerCancelled
+    ReleasePending --> CapacityUnit : EV-19 ReleaseSignalProcessed
+    Returned --> Returned : EV-18 PermitReleaseRequested
