@@ -5,7 +5,7 @@
 **Date:** 2026-08-06
 **Oracle:** Confirmed — primary finding matched exactly. Two additional findings
 confirmed as novel (D1 #6578, D4 #6577).
-**Defect class:** Caller terminal, scheduler admission claim remains eligible (PA-21)
+**Defect class:** Caller terminal, scheduler admission claim remains eligible (PA-21) — F-09 cancellation leak
 
 ## Primary finding
 

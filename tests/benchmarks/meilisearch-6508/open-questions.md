@@ -8,6 +8,7 @@ searches can exceed the configured parallelism.
 Current: explicit drop sends signal; Drop impl sends second signal via spawned
 task. saturating_sub masks the counter effect but does not prevent double grant.
 Expected: exactly one release signal per permit. Idempotent second path.
+ODC: fault F-08 (double release), trigger: step-4 matrix walk
 **Status:** OPEN
 
 Q-D2
@@ -21,6 +22,7 @@ Current: queue.len() used for capacity (L166), eviction (L166), selection (L131)
 and metric (L173) without filtering for liveness.
 Expected: WaitingCallerCancelled must trigger QueueEntryCeasesToBeEligible,
 removing the admission claim before it affects any scheduler decision.
+ODC: fault F-09 (cancellation leak; secondary F-07 lifecycle coupling), trigger: step-4 matrix walk
 **Status:** OPEN
 
 Q-D3
@@ -30,4 +32,5 @@ lost until the next release signal. No same-turn retry or alternate selection.
 Current: let _ = channel.send(...) ignores failure. Dead waiter already swap_removed.
 Expected: continue selection immediately after failed delivery, or prune dead
 entries before selection.
+ODC: fault F-13 (delay / late; secondary F-03 output fault), trigger: step-4 matrix walk
 **Status:** OPEN

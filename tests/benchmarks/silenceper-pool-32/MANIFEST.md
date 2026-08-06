@@ -15,6 +15,10 @@ does NOT close the `connReqs` waiter channels. Goroutines blocked in `Get()`
 on `<-req` are never unblocked. The pool terminates but waiting callers
 remain blocked forever.
 
+**Defect class:** Pool terminal, waiter lifecycle never notified (PA-21) — F-07 lifecycle coupling
+
+ODC: fault F-07 (lifecycle coupling; secondary F-20 blocked progress after terminal event), trigger: doctrine mapping (PA-21)
+
 ## StateRadar output
 
 - **Lifecycle disagreement (PA-21):** Pool lifecycle terminates without

@@ -32,3 +32,18 @@ regression anchors.
 
 11 pilots, 4 Oracle-confirmed, 11 bugs found, 6 GitHub issues filed,
 24 methodology rules (PA-1 through PA-24).
+
+## Fault-class × detector coverage (ODC)
+
+Dominant fault class per finding, from `formats/rules.toml`. Triggers per
+the case artifacts (grpc-go-2669 tracked separately).
+
+| Fault class | Trigger | Benchmark case(s) |
+|---|---|---|
+| F-07 lifecycle coupling | step-4 matrix walk; doctrine mapping (PA-21) | valkey-glide-5803 (Q-04), silenceper-pool-32 (primary) |
+| F-08 double release | step-4 matrix walk | valkey-glide-5803 (Q-02, Q-03), meilisearch-6508 (Q-D1) |
+| F-09 cancellation leak | step-4 matrix walk | meilisearch-6508 (Q-D2) |
+| F-13 delay / late | step-4 matrix walk | meilisearch-6508 (Q-D3) |
+| F-20 blocked progress after terminal event | step-4 matrix walk | python-websockets-1527 (Q-C1) |
+
+Fault classes with zero benchmark findings so far: F-01, F-02, F-03, F-04, F-05, F-06, F-10, F-11, F-12, F-14, F-15, F-16, F-17, F-18, F-19, F-21.

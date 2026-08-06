@@ -40,6 +40,8 @@ every request to that node acquires a permit via `reserve_inflight_request`,
 times out, but never releases the permit. Healthy nodes are blocked because
 `inflight_requests_allowed` stays at or below zero.
 
+ODC: fault F-07 (lifecycle coupling; secondary F-01 missing transition), trigger: step-4 matrix walk
+
 ---
 
 ## Sidecar Completeness

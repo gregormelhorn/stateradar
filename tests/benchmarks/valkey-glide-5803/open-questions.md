@@ -66,17 +66,21 @@ The caller-facing permit must be released when the timeout fires, not when
 the internal request completes. This is an independent transition —
 decoupling the caller lifecycle from the internal request lifecycle.
 
+ODC: fault F-07 (lifecycle coupling; secondary F-01 missing transition), trigger: step-4 matrix walk
+
 ---
 
 ## Other Questions
 
 Q-01: Internal events in non-permit-holding states. Structurally impossible —
 these events only fire from within the permit lifecycle. Document as such.
+ODC: fault F-04 (sneak path — probed, ruled out as structurally impossible), trigger: step-4 matrix walk
 
 Q-02: Release in terminal states. Once the permit is released, further release
 is idempotent per Requirement 6. `fetch_add(1)` on each release adds 1 to the
 counter — multiple releases would over-count. The code does not guard against
 double-release. Is this a concern?
+ODC: fault F-08 (double release), trigger: step-4 matrix walk
 
 Q-03: Internal request completion after caller timeout. The internal request
 may complete long after the timeout. When it completes, does it trigger a
@@ -84,6 +88,7 @@ SECOND permit release? If the release at line 637 already ran (after
 `send_command` returned with the timeout error), and the internal cleanup
 also calls release, the counter is incremented twice. This violates
 Requirement 6 (idempotent release).
+ODC: fault F-08 (double release; secondary F-07 lifecycle coupling), trigger: step-4 matrix walk
 
 ---
 

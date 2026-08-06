@@ -9,4 +9,5 @@ TimeoutError, then awaits connection_lost_waiter at send_context.go:874 —
 re-entering the wait the timeout was meant to bypass.
 Expected: CloseDeadlineExpired must force progress to ClosureObservable,
 releasing blocked callers even if TransportLost has not arrived.
+ODC: fault F-20 (blocked progress after terminal event; secondary F-07 lifecycle coupling), trigger: step-4 matrix walk
 **Status:** OPEN

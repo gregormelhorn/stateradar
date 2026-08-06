@@ -4,7 +4,7 @@
 **Commit:** v2.2.7
 **Date:** 2026-08-06
 **Oracle:** Confirmed — primary finding matched exactly.
-**Defect class:** Caller terminal, resource ownership remains active (PA-21)
+**Defect class:** Caller terminal, resource ownership remains active (PA-21) — F-07 lifecycle coupling
 
 ## Primary finding
 

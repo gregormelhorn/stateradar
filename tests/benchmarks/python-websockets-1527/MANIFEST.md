@@ -4,7 +4,7 @@
 **Commit:** `4d229bf9f583d593aa103287aee0a77c9fbc3a79` (v13.1)
 **Date:** 2026-08-06
 **Oracle:** Confirmed — primary finding matched exactly.
-**Defect class:** Local deadline expires, caller notification remains blocked (PA-21)
+**Defect class:** Local deadline expires, caller notification remains blocked (PA-21) — F-20 blocked progress after terminal event
 
 ## Primary finding
 
