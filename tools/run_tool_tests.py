@@ -24,8 +24,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-BENCH = Path(__file__).resolve().parent
-TOOLS = BENCH.parent / "tools"
+ROOT = Path(__file__).resolve().parent.parent
+BENCH = ROOT / "tests"
+TOOLS = ROOT / "tools"
 
 
 def _python() -> list[str]:
@@ -98,6 +99,9 @@ def main() -> int:
     names = sys.argv[1:] or sorted(
         d.name for d in BENCH.iterdir() if d.is_dir() and (d / "expected").is_dir()
     )
+    if not names:
+        print("BENCH: FAIL — no cases found (BUG: BENCH path may be wrong)")
+        return 1
     failures = 0
     for name in names:
         case = BENCH / name

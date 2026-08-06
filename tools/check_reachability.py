@@ -22,10 +22,10 @@ import sys
 from pathlib import Path
 
 
-def load_graph(analysis_dir: Path) -> tuple[set[str], set[str], dict[str, set[str]], set[str]]:
+def load_graph(analysis_dir: Path) -> tuple[set[str], set[str], dict[str, set[str]], set[str], set[str]]:
     """Load states, events, transitions, and terminal states from analysis.json.
 
-    Returns (states, events, adjacency, terminals).
+    Returns (states, events, adjacency, terminals, events_with_transitions).
     """
     sidecar = analysis_dir / "analysis.json"
     if not sidecar.is_file():
@@ -33,7 +33,11 @@ def load_graph(analysis_dir: Path) -> tuple[set[str], set[str], dict[str, set[st
 
     data = json.loads(sidecar.read_text(encoding="utf-8"))
     cells = data.get("cells", [])
-    states = set(data.get("states", []))
+    # Preserve list order from the sidecar — the first state is the
+    # conventional initial state. Converting to set destroys that order.
+    state_list: list[str] = data.get("states", [])
+    states = set(state_list)
+    initial = state_list[0] if state_list else None
     events = {e["id"] for e in data.get("events", [])}
 
     # Parse terminal states from the matrix comment
@@ -83,6 +87,11 @@ def main() -> int:
 
     adir = Path(sys.argv[1])
     states, events, adjacency, terminals, events_with_transitions = load_graph(adir)
+
+    # The first state in the sidecar's ordered list is the initial state.
+    adir_path = adir / "analysis.json"
+    state_list = json.loads(adir_path.read_text(encoding="utf-8")).get("states", [])
+    initial = state_list[0] if state_list else None
 
     errors: list[str] = []
 

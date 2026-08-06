@@ -2,7 +2,7 @@
 
 ## 1. CONVERGENCE.md — calibration data
 
-**Status:** Framework ready. `.benchmarks/device-connection/CONVERGENCE.md`
+**Status:** Framework ready. `tests/device-connection/CONVERGENCE.md`
 has the protocol and template. Needs two independent pilot runs on the
 synthetic Device Connection component. Run the pilot twice in fresh
 sessions, diff the matrices, record the divergence rate. Repeat per

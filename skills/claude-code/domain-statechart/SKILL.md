@@ -35,13 +35,6 @@ Determine the state of the component in question and follow the matching prompt:
    component → run `07-test-audit.md`. The audit classifies every test and cell.
    Deletion and weakening stay human decisions.
 
-## Language work
-
-Prose tasks (rewrite into STE, sense pass, rules pass, German DTK) belong to the
-ste-pack, vendored as a submodule at `tools/ste-pack/`. Route them to its
-`ste-writing` skill or its `prompts/lang-ste-*.md` passes. Never reimplement
-language checks here.
-
 ## Non-negotiable rules (all stages)
 
 - Never silently decide ambiguous domain semantics; raise `UNSPECIFIED` + a question.

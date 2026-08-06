@@ -76,7 +76,10 @@ agent that knows the matrix cannot un-know it.
 ## Proven pilot cases
 
 Both findings were frozen before the known upstream issues were
-revealed, then confirmed by the real bug reports.
+revealed, then confirmed by the real bug reports. Caveat: public
+issues may predate model training cutoffs. The strongest independent-
+discovery evidence is the 11 new bugs found across 6 projects, 2 of
+them critical and reported as new GitHub issues (see tests/benchmarks).
 
 ### valkey-glide — missing transition `CallerTimedOut → PermitReleased`
 
@@ -134,7 +137,7 @@ prompts/        canonical source of truth (harness-neutral Markdown)
 skills/         thin harness packagings (Claude Code skill)
 commands/       optional Claude Code slash commands
 examples/       reference runs (see examples/README.md before publishing any)
-tests/          benchmark regression suite — Oracle evidence archive
+tests/          benchmark regression suite + Oracle evidence
 tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 checker), gen_analysis_sidecar (emits the sidecar from
                 the matrices), part_b_pack (assembles and coverage-checks
@@ -146,7 +149,6 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 dsc_blind (blind-pass assembly + diff),
                 dsc_cross_check (reviewer cross-check), templates/
                 (the CI gate file + the per-component checker wrapper)
-tests/          tool regression + Oracle benchmark evidence
 formats/        analysis.schema.json + manifest.schema.json — the sidecar
                 and manifest contracts
 ```
