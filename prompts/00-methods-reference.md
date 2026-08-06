@@ -13,9 +13,30 @@ The objective is not to control the coding agent. The objective is to bring **ap
 1. domain logic must not remain hidden and silently decided inside AI-generated code;
 2. tests must derive from explicit behaviour, not mirror the implementation.
 
-Use the method for behaviour involving: lifecycles, connection management, protocol phases, asynchronous events, timeouts, retries, cancellation, recovery, sessions, mutually exclusive modes, concurrent coordination.
+Use the method for behaviour involving: lifecycles, connection management,
+protocol phases, asynchronous events, timeouts, retries, cancellation,
+recovery, sessions, mutually exclusive modes, concurrent coordination.
+This includes components whose state is explicit (enums, transition tables),
+implicit (boolean flags, nullable references), or **loop-phase** — where the
+lifecycle emerges from the phases of a retry/backoff/polling loop rather than
+from a declared state variable (cenkalti/backoff, 2026-08-06).
 
-Do not use it for: pure calculations, stateless transformations, formatting, validation, ordinary CRUD without temporal behaviour. Statefulness alone does not qualify; *temporal* behaviour does. One machine per bounded context, never one global machine.
+Do not use it for: pure calculations, stateless transformations, formatting,
+validation, ordinary CRUD without temporal behaviour. Statefulness alone does
+not qualify; *temporal* behaviour does. One machine per bounded context, never
+one global machine.
+
+The method produces artifacts that serve three purposes:
+
+1. **Specification and test oracle** — the matrix defines expected behaviour;
+   tests assert against it.
+2. **CI-enforceable discipline** — grid totality, doctrine mapping, and
+   DR links break the build on drift.
+3. **Public API documentation** — the statechart and terminal-state table
+   are human-readable references for library consumers. A user migrating
+   between major versions of a retry library needs the five-terminal-states
+   table more than they need the source code (cenkalti/backoff #185,
+   2026-08-06).
 
 ## The loop
 
@@ -195,6 +216,26 @@ diff is mechanical, not interpretive. Both passes follow the same rules:
    changes the disposition of at least one event, it is a separate state.
    If two flag combinations produce identical dispositions across all events,
    they are the same state.
+
+### Terminal states (PA-18)
+
+A **terminal state** is a state from which no event can cause a transition.
+The component has left the active lifecycle and will not process further
+events (Retry returned, connection permanently closed, process exited).
+
+1. **Mark terminal states in the matrix.** Instead of a full row of
+   `ignore (documented)`, add a single declaration after the matrix:
+   `<!-- terminal: Succeeded, PermanentFailure, Exhausted, TimedOut, Cancelled -->`.
+   The checker treats all events in terminal states as `ignore (documented)`
+   with an implicit citation to the state's entry condition.
+
+2. **Name terminal states by their exit condition.** "Exhausted" not
+   "State_MaxTriesReached"; "Cancelled" not "State_ContextCancelled".
+   Terminal states are the API contract — they tell the caller why the
+   component stopped. The names should be meaningful in isolation.
+
+This eliminates repetitive cells (cenkalti/backoff, 2026-08-06:
+5 terminal states × 14 events = 70 cells of identical `ignore (documented)`).
 
 5. **Document the condition.** Every state name carries a one-line description
    in the catalogue or extraction: "`Open_AwaitingStability`: connection

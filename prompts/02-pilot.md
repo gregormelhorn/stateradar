@@ -78,6 +78,13 @@ Read the component, its tests, and its docs. Output a short scope statement: the
 
 Extract and list, each item with provenance and location: states, external events, internal events, transitions, guards and conditions, actions and side effects. Also: timeouts and timers, retry behaviour and limits, cancellation paths, failure modes, apparent invariants. Also: contradictions between code, tests and docs, and behaviour you cannot determine. Include implicit states in boolean flags, nullable references, and enum-plus-flag mixtures. Enumerate the reachable combinations; they are the real state space.
 
+**For loop-based components** (retry loops, backoff loops, polling loops):
+the lifecycle states are the phases of one iteration — Attempting,
+Evaluating, Waiting. Terminal states (Succeeded, Exhausted, Cancelled)
+are the exit conditions of the loop. The `for` statement is the
+state transition engine; the phase you are in when a condition is
+checked determines the state.
+
 **Doctrine-line sweep.** Extract every normative sentence from the requirements and docs. Principle lines such as "identity stays sacred", "no lost X", "failures must be loud" go into a numbered list `DOC-1..n` with their source. Step 5 must classify each doctrine line: adopted as an invariant, adopted as a disposition constraint, or explicitly rejected as non-binding. A silently unused doctrine line is an error.
 
 **Seam-contract sweep.** For every external seam the component invokes (publisher or bus, classifier or model client, scheduler, executor, storage): read the callee's contract. Record its failure semantics (raises what, never raises, timeout behaviour) as NAT candidates with citations into the callee. Missing error handling at a call site is **not** evidence that failures propagate. To declare an invoked-operation failure path a hole without reading the callee's contract is an unproven inference. Label it as such.
@@ -155,6 +162,13 @@ A guard you cannot formalize gets the mark `not-formalizable: <category>: <reaso
 **Mechanical self-check (mandatory).** Wire the pack's generic checker: copy `tools/templates/check_matrix.py` into the output directory (it calls `tools/check_matrix.py`, which covers grid totality, citations, hole→Q links, pair→trace links, and undesired-coverage totality) and execute it. Write component-specific checks only when the matrix needs something the generic checker does not verify — never duplicate its logic per component (four ~90% copies existed in dobby before the generic one). The catalogue must carry a machine-readable id declaration (`<!-- event-ids: ... -->`) and the matrix a state declaration (`<!-- states: ... -->`). Checkers parse these declarations, never prose.
 
 Stage 1 (after this step): every state row contains exactly one disposition per catalogue event column. No catalogue column is missing. Every `ignore (documented)` and `reject` cell carries a citation. The `undesired-coverage` table is total (no empty cells).
+
+**Terminal states (PA-18).** A state from which no event can cause a transition
+is terminal. Instead of a full row of `ignore (documented)`, add a declaration
+after the matrix: `<!-- terminal: Succeeded, PermanentFailure, Exhausted, TimedOut, Cancelled -->`.
+Every event in a terminal state is `ignore (documented)` with an implicit
+citation to the state's entry condition. This eliminates repetitive cells
+(cenkalti/backoff, 2026-08-06: 5 terminal states × 14 events = 70 identical cells).
 
 Stage 2 (after Step 7, re-run): every hole cell (`UNSPECIFIED` or `ignore (accidental)`) carries a `→ Q-nn` back-reference that exists in `open-questions.md`. Every interaction pair `P-nn` appears in at least one trace in `adversarial-traces.md`. Every guard group has an outcome from `check_guards.py`. Every control-trace verdict that cites a requirement or decision carries the scope line ("cited text contemplates this ordering: yes/no").
 
