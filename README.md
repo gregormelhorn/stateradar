@@ -133,6 +133,7 @@ prompts/        canonical source of truth (harness-neutral Markdown)
 skills/         thin harness packagings (Claude Code skill)
 commands/       optional Claude Code slash commands
 examples/       reference runs (see examples/README.md before publishing any)
+tests/          benchmark regression suite — Oracle evidence archive
 tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 checker), gen_analysis_sidecar (emits the sidecar from
                 the matrices), part_b_pack (assembles and coverage-checks
@@ -188,7 +189,7 @@ Updating later: `git -C tools/prompt-pack fetch --tags && git -C tools/prompt-pa
 
 ## Claude Code integration
 
-* **Skill (auto-triggering):** copy or symlink `skills/claude-code/domain-statechart/` into `.claude/skills/` (per repo) or `~/.claude/skills/` (personal). The skill routes stateful work into the right stage of the workflow; language work routes to the ste-pack's `ste-writing` skill.
+* **Skill (auto-triggering):** copy or symlink `skills/claude-code/domain-statechart/` into `.claude/skills/` (per repo) or `~/.claude/skills/` (personal). The skill routes stateful work into the right stage of the workflow.
 * **Slash commands (explicit):** copy `commands/*.md` into `.claude/commands/`. They assume you vendored the pack at `tools/prompt-pack/`. Adjust the path at the top of each command if yours differs.
 
 Other harnesses: paste the prompts directly, or wire them into your harness's skill mechanism. The canonical files in `prompts/` are plain Markdown on purpose.

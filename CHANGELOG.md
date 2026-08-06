@@ -6,7 +6,7 @@
   language-layer infrastructure. StateRadar is now a standalone pack
   with zero submodule dependencies.
 - CI: simplified checkout, no recursive submodule init.
-- README: removed Language Policy section and ste-pack references.
+- README: removed Language Policy section.
 - 11 pilots, 3 Oracle-confirmed benchmarks, 24 methodology rules.
 
 ## v1.32 — PA-21 lifecycle disagreement, PA-22 requirement-to-cell mapping

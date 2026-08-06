@@ -67,6 +67,23 @@ if not rv or not cv:
 elif tuple(int(p) for p in rv.group(1).split(".")) != cv:
     errors.append(f"version mismatch: README {rv.group(1)} vs CHANGELOG {cv[0]}.{cv[1]}")
 
+# 4. Path existence: every pack-internal file/directory referenced in
+#    README and AGENTS must exist. Consumer-repo paths (domain-analysis/,
+#    DR-nnn.yaml, CLAUDE.md) are excluded — they live in the consumer's
+#    repository, not in the pack.
+PACK_ROOTS = {"prompts/", "tools/", "skills/", "commands/", "examples/",
+             "formats/", ".benchmarks/", "tests/", ".github/"}
+for doc_name in ("README.md", "AGENTS.md"):
+    doc = (ROOT / doc_name).read_text(encoding="utf-8")
+    for m in re.finditer(r"`([a-zA-Z0-9_/.-]+\.[a-z]{1,6})`", doc):
+        p = ROOT / m.group(1)
+        if not p.exists() and any(m.group(1).startswith(r) for r in PACK_ROOTS):
+            errors.append(f"{doc_name}: backtick path does not exist: {m.group(1)}")
+    for m in re.finditer(r"^([a-zA-Z0-9_/.-]+/)\s+", doc, re.M):
+        p = ROOT / m.group(1)
+        if not p.is_dir() and any(m.group(1).startswith(r) for r in PACK_ROOTS):
+            errors.append(f"{doc_name}: layout path does not exist: {m.group(1)}")
+
 if errors:
     print("PACK CONSISTENCY: FAIL")
     for e in errors: print(" -", e)
