@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.31 — PA-18 checker support, standing instruction foldback (2026-08-06)
+
+- gen_analysis_sidecar.py: terminal state auto-generation via
+  `<!-- terminal: ... -->` comment. dsc_check.py: sentinel citation
+  for auto-generated terminal cells.
+- 05-standing-instruction.md expanded (18 → 55 lines): rules 7-12
+  fold back v1.11–v1.13, PA-17, PA-18, loop-phase extraction.
+- 02-pilot v1.13: Step 8 finding verification.
+- 00-methods-reference: PA-17 state naming, PA-18 terminal states,
+  loop-phase extraction, statechart-as-documentation.
+- Tools: matrix format robustness, dsc_blind.py, dsc_cross_check.py,
+  question lifecycle, source index root fallback.
+- Seven pilot runs: reconnecting-websocket, gobreaker, recws,
+  recloser, cenkalti/backoff, tungstenite-rs, tenacity.
+
 ## v1.26 — lock-discipline catalogue, user-model gap lint, reviewer cross-check (2026-08-06)
 
 - 02-pilot v1.12: Lock-discipline annotation in the event catalogue
