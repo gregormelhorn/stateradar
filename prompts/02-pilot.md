@@ -220,6 +220,18 @@ Then run this checklist against the model and report violations with provenance:
   state in one lifecycle that does not trigger a cleanup transition in
   the shared resource track is a coupling bug. Flag terminal states
   missing cross-lifecycle cleanup transitions.
+* **dual ownership cleanup (PA-23):** an object with both an explicit
+  release method (`close()`, `drop(self)`) and an implicit destructor
+  (`Drop` impl, `__del__`, `defer`). Model both as independent events.
+  If both can fire for the same instance, prove exactly-one logical
+  release — the second path must be no-oppable, or one path must
+  suppress the other.
+* **async cancellation isolation (PA-24):** a resource transferred to
+  another task (channel sender, shared state) survives its original
+  owner's cancellation. Model the sender-side and receiver-side
+  lifecycles as separate orthogonal regions. A terminal event in one
+  region must have an explicit synchronization transition to the
+  other — implicit sync does not exist across channel boundaries.
 
 **Multi-instance assumption (NAT-SYS).** When N > 1 instances of this
 component share one external resource (server, broker, queue, peer mesh)

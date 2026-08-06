@@ -86,8 +86,11 @@ lifecycle must trigger a transition in the other:
 | Pattern | Example | Bug |
 |---|---|---|
 | Caller vs. internal request | Timeout fires → caller done, but permit still held by internal request | valkey-glide #5803: stalled node exhausts shared capacity |
+| Caller-local deadline vs. transport callback | Local `close_timeout` expires → transport closed, but `connection_lost()` callback never fires → caller still blocked | python-websockets #1527: server silent for 7 minutes with Wi-Fi off |
+| Caller terminal vs. scheduler admission claim | Caller cancelled → receiver dropped, but `oneshot::Sender` still in scheduler queue → capacity, eviction, selection, metrics all polluted | Meilisearch SearchQueue #6508: dead waiters evict live requests |
 | Public vs. background goroutine | Connection closed → user state terminal, but reconnect goroutine still holds lock | reconnecting-websocket Q-01: `_connectLock` leaked after maxRetries |
 | User API vs. system cleanup | User calls `close()` but pending timer callback still mutates state | Common in async libraries |
+| Explicit vs. implicit cleanup | `Permit::drop(self)` fires, then Rust `Drop` impl fires again → double release | Meilisearch SearchQueue #6578: two release signals per explicit drop |
 
 **Detection rule:** When you extract a state variable (counter, lock, flag)
 that is accessed from more than one lifecycle context, model each lifecycle
@@ -113,6 +116,36 @@ compliance check. The valkey-glide pilot (2026-08-06) demonstrated this:
 Requirement 3 ("release immediately on timeout") maps to the cell
 (CallerTimedOut, release_permit). That cell was `UNSPECIFIED` in the
 as-is matrix — a direct match to the production bug (#5803).
+
+### Dual ownership cleanup paths (PA-23)
+
+When a resource object has **both** an explicit release method
+(`close()`, `drop(self)`, `dispose()`) **and** an implicit
+cleanup hook (destructor, `Drop` impl, `__del__`, `defer`), model
+both as independent events in the Held state. The disposition matrix
+must have cells for `ExplicitReleaseRequested` and for
+`ImplicitCleanupTriggered`. If both can fire for the same resource
+instance (because the explicit method's return triggers the implicit
+hook), the invariant "exactly one logical release per permit" must
+be proven — either the second path is no-oppable, or one path
+suppresses the other. Meilisearch SearchQueue D1 (2026-08-06):
+`Permit::drop(self)` sends one signal, then Rust's `Drop for Permit`
+sends a second. Every explicit release produced two capacity returns.
+
+### Async cancellation isolation (PA-24)
+
+In async/await languages, cancelling a task or dropping a future
+does **not** automatically propagate to resources that were
+transferred to other tasks before cancellation. The sender-side
+and receiver-side lifecycles are separate orthogonal regions in
+the statechart. A terminal event in the receiver region (caller
+cancelled, future dropped) must have an **explicit** synchronization
+transition to the sender region (entry becomes ineligible). Implicit
+sync does not exist across channel boundaries. Meilisearch SearchQueue
+D2/#6508 (2026-08-06): `oneshot::Sender<Permit>` survived receiver
+cancellation and continued to affect capacity, eviction, selection,
+and metrics — because no explicit cancellation event reached the
+scheduler region.
 
 ## The loop
 
