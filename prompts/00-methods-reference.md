@@ -1,4 +1,4 @@
-# Domain Statechart Method — Reference
+# StateRadar Method — Reference
 
 This is the methodology behind the prompt pack. It uses Harel-style statecharts as explicit domain-behaviour specification and test oracle for software that AI coding agents write or modify. It condenses the full product handoff document (rev. 2) into a tooling-free form. Generated, executed checker scripts and normal test infrastructure (pytest + CI) do the work of the deterministic tooling described there.
 

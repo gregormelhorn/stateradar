@@ -1,9 +1,9 @@
 ---
 name: domain-statechart
-description: "Use when you analyze, modify, test, or review stateful components (lifecycles, connections, sessions, protocols, state machines, retries, timeouts, cancellation, recovery, queues, concurrent coordination), or when the user mentions a disposition matrix, decision records, domain-analysis/, open questions, or the statechart method. Enforces the domain-statechart discipline: model first, no silent domain decisions, checker-verified matrices, one test per matrix cell."
+description: "Use when you analyze, modify, test, or review stateful components (lifecycles, connections, sessions, protocols, state machines, retries, timeouts, cancellation, recovery, queues, concurrent coordination), or when the user mentions a disposition matrix, decision records, domain-analysis/, open questions, or the statechart method. Enforces StateRadar lifecycle contract verification: model first, no silent domain decisions, checker-verified matrices, one test per matrix cell."
 ---
 
-# Domain Statechart Discipline
+# StateRadar Discipline
 
 The pack's canonical prompts live in this repository (default vendored path:
 `tools/prompt-pack/prompts/`; if absent, search for `prompts/00-methods-reference.md`).
