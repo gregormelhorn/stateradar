@@ -5,21 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      # ste-pack is a PRIVATE repository. GITHUB_TOKEN cannot read it, so the
-      # submodule checkout runs over SSH with a read-only deploy key registered
-      # on ste-pack. The private key lives in the STE_PACK_SSH_KEY secret.
-      - name: Checkout ste-pack submodule (private, via deploy key)
-        env:
-          STE_PACK_SSH_KEY: ${{ secrets.STE_PACK_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$STE_PACK_SSH_KEY" > ~/.ssh/ste_pack_deploy
-          chmod 600 ~/.ssh/ste_pack_deploy
-          ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
-          git config --global core.sshCommand "ssh -i ~/.ssh/ste_pack_deploy -o IdentitiesOnly=yes"
-          git config --global url."git@github.com:".insteadOf "https://github.com/"
-          git submodule update --init --recursive
+        with:
+          fetch-depth: 0
+          submodules: recursive
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install jsonschema
