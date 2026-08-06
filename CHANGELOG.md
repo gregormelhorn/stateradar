@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.34 — tests consolidation, reachability checker, evidence repositioning
+
+- tests/: .benchmarks moved into tests/ (golden-mini, red-mini,
+  device-connection convergence framework). No hidden dirs.
+- tools/check_reachability.py: semantic state reachability checker.
+  Verifies all states reachable from initial, terminal states marked.
+  Selftest red case, CI gate on golden-mini.
+- tools/run_tool_tests.py: fixed path after consolidation, hard-fail
+  on zero discovered cases, wired into CI.
+- tools/check_pack_consistency.py: path-existence scan expanded to
+  skills/ and docs/; consumer mountpoint excluded.
+- Evidence repositioned: new bugs as primary evidence in README and
+  tests/benchmarks, contamination caveat on Oracle cases.
+- 11 pilots, 3 Oracle-confirmed, 11 bugs found, 6 issues filed.
+
 ## v1.33 — remove ste-pack dependency, standalone StateRadar
 
 - Removed ste-pack submodule, .vale.ini, technical-names.txt, and all

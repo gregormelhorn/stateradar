@@ -21,7 +21,7 @@ stdlib-Python plus jsonschema. The agent
 may propose and challenge behaviour, but must not silently decide it —
 and the tests come from the specification, not from the code.
 
-**Version 1.33.**
+**Version 1.34.**
 
 ## The problem
 
