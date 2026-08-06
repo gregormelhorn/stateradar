@@ -14,9 +14,10 @@ combinations, and missing tests.
 > Model-based testing checks code against a model.
 > StateRadar first checks whether the model deserves to be the oracle.
 
-The pack is a pure prompt pack for AI-coding-agent workflows. No
-tooling to install; the prompts themselves bootstrap the deterministic
-layer (generated checker scripts, cell tests, CI wiring). The agent
+The pack is a prompt pack for AI-coding-agent workflows. No build
+step — the prompts themselves bootstrap the deterministic layer
+(generated checker scripts, cell tests, CI wiring). Checkers are
+stdlib-Python plus jsonschema. The agent
 may propose and challenge behaviour, but must not silently decide it —
 and the tests come from the specification, not from the code.
 
