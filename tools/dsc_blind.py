@@ -91,8 +91,24 @@ def assemble(analysis_dir: Path) -> str:
     # from the catalogue serve as the normative event contract text.
     contracts = catalogue  # The catalogue IS the contract text for blind pass
 
+    # State list: include the matrix state names so the blind pass uses the
+    # exact same names.  This avoids the mapping problem where blind passes
+    # use human-readable names (CLOSED) while the matrix uses machine-
+    # readable names (Closed_Idle).
+    state_names = ""
+    sidecar_path = analysis_dir / "analysis.json"
+    if sidecar_path.is_file():
+        sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        states = sidecar.get("states", [])
+        if states:
+            state_names = (
+                "\n\nThe component has these states (use these exact names in your table):\n"
+                + ", ".join(states)
+            )
+
     parts = [
         instruction,
+        state_names,
         "\n\n---\n\n## INPUT 1: EVENT CATALOGUE\n\n",
         catalogue,
         "\n\n---\n\n## INPUT 2: PROSE REQUIREMENTS\n\n",
@@ -199,6 +215,19 @@ def _parse_blind_disposition(cell_text: str) -> str:
     return "UNSPECIFIED"
 
 
+def _match_state(blind_name: str, matrix_states: list[str]) -> str | None:
+    """Match a blind-pass state name to a matrix state name, case-insensitive.
+
+    Blind passes should use the exact state names from the dispatch prompt.
+    This fallback handles minor variations (case, whitespace).
+    """
+    b = blind_name.strip().lower()
+    for ms in matrix_states:
+        if ms.lower() == b:
+            return ms
+    return None
+
+
 def diff_blind(analysis_dir: Path, blind_path: Path) -> dict:
     """Diff blind output against the matrix sidecar.
 
@@ -221,18 +250,23 @@ def diff_blind(analysis_dir: Path, blind_path: Path) -> dict:
     # Build a lookup from the blind table: (state, event) → disposition
     blind_lookup: dict[tuple[str, str], str] = {}
     blind_rows = _extract_table_rows(blind_text).split("\n")
+    matrix_states = [c["state"] for c in cells]
+    # Deduplicate unique states
+    all_matrix_states = list(dict.fromkeys(matrix_states))
     for row in blind_rows:
         parts = [p.strip() for p in row.strip("|").split("|")]
         if len(parts) < 2:
             continue
-        blind_state = _strip_markdown(parts[0])
-        # Header detection: first column has "state" → skip
-        if "state" in blind_state.lower():
+        blind_state_raw = _strip_markdown(parts[0])
+        if "state" in blind_state_raw.lower():
             continue
+        matched = _match_state(blind_state_raw, all_matrix_states)
+        if matched is None:
+            continue  # can't match — skip this row
         for i, cell in enumerate(parts[1:], 1):
             if i <= len(sidecar.get("events", [])):
                 event_id = sidecar["events"][i - 1]["id"]
-                blind_lookup[(blind_state, _normalize_id(event_id))] = _parse_blind_disposition(cell)
+                blind_lookup[(matched, _normalize_id(event_id))] = _parse_blind_disposition(cell)
 
     for cell in cells:
         key = (cell["state"], _normalize_id(cell["event"]))
