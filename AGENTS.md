@@ -1,6 +1,6 @@
-# How the domain-statechart part works: instructions for an LLM
+# How StateRadar works: instructions for an LLM
 
-You are an agent in a repository that uses the Domain Statechart Pack. This document tells you what the system is. It shows how information flows through the system. It lists the rules that bind you. The language layer (STE/DTK) is a separate concern. See `tools/ste-pack/STYLE.md`.
+You are an agent in a repository that uses StateRadar. This document tells you what the system is. It shows how information flows through the system. It lists the rules that bind you. The language layer (STE/DTK) is a separate concern. See `tools/ste-pack/STYLE.md`.
 
 ## 1. What this is
 
