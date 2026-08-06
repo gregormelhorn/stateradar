@@ -5,9 +5,9 @@
  "analyzedSha": "WORKTREE",
  "watchPaths": [],
  "states": [
-  "open idle",
-  "open busy",
-  "closed"
+  "Open Idle",
+  "Open Busy",
+  "Closed"
  ],
  "events": [
   {
@@ -30,34 +30,34 @@
  "cells": [
   {
    "disposition": "transition",
-   "target": "open busy",
+   "target": "Open Busy",
    "citation": {
     "file": "src/gate.ts",
     "line": 12
    },
-   "state": "open idle",
+   "state": "Open Idle",
    "event": "E1"
   },
   {
    "disposition": "ignore (documented)",
    "dr": "DR-001",
-   "state": "open idle",
+   "state": "Open Idle",
    "event": "E2"
   },
   {
    "disposition": "defer (queued)",
    "dr": "DR-001",
-   "state": "open busy",
+   "state": "Open Busy",
    "event": "E1"
   },
   {
    "disposition": "transition",
-   "target": "open idle",
+   "target": "Open Idle",
    "citation": {
     "file": "src/gate.ts",
     "line": 20
    },
-   "state": "open busy",
+   "state": "Open Busy",
    "event": "E2"
   },
   {
@@ -66,57 +66,57 @@
     "file": "src/gate.ts",
     "line": 28
    },
-   "state": "closed",
+   "state": "Closed",
    "event": "E1"
   },
   {
    "disposition": "ignore (accidental)",
    "q": "Q-01",
-   "state": "closed",
+   "state": "Closed",
    "event": "E2"
   },
   {
    "disposition": "UNSPECIFIED",
    "q": "Q-02",
-   "state": "open idle",
+   "state": "Open Idle",
    "event": "UV-E1"
   },
   {
    "disposition": "transition",
-   "target": "closed",
+   "target": "Closed",
    "citation": {
     "file": "src/gate.ts",
     "line": 28
    },
-   "state": "open idle",
+   "state": "Open Idle",
    "event": "E3"
   },
   {
    "disposition": "UNSPECIFIED",
    "q": "Q-02",
-   "state": "open busy",
+   "state": "Open Busy",
    "event": "UV-E1"
   },
   {
    "disposition": "transition",
-   "target": "closed",
+   "target": "Closed",
    "citation": {
     "file": "src/gate.ts",
     "line": 28
    },
-   "state": "open busy",
+   "state": "Open Busy",
    "event": "E3"
   },
   {
    "disposition": "ignore (documented)",
    "dr": "DR-001",
-   "state": "closed",
+   "state": "Closed",
    "event": "UV-E1"
   },
   {
    "disposition": "ignore (documented)",
    "dr": "DR-001",
-   "state": "closed",
+   "state": "Closed",
    "event": "E3"
   }
  ],

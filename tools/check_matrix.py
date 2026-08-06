@@ -52,6 +52,25 @@ def main() -> int:
     if "<!-- states:" not in matrix:
         errors.append("matrix: no states declaration comment")
 
+    # PA-17 state naming: PascalCase segments joined by "_"
+    # (Open_AwaitingStability), ALL-CAPS API enums (CONNECTING,
+    # TRANSIENT_FAILURE), compound row labels word by word ("Open Idle").
+    # A name a blind reader cannot derive — implementation flags,
+    # comparisons, lowercase — is a modelling error.
+    word_ok = re.compile(r"^[A-Z][A-Za-z0-9]*(?:_[A-Z][A-Za-z0-9]*)*$")
+    decl = re.search(r"<!-- states: (.+?) -->", matrix)
+    if decl:
+        raw = decl.group(1)
+        names = ([s.strip() for s in raw.split(",")] if "," in raw
+                 else raw.split())
+        for name in names:
+            for word in name.split(" "):
+                if word and not word_ok.match(word):
+                    errors.append(
+                        f"state {name!r} violates PA-17 naming "
+                        f"(offending word {word!r}: use PascalCase segments "
+                        f"with '_' separators or the ALL-CAPS API enum name)")
+
     rows: dict[str, int] = {}
     for line in matrix.split("\n"):
         s = line.strip()

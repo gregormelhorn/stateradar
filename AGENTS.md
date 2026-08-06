@@ -91,6 +91,7 @@ The checkers catch the following defects. Do not fight them. (Generated from `fo
 * schema validity of the sidecar
 * existence of every cited DR file
 * reachable states and terminal-state marking
+* state names follow PA-17 (PascalCase segments or ALL-CAPS API enums)
 <!-- /generated:rules -->
 
 ## 6. Failure modes seen in real runs

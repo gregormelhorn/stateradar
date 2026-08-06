@@ -17,6 +17,12 @@
   registry's selftest backlog is now empty.
 - CI: workflow_dispatch trigger for manual runs; dependencies from
   tools/requirements-dev.txt.
+- tools/check_matrix.py: PA-17 state-naming check — PascalCase
+  segments with "_" separators or ALL-CAPS API enum names; compound
+  row labels validated word by word; red selftest. Pack fixtures
+  renamed to conform (Idle/Open/Closed, Open Idle/Open Busy).
+  BREAKING for consumer matrices with lowercase or flag-like state
+  names — rename per PA-17, then reconcile.
 
 ## v1.35 — rules registry: single source for method rules
 

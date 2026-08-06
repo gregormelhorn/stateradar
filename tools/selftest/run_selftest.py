@@ -99,7 +99,7 @@ def main() -> int:
 
         data = json.loads((gate / "analysis.json").read_text())
         states = set(data["states"])
-        if states != {"open idle", "open busy", "closed"}:
+        if states != {"Open Idle", "Open Busy", "Closed"}:
             failures.append(f"compound row labels not parsed: {sorted(states)}")
         cited = [c for c in data["cells"] if c.get("citation")]
         if not any(c["citation"]["file"].endswith(".ts") for c in cited):
@@ -128,7 +128,7 @@ def main() -> int:
         d2 = tmp / "sync"
         shutil.copytree(COMPOUND, d2)
         (d2 / "domain-analysis" / "gate" / "as-is.machine.mmd").write_text(
-            "stateDiagram-v2\n    [*] --> open\n    state open {\n        idle --> busy : E1\n    }\n")
+            "stateDiagram-v2\n    [*] --> Open\n    state Open {\n        Idle --> Busy : E1\n    }\n")
         expect("state missing from diagram", True,
                *dsc(d2 / "domain-analysis" / "gate", "--repo", str(d2), "--model", "as-is.machine.mmd"),
                needle="missing from diagram")
@@ -225,6 +225,14 @@ def main() -> int:
                     "| source | loss | delay |\n|---|---|---|\n"
                     "| operator | UV-M1-dup |  |\n")
         expect("empty coverage cell", True, *cmx(d6), needle="empty cell")
+        # PA-17: a lowercase / flag-like state name must fail
+        d7 = tmp / "cm-pa17"
+        shutil.copytree(gm, d7)
+        mx = d7 / "disposition-matrix.md"
+        mx.write_text(mx.read_text().replace(
+            "<!-- states: Idle Open Closed -->",
+            "<!-- states: Idle open_pending Closed -->"))
+        expect("PA-17 naming violation", True, *cmx(d7), needle="PA-17")
 
         print("part-B row coverage")
 
@@ -293,13 +301,13 @@ def main() -> int:
     adir = unr / "domain-analysis" / "gate"
     adir.mkdir(parents=True)
     (adir / "disposition-matrix.md").write_text(
-        "<!-- states: idle, open, closed, dead -->\n"
-        "<!-- terminal: closed -->\n"
+        "<!-- states: Idle, Open, Closed, Dead -->\n"
+        "<!-- terminal: Closed -->\n"
         "| state | connect | close | tick |\n"
-        "| **idle** | transition → open | ignore (documented) | ignore (documented) |\n"
-        "| **open** | ignore (documented) | transition → closed | handle |\n"
-        "| **closed** | ignore (documented) | ignore (documented) | handle |\n"
-        "| **dead** | ignore (documented) | ignore (documented) | ignore (documented) |\n"
+        "| **Idle** | transition → Open | ignore (documented) | ignore (documented) |\n"
+        "| **Open** | ignore (documented) | transition → Closed | handle |\n"
+        "| **Closed** | ignore (documented) | ignore (documented) | handle |\n"
+        "| **Dead** | ignore (documented) | ignore (documented) | ignore (documented) |\n"
     )
     gen_sidecar(adir)
     expect("unreachable state must fail", True,

@@ -492,8 +492,11 @@ id = "PA-17"
 title = "state naming convention"
 class = "wellformedness"
 statement = "state naming: public API names, condition-named sub-states, PascalCase with `_` separator — blind-derivable from requirements"
-enforcement = "prompt"
-checker_candidate = true
+enforcement = "checker"
+checker_ref = "tools/check_matrix.py (states declaration naming)"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "state names follow PA-17 (PascalCase segments or ALL-CAPS API enums)"
+catches_order = 17
 added_by = "pack:v1.32 (reconnecting-websocket)"
 
 [[rules]]
