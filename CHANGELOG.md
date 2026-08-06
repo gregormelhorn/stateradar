@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.26 — lock-discipline catalogue, user-model gap lint, reviewer cross-check (2026-08-06)
+
+- 02-pilot v1.12: Lock-discipline annotation in the event catalogue
+  (Step 3), user-model gap lint (Step 5), and reviewer cross-check
+  (Step 7a). Driven by the sony/gobreaker comparison: two real open
+  bugs found by different methods (deadlock via traditional review,
+  count-reset via statechart invariant), and the Erklärbarkeitslücke
+  exposed by gobreaker #49/#30.
+
 ## v1.25 — multi-instance sync probes, thundering-herd class (2026-08-06)
 
 - 02-pilot v1.11: new lint item "synchronized reset points", NAT-SYS
