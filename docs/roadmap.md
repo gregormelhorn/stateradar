@@ -15,9 +15,10 @@ Python component, a README with 9 requirements, and a full Part A
 analysis with Mermaid statechart and critical finding Q-02 (FAILED
 backdoor via disconnect).
 
-## 3. XState / Semantic Analysis (deferred)
+## 3. XState / Semantic Analysis
 
-**Status:** Deferred. `formats/analysis.schema.json` carries enough
-data for an eventual reachability checker (`tools/check_reachability.py`).
-No prompt changes needed — the schema already supports it. Priority
-is low: the current method finds bugs without semantic analysis.
+**Status:** ✅ Minimal version shipped. `tools/check_reachability.py`
+verifies all states are reachable from the initial state and that
+terminal states are marked. Selftest red case, CI-wired on golden-mini.
+Full reachability over hierarchy/parallel regions is deferred until
+needed — the `formats/analysis.schema.json` carries enough data.

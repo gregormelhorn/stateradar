@@ -145,6 +145,7 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 06-reconcile citation refresh), gen_matrix_scaffold
                 (empty matrix grids), dsc_compose (cross-model report),
                 check_matrix (the generic per-component checker),
+                check_reachability (semantic state reachability),
                 dsc_stamp (validate + pin the manifest),
                 dsc_blind (blind-pass assembly + diff),
                 dsc_cross_check (reviewer cross-check), templates/

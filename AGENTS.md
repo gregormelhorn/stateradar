@@ -78,6 +78,7 @@ The checkers catch the following defects. Do not fight them.
 * blind-table row coverage
 * schema validity of the sidecar
 * existence of every cited DR file
+* reachable states and terminal-state marking
 
 ## 6. Failure modes seen in real runs
 
