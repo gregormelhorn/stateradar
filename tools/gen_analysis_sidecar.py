@@ -59,7 +59,12 @@ def _src_index(root: Path, overlay: dict) -> dict[str, str]:
     index: dict[str, str] = {}
     roots = overlay.get("src_roots") or SRC_ROOTS
     exts = tuple(overlay.get("src_exts") or SRC_EXTS)
-    bases = [root / r for r in roots if (root / r).is_dir()] or [root]
+    # When no standard source roots exist (repo with files at top level),
+    # fall back to the root directory so citations resolve instead of
+    # silently dropping (pladaria/reconnecting-websocket, 2026-08-06).
+    bases = [root / r for r in roots if (root / r).is_dir()]
+    if not bases:
+        bases = [root]
     for base in bases:
         for dirpath, dirnames, files in os.walk(base):
             dirnames[:] = [d for d in dirnames
@@ -68,6 +73,21 @@ def _src_index(root: Path, overlay: dict) -> dict[str, str]:
                 if f.endswith(exts):
                     index.setdefault(f, str(Path(dirpath, f).relative_to(root)))
     return index
+
+
+def _strip_markdown(text: str) -> str:
+    """Strip inline markdown formatting from cell text.
+
+    Bold markers (**reject**) broke startswith("reject") checks;
+    inline code and links also interfere with disposition parsing.
+    """
+    # Bold/italic: **text**, *text*, ***text***
+    text = re.sub(r'\*{1,3}([^*]+)\*{1,3}', r'\1', text)
+    # Inline code: `text`
+    text = re.sub(r'`([^`]+)`', r'\1', text)
+    # Links: [text](url) — keep the text
+    text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
+    return text.strip()
 
 
 def _parse_events(header: str) -> list[dict]:
@@ -88,7 +108,7 @@ def _parse_cell(
     src_index: dict[str, str],
 ) -> dict:
     """One matrix cell → sidecar cell."""
-    raw = text.strip().strip("`").strip()
+    raw = _strip_markdown(text.strip())
     cell: dict = {}
     q = re.search(r"Q-[\w-]+", raw)
     dr = re.search(r"DR-\d+", raw)
@@ -218,7 +238,10 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
     for block_events, block_rows in blocks:
         for row in block_rows:
             label = row.strip().strip("|").split("|")[0].strip()
-            m = re.match(r"\*\*(\w[\w-]*)\*\*\s*(.*)", label)
+            # Accept any text between ** markers as the state name, then
+            # strip the markers to get plain text.  Previous regex
+            # (\w[\w-]*) rejected dots, spaces, and compound names.
+            m = re.match(r"\*\*(.+?)\*\*\s*(.*)", label)
             if not m:
                 raise ValueError(f"{component}: bad row label {label!r}")
             fam, leaf = m.group(1), m.group(2).strip()

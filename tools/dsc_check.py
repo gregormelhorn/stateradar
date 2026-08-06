@@ -120,6 +120,19 @@ def main() -> int:
         if q.get("status", "").split(" ")[0] not in Q_STATUS:
             E(f"question {q.get('id')}: status {q.get('status')!r} invalid")
 
+    # Question lifecycle: a RESOLVED question must have a DR link in at
+    # least one cell.  An answered question without a recorded decision
+    # is a decision that can be lost (gobreaker #72, 2026-08-06).
+    for q in data.get("questions", []):
+        if q.get("status", "").startswith("RESOLVED"):
+            linked = any(
+                c.get("q") == q["id"] and c.get("dr")
+                for c in data["cells"]
+            )
+            if not linked:
+                E(f"question {q['id']}: RESOLVED but no cell links a DR — "
+                  f"add a decision record reference to the cell")
+
     # Behavioural-DR reverse coverage
     cited = {c.get("dr") for c in data["cells"] if c.get("dr")}
     for dr in data.get("behaviouralDrs", []):
@@ -160,7 +173,10 @@ def main() -> int:
                 if stack:
                     stack.pop()
                 continue
-            m = re.match(r"\s*([^:\-\n]+?)\s*-->\s*([^:\n]+?)\s*(?::|$)", line)
+            # Allow hyphens in state names (e.g. Closed_Idle, Open_Unstable).
+            # The previous class [^:\-\n] excluded hyphens, silently dropping
+            # every hyphenated state from the diagram (recws, 2026-08-06).
+            m = re.match(r"\s*([^:\n]+?)\s*-->\s*([^:\n]+?)\s*(?::|$)", line)
             if m:
                 enclosing = stack[-1] if stack else None
                 edges.add((qualify(m.group(1), enclosing), qualify(m.group(2), enclosing)))
