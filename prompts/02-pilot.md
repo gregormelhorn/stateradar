@@ -3,6 +3,16 @@
 **Version 1.10.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.12 — lock-discipline in catalogue, user-model-legibility lint, reviewer
+  cross-check (Step 7a). Divergence class from the sony/gobreaker comparison
+  (2026-08-06): two real open bugs (#37 OnStateChange deadlock, #72 count
+  reset) were found by different methods (traditional review and statechart
+  respectively) and neither alone would have caught both. The combined model
+  is now explicit: traditional review and statechart cross-reference each
+  other. Three catalogue/lint additions close the Erklärbarkeitslücke found
+  in gobreaker issues #49/#30 (users don't understand when reject
+  dispositions occur because the matrix is correct but the concurrent
+  execution path is invisible in a single-threaded mental model).
 * v1.11 — multi-instance synchronization probes: a state reset triggered by
   an external event that N instances observe simultaneously (connection
   opened, heartbeat, leader elected) removes backpressure. The
@@ -87,6 +97,18 @@ For every external event source, derive undesired variants with this checklist: 
 
 **Upstream-guard annotation.** For every external event, state which validations happen upstream of this boundary (with citations into the upstream code) and which are absent here. Do this per deployment topology when more than one exists. A guard the catalogue does not mention will be re-invented or falsely assumed by every blind reader.
 
+**Lock-discipline annotation.** For every mutex-held section in the
+component: state which events or callbacks fire inside the critical
+section. Record the reentrancy contract — may event handlers or user
+callbacks call back into public methods of the component? A callback
+invoked under the mutex that calls any public method that acquires the
+same mutex is a deadlock. Record the contract per callback, with
+citations into the callback's documentation (does the README or
+docstring say not to call methods from callbacks? If not, the gap is a
+finding) and the lock-acquisition site (file:line). This annotation
+feeds adversarial traces that deliberately re-enter from callbacks; a
+deadlock becomes a matrix disposition, not a surprise.
+
 **Checklist coverage table (machine-readable).** Emit a table `undesired-coverage`: rows = external sources, columns = the five checklist categories. Each cell holds the derived variant id(s), or an explicit `n/a: <reason>`. An empty cell is an error. This table prevents a checklist category from silently producing no variant.
 
 **Cross-source interaction pairs.** Enumerate every pair of *external* events from *different* sources that reference the same entity (room, session, stream, id) and can plausibly arrive near-simultaneously. Both orderings of each pair get an id (`P-01a`, `P-01b`, …) in a pairs table. The per-source checklist covers single-source orderings. This table exists because a per-source checklist structurally misses the races *between* sources.
@@ -166,6 +188,16 @@ them. A NAT-SYS is not an obligation on this component — it is an
 environment assumption the adversarial traces use to model aggregate
 behaviour.
 
+* **user-model gap:** a `reject`, `ignore (documented)`, or `defer`
+  disposition whose trigger condition is only reachable under concurrent
+  execution — multiple in-flight requests, a race between an external
+  event and a timer, a stale callback from a previous generation. The
+  disposition is correct in the matrix but invisible in a
+  single-threaded mental model. Flag it. The adversarial trace that
+  exercises the race is also the user-facing documentation of *when*
+  this disposition occurs. A matrix with correct dispositions that users
+  cannot understand is a correct model that fails its purpose.
+
 → `invariants-and-lints.md`
 
 ### Step 6 — Adversarial traces
@@ -201,6 +233,29 @@ Status: OPEN — human decision required
 Do not resolve these questions. End with a summary count: states / events incl. undesired variants / interaction pairs / matrix cells / UNSPECIFIED / accidental ignores / guard groups proven / guard violations / not-formalizable / findings / open questions.
 
 → `open-questions.md`, `summary.md`
+
+### Step 7a — Reviewer cross-check (optional, recommended)
+
+After a traditional code review of the same component (separate session,
+no statechart methodology), map every review finding to a matrix cell,
+question, invariant, or lint item:
+
+* Finding maps to an existing cell → the matrix already covers it; add
+  the reviewer's citation as an additional provenance source on that
+  cell.
+* Finding does NOT map to any cell → the matrix has a gap. Raise a new
+  Q.
+* Finding refutes a cell's disposition → the matrix is wrong. Raise a
+  new Q with the conflicting evidence.
+* Finding concerns test quality, naming, code style, or language-specific
+  footguns → outside the statechart's scope. Note it in `summary.md`
+  under a "reviewer findings outside scope" section.
+
+This step makes the combined model explicit: the traditional reviewer
+finds practical bugs and API surprises; the statechart systematizes them
+into the matrix; the matrix gains additional provenance. A finding that
+the statechart missed is a gap in the model. A finding the reviewer
+missed is a gap in inspection. They are complementary, not redundant.
 
 ---
 
