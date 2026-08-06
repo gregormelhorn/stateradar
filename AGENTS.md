@@ -12,7 +12,17 @@ Never fill a specification gap with your own judgment, however plausible. Your v
 
 * **Machine boundary**: the scope statement declares one bounded component. The machine boundary is this component, not the whole system.
 * **State**: a state is a mode of the component. Implicit states count. Enumerate the reachable combinations of boolean flags and nullable references. These combinations are the real state space.
-* **Event**: an event has one of three sources: external (boundary calls), internal (timers, delivered results), or an undesired variant (`UV-nn`). Derive the undesired variants per source from a fixed checklist. The checklist covers loss or failure, delay beyond timeout, duplication, out-of-order or stale arrival, and contradictory input. The coverage table must show every category. Write a reason for each `n/a`.
+* **Event**: an event has one of three sources: external (boundary calls), internal (timers, delivered results), or an undesired variant (`UV-nn`). Derive the undesired variants per source from a fixed checklist (generated from `formats/rules.toml`):
+
+<!-- generated:rules key=uv-categories -->
+* loss or failure of the source (F-12)
+* delay beyond timeout (F-13)
+* duplication (F-14)
+* out-of-order or stale arrival, especially after cancellation or shutdown (F-15)
+* contradictory simultaneous inputs (F-16)
+<!-- /generated:rules -->
+
+  The coverage table must show every category. Write a reason for each `n/a`.
 * **Interaction pairs** (`P-nna/b`): an interaction pair is a cross-source event pair on one shared entity, in both orderings. Per-source checklists structurally miss races between sources. Interaction pairs close this gap.
 * **Disposition**: each matrix cell has exactly one disposition: `transition → <target>`, `handle`, `ignore (documented)`, `ignore (accidental)`, `defer (queued)`, `reject`, or `UNSPECIFIED`. The values `ignore (accidental)` and `UNSPECIFIED` are holes.
 * **Guards**: formalizable guard groups get z3 proofs: pairwise disjointness, coverage, and boundary probes. Each group ends as `proven`, `violation`, or `not-formalizable: <reason>`. Never skip a guard group silently.
@@ -61,8 +71,9 @@ Run 06 first when the manifest reports staleness. Run 01 or 02 for a new compone
 
 ## 5. What the checkers catch
 
-The checkers catch the following defects. Do not fight them.
+The checkers catch the following defects. Do not fight them. (Generated from `formats/rules.toml` — the registry maps each line to its rule, checker, and selftest.)
 
+<!-- generated:rules key=checker-catalogue -->
 * grid totality
 * disposition vocabulary
 * hole → Q back-references
@@ -79,6 +90,7 @@ The checkers catch the following defects. Do not fight them.
 * schema validity of the sidecar
 * existence of every cited DR file
 * reachable states and terminal-state marking
+<!-- /generated:rules -->
 
 ## 6. Failure modes seen in real runs
 

@@ -1,8 +1,11 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.10.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.14.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.14 — rules registry: the closed vocabularies, the undesired-variant
+  checklist, and the Step-5 lint list are now generated from
+  `formats/rules.toml` (single source; `tools/gen_rules.py`).
 * v1.13 — finding verification step (Step 8): every bug claim, invariant
   violation, and lint finding gets a second pass against the code before
   finalizing the matrix. Concurrency claims must cite memory ordering;
@@ -114,7 +117,17 @@ List every event with name, source, external/internal, payload gist, and where t
 
 **Remembrance semantics.** For every event family whose entities can end (episodes, sessions, connections): state what an ended entity leaves behind. What the component remembers, in what bound (size or duration), and what a late reference to it resolves to. Transition behaviour without end-of-life memory semantics is exactly where blind readers and late-arrival dispositions go wrong.
 
-For every external event source, derive undesired variants with this checklist: loss or failure of the source; delay beyond a timeout; duplication. Also: out-of-order or stale arrival, above all after cancellation or shutdown. Also: contradictory simultaneous inputs. Add the variants to the catalogue. They receive matrix columns like any other event.
+For every external event source, derive undesired variants with this checklist (each category carries its fault-class id from `formats/rules.toml`):
+
+<!-- generated:rules key=uv-categories -->
+* loss or failure of the source (F-12)
+* delay beyond timeout (F-13)
+* duplication (F-14)
+* out-of-order or stale arrival, especially after cancellation or shutdown (F-15)
+* contradictory simultaneous inputs (F-16)
+<!-- /generated:rules -->
+
+Add the variants to the catalogue. They receive matrix columns like any other event.
 
 **Upstream-guard annotation.** For every external event, state which validations happen upstream of this boundary (with citations into the upstream code) and which are absent here. Do this per deployment topology when more than one exists. A guard the catalogue does not mention will be re-invented or falsely assumed by every blind reader.
 
@@ -130,7 +143,7 @@ finding) and the lock-acquisition site (file:line). This annotation
 feeds adversarial traces that deliberately re-enter from callbacks; a
 deadlock becomes a matrix disposition, not a surprise.
 
-**Checklist coverage table (machine-readable).** Emit a table `undesired-coverage`: rows = external sources, columns = the five checklist categories. Each cell holds the derived variant id(s), or an explicit `n/a: <reason>`. An empty cell is an error. This table prevents a checklist category from silently producing no variant.
+**Checklist coverage table (machine-readable).** Emit a table `undesired-coverage`: rows = external sources, columns = the checklist categories. Each cell holds the derived variant id(s), or an explicit `n/a: <reason>`. An empty cell is an error. This table prevents a checklist category from silently producing no variant.
 
 **Cross-source interaction pairs.** Enumerate every pair of *external* events from *different* sources that reference the same entity (room, session, stream, id) and can plausibly arrive near-simultaneously. Both orderings of each pair get an id (`P-01a`, `P-01b`, …) in a pairs table. The per-source checklist covers single-source orderings. This table exists because a per-source checklist structurally misses the races *between* sources.
 
@@ -196,8 +209,9 @@ disposition, the requirement is **violated** — the code does not
 implement what the requirements demand. If no cell maps to the
 requirement, the requirement is **unimplemented** — raise a Q.
 
-Then run this checklist against the model and report violations with provenance:
+Then run this checklist against the model and report violations with provenance (the list is generated from `formats/rules.toml`):
 
+<!-- generated:rules key=step5-lints -->
 * waiting, connecting, or stopping states without timeout behaviour
 * retries without a maximum
 * invoked external operations without an explicit failure outcome
@@ -251,6 +265,7 @@ behaviour.
   exercises the race is also the user-facing documentation of *when*
   this disposition occurs. A matrix with correct dispositions that users
   cannot understand is a correct model that fails its purpose.
+<!-- /generated:rules -->
 
 → `invariants-and-lints.md`
 
@@ -356,7 +371,9 @@ Run this in a **new** agent session with no access to the as-is model, the matri
 
 > Here is the event catalogue of a component, and its requirements. For every event — including undesired variants and both orderings of every interaction pair — state in which situations the component should handle, ignore, or reject it, and what should happen. Describe situations in requirement terms. Name states per PA-17 (state naming convention): prefer public API names, name sub-states by their condition, use PascalCase with `_` as separator. If you must assume a lifecycle state the requirements do not name, label it `assumed-state:` with the condition that defines it. You have no access to the implementation. Be concrete. Produce a table keyed by the catalogue's event ids. End with a coverage checklist: every catalogue event id, listed once, ticked. A missing row must be impossible to miss.
 >
+<!-- generated:rules key=partb-vocab -->
 > The disposition vocabulary you must use (from the methods reference): `transition → <target>` | `handle` (stays in the state, does something) | `ignore (documented)` | `ignore (accidental)` | `defer (queued)` | `reject` (a declared refusal signal: error, diagnostic, nack) | `UNSPECIFIED`. Without these definitions a blind pass applies `reject` and `handle` to identical semantics interchangeably (dobby trigger-service, 2026-08-05: four vocabulary-only "divergences").
+<!-- /generated:rules -->
 
 Then diff its table against `disposition-matrix.md` (an agent that sees both may do this diff).
 

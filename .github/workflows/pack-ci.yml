@@ -10,6 +10,11 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install jsonschema
       - run: python tools/check_pack_consistency.py
+      # The rules-registry selftest proves gen_rules --check can go red:
+      # a checker rule without a selftest, an unknown fault id, and a
+      # drifted generated block must each fail.
+      - name: rules registry selftest
+        run: python tools/gen_rules.py --selftest
       # The selftest runs the checker red as well as green: it asserts that
       # silent omission, drifted citations, an out-of-sync diagram, and a
       # snake_case manifest key each FAIL. A green-only run proves nothing.

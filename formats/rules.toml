@@ -1,0 +1,925 @@
+# StateRadar rules registry — the single source for method rules.
+#
+# docs/plan-rules-registry.md is the design document. Edit THIS file,
+# then run `python3 tools/gen_rules.py --write` to re-render every
+# generated block (marked `<!-- generated:rules key=... -->`) in
+# prompts/00-methods-reference.md, prompts/02-pilot.md, AGENTS.md and
+# README.md. `python3 tools/gen_rules.py --check` (run by
+# tools/check_pack_consistency.py) fails the build on drift.
+#
+# Rule fields:
+#   id            stable identifier (PA-n from the methods reference,
+#                 or R-* for rules that never had a PA number)
+#   title         short human name
+#   class         wellformedness | completeness | fault-model | process
+#                 | empirical-pattern
+#   statement     one-line normative text (rendered into 00's condensed list
+#                 for PA-* ids)
+#   enforcement   checker | test | lint | prompt | human | data
+#   checker_ref   which deterministic check enforces it (enforcement=checker)
+#   selftest_ref  red-case proof that the checker can fail. "TODO" is an
+#                 explicit, warned-about backlog entry — never omit silently.
+#   catches       verbatim line for the AGENTS §5 checker catalogue
+#   catches_order position in that catalogue
+#   render        verbatim markdown for the generated Step-5 lint block
+#   step5_order   position in that block
+#   lint_ref      where a lint rule lives when it is prose, not a bullet
+#   detects       fault-class ids (F-xx) this rule can find (the ODC
+#                 trigger→defect-type mapping; required for class=fault-model)
+#   lineage       literature anchors
+#   added_by      version / pilot that introduced the rule
+#   checker_candidate  true = should become a checker; warned as backlog
+
+# ---------------------------------------------------------------------------
+# Closed vocabularies
+# ---------------------------------------------------------------------------
+
+[vocab]
+dispositions = [
+  "transition → <target>", "handle", "ignore (documented)",
+  "ignore (accidental)", "defer (queued)", "reject", "UNSPECIFIED",
+]
+holes = ["ignore (accidental)", "UNSPECIFIED"]
+question_status = ["OPEN", "ANSWERED", "RESOLVED", "CONFLICT"]
+not_formalizable = ["external-call", "dynamic-state", "clock", "unstructured-payload"]
+provenance = [
+  "explicit-requirement", "observed-in-code", "observed-in-tests",
+  "inferred", "proposed",
+]
+
+[vocab.disposition_defs]
+"handle" = "stays in the state, does something"
+"reject" = "a declared refusal signal: error, diagnostic, nack"
+
+[render]
+partb_vocab_tail = "Without these definitions a blind pass applies `reject` and `handle` to identical semantics interchangeably (dobby trigger-service, 2026-08-05: four vocabulary-only \"divergences\")."
+
+# ---------------------------------------------------------------------------
+# Fault-class catalogue (F-xx)
+# Binder's state-machine fault taxonomy + the pack's empirically found
+# classes + the undesired-variant categories (SHARD guide-word aligned).
+# ---------------------------------------------------------------------------
+
+[[faults]]
+id = "F-01"
+name = "missing transition"
+binder = "missing-transition"
+
+[[faults]]
+id = "F-02"
+name = "transfer fault"
+binder = "transfer-fault"
+
+[[faults]]
+id = "F-03"
+name = "output fault"
+binder = "output-fault"
+
+[[faults]]
+id = "F-04"
+name = "sneak path"
+binder = "sneak-path"
+
+[[faults]]
+id = "F-05"
+name = "corrupt state"
+binder = "corrupt-state"
+
+[[faults]]
+id = "F-06"
+name = "trap door"
+binder = "trap-door"
+
+[[faults]]
+id = "F-07"
+name = "lifecycle coupling"
+source = "PA-21 (valkey-glide #5803, python-websockets #1527, Meilisearch #6508)"
+
+[[faults]]
+id = "F-08"
+name = "double release"
+source = "PA-23 (Meilisearch #6578)"
+
+[[faults]]
+id = "F-09"
+name = "cancellation leak"
+source = "PA-24 (Meilisearch #6508)"
+
+[[faults]]
+id = "F-10"
+name = "synchronized reset herd"
+source = "02:v1.11 (reconnecting-websocket #200)"
+
+[[faults]]
+id = "F-11"
+name = "callback deadlock"
+source = "02:v1.12 (gobreaker #37)"
+
+[[faults]]
+id = "F-12"
+name = "loss / omission"
+shard = "omission"
+
+[[faults]]
+id = "F-13"
+name = "delay / late"
+shard = "late"
+
+[[faults]]
+id = "F-14"
+name = "duplication"
+shard = "commission (repeat)"
+
+[[faults]]
+id = "F-15"
+name = "out-of-order / stale"
+shard = "early/late"
+
+[[faults]]
+id = "F-16"
+name = "contradictory input"
+shard = "value (coarse)"
+
+
+[[faults]]
+id = "F-19"
+name = "unimplemented requirement"
+source = "PA-22"
+
+[[faults]]
+id = "F-20"
+name = "blocked progress after terminal event"
+source = "python-websockets #1527"
+
+[[faults]]
+id = "F-21"
+name = "mirroring test (structure-bound)"
+source = "07-test-audit"
+
+# ---------------------------------------------------------------------------
+# Undesired-variant checklist categories (PA-13b data; SHARD-aligned).
+# Extending this list is a data edit that propagates into 00, 02 Step 3
+# and AGENTS §2 via generation.
+# ---------------------------------------------------------------------------
+
+[[uv_categories]]
+fault = "F-12"
+label = "loss or failure of the source"
+
+[[uv_categories]]
+fault = "F-13"
+label = "delay beyond timeout"
+
+[[uv_categories]]
+fault = "F-14"
+label = "duplication"
+
+[[uv_categories]]
+fault = "F-15"
+label = "out-of-order or stale arrival, especially after cancellation or shutdown"
+
+[[uv_categories]]
+fault = "F-16"
+label = "contradictory simultaneous inputs"
+
+
+# ---------------------------------------------------------------------------
+# README "What StateRadar finds" (generated list; order = file order)
+# ---------------------------------------------------------------------------
+
+[[readme_finds]]
+fault = "F-01"
+text = "missing State/Event transitions and `UNSPECIFIED` matrix cells"
+
+[[readme_finds]]
+fault = "F-13"
+text = "timeout events without guaranteed progress"
+
+[[readme_finds]]
+fault = "F-20"
+text = "caller operations blocked after a terminal event"
+
+[[readme_finds]]
+fault = "F-07"
+text = "internal requests holding resources after a caller timeout"
+
+[[readme_finds]]
+fault = "F-13"
+text = "unbounded waits"
+
+[[readme_finds]]
+fault = "F-02"
+text = "invalid recovery or reconnect paths"
+
+[[readme_finds]]
+fault = "F-07"
+text = "wrongly coupled lifecycle regions (caller vs. internal)"
+
+[[readme_finds]]
+fault = "F-03"
+text = "lost or overwritten failure causes"
+
+[[readme_finds]]
+fault = "F-08"
+text = "missing idempotency in cleanup and release"
+
+
+[[readme_finds]]
+fault = "F-19"
+text = "requirements without a complete execution path"
+
+[[readme_finds]]
+fault = "F-06"
+text = "implementation paths without a documented contract"
+
+[[readme_finds]]
+fault = "F-21"
+text = "tests that assert internal states but not caller-visible behaviour"
+
+# ---------------------------------------------------------------------------
+# Rules — PA series (rendered into 00's condensed block)
+# ---------------------------------------------------------------------------
+
+[[rules]]
+id = "PA-1"
+title = "guard disjointness"
+class = "wellformedness"
+statement = "guards per (state,event) pairwise disjoint — order must never decide"
+enforcement = "checker"
+checker_ref = "check_guards.py (per-run z3); outcome presence via tools/dsc_check.py"
+selftest_ref = "TODO"
+lineage = ["heitmeyer-tosem-1996"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-2"
+title = "guard coverage"
+class = "wellformedness"
+statement = "guards jointly exhaustive, or an explicit else exists; gap = hole"
+enforcement = "checker"
+checker_ref = "check_guards.py (per-run z3); outcome presence via tools/dsc_check.py"
+selftest_ref = "TODO"
+lineage = ["heitmeyer-tosem-1996"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-3a"
+title = "guard assumptions proven"
+class = "wellformedness"
+statement = "guard checks state their assumptions; z3 proofs via a generated check_guards.py where formalizable"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (guard outcomes present)"
+selftest_ref = "TODO"
+catches = "guard outcomes present"
+catches_order = 7
+lineage = ["heitmeyer-tosem-1996"]
+added_by = "02:v1.2"
+
+[[rules]]
+id = "PA-3b"
+title = "not-formalizable labelling"
+class = "process"
+statement = "unformalizable guards keep inspection-only reasoning, labelled `not-formalizable: <category>` from the closed vocabulary"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (not-formalizable category vocabulary)"
+selftest_ref = "TODO"
+added_by = "02:v1.2"
+
+[[rules]]
+id = "PA-4"
+title = "event classification"
+class = "wellformedness"
+statement = "events classified: monitored input | controlled output | internal"
+enforcement = "prompt"
+checker_candidate = true
+lineage = ["parnas-madey-1995"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-5"
+title = "derived events"
+class = "wellformedness"
+statement = "derived events may be defined as @T(predicate) WHEN condition"
+enforcement = "prompt"
+lineage = ["heitmeyer-tosem-1996"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-6a"
+title = "NAT/SYS split"
+class = "wellformedness"
+statement = "invariants split NAT vs SYS"
+enforcement = "prompt"
+lineage = ["parnas-madey-1995"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-6b"
+title = "NAT assumption boundary"
+class = "process"
+statement = "analysis may assume NAT, tests may not"
+enforcement = "prompt"
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-7"
+title = "bindings in the spec"
+class = "wellformedness"
+statement = "bindings (abstract action → concrete symbol) are part of the spec"
+enforcement = "prompt"
+checker_candidate = true
+lineage = ["heninger-1980"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-8"
+title = "single-input assumption"
+class = "wellformedness"
+statement = "single-input assumption: one event to completion at a time"
+enforcement = "prompt"
+lineage = ["heninger-1980"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-9a"
+title = "serializing dispatch seam"
+class = "process"
+statement = "tests require a serializing dispatch seam"
+enforcement = "test"
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-9b"
+title = "reentrancy probes"
+class = "fault-model"
+statement = "probe reentrancy from callbacks and event handlers"
+enforcement = "test"
+detects = ["F-11"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-10"
+title = "declared abstraction"
+class = "completeness"
+statement = "completeness is relative to a declared abstraction (hierarchy inheritance, guard predicates) — state it in the matrix header"
+enforcement = "prompt"
+checker_candidate = true
+lineage = ["heimdahl-leveson-1996"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-11"
+title = "witness traces"
+class = "completeness"
+statement = "aim for a witness trace per matrix cell, not just happy paths"
+enforcement = "prompt"
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-12"
+title = "cell test coverage"
+class = "completeness"
+statement = "every reachable cell gets ≥1 test; untestable cells carry reasons"
+enforcement = "test"
+checker_ref = "consumer CI: matrix-coverage.json ↔ cell-test map (04-testgen)"
+detects = ["F-01", "F-02", "F-03", "F-04"]
+lineage = ["gargantini-heitmeyer-1999", "binder-1999"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-13a"
+title = "undesired-variant obligation"
+class = "completeness"
+statement = "undesired-event checklist applied to every external source; the coverage table is total"
+enforcement = "checker"
+checker_ref = "tools/check_matrix.py (undesired-coverage totality)"
+selftest_ref = "TODO"
+catches = "coverage-table totality"
+catches_order = 8
+lineage = ["jaffe-leveson-1991"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-13b"
+title = "undesired-variant categories"
+class = "fault-model"
+statement = "the checklist categories are registry data (SHARD-aligned); extending them is a data edit, not a prose edit"
+enforcement = "data"
+detects = ["F-12", "F-13", "F-14", "F-15", "F-16"]
+lineage = ["shard-pumfrey-mcdermid", "jaffe-leveson-1991"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-14a"
+title = "diagram/matrix round-trip"
+class = "wellformedness"
+statement = "the matrix round-trips with the diagram; sync is checker-verified"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (Mermaid ↔ matrix sync)"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "Mermaid ↔ matrix sync"
+catches_order = 10
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-14b"
+title = "matrix as review surface"
+class = "process"
+statement = "the matrix is the primary review surface"
+enforcement = "prompt"
+lineage = ["heninger-1980"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-15"
+title = "completeness lint checklist"
+class = "completeness"
+statement = "lint checklist follows the Jaffe–Leveson completeness criteria: every input in every state, timing on waiting states, startup/shutdown defined, capacity bounded, robustness to undesired events"
+enforcement = "lint"
+step5_order = 1
+detects = ["F-13", "F-20"]
+lineage = ["jaffe-leveson-1991"]
+added_by = "v1.0"
+render = """
+* waiting, connecting, or stopping states without timeout behaviour
+* retries without a maximum
+* invoked external operations without an explicit failure outcome
+* externally initiated operations without cancellation handling
+* terminal or error states without documented meaning or diagnostic
+* undefined startup or shutdown behaviour
+* unbounded queues or buffers, unhandled overload"""
+
+[[rules]]
+id = "PA-16"
+title = "AND/OR guard tables"
+class = "process"
+statement = "render complex guards as AND/OR tables for human review"
+enforcement = "prompt"
+lineage = ["rsml-leveson-1994"]
+added_by = "v1.0"
+
+[[rules]]
+id = "PA-17"
+title = "state naming convention"
+class = "wellformedness"
+statement = "state naming: public API names, condition-named sub-states, PascalCase with `_` separator — blind-derivable from requirements"
+enforcement = "prompt"
+checker_candidate = true
+added_by = "pack:v1.32 (reconnecting-websocket)"
+
+[[rules]]
+id = "PA-18a"
+title = "terminal-state declaration"
+class = "wellformedness"
+statement = "terminal states declared after the matrix; the checker treats their events as ignore (documented)"
+enforcement = "checker"
+checker_ref = "tools/check_reachability.py"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "reachable states and terminal-state marking"
+catches_order = 16
+added_by = "pack:v1.32 (cenkalti/backoff)"
+
+[[rules]]
+id = "PA-18b"
+title = "terminal-state naming"
+class = "process"
+statement = "terminal states named by their exit condition — they are the API contract"
+enforcement = "prompt"
+added_by = "pack:v1.32 (cenkalti/backoff)"
+
+[[rules]]
+id = "PA-19"
+title = "runtime boundary"
+class = "process"
+statement = "language-runtime, OS, and performance behaviour are outside the statechart; findings there are `unverifiable-runtime`"
+enforcement = "human"
+lineage = ["parnas-madey-1995"]
+added_by = "pack:v1.32 (tenacity #534)"
+
+[[rules]]
+id = "PA-20"
+title = "API contract vs. state machine"
+class = "process"
+statement = "wrong return values are API-contract issues, wrong transitions are matrix issues; only the latter belong in the matrix"
+enforcement = "human"
+lineage = ["parnas-madey-1995"]
+added_by = "pack:v1.32 (tenacity #517)"
+
+[[rules]]
+id = "PA-21"
+title = "lifecycle disagreement"
+class = "fault-model"
+statement = "shared state across independent lifecycles: a terminal state in one track must trigger cleanup in the other"
+enforcement = "lint"
+step5_order = 3
+detects = ["F-07"]
+added_by = "pack:v1.32 (valkey-glide #5803, python-websockets #1527)"
+render = """
+* **lifecycle disagreement (PA-21):** a state variable (counter, lock,
+  flag) accessed from more than one independent lifecycle (caller vs.
+  internal request, public API vs. background goroutine, user action vs.
+  system cleanup). Model each lifecycle as a separate track. A terminal
+  state in one lifecycle that does not trigger a cleanup transition in
+  the shared resource track is a coupling bug. Flag terminal states
+  missing cross-lifecycle cleanup transitions."""
+
+[[rules]]
+id = "PA-22"
+title = "requirement-to-cell mapping"
+class = "completeness"
+statement = "every DOC-n requirement maps to ≥1 matrix cell; UNSPECIFIED there = violated, no cell = unimplemented"
+enforcement = "lint"
+lint_ref = "02#step-5 'Map requirements to cells' paragraph"
+checker_candidate = true
+detects = ["F-19"]
+added_by = "pack:v1.32 (valkey-glide)"
+
+[[rules]]
+id = "PA-23"
+title = "dual ownership cleanup"
+class = "fault-model"
+statement = "explicit release and implicit destructor are independent events; prove exactly-one logical release"
+enforcement = "lint"
+step5_order = 4
+detects = ["F-08"]
+added_by = "pack:v1.33 (Meilisearch #6578)"
+render = """
+* **dual ownership cleanup (PA-23):** an object with both an explicit
+  release method (`close()`, `drop(self)`) and an implicit destructor
+  (`Drop` impl, `__del__`, `defer`). Model both as independent events.
+  If both can fire for the same instance, prove exactly-one logical
+  release — the second path must be no-oppable, or one path must
+  suppress the other."""
+
+[[rules]]
+id = "PA-24"
+title = "async cancellation isolation"
+class = "fault-model"
+statement = "receiver-side terminal events need explicit sync transitions to the sender region — implicit sync does not cross channel boundaries"
+enforcement = "lint"
+step5_order = 5
+detects = ["F-09"]
+added_by = "pack:v1.33 (Meilisearch #6508)"
+render = """
+* **async cancellation isolation (PA-24):** a resource transferred to
+  another task (channel sender, shared state) survives its original
+  owner's cancellation. Model the sender-side and receiver-side
+  lifecycles as separate orthogonal regions. A terminal event in one
+  region must have an explicit synchronization transition to the
+  other — implicit sync does not exist across channel boundaries."""
+
+# ---------------------------------------------------------------------------
+# Rules — non-PA (hard rules, checker catalogue, empirical additions)
+# ---------------------------------------------------------------------------
+
+[[rules]]
+id = "R-NO-SILENT-DECISIONS"
+title = "never decide domain semantics"
+class = "process"
+statement = "unclear, contradictory, or unspecified behaviour becomes a question; benignity is a proposal inside the question, never a reason to omit it"
+enforcement = "prompt"
+added_by = "v1.0"
+
+[[rules]]
+id = "R-REQUIREMENT-SCOPE"
+title = "requirement-scope rule"
+class = "process"
+statement = "a citation covers only the scenario its text describes; control-trace verdicts carry the 'cited text contemplates this ordering' line"
+enforcement = "checker"
+checker_ref = "tools/check_matrix.py (scope lines on citing control traces)"
+selftest_ref = "TODO"
+catches = "scope lines on citing control traces"
+catches_order = 9
+added_by = "02:v1.1"
+
+[[rules]]
+id = "R-SEAM-CONTRACT"
+title = "read callee contracts"
+class = "process"
+statement = "missing error handling at a call site is not evidence that failures propagate; read and cite the callee's contract"
+enforcement = "prompt"
+added_by = "02:v1.3"
+
+[[rules]]
+id = "R-EXECUTED-CHECKS"
+title = "checks as executed code"
+class = "process"
+statement = "deliver checks as executed code, never as claims; a red checker means fix the artefact or fix the checker openly"
+enforcement = "prompt"
+added_by = "v1.0"
+
+[[rules]]
+id = "R-PROPOSALS"
+title = "proposals are not decisions"
+class = "process"
+statement = "recommendations are labelled `proposed` and held loosely; pre-selection in the interview is presentation, not authority"
+enforcement = "prompt"
+added_by = "v1.0"
+
+[[rules]]
+id = "R-ANTI-MIRRORING"
+title = "tests bind to behaviour"
+class = "process"
+statement = "assert only through the declared seam: projected state, emitted effects, SYS invariants; never weaken a test to make it pass"
+enforcement = "test"
+detects = ["F-21"]
+added_by = "v1.0"
+
+[[rules]]
+id = "R-PART-B"
+title = "blind adversarial pass"
+class = "process"
+statement = "Part B gets catalogue, requirements, and event contracts — never code, matrix, or prior analyses"
+enforcement = "prompt"
+detects = ["F-06", "F-19"]
+added_by = "02:v1.1"
+
+[[rules]]
+id = "R-DEFERRED-OPEN"
+title = "deferred stays OPEN"
+class = "process"
+statement = "a deferred question blocks only its own cells and keeps status OPEN"
+enforcement = "prompt"
+added_by = "v1.0"
+
+[[rules]]
+id = "R-GRID-TOTALITY"
+title = "grid totality"
+class = "completeness"
+statement = "every state row has exactly one disposition per catalogue event column"
+enforcement = "checker"
+checker_ref = "tools/check_matrix.py + tools/dsc_check.py"
+selftest_ref = "TODO"
+catches = "grid totality"
+catches_order = 1
+lineage = ["heninger-1980"]
+added_by = "v1.0"
+
+[[rules]]
+id = "R-DISPOSITION-VOCAB"
+title = "disposition vocabulary"
+class = "wellformedness"
+statement = "every cell value comes from the seven-value closed vocabulary"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (VOCAB)"
+selftest_ref = "TODO"
+catches = "disposition vocabulary"
+catches_order = 2
+added_by = "v1.0"
+
+[[rules]]
+id = "R-HOLE-Q"
+title = "hole→Q back-references"
+class = "wellformedness"
+statement = "every hole cell carries a `→ Q-nn` reference that exists in open-questions.md"
+enforcement = "checker"
+checker_ref = "tools/check_matrix.py + tools/dsc_check.py"
+selftest_ref = "TODO"
+catches = "hole → Q back-references"
+catches_order = 3
+added_by = "02:v1.1"
+
+[[rules]]
+id = "R-DR-LINKS"
+title = "DR links on dispositions"
+class = "wellformedness"
+statement = "every to-be ignore/reject/defer cell carries its DR link or citation"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py"
+selftest_ref = "tests/red-mini"
+catches = "DR links on ignore, reject, and defer"
+catches_order = 4
+added_by = "v1.0"
+
+[[rules]]
+id = "R-DR-REVERSE"
+title = "behavioural-DR reverse coverage"
+class = "wellformedness"
+statement = "every decided behavioural change connects to a matrix cell"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py"
+selftest_ref = "TODO"
+catches = "behavioural-DR reverse coverage: every decided change connects to a cell"
+catches_order = 5
+added_by = "pack:v1.30"
+
+[[rules]]
+id = "R-INTERACTION-PAIRS"
+title = "cross-source interaction pairs"
+class = "completeness"
+statement = "cross-source event pairs on one shared entity get both orderings (P-nna/b) and each ordering gets a trace"
+enforcement = "checker"
+checker_ref = "tools/check_matrix.py (pair → trace links)"
+selftest_ref = "TODO"
+catches = "pair → trace coverage"
+catches_order = 6
+detects = ["F-15", "F-16"]
+added_by = "02:v1.1"
+
+[[rules]]
+id = "R-FRAGMENT-CITATIONS"
+title = "fragment citations"
+class = "wellformedness"
+statement = "observed-in-* citations carry `file:line (\"fragment\")`; checkers verify the fragment near that line"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (fragment within ±3 lines)"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "fragment citations within ±3 lines"
+catches_order = 11
+added_by = "02:v1.9"
+
+[[rules]]
+id = "R-MANIFEST-STALENESS"
+title = "manifest staleness"
+class = "wellformedness"
+statement = "manifest.json pins analyzedSha and camelCase watchPaths; git diffs turn staleness into a CI signal"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py + tools/dsc_stamp.py"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "manifest staleness"
+catches_order = 12
+added_by = "pack:v1.28"
+
+[[rules]]
+id = "R-BLIND-ROW-COVERAGE"
+title = "blind-table row coverage"
+class = "completeness"
+statement = "every catalogue event id has exactly one row in the blind table before classification"
+enforcement = "checker"
+checker_ref = "tools/part_b_pack.py + tools/dsc_blind.py"
+selftest_ref = "TODO"
+catches = "blind-table row coverage"
+catches_order = 13
+added_by = "02:v1.3"
+
+[[rules]]
+id = "R-SIDECAR-SCHEMA"
+title = "sidecar schema validity"
+class = "wellformedness"
+statement = "analysis.json validates against formats/analysis.schema.json"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (jsonschema)"
+selftest_ref = "TODO"
+catches = "schema validity of the sidecar"
+catches_order = 14
+added_by = "02:v1.9"
+
+[[rules]]
+id = "R-DR-FILE-EXISTS"
+title = "cited DR files exist"
+class = "wellformedness"
+statement = "every DR cited anywhere resolves to an existing decisions/DR-nnn.yaml"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py"
+selftest_ref = "TODO"
+catches = "existence of every cited DR file"
+catches_order = 15
+added_by = "pack:v1.30"
+
+[[rules]]
+id = "R-ASSERTED-ABSENCE"
+title = "asserted absence"
+class = "wellformedness"
+statement = "an empty pairs/guardGroups/coverage section needs a reason in the sidecar's completeness block; silence never passes"
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (completeness block)"
+selftest_ref = "tools/selftest/run_selftest.py"
+added_by = "02:v1.10"
+
+[[rules]]
+id = "R-REMEMBRANCE"
+title = "remembrance semantics"
+class = "wellformedness"
+statement = "every event family whose entities can end states what an ended entity leaves behind, in what bound, and what late references resolve to"
+enforcement = "prompt"
+added_by = "02:v1.4"
+
+[[rules]]
+id = "R-GATE-TYPE"
+title = "gate-type annotation"
+class = "wellformedness"
+statement = "every branching event states its gate: payload content or service-side state — blind readers must not guess"
+enforcement = "prompt"
+added_by = "02:v1.1"
+
+[[rules]]
+id = "R-UPSTREAM-GUARD"
+title = "upstream-guard annotation"
+class = "wellformedness"
+statement = "every external event states which validations happen upstream, with citations, per deployment topology"
+enforcement = "prompt"
+added_by = "02:v1.3"
+
+[[rules]]
+id = "R-LOCK-DISCIPLINE"
+title = "lock-discipline annotation"
+class = "fault-model"
+statement = "every mutex-held section states which events/callbacks fire inside it and the reentrancy contract per callback"
+enforcement = "prompt"
+detects = ["F-11"]
+added_by = "02:v1.12 (gobreaker #37)"
+
+[[rules]]
+id = "R-SYNC-RESET"
+title = "synchronized reset points"
+class = "fault-model"
+statement = "flag every external-event-triggered reset whose effect is to reduce a limit or delay; the aggregate can overwhelm the shared resource"
+enforcement = "lint"
+step5_order = 2
+detects = ["F-10"]
+added_by = "02:v1.11 (reconnecting-websocket #200)"
+render = """
+* **synchronized reset points:** a state reset triggered by an external
+  event that multiple instances observe simultaneously — connection
+  opened, heartbeat received, leader elected, cooldown expired. If the
+  reset removes backpressure (retryCount→0, cooldown→false, penalty→clear),
+  the aggregate can overwhelm the shared external resource on the next
+  failure cycle. Flag every external-event-triggered reset whose effect is
+  to reduce a limit or a delay. The reset may be correct in isolation;
+  the lint flags it so the adversarial traces can model the aggregate."""
+
+[[rules]]
+id = "R-MULTI-INSTANCE"
+title = "multi-instance assumption (NAT-SYS)"
+class = "fault-model"
+statement = "N>1 instances sharing a degrading external resource observe the degradation near-simultaneously; adversarial traces model the aggregate"
+enforcement = "lint"
+step5_order = 6
+detects = ["F-10"]
+added_by = "02:v1.11 (reconnecting-websocket #200)"
+render = """
+
+**Multi-instance assumption (NAT-SYS).** When N > 1 instances of this
+component share one external resource (server, broker, queue, peer mesh)
+and that resource degrades, the instances observe the degradation
+near-simultaneously. State transitions that depend on external events will
+synchronize across instances unless the component actively decorrelates
+them. A NAT-SYS is not an obligation on this component — it is an
+environment assumption the adversarial traces use to model aggregate
+behaviour.
+"""
+
+[[rules]]
+id = "R-USER-MODEL-GAP"
+title = "user-model gap"
+class = "process"
+statement = "a correct disposition only reachable under concurrency is invisible in a single-threaded mental model; flag it and document it via its trace"
+enforcement = "lint"
+step5_order = 7
+added_by = "02:v1.12 (gobreaker #49/#30)"
+render = """
+* **user-model gap:** a `reject`, `ignore (documented)`, or `defer`
+  disposition whose trigger condition is only reachable under concurrent
+  execution — multiple in-flight requests, a race between an external
+  event and a timer, a stale callback from a previous generation. The
+  disposition is correct in the matrix but invisible in a
+  single-threaded mental model. Flag it. The adversarial trace that
+  exercises the race is also the user-facing documentation of *when*
+  this disposition occurs. A matrix with correct dispositions that users
+  cannot understand is a correct model that fails its purpose."""
+
+[[rules]]
+id = "R-DOCTRINE-SWEEP"
+title = "doctrine-line sweep"
+class = "completeness"
+statement = "every normative sentence becomes a DOC-n line; each is adopted as invariant, adopted as disposition constraint, or explicitly rejected"
+enforcement = "lint"
+lint_ref = "02#step-5 'Close the doctrine sweep' paragraph"
+added_by = "02:v1.1"
+
+[[rules]]
+id = "R-FINDING-VERIFICATION"
+title = "finding verification pass"
+class = "process"
+statement = "every bug claim re-verified against the code before the matrix is finalized: memory ordering cited, sentinels classified, line numbers re-read, severity recalibrated"
+enforcement = "prompt"
+added_by = "02:v1.13 (recloser)"
+
+[[rules]]
+id = "R-INVARIANT-ORACLE"
+title = "SYS-invariant oracle"
+class = "process"
+statement = "every generated test asserts all SYS invariants after every delivered event"
+enforcement = "test"
+detects = ["F-05"]
+added_by = "v1.0"
+
+[[rules]]
+id = "R-WEAK-TEST-AUDIT"
+title = "weak-test audit"
+class = "process"
+statement = "off-cycle audit judges the suite against the decided matrix: weak (structure-bound) tests first, then redundancy, deviations, gaps"
+enforcement = "prompt"
+detects = ["F-21"]
+added_by = "pack:v1.20"
+
+
+[[rules]]
+id = "R-REGISTRY"
+title = "registry consistency"
+class = "wellformedness"
+statement = "generated blocks match the registry; checker rules carry selftests; fault classes have detectors"
+enforcement = "checker"
+checker_ref = "tools/gen_rules.py --check (via tools/check_pack_consistency.py)"
+selftest_ref = "tools/gen_rules.py --selftest"
+added_by = "pack:v1.35"

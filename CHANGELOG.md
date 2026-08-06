@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.35 — rules registry: single source for method rules
+
+- formats/rules.toml: machine-readable registry — closed vocabularies,
+  fault-class catalogue (Binder's state-machine fault taxonomy + the
+  pack's empirical classes + the undesired-variant categories), and
+  every method rule with class, enforcement, checker/selftest refs,
+  and detects links (the ODC fault-class × detector mapping). Split
+  PAs (3, 6, 9, 13, 14, 18) get suffixed ids where the original prose
+  mixed two rule classes.
+- tools/gen_rules.py: renders the registry into generated blocks in
+  00, 02, AGENTS §5, and the README finds list; --check fails CI on
+  drift (regenerate-and-diff replaces the old VOCAB-x2 sync check);
+  --selftest proves the red paths. Registry constraints: checker rules
+  need selftest refs ("TODO" = warned backlog, never silent), lint
+  rules must render, fault-model rules must declare detects, fault
+  classes without detectors warn.
+- 00-methods-reference: doctrine-mapping enforcement claim corrected
+  (lint, checker candidate).
+
 ## v1.34 — tests consolidation, reachability checker, evidence repositioning
 
 - tests/: .benchmarks moved into tests/ (golden-mini, red-mini,

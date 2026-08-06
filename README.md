@@ -21,7 +21,7 @@ stdlib-Python plus jsonschema. The agent
 may propose and challenge behaviour, but must not silently decide it —
 and the tests come from the specification, not from the code.
 
-**Version 1.34.**
+**Version 1.35.**
 
 ## The problem
 
@@ -60,6 +60,10 @@ agent that knows the matrix cannot un-know it.
 
 ## What StateRadar finds
 
+The fault-class catalogue behind this list lives in `formats/rules.toml`
+(F-xx ids):
+
+<!-- generated:rules key=readme-finds -->
 * missing State/Event transitions and `UNSPECIFIED` matrix cells;
 * timeout events without guaranteed progress;
 * caller operations blocked after a terminal event;
@@ -72,6 +76,7 @@ agent that knows the matrix cannot un-know it.
 * requirements without a complete execution path;
 * implementation paths without a documented contract;
 * tests that assert internal states but not caller-visible behaviour.
+<!-- /generated:rules -->
 
 ## Proven pilot cases
 
@@ -148,10 +153,13 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 check_reachability (semantic state reachability),
                 dsc_stamp (validate + pin the manifest),
                 dsc_blind (blind-pass assembly + diff),
-                dsc_cross_check (reviewer cross-check), templates/
+                dsc_cross_check (reviewer cross-check), gen_rules
+                (renders the rules registry into the prompts, AGENTS
+                and README generated blocks), templates/
                 (the CI gate file + the per-component checker wrapper)
 formats/        analysis.schema.json + manifest.schema.json — the sidecar
-                and manifest contracts
+                and manifest contracts; rules.toml — the rules registry
+                (method rules, closed vocabularies, fault-class catalogue)
 ```
 
 The pack is **stateless**: all analysis artifacts (`domain-analysis/<component>/`) and generated tests live in the consuming repository, never here.

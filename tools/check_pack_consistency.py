@@ -2,14 +2,18 @@
 """Pack self-consistency checker (dogfooding: checks as executed code).
 
 Verifies:
-  1. The seven-value disposition vocabulary appears in both 00 and 02.
+  1. The rules registry (formats/rules.toml): generated blocks in the
+     prompts/AGENTS/README match it, and its constraints hold
+     (delegated to tools/gen_rules.py --check; the old VOCAB-x2 sync
+     check is obsolete by construction — both vocabulary occurrences
+     are generated from the registry).
   2. Artifact filenames referenced across prompts are defined by the
      producing prompts (02 or 04).
   3. README version matches the newest (highest) CHANGELOG entry.
 Exit code 0 = OK, 1 = violations (printed).
 """
 from pathlib import Path
-import re, sys
+import re, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[1]
 P = ROOT / "prompts"
@@ -17,13 +21,11 @@ errors = []
 
 def read(name): return (P / name).read_text(encoding="utf-8")
 
-VOCAB = ["transition", "handle", "ignore (documented)", "ignore (accidental)",
-         "defer (queued)", "reject", "UNSPECIFIED"]
-for fname in ("00-methods-reference.md", "02-pilot.md"):
-    text = read(fname)
-    for v in VOCAB:
-        if v not in text:
-            errors.append(f"{fname}: disposition value '{v}' missing")
+gr = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_rules.py"),
+                     "--check"], capture_output=True, text=True)
+sys.stdout.write(gr.stdout)
+if gr.returncode != 0:
+    errors.append("rules registry check failed (see output above)")
 
 ARTIFACTS = {  # filename -> prompts that define/produce it
     "disposition-matrix.md": ["02-pilot.md"],
@@ -97,4 +99,4 @@ if errors:
     print("PACK CONSISTENCY: FAIL")
     for e in errors: print(" -", e)
     sys.exit(1)
-print(f"PACK CONSISTENCY: OK ({len(ARTIFACTS)} artifacts, vocab x2, version {rv.group(1)})")
+print(f"PACK CONSISTENCY: OK ({len(ARTIFACTS)} artifacts, registry, version {rv.group(1)})")

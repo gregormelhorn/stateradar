@@ -30,8 +30,9 @@ The method produces artifacts that serve three purposes:
 
 1. **Specification and test oracle** — the matrix defines expected behaviour;
    tests assert against it.
-2. **CI-enforceable discipline** — grid totality, doctrine mapping, and
-   DR links break the build on drift.
+2. **CI-enforceable discipline** — grid totality and DR links break the
+   build on drift; doctrine-to-cell mapping is lint-enforced in Step 5
+   (a checker candidate, tracked in `formats/rules.toml`).
 3. **Public API documentation** — the statechart and terminal-state table
    are human-readable references for library consumers. A user migrating
    between major versions of a retry library needs the five-terminal-states
@@ -246,22 +247,26 @@ gap (04-testgen).
 
 Rows = leaf states of the model; columns = every catalogue event **including undesired variants**. Every cell has exactly one value:
 
+<!-- generated:rules key=disposition-vocab -->
 ```text
-transition → <target>   | handle          | ignore (documented)
-ignore (accidental)*    | defer (queued)  | reject | UNSPECIFIED*
+transition → <target> | handle | ignore (documented) | ignore (accidental)*
+| defer (queued) | reject | UNSPECIFIED*
 ```
+<!-- /generated:rules -->
 
 Values marked * count as specification holes. Never accept "nothing happens" implicitly: it is either a documented, DR-linked ignore, or a hole. State dispositions at compound-state level; substates inherit them. Mark inherited cells with their source. Only unresolved leaf cells count as holes. In the to-be matrix, every `ignore` / `reject` / `defer` cell carries its DR link, and `ignore (accidental)` may no longer appear.
 
 ## Event catalogue and undesired variants
 
-Every event lists: name, source, external/internal, payload gist, where produced and consumed. For every external source, derive undesired variants by checklist:
+Every event lists: name, source, external/internal, payload gist, where produced and consumed. For every external source, derive undesired variants by checklist (each category carries its fault-class id from `formats/rules.toml`):
 
-```text
-loss/failure of the source · delay beyond timeout · duplication ·
-out-of-order or stale arrival (esp. after cancellation/shutdown) ·
-contradictory simultaneous inputs
-```
+<!-- generated:rules key=uv-categories -->
+* loss or failure of the source (F-12)
+* delay beyond timeout (F-13)
+* duplication (F-14)
+* out-of-order or stale arrival, especially after cancellation or shutdown (F-15)
+* contradictory simultaneous inputs (F-16)
+<!-- /generated:rules -->
 
 Each variant receives a matrix column and a disposition (or an explicit `not applicable` with reason). This is the systematic counter to "completeness only holds relative to the catalogue".
 
@@ -370,33 +375,62 @@ name because both passes speak the same language.
 * Optional honesty probe: run a mutation tool (`mutmut`, `cosmic-ray`, Stryker) over the lifecycle code; surviving mutants are weak spots of the suite.
 * Calibration probe for the method itself: run the pilot twice on the same component in fresh sessions and diff the matrices. Divergence measures how much you can trust a single unverified run.
 
-## Method rules (PA-1 … PA-16, condensed)
+## Method rules (PA-1 … PA-24, condensed)
 
 Settled by prior art; agents must not relitigate them without a DR. In pack mode, generated checker scripts, explicit reasoning marked unproven, and the CI-wired test suite discharge the "Analyzer/tooling" duties.
 
+The registry `formats/rules.toml` is the single source for these rules — their class (wellformedness | completeness | fault-model | process), their enforcement (checker | test | lint | prompt | human | data), and the fault-class catalogue (F-xx) they detect. The list below is generated from it (`tools/gen_rules.py`); a split id (PA-3a/PA-3b) marks a rule whose original prose mixed two classes.
+
+<!-- generated:rules key=pa-condensed -->
 ```text
-PA-1  guards per (state,event) pairwise disjoint — order must never decide
-PA-2  guards jointly exhaustive, or an explicit else exists; gap = hole
-PA-3  guard checks state their assumptions (in pack mode: z3 proofs via
-      a generated check_guards.py where formalizable; otherwise labelled
-      inspection-only)
-PA-4  events classified: monitored input | controlled output | internal
-PA-5  derived events may be defined as @T(predicate) WHEN condition
-PA-6  invariants split NAT vs SYS; analysis may assume NAT, tests may not
-PA-7  bindings (abstract action → concrete symbol) are part of the spec
-PA-8  single-input assumption: one event to completion at a time
-PA-9  tests require a serializing dispatch seam; probe reentrancy
-PA-10 completeness is relative to a declared abstraction (hierarchy
-      inheritance, guard predicates) — state it in the matrix header
-PA-11 aim for a witness trace per matrix cell, not just happy paths
-PA-12 every reachable cell gets ≥1 test; untestable cells carry reasons
-PA-13 undesired-event checklist applied to every external source
-PA-14 the matrix is the primary review surface; keep it round-trippable
-PA-15 lint checklist follows the Jaffe–Leveson completeness criteria:
-      every input in every state, timing on waiting states, startup/
-      shutdown defined, capacity bounded, robustness to undesired events
-PA-16 render complex guards as AND/OR tables for human review
+PA-1   guards per (state,event) pairwise disjoint — order must never decide
+PA-2   guards jointly exhaustive, or an explicit else exists; gap = hole
+PA-3a  guard checks state their assumptions; z3 proofs via a generated
+       check_guards.py where formalizable
+PA-3b  unformalizable guards keep inspection-only reasoning, labelled
+       `not-formalizable: <category>` from the closed vocabulary
+PA-4   events classified: monitored input | controlled output | internal
+PA-5   derived events may be defined as @T(predicate) WHEN condition
+PA-6a  invariants split NAT vs SYS
+PA-6b  analysis may assume NAT, tests may not
+PA-7   bindings (abstract action → concrete symbol) are part of the spec
+PA-8   single-input assumption: one event to completion at a time
+PA-9a  tests require a serializing dispatch seam
+PA-9b  probe reentrancy from callbacks and event handlers
+PA-10  completeness is relative to a declared abstraction (hierarchy
+       inheritance, guard predicates) — state it in the matrix header
+PA-11  aim for a witness trace per matrix cell, not just happy paths
+PA-12  every reachable cell gets ≥1 test; untestable cells carry reasons
+PA-13a undesired-event checklist applied to every external source; the
+       coverage table is total
+PA-13b the checklist categories are registry data (SHARD-aligned); extending
+       them is a data edit, not a prose edit
+PA-14a the matrix round-trips with the diagram; sync is checker-verified
+PA-14b the matrix is the primary review surface
+PA-15  lint checklist follows the Jaffe–Leveson completeness criteria: every
+       input in every state, timing on waiting states, startup/shutdown
+       defined, capacity bounded, robustness to undesired events
+PA-16  render complex guards as AND/OR tables for human review
+PA-17  state naming: public API names, condition-named sub-states, PascalCase
+       with `_` separator — blind-derivable from requirements
+PA-18a terminal states declared after the matrix; the checker treats their
+       events as ignore (documented)
+PA-18b terminal states named by their exit condition — they are the API
+       contract
+PA-19  language-runtime, OS, and performance behaviour are outside the
+       statechart; findings there are `unverifiable-runtime`
+PA-20  wrong return values are API-contract issues, wrong transitions are
+       matrix issues; only the latter belong in the matrix
+PA-21  shared state across independent lifecycles: a terminal state in one
+       track must trigger cleanup in the other
+PA-22  every DOC-n requirement maps to ≥1 matrix cell; UNSPECIFIED there =
+       violated, no cell = unimplemented
+PA-23  explicit release and implicit destructor are independent events; prove
+       exactly-one logical release
+PA-24  receiver-side terminal events need explicit sync transitions to the
+       sender region — implicit sync does not cross channel boundaries
 ```
+<!-- /generated:rules -->
 
 ## Lineage (why this works)
 
