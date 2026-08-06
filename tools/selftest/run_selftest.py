@@ -204,6 +204,18 @@ def main() -> int:
         mutated("missing checklist category",
                 lambda r: r["coverage"]["src"].pop("commission"),
                 "src/commission")
+        # PA-22 — a declared doctrine line without a mapping must fail
+        mutated("unmapped doctrine line",
+                lambda r: r["docLines"].pop(0),
+                "DOC-1 declared but not mapped")
+        # PA-22 — a doctrine line mapped to a nonexistent cell must fail
+        mutated("doctrine mapped to missing cell",
+                lambda r: r["docLines"][0].update(target="Nowhere x E9"),
+                "not in the grid")
+        # PA-22 — a rejection without a reviewable reason must fail
+        mutated("doctrine rejected without reason",
+                lambda r: r["docLines"][2].update(target="no"),
+                "without a reviewable reason")
 
         print("matrix checker (markdown side)")
 

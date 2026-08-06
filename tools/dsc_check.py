@@ -154,6 +154,47 @@ def main() -> int:
                 E(f"question {q['id']}: RESOLVED but no cell links a DR — "
                   f"add a decision record reference to the cell")
 
+    # PA-22 doctrine-line mapping. The doc-ids declaration in
+    # invariants-and-lints.md is the universe; every declared DOC-n
+    # must map (sidecar docLines) to an existing cell, an invariant/
+    # constraint, or an explicit rejection with a reason. An unmapped
+    # doctrine line is an error; a mapped hole cell is a finding the
+    # hole→Q machinery already carries, not a checker failure.
+    inv_path = adir / "invariants-and-lints.md"
+    if inv_path.is_file():
+        inv_text = inv_path.read_text(encoding="utf-8")
+        decl = re.search(r"<!-- doc-ids: (.+?) -->", inv_text)
+        if decl:
+            declared = decl.group(1).split()
+            mapped = {d.get("id"): d for d in data.get("docLines", [])}
+            for did in declared:
+                d = mapped.get(did)
+                if d is None:
+                    E(f"doctrine: {did} declared but not mapped "
+                      f"(docLines) — an unmapped doctrine line is an error (PA-22)")
+                    continue
+                kind = d.get("mapping")
+                tgt = d.get("target", "")
+                if kind == "cell":
+                    m = re.fullmatch(r"(.+?)\s+x\s+(\S+)", tgt)
+                    if not m or m.group(1).strip() not in states \
+                            or m.group(2).strip() not in events:
+                        E(f"doctrine: {did} maps to cell {tgt!r} which is "
+                          f"not in the grid")
+                elif kind in ("invariant", "constraint"):
+                    if not re.match(r"(SYS|NAT)", tgt):
+                        E(f"doctrine: {did} maps to {kind} {tgt!r} — "
+                          f"expected a SYS-/NAT- id")
+                elif kind == "rejected":
+                    if len(tgt) < 10:
+                        E(f"doctrine: {did} rejected without a reviewable "
+                          f"reason")
+                else:
+                    E(f"doctrine: {did} has unknown mapping {kind!r}")
+            for did in mapped:
+                if did not in declared:
+                    E(f"doctrine: {did} mapped but not declared in doc-ids")
+
     # Behavioural-DR reverse coverage
     cited = {c.get("dr") for c in data["cells"] if c.get("dr")}
     for dr in data.get("behaviouralDrs", []):

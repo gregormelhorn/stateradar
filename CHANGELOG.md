@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.37 — PA-22 doctrine-mapping checker
+
+- PA-22 graduates from lint to checker: invariants-and-lints.md
+  carries a `<!-- doc-ids: ... -->` declaration plus a machine-readable
+  `## Doctrine mapping` table (DOC-n → cell / invariant / constraint /
+  rejected-with-reason); gen_analysis_sidecar lifts it into sidecar
+  `docLines` (schema extended); dsc_check fails on declared-but-
+  unmapped lines, cell targets outside the grid, and unreviewable
+  rejections. Three red selftests. 00's "doctrine mapping breaks the
+  build" claim — corrected to lint-only in v1.35 — is true again, now
+  with a checker behind it. Checker-candidate backlog: 4.
+- grpc-go-2669 dogfoods the mechanism: its 20 prose-mapped DOC lines
+  are retrofitted as the machine-readable table.
+
 ## v1.36 — dependency policy, z3 guard-proof library
 
 - Policy: the deterministic layer is no longer restricted to

@@ -30,9 +30,9 @@ The method produces artifacts that serve three purposes:
 
 1. **Specification and test oracle** — the matrix defines expected behaviour;
    tests assert against it.
-2. **CI-enforceable discipline** — grid totality and DR links break the
-   build on drift; doctrine-to-cell mapping is lint-enforced in Step 5
-   (a checker candidate, tracked in `formats/rules.toml`).
+2. **CI-enforceable discipline** — grid totality, doctrine mapping, and
+   DR links break the build on drift (each backed by a checker with a
+   red selftest, tracked in `formats/rules.toml`).
 3. **Public API documentation** — the statechart and terminal-state table
    are human-readable references for library consumers. A user migrating
    between major versions of a retry library needs the five-terminal-states

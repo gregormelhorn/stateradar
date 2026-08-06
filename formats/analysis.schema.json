@@ -1,58 +1,244 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Domain Statechart Pack — analysis sidecar",
-  "type": "object",
-  "required": ["formatVersion", "component", "states", "events", "cells"],
-  "properties": {
-    "formatVersion": { "const": "1.0" },
-    "component": { "type": "string" },
-    "packVersion": { "type": "string" },
-    "analyzedSha": { "type": "string", "description": "git SHA or WORKTREE" },
-    "watchPaths": { "type": "array", "items": { "type": "string" } },
-    "states": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-    "events": { "type": "array", "items": { "type": "object",
-      "required": ["id"], "properties": {
-        "id": { "type": "string" }, "undesired": { "type": "boolean" } } } },
-    "cells": { "type": "array", "items": { "type": "object",
-      "required": ["state", "event", "disposition"], "properties": {
-        "state": { "type": "string" }, "event": { "type": "string" },
-        "disposition": { "enum": ["transition", "handle", "ignore (documented)",
-          "ignore (accidental)", "defer (queued)", "reject", "UNSPECIFIED"] },
-        "target": { "type": "string" }, "dr": { "type": "string" },
-        "q": { "type": "string" },
-        "citation": { "type": "object", "required": ["file", "line"],
-          "properties": { "file": { "type": "string" },
-            "line": { "type": "integer" }, "fragment": { "type": "string" } } } } } },
-    "pairs": { "type": "array", "items": { "type": "object",
-      "required": ["id", "trace"], "properties": {
-        "id": { "type": "string" }, "trace": { "type": "string" } } } },
-    "guardGroups": { "type": "array", "items": { "type": "object",
-      "required": ["id", "outcome"], "properties": { "id": { "type": "string" },
-        "outcome": { "enum": ["proven", "violation", "not-formalizable"] },
-        "reason": { "type": "string", "description": "mandatory for not-formalizable: starts with external-call | dynamic-state | clock | unstructured-payload" } } } },
-    "coverage": { "type": "object", "additionalProperties": { "type": "object" } },
-    "questions": { "type": "array", "items": { "type": "object",
-      "required": ["id", "status"] } },
-    "behaviouralDrs": { "type": "array", "items": { "type": "string" } },
-    "completeness": {
-      "type": "object",
-      "description": "Asserted absence. A section that is empty or missing must say so here with a reason; otherwise the checker cannot distinguish 'nothing to report' from 'the step was skipped'.",
-      "additionalProperties": false,
-      "properties": {
-        "pairs": { "$ref": "#/$defs/absence" },
-        "guardGroups": { "$ref": "#/$defs/absence" },
-        "coverage": { "$ref": "#/$defs/absence" }
-      }
-    }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "Domain Statechart Pack \u2014 analysis sidecar",
+ "type": "object",
+ "required": [
+  "formatVersion",
+  "component",
+  "states",
+  "events",
+  "cells"
+ ],
+ "properties": {
+  "formatVersion": {
+   "const": "1.0"
   },
-  "$defs": {
-    "absence": {
-      "type": "object",
-      "required": ["count", "reason"],
-      "properties": {
-        "count": { "const": 0 },
-        "reason": { "type": "string", "minLength": 12 }
-      }
+  "component": {
+   "type": "string"
+  },
+  "packVersion": {
+   "type": "string"
+  },
+  "analyzedSha": {
+   "type": "string",
+   "description": "git SHA or WORKTREE"
+  },
+  "watchPaths": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "states": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   },
+   "minItems": 1
+  },
+  "events": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "undesired": {
+      "type": "boolean"
+     }
     }
+   }
+  },
+  "cells": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "state",
+     "event",
+     "disposition"
+    ],
+    "properties": {
+     "state": {
+      "type": "string"
+     },
+     "event": {
+      "type": "string"
+     },
+     "disposition": {
+      "enum": [
+       "transition",
+       "handle",
+       "ignore (documented)",
+       "ignore (accidental)",
+       "defer (queued)",
+       "reject",
+       "UNSPECIFIED"
+      ]
+     },
+     "target": {
+      "type": "string"
+     },
+     "dr": {
+      "type": "string"
+     },
+     "q": {
+      "type": "string"
+     },
+     "citation": {
+      "type": "object",
+      "required": [
+       "file",
+       "line"
+      ],
+      "properties": {
+       "file": {
+        "type": "string"
+       },
+       "line": {
+        "type": "integer"
+       },
+       "fragment": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
+  },
+  "pairs": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "trace"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "trace": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "guardGroups": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "outcome"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "outcome": {
+      "enum": [
+       "proven",
+       "violation",
+       "not-formalizable"
+      ]
+     },
+     "reason": {
+      "type": "string",
+      "description": "mandatory for not-formalizable: starts with external-call | dynamic-state | clock | unstructured-payload"
+     }
+    }
+   }
+  },
+  "coverage": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object"
+   }
+  },
+  "questions": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "status"
+    ]
+   }
+  },
+  "behaviouralDrs": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "completeness": {
+   "type": "object",
+   "description": "Asserted absence. A section that is empty or missing must say so here with a reason; otherwise the checker cannot distinguish 'nothing to report' from 'the step was skipped'.",
+   "additionalProperties": false,
+   "properties": {
+    "pairs": {
+     "$ref": "#/$defs/absence"
+    },
+    "guardGroups": {
+     "$ref": "#/$defs/absence"
+    },
+    "coverage": {
+     "$ref": "#/$defs/absence"
+    }
+   }
+  },
+  "docLines": {
+   "type": "array",
+   "description": "PA-22 doctrine-line mapping: every DOC-n from the doctrine sweep maps to a cell, an invariant/constraint, or an explicit rejection",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "mapping",
+     "target"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^DOC-"
+     },
+     "mapping": {
+      "enum": [
+       "cell",
+       "invariant",
+       "constraint",
+       "rejected"
+      ]
+     },
+     "target": {
+      "type": "string",
+      "minLength": 3
+     }
+    }
+   }
   }
+ },
+ "$defs": {
+  "absence": {
+   "type": "object",
+   "required": [
+    "count",
+    "reason"
+   ],
+   "properties": {
+    "count": {
+     "const": 0
+    },
+    "reason": {
+     "type": "string",
+     "minLength": 12
+    }
+   }
+  }
+ }
 }

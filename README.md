@@ -25,7 +25,7 @@ optional dependency is missing. The agent
 may propose and challenge behaviour, but must not silently decide it —
 and the tests come from the specification, not from the code.
 
-**Version 1.36.**
+**Version 1.37.**
 
 ## The problem
 

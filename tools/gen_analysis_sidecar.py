@@ -155,6 +155,29 @@ def _parse_cell(
     return cell
 
 
+def _parse_doc_map(path: Path) -> list[dict]:
+    """PA-22 doctrine mapping: parse the machine-readable table under
+    '## Doctrine mapping' in invariants-and-lints.md into sidecar
+    docLines. Row format: | DOC-n | cell/invariant/constraint/rejected
+    | target |. Declarations, never prose (02-pilot v1.4 rule)."""
+    if not path.is_file():
+        return []
+    text = path.read_text(encoding="utf-8")
+    if "## Doctrine mapping" not in text:
+        return []
+    block = text.split("## Doctrine mapping")[1].split("\n## ")[0]
+    rows = []
+    for line in block.split("\n"):
+        s = line.strip()
+        if not s.startswith("| DOC-"):
+            continue
+        cells = [c.strip() for c in s.split("|")[1:-1]]
+        if len(cells) >= 3:
+            rows.append({"id": cells[0], "mapping": cells[1],
+                         "target": cells[2]})
+    return rows
+
+
 def _parse_questions(path: Path) -> list[dict]:
     """open-questions.md → [{id, status}] pairs (DECIDED → RESOLVED)."""
     if not path.is_file():
@@ -297,6 +320,8 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
                         k: v for k, v in extra.items() if k in ("file", "line", "fragment")
                     }
 
+    doc_lines = _parse_doc_map(adir / "invariants-and-lints.md")
+
     questions = _parse_questions(adir / "open-questions.md")
     known = {q["id"] for q in questions}
     for cell in cells:
@@ -325,6 +350,8 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         "questions": questions,
         "behaviouralDrs": cited_drs,
     }
+    if doc_lines:
+        data["docLines"] = doc_lines
 
     # The matrix does not carry pairs, guard outcomes, or the coverage
     # table — they live in adversarial-traces.md, guard-results.txt, and

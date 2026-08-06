@@ -224,6 +224,15 @@ disposition, the requirement is **violated** — the code does not
 implement what the requirements demand. If no cell maps to the
 requirement, the requirement is **unimplemented** — raise a Q.
 
+Emit the mapping machine-readably (checkers parse declarations, never
+prose): in `invariants-and-lints.md`, a `<!-- doc-ids: DOC-1 DOC-2 ... -->`
+declaration plus a table under `## Doctrine mapping` with one row per
+line — `| DOC-n | cell | <State> x <EventId> |`, `| DOC-n | invariant |
+SYS-m |` (or `constraint`), or `| DOC-n | rejected | <reason> |`. The
+sidecar generator lifts it into `docLines`; `dsc_check` fails on any
+declared-but-unmapped line, a cell target outside the grid, or a
+rejection without a reviewable reason.
+
 Then run this checklist against the model and report violations with provenance (the list is generated from `formats/rules.toml`):
 
 <!-- generated:rules key=step5-lints -->

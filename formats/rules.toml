@@ -560,9 +560,11 @@ id = "PA-22"
 title = "requirement-to-cell mapping"
 class = "completeness"
 statement = "every DOC-n requirement maps to ≥1 matrix cell; UNSPECIFIED there = violated, no cell = unimplemented"
-enforcement = "lint"
-lint_ref = "02#step-5 'Map requirements to cells' paragraph"
-checker_candidate = true
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (doc-ids declaration ↔ docLines mapping totality)"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "doctrine-line mapping totality (DOC-n → cell / invariant / rejected)"
+catches_order = 18
 detects = ["F-19"]
 added_by = "pack:v1.32 (valkey-glide)"
 

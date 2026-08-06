@@ -92,6 +92,7 @@ The checkers catch the following defects. Do not fight them. (Generated from `fo
 * existence of every cited DR file
 * reachable states and terminal-state marking
 * state names follow PA-17 (PascalCase segments or ALL-CAPS API enums)
+* doctrine-line mapping totality (DOC-n → cell / invariant / rejected)
 <!-- /generated:rules -->
 
 ## 6. Failure modes seen in real runs
