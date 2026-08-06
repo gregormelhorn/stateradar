@@ -245,17 +245,36 @@ def main() -> int:
                 capture_output=True, text=True)
             return r.returncode, (r.stdout + r.stderr).strip()
 
+        checklist = "\n- [x] M1\n- [x] M2\n- [x] UV-M1-dup\n"
         full = tmp / "blind-full.md"
         full.write_text("| id | disposition |\n|---|---|\n"
                         "| M1 | handle |\n| M2 | reject |\n"
-                        "| UV-M1-dup | ignore (documented) |\n")
+                        "| UV-M1-dup | ignore (documented) |\n" + checklist)
         expect("blind table complete", False, *pbp(full))
+        # a finer-grained table (several situation rows per event id,
+        # cross-references in prose cells) is MORE information — must pass
+        fine = tmp / "blind-fine.md"
+        fine.write_text("| id | situation | disposition |\n|---|---|---|\n"
+                        "| **M1** | Idle | handle |\n"
+                        "| M1 | Open (after M2, see UV-M1-dup) | reject |\n"
+                        "| M2 | any | reject |\n"
+                        "| UV-M1-dup | any | ignore (documented) |\n" + checklist)
+        expect("blind table finer than one row per id", False, *pbp(fine))
         # R-BLIND-ROW-COVERAGE: a missing catalogue row must fail
         partial = tmp / "blind-partial.md"
         partial.write_text("| id | disposition |\n|---|---|\n"
-                           "| M1 | handle |\n| M2 | reject |\n")
+                           "| M1 | handle |\n| M2 | reject |\n"
+                           "\n- [x] M1\n- [x] M2\n")
         expect("blind table missing row", True, *pbp(partial),
                needle="missing row: UV-M1-dup")
+        # a duplicated checklist tick must fail — coverage must be countable
+        dup = tmp / "blind-dup.md"
+        dup.write_text("| id | disposition |\n|---|---|\n"
+                       "| M1 | handle |\n| M2 | reject |\n"
+                       "| UV-M1-dup | ignore (documented) |\n"
+                       + checklist + "- [x] M2\n")
+        expect("duplicated checklist tick", True, *pbp(dup),
+               needle="duplicated checklist entry: M2")
 
     print("guard proofs (z3, PA-1/PA-2)")
     sys.path.insert(0, str(ROOT / "tools"))

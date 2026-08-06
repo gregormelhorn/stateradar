@@ -24,7 +24,12 @@ import re
 import sys
 from pathlib import Path
 
-CITATION_OK = (".py:", "DR-", "inferred")
+# A citation is `file.<ext>:NNN` in any implementation language (the
+# pack claims language neutrality; ".py:" alone silently failed every
+# Go/TS/Rust matrix — grpc-go addrconn pilot, 2026-08-07), a DR id, or
+# an explicit `inferred` marker.
+CITATION_OK = ("DR-", "inferred")
+CITATION_RE = re.compile(r"[\w./-]+\.[A-Za-z]{1,4}:\d+")
 
 
 def _events(catalogue: str) -> list[str]:
@@ -86,6 +91,7 @@ def main() -> int:
                 continue
             if (
                 c.startswith(("reject", "ignore (documented", "defer"))
+                and not CITATION_RE.search(c)
                 and not any(tok in c for tok in CITATION_OK)
                 and "Q-" not in c
             ):

@@ -17,6 +17,15 @@
   registry's selftest backlog is now empty.
 - CI: workflow_dispatch trigger for manual runs; dependencies from
   tools/requirements-dev.txt.
+- Two harness defects found by the grpc-go addrconn pilot (2026-08-07):
+  check_matrix.py accepted only `.py:` citations — the pack's claimed
+  language neutrality was silently broken for every Go/TS/Rust matrix;
+  now any `file.<ext>:NNN`. part_b_pack.py --check counted id mentions
+  across whole table rows — every cross-reference read as a duplicate,
+  and a per-(state,event) blind table (finer than one row per event =
+  more information) failed; coverage now means every id keys >= 1 row
+  and the checklist ticks it exactly once. New selftest red/green
+  cases for both.
 - tools/check_matrix.py: PA-17 state-naming check — PascalCase
   segments with "_" separators or ALL-CAPS API enum names; compound
   row labels validated word by word; red selftest. Pack fixtures

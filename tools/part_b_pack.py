@@ -217,16 +217,31 @@ def check(args: argparse.Namespace) -> int:
     catalogue = (adir / "event-catalogue.md").read_text(encoding="utf-8")
     events, pairs = _catalogue_ids(catalogue)
     blind = Path(args.check).read_text(encoding="utf-8")
-    table_rows = "\n".join(
-        ln for ln in blind.split("\n") if ln.strip().startswith("|")
-    )
+    # A blind table is keyed by its FIRST cell. Counting id mentions
+    # across whole rows flagged every cross-reference ("via E07 path")
+    # as a duplicate, and a per-(state,event) table — finer than one
+    # row per event, which is more information, not less — as invalid
+    # (grpc-go addrconn pilot, 2026-08-07). Coverage now means: every
+    # id keys >= 1 table row, and the final checklist ticks it exactly
+    # once. A missing row must be impossible to miss; granularity is
+    # the blind pass's choice.
+    key_cells = []
+    for ln in blind.split("\n"):
+        s = ln.strip()
+        if s.startswith("|"):
+            key_cells.append(s.split("|")[1].strip().lstrip("*").strip())
+    checklist = re.findall(r"^\s*- \[x\] ([\w-]+)\s*$", blind, re.M)
     errors: list[str] = []
     for ident in events + pairs:
-        n = len(re.findall(rf"(?<![\w-]){re.escape(ident)}(?![\w-])", table_rows))
-        if n == 0:
-            errors.append(f"missing row: {ident}")
-        elif n > 1:
-            errors.append(f"duplicated row: {ident} ({n} table rows)")
+        keyed = sum(1 for c in key_cells
+                    if re.match(rf"{re.escape(ident)}(?![\w-])", c))
+        if keyed == 0:
+            errors.append(f"missing row: {ident} (no table row keyed by it)")
+        ticks = checklist.count(ident)
+        if ticks == 0:
+            errors.append(f"missing checklist tick: {ident}")
+        elif ticks > 1:
+            errors.append(f"duplicated checklist entry: {ident} ({ticks}x)")
     if errors:
         print("PART-B COVERAGE: FAIL")
         for e in errors:
