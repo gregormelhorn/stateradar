@@ -88,6 +88,11 @@ Extract and list, each item with provenance and location: states, external event
 
 Produce a Mermaid `stateDiagram-v2` of the current behaviour. Rules: do not idealize. Where the code contradicts itself: model the dominant path and record the contradiction as a finding. Use hierarchy where the code's structure supports it.
 
+Name states per PA-17 (state naming convention): prefer public API names,
+name sub-states by their condition not their implementation flag, use
+PascalCase with `_` as sub-state separator. A state name that a blind
+reader cannot derive from the requirements is a modelling error.
+
 Every matrix state must exist in the diagram (PA-14 round-trippability; the pack checker verifies it). A state that no event transition reaches still needs presence: add a **documenting edge** labelled with its entry semantics — `active --> retired: operator (manual status)` for operator-set states, `partial --> invalid: deque length mismatch (guard)` for guard-condition states. The edge documents; it does not claim an event.
 
 Then validate the model against the existing tests. Walk each relevant test scenario through the model. A test the model cannot accept means a modelling error or undocumented behaviour. Report which one, with provenance.
@@ -306,7 +311,7 @@ removed with a note in the summary.
 
 Run this in a **new** agent session with no access to the as-is model, the matrix, the traces, or the code. Provide only these inputs. First: `event-catalogue.md`, with gate-type annotations, upstream-guard annotations, and the pairs table. Second: the prose requirements. Third: the **normative contract text of every event the component emits or consumes**. Contract text means contract docstrings and schema descriptions: requirements-level material, never component code.
 
-> Here is the event catalogue of a component, its state list, and its requirements. For every event — including undesired variants and both orderings of every interaction pair — state in which situations the component should handle, ignore, or reject it, and what should happen. Use the exact state names from the state list above. If you must assume a lifecycle state the requirements do not name, label it `assumed-state:` and explain why. You have no access to the implementation. Be concrete. Produce a table keyed by the catalogue's event ids. End with a coverage checklist: every catalogue event id, listed once, ticked. A missing row must be impossible to miss.
+> Here is the event catalogue of a component, and its requirements. For every event — including undesired variants and both orderings of every interaction pair — state in which situations the component should handle, ignore, or reject it, and what should happen. Describe situations in requirement terms. Name states per PA-17 (state naming convention): prefer public API names, name sub-states by their condition, use PascalCase with `_` as separator. If you must assume a lifecycle state the requirements do not name, label it `assumed-state:` with the condition that defines it. You have no access to the implementation. Be concrete. Produce a table keyed by the catalogue's event ids. End with a coverage checklist: every catalogue event id, listed once, ticked. A missing row must be impossible to miss.
 >
 > The disposition vocabulary you must use (from the methods reference): `transition → <target>` | `handle` (stays in the state, does something) | `ignore (documented)` | `ignore (accidental)` | `defer (queued)` | `reject` (a declared refusal signal: error, diagnostic, nack) | `UNSPECIFIED`. Without these definitions a blind pass applies `reject` and `handle` to identical semantics interchangeably (dobby trigger-service, 2026-08-05: four vocabulary-only "divergences").
 

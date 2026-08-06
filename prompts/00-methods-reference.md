@@ -174,6 +174,41 @@ Governance rules: every to-be deviation from as-is traces to a DR. No dispositio
 * `defer` means an explicit, observable queue with re-delivery on the dequeuing state entry, never implicit buffering.
 * Late, duplicate, and stale events are never undefined; they are catalogue variants with dispositions.
 
+### State naming convention (PA-17)
+
+Part A (code-aware) and Part B (blind) must name states consistently so the
+diff is mechanical, not interpretive. Both passes follow the same rules:
+
+1. **Prefer the public API name.** If the component exposes a state enum
+   (`CONNECTING`, `OPEN`, `CLOSED`, `CLOSED`), use that name.
+
+2. **Name sub-states by their CONDITION, not by the implementation flag.**
+   "AwaitingStability" not "`_uptimeTimeout_active`"; "RetriesExhausted" not
+   "`_retryCount>=maxRetries`"; "UserRequested" not "`_closeCalled`". A blind
+   reader who has only the requirements can derive these names.
+
+3. **Format: PascalCase, `_` as sub-state separator.** `Open_AwaitingStability`,
+   `Open_Stable`, `Closed_UserRequested`, `Closed_RetriesExhausted`.
+   The first segment is the parent state; the rest are qualifying conditions.
+
+4. **One state per behaviorally distinct combination.** If changing one flag
+   changes the disposition of at least one event, it is a separate state.
+   If two flag combinations produce identical dispositions across all events,
+   they are the same state.
+
+5. **Document the condition.** Every state name carries a one-line description
+   in the catalogue or extraction: "`Open_AwaitingStability`: connection
+   established but min-uptime not yet reached (DOC-9)."
+
+This convention removes the mapping problem discovered in the
+reconnecting-websocket Part-B diff (2026-08-06): the blind pass used
+human-readable names ("CLOSED", "OPEN_unstable") while the matrix used
+machine-readable names ("Closed_Idle", "Open_Unstable"). Both were valid;
+neither could match the other. With PA-17, Part A extracts states from the
+code and names them per the convention; Part B derives states from the
+requirements and names them per the SAME convention. The diff matches by
+name because both passes speak the same language.
+
 ## Testing conventions
 
 * **One test per matrix cell**, named `test_cell__<state>__<event>[__variant]`, docstring citing disposition and DR.
