@@ -61,20 +61,22 @@ agent that knows the matrix cannot un-know it.
 ## What StateRadar finds
 
 The fault-class catalogue behind this list lives in `formats/rules.toml`
-(F-xx ids):
+(F-xx ids; the italic names are Binder's state-machine fault taxonomy,
+which the matrix's completeness makes testable):
 
 <!-- generated:rules key=readme-finds -->
-* missing State/Event transitions and `UNSPECIFIED` matrix cells;
+* missing State/Event transitions and `UNSPECIFIED` matrix cells (*missing transitions*);
 * timeout events without guaranteed progress;
 * caller operations blocked after a terminal event;
 * internal requests holding resources after a caller timeout;
 * unbounded waits;
-* invalid recovery or reconnect paths;
+* invalid recovery or reconnect paths (*transfer faults*);
 * wrongly coupled lifecycle regions (caller vs. internal);
-* lost or overwritten failure causes;
+* lost or overwritten failure causes (*output faults*);
 * missing idempotency in cleanup and release;
+* events accepted where the specification says ignore or reject (*sneak paths*);
 * requirements without a complete execution path;
-* implementation paths without a documented contract;
+* implementation paths without a documented contract (*trap doors*);
 * tests that assert internal states but not caller-visible behaviour.
 <!-- /generated:rules -->
 

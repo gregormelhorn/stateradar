@@ -20,6 +20,8 @@ Never fill a specification gap with your own judgment, however plausible. Your v
 * duplication (F-14)
 * out-of-order or stale arrival, especially after cancellation or shutdown (F-15)
 * contradictory simultaneous inputs (F-16)
+* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17)
+* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18)
 <!-- /generated:rules -->
 
   The coverage table must show every category. Write a reason for each `n/a`.

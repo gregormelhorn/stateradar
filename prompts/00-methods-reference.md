@@ -266,6 +266,8 @@ Every event lists: name, source, external/internal, payload gist, where produced
 * duplication (F-14)
 * out-of-order or stale arrival, especially after cancellation or shutdown (F-15)
 * contradictory simultaneous inputs (F-16)
+* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17)
+* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18)
 <!-- /generated:rules -->
 
 Each variant receives a matrix column and a disposition (or an explicit `not applicable` with reason). This is the systematic counter to "completeness only holds relative to the catalogue".
@@ -451,6 +453,9 @@ The lineage is methodological, not a certification claim.
 * Jaffe, Leveson, Heimdahl, Melhart. *Software Requirements Analysis for Real-Time Process-Control Systems.* IEEE TSE 17(3), 1991.
 * Leveson, Heimdahl, Hildreth, Reese. *Requirements Specification for Process-Control Systems.* IEEE TSE 20(9), 1994.
 * Heimdahl, Leveson. *Completeness and Consistency in Hierarchical State-Based Requirements.* IEEE TSE 22(6), 1996.
+* Binder. *Testing Object-Oriented Systems: Models, Patterns, and Tools.* Addison-Wesley, 1999. (State-machine fault taxonomy: the F-xx catalogue names.)
+* Pumfrey, McDermid. *Software Safety Analysis — SHARD.* (HAZOP guide words for software: omission, commission, early, late, value — the undesired-variant categories.)
+* Chillarege et al. *Orthogonal Defect Classification.* IEEE TSE 18(11), 1992. (Defect type × trigger — the fault-class/detector fields on findings.)
 <!-- vale on -->
 
 Tool pointers (optional, not dependencies): Mermaid for diagrams; `z3-solver` (pip) for ad-hoc guard proofs; mutation tools (`mutmut`, `cosmic-ray`, Stryker). Use Quint (quint.sh) if a composed multi-machine design ever warrants formal simulation/checking.

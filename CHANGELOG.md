@@ -3,12 +3,12 @@
 ## v1.35 — rules registry: single source for method rules
 
 - formats/rules.toml: machine-readable registry — closed vocabularies,
-  fault-class catalogue (Binder's state-machine fault taxonomy + the
-  pack's empirical classes + the undesired-variant categories), and
-  every method rule with class, enforcement, checker/selftest refs,
-  and detects links (the ODC fault-class × detector mapping). Split
-  PAs (3, 6, 9, 13, 14, 18) get suffixed ids where the original prose
-  mixed two rule classes.
+  fault-class catalogue (F-01..F-21: Binder's state-machine fault
+  taxonomy + the pack's empirical classes + SHARD-aligned
+  undesired-variant categories), and every method rule with class,
+  enforcement, checker/selftest refs, and detects links (the ODC
+  fault-class × detector mapping). Split PAs (3, 6, 9, 13, 14, 18) get
+  suffixed ids where the original prose mixed two rule classes.
 - tools/gen_rules.py: renders the registry into generated blocks in
   00, 02, AGENTS §5, and the README finds list; --check fails CI on
   drift (regenerate-and-diff replaces the old VOCAB-x2 sync check);
@@ -16,8 +16,11 @@
   need selftest refs ("TODO" = warned backlog, never silent), lint
   rules must render, fault-model rules must declare detects, fault
   classes without detectors warn.
+- 02-pilot v1.14: undesired-variant checklist gains spontaneous
+  commission and subtle value fault (SHARD); ODC fields (fault class +
+  trigger) on every finding.
 - 00-methods-reference: doctrine-mapping enforcement claim corrected
-  (lint, checker candidate).
+  (lint, checker candidate); Binder, SHARD, ODC added to references.
 
 ## v1.34 — tests consolidation, reachability checker, evidence repositioning
 

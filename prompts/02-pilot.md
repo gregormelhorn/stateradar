@@ -5,7 +5,15 @@
 <!-- vale off -->
 * v1.14 — rules registry: the closed vocabularies, the undesired-variant
   checklist, and the Step-5 lint list are now generated from
-  `formats/rules.toml` (single source; `tools/gen_rules.py`).
+  `formats/rules.toml` (single source; `tools/gen_rules.py`). The
+  checklist gains two SHARD-derived categories: spontaneous commission
+  (an event with no legitimate trigger — spurious wakeup, callback
+  without request; duplication only covers the repeat case) and subtle
+  value fault (plausible but wrong payload — foreign session id, stale
+  epoch; contradictory input only covers the simultaneous case). New
+  ODC fields: every finding records its fault class (F-xx) and its
+  trigger (the detector that found it), so the detection portfolio can
+  be evaluated against the fault catalogue across pilots.
 * v1.13 — finding verification step (Step 8): every bug claim, invariant
   violation, and lint finding gets a second pass against the code before
   finalizing the matrix. Concurrency claims must cite memory ordering;
@@ -125,6 +133,8 @@ For every external event source, derive undesired variants with this checklist (
 * duplication (F-14)
 * out-of-order or stale arrival, especially after cancellation or shutdown (F-15)
 * contradictory simultaneous inputs (F-16)
+* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17)
+* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18)
 <!-- /generated:rules -->
 
 Add the variants to the catalogue. They receive matrix columns like any other event.
@@ -298,6 +308,8 @@ Options: reactivate | ignore | reject with diagnostic
 Proposed: ignore — shutdown is operator-initiated and final
 Status: OPEN — human decision required
 ```
+
+**ODC fields.** Every finding and question records two extra fields: `fault: F-xx` — its fault class from the catalogue in `formats/rules.toml` — and `trigger:` — the mechanism that found it (step-3 checklist, step-5 lint, z3 proof, adversarial trace, part-B diff, reviewer cross-check, step-8 verification). Across pilots these two fields are the data that shows which detectors earn their prompt space and which fault classes have no detector.
 
 Do not resolve these questions. End with a summary count: states / events incl. undesired variants / interaction pairs / matrix cells / UNSPECIFIED / accidental ignores / guard groups proven / guard violations / not-formalizable / findings / open questions.
 
