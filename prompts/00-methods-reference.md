@@ -366,7 +366,6 @@ code and names them per the convention; Part B derives states from the
 requirements and names them per the SAME convention. The diff matches by
 name because both passes speak the same language.
 
-<!-- rule:R-ANTI-MIRRORING -->
 <!-- rule:PA-19 -->
 <!-- rule:PA-20 -->
 ## Testing conventions
@@ -386,19 +385,6 @@ Settled by prior art; agents must not relitigate them without a DR. In pack mode
 
 The registry `formats/rules.toml` is the single source for these rules — their class (wellformedness | completeness | fault-model | process), their enforcement (checker | test | lint | prompt | human | data), and the fault-class catalogue (F-xx) they detect. The list below is generated from it (`tools/gen_rules.py`); a split id (PA-3a/PA-3b) marks a rule whose original prose mixed two classes.
 
-<!-- rule:PA-5 -->
-<!-- rule:PA-6a -->
-<!-- rule:PA-6b -->
-<!-- rule:PA-7 -->
-<!-- rule:PA-8 -->
-<!-- rule:PA-9a -->
-<!-- rule:PA-9b -->
-<!-- rule:PA-11 -->
-<!-- rule:PA-12 -->
-<!-- rule:PA-13b -->
-<!-- rule:PA-14b -->
-<!-- rule:PA-16 -->
-<!-- rule:PA-18b -->
 
 <!-- generated:rules key=pa-condensed -->
 ```text

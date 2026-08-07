@@ -60,16 +60,23 @@ Never fill a specification gap with your own judgment, however plausible. Your v
 
 Run 06 first when the manifest reports staleness. Run 01 or 02 for a new component. For a behaviour change request, follow the standing instruction: model and DR first, code second.
 
-<!-- rule:R-DEFERRED-OPEN -->
 ## 4. Rules that do not bend
 
+<!-- rule:R-NO-SILENT-DECISIONS -->
 1. **Never decide domain semantics.** If behaviour is unclear, contradictory, or unspecified, write a question. Treat a "benign" gap as a proposal inside the question. It is never a reason to omit the question.
+<!-- rule:R-REQUIREMENT-SCOPE-a -->
 2. **Requirement-scope rule.** A citation covers only the scenario that its text describes. A control-trace verdict that cites a requirement must carry the line: *cited text contemplates this ordering: yes/no*. A "no" voids the verdict. Then raise a question.
+<!-- rule:R-SEAM-CONTRACT -->
 3. **Read callee contracts. Do not infer them.** Missing error handling at a call site is not evidence that failures propagate. Read the contract of the seam. Cite into the callee.
+<!-- rule:R-EXECUTED-CHECKS -->
 4. **Run checks as executed code.** You emit data. The pack verifies it with `tools/dsc_check.py` on the sidecar. When you write per-run checkers, run them and paste the output. A red checker means: fix the artefact, or fix the checker openly and re-run. Never "fix" the data to silence a check.
+<!-- rule:R-PROPOSALS -->
 5. **Proposals are not decisions.** Recommendations have flipped between runs on the same code. Present them, label them `proposed`, and hold them loosely. Pre-selection in the interview is presentation, not authority.
+<!-- rule:R-ANTI-MIRRORING -->
 6. **Tests bind to behaviour, not structure.** Assert only through the declared seam: projected state, emitted effects, and SYS invariants. Never weaken, skip, or delete a test to make it pass. A failing cell test is a finding.
+<!-- rule:R-PART-B -->
 7. **Part B stays blind.** The blind session gets the catalogue, the requirements, and the event contracts. It never gets the code, the matrix, or prior analyses. Do no git archaeology on deleted analyses.
+<!-- rule:R-DEFERRED-OPEN -->
 8. **Deferred stays OPEN.** A deferred question blocks only its own cells.
 
 ## 5. What the checkers catch

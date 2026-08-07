@@ -217,21 +217,49 @@ def constraints(reg: dict, root: Path) -> tuple[list[str], list[str]]:
         if tool not in all_checker_refs:
             warnings.append(f"checker-shaped tool not cited by any rule: {tool}")
 
-    # RR5: rules with no render target (no catches, render, lint_ref, prose_ref)
-    # become dark-prose warnings — their normative prose has no anchor.
+    # F2b: prose anchors. Rules need a render target: catches, render,
+    # lint_ref, prose_ref, or prose="registry-only".  prose_ref format
+    # is "<file>#<RULE-ID>"; the file must contain <!-- rule:<ID> -->
+    # and that anchor must NOT fall inside a generated block.
+    generated_ranges: dict[str, list[tuple[int, int]]] = {}
     for r in reg.get("rules", []):
         has_target = any(
             r.get(k) for k in ["catches", "render", "lint_ref", "prose_ref"]
-        )
+        ) or r.get("prose") == "registry-only"
         if not has_target and r.get("enforcement") != "checker":
             warnings.append(f"dark rule (no prose anchor): {r['id']} — {r['title']}")
-        # Verify prose_ref file exists (section existence is best-effort)
+
         pref = r.get("prose_ref", "")
         if pref and "#" in pref:
-            fname = pref.split("#", 1)[0]
+            fname, anchor_id = pref.split("#", 1)
             target_path = root / fname
             if not target_path.is_file():
                 errors.append(f"{r['id']}: prose_ref file not found: {fname}")
+                continue
+            text = target_path.read_text(encoding="utf-8")
+            anchor_tag = f"rule:{anchor_id}"
+            if f"<!-- {anchor_tag} -->" not in text:
+                errors.append(
+                    f"{r['id']}: prose_ref anchor '<!-- {anchor_tag} -->' "
+                    f"not found in {fname}"
+                )
+                continue
+            # Anti-circularity: anchor must not be inside a generated block
+            if fname not in generated_ranges:
+                generated_ranges[fname] = []
+                import re as _re
+                for m in _re.finditer(
+                    r"<!-- generated:rules .*?-->(.*?)<!-- /generated:rules -->",
+                    text, _re.DOTALL
+                ):
+                    generated_ranges[fname].append((m.start(), m.end()))
+            anchor_pos = text.find(f"<!-- {anchor_tag} -->")
+            for gs, ge in generated_ranges[fname]:
+                if gs <= anchor_pos < ge:
+                    warnings.append(
+                        f"{r['id']}: prose_ref anchor inside generated block in {fname}"
+                    )
+                    break
 
     return errors, warnings
 

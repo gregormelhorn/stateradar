@@ -80,8 +80,10 @@ You perform a domain-behaviour analysis of one stateful component. You analyze. 
 ### Hard rules
 
 1. Do not modify any source code, tests, or configuration. Your only outputs are the analysis files listed below, in the configured output directory.
+<!-- rule:R-NO-SILENT-DECISIONS -->
 2. Do not decide unclear domain behaviour yourself. If the behaviour is not clear, or two sources do not agree, or no source gives the behaviour: write an open question. Do not select an answer and continue. Label your recommendations `proposed`, never as fact. To call a gap "benign" is such a decision. Benignity may appear as a proposal inside a question. It is never a reason to omit the question.
 3. Every claim about existing behaviour carries provenance: `explicit-requirement` (cite the document), `observed-in-code` (cite file:line), `observed-in-tests` (cite file:line), `inferred` (state the inference), or `proposed` (yours). A claim without provenance is at best `inferred`. An `observed-in-code` or `observed-in-tests` citation carries a short verbatim fragment: `file:line ("fragment")`. Checkers verify the fragment near that line.
+<!-- rule:R-REQUIREMENT-SCOPE-a -->
 4. **Requirement-scope rule.** A citation covers only the scenario that the cited text describes. If you apply a requirement, doc line, or recorded decision to an ordering, race, or variant it does not address: downgrade the provenance to `inferred` and treat the cell as a hole candidate. Written down is not the same as decided for this case.
 5. Model what the code does, not what it should do. The desired design comes later, after a human resolves the open questions. Do not produce a to-be model in this run.
 6. The component may have no real temporal behaviour: no lifecycle, no asynchronous events, no retries, no timeouts, no cancellation. In that case say so, explain briefly, and stop. A negative result is a valid result.
@@ -103,6 +105,7 @@ checked determines the state.
 
 **Doctrine-line sweep.** Extract every normative sentence from the requirements and docs. Principle lines such as "identity stays sacred", "no lost X", "failures must be loud" go into a numbered list `DOC-1..n` with their source. Step 5 must classify each doctrine line: adopted as an invariant, adopted as a disposition constraint, or explicitly rejected as non-binding. A silently unused doctrine line is an error.
 
+<!-- rule:R-SEAM-CONTRACT -->
 **Seam-contract sweep.** For every external seam the component invokes (publisher or bus, classifier or model client, scheduler, executor, storage): read the callee's contract. Record its failure semantics (raises what, never raises, timeout behaviour) as NAT candidates with citations into the callee. Missing error handling at a call site is **not** evidence that failures propagate. To declare an invoked-operation failure path a hole without reading the callee's contract is an unproven inference. Label it as such.
 
 → `extraction.md`
@@ -122,6 +125,8 @@ Then validate the model against the existing tests. Walk each relevant test scen
 
 → `as-is.machine.mmd`, `as-is-validation.md`
 
+<!-- rule:R-REMEMBRANCE -->
+<!-- rule:R-LOCK-DISCIPLINE -->
 ### Step 3 — Event catalogue incl. undesired variants and interaction pairs
 
 List every event with name, source, external/internal, payload gist, and where the code produces and consumes it.
@@ -213,6 +218,7 @@ Omitting a section you simply did not produce is the failure this block exists t
 
 → `disposition-matrix.md`, `check_matrix.py`, `check_guards.py`
 
+<!-- rule:R-INVARIANT-ORACLE -->
 ### Step 5 — Invariants and lint findings
 
 Propose invariants as checkable predicates over state and context, classified `NAT` (assumption about the environment) or `SYS` (obligation of the system). Check every SYS invariant against the as-is model, state by state. Violations are findings. **Close the doctrine sweep:** map every `DOC-n` line from Step 1 to an invariant, a disposition constraint, or an explicit rejection with reason. An unmapped doctrine line is an error.
@@ -312,6 +318,7 @@ For each trace give (a) the sequence, (b) what the code appears to do, with prov
 
 → `adversarial-traces.md`
 
+<!-- rule:R-ODC-FIELDS -->
 ### Step 7 — Open domain questions (primary deliverable)
 
 Consolidate every hole, contradiction, accidental ignore, invariant violation, unmapped-doctrine finding, lint finding, and adversarial question into a numbered list. These are decisions that only a human can make. **Nothing gets dropped in consolidation.** Every hole cell maps to exactly one Q. To group related cells into one Q is fine. To omit one is not.
@@ -356,6 +363,7 @@ into the matrix; the matrix gains additional provenance. A finding that
 the statechart missed is a gap in the model. A finding the reviewer
 missed is a gap in inspection. They are complementary, not redundant.
 
+<!-- rule:R-FINDING-VERIFICATION -->
 ### Step 8 — Finding verification (mandatory, after open questions)
 
 Re-read every bug claim, invariant violation, and lint finding against
@@ -395,6 +403,7 @@ removed with a note in the summary.
 
 ---
 
+<!-- rule:R-PART-B -->
 ## PART B — Blind adversarial pass (separate, fresh session)
 
 Run this in a **new** agent session with no access to the as-is model, the matrix, the traces, or the code. Provide only these inputs. First: `event-catalogue.md`, with gate-type annotations, upstream-guard annotations, and the pairs table. Second: the prose requirements. Third: the **normative contract text of every event the component emits or consumes**. Contract text means contract docstrings and schema descriptions: requirements-level material, never component code.
