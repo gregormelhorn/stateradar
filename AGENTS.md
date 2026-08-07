@@ -78,6 +78,8 @@ Run 06 first when the manifest reports staleness. Run 01 or 02 for a new compone
 7. **Part B stays blind.** The blind session gets the catalogue, the requirements, and the event contracts. It never gets the code, the matrix, or prior analyses. Do no git archaeology on deleted analyses.
 <!-- rule:R-DEFERRED-OPEN -->
 8. **Deferred stays OPEN.** A deferred question blocks only its own cells.
+<!-- rule:R-READ-PROMPTS -->
+9. **Read prompts in full.** When a task says "run prompt X" or references a prompt file (e.g. `prompts/02-pilot.md`), read the complete file before producing output. Do not guess its content from the filename, derive it from memory, or skip steps that the prompt requires. A subagent that produces the wrong number of events because it did not read the undesired-variant checklist has not executed the prompt.
 
 ## 5. What the checkers catch
 
