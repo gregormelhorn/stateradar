@@ -1,62 +1,69 @@
-# Invariants and Lints — device-connection
+# Invariants and lints — device-connection
+
+## NAT invariants (environment assumptions; analysis may assume, tests may not)
+
+- **NAT-1** `_simulate_connect` is probabilistic (~70% success) and may fail unpredictably. The connection result (success, refused, timeout) is determined by the simulated network environment. Observed-in-code: `device_connection.py:137-144`.
+- **NAT-2** Single-input assumption (PA-8): events are processed one at a time under asyncio cooperative concurrency. The component does not use locks or threads. Observed-in-code: entire class uses `async`/`await` without threading primitives.
+- **NAT-3** The caller serializes external events (connect, disconnect). There is no concurrent external dispatch from multiple callers within a single event-loop turn. Observed: standard asyncio contract.
+- **NAT-4** `max_retries >= 1` (default 3). The constructor accepts any int; retry_count < max_retries comparison at line 108 assumes max_retries > 0 for meaningful behavior. With max_retries=0, the loop body never executes and the component stays in CONNECTING indefinitely. Proposed: document minimum.
+- **NAT-SYS-1** When N > 1 DeviceConnection instances share one device, connection failures may synchronize across instances. The per-instance jitter (`random.uniform(0, backoff * 0.5)`, line 122) provides some decorrelation. Multi-instance traces model aggregate behavior.
+
+## SYS invariants (obligations), checked state by state against the as-is model
+
+| id | predicate | verdict |
+|---|---|---|
+| SYS-1 | `state == FAILED` ⇒ no `_connect_loop` is running | holds — `_connect_loop` returns at line 119 after setting FAILED; `connect()` raises in FAILED (line 86-87); no code path starts a new loop from FAILED |
+| SYS-2 | `state == DISCONNECTED` ⇒ `_connect_task is None` | **VIOLATED** — `connect()` during RECONNECTING overwrites `_connect_task` (line 91) without cancelling the old task (lines 89-91). The old loop task continues running and can complete after `_connect_task` is set to a new task or to None. → Q-02 |
+| SYS-3 | `state == CONNECTED` ⇒ `retry_count == 0` | holds — `retry_count = 0` set immediately at line 112 when connection succeeds; no path increments retry_count while CONNECTED |
+| SYS-4 | `state == FAILED` is terminal under normal operation | **VIOLATED** — `disconnect()` has no FAILED guard (lines 96-103) and transitions FAILED → DISCONNECTED. Contradicts R-05 ("remains in FAILED state permanently"). → Q-03 |
+| SYS-5 | `disconnect()` eventually reaches DISCONNECTED from any state | holds — disconnect() sets `self.state = State.DISCONNECTED` unconditionally at line 103 |
+| SYS-6 | `_uptime_task is not None` ⇒ `state == CONNECTED` | holds — `_uptime_task` is created only in `_start_uptime_timer()` (line 154), called only from `_connect_loop` (line 113) immediately after setting CONNECTED (line 111); cleared on disconnect (line 102) |
 
 ## Doctrine mapping
 
-Doctrine lines extracted from `examples/device-connection/README.md`. Each normative sentence maps to an invariant, a disposition constraint, or an explicit rejection.
+<!-- doc-ids: DOC-1 DOC-2 DOC-3 DOC-4 DOC-5 DOC-6 DOC-7 DOC-8 DOC-9 -->
 
-| DOC id | Mapping | Target |
+| id | mapping | target |
 |---|---|---|
-| DOC-01 | invariant | SYS-01: `connect()` sets state to CONNECTING and starts a connection attempt |
-| DOC-02 | disposition | connect in {CONNECTED, CONNECTING} → ignore (documented) |
-| DOC-03 | invariant | SYS-02: `disconnect()` sets `_should_stop=True`, cancels pending tasks, sets state to DISCONNECTED |
-| DOC-04 | invariant | SYS-03: On successful connection, state=CONNECTED and retry_count=0 |
-| DOC-05 | invariant | SYS-04: On connection failure, retry_count increments, component retries up to max_retries with exponential backoff + jitter |
-| DOC-06 | invariant | SYS-05: When retry_count >= max_retries, state=FAILED; no further connection attempts |
-| DOC-07 | disposition | disconnect in {CONNECTING, RECONNECTING} → transition → DISCONNECTED |
-| DOC-08 | invariant | SYS-06: Connection timeout is treated as a failure (caught in same except block, device_connection.py:111) |
-| DOC-09 | invariant | SYS-07: retry_count=0 already set on successful connect; min_uptime timer started |
-| DOC-10 | invariant | SYS-08: Backoff computed as `base_backoff * 2^(retry_count-1) + uniform(0, backoff*0.5)` |
+| DOC-1 | cell | (DISCONNECTED, connect), (CONNECTING, connect), (CONNECTED, connect) |
+| DOC-2 | cell | (CONNECTING, disconnect), (RECONNECTING, disconnect) |
+| DOC-3 | cell | (CONNECTING, connection_succeeds), (RECONNECTING, connection_succeeds) |
+| DOC-3 | invariant | SYS-3 |
+| DOC-4 | cell | (CONNECTING, connection_fails), (CONNECTING, connection_timeout), (RECONNECTING, connection_fails), (RECONNECTING, connection_timeout) |
+| DOC-5 | cell | (CONNECTING, max_retries_exhausted), (RECONNECTING, max_retries_exhausted), (FAILED, connect) |
+| DOC-5 | invariant | SYS-1, SYS-4 |
+| DOC-6 | cell | (CONNECTING, disconnect), (RECONNECTING, disconnect) |
+| DOC-7 | cell | (CONNECTING, connection_timeout), (RECONNECTING, connection_timeout) |
+| DOC-8 | invariant | SYS-3 — retry_count=0 on connect; **gap**: reset happens before min_uptime elapses → Q-04 |
+| DOC-9 | cell | backoff jitter at `device_connection.py:122-123` |
 
-## NAT — Assumptions about the environment
+## Doctrine sweep prose detail (Step-5 closure of the DOC sweep; PA-22 cell check)
 
-| ID | Statement | Cited callee / upstream |
-|---|---|---|
-| NAT-01 | `connect()` and `disconnect()` are called within a running asyncio event loop. | Caller contract — component uses `asyncio.create_task` and `asyncio.sleep`. |
-| NAT-02 | The device address (`DeviceInfo.address`) is valid and reachable under normal network conditions. | `DeviceInfo` — value supplied by caller at construction. |
-| NAT-03 | `asyncio.sleep()` does not wake spuriously. Python's asyncio implementation does not have spurious wakeups; this is an environmental assumption. | `asyncio` standard library. |
-| NAT-04 | `asyncio.wait_for()` raises `TimeoutError` when the timeout is exceeded. This is Python's documented contract. | `asyncio` standard library. |
-| NAT-05 | Task cancellation via `task.cancel()` propagates `CancelledError` into the task's coroutine at the next `await` point. | `asyncio.Task.cancel()` — Python standard library contract. |
-| NAT-06 | Component is single-tenant: one `DeviceConnection` manages one device. No concurrent sharing of the same instance across threads. | Caller contract — no synchronization primitives in the component. |
-
-## SYS — Obligations of the system
-
-| ID | Statement | Verified states |
-|---|---|---|
-| SYS-01 | `state ∈ {DISCONNECTED, CONNECTING, CONNECTED, RECONNECTING, FAILED}` at all times. | All — enum guarantees this by construction. |
-| SYS-02 | `retry_count ≤ max_retries` at all times. | All — checked in `_connect_loop` line 102; reset to 0 on success line 107; only incremented on failure line 112. |
-| SYS-03 | After `connect()` returns from DISCONNECTED, `state == CONNECTING`. | DISCONNECTED — `device_connection.py:89`. |
-| SYS-04 | After successful connection, `state == CONNECTED` and `retry_count == 0`. | CONNECTING, RECONNECTING — `device_connection.py:106-107`. |
-| SYS-05 | `connect()` in FAILED raises `ConnectionError`. | FAILED — `device_connection.py:87-88`. |
-| SYS-06 | After `disconnect()`, `state == DISCONNECTED` regardless of prior state (including FAILED per current code, but see Q-06). | All — `device_connection.py:100`. |
-| SYS-07 | `_connect_task` is not None only during CONNECTING or RECONNECTING. | CONNECTING, RECONNECTING — set at `device_connection.py:90`, cleared on cancel/complete. |
-| SYS-08 | Backoff includes random jitter: `backoff = base_backoff * (2 ** (retry_count - 1)) + uniform(0, backoff * 0.5)`. | RECONNECTING — `device_connection.py:119-120`. |
-| SYS-09 | When `_should_stop == True`, the connection loop terminates at the next iteration boundary and no new attempts are made. | CONNECTING, RECONNECTING — `device_connection.py:102`. |
-
-## SYS Invariant state-by-state check
-
-| Invariant | DISCONNECTED | CONNECTING | CONNECTED | RECONNECTING | FAILED |
-|---|---|---|---|---|---|
-| SYS-01 (state in enum) | ✓ | ✓ | ✓ | ✓ | ✓ |
-| SYS-02 (retry_count ≤ max_retries) | ✓ (retry_count=0) | ✓ | ✓ (retry_count=0) | ✓ | ✓ (retry_count=max_retries at time of entry) |
-| SYS-06 (disconnect → DISCONNECTED) | ✓ (no-op) | ✓ | ✓ | ✓ | ⚠ code allows, Q-06 |
-| SYS-07 (_connect_task) | ✓ (None) | ✓ (non-None) | ✓ (None after loop returns) | ✓ (non-None) | ✓ (None after loop exits) |
-
-## Lints
-
-| ID | Severity | Description | Location |
+| DOC | classification | mapping | verdict |
 |---|---|---|---|
-| L-01 | HIGH | `connect()` during RECONNECTING is not prevented — the guard at `device_connection.py:85` only checks CONNECTED/CONNECTING. A second `connect()` creates a new `_connect_task`, overwriting the reference to the running retry loop. The orphaned task may still fire events. | device_connection.py:85 |
-| L-02 | HIGH | `disconnect()` during FAILED transitions to DISCONNECTED (`device_connection.py:100`). R-05 states the component "remains in FAILED state permanently." Code and requirement conflict. | device_connection.py:91-100, README.md R-05 |
-| L-03 | MEDIUM | `_uptime_task` is created but its completion has no side effect — the comment at `device_connection.py:144-145` notes that `retry_count=0` is already handled in `_connect_loop`. The uptime timer is dead code that could be removed or repurposed to detect early disconnection. | device_connection.py:139-147 |
-| L-04 | MEDIUM | `_should_stop` is set to `False` in `connect()` (`device_connection.py:88`) but only checked at the top of the while loop (`device_connection.py:102`). If `_should_stop` was set to `True` by a previous `disconnect()`, the new `connect()` correctly resets it. However, there is a TOCTOU window between the check and the `_attempt_connection()` call. | device_connection.py:88,102 |
-| L-05 | INFO | `_connect_task` and `_uptime_task` are not awaited after cancellation. The tasks may still be in a cancelled state when the next `connect()` overwrites `_connect_task`. This is Python-idiomatic (cancelled tasks are GC'd) but could confuse static analysis. | device_connection.py:95-97 |
+| DOC-1 | adopted: disposition constraint | (DISCONNECTED, connect) → CONNECTING; (CONNECTING/CONNECTED, connect) → ignore | conforms at `device_connection.py:84,89-91` |
+| DOC-2 | adopted: disposition constraint | (CONNECTING/RECONNECTING, disconnect) → DISCONNECTED | conforms at `device_connection.py:96-103` |
+| DOC-3 | adopted: disposition constraint + invariant | connection_succeeds → CONNECTED, retry_count=0 | conforms at `device_connection.py:111-112` |
+| DOC-4 | adopted: disposition constraint | connection fails → retry with exponential backoff + jitter | conforms at `device_connection.py:115-123`; jitter at line 122 |
+| DOC-5 | adopted then found **violated** | max_retries_exhausted → FAILED, permanent; (FAILED, connect) → reject | SYS-1 holds (no loop in FAILED). SYS-4 **violated**: disconnect() from FAILED → DISCONNECTED at line 96-103. FAILED is not permanent. → Q-03 |
+| DOC-6 | adopted: disposition constraint | disconnect during CONNECTING/RECONNECTING → DISCONNECTED | conforms at `device_connection.py:96-100` |
+| DOC-7 | adopted: disposition constraint | timeout treated as failure, retried | conforms — same except block at `device_connection.py:115` |
+| DOC-8 | adopted: invariant | retry_count=0 after stable connection | **gap**: retry_count reset at line 112 happens before min_uptime elapses. `_uptime_task` is a no-op (lines 149-154). Connection drops within min_uptime are not detected. → Q-04 |
+| DOC-9 | adopted: code observation | backoff includes random jitter | conforms at `device_connection.py:122-123` |
+
+## Lint checklist (rules.toml step-5 list)
+
+| lint | finding |
+|---|---|
+| waiting/connecting/stopping states without timeout | CONNECTING and RECONNECTING have timeout via `connect_timeout` in `_attempt_connection` (lines 129-134). **However**, CONNECTED has no connection monitoring — once connected, the component stays CONNECTED until disconnect(). No heartbeat, no drop detection. → Q-05 |
+| retries without a maximum | bounded by `max_retries` (default 3, line 60). Conforms. **Note**: `max_retries=0` is accepted by constructor and results in infinite CONNECTING (loop body never executes, line 108). Proposed: validate max_retries >= 1. |
+| invoked external operations without explicit failure outcome | `_attempt_connection` explicitly models success/failure/timeout (lines 125-135). All outcomes handled. Conforms. |
+| externally initiated operations without cancellation handling | `connect()` creates cancellable `_connect_task` (line 91). `disconnect()` cancels it (line 98). **Gap**: `connect()` during RECONNECTING does not cancel the old task before creating a new one. → Q-02 (F-09 cancellation leak) |
+| terminal/error states without documented meaning | FAILED is documented in R-05 ("no further connection attempts"). **Contradiction**: FAILED can be exited via disconnect(). → Q-03 |
+| undefined startup/shutdown behaviour | Startup: `__init__` at lines 57-79 sets state=DISCONNECTED, retry_count=0. Shutdown: `disconnect()` cancels tasks and sets DISCONNECTED. **No dedicated shutdown/cleanup method** — disconnect() doubles as cleanup. Acceptable for single-device component. |
+| unbounded queues/buffers, unhandled overload | No queues or buffers. Conforms. |
+| synchronized reset points | `retry_count=0` on successful connect (line 112) is a synchronized reset: all instances that connect simultaneously reset their retry count. With NAT-SYS-1, a device flap can synchronize reset across instances. The jitter applies only to backoff, not to the retry_count reset. Proposed: note in multi-instance analysis. |
+| lifecycle disagreement (PA-21) | `retry_count` is accessed from both `connect()` (indirectly via `_connect_loop`) and `_connect_loop` internal. The orphaned-task scenario (Q-02) creates two concurrent `_connect_loop` instances accessing the same `retry_count` — a lifecycle coupling fault (F-07). |
+| dual ownership cleanup (PA-23) | `_connect_task` is created by `connect()` and cancelled by `disconnect()`. Single ownership in normal flow. **Gap**: connect() during RECONNECTING creates a second task without releasing the first. → Q-02 |
+| async cancellation isolation (PA-24) | `_connect_loop` task is fire-and-forget after `connect()` returns. No synchronization from task completion back to the caller. Acceptable for state-only component (no result channel). **Gap**: orphaned task can deliver state changes after disconnect() — no suppression mechanism. → Q-02 |
+| user-model gap | (RECONNECTING, connect) → CONNECTING via lines 89-91: correct disposition but the orphaned task scenario (racing old and new `_connect_loop`) is visible only under concurrent execution (two loop tasks). The adversarial trace P-03b documents this. Also (FAILED, disconnect) → DISCONNECTED: correct per code but contradicts documented contract R-05. |

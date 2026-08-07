@@ -1,8 +1,8 @@
 {
  "formatVersion": "1.0",
- "component": "device-connection",
+ "component": "run2",
  "packVersion": "",
- "analyzedSha": "35567f274f011cd65a0fa726e0949f25ea457f54",
+ "analyzedSha": "3fee207d38882072f97ab616dbca949f97eb0687",
  "watchPaths": [
   "examples/device-connection/device_connection.py",
   "examples/device-connection/README.md"
@@ -10,69 +10,177 @@
  "states": [
   "DISCONNECTED",
   "CONNECTING",
-  "RECONNECTING",
   "CONNECTED",
+  "RECONNECTING",
   "FAILED"
  ],
  "events": [
   {
    "id": "connect",
    "undesired": false,
-   "gate": "Caller entry — no internal precondition beyond FAILED rejection.",
+   "gate": "service-side state (idempotent guard on CONNECTED/CONNECTING; FAILED guard raises)",
    "upstream_guards": [
-    "none"
+    "validated upstream (caller ensures device exists)"
    ]
   },
   {
    "id": "disconnect",
    "undesired": false,
-   "gate": "Caller entry — no internal precondition.",
+   "gate": "service-side state (no guard — always processes)",
    "upstream_guards": [
-    "none"
+    "validated upstream (caller ensures device exists)"
    ]
   },
   {
    "id": "connection_succeeds",
    "undesired": false,
-   "gate": "Delivered as the successful outcome of an asynchronous connection attempt. The gate is the completion of `_attempt_connection()` without exception.",
+   "gate": "internal (outcome of _attempt_connection)",
    "upstream_guards": [
-    "state ∈ {CONNECTING",
-    "RECONNECTING}"
+    "n/a (internal event)"
    ]
   },
   {
    "id": "connection_fails",
    "undesired": false,
-   "gate": "Delivered as the failure outcome of an asynchronous connection attempt.",
+   "gate": "internal (outcome of _attempt_connection)",
    "upstream_guards": [
-    "state ∈ {CONNECTING",
-    "RECONNECTING}"
+    "n/a (internal event)"
    ]
   },
   {
    "id": "connection_timeout",
    "undesired": false,
-   "gate": "Delivered as the timeout outcome of an asynchronous connection attempt.",
+   "gate": "internal (outcome of _attempt_connection)",
    "upstream_guards": [
-    "state ∈ {CONNECTING",
-    "RECONNECTING}"
+    "n/a (internal event)"
    ]
   },
   {
    "id": "backoff_elapsed",
    "undesired": false,
-   "gate": "Delivered when `asyncio.sleep(backoff + jitter)` completes in the retry loop.",
+   "gate": "internal (asyncio.sleep completion)",
    "upstream_guards": [
-    "state = RECONNECTING"
+    "n/a (internal event)"
    ]
   },
   {
    "id": "max_retries_exhausted",
    "undesired": false,
-   "gate": "Internal check `retry_count >= max_retries` after increment in `_connect_loop`.",
+   "gate": "internal (retry_count >= max_retries check)",
    "upstream_guards": [
-    "state ∈ {CONNECTING",
-    "RECONNECTING}"
+    "n/a (internal event)"
+   ]
+  },
+  {
+   "id": "UV-connect-loss",
+   "undesired": true,
+   "gate": "n/a — event never arrives",
+   "upstream_guards": [
+    "n/a"
+   ]
+  },
+  {
+   "id": "UV-connect-delay",
+   "undesired": true,
+   "gate": "service-side state (same as connect)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-duplication",
+   "undesired": true,
+   "gate": "service-side state (second connect may hit idempotent guard)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-out-of-order",
+   "undesired": true,
+   "gate": "service-side state (connect processed after a later disconnect)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-contradiction",
+   "undesired": true,
+   "gate": "service-side state (interleaving with disconnect determines outcome)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-commission",
+   "undesired": true,
+   "gate": "service-side state (component cannot distinguish from legitimate connect)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-value",
+   "undesired": true,
+   "gate": "n/a — connect() takes no payload",
+   "upstream_guards": [
+    "n/a"
+   ]
+  },
+  {
+   "id": "UV-disconnect-loss",
+   "undesired": true,
+   "gate": "n/a — event never arrives",
+   "upstream_guards": [
+    "n/a"
+   ]
+  },
+  {
+   "id": "UV-disconnect-delay",
+   "undesired": true,
+   "gate": "service-side state (same as disconnect)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-duplication",
+   "undesired": true,
+   "gate": "service-side state (second disconnect is idempotent)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-out-of-order",
+   "undesired": true,
+   "gate": "service-side state (disconnect processed after a later connect)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-contradiction",
+   "undesired": true,
+   "gate": "service-side state (interleaving with connect determines outcome)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-commission",
+   "undesired": true,
+   "gate": "service-side state (component cannot distinguish from legitimate disconnect)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-value",
+   "undesired": true,
+   "gate": "n/a — disconnect() takes no payload",
+   "upstream_guards": [
+    "n/a"
    ]
   }
  ],
@@ -82,16 +190,16 @@
    "target": "CONNECTING",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 88
+    "line": 89
    },
    "state": "DISCONNECTED",
    "event": "connect"
   },
   {
-   "disposition": "ignore (documented)",
+   "disposition": "handle",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 100
+    "line": 96
    },
    "state": "DISCONNECTED",
    "event": "disconnect"
@@ -130,7 +238,7 @@
    "disposition": "ignore (documented)",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 85
+    "line": 84
    },
    "state": "CONNECTING",
    "event": "connect"
@@ -140,7 +248,7 @@
    "target": "DISCONNECTED",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 92
+    "line": 96
    },
    "state": "CONNECTING",
    "event": "disconnect"
@@ -150,7 +258,7 @@
    "target": "CONNECTED",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 106
+    "line": 111
    },
    "state": "CONNECTING",
    "event": "connection_succeeds"
@@ -160,7 +268,7 @@
    "target": "RECONNECTING",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 111
+    "line": 115
    },
    "state": "CONNECTING",
    "event": "connection_fails"
@@ -170,26 +278,83 @@
    "target": "RECONNECTING",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 111
+    "line": 115
    },
    "state": "CONNECTING",
    "event": "connection_timeout"
   },
   {
    "disposition": "UNSPECIFIED",
-   "q": "Q-02",
+   "q": "Q-01",
    "state": "CONNECTING",
    "event": "backoff_elapsed"
   },
   {
-   "disposition": "UNSPECIFIED",
-   "q": "Q-03",
+   "disposition": "transition",
+   "target": "FAILED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 117
+   },
    "state": "CONNECTING",
    "event": "max_retries_exhausted"
   },
   {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTED",
+   "event": "connect"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTED",
+   "event": "disconnect"
+  },
+  {
    "disposition": "UNSPECIFIED",
-   "q": "Q-04",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "connection_succeeds"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "connection_fails"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "connection_timeout"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "backoff_elapsed"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "max_retries_exhausted"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
    "state": "RECONNECTING",
    "event": "connect"
   },
@@ -198,7 +363,7 @@
    "target": "DISCONNECTED",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 92
+    "line": 96
    },
    "state": "RECONNECTING",
    "event": "disconnect"
@@ -208,7 +373,7 @@
    "target": "CONNECTED",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 106
+    "line": 111
    },
    "state": "RECONNECTING",
    "event": "connection_succeeds"
@@ -218,7 +383,7 @@
    "target": "RECONNECTING",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 111
+    "line": 115
    },
    "state": "RECONNECTING",
    "event": "connection_fails"
@@ -228,7 +393,7 @@
    "target": "RECONNECTING",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 111
+    "line": 115
    },
    "state": "RECONNECTING",
    "event": "connection_timeout"
@@ -237,24 +402,28 @@
    "disposition": "handle",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 120
+    "line": 123
    },
    "state": "RECONNECTING",
    "event": "backoff_elapsed"
   },
   {
-   "disposition": "UNSPECIFIED",
-   "q": "Q-03",
+   "disposition": "transition",
+   "target": "FAILED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 117
+   },
    "state": "RECONNECTING",
    "event": "max_retries_exhausted"
   },
   {
-   "disposition": "ignore (documented)",
+   "disposition": "reject",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 85
+    "line": 86
    },
-   "state": "CONNECTED",
+   "state": "FAILED",
    "event": "connect"
   },
   {
@@ -262,85 +431,700 @@
    "target": "DISCONNECTED",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 92
+    "line": 96
    },
-   "state": "CONNECTED",
+   "state": "FAILED",
    "event": "disconnect"
   },
   {
    "disposition": "UNSPECIFIED",
-   "q": "Q-05",
-   "state": "CONNECTED",
+   "q": "Q-01",
+   "state": "FAILED",
    "event": "connection_succeeds"
   },
   {
    "disposition": "UNSPECIFIED",
-   "q": "Q-05",
-   "state": "CONNECTED",
+   "q": "Q-01",
+   "state": "FAILED",
    "event": "connection_fails"
   },
   {
    "disposition": "UNSPECIFIED",
-   "q": "Q-05",
-   "state": "CONNECTED",
+   "q": "Q-01",
+   "state": "FAILED",
    "event": "connection_timeout"
   },
   {
    "disposition": "UNSPECIFIED",
-   "q": "Q-05",
-   "state": "CONNECTED",
+   "q": "Q-01",
+   "state": "FAILED",
    "event": "backoff_elapsed"
   },
   {
    "disposition": "UNSPECIFIED",
-   "q": "Q-05",
-   "state": "CONNECTED",
+   "q": "Q-01",
+   "state": "FAILED",
    "event": "max_retries_exhausted"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 81
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-connect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-connect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-connect-duplication"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-connect-out-of-order"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-connect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-connect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 81
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-connect-value"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 81
+   },
+   "state": "CONNECTING",
+   "event": "UV-connect-loss"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTING",
+   "event": "UV-connect-delay"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTING",
+   "event": "UV-connect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTING",
+   "event": "UV-connect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTING",
+   "event": "UV-connect-contradiction"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTING",
+   "event": "UV-connect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 81
+   },
+   "state": "CONNECTING",
+   "event": "UV-connect-value"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 81
+   },
+   "state": "CONNECTED",
+   "event": "UV-connect-loss"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTED",
+   "event": "UV-connect-delay"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTED",
+   "event": "UV-connect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTED",
+   "event": "UV-connect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTED",
+   "event": "UV-connect-contradiction"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 84
+   },
+   "state": "CONNECTED",
+   "event": "UV-connect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 81
+   },
+   "state": "CONNECTED",
+   "event": "UV-connect-value"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 81
+   },
+   "state": "RECONNECTING",
+   "event": "UV-connect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "RECONNECTING",
+   "event": "UV-connect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "RECONNECTING",
+   "event": "UV-connect-duplication"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "RECONNECTING",
+   "event": "UV-connect-out-of-order"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "RECONNECTING",
+   "event": "UV-connect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 89
+   },
+   "state": "RECONNECTING",
+   "event": "UV-connect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 81
+   },
+   "state": "RECONNECTING",
+   "event": "UV-connect-value"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 81
+   },
+   "state": "FAILED",
+   "event": "UV-connect-loss"
   },
   {
    "disposition": "reject",
    "citation": {
     "file": "examples/device-connection/device_connection.py",
-    "line": 87
+    "line": 86
    },
    "state": "FAILED",
-   "event": "connect"
+   "event": "UV-connect-delay"
   },
   {
-   "disposition": "UNSPECIFIED",
-   "q": "Q-06",
+   "disposition": "reject",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 86
+   },
    "state": "FAILED",
-   "event": "disconnect"
+   "event": "UV-connect-duplication"
   },
   {
-   "disposition": "UNSPECIFIED",
-   "q": "Q-07",
+   "disposition": "reject",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 86
+   },
    "state": "FAILED",
-   "event": "connection_succeeds"
+   "event": "UV-connect-out-of-order"
   },
   {
-   "disposition": "UNSPECIFIED",
-   "q": "Q-07",
+   "disposition": "reject",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 86
+   },
    "state": "FAILED",
-   "event": "connection_fails"
+   "event": "UV-connect-contradiction"
   },
   {
-   "disposition": "UNSPECIFIED",
-   "q": "Q-07",
+   "disposition": "reject",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 86
+   },
    "state": "FAILED",
-   "event": "connection_timeout"
+   "event": "UV-connect-commission"
   },
   {
-   "disposition": "UNSPECIFIED",
-   "q": "Q-07",
+   "disposition": "reject",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 86
+   },
    "state": "FAILED",
-   "event": "backoff_elapsed"
+   "event": "UV-connect-value"
   },
   {
-   "disposition": "UNSPECIFIED",
-   "q": "Q-07",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-value"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
+   "state": "CONNECTING",
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTING",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTING",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTING",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTING",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTING",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
+   "state": "CONNECTING",
+   "event": "UV-disconnect-value"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
+   "state": "CONNECTED",
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTED",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTED",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTED",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTED",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "CONNECTED",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
+   "state": "CONNECTED",
+   "event": "UV-disconnect-value"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-value"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
    "state": "FAILED",
-   "event": "max_retries_exhausted"
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "FAILED",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "FAILED",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "FAILED",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "FAILED",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 96
+   },
+   "state": "FAILED",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "examples/device-connection/device_connection.py",
+    "line": 93
+   },
+   "state": "FAILED",
+   "event": "UV-disconnect-value"
   }
  ],
  "questions": [
@@ -363,71 +1147,64 @@
   {
    "id": "Q-05",
    "status": "OPEN"
-  },
-  {
-   "id": "Q-06",
-   "status": "OPEN"
-  },
-  {
-   "id": "Q-07",
-   "status": "OPEN"
-  },
-  {
-   "id": "Q-08",
-   "status": "OPEN"
   }
  ],
  "behaviouralDrs": [],
  "docLines": [
   {
-   "id": "DOC-01",
+   "id": "DOC-1",
+   "mapping": "cell",
+   "target": "(DISCONNECTED, connect), (CONNECTING, connect), (CONNECTED, connect)"
+  },
+  {
+   "id": "DOC-2",
+   "mapping": "cell",
+   "target": "(CONNECTING, disconnect), (RECONNECTING, disconnect)"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "cell",
+   "target": "(CONNECTING, connection_succeeds), (RECONNECTING, connection_succeeds)"
+  },
+  {
+   "id": "DOC-3",
    "mapping": "invariant",
-   "target": "SYS-01: `connect()` sets state to CONNECTING and starts a connection attempt"
+   "target": "SYS-3"
   },
   {
-   "id": "DOC-02",
-   "mapping": "disposition",
-   "target": "connect in {CONNECTED, CONNECTING} → ignore (documented)"
+   "id": "DOC-4",
+   "mapping": "cell",
+   "target": "(CONNECTING, connection_fails), (CONNECTING, connection_timeout), (RECONNECTING, connection_fails), (RECONNECTING, connection_timeout)"
   },
   {
-   "id": "DOC-03",
+   "id": "DOC-5",
+   "mapping": "cell",
+   "target": "(CONNECTING, max_retries_exhausted), (RECONNECTING, max_retries_exhausted), (FAILED, connect)"
+  },
+  {
+   "id": "DOC-5",
    "mapping": "invariant",
-   "target": "SYS-02: `disconnect()` sets `_should_stop=True`, cancels pending tasks, sets state to DISCONNECTED"
+   "target": "SYS-1, SYS-4"
   },
   {
-   "id": "DOC-04",
+   "id": "DOC-6",
+   "mapping": "cell",
+   "target": "(CONNECTING, disconnect), (RECONNECTING, disconnect)"
+  },
+  {
+   "id": "DOC-7",
+   "mapping": "cell",
+   "target": "(CONNECTING, connection_timeout), (RECONNECTING, connection_timeout)"
+  },
+  {
+   "id": "DOC-8",
    "mapping": "invariant",
-   "target": "SYS-03: On successful connection, state=CONNECTED and retry_count=0"
+   "target": "SYS-3 — retry_count=0 on connect; **gap**: reset happens before min_uptime elapses → Q-04"
   },
   {
-   "id": "DOC-05",
-   "mapping": "invariant",
-   "target": "SYS-04: On connection failure, retry_count increments, component retries up to max_retries with exponential backoff + jitter"
-  },
-  {
-   "id": "DOC-06",
-   "mapping": "invariant",
-   "target": "SYS-05: When retry_count >= max_retries, state=FAILED; no further connection attempts"
-  },
-  {
-   "id": "DOC-07",
-   "mapping": "disposition",
-   "target": "disconnect in {CONNECTING, RECONNECTING} → transition → DISCONNECTED"
-  },
-  {
-   "id": "DOC-08",
-   "mapping": "invariant",
-   "target": "SYS-06: Connection timeout is treated as a failure (caught in same except block, device_connection.py:111)"
-  },
-  {
-   "id": "DOC-09",
-   "mapping": "invariant",
-   "target": "SYS-07: retry_count=0 already set on successful connect; min_uptime timer started"
-  },
-  {
-   "id": "DOC-10",
-   "mapping": "invariant",
-   "target": "SYS-08: Backoff computed as `base_backoff * 2^(retry_count-1) + uniform(0, backoff*0.5)`"
+   "id": "DOC-9",
+   "mapping": "cell",
+   "target": "backoff jitter at `device_connection.py:122-123`"
   }
  ],
  "completeness": {
@@ -442,67 +1219,22 @@
  },
  "coverage": {
   "connect": {
-   "loss": "n/a: direct synchronous call; loss means caller never invokes, which is outside the component boundary.",
-   "delay": "n/a: synchronous call with no timeout semantics at the boundary.",
-   "duplication": "UV-connect-dup — caller invokes `connect()` twice in rapid succession.",
-   "out-of-order": "n/a: single caller; ordering relative to other events is covered by interaction pairs.",
-   "contradiction": "UV-connect-contra — `connect()` and `disconnect()` called simultaneously from separate coroutines.",
-   "commission": "UV-connect-commission — spurious `connect()` call when already CONNECTED (no-op path).",
-   "value": "n/a: `connect()` takes no parameters that could carry a foreign session or stale epoch."
+   "loss": "applicable — async call may be dropped before dispatch",
+   "delay": "applicable — async call may be delayed",
+   "duplication": "applicable — caller may retry",
+   "out-of-order": "applicable — may arrive after a later disconnect",
+   "contradiction": "applicable — may race with disconnect",
+   "commission": "applicable — spurious wakeup or callback possible",
+   "value": "n/a: connect() takes no arguments; wrong-instance call is a caller error, not a payload fault"
   },
   "disconnect": {
-   "loss": "n/a: direct synchronous call; loss means caller never invokes, outside the component boundary.",
-   "delay": "n/a: synchronous call with no timeout semantics at the boundary.",
-   "duplication": "UV-disconnect-dup — caller invokes `disconnect()` twice in rapid succession.",
-   "out-of-order": "n/a: single caller; ordering covered by interaction pairs.",
-   "contradiction": "UV-disconnect-contra — `disconnect()` and `connect()` called simultaneously from separate coroutines.",
-   "commission": "UV-disconnect-commission — spurious `disconnect()` call when already DISCONNECTED.",
-   "value": "n/a: `disconnect()` takes no parameters."
-  },
-  "connection_succeeds": {
-   "loss": "UV-conn-succeeds-loss — the success callback is lost (task cancelled, event loop stopped).",
-   "delay": "UV-conn-succeeds-delay — the success arrives after `disconnect()` has already cancelled the task.",
-   "duplication": "UV-conn-succeeds-dup — the success event fires twice (unlikely given single-task pattern, but task resurrection or double-completion is a UV).",
-   "out-of-order": "UV-conn-succeeds-stale — a stale success from a previously cancelled `_connect_task` arrives after a new `connect()` has been issued.",
-   "contradiction": "n/a: success and failure cannot co-occur on the same attempt.",
-   "commission": "n/a: success requires a preceding connection attempt.",
-   "value": "n/a: success has no payload carrying entity identity."
-  },
-  "connection_fails": {
-   "loss": "UV-conn-fails-loss — the failure callback is lost (task cancelled, exception swallowed).",
-   "delay": "UV-conn-fails-delay — the failure arrives after `disconnect()` has already cancelled the task.",
-   "duplication": "UV-conn-fails-dup — the failure event fires twice.",
-   "out-of-order": "UV-conn-fails-stale — a stale failure from a cancelled task arrives out of order.",
-   "contradiction": "n/a: success and failure cannot co-occur on the same attempt.",
-   "commission": "n/a: failure requires a preceding connection attempt.",
-   "value": "n/a: failure carries no entity-identifying payload."
-  },
-  "connection_timeout": {
-   "loss": "UV-conn-timeout-loss — the timeout is swallowed or the task is cancelled before the timeout fires.",
-   "delay": "UV-conn-timeout-delay — the timeout fires late, after a new connection has already been initiated.",
-   "duplication": "UV-conn-timeout-dup — the timeout fires twice.",
-   "out-of-order": "UV-conn-timeout-stale — a stale timeout from a cancelled task arrives out of order.",
-   "contradiction": "n/a: timeout and success cannot co-occur on the same attempt.",
-   "commission": "n/a: timeout requires a preceding connection attempt.",
-   "value": "n/a: timeout carries no entity-identifying payload."
-  },
-  "backoff_elapsed": {
-   "loss": "UV-backoff-loss — the sleep is interrupted by task cancellation before completing.",
-   "delay": "UV-backoff-delay — the sleep takes longer than expected (e.g., event loop congestion).",
-   "duplication": "n/a: a single sleep completion is atomic.",
-   "out-of-order": "n/a: backoff is sequential within the loop; ordering violation requires loop corruption.",
-   "contradiction": "n/a: no simultaneous contradictory event possible for a timer completion.",
-   "commission": "UV-backoff-commission — a spurious wakeup from `asyncio.sleep` (theoretical; Python asyncio does not spurious-wake).",
-   "value": "n/a: backoff carries no payload."
-  },
-  "max_retries_exhausted": {
-   "loss": "n/a: this is a synchronous check, not a delivered event; it cannot be lost.",
-   "delay": "n/a: synchronous check.",
-   "duplication": "n/a: synchronous check evaluated once per failure.",
-   "out-of-order": "n/a: synchronous check in the same control flow.",
-   "contradiction": "n/a: synchronous check cannot contradict itself.",
-   "commission": "n/a: requires a preceding failure and increment; cannot occur spontaneously.",
-   "value": "UV-maxretries-value — `max_retries` is misconfigured (0 or negative) or `retry_count` is corrupted, causing premature or skipped exhaustion."
+   "loss": "applicable — async call may be dropped before dispatch",
+   "delay": "applicable — async call may be delayed",
+   "duplication": "applicable — caller may retry",
+   "out-of-order": "applicable — may arrive after a later connect",
+   "contradiction": "applicable — may race with connect",
+   "commission": "applicable — spurious wakeup or callback possible",
+   "value": "n/a: disconnect() takes no arguments; wrong-instance call is a caller error, not a payload fault"
   }
  }
 }

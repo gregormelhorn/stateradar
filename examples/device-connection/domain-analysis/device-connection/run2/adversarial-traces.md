@@ -1,151 +1,157 @@
-# Adversarial Traces — device-connection
+# Adversarial traces — device-connection
 
-## Interaction Pairs
+Format per trace: (a) sequence, (b) what the code does (provenance),
+(c) question raised, or `none — control trace` (with the
+requirement-scope line where a verdict cites text).
 
-Interaction pairs examine cross-source event orderings on shared entities. Per-source UV checklists structurally miss races between sources. Each pair is presented in both orderings and evaluated against the component's code.
+## Systematic — interaction-pair orderings
 
----
+**P-01a** connect then disconnect during CONNECTING.
+(a) DISCONNECTED → connect → CONNECTING → disconnect → DISCONNECTED.
+(b) `connect()` sets state=CONNECTING and creates `_connect_task` (lines 89-91).
+`disconnect()` cancels `_connect_task` (line 98), sets `_connect_task=None`
+(line 99), sets state=DISCONNECTED (line 103). The cancelled task raises
+`CancelledError` which propagates unhandled out of `_connect_loop` (the
+except at line 115 only catches ConnectionError/ConnectionTimeout).
+(c) none — control trace. Cites R-06 ("Calling disconnect() during
+CONNECTING … cancels the connection attempt and returns to DISCONNECTED").
+Cited text contemplates this ordering: yes.
 
-### P-01: connect / disconnect race
+**P-01b** disconnect then connect.
+(a) CONNECTED → disconnect → DISCONNECTED → connect → CONNECTING.
+(b) `disconnect()` cancels `_uptime_task` (line 101-102), sets state=DISCONNECTED
+(line 103). `connect()` sets state=CONNECTING (line 90). Normal lifecycle.
+(c) none — control trace.
 
-**Entities shared:** Single `DeviceConnection` instance, `_connect_task`, `_should_stop` flag.
+**P-02a** connect then disconnect (contradiction race).
+(a) Two events arrive near-simultaneously. If connect processes first:
+DISCONNECTED → connect → CONNECTING → disconnect → DISCONNECTED.
+If disconnect processes first:
+DISCONNECTED → disconnect → DISCONNECTED (handle, idempotent) → connect → CONNECTING.
+(b) Under single-input assumption (PA-8), one event completes before the next.
+Both orderings are deterministic for the given interleaving.
+(c) none — control trace. Both orderings are already covered by matrix cells.
 
-**Ordering A: connect → disconnect (mid-attempt)**
-- **Trace:** `connect()` sets state=CONNECTING, creates `_connect_task` → `_attempt_connection()` starts → `disconnect()` called → sets `_should_stop=True`, cancels `_connect_task`, sets state=DISCONNECTED → cancelled task raises `CancelledError` in `_connect_loop`.
-- **Code path:** device_connection.py:84-90 → device_connection.py:91-100.
-- **Expected outcome:** Component ends in DISCONNECTED. Connection attempt is cancelled.
-- **Cited text contemplates this ordering:** yes (R-06 explicitly covers disconnect during connection).
-- **Verdict:** COVERED — R-06.
+**P-02b** connect during CONNECTING (duplicate connect).
+(a) DISCONNECTED → connect → CONNECTING → connect (duplicate) → stays CONNECTING.
+(b) Second `connect()` hits idempotent guard at line 84, returns immediately.
+State unchanged. `_connect_task` unchanged.
+(c) none — control trace. Cites R-01 ("If already connected or connecting,
+it is a no-op"). Cited text contemplates this ordering: yes.
 
-**Ordering B: disconnect → connect (rapid reconnection)**
-- **Trace:** `disconnect()` sets `_should_stop=True`, state=DISCONNECTED → `connect()` called → sets `_should_stop=False`, state=CONNECTING, creates new `_connect_task`.
-- **Code path:** device_connection.py:91-100 → device_connection.py:84-90.
-- **Expected outcome:** Component restarts connection from DISCONNECTED.
-- **Cited text contemplates this ordering:** yes (R-01: "calling connect() initiates a connection attempt"). R-02 completes first, returning to DISCONNECTED; R-01 then applies normally.
-- **Verdict:** COVERED — R-01, R-02.
+**P-03a** disconnect during DISCONNECTED (duplicate disconnect).
+(a) DISCONNECTED → disconnect → DISCONNECTED → disconnect → DISCONNECTED.
+(b) `disconnect()` always executes (lines 96-103). Sets `_should_stop=True`,
+cancels None tasks (no-op), sets state=DISCONNECTED (already DISCONNECTED).
+Second call is identical. Idempotent in effect.
+(c) none — control trace.
 
----
+**P-03b** connect during RECONNECTING (orphaned task).
+(a) DISCONNECTED → connect → CONNECTING → connection_fails → RECONNECTING →
+connect (new call) → CONNECTING. Old `_connect_loop` task continues running
+as orphan, new `_connect_loop` created at line 91.
+(b) Old task: still in backoff sleep or about to call `_attempt_connection`.
+New task: starts fresh `_connect_loop` with `retry_count` possibly modified
+by the old task. Both tasks share `self.state`, `self.retry_count`,
+`self._should_stop`. Race on state transitions.
+(c) **Q-02** — orphaned task races with new task. F-09 (cancellation leak),
+F-07 (lifecycle coupling). Cited R-01 text ("If already connected or
+connecting, it is a no-op"). RECONNECTING is not "connected or connecting."
+Cited text contemplates this ordering: no.
 
-### P-02: connection_succeeds / disconnect race
+## Systematic — adversarial scenario traces
 
-**Entities shared:** Single `DeviceConnection` instance, `_connect_task`.
+**T-01** Happy path: connect, succeed, disconnect.
+(a) DISCONNECTED → connect → CONNECTING → connection_succeeds → CONNECTED →
+disconnect → DISCONNECTED.
+(b) Lines 89-91 (connect → CONNECTING), 111-112 (succeed → CONNECTED,
+retry_count=0), 96-103 (disconnect → DISCONNECTED).
+(c) none — control trace.
 
-**Ordering A: connection_succeeds → disconnect (just after connect)**
-- **Trace:** Connection succeeds (`device_connection.py:106`) → state=CONNECTED, `retry_count=0`, `_connect_loop` returns → `disconnect()` called → `_should_stop=True`, state=DISCONNECTED.
-- **Code path:** device_connection.py:106-108 → device_connection.py:91-100.
-- **Expected outcome:** Component enters CONNECTED, then transitions to DISCONNECTED.
-- **Cited text contemplates this ordering:** yes (R-03 then R-02).
-- **Verdict:** COVERED.
+**T-02** Retry then succeed.
+(a) DISCONNECTED → connect → CONNECTING → connection_fails → RECONNECTING →
+backoff_elapsed → connection_succeeds → CONNECTED.
+(b) Lines 115-120 (fail → RECONNECTING, retry_count=1), 121-123 (backoff sleep),
+111-112 (succeed → CONNECTED, retry_count=0).
+(c) none — control trace. Cites R-04 ("retries up to max_retries attempts
+with exponential backoff"). Cited text contemplates this ordering: yes.
 
-**Ordering B: disconnect → connection_succeeds (success arrives after cancellation)**
-- **Trace:** `disconnect()` called during CONNECTING → `_should_stop=True`, task cancelled → BUT `_attempt_connection()` already completed and the coroutine is about to process the success at line 106 → The cancellation may not take effect until the next `await` → `state=CONNECTED` is set AFTER `disconnect()` set it to DISCONNECTED.
-- **Code path:** device_connection.py:91-100 → device_connection.py:106-108 (stale).
-- **Expected outcome:** RACE: `disconnect()` sets state=DISCONNECTED, but the stale success from the cancelled task may overwrite state to CONNECTED. The component ends CONNECTED despite disconnect().
-- **Cited text contemplates this ordering:** no — neither R-02 nor R-06 describes the case where a connection succeeds between the cancellation request and the cancellation taking effect.
-- **Verdict:** GAP — raises Q-08. This is a TOCTOU race in the cancellation model.
+**T-03** Retry exhaustion after max_retries failures.
+(a) DISCONNECTED → connect → CONNECTING → connection_fails (count=1) →
+RECONNECTING → backoff_elapsed → connection_fails (count=2) → RECONNECTING →
+backoff_elapsed → connection_fails (count=3 >= max=3) → max_retries_exhausted →
+FAILED.
+(b) Lines 115-119: after third failure, retry_count=3 >= max_retries=3,
+state=FAILED, `return`. Loop exits.
+(c) none — control trace. Cites R-05 ("When max_retries is exhausted, the
+component enters FAILED state"). Cited text contemplates this ordering: yes.
 
----
+**T-04** Disconnect during RECONNECTING.
+(a) DISCONNECTED → connect → CONNECTING → connection_fails → RECONNECTING →
+disconnect → DISCONNECTED.
+(b) Lines 96-100: `disconnect()` cancels `_connect_task` (which is sleeping
+or about to retry), sets state=DISCONNECTED. CancelledError propagates
+out of `_connect_loop` (unhandled — except at line 115 only catches
+ConnectionError/ConnectionTimeout).
+(c) none — control trace. Cites R-06 ("Calling disconnect() during …
+RECONNECTING cancels the connection attempt and returns to DISCONNECTED").
+Cited text contemplates this ordering: yes.
 
-### P-03: connection_fails / disconnect race
+**T-05** Connection timeout.
+(a) DISCONNECTED → connect → CONNECTING → connection_timeout → RECONNECTING.
+(b) Lines 129-134: `asyncio.wait_for` raises TimeoutError → `_attempt_connection`
+raises ConnectionTimeout → caught at line 115 → retry_count=1, state=RECONNECTING
+(line 120).
+(c) none — control trace. Cites R-07 ("If a connection attempt does not
+complete within connect_timeout, it is treated as a failure and retried").
+Cited text contemplates this ordering: yes.
 
-**Entities shared:** `_connect_task`, `retry_count`.
+**T-06** disconnect from FAILED (contradicts R-05).
+(a) … → max_retries_exhausted → FAILED → disconnect → DISCONNECTED.
+(b) Lines 96-103: `disconnect()` has no FAILED guard. Sets `_should_stop=True`,
+cancels None tasks, sets state=DISCONNECTED (line 103). Component recovers
+from FAILED.
+(c) **Q-03** — FAILED is not terminal. R-05 says "remains in FAILED state
+permanently." Cites R-05 ("The component remains in FAILED state permanently.
+No further connection attempts are made."). Cited text contemplates this
+ordering: no.
 
-**Ordering A: connection_fails → disconnect (during retry loop)**
-- **Trace:** Connection fails → `retry_count += 1` → if `retry_count < max_retries`, state=RECONNECTING, `asyncio.sleep(backoff)` starts → `disconnect()` called → `_should_stop=True`, task cancelled, state=DISCONNECTED.
-- **Code path:** device_connection.py:111-120 → device_connection.py:91-100.
-- **Expected outcome:** Component ends in DISCONNECTED. The backoff sleep is interrupted.
-- **Cited text contemplates this ordering:** yes (R-06 covers disconnect during RECONNECTING).
-- **Verdict:** COVERED — R-06.
+**T-07** connect rejected in FAILED.
+(a) … → FAILED → connect → reject (ConnectionError).
+(b) Lines 86-87: `raise ConnectionError("device is in FAILED state")`.
+State stays FAILED.
+(c) none — control trace. Cites R-05 ("No further connection attempts are
+made"). Cited text contemplates this ordering: yes.
 
-**Ordering B: disconnect → connection_fails (failure arrives after cancellation)**
-- **Trace:** Similar to P-02B: `disconnect()` cancels task, but failure already occurred → stale failure sets state=RECONNECTING (or FAILED) after disconnect() set DISCONNECTED.
-- **Expected outcome:** RACE: stale failure overwrites DISCONNECTED.
-- **Cited text contemplates this ordering:** no.
-- **Verdict:** GAP — raises Q-08.
+**T-08** backoff_elapsed → handle (internal loop).
+(a) … → RECONNECTING → backoff_elapsed → (stays RECONNECTING, loop calls
+_attempt_connection).
+(b) Line 123: `await asyncio.sleep(backoff + jitter)` completes.
+The `while` loop (line 108) iterates. State is still RECONNECTING.
+`_attempt_connection` is called. If it succeeds → CONNECTED (line 111).
+If it fails → RECONNECTING again (line 120) or FAILED (lines 117-119).
+(c) none — control trace. Backoff_elapsed itself is `handle` — no state
+change. The subsequent connection_succeeds or connection_fails changes state.
 
----
+**T-09** Connection drops before min_uptime (R-08 gap).
+(a) CONNECTING → connection_succeeds → CONNECTED (retry_count=0 immediately,
+line 112). Connection drops at t < min_uptime. Component stays CONNECTED
+(no drop detection). `_uptime_task` is sleeping (line 150), will wake and
+do nothing.
+(b) retry_count already 0. No transition on drop. No recovery mechanism.
+(c) **Q-04** — retry_count reset before min_uptime validation.
+**Q-05** — no connection-drop detection. Cites R-08 ("A connection that
+survives for at least min_uptime is considered stable"). R-08's intent
+is not enforced. Cited text contemplates this ordering: no.
 
-### P-04: connect during RECONNECTING (self-race)
-
-**Entities shared:** `_connect_task`, `retry_count`, `state`.
-
-**Trace:** Component is RECONNECTING with an active `_connect_loop` → second `connect()` called → guard at line 85 does NOT block RECONNECTING → `_should_stop=False`, `state=CONNECTING`, new `_connect_task` overwrites the old one → TWO `_connect_loop` coroutines now running.
-- **Code path:** device_connection.py:84-90 (second connect) while first _connect_loop is executing (device_connection.py:102-120).
-- **Expected outcome:** RACE: Two connection loops compete. The orphaned loop may still fire events (success/failure/timeout) that transition the component from under the new loop.
-- **Cited text contemplates this ordering:** no — R-01 only says "if already connected or connecting, it is a no-op." RECONNECTING is not mentioned.
-- **Verdict:** GAP — raises Q-04 (already captured in matrix).
-
----
-
-### P-05: max_retries_exhausted + disconnect race
-
-**Entities shared:** `state`, `_should_stop`.
-
-**Ordering A: final failure → FAILED → disconnect**
-- **Trace:** Final connection fails, `retry_count >= max_retries` → `state = FAILED` (line 114) → `disconnect()` called → `state = DISCONNECTED` (line 100).
-- **Code path:** device_connection.py:113-115 → device_connection.py:91-100.
-- **Expected outcome:** Component exits FAILED via disconnect. Contradicts R-05 "remains in FAILED state permanently."
-- **Cited text contemplates this ordering:** no — R-05 does not address explicit disconnect.
-- **Verdict:** GAP — raises Q-06 (already captured in matrix).
-
-**Ordering B: disconnect → final failure (disconnect during the last attempt)**
-- **Trace:** Disconnect during the final connection attempt → `_should_stop=True`, task cancelled → but the failure exception already propagated to the except block → `state = FAILED` is set AFTER `disconnect()` set DISCONNECTED.
-- **Expected outcome:** RACE: FAILED overwrites DISCONNECTED.
-- **Cited text contemplates this ordering:** no.
-- **Verdict:** GAP — raises Q-08.
-
----
-
-## Adversarial Scenario Traces
-
-### AS-01: Rapid connect/disconnect cycling
-
-**Trace:** `connect()` → `disconnect()` → `connect()` → `disconnect()` → ... rapid cycling.
-**Risk:** Task creation and cancellation churn. `_connect_task` repeatedly overwritten.
-**Code observation:** `device_connection.py:90` always creates a new task. `device_connection.py:95` cancels and sets to None. No resource leak in the happy path, but rapid cycling during active connection could create orphaned tasks (see P-04).
-**Severity:** MEDIUM.
-
-### AS-02: Stale callback after reconnection
-
-**Trace:** `connect()` → connection attempt starts → `disconnect()` → `connect()` (new attempt) → stale success from first attempt arrives.
-**Risk:** The stale success callback sets state=CONNECTED even though a fresh connection attempt is running. The component now thinks it's CONNECTED but a connection loop is still active.
-**Code path:** device_connection.py:106-108 fires for the old task. No task-identity check to validate which attempt succeeded.
-**Severity:** HIGH — state corruption.
-**Related:** Q-08.
-
-### AS-03: Backoff sleep interruption and stale wakeup
-
-**Trace:** Connection fails → RECONNECTING → `asyncio.sleep(backoff)` starts → `disconnect()` cancels task → BUT sleep already completed, task resumes at line 102 → `_should_stop` check catches it, loop exits.
-**Risk:** The `_should_stop` check at line 102 is the defense. If the backoff elapsed between `disconnect()` starting and the task cancellation propagating, the loop iterates once more. In this iteration, `_should_stop` is True, so the while condition fails and the loop exits without another attempt.
-**Severity:** LOW — the `_should_stop` flag catches this case.
-
-### AS-04: max_retries = 0 or negative
-
-**Trace:** Component constructed with `max_retries=0`. `connect()` → `_connect_loop` enters while `0 < 0` → loop body never executes → component remains in CONNECTING indefinitely.
-**Risk:** The component hangs in CONNECTING. No timeout, no failure, no state change after the initial `connect()`.
-**Code path:** device_connection.py:102: `while self.retry_count < self.max_retries` — `0 < 0` is False, loop skipped entirely.
-**Severity:** MEDIUM — input validation gap.
-**Related:** UV-maxretries-value (coverage table).
-
-### AS-05: _uptime_task surviving disconnect
-
-**Trace:** Connection succeeds → `_start_uptime_timer()` creates `_uptime_task` → `disconnect()` called rapidly → `_uptime_task` is cancelled at line 98-99.
-**Expected:** `_uptime_task` cancelled. No leak.
-**Severity:** NONE — properly handled.
-
----
-
-## Q-08: TOCTOU race in task cancellation model
-
-**Status:** OPEN
-
-**Context:** The component uses `asyncio.Task.cancel()` for cancellation. Python's cancellation is cooperative: it raises `CancelledError` at the next `await`. If a connection attempt completes (success or failure) between the cancellation request and the next `await`, the result is processed AFTER `disconnect()` already set state=DISCONNECTED. This creates a TOCTOU window where stale results can overwrite the disconnected state.
-
-**Affected pairs:** P-02B, P-03B, P-05B.
-
-**Question:** Should the component:
-1. **Add task-identity checks** — tag each attempt with a generation counter; discard results from stale generations.
-2. **Add state guards before applying results** — check `self.state in (CONNECTING, RECONNECTING)` before applying connection_succeeds/connection_fails.
-3. **Accept the race** — document that rapid disconnect/reconnect cycles may have undefined behavior.
-
-**Recommendation:** Option 2. Adding a state guard at `device_connection.py:106` and `device_connection.py:111` is the minimal fix: check that the component is still in an appropriate state before applying the outcome.
+**T-10** Orphaned task delivers connection_succeeds after disconnect.
+(a) DISCONNECTED → connect → CONNECTING → disconnect (cancels task) →
+DISCONNECTED. But old `_connect_loop` was in `_attempt_connection` when
+cancelled. The `CancelledError` propagates unhandled.
+(b) No state change from the cancelled task — CancelledError is not
+caught by except at line 115, so the task terminates. However, if
+`_attempt_connection` completed just before cancel took effect, the
+result could be delivered. Under asyncio, cancel() schedules
+CancelledError at the next await point.
+(c) none — CancelledError propagation is standard asyncio behavior.
+The task terminates without producing further internal events.

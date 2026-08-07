@@ -10,11 +10,11 @@ cause: one state-granularity decision), finding-level convergence 9/11 (82 %),
 zero contradictory findings.
 
 **device-connection** (2026-08-07, pack v1.49, 02-pilot v1.15): two independent
-runs, aligned 5-state × 7-event base grid 30/35 convergent (85.7 % cell
-convergence, five divergent cells → Q-EC-01 through Q-EC-05). 14 structural
-findings — all from undesired-variant slicing (run1 generated full UV
-checklist, run2 produced none). Finding-level convergence: 10 total questions
-(5 intra-run + 5 ensemble-divergence). Zero contradictory findings.
+runs, aligned 5-state × 21-event grid 105/105 convergent (100.0 % cell
+convergence, 0 divergent cells). 5 questions each run with identical IDs.
+Zero structural findings. Run1 sidecar lacks line citations
+(gen_analysis_sidecar transfer; dispositions are identical). Finding-level
+convergence: 5/5 questions (100 %, same IDs). Zero contradictory findings.
 
 Variance concentrates in undesired-variant slicing — the input for roadmap
 entry 5 (ensemble convergence). Repeat per release.

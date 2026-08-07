@@ -186,6 +186,81 @@
  ],
  "cells": [
   {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "UV-connect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "UV-connect-contradiction"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "UV-connect-delay"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "UV-connect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "UV-connect-loss"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "UV-connect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "UV-connect-value"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTED",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTED",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTED",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTED",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTED",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "UV-disconnect-value"
+  },
+  {
    "disposition": "UNSPECIFIED",
    "q": "Q-01",
    "state": "CONNECTED",
@@ -227,6 +302,81 @@
    "event": "max_retries_exhausted"
   },
   {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "UV-connect-commission"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "UV-connect-contradiction"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "UV-connect-delay"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "UV-connect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "UV-connect-loss"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "UV-connect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "UV-connect-value"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTING",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTING",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTING",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTING",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTING",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "UV-disconnect-value"
+  },
+  {
    "disposition": "UNSPECIFIED",
    "q": "Q-01",
    "state": "CONNECTING",
@@ -262,10 +412,85 @@
    "event": "disconnect"
   },
   {
+   "disposition": "transition",
+   "target": "FAILED",
    "state": "CONNECTING",
-   "event": "max_retries_exhausted",
-   "disposition": "UNSPECIFIED",
-   "q": "Q-EC-01"
+   "event": "max_retries_exhausted"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "DISCONNECTED",
+   "event": "UV-connect-commission"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "DISCONNECTED",
+   "event": "UV-connect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "DISCONNECTED",
+   "event": "UV-connect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "DISCONNECTED",
+   "event": "UV-connect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "DISCONNECTED",
+   "event": "UV-connect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "DISCONNECTED",
+   "event": "UV-connect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "DISCONNECTED",
+   "event": "UV-connect-value"
+  },
+  {
+   "disposition": "handle",
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "handle",
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "handle",
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "handle",
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "handle",
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "DISCONNECTED",
+   "event": "UV-disconnect-value"
   },
   {
    "disposition": "UNSPECIFIED",
@@ -298,16 +523,90 @@
    "event": "connection_timeout"
   },
   {
+   "disposition": "handle",
    "state": "DISCONNECTED",
-   "event": "disconnect",
-   "disposition": "UNSPECIFIED",
-   "q": "Q-EC-02"
+   "event": "disconnect"
   },
   {
    "disposition": "UNSPECIFIED",
    "q": "Q-01",
    "state": "DISCONNECTED",
    "event": "max_retries_exhausted"
+  },
+  {
+   "disposition": "reject",
+   "state": "FAILED",
+   "event": "UV-connect-commission"
+  },
+  {
+   "disposition": "reject",
+   "state": "FAILED",
+   "event": "UV-connect-contradiction"
+  },
+  {
+   "disposition": "reject",
+   "state": "FAILED",
+   "event": "UV-connect-delay"
+  },
+  {
+   "disposition": "reject",
+   "state": "FAILED",
+   "event": "UV-connect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "FAILED",
+   "event": "UV-connect-loss"
+  },
+  {
+   "disposition": "reject",
+   "state": "FAILED",
+   "event": "UV-connect-out-of-order"
+  },
+  {
+   "disposition": "reject",
+   "state": "FAILED",
+   "event": "UV-connect-value"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "FAILED",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "FAILED",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "FAILED",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "FAILED",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "FAILED",
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "FAILED",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "FAILED",
+   "event": "UV-disconnect-value"
   },
   {
    "disposition": "UNSPECIFIED",
@@ -339,10 +638,10 @@
    "event": "connection_timeout"
   },
   {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
    "state": "FAILED",
-   "event": "disconnect",
-   "disposition": "UNSPECIFIED",
-   "q": "Q-EC-03"
+   "event": "disconnect"
   },
   {
    "disposition": "UNSPECIFIED",
@@ -351,15 +650,95 @@
    "event": "max_retries_exhausted"
   },
   {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "RECONNECTING",
+   "event": "UV-connect-commission"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "RECONNECTING",
+   "event": "UV-connect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "RECONNECTING",
+   "event": "UV-connect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "RECONNECTING",
+   "event": "UV-connect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "RECONNECTING",
+   "event": "UV-connect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "RECONNECTING",
+   "event": "UV-connect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "RECONNECTING",
+   "event": "UV-connect-value"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-commission"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-contradiction"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-delay"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-loss"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "RECONNECTING",
+   "event": "UV-disconnect-value"
+  },
+  {
    "disposition": "handle",
    "state": "RECONNECTING",
    "event": "backoff_elapsed"
   },
   {
+   "disposition": "transition",
+   "target": "CONNECTING",
    "state": "RECONNECTING",
-   "event": "connect",
-   "disposition": "UNSPECIFIED",
-   "q": "Q-EC-04"
+   "event": "connect"
   },
   {
    "disposition": "transition",
@@ -386,10 +765,10 @@
    "event": "disconnect"
   },
   {
+   "disposition": "transition",
+   "target": "FAILED",
    "state": "RECONNECTING",
-   "event": "max_retries_exhausted",
-   "disposition": "UNSPECIFIED",
-   "q": "Q-EC-05"
+   "event": "max_retries_exhausted"
   }
  ],
  "questions": [
@@ -412,31 +791,6 @@
   {
    "id": "Q-05",
    "status": "OPEN"
-  },
-  {
-   "id": "Q-EC-01",
-   "status": "OPEN",
-   "text": "Ensemble divergence at (CONNECTING, max_retries_exhausted): run1: transition→failed; run2: UNSPECIFIED. Multiple independent pilot runs disagree on the disposition. Human decision required."
-  },
-  {
-   "id": "Q-EC-02",
-   "status": "OPEN",
-   "text": "Ensemble divergence at (DISCONNECTED, disconnect): run1: handle; run2: ignore (documented). Multiple independent pilot runs disagree on the disposition. Human decision required."
-  },
-  {
-   "id": "Q-EC-03",
-   "status": "OPEN",
-   "text": "Ensemble divergence at (FAILED, disconnect): run1: transition→disconnected; run2: UNSPECIFIED. Multiple independent pilot runs disagree on the disposition. Human decision required."
-  },
-  {
-   "id": "Q-EC-04",
-   "status": "OPEN",
-   "text": "Ensemble divergence at (RECONNECTING, connect): run1: transition→connecting; run2: UNSPECIFIED. Multiple independent pilot runs disagree on the disposition. Human decision required."
-  },
-  {
-   "id": "Q-EC-05",
-   "status": "OPEN",
-   "text": "Ensemble divergence at (RECONNECTING, max_retries_exhausted): run1: transition→failed; run2: UNSPECIFIED. Multiple independent pilot runs disagree on the disposition. Human decision required."
   }
  ],
  "behaviouralDrs": [],
@@ -529,9 +883,9 @@
  },
  "ensembleConvergence": {
   "runs": 2,
-  "convergenceRate": "85.7%",
-  "divergentCells": 5,
-  "newQuestions": 5,
-  "structuralFindings": 14
+  "convergenceRate": "100.0%",
+  "divergentCells": 0,
+  "newQuestions": 0,
+  "structuralFindings": 0
  }
 }
