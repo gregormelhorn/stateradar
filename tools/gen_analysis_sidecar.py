@@ -90,6 +90,68 @@ def _strip_markdown(text: str) -> str:
     return text.strip()
 
 
+def _parse_event_annotations(cat_path: Path) -> dict[str, dict]:
+    """Parse the '## Event annotations' section of event-catalogue.md.
+
+    Per-event block::
+
+        ### <event-id>
+        - gate: <free text>
+        - upstream_guards: <comma-separated list>
+        - coverage:
+          - <category>: <value or 'n/a: reason'>
+
+    Returns {event_id: {"gate": str|None, "upstream_guards": [...],
+    "coverage": {category: value}}}.  Missing file or section -> {}.
+    The catalogue is the authoring surface for these annotations; the
+    sidecar is generated from it (v1.48 — replaces the runner-side
+    backfill that hollowed the drift check in v1.47)."""
+    if not cat_path.is_file():
+        return {}
+    text = cat_path.read_text(encoding="utf-8")
+    m = re.search(r"^## Event annotations\s*$", text, re.M)
+    if not m:
+        return {}
+    body = text[m.end():]
+    nxt = re.search(r"^## ", body, re.M)
+    if nxt:
+        body = body[: nxt.start()]
+    out: dict[str, dict] = {}
+    cur: dict | None = None
+    in_cov = False
+    for line in body.splitlines():
+        h = re.match(r"^### (\S+)", line)
+        if h:
+            cur = out.setdefault(
+                h.group(1),
+                {"gate": None, "upstream_guards": [], "coverage": {}})
+            in_cov = False
+            continue
+        if cur is None:
+            continue
+        mg = re.match(r"^- gate:\s*(.+)$", line)
+        if mg:
+            cur["gate"] = mg.group(1).strip()
+            in_cov = False
+            continue
+        mu = re.match(r"^- upstream_guards:\s*(.+)$", line)
+        if mu:
+            cur["upstream_guards"] = [
+                p.strip() for p in mu.group(1).split(",") if p.strip()]
+            in_cov = False
+            continue
+        if re.match(r"^- coverage:\s*$", line):
+            in_cov = True
+            continue
+        mc = re.match(r"^\s+- ([A-Za-z-]+):\s*(.+)$", line)
+        if in_cov and mc:
+            cur["coverage"][mc.group(1).strip()] = mc.group(2).strip()
+            continue
+        if line.strip() and not line.startswith((" ", "\t")):
+            in_cov = False
+    return out
+
+
 def _parse_events(header: str) -> list[dict]:
     """Header row cells after the first: 'P1 `put`' / 'UV-P1 `duplicate`'."""
     events = []
@@ -338,6 +400,23 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
     manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
     watch = manifest.get("watchPaths") or manifest.get("watch_paths") or []
     cited_drs = sorted({c["dr"] for c in cells if c.get("dr")})
+
+    # Catalogue annotations (gate / upstream_guards / UV coverage) carry
+    # through from event-catalogue.md — the catalogue is the source, the
+    # sidecar stays generated.
+    annotations = _parse_event_annotations(adir / "event-catalogue.md")
+    for ev in events:
+        ann = annotations.get(ev["id"])
+        if not ann:
+            continue
+        if ann.get("gate") is not None:
+            ev["gate"] = ann["gate"]
+        if ann.get("upstream_guards"):
+            ev["upstream_guards"] = ann["upstream_guards"]
+    catalogue_coverage = {
+        eid: ann["coverage"] for eid, ann in annotations.items()
+        if ann.get("coverage")}
+
     data = {
         "formatVersion": "1.0",
         "component": component,
@@ -366,6 +445,9 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         "guardGroups": {"count": 0, "reason": absent.format(src="guard-results.txt")},
         "coverage": {"count": 0, "reason": absent.format(src="event-catalogue.md")},
     }
+    if catalogue_coverage:
+        data["coverage"] = catalogue_coverage
+        data["completeness"].pop("coverage", None)
 
     # A hand-merged sidecar keeps its real sections: never regress one to
     # an absence assertion just because this run could not derive it.
@@ -376,7 +458,7 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         except json.JSONDecodeError:
             prior = {}
         for section in ("pairs", "guardGroups", "coverage"):
-            if prior.get(section):
+            if prior.get(section) and not data.get(section):
                 data[section] = prior[section]
                 data["completeness"].pop(section, None)
         if not data["completeness"]:
