@@ -275,10 +275,76 @@ def main() -> int:
                 capture_output=True, text=True)
             return r.returncode, (r.stdout + r.stderr).strip()
 
+        def mutation(adir: Path) -> tuple[int, str]:
+            r = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "check_matrix_mutation.py"), str(adir)],
+                capture_output=True, text=True)
+            return r.returncode, (r.stdout + r.stderr).strip()
+
         gm = ROOT / "tests" / "golden-mini" / "domain-analysis" / "mini"
         d5 = tmp / "cm-green"
         shutil.copytree(gm, d5)
         expect("check_matrix green on golden-mini", False, *cmx(d5))
+        no_config = sidecar(tmp, gm)
+        (no_config / "matrix-mutation.json").unlink()
+        expect("mutation checker rejects missing configuration", True,
+               *mutation(no_config), needle="CONFIG ERROR: missing matrix-mutation.json")
+
+        weak = sidecar(tmp, gm)
+        (weak / "matrix-mutation.json").write_text(json.dumps({
+            "formatVersion": 1,
+            "testCommand": ["python3", "-c", "import sys; raise SystemExit(0)", "{analysis_dir}"],
+            "workingDirectory": ".",
+            "timeoutSeconds": 5,
+        }))
+        expect("mutation checker reports weak suite survivors", True,
+               *mutation(weak), needle="SURVIVED")
+
+        expect("mutation checker golden-mini kills supported mutants", False,
+               *mutation(gm), needle="MUTATION CHECK: OK")
+
+        no_placeholder = sidecar(tmp, gm)
+        (no_placeholder / "matrix-mutation.json").write_text(json.dumps({
+            "formatVersion": 1,
+            "testCommand": ["python3", "-c", "pass"],
+        }))
+        expect("mutation checker rejects missing placeholder", True,
+               *mutation(no_placeholder), needle="CONFIG ERROR: testCommand must contain exactly one {analysis_dir}")
+
+        repeated_placeholder = sidecar(tmp, gm)
+        (repeated_placeholder / "matrix-mutation.json").write_text(json.dumps({
+            "formatVersion": 1,
+            "testCommand": ["python3", "{analysis_dir}", "{analysis_dir}"],
+        }))
+        expect("mutation checker rejects repeated placeholder", True,
+               *mutation(repeated_placeholder), needle="CONFIG ERROR: testCommand must contain exactly one {analysis_dir}")
+
+        non_array_command = sidecar(tmp, gm)
+        (non_array_command / "matrix-mutation.json").write_text(json.dumps({
+            "formatVersion": 1,
+            "testCommand": "python3 tests/test_cell_suite.py {analysis_dir}",
+        }))
+        expect("mutation checker rejects non-array command", True,
+               *mutation(non_array_command), needle="CONFIG ERROR: testCommand must be a non-empty array of strings")
+
+        baseline_failure = sidecar(tmp, gm)
+        (baseline_failure / "matrix-mutation.json").write_text(json.dumps({
+            "formatVersion": 1,
+            "testCommand": ["python3", "-c", "raise SystemExit(3)", "{analysis_dir}"],
+            "workingDirectory": ".",
+        }))
+        expect("mutation checker blocks failed baseline", True,
+               *mutation(baseline_failure), needle="BLOCKED: baseline exit=3")
+
+        baseline_timeout = sidecar(tmp, gm)
+        (baseline_timeout / "matrix-mutation.json").write_text(json.dumps({
+            "formatVersion": 1,
+            "testCommand": ["python3", "-c", "import time; time.sleep(2)", "{analysis_dir}"],
+            "workingDirectory": ".",
+            "timeoutSeconds": 1,
+        }))
+        expect("mutation checker blocks timed-out baseline", True,
+               *mutation(baseline_timeout), needle="BLOCKED: baseline timeout=1s")
         # PA-13a (markdown table side): an empty coverage cell must fail
         d6 = tmp / "cm-red"
         shutil.copytree(gm, d6)

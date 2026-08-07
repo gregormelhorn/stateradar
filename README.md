@@ -197,7 +197,9 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 06-reconcile citation refresh), gen_matrix_scaffold
                 (empty matrix grids), dsc_compose (cross-model report),
                 check_matrix (the generic per-component checker),
-                check_reachability (semantic state reachability),
+                check_matrix_mutation (runs declared cell suites against
+                isolated matrix mutants), check_reachability (semantic state
+                reachability),
                 dsc_stamp (validate + pin the manifest),
                 dsc_blind (blind-pass assembly + diff),
                 dsc_cross_check (reviewer cross-check), gen_rules
@@ -224,6 +226,14 @@ System Python on macOS is PEP-668 externally managed. Run the checkers through u
 ```bash
 uv run --with-requirements tools/requirements-dev.txt python3 tools/dsc_check.py <analysis-dir>
 ```
+
+Run a declared cell suite against temporary matrix mutants:
+
+```bash
+python3 tools/check_matrix_mutation.py domain-analysis/<component>
+```
+
+The checker fails when the declared suite lets a supported mutant survive.
 
 Without `jsonschema`, `dsc_check` cannot validate the sidecar contract and fails with that reason. Pass `--allow-no-schema` to accept structural checks only — a deliberate reduction in coverage, never a silent one. CI installs the packages with pip instead.
 

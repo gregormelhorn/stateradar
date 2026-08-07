@@ -59,14 +59,12 @@ Classification logic selftest wired into run_selftest.py.
 
 ## 7. Matrix mutation checker (is the matrix strong enough?)
 
-**Status:** Planned — priority 2 (biggest insight per effort).
-MutDafny (ICSE 2026) mutates *specifications*, not code. Transfer:
-mutate matrix cells (`transition→ignore`, target swap, guard
-negation) and check whether the generated cell suite notices.
-Surviving matrix mutants = under-tested cells. Answers the question
-the pack leaves open today: not "is the matrix total" but "do its
-tests defend it". A new checker beside dsc_check/reachability, with a
-red selftest, per house rule.
+**Status:** ✅ Shipped. `tools/check_matrix_mutation.py` runs a declared cell
+suite against isolated temporary matrix copies. A component opts in with
+`matrix-mutation.json`. The checker supports transition-to-ignore, transition
+target-swap, and handle-to-ignore mutations. It reports killed and surviving
+mutants. The deterministic selftest proves a weak suite fails and the
+golden-mini suite kills every supported mutant.
 
 ## 8. ACH-style fault-class mutants (testgen upgrade)
 
