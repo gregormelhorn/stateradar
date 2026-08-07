@@ -43,12 +43,22 @@ PACK_DIR = Path(__file__).resolve().parent.parent
 
 
 def clone_at_commit(repo_url: str, commit: str, target: Path) -> bool:
-    """Clone a repo at a specific commit. Returns True on success."""
+    """Clone a repo at a specific commit. Returns True on success.
+
+    One retry on clone failure: a transient network error is otherwise
+    indistinguishable from a real regression in the summary line (this
+    bit the v1.47 review — a single hiccup printed '1 failed')."""
     target.mkdir(parents=True, exist_ok=True)
     result = subprocess.run(
         ["git", "clone", "--quiet", repo_url, str(target)],
         capture_output=True, text=True,
     )
+    if result.returncode != 0:
+        print(f"  clone attempt 1 failed ({result.stderr.strip()[:120]}); retrying")
+        result = subprocess.run(
+            ["git", "clone", "--quiet", repo_url, str(target)],
+            capture_output=True, text=True,
+        )
     if result.returncode != 0:
         print(f"  clone failed: {result.stderr.strip()}")
         return False
@@ -259,6 +269,7 @@ def main() -> int:
                 results.append((name, passed))
                 total_skips += skipped
                 print(log)
+                print(f"CASE {name}: {'OK' if passed else 'FAIL'}")
                 print()
     else:
         results = []
@@ -268,9 +279,13 @@ def main() -> int:
             results.append((name, passed))
             total_skips += skipped
             print(log)
+            print(f"CASE {name}: {'OK' if passed else 'FAIL'}")
             print()
 
     total = len(results)
+    if total != len(names):
+        print(f"ERROR: {len(names)} cases scheduled, {total} reported — a case was swallowed")
+        return 1
     passed = sum(1 for _, p in results if p)
     failed = total - passed
     skip_str = f" ({total_skips} checks skipped)" if total_skips else ""
