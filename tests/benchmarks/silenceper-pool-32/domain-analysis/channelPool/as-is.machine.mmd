@@ -1,0 +1,16 @@
+stateDiagram-v2
+    %% silenceper/pool channelPool — as-is representation.
+    %% The canonical root analysis.json is the authority surface.
+    %% This model does not encode to-be terminal waiter resolution or queued-Ping parity.
+
+    [*] --> Active_HasIdle: construction with an idle connection
+
+    Active_HasIdle --> Active_IdleExhausted_UnderCap: Get exhausts idle supply
+    Active_IdleExhausted_UnderCap --> Active_HasIdle: Put makes a connection idle
+    Active_IdleExhausted_UnderCap --> Active_IdleExhausted_AtCapacity: Get reaches capacity
+    Active_IdleExhausted_AtCapacity --> Active_IdleExhausted_AtCapacity: Get queues
+
+    Active_HasIdle --> Released: Release
+    Active_IdleExhausted_UnderCap --> Released: Release
+    Active_IdleExhausted_AtCapacity --> Released: Release
+    Released --> Released: terminal calls

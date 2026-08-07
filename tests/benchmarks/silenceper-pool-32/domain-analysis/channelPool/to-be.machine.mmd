@@ -1,0 +1,16 @@
+stateDiagram-v2
+    %% silenceper/pool channelPool — approved Resolution to-be model.
+    %% The disposition matrix is the authority surface.
+    %% No lease-tracking or duplicate-close state is added: DR-002 and DR-006 are NAT assumptions.
+
+    [*] --> Active_HasIdle: construction with an idle connection
+
+    Active_HasIdle --> Active_IdleExhausted_UnderCap: Get exhausts idle supply
+    Active_IdleExhausted_UnderCap --> Active_HasIdle: Put makes a connection idle
+    Active_IdleExhausted_UnderCap --> Active_IdleExhausted_AtCapacity: Get reaches capacity
+    Active_IdleExhausted_AtCapacity --> Active_IdleExhausted_AtCapacity: queued Get / Ping before return; discard and retry on failure (DR-004)
+
+    Active_HasIdle --> Released: Release
+    Active_IdleExhausted_UnderCap --> Released: Release
+    Active_IdleExhausted_AtCapacity --> Released: Release / resolve queued Get() with ErrMaxActiveConnReached (DR-001)
+    Released --> Released: observed terminal calls; Release UV scope remains Q-07
