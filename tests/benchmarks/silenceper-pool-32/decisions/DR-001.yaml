@@ -1,0 +1,17 @@
+id: DR-001
+date: 2026-08-07
+source_question: Q-01
+question: What should Release() do to Get() calls queued at capacity?
+options:
+  - unblock queued Get() calls with ErrMaxActiveConnReached
+  - return ErrClosed
+  - timeout or retry
+  - defer
+decision: unblock queued Get() calls with ErrMaxActiveConnReached
+rationale: Project owner selected option 1 after review of reconstructed upstream owner intent from merged PR #29 and issue #32. The decision applies terminal Release() only; it does not decide the non-terminal capacity-exhaustion timeout policy.
+links:
+  - "matrix: Active_IdleExhausted_AtCapacity × Release"
+  - "question: Q-01"
+  - "upstream: https://github.com/silenceper/pool/pull/29"
+  - "upstream: https://github.com/silenceper/pool/issues/32"
+status: accepted

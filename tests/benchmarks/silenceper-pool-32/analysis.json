@@ -281,7 +281,8 @@
    "state": "Active_IdleExhausted_AtCapacity",
    "event": "Release",
    "disposition": "UNSPECIFIED",
-   "q": "Q-01"
+   "q": "Q-01",
+   "dr": "DR-001"
   },
   {
    "state": "Active_IdleExhausted_AtCapacity",
@@ -692,7 +693,7 @@
  "questions": [
   {
    "id": "Q-01",
-   "status": "OPEN",
+   "status": "ANSWERED — DR-001",
    "fault": [
     "F-07",
     "F-20"
@@ -760,6 +761,9 @@
    "trigger": "step-3 checklist",
    "text": "Get undesired variants: UV-Get-commission (spurious Get \u2014 any goroutine with a pool reference can call Get()), UV-Get-value (subtle value fault \u2014 Get after Release returns ErrClosed but the error may be ignored). From run2 Q-12."
   }
+ ],
+ "behaviouralDrs": [
+  "DR-001"
  ],
  "coverage": {
   "Get": {
