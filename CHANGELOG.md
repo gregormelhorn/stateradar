@@ -2,6 +2,10 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.44
+
+- Skill renamed from domain-statechart to stateradar.
+
 ## v1.43 — real prose anchor verification
 
 - prose anchors are now verified, not best-effort: missing anchor =
