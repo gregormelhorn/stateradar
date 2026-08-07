@@ -57,3 +57,12 @@ succeeds. A Factory error returns to the caller without consuming capacity.
 Initial construction failure releases partial state and aborts pool creation;
 Factory is not invoked from the at-capacity waiter branch, so no special waiter
 notification is required.
+
+## Q-06: Close ownership and `openingConns` (F-05, F-14)
+
+**Status:** ANSWERED — [DR-006](decisions/DR-006.yaml); to-be model and test generation pending.
+
+`openingConns >= 0` is a system invariant under the DR-002/DR-006 valid-caller
+contract. A caller closes only a genuine borrowed connection once and does not
+both `Put()` and `Close()` the same borrow. The pool does not add duplicate-close
+tracking, foreign-connection detection, or counter clamping.

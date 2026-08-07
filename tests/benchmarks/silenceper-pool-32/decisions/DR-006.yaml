@@ -1,0 +1,20 @@
+id: DR-006
+date: 2026-08-07
+source_question: Q-06
+question: Must the pool defend against duplicate or foreign Close() calls?
+options:
+  - NAT: callers close one genuine borrowed connection exactly once; no duplicate-close guard
+  - add ownership tracking and reject duplicate or foreign Close()
+  - clamp openingConns at zero
+  - defer
+decision: NAT: callers close one genuine borrowed connection exactly once; no duplicate-close guard
+rationale: Project owner selected option 1. This extends the accepted DR-002 caller-ownership contract to Close(): callers do not double-close, close foreign connections, or both Put() and Close() one borrow. openingConns >= 0 remains a SYS invariant only under that environment assumption; no defensive tracking or clamping is added.
+links:
+  - "invariant: INV-01"
+  - "matrix: Active_IdleExhausted_UnderCap × Close"
+  - "matrix: Active_IdleExhausted_AtCapacity × Close"
+  - "matrix: all states × UV-Close-duplication"
+  - "matrix: all states × UV-Close-out-of-order"
+  - "matrix: all states × UV-Close-contradiction"
+  - "question: Q-06"
+status: accepted

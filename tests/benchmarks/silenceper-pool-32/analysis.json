@@ -210,7 +210,8 @@
    "state": "Active_IdleExhausted_UnderCap",
    "event": "Close",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_IdleExhausted_UnderCap",
@@ -277,7 +278,8 @@
    "state": "Active_IdleExhausted_AtCapacity",
    "event": "Close",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_IdleExhausted_AtCapacity",
@@ -425,19 +427,22 @@
    "state": "Active_HasIdle",
    "event": "UV-Close-duplication",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_HasIdle",
    "event": "UV-Close-out-of-order",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_HasIdle",
    "event": "UV-Close-contradiction",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_HasIdle",
@@ -507,19 +512,22 @@
    "state": "Active_IdleExhausted_UnderCap",
    "event": "UV-Close-duplication",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_IdleExhausted_UnderCap",
    "event": "UV-Close-out-of-order",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_IdleExhausted_UnderCap",
    "event": "UV-Close-contradiction",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_IdleExhausted_UnderCap",
@@ -589,19 +597,22 @@
    "state": "Active_IdleExhausted_AtCapacity",
    "event": "UV-Close-duplication",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_IdleExhausted_AtCapacity",
    "event": "UV-Close-out-of-order",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_IdleExhausted_AtCapacity",
    "event": "UV-Close-contradiction",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Active_IdleExhausted_AtCapacity",
@@ -671,19 +682,22 @@
    "state": "Released",
    "event": "UV-Close-duplication",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Released",
    "event": "UV-Close-out-of-order",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Released",
    "event": "UV-Close-contradiction",
    "disposition": "UNSPECIFIED",
-   "q": "Q-06"
+   "q": "Q-06",
+   "dr": "DR-006"
   },
   {
    "state": "Released",
@@ -763,7 +777,7 @@
   },
   {
    "id": "Q-06",
-   "status": "OPEN",
+   "status": "ANSWERED — DR-006",
    "fault": [
     "F-05",
     "F-14"
@@ -787,7 +801,8 @@
   "DR-002",
   "DR-003",
   "DR-004",
-  "DR-005"
+  "DR-005",
+  "DR-006"
  ],
  "coverage": {
   "Get": {
@@ -867,8 +882,9 @@
  "invariants": [
   {
    "id": "INV-01",
-   "text": "openingConns >= 0 at all times (SYS invariant; underflow indicates double-Close or Close-after-Release accounting fault)",
-   "questionRef": "Q-06"
+   "text": "SYS invariant: openingConns >= 0 while the DR-002/DR-006 valid-caller ownership contract holds",
+   "questionRef": "Q-06",
+   "dr": "DR-006"
   }
  ]
 }
