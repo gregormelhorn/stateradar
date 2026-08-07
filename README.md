@@ -134,6 +134,27 @@ gobreaker, recws, recloser, cenkalti/backoff, tungstenite-rs,
 tenacity) reached 93% tracker-bug coverage and surfaced eight new
 bugs, two of them critical and reported upstream.
 
+## Method reliability (CONVERGENCE baseline)
+
+Two independent, fresh-session pilot runs on the same component
+(`examples/device-connection/`) produced:
+
+- **4.1 % cell divergence** on the 7×7 aligned base grid (47/49 cells
+  convergent). Both divergent cells share one root cause: a single
+  state-granularity decision (`Disconnected_RetriesExhausted`).
+- **82 % finding-level convergence** (9/11 distinct findings found by
+  both runs). No contradictory findings — divergence was purely additive.
+- Variance concentrates in undesired-variant slicing (5 vs 3 UV columns).
+- The predicted FAILED-terminality divergence did **not** occur — both
+  runs modeled the disconnect backdoor identically.
+
+`tools/ensemble_convergence.py` automates the protocol: it normalizes
+state names (case-insensitive, never stripping qualifiers per PA-17
+Rule 4), aligns events by ID, diffs cells, reports structural
+(granularity/slicing) divergence separately from cell convergence, and
+mechanically marks divergent cells `UNSPECIFIED → Q`. Full protocol at
+`tests/device-connection/CONVERGENCE.md`.
+
 ## Scope
 
 Use for lifecycles, connections, protocols, async workflows, retries,

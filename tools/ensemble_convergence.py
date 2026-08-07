@@ -9,63 +9,73 @@ Core idea (roadmap §5): intersection = high confidence, symmetric
 difference = automatic question candidates. The CONVERGENCE protocol
 only *measured* divergence; this tool *uses* it.
 
+Design constraints (from the device-connection baseline):
+1. ALLCAPS↔PascalCase normalization IS empirically needed (Run 2 used
+   the enum spelling). Case-only normalization bridges writing styles.
+2. QUALIFIER STRIPPING IS FORBIDDEN. PA-17 Rule 4 makes qualifiers
+   behaviorally significant — Run 1's extra state
+   Disconnected_RetriesExhausted IS the divergence and encodes the
+   finding both runs made independently. A normalizer that strips
+   qualifiers masks granularity divergence as convergence.
+3. UV SLICING DIVERGENCE is structural, not cellular. UV columns
+   were "not alignable (different slicing)" in the baseline. The
+   tool counts them separately and never mixes them into the cell
+   convergence rate.
+
+Normalization policy:
+- State names: case-insensitive exact match only. Non-matching states
+  are reported as structural (granularity) divergence — never forced
+  into alignment.
+- Event IDs: matched by ID. Events present in some runs only are
+  structural divergence.
+- Only fully aligned (state, event) pairs contribute to the cell
+  convergence rate.
+
 Usage:
-  # Diff two runs, emit merged analysis + report to stdout
-  python3 tools/ensemble_convergence.py run1/analysis.json run2/analysis.json
-
-  # Diff three runs, write merged sidecar to a file
-  python3 tools/ensemble_convergence.py r1/a.json r2/a.json r3/a.json -o merged.json
-
-  # Also write the convergence report to a markdown file
-  python3 tools/ensemble_convergence.py r1/a.json r2/a.json --report report.md
+  python3 tools/ensemble_convergence.py run1/a.json run2/a.json [-o merged.json] [--report report.md]
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
 
 # ---------------------------------------------------------------------------
-# State-name normalization
+# State-name normalization — case only, no suffix stripping
 # ---------------------------------------------------------------------------
 
 def _normalize_state(name: str) -> str:
-    """Normalize a state name for cross-run alignment.
+    """Case-insensitive exact match. No suffix stripping.
 
-    Rules (per PA-17: PascalCase segments or ALLCAPS API enums):
-    - lowercase and strip whitespace
-    - strip trailing qualifiers like _AttemptInFlight, _Attempting, _BackingOff, _Backoff
-    - map known ALLCAPS → PascalCase pairs
+    Per PA-17 Rule 4, qualifiers (_RetriesExhausted, _Attempting,
+    _BackingOff) ARE behaviorally significant. Stripping them masks
+    granularity divergence — the exact signal the tool exists to detect.
     """
-    name = name.strip().lower()
-    # Strip common derivation suffixes that encode the same semantic state
-    for suffix in (
-        "_attemptinflight", "_attempting", "_noattempt",
-        "_backingoff", "_backoff",
-        "_retriesexhausted", "_exhausted",
-        "_idle",
-    ):
-        if name.endswith(suffix):
-            base = name[:-len(suffix)]
-            if base:  # don't reduce to empty
-                return base
-    return name
+    return name.strip().lower()
 
 
-def _align_states(all_state_lists: list[list[str]]) -> dict[str, list[str]]:
-    """Build a mapping from canonical state name to per-run state names.
+# ---------------------------------------------------------------------------
+# State alignment
+# ---------------------------------------------------------------------------
 
-    Returns {canonical: [run0_name_or_None, run1_name_or_None, ...]}.
-    Runs that don't have this state get None.
+def _align_states(all_state_lists: list[list[str]]) -> tuple[
+    dict[str, list[Optional[str]]],  # canonical → per-run original name or None
+    list[str],                        # structural findings
+]:
+    """Align states across runs by case-insensitive name.
+
+    States present in all runs are aligned. States present in some
+    runs but not others are structural (granularity) divergence.
+
+    Returns (alignment, findings).
     """
     n_runs = len(all_state_lists)
-    # Collect all normalized forms
+    # Collect all normalized forms and their per-run originals
     norm_to_originals: dict[str, list[Optional[str]]] = defaultdict(
         lambda: [None] * n_runs
     )
@@ -74,7 +84,26 @@ def _align_states(all_state_lists: list[list[str]]) -> dict[str, list[str]]:
             norm = _normalize_state(s)
             norm_to_originals[norm][run_idx] = s
 
-    return dict(norm_to_originals)
+    findings: list[str] = []
+
+    # Separate fully-aligned states from partially-present states
+    aligned: dict[str, list[Optional[str]]] = {}
+    for norm, per_run in norm_to_originals.items():
+        present_count = sum(1 for v in per_run if v is not None)
+        if present_count == n_runs:
+            aligned[norm] = per_run
+        else:
+            # Structural divergence: state present in only some runs
+            run_presence = [
+                f"run-{i + 1}: {per_run[i] or 'absent'}"
+                for i in range(n_runs)
+            ]
+            findings.append(
+                f"State granularity divergence: '{norm}' — "
+                + "; ".join(run_presence)
+            )
+
+    return aligned, findings
 
 
 # ---------------------------------------------------------------------------
@@ -82,14 +111,18 @@ def _align_states(all_state_lists: list[list[str]]) -> dict[str, list[str]]:
 # ---------------------------------------------------------------------------
 
 def _align_events(all_event_lists: list[list[dict]]) -> tuple[
-    list[str],                       # canonical event ids (ordered)
+    list[str],                       # aligned event ids (ordered)
     dict[str, list[Optional[str]]],  # canonical → per-run event id or None
+    list[str],                        # structural findings
 ]:
     """Align event IDs across runs.
 
-    Events are matched by ID. Returns the union of all event IDs and
-    per-run presence.
+    Events matched by ID. Events present in some runs only are
+    structural divergence (e.g., different UV slicing).
     """
+    n_runs = len(all_event_lists)
+
+    # Union of all event IDs
     all_ids: set[str] = set()
     for events in all_event_lists:
         for e in events:
@@ -97,8 +130,11 @@ def _align_events(all_event_lists: list[list[dict]]) -> tuple[
 
     canonical_ids = sorted(all_ids)
     presence: dict[str, list[Optional[str]]] = {}
+    findings: list[str] = []
+
+    aligned_ids: list[str] = []
     for cid in canonical_ids:
-        row = [None] * len(all_event_lists)
+        row = [None] * n_runs
         for run_idx, events in enumerate(all_event_lists):
             for e in events:
                 if e["id"] == cid:
@@ -106,7 +142,21 @@ def _align_events(all_event_lists: list[list[dict]]) -> tuple[
                     break
         presence[cid] = row
 
-    return canonical_ids, presence
+        present_count = sum(1 for v in row if v is not None)
+        if present_count == n_runs:
+            aligned_ids.append(cid)
+        elif present_count > 0:
+            # Structural divergence: event in some runs only (e.g., UV slicing)
+            run_presence = [
+                f"run-{i + 1}: {row[i] or 'absent'}"
+                for i in range(n_runs)
+            ]
+            findings.append(
+                f"Event presence divergence: '{cid}' — "
+                + "; ".join(run_presence)
+            )
+
+    return aligned_ids, presence, findings
 
 
 # ---------------------------------------------------------------------------
@@ -129,47 +179,33 @@ def _load_cells_index(analysis_path: Path) -> dict[tuple[str, str], dict]:
 # ---------------------------------------------------------------------------
 
 def _cell_fingerprint(cell: dict | None) -> Optional[str]:
-    """Return a stable fingerprint for a cell's behavioural content.
-
-    The fingerprint captures disposition + target (if transition).
-    Citations, Q-refs, and DR-refs are stripped — they differ between runs
-    but don't indicate behavioural divergence.
-    """
+    """Return a stable fingerprint for a cell's behavioural content."""
     if cell is None:
         return None
     disp = cell.get("disposition", "")
     if disp == "transition":
-        return f"{disp}→{cell.get('target', '?')}"
+        target = cell.get("target", "?").strip().lower()
+        return f"{disp}→{target}"
     return disp
 
 
-def _divergence_class(
-    fingerprints: list[Optional[str]],
-) -> str:
+def _divergence_class(fingerprints: list[Optional[str]]) -> str:
     """Classify the divergence pattern across runs.
 
-    Returns one of:
-    - convergent: all runs agree
-    - disposition-divergent: same cell, different dispositions
-    - target-divergent: all transition, different targets
-    - presence-divergent: cell exists in some runs but not others
-    - noise: all UNSPECIFIED / ignore(accidental) but different Q-ids (not
-      behavioural divergence — the holes are already caught)
+    Returns: convergent, disposition-divergent, target-divergent,
+             presence-divergent, hole-noise, all-absent
     """
-    # Filter out None (absent runs)
     present = [fp for fp in fingerprints if fp is not None]
     if not present:
-        return "all-absent"  # shouldn't happen for aligned cells
+        return "all-absent"
 
     if len(set(present)) == 1:
         return "convergent"
 
-    # Check if all present are hole-class dispositions
     hole_disps = {"UNSPECIFIED", "ignore (accidental)"}
     if all(fp in hole_disps for fp in present):
         return "hole-noise"
 
-    # Check if all are transitions but with different targets
     if all(fp.startswith("transition→") for fp in present):
         return "target-divergent"
 
@@ -181,13 +217,17 @@ def _divergence_class(
 # ---------------------------------------------------------------------------
 
 def _merge_cells(
-    canonical_states: dict[str, list[Optional[str]]],
-    canonical_events: list[str],
+    aligned_states: dict[str, list[Optional[str]]],
+    aligned_events: list[str],
     event_presence: dict[str, list[Optional[str]]],
     cell_indices: list[dict[tuple[str, str], dict]],
     runs_metadata: list[dict],
+    structural_findings: list[str],
 ) -> tuple[list[dict], list[dict], dict]:
     """Merge cells across runs and classify convergence.
+
+    Only fully aligned (state, event) pairs contribute to the cell
+    convergence rate. Structural findings are reported separately.
 
     Returns (merged_cells, new_questions, stats).
     """
@@ -201,15 +241,16 @@ def _merge_cells(
         "convergent": 0,
         "disposition_divergent": 0,
         "target_divergent": 0,
-        "presence_divergent": 0,
         "hole_noise": 0,
         "new_questions": 0,
         "convergence_rate": 0.0,
+        "structural_findings": len(structural_findings),
+        "structural_details": structural_findings,
     }
 
-    for canonical_state, state_names in canonical_states.items():
-        for canonical_event in canonical_events:
-            # Collect fingerprints and original cells
+    for canonical_state, state_names in aligned_states.items():
+        for canonical_event in aligned_events:
+            # All runs must have this state and event (by construction)
             fingerprints: list[Optional[str]] = []
             originals: list[Optional[dict]] = []
             for run_idx in range(n_runs):
@@ -228,7 +269,6 @@ def _merge_cells(
 
             if d_class == "convergent":
                 stats["convergent"] += 1
-                # Use the first non-None cell as the representative
                 for orig in originals:
                     if orig is not None:
                         merged.append(dict(orig))
@@ -236,7 +276,6 @@ def _merge_cells(
 
             elif d_class == "hole-noise":
                 stats["hole_noise"] += 1
-                # Already holes in all runs — keep the first one
                 for orig in originals:
                     if orig is not None:
                         merged.append(dict(orig))
@@ -250,31 +289,29 @@ def _merge_cells(
 
                 if d_class == "disposition-divergent":
                     stats["disposition_divergent"] += 1
-                elif d_class == "target-divergent":
-                    stats["target_divergent"] += 1
                 else:
-                    stats["presence_divergent"] += 1
+                    stats["target_divergent"] += 1
 
-                # Build a descriptive divergence summary
+                # Build divergence summary
                 run_details = []
                 for run_idx in range(n_runs):
-                    run_label = runs_metadata[run_idx].get("label", f"run-{run_idx + 1}")
+                    rl = runs_metadata[run_idx].get("label", f"run-{run_idx + 1}")
                     fp = fingerprints[run_idx]
                     if fp is None:
-                        run_details.append(f"{run_label}: absent")
+                        run_details.append(f"{rl}: absent")
                     else:
-                        run_details.append(f"{run_label}: {fp}")
+                        run_details.append(f"{rl}: {fp}")
 
                 divergence_detail = "; ".join(run_details)
 
-                # Derive display names from the first run that has this state/event
+                # Use first run's original state name as display name
                 display_state = canonical_state
                 for sn in state_names:
                     if sn is not None:
                         display_state = sn
                         break
                 display_event = canonical_event
-                for ep in event_presence.get(canonical_event, [None]):
+                for ep in event_presence.get(canonical_event, []):
                     if ep is not None:
                         display_event = ep
                         break
@@ -290,7 +327,7 @@ def _merge_cells(
                     "id": q_id,
                     "status": "OPEN",
                     "text": (
-                        f"Ensemble divergence at ({canonical_state}, {canonical_event}): "
+                        f"Ensemble divergence at ({display_state}, {display_event}): "
                         f"{divergence_detail}. "
                         f"Multiple independent pilot runs disagree on the disposition. "
                         f"Human decision required."
@@ -316,11 +353,13 @@ def _merge_cells(
 
 def _render_report(
     stats: dict,
-    canonical_states: dict[str, list[Optional[str]]],
-    canonical_events: list[str],
+    aligned_states: dict[str, list[Optional[str]]],
+    aligned_events: list[str],
     runs_metadata: list[dict],
     merged_cells: list[dict],
     questions: list[dict],
+    all_state_lists: list[list[str]],
+    all_event_lists: list[list[dict]],
 ) -> str:
     """Render a markdown convergence report."""
     lines: list[str] = []
@@ -333,18 +372,29 @@ def _render_report(
         label = meta.get("label", f"run-{i + 1}")
         path = meta.get("path", "?")
         lines.append(f"- **{label}:** `{path}`")
+        lines.append(f"  States: {len(all_state_lists[i])}, Events: {len(all_event_lists[i])}")
     lines.append("")
 
-    lines.append("## State alignment")
+    # Structural findings
+    if stats["structural_details"]:
+        lines.append("## Structural divergence (not in cell rate)")
+        lines.append("")
+        for finding in stats["structural_details"]:
+            lines.append(f"- {finding}")
+        lines.append("")
+
+    lines.append("## State alignment (case-insensitive exact match)")
     lines.append("")
-    lines.append(f"Canonical states: {len(canonical_states)}")
+    lines.append(f"Aligned states: {len(aligned_states)}")
     lines.append("")
-    for canonical, per_run in canonical_states.items():
+    for canonical, per_run in aligned_states.items():
         run_names = [n or "—" for n in per_run]
         lines.append(f"- `{canonical}` ← {', '.join(run_names)}")
     lines.append("")
 
-    lines.append("## Convergence statistics")
+    lines.append("## Cell convergence (aligned grid only)")
+    lines.append("")
+    lines.append(f"Aligned grid: {len(aligned_states)} states × {len(aligned_events)} events")
     lines.append("")
     lines.append(f"| Metric | Value |")
     lines.append(f"|---|---|")
@@ -352,10 +402,10 @@ def _render_report(
     lines.append(f"| Convergent | {stats['convergent']} |")
     lines.append(f"| Disposition-divergent | {stats['disposition_divergent']} |")
     lines.append(f"| Target-divergent | {stats['target_divergent']} |")
-    lines.append(f"| Presence-divergent | {stats['presence_divergent']} |")
     lines.append(f"| Hole noise (non-behavioural) | {stats['hole_noise']} |")
     lines.append(f"| **Behavioural convergence rate** | **{stats['convergence_rate']}%** |")
     lines.append(f"| New questions raised | {stats['new_questions']} |")
+    lines.append(f"| Structural findings | {stats['structural_findings']} |")
     lines.append("")
 
     if questions:
@@ -364,7 +414,7 @@ def _render_report(
         for q in questions:
             lines.append(f"### {q['id']}")
             lines.append(f"**Status:** {q['status']}")
-            lines.append(f"")
+            lines.append("")
             lines.append(q["text"])
             lines.append("")
 
@@ -405,7 +455,6 @@ def main() -> int:
     if len(args.sidecars) < 2:
         sys.exit("ensemble_convergence: need at least 2 analysis.json files")
 
-    # Validate all sidecars exist
     for p in args.sidecars:
         if not p.is_file():
             sys.exit(f"not found: {p}")
@@ -432,43 +481,43 @@ def main() -> int:
     all_state_lists = [d.get("states", []) for d in all_data]
     all_event_lists = [d.get("events", []) for d in all_data]
 
-    # Align
-    canonical_states = _align_states(all_state_lists)
-    canonical_events, event_presence = _align_events(all_event_lists)
+    # Align — state: case-insensitive exact match only
+    aligned_states, state_findings = _align_states(all_state_lists)
+    aligned_events, event_presence, event_findings = _align_events(all_event_lists)
+    structural_findings = state_findings + event_findings
 
     # Load cell indices
     cell_indices = [_load_cells_index(p) for p in args.sidecars]
 
     # Merge and classify
     merged_cells, questions, stats = _merge_cells(
-        canonical_states, canonical_events, event_presence,
-        cell_indices, runs_metadata,
+        aligned_states, aligned_events, event_presence,
+        cell_indices, runs_metadata, structural_findings,
     )
 
-    # Build merged analysis.json (clone structure from first run)
+    # Build merged analysis.json
     merged = dict(all_data[0])
-    merged["states"] = sorted(canonical_states.keys())
-    # Union of all events
+    merged["states"] = sorted(aligned_states.keys())
+    # Union of all events (only aligned ones)
     all_event_objs: list[dict] = []
     seen_ids: set[str] = set()
     for events in all_event_lists:
         for e in events:
-            if e["id"] not in seen_ids:
-                seen_ids.add(e["id"])
-                all_event_objs.append(dict(e))
+            if e["id"] in seen_ids:
+                continue
+            seen_ids.add(e["id"])
+            all_event_objs.append(dict(e))
     merged["events"] = sorted(all_event_objs, key=lambda e: e["id"])
     merged["cells"] = merged_cells
-    # Append ensemble questions
     existing_questions = merged.get("questions", [])
     merged["questions"] = existing_questions + questions
-    # Note ensemble provenance
     merged["ensembleConvergence"] = {
         "runs": len(args.sidecars),
         "convergenceRate": stats["convergence_rate"],
         "divergentCells": stats["disposition_divergent"]
-        + stats["target_divergent"]
-        + stats["presence_divergent"],
+        + stats["target_divergent"],
         "newQuestions": stats["new_questions"],
+        "structuralFindings": stats["structural_findings"],
     }
 
     # Output merged analysis
@@ -481,8 +530,9 @@ def main() -> int:
 
     # Output report
     report = _render_report(
-        stats, canonical_states, canonical_events,
+        stats, aligned_states, aligned_events,
         runs_metadata, merged_cells, questions,
+        all_state_lists, all_event_lists,
     )
     if args.report:
         args.report.write_text(report, encoding="utf-8")
@@ -490,15 +540,22 @@ def main() -> int:
     else:
         print("\n" + report, file=sys.stderr)
 
-    # Return non-zero if there are divergent cells (for CI gating)
+    # Return non-zero on any divergence (cell or structural)
     divergent = (
         stats["disposition_divergent"]
         + stats["target_divergent"]
-        + stats["presence_divergent"]
+        + stats["structural_findings"]
     )
     if divergent > 0:
+        cell_div = stats["disposition_divergent"] + stats["target_divergent"]
+        struct_div = stats["structural_findings"]
+        parts = []
+        if cell_div:
+            parts.append(f"{cell_div} cell-divergent")
+        if struct_div:
+            parts.append(f"{struct_div} structural")
         print(
-            f"⚠ {divergent} divergent cells found — {stats['new_questions']} "
+            f"⚠ {', '.join(parts)} findings — {stats['new_questions']} "
             f"questions raised. Convergence rate: {stats['convergence_rate']}%",
             file=sys.stderr,
         )
