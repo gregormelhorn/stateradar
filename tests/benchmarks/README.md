@@ -38,42 +38,31 @@ SHARD categories, and blind-pass row-coverage checking end to end;
 its 15 non-oracle findings describe the frozen v1.18.0 tree and are
 unverified against current grpc-go.
 
+<!-- generated:odc start -->
+
 ## Fault-class × detector coverage (ODC)
 
-Dominant fault class per finding, from `formats/rules.toml`. Triggers per
-the case artifacts (grpc-go-2669 tracked separately).
+Dominant fault class per finding, from `formats/rules.toml`. Generated from benchmark sidecar `fault`/`trigger` fields.
 
 | Fault class | Trigger | Benchmark case(s) |
 |---|---|---|
-| F-07 lifecycle coupling | step-4 matrix walk; doctrine mapping (PA-21) | valkey-glide-5803 (Q-04), silenceper-pool-32 (primary) |
-| F-08 double release | step-4 matrix walk | valkey-glide-5803 (Q-02, Q-03), meilisearch-6508 (Q-D1) |
-| F-09 cancellation leak | step-4 matrix walk | meilisearch-6508 (Q-D2) |
-| F-13 delay / late | step-4 matrix walk | meilisearch-6508 (Q-D3) |
-| F-20 blocked progress after terminal event | step-4 matrix walk | python-websockets-1527 (Q-C1) |
-| F-01 missing transition | step-4 matrix walk | grpc-go-2669 (Q-15) |
-| F-02 transfer fault | doctrine mapping (PA-22); step-2 test replay | grpc-go-2669 (Q-04, Q-07) |
-| F-03 output fault | step-2 test replay | grpc-go-2669 (Q-14) |
-| F-04 sneak path | pairs table + z3 proof | grpc-go-2669 (Q-01) |
-| F-05 corrupt state | adversarial trace | grpc-go-2669 (Q-16) |
-| F-06 trap door | step-1 extraction | grpc-go-2669 (Q-10) |
-| F-07 lifecycle coupling | seam-contract sweep; step-5 lint | grpc-go-2669 (Q-11, Q-12) |
-| F-10 synchronized reset herd | step-5 lint + multi-instance probes | grpc-go-2669 (Q-13) |
-| F-11 callback deadlock | step-3 lock-discipline annotation | grpc-go-2669 (Q-02) |
-| F-13 delay / late | step-3 checklist + step-5 lint | grpc-go-2669 (Q-08) |
-| F-15 out-of-order / stale | step-4 matrix walk | grpc-go-2669 (Q-09) |
-| F-18 subtle value fault | step-1 extraction + traces; seam-contract sweep | grpc-go-2669 (Q-03 **oracle**, Q-05) |
-| F-19 unimplemented requirement | doctrine mapping (PA-22) | grpc-go-2669 (Q-06) |
+| F-01 | step-4 matrix walk | grpc-go-2669 (Q-15) |
+| F-02 | doctrine mapping (PA-22); step-2 test replay | grpc-go-2669 (Q-04), grpc-go-2669 (Q-07) |
+| F-03 | step-2 test replay | grpc-go-2669 (Q-14) |
+| F-04 | pairs table + z3 proof | grpc-go-2669 (Q-01) |
+| F-05 | adversarial trace | grpc-go-2669 (Q-16) |
+| F-06 | step-1 extraction | grpc-go-2669 (Q-10) |
+| F-07 | seam-contract sweep; step-5 lint | grpc-go-2669 (Q-11), grpc-go-2669 (Q-12) |
+| F-07 | step-4 matrix walk; doctrine mapping | valkey-glide-5803 (Q-04) |
+| F-08 | step-4 matrix walk | meilisearch-6508 (Q-D1), valkey-glide-5803 (Q-02), valkey-glide-5803 (Q-03) |
+| F-09 | step-4 matrix walk | meilisearch-6508 (Q-D2) |
+| F-10 | step-5 lint + multi-instance probes | grpc-go-2669 (Q-13) |
+| F-11 | step-3 lock-discipline annotation | grpc-go-2669 (Q-02) |
+| F-13 | step-3 checklist + step-5 lint | grpc-go-2669 (Q-08) |
+| F-13 | step-4 matrix walk | meilisearch-6508 (Q-D3) |
+| F-15 | step-4 matrix walk | grpc-go-2669 (Q-09) |
+| F-18 | seam-contract sweep; step-1 extraction + traces | grpc-go-2669 (Q-03), grpc-go-2669 (Q-05) |
+| F-19 | doctrine mapping (PA-22) | grpc-go-2669 (Q-06) |
+| F-20 | step-4 matrix walk | python-websockets-1527 (Q-C1) |
 
-Fault classes with zero benchmark findings so far: F-12, F-14, F-16,
-F-17, F-21 — for grpc-go-2669 the first four were probed by the
-checklist and found correctly handled (a checked non-defect, not a
-blind spot); F-21 needs a 07-test-audit case.
-
-The grpc-go columns are the first data point for the portfolio
-question the ODC fields exist to answer: the four pre-v1.11 benchmark
-cases were found by a single trigger (matrix walk), the v1.15 pilot's
-sixteen findings came through nine distinct detectors.
-
-**silenceper-pool-32:** unwired — MANIFEST.md present but no
-expected.json or run_benchmark case. This case was found by the
-statechart method but was never wired into the deterministic runner.
+<!-- generated:odc end -->

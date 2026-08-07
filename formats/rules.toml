@@ -46,6 +46,19 @@ provenance = [
   "explicit-requirement", "observed-in-code", "observed-in-tests",
   "inferred", "proposed",
 ]
+odc_triggers = [
+  "step-1 extraction",
+  "step-2 test replay",
+  "step-3 checklist",
+  "step-3 lock-discipline annotation",
+  "step-4 matrix walk",
+  "step-5 lint",
+  "doctrine mapping",
+  "seam-contract sweep",
+  "pairs table + z3 proof",
+  "adversarial trace",
+  "multi-instance probes",
+]
 
 [vocab.disposition_defs]
 "handle" = "stays in the state, does something"
@@ -133,7 +146,8 @@ shard = "commission (repeat)"
 [[faults]]
 id = "F-15"
 name = "out-of-order / stale"
-shard = "early/late"
+# late is exclusively F-13 (delay); F-15 covers early/out-of-order/stale
+shard = "sequence/early"
 
 [[faults]]
 id = "F-16"
@@ -164,6 +178,16 @@ source = "python-websockets #1527"
 id = "F-21"
 name = "mirroring test (structure-bound)"
 source = "07-test-audit"
+artifact = "test-suite"
+
+[[faults]]
+id = "F-22"
+name = "control stopped too soon / applied too long"
+# STPA Handbook (Leveson/Thomas 2018), UCA class 4:
+# duration/holding faults — monitoring or control ended before the
+# controlled process, a resource held past its owner's lifetime where
+# no F-07/F-09 coupling explains it.
+lineage = "leveson-thomas-stpa-2018"
 
 # ---------------------------------------------------------------------------
 # Undesired-variant checklist categories (PA-13b data; SHARD-aligned).
@@ -623,20 +647,28 @@ statement = "unclear, contradictory, or unspecified behaviour becomes a question
 enforcement = "prompt"
 added_by = "v1.0"
 
-# 2026-08-07: briefly downgraded from a false checker claim (AGENTS §5
-# advertised a scope-line checker no tool implemented); implemented
-# for real in check_matrix the same day, with red selftests.
+# Split in pack:v1.41 per the PA-3a/3b precedent: the semantic rule
+# (prompt) governs when a citation applies; the mechanical obligation
+# (checker) governs the reporting line.
 [[rules]]
-id = "R-REQUIREMENT-SCOPE"
-title = "requirement-scope rule"
+id = "R-REQUIREMENT-SCOPE-a"
+title = "requirement-scope rule (semantic)"
 class = "process"
-statement = "a citation covers only the scenario its text describes; control-trace verdicts carry the 'cited text contemplates this ordering' line"
+statement = "a citation covers only the scenario its text describes: applying a requirement, doc line, or decision record to an ordering, race, or variant it does not address downgrades provenance to inferred and makes the cell a hole candidate"
+enforcement = "prompt"
+added_by = "pack:v1.41 (split from R-REQUIREMENT-SCOPE)"
+
+[[rules]]
+id = "R-REQUIREMENT-SCOPE-b"
+title = "requirement-scope line (mechanical)"
+class = "wellformedness"
+statement = "every decision- or doc-citing control-trace verdict carries the requirement-scope line ('cited text contemplates this ordering: yes/no')"
 enforcement = "checker"
 checker_ref = "tools/check_matrix.py (scope line on citing control traces)"
 selftest_ref = "tools/selftest/run_selftest.py"
 catches = "scope lines on citing control traces"
 catches_order = 21
-added_by = "02:v1.1"
+added_by = "pack:v1.41 (split from R-REQUIREMENT-SCOPE)"
 
 [[rules]]
 id = "R-SEAM-CONTRACT"
@@ -846,6 +878,12 @@ title = "gate-type annotation"
 class = "wellformedness"
 statement = "every branching event states its gate: payload content or service-side state — blind readers must not guess"
 enforcement = "prompt"
+# checker_candidate: catalogue/sidecar gains a per-event `gate` field;
+# the checker asserts presence on every branching event, analogous to
+# R-ASSERTED-ABSENCE.  Blind-reader divergence class 'artefact'
+# (missing gate-type) exists but is currently caught only by
+# post-hoc Part-B diff.
+checker_candidate = true
 added_by = "02:v1.1"
 
 [[rules]]
@@ -854,6 +892,11 @@ title = "upstream-guard annotation"
 class = "wellformedness"
 statement = "every external event states which validations happen upstream, with citations, per deployment topology"
 enforcement = "prompt"
+# checker_candidate: catalogue/sidecar gains a per-external-event
+# `upstream_guards` field (list of {guard, citation, topology?});
+# the checker asserts presence on every external event.  Same
+# artefact-class driver as R-GATE-TYPE.
+checker_candidate = true
 added_by = "02:v1.3"
 
 [[rules]]
@@ -862,7 +905,7 @@ title = "lock-discipline annotation"
 class = "fault-model"
 statement = "every mutex-held section states which events/callbacks fire inside it and the reentrancy contract per callback"
 enforcement = "prompt"
-detects = ["F-11"]
+detects = ["F-11", "F-22"]
 added_by = "02:v1.12 (gobreaker #37)"
 
 [[rules]]

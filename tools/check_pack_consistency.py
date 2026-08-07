@@ -100,6 +100,15 @@ if errors:
     for e in errors: print(" -", e)
     sys.exit(1)
 
+# ODC table sync
+odc_check = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "gen_odc_table.py"), "--check"],
+    capture_output=True, text=True, cwd=ROOT,
+)
+sys.stdout.write(odc_check.stdout)
+if odc_check.returncode != 0:
+    errors.append("ODC table drift — run tools/gen_odc_table.py --write")
+
 # R3: version-tag consistency (warning only — CI checkouts may be shallow)
 import subprocess as _sp
 tag_result = _sp.run(

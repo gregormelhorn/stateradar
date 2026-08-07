@@ -2,6 +2,33 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.41 — registry deep-review: ODC data path, fault-catalogue corrections, dark-rule anchors
+
+- **RR1:** R-REQUIREMENT-SCOPE split into -a (semantic, prompt) and -b
+  (mechanical scope line, checker). The checker no longer overclaims
+  enforcement of the semantic rule.
+- **RR2:** Checker-candidate backlog repopulated: R-GATE-TYPE and
+  R-UPSTREAM-GUARD added with design sketches; PA-7 de-candidacy
+  decision documented.
+- **RR3:** Fault-catalogue corrections. F-22 ("control stopped too
+  soon / applied too long") added, mapped to R-LOCK-DISCIPLINE.
+  `artifact` field with closed vocabulary [behaviour, test-suite];
+  F-21 set to test-suite. F-15 shard corrected to "sequence/early"
+  (late is exclusively F-13). All 22 fault classes have ≥1 detector.
+- **RR4:** ODC data path. questions[] gains optional `fault` (F-xx
+  array) and `trigger` (string) in schema. Closed trigger vocabulary
+  in rules.toml [vocab].odc_triggers. dsc_check validates fault ids
+  and triggers. Red selftest for F-99. gen_odc_table.py generates the
+  Fault-class×detector coverage table from committed sidecars into
+  tests/benchmarks/README.md between generated markers. All four
+  wired benchmarks carry ODC data. Wired into check_pack_consistency.
+- **RR5:** Dark-rule anchor mechanism. gen_rules --check warns on
+  rules with no render target (catches/render/lint_ref/prose_ref).
+  28 dark rules now flagged as warnings — the registry's self-audit
+  is working.
+- **RR6:** 66 rules, 22 fault classes, 33 warnings (all intentional:
+  2 checker candidates + 28 dark rules + 3 other).
+
 ## v1.40 — residuals: input-order invariance, benchmark skip reduction, finding-level convergence
 
 - **R1:** Ensemble input-order invariance. State alignment section sorted

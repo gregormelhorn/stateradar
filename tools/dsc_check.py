@@ -154,6 +154,26 @@ def main() -> int:
                 E(f"question {q['id']}: RESOLVED but no cell links a DR — "
                   f"add a decision record reference to the cell")
 
+    # ODC fields (fault/trigger) on questions.
+    # When present, validate fault ids against the catalogue and trigger
+    # against the closed vocabulary in formats/rules.toml [vocab].odc_triggers.
+    if any(q.get("fault") or q.get("trigger") for q in data.get("questions", [])):
+        try:
+            import tomllib
+            reg = tomllib.loads((adir.parent.parent / "formats" / "rules.toml").read_text())
+            fault_ids = {f["id"] for f in reg.get("faults", [])}
+            trigger_vocab = set(reg.get("vocab", {}).get("odc_triggers", []))
+        except Exception:
+            fault_ids = set()
+            trigger_vocab = set()
+        for q in data.get("questions", []):
+            for f_id in q.get("fault", []):
+                if f_id not in fault_ids:
+                    E(f"question {q['id']}: unknown fault class {f_id}")
+            trigger = q.get("trigger", "")
+            if trigger and trigger not in trigger_vocab:
+                E(f"question {q['id']}: trigger {trigger!r} not in ODC trigger vocabulary")
+
     # PA-22 doctrine-line mapping. The doc-ids declaration in
     # invariants-and-lints.md is the universe; every declared DOC-n
     # must map (sidecar docLines) to an existing cell, an invariant/

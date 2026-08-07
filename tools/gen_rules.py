@@ -217,6 +217,15 @@ def constraints(reg: dict) -> tuple[list[str], list[str]]:
         if tool not in all_checker_refs:
             warnings.append(f"checker-shaped tool not cited by any rule: {tool}")
 
+    # RR5: rules with no render target (no catches, render, lint_ref, prose_ref)
+    # become dark-prose warnings — their normative prose has no anchor.
+    for r in reg.get("rules", []):
+        has_target = any(
+            r.get(k) for k in ["catches", "render", "lint_ref", "prose_ref"]
+        )
+        if not has_target and r.get("enforcement") != "checker":
+            warnings.append(f"dark rule (no prose anchor): {r['id']} — {r['title']}")
+
     return errors, warnings
 
 

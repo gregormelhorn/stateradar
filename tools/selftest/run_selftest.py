@@ -216,6 +216,10 @@ def main() -> int:
         mutated("doctrine rejected without reason",
                 lambda r: r["docLines"][2].update(target="no"),
                 "without a reviewable reason")
+        # ODC fault validation: unknown F-99 must fail
+        mutated("unknown ODC fault class",
+                lambda r: r["questions"][0].update(fault=["F-99"]),
+                "F-99")
 
         print("matrix checker (markdown side)")
 
