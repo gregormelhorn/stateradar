@@ -27,7 +27,7 @@ optional dependency is missing. The agent
 may propose and challenge behaviour, but must not silently decide it —
 and the tests come from the specification, not from the code.
 
-**Version 1.39.**
+**Version 1.40.**
 
 ## The problem
 
@@ -155,6 +155,9 @@ per PA-17 Rule 4), aligns events by ID, diffs cells, reports structural
 (granularity/slicing) divergence separately from cell convergence, and
 mechanically marks divergent cells `UNSPECIFIED → Q`. Full protocol and
 recorded baseline at `tests/device-connection/CONVERGENCE.md`.
+
+Finding-level convergence: 3 of 5 question themes found by both runs;
+no contradictory findings — divergence is additive.
 
 ## Scope
 

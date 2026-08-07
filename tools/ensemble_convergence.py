@@ -261,7 +261,8 @@ def _merge_cells(
         "structural_details": structural_findings,
     }
 
-    for canonical_state, state_names in aligned_states.items():
+    for canonical_state in sorted(aligned_states):
+        state_names = aligned_states[canonical_state]
         for canonical_event in aligned_events:
             # All runs must have this state and event (by construction)
             fingerprints: list[Optional[str]] = []
@@ -374,6 +375,7 @@ def _render_report(
     questions: list[dict],
     all_state_lists: list[list[str]],
     all_event_lists: list[list[dict]],
+    labels_explicit: bool,
 ) -> str:
     """Render a markdown convergence report."""
     lines: list[str] = []
@@ -385,7 +387,10 @@ def _render_report(
     for i, meta in enumerate(runs_metadata):
         label = meta.get("label", f"run-{i + 1}")
         path = meta.get("path", "?")
-        lines.append(f"- **{label}:** `{path}`")
+        if labels_explicit:
+            lines.append(f"- **{label}**")
+        else:
+            lines.append(f"- **{label}:** `{path}`")
         lines.append(f"  States: {len(all_state_lists[i])}, Events: {len(all_event_lists[i])}")
     lines.append("")
 
@@ -401,7 +406,8 @@ def _render_report(
     lines.append("")
     lines.append(f"Aligned states: {len(aligned_states)}")
     lines.append("")
-    for canonical, per_run in aligned_states.items():
+    for canonical in sorted(aligned_states):
+        per_run = aligned_states[canonical]
         run_names = [n or "—" for n in per_run]
         lines.append(f"- `{canonical}` ← {', '.join(run_names)}")
     lines.append("")
@@ -483,6 +489,7 @@ def main() -> int:
 
     # Build run metadata
     labels = args.labels or []
+    labels_explicit = bool(args.labels)
     while len(labels) < len(args.sidecars):
         labels.append(f"run-{len(labels) + 1}")
 
@@ -546,7 +553,7 @@ def main() -> int:
     report = _render_report(
         stats, aligned_states, aligned_events,
         runs_metadata, merged_cells, questions,
-        all_state_lists, all_event_lists,
+        all_state_lists, all_event_lists, labels_explicit,
     )
     if args.report:
         args.report.write_text(report, encoding="utf-8")

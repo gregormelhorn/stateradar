@@ -95,8 +95,13 @@ def run_part_a(analysis_dir: Path, repo_dir: Path, model_path: Path | None = Non
     return json.loads(sidecar_path.read_text())
 
 
-def assert_expected(sidecar: dict, expected: dict) -> tuple[int, int, int, list[str]]:
-    """Assert expected findings are present. Returns (passed, failed, skipped, messages)."""
+def assert_expected(sidecar: dict, expected: dict,
+                    case_dir: Path | None = None) -> tuple[int, int, int, list[str]]:
+    """Assert expected findings are present. Returns (passed, failed, skipped, messages).
+
+    Phrase checks search the case's committed open-questions.md (not the
+    sidecar, which doesn't carry full question text).
+    """
     passed = 0
     failed = 0
     skipped = 0
@@ -134,35 +139,39 @@ def assert_expected(sidecar: dict, expected: dict) -> tuple[int, int, int, list[
             failed += 1
             messages.append(f"  FAIL: question {qid} not found")
 
-    # Check expected invariant violations (prose check in open-questions)
+    # Check expected invariant violations (prose check in committed open-questions.md)
+    oq_text = ""
+    if case_dir and (case_dir / "open-questions.md").is_file():
+        oq_text = (case_dir / "open-questions.md").read_text(encoding="utf-8")
     for phrase in expected.get("expected_phrases", []):
         found = False
-        for q in sidecar.get("questions", []):
-            # Check in question text if we have it
-            pass  # questions don't carry full text in sidecar
-        # For now, check if any cell q-ref matches
-        for c in sidecar.get("cells", []):
-            qid = c.get("q", "")
-            if phrase.lower() in qid.lower():
-                found = True
-                break
+        phrase_lower = phrase.lower()
+        # Search in committed open-questions.md
+        if phrase_lower in oq_text.lower():
+            found = True
+        # Fallback: check sidecar cell q-refs
+        if not found:
+            for c in sidecar.get("cells", []):
+                qid = c.get("q", "")
+                if phrase_lower in qid.lower():
+                    found = True
+                    break
         if found:
             passed += 1
-            messages.append(f"  PASS: phrase '{phrase}' referenced in cells")
+            messages.append(f"  PASS: phrase '{phrase}' found")
         else:
-            # Don't fail on phrase check — sidecar doesn't carry full text
-            skipped += 1
-            messages.append(f"  SKIP: phrase '{phrase}' — sidecar lacks full text")
+            failed += 1
+            messages.append(f"  FAIL: phrase '{phrase}' not found in open-questions.md or cell q-refs")
 
     return passed, failed, skipped, messages
 
 
-def run_benchmark(name: str) -> tuple[str, bool, str]:
-    """Run a single benchmark. Returns (name, passed, log)."""
+def run_benchmark(name: str) -> tuple[str, bool, int, str]:
+    """Run a single benchmark. Returns (name, passed, skip_count, log)."""
     bdir = BENCHMARKS_DIR / name
     expected_path = bdir / "expected.json"
     if not expected_path.is_file():
-        return name, False, f"SKIP {name}: no expected.json"
+        return name, False, 0, f"SKIP {name}: no expected.json"
 
     expected = json.loads(expected_path.read_text())
     repo_url = expected.get("repo")
@@ -171,14 +180,14 @@ def run_benchmark(name: str) -> tuple[str, bool, str]:
     model_path = bdir / "model.mmd" if (bdir / "model.mmd").is_file() else None
 
     if not repo_url or not commit:
-        return name, False, f"SKIP {name}: expected.json missing repo/commit"
+        return name, False, 0, f"SKIP {name}: expected.json missing repo/commit"
 
     log_lines = [f"=== {name} ===", f"repo: {repo_url}", f"commit: {commit}"]
 
     with tempfile.TemporaryDirectory() as tmpdir:
         repo_dir = Path(tmpdir) / "repo"
         if not clone_at_commit(repo_url, commit, repo_dir):
-            return name, False, "\n".join(log_lines + ["  clone failed"])
+            return name, False, 0, "\n".join(log_lines + ["  clone failed"])
 
         # Place analysis under the repo so gen_analysis_sidecar can find it
         analysis_dir = repo_dir / "domain-analysis" / component
@@ -194,7 +203,7 @@ def run_benchmark(name: str) -> tuple[str, bool, str]:
         # If no matrix is provided, we need to generate it from scratch.
         # For now, require the benchmark to include its own matrix.
         if not (analysis_dir / "disposition-matrix.md").is_file():
-            return name, False, "\n".join(log_lines + [
+            return name, False, 0, "\n".join(log_lines + [
                 "  SKIP: no disposition-matrix.md in benchmark —",
                 "  full Part A re-run requires AI. This runner only validates",
                 "  that pre-generated analysis artifacts still check correctly."
@@ -202,13 +211,14 @@ def run_benchmark(name: str) -> tuple[str, bool, str]:
 
         sidecar = run_part_a(analysis_dir, repo_dir, model_path)
         if sidecar is None:
-            return name, False, "\n".join(log_lines + ["  sidecar generation failed"])
+            return name, False, 0, "\n".join(log_lines + ["  sidecar generation failed"])
 
-        passed, failed, skipped, msgs = assert_expected(sidecar, expected)
+        passed, failed, skipped, msgs = assert_expected(
+            sidecar, expected, case_dir=bdir)
         log_lines.extend(msgs)
         skipped_str = f" ({skipped} skipped)" if skipped else ""
         log_lines.append(f"  Result: {passed} passed{skipped_str}, {failed} failed")
-        return name, failed == 0, "\n".join(log_lines)
+        return name, failed == 0, skipped, "\n".join(log_lines)
 
 
 def main() -> int:
@@ -236,24 +246,29 @@ def main() -> int:
         with ProcessPoolExecutor(max_workers=args.jobs) as pool:
             futures = {pool.submit(run_benchmark, name): name for name in names}
             results = []
+            total_skips = 0
             for future in as_completed(futures):
-                name, passed, log = future.result()
+                name, passed, skipped, log = future.result()
                 results.append((name, passed))
+                total_skips += skipped
                 print(log)
                 print()
     else:
         results = []
+        total_skips = 0
         for name in names:
-            name, passed, log = run_benchmark(name)
+            name, passed, skipped, log = run_benchmark(name)
             results.append((name, passed))
+            total_skips += skipped
             print(log)
             print()
 
     total = len(results)
     passed = sum(1 for _, p in results if p)
     failed = total - passed
+    skip_str = f" ({total_skips} checks skipped)" if total_skips else ""
     print(f"{'='*40}")
-    print(f"Results: {passed} passed, {failed} failed, {total} total")
+    print(f"Results: {passed} passed, {failed} failed{skip_str}, {total} total")
     return 0 if failed == 0 else 1
 
 

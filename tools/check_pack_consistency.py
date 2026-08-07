@@ -99,4 +99,18 @@ if errors:
     print("PACK CONSISTENCY: FAIL")
     for e in errors: print(" -", e)
     sys.exit(1)
+
+# R3: version-tag consistency (warning only — CI checkouts may be shallow)
+import subprocess as _sp
+tag_result = _sp.run(
+    ["git", "describe", "--tags", "--abbrev=0"],
+    capture_output=True, text=True,
+    cwd=ROOT,
+)
+if tag_result.returncode == 0:
+    latest_tag = tag_result.stdout.strip()
+    tag_ver = latest_tag.lstrip("v")
+    if tag_ver != rv.group(1):
+        print(f"  WARNING: latest tag {latest_tag} ({tag_ver}) != README version {rv.group(1)}")
+
 print(f"PACK CONSISTENCY: OK ({len(ARTIFACTS)} artifacts, registry, version {rv.group(1)})")

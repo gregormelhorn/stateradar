@@ -382,10 +382,10 @@ def main() -> int:
 
     print("ensemble convergence")
 
-    def ens(*paths: Path) -> tuple[int, str]:
+    def ens(*args: Path | str) -> tuple[int, str]:
         r = subprocess.run(
             [sys.executable, str(ROOT / "tools" / "ensemble_convergence.py"),
-             *(str(p) for p in paths)],
+             *(str(a) for a in args)],
             capture_output=True, text=True)
         return r.returncode, (r.stdout + r.stderr).strip()
 
@@ -405,14 +405,14 @@ def main() -> int:
     # Baseline acceptance: actual device-connection CONVERGENCE sidecars
     DC = ROOT / "tests" / "device-connection"
     rc, out = ens(DC / "run1" / "analysis.json", DC / "run2" / "analysis.json")
-    expect("ensemble baseline acceptance", True, rc, out, needle="93.8%")
+    expect("ensemble baseline: exit 1 + needle", True, rc, out, needle="93.8%")
     if "Total aligned cells | 32" not in out:
         failures.append(
             f"ensemble baseline: expected 32 aligned cells, got:\n{out[:2000]}")
     if "Structural findings" not in out:
-        failures.append("ensemble baseline: missing structural findings count")
+        failures.append("ensemble baseline: no structural findings count")
     else:
-        print("  ok  ensemble baseline acceptance (aligned grid 4×8, convergence 93.8%)")
+        print("  ok  ensemble baseline: aligned grid 4×8 @ 93.8%")
     # T3a: deterministic reports — run twice with identical inputs, byte-identical output
     import hashlib
     r1_out = ens(ENS / "run1.json", ENS / "run2.json")[1]
@@ -421,6 +421,24 @@ def main() -> int:
         failures.append("ensemble: deterministic output failed — two runs differ")
     else:
         print("  ok  ensemble deterministic output (byte-identical on repeat)")
+    # R1: input-order invariance — shuffle one input, reports must be identical
+    import random
+    d = json.loads((ENS / "run1.json").read_text())
+    rng = random.Random(42)
+    rng.shuffle(d["states"])
+    rng.shuffle(d["events"])
+    rng.shuffle(d["cells"])
+    shuffled_path = tmp / "ensemble-shuffled.json"
+    shuffled_path.write_text(json.dumps(d))
+    # Both invocations with --labels to normalize run path labels
+    r1_shuf = ens(ENS / "run1.json", ENS / "run2.json",
+                  "--labels", "run-a", "run-b")[1]
+    r2_shuf = ens(shuffled_path, ENS / "run2.json",
+                  "--labels", "run-a", "run-b")[1]
+    if r1_shuf != r2_shuf:
+        failures.append("ensemble: input-order invariance failed — shuffled differs")
+    else:
+        print("  ok  ensemble input-order invariance (shuffled states/events/cells)")
     # T3b: zero-denominator — no aligned states
     rc_z, out_z = ens(ENS / "zero1.json", ENS / "zero2.json")
     expect("ensemble zero-alignment", True, rc_z, out_z, needle="n/a (no aligned cells)")
@@ -444,12 +462,12 @@ def main() -> int:
     if "Structural findings" not in out or "3" not in out:
         failures.append("baseline acceptance: structural findings missing or < 3")
     else:
-        print("  ok  ensemble baseline acceptance (exit 1, structural >= 3)")
+        print("  ok  ensemble baseline: exit 1 + structural >= 3")
     # Aligned cell count must be 32 (4 states x 8 events)
     if "Total aligned cells | 32" not in out:
         failures.append(f"baseline acceptance: expected 32 aligned cells")
     else:
-        print("  ok  ensemble baseline aligned cells = 32")
+        print("  ok  ensemble baseline: aligned cells = 32")
 
     print("benchmark dating protocol")
     import benchmark_evidence

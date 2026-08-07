@@ -1,5 +1,28 @@
 # Changelog
 
+> **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
+
+## v1.40 — residuals: input-order invariance, benchmark skip reduction, finding-level convergence
+
+- **R1:** Ensemble input-order invariance. State alignment section sorted
+  by canonical name; merged cells sorted by (state, event); report
+  byte-identical on repeat with shuffled input (selftested). Red probe:
+  removing sorted() breaks the shuffle test.
+- **R2:** Benchmark runner skip reduction. Phrase checks now read the
+  case's committed `open-questions.md` instead of the sidecar (which
+  lacks full text). Skip count eliminated (9→0); final summary
+  aggregates skip total. Per-case result lines unchanged.
+- **R3:** Tags restored. v1.38 tagged at 9951db4, v1.39 at 283c171.
+  check_pack_consistency now warns when `git describe --tags` version
+  ≠ README version.
+- **R4:** Finding-level convergence metric. 3 of 5 question themes found
+  by both runs in the device-connection baseline; divergence is additive
+  (manually recorded in CONVERGENCE.md).
+- **R5:** Selftest naming hygiene — three ensemble baseline cases now
+  have unique names.
+- `tests/benchmarks/*/expected.json`: phrase checks updated to match
+  open-questions.md content (`release_inflight_request`, `awaits`).
+
 ## v1.39 — ensemble hardening, registry coverage, benchmark dating fixup
 
 - **T1:** CHANGELOG v1.38 entry corrected — no longer claims suffix

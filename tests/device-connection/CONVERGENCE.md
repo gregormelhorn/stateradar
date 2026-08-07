@@ -2,7 +2,7 @@
 
 **Component:** `examples/device-connection/device_connection.py`
 **Method:** Two independent Part-A pilot runs on the same component.
-**Status:** Baseline recorded 2026-08-07, updated 2026-08-07 (v1.38 fixup).
+**Status:** Baseline recorded 2026-08-07, re-recorded 2026-08-07 (pack v1.39).
 Both runs fresh sessions, independence enforced; both matrices
 checker-green.
 
@@ -65,6 +65,16 @@ Both divergent cells are the FAILED backdoor — the protocol's predicted
 divergence source. Run 1 found the backdoor and rendered it as an
 explicit transition; Run 2 left the cell unspecified.
 
+**Finding-level convergence (manually recorded):** Run 1 has 5 question
+themes (duplicate-connect, attempt-failure, stale-results,
+connection-loss, reconnect-while-reconnecting). Run 2 has 5 question
+themes (attempt-failure, spurious-disconnect, stale-results,
+reconnect-semantics, FAILED-backdoor). **3 themes found by both runs**
+(attempt-failure, stale-results, reconnect-semantics). The FAILED
+backdoor was a question for Run 2 and an explicit transition for
+Run 1 — both runs recognized the same finding but rendered it
+differently. No contradictory findings — divergence is additive.
+
 **Structural divergence (7 findings):**
 
 - State granularity: Run 1 splits RECONNECTING into a single flat
@@ -84,5 +94,5 @@ explicit transition; Run 2 left the cell unspecified.
   `tools/ensemble_convergence.py` (roadmap §5) addresses this:
   intersection = confidence, symmetric difference = automatic Q
   candidates.
-- Tool-verified: 2026-08-07, pack v1.38 — ensemble_convergence
+- Tool-verified: 2026-08-07, pack v1.39 — ensemble_convergence
   reproduces the mechanical diff.
