@@ -1,0 +1,773 @@
+{
+ "formatVersion": "1.0",
+ "component": "meilisearch-s3-snapshot",
+ "packVersion": "",
+ "analyzedSha": "fff2ef5a42658b16a937d922aabc3fb7f89f2018",
+ "watchPaths": [
+  "crates/index-scheduler/src/scheduler/enterprise_edition/s3.rs"
+ ],
+ "states": [
+  "NoUpload",
+  "UploadCreated",
+  "Uploading",
+  "Completed",
+  "Aborted"
+ ],
+ "events": [
+  {
+   "id": "create_succeeds",
+   "undesired": false,
+   "gate": "result identity",
+   "upstream_guards": [
+    "S3 response status check (`s3.rs:CreateMultipartUpload response`)"
+   ]
+  },
+  {
+   "id": "create_fails",
+   "undesired": false,
+   "gate": "result identity",
+   "upstream_guards": [
+    "S3 response status check"
+   ]
+  },
+  {
+   "id": "part_ready",
+   "undesired": false,
+   "gate": "buffer capacity",
+   "upstream_guards": [
+    "pipe reader chunk read (`s3.rs:reader loop`)"
+   ]
+  },
+  {
+   "id": "part_succeeds",
+   "undesired": false,
+   "gate": "result identity",
+   "upstream_guards": [
+    "S3 response",
+    "etag extraction (`s3.rs:collect etag`)"
+   ]
+  },
+  {
+   "id": "part_fails",
+   "undesired": false,
+   "gate": "retry",
+   "upstream_guards": [
+    "transient error classification in retry loop (`s3.rs:transient error match`)"
+   ]
+  },
+  {
+   "id": "part_permanent_fail",
+   "undesired": false,
+   "gate": "result identity",
+   "upstream_guards": [
+    "client error status check (`s3.rs:client_error match`)"
+   ]
+  },
+  {
+   "id": "all_parts_done",
+   "undesired": false,
+   "gate": "reader EOF",
+   "upstream_guards": [
+    "pipe reader exhaustion (`s3.rs:reader EOF`)"
+   ]
+  },
+  {
+   "id": "cancel",
+   "undesired": false,
+   "gate": "flag",
+   "upstream_guards": [
+    "set by scheduler task cancellation (`s3.rs:process_snapshot_to_s3`",
+    "`must_stop_processing` flag)"
+   ]
+  },
+  {
+   "id": "complete_succeeds",
+   "undesired": false,
+   "gate": "result identity",
+   "upstream_guards": [
+    "S3 response status check (`s3.rs:CompleteMultipartUpload response`)"
+   ]
+  },
+  {
+   "id": "complete_fails",
+   "undesired": false,
+   "gate": "result identity",
+   "upstream_guards": [
+    "S3 response status check"
+   ]
+  },
+  {
+   "id": "UV-cancel-duplication",
+   "undesired": true
+  },
+  {
+   "id": "UV-cancel-out-of-order",
+   "undesired": true
+  },
+  {
+   "id": "UV-cancel-commission",
+   "undesired": true
+  }
+ ],
+ "cells": [
+  {
+   "disposition": "transition",
+   "target": "UploadCreated",
+   "state": "NoUpload",
+   "event": "create_succeeds"
+  },
+  {
+   "disposition": "transition",
+   "target": "Aborted",
+   "state": "NoUpload",
+   "event": "create_fails"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoUpload",
+   "event": "part_ready"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoUpload",
+   "event": "part_succeeds"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoUpload",
+   "event": "part_fails"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoUpload",
+   "event": "part_permanent_fail"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoUpload",
+   "event": "all_parts_done"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "UploadCreated",
+   "event": "create_succeeds"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "UploadCreated",
+   "event": "create_fails"
+  },
+  {
+   "disposition": "transition",
+   "target": "Uploading",
+   "state": "UploadCreated",
+   "event": "part_ready"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "UploadCreated",
+   "event": "part_succeeds"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "UploadCreated",
+   "event": "part_fails"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "UploadCreated",
+   "event": "part_permanent_fail"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "UploadCreated",
+   "event": "all_parts_done"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "Uploading",
+   "event": "create_succeeds"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "Uploading",
+   "event": "create_fails"
+  },
+  {
+   "disposition": "handle",
+   "state": "Uploading",
+   "event": "part_ready"
+  },
+  {
+   "disposition": "handle",
+   "state": "Uploading",
+   "event": "part_succeeds"
+  },
+  {
+   "disposition": "handle",
+   "state": "Uploading",
+   "event": "part_fails"
+  },
+  {
+   "disposition": "transition",
+   "target": "Aborted",
+   "state": "Uploading",
+   "event": "part_permanent_fail"
+  },
+  {
+   "disposition": "transition",
+   "target": "Completed",
+   "state": "Uploading",
+   "event": "all_parts_done"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "NoUpload",
+   "event": "cancel"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoUpload",
+   "event": "complete_succeeds"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "NoUpload",
+   "event": "complete_fails"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "NoUpload",
+   "event": "UV-cancel-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "NoUpload",
+   "event": "UV-cancel-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "NoUpload",
+   "event": "UV-cancel-commission"
+  },
+  {
+   "disposition": "transition",
+   "target": "Aborted",
+   "state": "UploadCreated",
+   "event": "cancel"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "UploadCreated",
+   "event": "complete_succeeds"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "UploadCreated",
+   "event": "complete_fails"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "UploadCreated",
+   "event": "UV-cancel-duplication"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "UploadCreated",
+   "event": "UV-cancel-out-of-order"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "s3.rs",
+    "line": 1
+   },
+   "state": "UploadCreated",
+   "event": "UV-cancel-commission"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02",
+   "state": "Uploading",
+   "event": "cancel"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-01",
+   "state": "Uploading",
+   "event": "complete_succeeds"
+  },
+  {
+   "disposition": "transition",
+   "target": "Aborted",
+   "state": "Uploading",
+   "event": "complete_fails"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02",
+   "state": "Uploading",
+   "event": "UV-cancel-duplication"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02",
+   "state": "Uploading",
+   "event": "UV-cancel-out-of-order"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02",
+   "state": "Uploading",
+   "event": "UV-cancel-commission"
+  },
+  {
+   "state": "Completed",
+   "event": "create_succeeds",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "create_fails",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "part_ready",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "part_succeeds",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "part_fails",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "part_permanent_fail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "all_parts_done",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "cancel",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "complete_succeeds",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "complete_fails",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "UV-cancel-duplication",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "UV-cancel-out-of-order",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Completed",
+   "event": "UV-cancel-commission",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "create_succeeds",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "create_fails",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "part_ready",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "part_succeeds",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "part_fails",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "part_permanent_fail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "all_parts_done",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "cancel",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "complete_succeeds",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "complete_fails",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "UV-cancel-duplication",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "UV-cancel-out-of-order",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  },
+  {
+   "state": "Aborted",
+   "event": "UV-cancel-commission",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "disposition-matrix.md",
+    "line": 0,
+    "fragment": "terminal state declaration"
+   }
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN"
+  }
+ ],
+ "behaviouralDrs": [],
+ "docLines": [
+  {
+   "id": "DOC-1",
+   "mapping": "cell",
+   "target": "Uploading x cancel"
+  },
+  {
+   "id": "DOC-2",
+   "mapping": "invariant",
+   "target": "SYS-INV-01"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "invariant",
+   "target": "SYS-INV-02"
+  },
+  {
+   "id": "DOC-4",
+   "mapping": "cell",
+   "target": "Uploading x cancel"
+  }
+ ],
+ "completeness": {
+  "pairs": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from adversarial-traces.md before the component claims L4."
+  },
+  "guardGroups": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from guard-results.txt before the component claims L4."
+  }
+ },
+ "coverage": {
+  "cancel": {
+   "loss": "n/a: atomic flag, no loss possible",
+   "delay": "n/a: flag check is synchronous in loop",
+   "duplication": "UV-cancel-duplication",
+   "out-of-order": "UV-cancel-out-of-order",
+   "contradiction": "n/a: cancel is monotonic (once set, stays set)",
+   "commission": "UV-cancel-commission",
+   "value": "n/a: boolean flag, no value fault possible"
+  },
+  "create_succeeds": {
+   "loss": "n/a: internal",
+   "delay": "n/a: already awaited",
+   "duplication": "n/a: single result",
+   "out-of-order": "n/a: single invocation",
+   "contradiction": "n/a: single invocation",
+   "commission": "n/a: only delivered by known call",
+   "value": "n/a: S3 validated"
+  },
+  "create_fails": {
+   "loss": "n/a: internal",
+   "delay": "n/a: already awaited",
+   "duplication": "n/a: single result",
+   "out-of-order": "n/a: single invocation",
+   "contradiction": "n/a: single invocation",
+   "commission": "n/a: only delivered by known call",
+   "value": "n/a: S3 validated"
+  },
+  "part_ready": {
+   "loss": "n/a: internal",
+   "delay": "n/a: synchronous",
+   "duplication": "n/a: part_number sequenced",
+   "out-of-order": "n/a: sequential loop",
+   "contradiction": "n/a: single producer",
+   "commission": "n/a: loop body only",
+   "value": "n/a: size validated"
+  },
+  "part_succeeds": {
+   "loss": "n/a: internal",
+   "delay": "n/a: already awaited",
+   "duplication": "n/a: single etag per part_number",
+   "out-of-order": "n/a: etags collected in order",
+   "contradiction": "n/a: single result per spawn",
+   "commission": "n/a: only from spawned task",
+   "value": "n/a: S3 validated"
+  },
+  "part_fails": {
+   "loss": "n/a: retry loop",
+   "delay": "n/a: backoff in retry",
+   "duplication": "n/a: idempotent PUT",
+   "out-of-order": "n/a: part numbers sequenced",
+   "contradiction": "n/a: single result per spawn",
+   "commission": "n/a: spawned by known loop",
+   "value": "n/a: S3 validates on success"
+  },
+  "part_permanent_fail": {
+   "loss": "n/a: internal",
+   "delay": "n/a: already awaited",
+   "duplication": "n/a: single result",
+   "out-of-order": "n/a: single invocation",
+   "contradiction": "n/a: permanent error by definition",
+   "commission": "n/a: only from spawned task",
+   "value": "n/a: S3 validated"
+  },
+  "all_parts_done": {
+   "loss": "n/a: internal",
+   "delay": "n/a: synchronous after last part",
+   "duplication": "n/a: single transition",
+   "out-of-order": "n/a: after all parts complete",
+   "contradiction": "n/a: single producer",
+   "commission": "n/a: only from loop completion",
+   "value": "n/a: etags already validated"
+  },
+  "complete_succeeds": {
+   "loss": "n/a: internal",
+   "delay": "n/a: already awaited",
+   "duplication": "n/a: single invocation",
+   "out-of-order": "n/a: only after all parts",
+   "contradiction": "n/a: only called once",
+   "commission": "n/a: only from known path",
+   "value": "n/a: S3 validated"
+  },
+  "complete_fails": {
+   "loss": "n/a: internal",
+   "delay": "n/a: already awaited",
+   "duplication": "n/a: single invocation",
+   "out-of-order": "n/a: only after all parts",
+   "contradiction": "n/a: only called once",
+   "commission": "n/a: only from known path",
+   "value": "n/a: S3 validated"
+  }
+ }
+}
