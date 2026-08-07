@@ -227,7 +227,8 @@
    "state": "Active_IdleExhausted_UnderCap",
    "event": "FactoryFail",
    "disposition": "UNSPECIFIED",
-   "q": "Q-05"
+   "q": "Q-05",
+   "dr": "DR-005"
   },
   {
    "state": "Active_IdleExhausted_UnderCap",
@@ -289,7 +290,8 @@
    "state": "Active_IdleExhausted_AtCapacity",
    "event": "FactoryFail",
    "disposition": "UNSPECIFIED",
-   "q": "Q-05"
+   "q": "Q-05",
+   "dr": "DR-005"
   },
   {
    "state": "Active_IdleExhausted_AtCapacity",
@@ -751,7 +753,7 @@
   },
   {
    "id": "Q-05",
-   "status": "OPEN",
+   "status": "ANSWERED — DR-005",
    "fault": [
     "F-01",
     "F-12"
@@ -784,7 +786,8 @@
   "DR-001",
   "DR-002",
   "DR-003",
-  "DR-004"
+  "DR-004",
+  "DR-005"
  ],
  "coverage": {
   "Get": {

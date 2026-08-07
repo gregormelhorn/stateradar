@@ -50,5 +50,10 @@ return the failed connection or merely pass the Ping error through.
 
 ## Q-05: FactoryFail handling (F-01)
 
-Factory failure during Get() at channel.go:155 returns error to caller
-without decrementing openingConns or notifying waiters.
+**Status:** ANSWERED — [DR-005](decisions/DR-005.yaml); to-be model and test generation pending.
+
+The ordinary `Get()` path increments `openingConns` only after `Factory()`
+succeeds. A Factory error returns to the caller without consuming capacity.
+Initial construction failure releases partial state and aborts pool creation;
+Factory is not invoked from the at-capacity waiter branch, so no special waiter
+notification is required.

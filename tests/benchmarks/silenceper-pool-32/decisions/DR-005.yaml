@@ -1,0 +1,17 @@
+id: DR-005
+date: 2026-08-07
+source_question: Q-05
+question: What should happen when Factory() fails during Get() or initialization?
+options:
+  - return the Factory error without consuming capacity; initialization failure aborts construction
+  - retry Factory()
+  - wake queued waiters with the Factory error
+  - defer
+decision: return the Factory error without consuming capacity; initialization failure aborts construction
+rationale: Project owner selected option 1 after review of current upstream behavior. The on-demand Get() path increments openingConns only after Factory() succeeds, so an error does not consume capacity. Initialization failure releases partial state and returns no pool. A Factory call cannot be initiated from the at-capacity waiter branch, so no special waiter notification is added.
+links:
+  - "matrix: Active_IdleExhausted_UnderCap × FactoryFail"
+  - "matrix: Active_IdleExhausted_AtCapacity × FactoryFail"
+  - "question: Q-05"
+  - "code: channel.go Get() and NewChannelPool()"
+status: accepted
