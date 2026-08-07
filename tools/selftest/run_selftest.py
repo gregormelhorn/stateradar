@@ -95,8 +95,7 @@ def main() -> int:
         else:
             print("  ok  generator parses multi-table matrix with compound rows")
         gate = COMPOUND / "domain-analysis" / "gate"
-        # Backfill gate/guard on generated compound sidecar (gen_analysis_sidecar
-        # doesn't carry catalogue annotations through yet)
+        # Backfill gate/guard + UV coverage on generated compound sidecar
         sc = json.loads((gate / "analysis.json").read_text())
         for ev in sc.get("events", []):
             if ev.get("undesired"):
@@ -105,6 +104,12 @@ def main() -> int:
                 ev["gate"] = "payload content"
             if "upstream_guards" not in ev:
                 ev["upstream_guards"] = ["validated upstream"]
+        if "coverage" not in sc:
+            sc["coverage"] = {}
+        for ev in sc.get("events", []):
+            if not ev.get("undesired"):
+                if ev["id"] not in sc["coverage"]:
+                    sc["coverage"][ev["id"]] = {"loss": "n/a: local", "delay": "n/a: sync", "duplication": "n/a: sync", "out-of-order": "n/a: sync", "contradiction": "n/a: sync", "commission": "n/a: sync", "value": "n/a: payload validated"}
         (gate / "analysis.json").write_text(json.dumps(sc, indent=1))
         expect("compound fixture", False, *dsc(gate, "--repo", str(COMPOUND), "--model", "as-is.machine.mmd"))
 
@@ -121,7 +126,7 @@ def main() -> int:
         print("silent omission (v1.20: absence must be asserted)")
         d = sidecar(tmp, FLAT)
         raw = json.loads((d / "analysis.json").read_text())
-        for key in ("pairs", "guardGroups", "coverage"):
+        for key in ("pairs", "guardGroups"):
             raw.pop(key, None)
         (d / "analysis.json").write_text(json.dumps(raw))
         expect("omitted sections", True, *dsc(d), needle="does not say why")
@@ -212,9 +217,9 @@ def main() -> int:
                 "schema:")
         # PA-13a — a checklist category (here: a SHARD-added one) that
         # silently produces no entry must fail, per source
-        mutated("missing checklist category",
-                lambda r: r["coverage"]["src"].pop("commission"),
-                "src/commission")
+        mutated("missing UV coverage entry",
+                lambda r: r["coverage"]["E1"].pop("commission"),
+                "UV coverage")
         # PA-22 — a declared doctrine line without a mapping must fail
         mutated("unmapped doctrine line",
                 lambda r: r["docLines"].pop(0),
@@ -239,6 +244,28 @@ def main() -> int:
         mutated("missing upstream-guard annotation",
                 lambda r: r["events"][0].pop("upstream_guards", None),
                 "R-UPSTREAM-GUARD")
+
+        # J3: UV coverage must bind at zero UV events
+        d = sidecar(tmp, FLAT)
+        raw = json.loads((d / "analysis.json").read_text())
+        raw["events"] = [{"id": "E1", "gate": "payload", "upstream_guards": ["caller"]}, {"id": "UV1", "undesired": True}]
+        raw["cells"] = [{"state": "S0", "event": "E1", "disposition": "handle"}, {"state": "S0", "event": "UV1", "disposition": "handle"}, {"state": "S1", "event": "E1", "disposition": "handle"}, {"state": "S1", "event": "UV1", "disposition": "handle"}]
+        raw["questions"] = []
+        raw["behaviouralDrs"] = []
+        raw["docLines"] = []
+        raw["pairs"] = []
+        raw["guardGroups"] = []
+        raw["completeness"] = {"pairs": {"count": 0, "reason": "no interaction pairs in this test fixture"}, "guardGroups": {"count": 0, "reason": "no guard groups in this test fixture"}}
+        # Remove doctrine declaration from invariants-and-lints.md since we dropped docLines
+        inv_path = d / "invariants-and-lints.md"
+        if inv_path.is_file():
+            inv_path.write_text(inv_path.read_text().replace("DOC-1 DOC-2 DOC-3", ""))
+        raw.pop("coverage", None)
+        (d / "analysis.json").write_text(json.dumps(raw))
+        expect("UV coverage without assertions", True, *dsc(d), needle="UV coverage")
+        raw["coverage"] = {"E1": {"loss": "n/a: local", "delay": "n/a: sync", "duplication": "n/a: sync", "out-of-order": "n/a: sync", "contradiction": "n/a: sync", "commission": "n/a: sync", "value": "n/a: payload validated upstream"}}
+        (d / "analysis.json").write_text(json.dumps(raw))
+        expect("UV coverage with assertions", False, *dsc(d))
 
         print("matrix checker (markdown side)")
 

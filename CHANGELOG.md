@@ -2,6 +2,24 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.46 — silenceper reconciliation, UV coverage checker
+
+- silenceper-pool-32: canonical merge reconciliation documented in
+  CONVERGENCE.md. 7+12 run questions → 3 carried/merged, 1
+  resolved-by-cell, 2 dropped with rationale, 13 LOST explicitly
+  listed. Lost substance recovered: Q-04 (ping-skip), Q-06
+  (openingConns underflow), Q-02 (Put integrity).
+- UV coverage: 13 UV columns added across 4 states, 7 questions now
+  (Q-01…Q-06 + Q-UV-01). Coverage section with per-event
+  asserted-absence entries.
+- J3: UV-category coverage checker in dsc_check. For every base
+  event × registry UV category, a UV column exists OR an
+  asserted-absence entry. Red selftest: sidecar without coverage
+  fails, with coverage passes. Coverage binds at zero UV events.
+- Blast radius handled: golden-mini, red-mini, device-connection,
+  compound fixture, and FLAT fixture all backfilled with per-event
+  UV coverage entries.
+
 ## v1.45 — silenceper/pool convergence baseline, benchmark wiring
 
 - silenceper/pool wired: convergence baseline (100% on aligned 4×7 grid,

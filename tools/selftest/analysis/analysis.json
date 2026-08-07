@@ -14,7 +14,9 @@
   {
    "id": "E1",
    "gate": "payload content",
-   "upstream_guards": ["validated by caller"]
+   "upstream_guards": [
+    "validated by caller"
+   ]
   },
   {
    "id": "UV1",
@@ -69,16 +71,14 @@
   }
  ],
  "coverage": {
-  "src": {
-   "loss": "n/a: single in-process source",
-   "delay": [
-    "UV1"
-   ],
+  "E1": {
+   "loss": "n/a: single source",
+   "delay": "n/a: sync",
    "duplication": "n/a: keyed upstream",
-   "out-of-order": "n/a: synchronous",
+   "out-of-order": "n/a: sync",
    "contradiction": "n/a: single writer",
-   "commission": "n/a: no unsolicited callback path (single in-process producer)",
-   "value": "n/a: payload is a closed enum, no plausible-but-wrong values"
+   "commission": "n/a: single producer",
+   "value": "n/a: closed enum"
   }
  },
  "questions": [

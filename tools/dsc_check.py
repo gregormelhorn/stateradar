@@ -184,6 +184,22 @@ def main() -> int:
         if not ev.get("upstream_guards"):
             E(f"event {ev['id']}: missing upstream-guard annotation (R-UPSTREAM-GUARD)")
 
+    # J3: UV-category coverage must bind even at zero UV events.
+    # For every base event × registry UV category: a UV column exists
+    # OR coverage[base_event][category] has an asserted-absence entry
+    # (n/a: <reason>).  A sidecar with neither is red.
+    uv_categories = ["loss", "delay", "duplication", "out-of-order",
+                     "contradiction", "commission", "value"]
+    base_events = [e["id"] for e in data.get("events", []) if not e.get("undesired")]
+    coverage = data.get("coverage", {})
+    for be_id in base_events:
+        be_cov = coverage.get(be_id, {})
+        for cat in uv_categories:
+            entry = be_cov.get(cat, "")
+            if not entry:
+                E(f"UV coverage: {be_id}/{cat} — no UV column and no "
+                  f"asserted-absence entry (n/a: <reason>)")
+
     # PA-22 doctrine-line mapping. The doc-ids declaration in
     # invariants-and-lints.md is the universe; every declared DOC-n
     # must map (sidecar docLines) to an existing cell, an invariant/

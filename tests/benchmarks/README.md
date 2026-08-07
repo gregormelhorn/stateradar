@@ -59,9 +59,11 @@ Dominant fault class per finding, from `formats/rules.toml`. Generated from benc
 | F-01 | step-4 matrix walk | grpc-go-2669 (Q-15), silenceper-pool-32 (Q-05) |
 | F-02 | doctrine mapping (PA-22); step-2 test replay | grpc-go-2669 (Q-04), grpc-go-2669 (Q-07) |
 | F-03 | step-2 test replay | grpc-go-2669 (Q-14) |
+| F-03 | step-4 matrix walk | silenceper-pool-32 (Q-04) |
 | F-04 | pairs table + z3 proof | grpc-go-2669 (Q-01) |
 | F-04 | step-4 matrix walk | silenceper-pool-32 (Q-03) |
 | F-05 | adversarial trace | grpc-go-2669 (Q-16) |
+| F-05 | step-4 matrix walk | silenceper-pool-32 (Q-06) |
 | F-06 | step-1 extraction | grpc-go-2669 (Q-10) |
 | F-07 | seam-contract sweep; step-5 lint | grpc-go-2669 (Q-11), grpc-go-2669 (Q-12) |
 | F-07 | step-4 matrix walk | silenceper-pool-32 (Q-01) |
@@ -70,10 +72,16 @@ Dominant fault class per finding, from `formats/rules.toml`. Generated from benc
 | F-09 | step-4 matrix walk | meilisearch-6508 (Q-D2) |
 | F-10 | step-5 lint + multi-instance probes | grpc-go-2669 (Q-13) |
 | F-11 | step-3 lock-discipline annotation | grpc-go-2669 (Q-02) |
+| F-12 | step-3 checklist | silenceper-pool-32 (Q-02) |
+| F-12 | step-4 matrix walk | silenceper-pool-32 (Q-05) |
 | F-13 | step-3 checklist + step-5 lint | grpc-go-2669 (Q-08) |
 | F-13 | step-4 matrix walk | meilisearch-6508 (Q-D3) |
-| F-15 | step-4 matrix walk | grpc-go-2669 (Q-09) |
+| F-14 | step-3 checklist | silenceper-pool-32 (Q-02) |
+| F-14 | step-4 matrix walk | silenceper-pool-32 (Q-06) |
+| F-15 | step-4 matrix walk | grpc-go-2669 (Q-09), silenceper-pool-32 (Q-03) |
+| F-17 | step-3 checklist | silenceper-pool-32 (Q-02), silenceper-pool-32 (Q-UV-01) |
 | F-18 | seam-contract sweep; step-1 extraction + traces | grpc-go-2669 (Q-03), grpc-go-2669 (Q-05) |
+| F-18 | step-3 checklist | silenceper-pool-32 (Q-UV-01) |
 | F-19 | doctrine mapping (PA-22) | grpc-go-2669 (Q-06) |
 | F-20 | step-4 matrix walk | python-websockets-1527 (Q-C1), silenceper-pool-32 (Q-01) |
 

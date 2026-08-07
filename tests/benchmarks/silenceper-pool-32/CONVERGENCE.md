@@ -73,3 +73,49 @@ more UV coverage).
   divergence in state granularity (Initializing vs not) and event
   naming (PutNil, Len) is the real signal.
 - Tool-verified: 2026-08-07, pack v1.44.
+
+## Canonical merge reconciliation (verified)
+
+The canonical `analysis.json` (4 states, 7 events, 3 questions) is a
+reduction of 7+12 run questions. Verified line-by-line against
+`convergence/run1.json`, `convergence/run2.json`, and `analysis.json`.
+
+### Run 1 questions (7) → canonical
+
+| Run1 Q | Disposition | Details |
+|---|---|---|
+| Q-01 (Initializing modeling) | dropped | Initializing is constructor-only; pool ref not returned to caller until NewChannelPool completes. Canonical folds into Active states. |
+| Q-02 (Release/connReqs goroutine leak) | carried-as Q-01 | |
+| Q-03 (internal Release on factory failure) | merged-into Q-05 | FactoryFail in init calls Release() internally; same fault: connReqs not closed. |
+| Q-04 (waiter-path Get skips ping) | LOST | AtCapacity×Get = defer (queued), does not capture internal ping-skip. channel.go:142-147. |
+| Q-05 (Put after Release leaks) | carried-as Q-03 | |
+| Q-06 (openingConns negative) | LOST | Close = handle does not capture counter-underflow. |
+| Q-07 (Len semantics) | dropped | Len removed: informational, no lifecycle transitions. |
+
+### Run 2 questions (12) → canonical
+
+| Run2 Q | Disposition | Details |
+|---|---|---|
+| Q-01 (Release/connReqs leak) | carried-as Q-01 | |
+| Q-02 (caller crash without Put/Close) | LOST | No openingConns-leak model. |
+| Q-03 (Put duplication) | LOST | No duplicate-detection. |
+| Q-04 (Put after Release, out-of-order) | merged-into Q-03 | Released×Put = UNSPECIFIED → Q-03. |
+| Q-05 (Put + Release race) | LOST | Concurrency race not explicitly modeled. |
+| Q-06 (spurious/foreign Put) | LOST | No connection identity validation. |
+| Q-07 (Double Close) | LOST | No double-close model. |
+| Q-08 (Close after Release) | resolved-by-cell | Released×Close = ignore (documented). channel.go:202: c.close==nil → return nil. |
+| Q-09 (Close + Get race) | LOST | |
+| Q-10 (spurious/foreign Close) | LOST | |
+| Q-11 (Release + Get/Put race) | LOST | |
+| Q-12 (spontaneous Release) | LOST | |
+
+**Summary:** 3 carried/merged, 1 resolved-by-cell (citation confirmed),
+2 dropped with rationale, 13 LOST in merge.
+
+### Removed events
+
+| Event | Disposition | Justification |
+|---|---|---|
+| CloseNil | removed | Folded into Close upstream_guard annotation. channel.go:198 nil check is a fast-reject, not a lifecycle event. |
+| Len | removed | Informational only (channel len), no lifecycle transitions. |
+| PutNil | removed | Folded into Put upstream_guard annotation. channel.go:183 nil check is a fast-reject, not a lifecycle event. |
