@@ -2,6 +2,15 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.43 — real prose anchor verification
+
+- prose anchors are now verified, not best-effort: missing anchor =
+  registry FAIL (rule id + file), anchor inside a generated block =
+  warning. 13 rules explicitly registry-only (`prose = "registry-only"`),
+  16 anchored via `<file>#<RULE-ID>`.
+- Red probes: deleting anchor → exact rule error; anchor in generated
+  block → anti-circularity warning.
+
 ## v1.42 — finish line: prose anchors, gate/guard checkers, warning budget zero
 
 - **F1:** Tags v1.38–v1.41 verified pushed via ls-remote.
