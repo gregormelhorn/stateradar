@@ -88,51 +88,11 @@ which the matrix's completeness makes testable):
 
 ## Proven pilot cases
 
-Both findings were frozen before the known upstream issues were
-revealed, then confirmed by the real bug reports. Caveat: public
-issues may predate model training cutoffs. The strongest independent-
-discovery evidence is the 11 new bugs found across 6 projects, 2 of
-them critical and reported as new GitHub issues (see tests/benchmarks).
-
-### valkey-glide — missing transition `CallerTimedOut → PermitReleased`
-
-A concrete defect (issue #5803): requests retained shared in-flight
-capacity after the user-facing timeout had fired. One unresponsive
-cluster node exhausted the permit limit for all healthy nodes.
-StateRadar identified the missing timeout-release transition, the
-wrong coupling between caller and internal request lifecycles, and
-the need for an immediate, idempotent release — from six neutral
-requirements alone.
-
-### python-websockets — missing transition `CloseDeadlineExpired → ClosureObservable`
-
-After `close_timeout` expired, the implementation closed the transport
-but then waited again for the `connection_lost()` event-loop callback.
-With Wi-Fi off, no TCP reset arrives, `connection_lost()` never
-fires, and the server stayed silent for minutes instead of raising
-`ConnectionClosedError` (issue #1527). StateRadar found the missing
-progress after deadline expiry, the faulty dependence on the
-event-loop callback, and the gap between protocol, transport, and
-caller lifecycles.
-
-### grpc-go — stale backoff after an established connection
-
-On the frozen v1.18.0 tree, the `addrConn` pilot recorded Q-03: the
-reconnect sleep duration is computed once per loop iteration and
-consumed stale after a healthy connection dies — up to 120 seconds of
-dead air. The cross-connection backoff index was reset on success, the
-loop-local sleep value was not: "Ready + backoff reset" was two
-half-effects, not one atomic obligation. That is exactly what
-maintainers later fixed in PR #2669 ("client: reset backoff to 0
-after a connection is established"). The blind pass derived the same
-cells independently from the backoff contract alone. The pilot also
-exposed two pack harness defects, fixed the same day (see CHANGELOG
-v1.36).
-
-Earlier pilots on eight real-world components (reconnecting-websocket,
-gobreaker, recws, recloser, cenkalti/backoff, tungstenite-rs,
-tenacity) reached 93% tracker-bug coverage and surfaced eight new
-bugs, two of them critical and reported upstream.
+StateRadar has found 11 bugs across 6 upstream projects, including 2
+critical defects reported as new GitHub issues. Five wired benchmarks
+(2 primary evidence, 3 regression anchors) provide reproducible
+Oracle-confirmed findings. Full evidence, fault-class coverage, and
+per-case analysis at [`tests/benchmarks/README.md`](tests/benchmarks/README.md).
 
 ## Method reliability (CONVERGENCE baseline)
 
@@ -242,7 +202,7 @@ uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run
 
 ```bash
 git submodule add <this-repo-url> tools/prompt-pack
-git -C tools/prompt-pack checkout v1.32
+git -C tools/prompt-pack checkout v1.50
 ```
 
 Updating later: `git -C tools/prompt-pack fetch --tags && git -C tools/prompt-pack checkout <newer-tag>`. One place, no drift.
@@ -257,7 +217,7 @@ Updating later: `git -C tools/prompt-pack fetch --tags && git -C tools/prompt-pa
 
 ## Claude Code integration
 
-* **Skill (auto-triggering):** copy or symlink `skills/claude-code/domain-statechart/` into `.claude/skills/` (per repo) or `~/.claude/skills/` (personal). The skill routes stateful work into the right stage of the workflow.
+* **Skill (auto-triggering):** copy or symlink `skills/claude-code/stateradar/` into `.claude/skills/` (per repo) or `~/.claude/skills/` (personal). The skill routes stateful work into the right stage of the workflow.
 * **Slash commands (explicit):** copy `commands/*.md` into `.claude/commands/`. They assume you vendored the pack at `tools/prompt-pack/`. Adjust the path at the top of each command if yours differs.
 
 Other harnesses: paste the prompts directly, or wire them into your harness's skill mechanism. The canonical files in `prompts/` are plain Markdown on purpose.
@@ -371,7 +331,7 @@ Rules of thumb from consumer experience:
 
 ## Versioning
 
-Pack versions are git tags (`v1.32`) mirrored in `CHANGELOG.md`. The pilot prompt also carries the method's feedback-loop changelog at its top. It folds divergence *classes* found by Part-B blind passes back into rules there. Consumers pin a tag; an analysis directory should note the pack version used to produce it.
+Pack versions are git tags (`v1.50`) mirrored in `CHANGELOG.md`. The pilot prompt also carries the method's feedback-loop changelog at its top. It folds divergence *classes* found by Part-B blind passes back into rules there. Consumers pin a tag; an analysis directory should note the pack version used to produce it.
 
 ## Claims
 
@@ -383,6 +343,8 @@ StateRadar currently claims credibly:
 * Detects unspecified, untested, or unimplemented State/Event combinations.
 * Produces traceable findings before known upstream bug information is revealed.
 * Turns approved lifecycle decisions into executable tests and CI checks.
+* Detects weak cell suites via deterministic matrix mutation (transition,
+  target-swap, handle mutations).
 
 It does not claim to find all software defects, to guarantee
 correctness, to replace code review, to provide formal proofs, to have
