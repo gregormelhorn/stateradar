@@ -14,11 +14,19 @@
  "events": [
   {
    "id": "M1",
-   "undesired": false
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
   },
   {
    "id": "M2",
-   "undesired": false
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
   },
   {
    "id": "UV-M1-dup",
@@ -30,7 +38,7 @@
    "disposition": "transition",
    "target": "Open",
    "citation": {
-    "file": "tools/selftest/src/mini.py",
+    "file": "src/mini.py",
     "line": 10
    },
    "state": "Idle",
@@ -39,7 +47,7 @@
   {
    "disposition": "ignore (documented)",
    "citation": {
-    "file": "tools/selftest/src/mini.py",
+    "file": "src/mini.py",
     "line": 20
    },
    "state": "Idle",
@@ -48,7 +56,7 @@
   {
    "disposition": "handle",
    "citation": {
-    "file": "tools/selftest/src/mini.py",
+    "file": "src/mini.py",
     "line": 30
    },
    "state": "Idle",
@@ -57,7 +65,7 @@
   {
    "disposition": "ignore (documented)",
    "citation": {
-    "file": "tools/selftest/src/mini.py",
+    "file": "src/mini.py",
     "line": 40
    },
    "state": "Open",
@@ -67,7 +75,7 @@
    "disposition": "transition",
    "target": "Closed",
    "citation": {
-    "file": "tools/selftest/src/mini.py",
+    "file": "src/mini.py",
     "line": 50
    },
    "state": "Open",
@@ -76,7 +84,7 @@
   {
    "disposition": "handle",
    "citation": {
-    "file": "tools/selftest/src/mini.py",
+    "file": "src/mini.py",
     "line": 60
    },
    "state": "Open",
@@ -85,7 +93,7 @@
   {
    "disposition": "reject",
    "citation": {
-    "file": "tools/selftest/src/mini.py",
+    "file": "src/mini.py",
     "line": 70
    },
    "state": "Closed",
@@ -94,7 +102,7 @@
   {
    "disposition": "ignore (documented)",
    "citation": {
-    "file": "tools/selftest/src/mini.py",
+    "file": "src/mini.py",
     "line": 80
    },
    "state": "Closed",
@@ -103,7 +111,7 @@
   {
    "disposition": "handle",
    "citation": {
-    "file": "tools/selftest/src/mini.py",
+    "file": "src/mini.py",
     "line": 90
    },
    "state": "Closed",

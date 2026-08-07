@@ -1,456 +1,62 @@
 {
  "formatVersion": "1.0",
- "component": "silenceper/pool",
+ "component": "silenceper/pool — channelPool",
  "states": [
-  "Initializing",
   "Active_HasIdle",
   "Active_IdleExhausted_UnderCap",
   "Active_IdleExhausted_AtCapacity",
   "Released"
  ],
  "events": [
-  {
-   "id": "Get",
-   "undesired": false
-  },
-  {
-   "id": "Put",
-   "undesired": false
-  },
-  {
-   "id": "PutNil",
-   "undesired": false
-  },
-  {
-   "id": "Close",
-   "undesired": false
-  },
-  {
-   "id": "CloseNil",
-   "undesired": false
-  },
-  {
-   "id": "Release",
-   "undesired": false
-  },
-  {
-   "id": "Len",
-   "undesired": false
-  },
-  {
-   "id": "IdleTimeout",
-   "undesired": false
-  },
-  {
-   "id": "PingFail",
-   "undesired": false
-  },
-  {
-   "id": "FactoryFail",
-   "undesired": false
-  }
+  {"id": "Get", "gate": "mutex + capacity check (openingConns vs maxActive, channel select)", "upstream_guards": ["caller must handle ErrClosed", "caller must handle ErrMaxActiveConnReached"]},
+  {"id": "Put", "gate": "mutex + nil check on conn; waiter queue vs idle queue priority", "upstream_guards": ["caller owns the connection being returned", "caller must not Put nil"]},
+  {"id": "Close", "gate": "mutex; close function non-nil; decrements openingConns", "upstream_guards": ["caller provides a connection obtained from the pool"]},
+  {"id": "Release", "gate": "mutex; conns==nil idempotency guard (second Release is no-op)", "upstream_guards": ["caller initiates graceful pool shutdown"]},
+  {"id": "FactoryFail", "gate": "factory() returns (nil, error) at channel.go:155 or NewChannelPool:82", "upstream_guards": ["user-provided Factory function installed at pool creation"]},
+  {"id": "IdleTimeout", "gate": "idleTimeout > 0 AND time.Now() after wrapConn.t + timeout", "upstream_guards": ["system clock monotonic", "idleTimeout configured at pool creation"]},
+  {"id": "PingFail", "gate": "c.ping != nil AND ping(conn) returns error", "upstream_guards": ["user-provided Ping function installed at pool creation"]}
  ],
  "cells": [
-  {
-   "state": "S_Initializing",
-   "event": "Get",
-   "disposition": "UNSPECIFIED",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Initializing",
-   "event": "Put",
-   "disposition": "UNSPECIFIED",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Initializing",
-   "event": "Put_nil",
-   "disposition": "UNSPECIFIED",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Initializing",
-   "event": "Close",
-   "disposition": "UNSPECIFIED",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Initializing",
-   "event": "Close_nil",
-   "disposition": "UNSPECIFIED",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Initializing",
-   "event": "Release",
-   "disposition": "UNSPECIFIED",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Initializing",
-   "event": "Len",
-   "disposition": "UNSPECIFIED",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Initializing",
-   "event": "IdleTimeout",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Initializing",
-   "event": "PingFail",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Initializing",
-   "event": "FactoryFail",
-   "disposition": "transition \u2192 S_Released",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "Get",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "Put",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "Put_nil",
-   "disposition": "reject",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "Close",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "Close_nil",
-   "disposition": "reject",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "Release",
-   "disposition": "transition \u2192 S_Released",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "Len",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "IdleTimeout",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "PingFail",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_HasIdle",
-   "event": "FactoryFail",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "Get",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "Put",
-   "disposition": "transition \u2192 S_Active_HasIdle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "Put_nil",
-   "disposition": "reject",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "Close",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "Close_nil",
-   "disposition": "reject",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "Release",
-   "disposition": "transition \u2192 S_Released",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "Len",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "IdleTimeout",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "PingFail",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Busy",
-   "event": "FactoryFail",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "Get",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "Put",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "Put_nil",
-   "disposition": "reject",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "Close",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "Close_nil",
-   "disposition": "reject",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "Release",
-   "disposition": "transition \u2192 S_Released",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "Len",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "IdleTimeout",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "PingFail",
-   "disposition": "UNSPECIFIED",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Active_Full",
-   "event": "FactoryFail",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "Get",
-   "disposition": "reject",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "Put",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "Put_nil",
-   "disposition": "reject",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "Close",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "Close_nil",
-   "disposition": "reject",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "Release",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "Len",
-   "disposition": "handle",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "IdleTimeout",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "PingFail",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  },
-  {
-   "state": "S_Released",
-   "event": "FactoryFail",
-   "disposition": "ignore (documented)",
-   "target": null,
-   "q": null
-  }
+  {"state": "Active_HasIdle", "event": "Get", "disposition": "handle", "citation": {"file": "channel.go", "line": 108, "fragment": "case wrapConn := <-conns"}},
+  {"state": "Active_HasIdle", "event": "Put", "disposition": "handle", "citation": {"file": "channel.go", "line": 164, "fragment": "case c.conns <- &idleConn"}},
+  {"state": "Active_HasIdle", "event": "Close", "disposition": "handle", "citation": {"file": "channel.go", "line": 197, "fragment": "c.openingConns--"}},
+  {"state": "Active_HasIdle", "event": "Release", "disposition": "transition", "target": "Released", "citation": {"file": "channel.go", "line": 215, "fragment": "c.conns = nil"}},
+  {"state": "Active_HasIdle", "event": "FactoryFail", "disposition": "handle", "citation": {"file": "channel.go", "line": 155, "fragment": "conn, err := c.factory()"}},
+  {"state": "Active_HasIdle", "event": "IdleTimeout", "disposition": "handle", "citation": {"file": "channel.go", "line": 117, "fragment": "wrapConn.t.Add(timeout).Before(time.Now())"}},
+  {"state": "Active_HasIdle", "event": "PingFail", "disposition": "handle", "citation": {"file": "channel.go", "line": 124, "fragment": "c.Ping(wrapConn.conn)"}},
+
+  {"state": "Active_IdleExhausted_UnderCap", "event": "Get", "disposition": "handle", "citation": {"file": "channel.go", "line": 148, "fragment": "conn, err := c.factory()"}},
+  {"state": "Active_IdleExhausted_UnderCap", "event": "Put", "disposition": "transition", "target": "Active_HasIdle", "citation": {"file": "channel.go", "line": 164, "fragment": "case c.conns <- &idleConn"}},
+  {"state": "Active_IdleExhausted_UnderCap", "event": "Close", "disposition": "handle", "citation": {"file": "channel.go", "line": 197, "fragment": "c.openingConns--"}},
+  {"state": "Active_IdleExhausted_UnderCap", "event": "Release", "disposition": "transition", "target": "Released", "citation": {"file": "channel.go", "line": 215, "fragment": "c.conns = nil"}},
+  {"state": "Active_IdleExhausted_UnderCap", "event": "FactoryFail", "disposition": "UNSPECIFIED", "q": "Q-05"},
+  {"state": "Active_IdleExhausted_UnderCap", "event": "IdleTimeout", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 148, "fragment": "No idle conns available"}},
+  {"state": "Active_IdleExhausted_UnderCap", "event": "PingFail", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 148, "fragment": "No idle conns — factory path"}},
+
+  {"state": "Active_IdleExhausted_AtCapacity", "event": "Get", "disposition": "defer (queued)", "citation": {"file": "channel.go", "line": 137, "fragment": "c.connReqs = append(c.connReqs, req)"}},
+  {"state": "Active_IdleExhausted_AtCapacity", "event": "Put", "disposition": "handle", "citation": {"file": "channel.go", "line": 176, "fragment": "req <- connReq"}},
+  {"state": "Active_IdleExhausted_AtCapacity", "event": "Close", "disposition": "handle", "citation": {"file": "channel.go", "line": 197, "fragment": "c.openingConns--"}},
+  {"state": "Active_IdleExhausted_AtCapacity", "event": "Release", "disposition": "UNSPECIFIED", "q": "Q-01"},
+  {"state": "Active_IdleExhausted_AtCapacity", "event": "FactoryFail", "disposition": "UNSPECIFIED", "q": "Q-05"},
+  {"state": "Active_IdleExhausted_AtCapacity", "event": "IdleTimeout", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 132, "fragment": "openingConns >= c.maxActive"}},
+  {"state": "Active_IdleExhausted_AtCapacity", "event": "PingFail", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 132, "fragment": "openingConns >= maxActive"}},
+
+  {"state": "Released", "event": "Get", "disposition": "reject", "citation": {"file": "channel.go", "line": 99, "fragment": "return nil, ErrClosed"}},
+  {"state": "Released", "event": "Put", "disposition": "UNSPECIFIED", "q": "Q-03"},
+  {"state": "Released", "event": "Close", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 202, "fragment": "if c.close == nil { return nil }"}},
+  {"state": "Released", "event": "Release", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 225, "fragment": "if conns == nil { return }"}},
+  {"state": "Released", "event": "FactoryFail", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 218, "fragment": "c.factory = nil"}},
+  {"state": "Released", "event": "IdleTimeout", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 218, "fragment": "pool is closed — no connections remain"}},
+  {"state": "Released", "event": "PingFail", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 220, "fragment": "c.ping = nil"}}
  ],
  "questions": [
-  {
-   "id": "Q-01",
-   "status": "OPEN",
-   "fault": [],
-   "trigger": "",
-   "text": "Should S_Initializing be modeled as an externally reachable state? The Pool reference is not returned to the caller until NewChannelPool completes. External events (Get, Put, etc.) cannot reach this state through the Pool interface."
-  },
-  {
-   "id": "Q-02",
-   "status": "OPEN",
-   "fault": [],
-   "trigger": "",
-   "text": "CRITICAL \u2014 Release() does not close connReqs waiter channels. When pool transitions to S_Released with blocked waiters (S_Active_Full), those goroutines block forever on <-req. Should Release() iterate connReqs and close each waiter channel?"
-  },
-  {
-   "id": "Q-03",
-   "status": "OPEN",
-   "fault": [],
-   "trigger": "",
-   "text": "Release() is called internally by NewChannelPool on factory failure during initialization. Should this internal Release be modeled as a separate event or as part of the initialization transition?"
-  },
-  {
-   "id": "Q-04",
-   "status": "OPEN",
-   "fault": [],
-   "trigger": "",
-   "text": "Waiter-path Get() (channel.go:142-147) checks idleTimeout on the delivered connection but does NOT check ping validity. The idle-path Get() (channel.go:125-129) checks both. Is this discrepancy intentional or an oversight? A connection that fails ping could be delivered to a blocked waiter."
-  },
-  {
-   "id": "Q-05",
-   "status": "OPEN",
-   "fault": [],
-   "trigger": "",
-   "text": "In S_Released, Put(conn) calls c.Close(conn) which checks c.close==nil and returns nil without calling the underlying close function or decrementing openingConns. The connection is silently leaked \u2014 no error returned to caller. Is this the intended contract? The caller cannot distinguish 'connection was closed' from 'pool is released, close func is gone.'"
-  },
-  {
-   "id": "Q-06",
-   "status": "OPEN",
-   "fault": [],
-   "trigger": "",
-   "text": "openingConns counter can go negative if Close is called more times than connections were created. The counter starts at InitialCap and is decremented on each Close. If callers Close connections from other pools or Close the same connection twice, openingConns drops below zero with no guard. Should there be a minimum-bounds check?"
-  },
-  {
-   "id": "Q-07",
-   "status": "OPEN",
-   "fault": [],
-   "trigger": "",
-   "text": "Should Len() return openingConns (total open connections) instead of len(conns) (only idle)? Current implementation returns idle connection count, which may be misleading. The README says 'View the number of connections in the current connection pool' \u2014 this could mean total or idle."
-  }
- ]
+  {"id": "Q-01", "status": "OPEN", "fault": ["F-07", "F-20"], "trigger": "step-4 matrix walk", "text": "CRITICAL: Release() at channel.go:215 sets conns=nil, closes idle conns channel, iterates idle conns — but NEVER closes connReqs waiter channels. Goroutines blocked in Get() on <-req at channel.go:139 hang forever after pool termination. Pool terminal does not synchronize with Waiter lifecycle (PA-21). Fix: close each connReqs channel so waiters receive zero value and return ErrMaxActiveConnReached."},
+  {"id": "Q-03", "status": "OPEN", "fault": ["F-04"], "trigger": "step-4 matrix walk", "text": "Put() after Release: conns is nil so Put calls c.Close(conn) at channel.go:190. Close() then checks c.close==nil and is a silent no-op — the connection is leaked, openingConns is not decremented (already stale). No guard prevents Put on a closed pool from leaking connections."},
+  {"id": "Q-05", "status": "OPEN", "fault": ["F-01"], "trigger": "step-4 matrix walk", "text": "FactoryFail handling: factory failure during Get() at channel.go:155 returns error to caller without decrementing openingConns or notifying waiters. The openingConns counter can drift. Same for factory failure in NewChannelPool which calls c.Release() — but Release doesn't clean up connReqs either."}
+ ],
+ "completeness": {
+  "pairs": {"count": 0, "reason": "this sidecar is the canonical merged summary; interaction pairs are in convergence/run*.json"},
+  "guardGroups": {"count": 0, "reason": "Go mutex + channel semantics are not formalizable in z3 integer arithmetic"},
+  "coverage": {"count": 0, "reason": "undesired-variant coverage is in convergence/run2.json (28 UV cells)"}
+ }
 }

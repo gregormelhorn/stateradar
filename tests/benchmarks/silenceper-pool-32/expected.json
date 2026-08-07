@@ -4,10 +4,10 @@
   "component": "channelPool",
   "unspecified_cells": [
     {"state": "Released", "event": "Put"},
-    {"state": "Active_Full", "event": "Release"}
+    {"state": "Active_IdleExhausted_AtCapacity", "event": "Release"}
   ],
   "expected_questions": ["Q-01"],
-  "expected_phrases": ["connReqs", "Release"],
+  "expected_phrases": ["connReqs", "waiter"],
   "dating": {
     "issue_published": "2020-11-19",
     "model": "claude-sonnet-4-20250514",

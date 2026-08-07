@@ -2,6 +2,18 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.45 — silenceper/pool convergence baseline, benchmark wiring
+
+- silenceper/pool wired: convergence baseline (100% on aligned 4×7 grid,
+  5 structural findings), canonical analysis.json with gate/upstream_guards
+  annotations, ODC fault/trigger on all questions, open-questions.md.
+- run_benchmark: committed analysis.json accepted when no matrix exists;
+  5/5 cases pass.
+- dsc_check: fixed rules.toml path for ODC field validation (was using
+  adir-relative path, now uses absolute _registry path).
+- tests/benchmarks/README.md: wired benchmark standard documented.
+- check_pack_consistency: tag WARNING now suggests `git fetch --tags`.
+
 ## v1.44
 
 - Skill renamed from domain-statechart to stateradar.

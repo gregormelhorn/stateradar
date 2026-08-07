@@ -160,7 +160,7 @@ def main() -> int:
     if any(q.get("fault") or q.get("trigger") for q in data.get("questions", [])):
         try:
             import tomllib
-            reg = tomllib.loads((adir.parent.parent / "formats" / "rules.toml").read_text())
+            reg = tomllib.loads(_registry.read_text())
             fault_ids = {f["id"] for f in reg.get("faults", [])}
             trigger_vocab = set(reg.get("vocab", {}).get("odc_triggers", []))
         except Exception:

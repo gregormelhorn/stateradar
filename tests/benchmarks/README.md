@@ -15,6 +15,16 @@ upstream discoveries reported as new GitHub issues.
 | pladaria/reconnecting-websocket | 1 critical | Terminal lock leak |
 | valkey-glide | 1 critical | Missing timeout→release transition |
 
+## Wired benchmark standard
+
+A wired benchmark case (with `expected.json`) must carry a canonical
+`analysis.json` that passes `dsc_check` — including gate-type and
+upstream-guard annotations on every base event, ODC `fault`/`trigger`
+fields on every question, and asserted-absence `completeness` block.
+Convergence `convergence/run*.json` recordings are raw pilot output
+and exempt from dsc_check; only the canonical merged sidecar is
+gate-checked.
+
 ## Oracle-confirmed benchmarks (3/3)
 
 Caveat: The public issues may predate model training cutoff. New bugs
@@ -46,13 +56,15 @@ Dominant fault class per finding, from `formats/rules.toml`. Generated from benc
 
 | Fault class | Trigger | Benchmark case(s) |
 |---|---|---|
-| F-01 | step-4 matrix walk | grpc-go-2669 (Q-15) |
+| F-01 | step-4 matrix walk | grpc-go-2669 (Q-15), silenceper-pool-32 (Q-05) |
 | F-02 | doctrine mapping (PA-22); step-2 test replay | grpc-go-2669 (Q-04), grpc-go-2669 (Q-07) |
 | F-03 | step-2 test replay | grpc-go-2669 (Q-14) |
 | F-04 | pairs table + z3 proof | grpc-go-2669 (Q-01) |
+| F-04 | step-4 matrix walk | silenceper-pool-32 (Q-03) |
 | F-05 | adversarial trace | grpc-go-2669 (Q-16) |
 | F-06 | step-1 extraction | grpc-go-2669 (Q-10) |
 | F-07 | seam-contract sweep; step-5 lint | grpc-go-2669 (Q-11), grpc-go-2669 (Q-12) |
+| F-07 | step-4 matrix walk | silenceper-pool-32 (Q-01) |
 | F-07 | step-4 matrix walk; doctrine mapping | valkey-glide-5803 (Q-04) |
 | F-08 | step-4 matrix walk | meilisearch-6508 (Q-D1), valkey-glide-5803 (Q-02), valkey-glide-5803 (Q-03) |
 | F-09 | step-4 matrix walk | meilisearch-6508 (Q-D2) |
@@ -63,6 +75,6 @@ Dominant fault class per finding, from `formats/rules.toml`. Generated from benc
 | F-15 | step-4 matrix walk | grpc-go-2669 (Q-09) |
 | F-18 | seam-contract sweep; step-1 extraction + traces | grpc-go-2669 (Q-03), grpc-go-2669 (Q-05) |
 | F-19 | doctrine mapping (PA-22) | grpc-go-2669 (Q-06) |
-| F-20 | step-4 matrix walk | python-websockets-1527 (Q-C1) |
+| F-20 | step-4 matrix walk | python-websockets-1527 (Q-C1), silenceper-pool-32 (Q-01) |
 
 <!-- generated:odc end -->

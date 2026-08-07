@@ -120,6 +120,6 @@ if tag_result.returncode == 0:
     latest_tag = tag_result.stdout.strip()
     tag_ver = latest_tag.lstrip("v")
     if tag_ver != rv.group(1):
-        print(f"  WARNING: latest tag {latest_tag} ({tag_ver}) != README version {rv.group(1)}")
+        print(f"  WARNING: latest tag {latest_tag} ({tag_ver}) != README version {rv.group(1)} (local tags may be stale — run `git fetch --tags`)")
 
 print(f"PACK CONSISTENCY: OK ({len(ARTIFACTS)} artifacts, registry, version {rv.group(1)})")

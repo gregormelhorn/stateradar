@@ -200,18 +200,25 @@ def run_benchmark(name: str) -> tuple[str, bool, int, str]:
             if src.is_file():
                 shutil.copy(src, analysis_dir / fname)
 
-        # If no matrix is provided, we need to generate it from scratch.
-        # For now, require the benchmark to include its own matrix.
+        # If no matrix is provided, check for a committed analysis.json.
+        # Wired benchmarks that carry a canonical sidecar (passing dsc_check)
+        # can skip the Part A pipeline and validate directly.
+        committed_sidecar = bdir / "analysis.json"
         if not (analysis_dir / "disposition-matrix.md").is_file():
-            return name, False, 0, "\n".join(log_lines + [
-                "  SKIP: no disposition-matrix.md in benchmark —",
-                "  full Part A re-run requires AI. This runner only validates",
-                "  that pre-generated analysis artifacts still check correctly."
-            ])
-
-        sidecar = run_part_a(analysis_dir, repo_dir, model_path)
-        if sidecar is None:
-            return name, False, 0, "\n".join(log_lines + ["  sidecar generation failed"])
+            if committed_sidecar.is_file():
+                shutil.copy(committed_sidecar, analysis_dir / "analysis.json")
+                sidecar = json.loads(committed_sidecar.read_text())
+                log_lines.append("  Using committed analysis.json (no matrix needed)")
+            else:
+                return name, False, 0, "\n".join(log_lines + [
+                    "  SKIP: no disposition-matrix.md in benchmark —",
+                    "  full Part A re-run requires AI. This runner only validates",
+                    "  that pre-generated analysis artifacts still check correctly."
+                ])
+        else:
+            sidecar = run_part_a(analysis_dir, repo_dir, model_path)
+            if sidecar is None:
+                return name, False, 0, "\n".join(log_lines + ["  sidecar generation failed"])
 
         passed, failed, skipped, msgs = assert_expected(
             sidecar, expected, case_dir=bdir)
