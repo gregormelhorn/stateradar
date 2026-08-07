@@ -38,28 +38,24 @@ backfill over the eleven pilot manifests
 
 ## 5. Ensemble convergence (from CONVERGENCE measurement to mechanism)
 
-**Status:** Planned — priority 1 (cheap, turns an existing weakness
-into a feature). The 2024–26 LLM-FSM-inference literature (ProtocolGPT
-arXiv:2405.00393, FlowFSM arXiv:2507.11222, SpecGPT arXiv:2510.14348)
-runs multiple independent extractions and votes: transition
-intersection = high confidence, symmetric difference = automatic
-question candidates. Our CONVERGENCE protocol only *measures*
-divergence; the upgrade is to *use* it — run the pilot 2–3×, diff at
-cell level with tooling, and mechanically mark divergent cells
-`UNSPECIFIED → Q` instead of comparing by hand. Turns the calibration
-advice into a pack feature.
+**Status:** ✅ Shipped in v1.38. `tools/ensemble_convergence.py` takes
+N independent pilot sidecars, normalizes state names, aligns events by
+ID, computes cell-level convergence, and mechanically marks divergent
+cells `UNSPECIFIED → Q` (Q-EC-nn with a divergence summary). Green/
+red selftests wired into `tools/selftest/run_selftest.py`; exit code
+non-zero on divergence for CI gating. The CONVERGENCE.md protocol now
+points to the tool instead of the hand-written diff step.
 
 ## 6. Benchmark dating protocol (contamination-honest evidence)
 
-**Status:** Planned — priority 1 (cheap; makes the evidence section
-self-writing). Knowledge cutoff only bounds pretraining; post-training
-on newer data is common, so "issue predates cutoff" is not the right
-caveat. Adopt the LiveCodeBench / CWE-Trace pattern: every case
-manifest gains `issue_published`, `model`, `model_release`,
-`model_cutoff`; the benchmark runner classifies cases automatically
-into *primary evidence* (issue published after model release) and
-*regression anchor* (rest). The 2026-08 pilots are already de-facto
-rolling collection — only the protocol formalization is missing.
+**Status:** ✅ Shipped in v1.38. `tools/benchmark_evidence.py` reads
+dating metadata from each case's `expected.json` and classifies into
+*primary evidence* (issue published after model release) vs *regression
+anchor* (rest). Fields: `issue_published`, `model`, `model_release`,
+`model_cutoff`. All four wired benchmarks carry dating metadata;
+two are primary evidence (valkey-glide-5803, meilisearch-6508),
+two are regression anchors (grpc-go-2669, python-websockets-1527).
+Classification logic selftest wired into run_selftest.py.
 
 ## 7. Matrix mutation checker (is the matrix strong enough?)
 

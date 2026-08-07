@@ -3,6 +3,7 @@
 **Issue:** [#5803](https://github.com/valkey-io/valkey-glide/issues/5803)
 **Commit:** v2.2.7
 **Date:** 2026-08-06
+**Dating:** Primary evidence — issue #5803 published 2026-04-22, after model release (claude-sonnet-4-20250514, 2025-05-14).
 **Oracle:** Confirmed — primary finding matched exactly.
 **Defect class:** Caller terminal, resource ownership remains active (PA-21) — F-07 lifecycle coupling
 

@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.38 — ensemble convergence (roadmap §5)
+
+- `tools/ensemble_convergence.py`: takes N independent pilot sidecars,
+  normalizes state names (case-insensitive, strips qualifier suffixes,
+  maps ALLCAPS↔PascalCase), aligns events by ID, and computes
+  cell-level convergence. Divergent cells (disposition disagreement,
+  target disagreement, or presence divergence) are mechanically
+  marked `UNSPECIFIED → Q` with auto-generated Q-EC-nn questions
+  carrying a per-run divergence summary.
+- Green/red selftests wired into `tools/selftest/run_selftest.py`:
+  identical sidecars converge 100 % (exit 0), divergent sidecars
+  report divergence and exit non-zero for CI gating.
+- `tests/device-connection/CONVERGENCE.md` protocol updated:
+  step 3–4 (hand-written diff and data entry) replaced by a single
+  `ensemble_convergence.py` invocation.
+- `docs/roadmap.md`: §5 marked done.
+- `tools/benchmark_evidence.py`: contamination-honest evidence
+  classification (roadmap §6). Reads dating metadata (`issue_published`,
+  `model`, `model_release`, `model_cutoff`) from each case's
+  `expected.json` and classifies into *primary evidence* (issue after
+  model release) vs *regression anchor* (rest). Classification logic
+  selftest wired into run_selftest.py.
+- All four wired benchmarks carry dating metadata: valkey-glide-5803
+  (primary), meilisearch-6508 (primary), grpc-go-2669 (regression),
+  python-websockets-1527 (regression). MANIFEST.md headers updated.
+- `docs/roadmap.md`: §6 marked done.
+
 ## v1.37 — PA-22 doctrine-mapping checker; candidate backlog emptied
 
 - check_matrix gains three checks, each with red selftests: PA-10

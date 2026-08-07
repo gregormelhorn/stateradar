@@ -1,10 +1,24 @@
 {
-  "repo": "https://github.com/valkey-io/valkey-glide",
-  "commit": "v2.2.7",
-  "component": "inflight",
-  "unspecified_cells": [
-    {"state": "CallerTimedOut", "event": "release_permit"}
-  ],
-  "expected_questions": ["Q-04"],
-  "expected_phrases": ["CallerTimedOut", "release immediately"]
+ "repo": "https://github.com/valkey-io/valkey-glide",
+ "commit": "v2.2.7",
+ "component": "inflight",
+ "unspecified_cells": [
+  {
+   "state": "CallerTimedOut",
+   "event": "release_permit"
+  }
+ ],
+ "expected_questions": [
+  "Q-04"
+ ],
+ "expected_phrases": [
+  "CallerTimedOut",
+  "release immediately"
+ ],
+ "dating": {
+  "issue_published": "2026-04-22",
+  "model": "claude-sonnet-4-20250514",
+  "model_release": "2025-05-14",
+  "model_cutoff": "2025-01-01"
+ }
 }

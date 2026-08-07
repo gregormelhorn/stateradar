@@ -380,6 +380,56 @@ def main() -> int:
            *chk(adir),
            needle="unreachable")
 
+    print("ensemble convergence")
+
+    def ens(*paths: Path) -> tuple[int, str]:
+        r = subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "ensemble_convergence.py"),
+             *(str(p) for p in paths)],
+            capture_output=True, text=True)
+        return r.returncode, (r.stdout + r.stderr).strip()
+
+    ENS = ROOT / "tools" / "selftest" / "ensemble"
+    # Green: identical sidecars must converge 100%
+    expect("ensemble convergent (identical)", False,
+           *ens(ENS / "run1.json", ENS / "run1.json"),
+           needle="100.0%")
+    # Red: divergent sidecars must fail and report divergence
+    expect("ensemble divergent (2 runs)", True,
+           *ens(ENS / "run1.json", ENS / "run2.json"),
+           needle="divergent")
+    # Red: three-way divergence must also fail
+    expect("ensemble divergent (3 runs)", True,
+           *ens(ENS / "run1.json", ENS / "run2.json", ENS / "run3.json"),
+           needle="divergent")
+
+    print("benchmark dating protocol")
+    import benchmark_evidence
+
+    # Primary: issue after model release
+    assert benchmark_evidence.classify({
+        "issue_published": "2026-07-13",
+        "model": "claude-sonnet-4-20250514",
+        "model_release": "2025-05-14",
+        "model_cutoff": "2025-01-01",
+    }) == "primary", "post-release issue must be primary"
+    # Regression: issue before model release
+    assert benchmark_evidence.classify({
+        "issue_published": "2024-10-22",
+        "model": "claude-sonnet-4-20250514",
+        "model_release": "2025-05-14",
+        "model_cutoff": "2025-01-01",
+    }) == "regression", "pre-release issue must be regression"
+    # Unknown: missing fields
+    assert benchmark_evidence.classify(None) == "unknown", "missing dating is unknown"
+    assert benchmark_evidence.classify({}) == "unknown", "empty dating is unknown"
+    # Red: issue published but no model release → unknown (not primary)
+    assert benchmark_evidence.classify({
+        "issue_published": "2026-07-13",
+        "model": "claude-sonnet-4-20250514",
+    }) == "unknown", "missing model_release is unknown"
+    print("  ok  benchmark dating classification correct")
+
     if failures:
         print("\nSELFTEST: FAIL")
         for f in failures:

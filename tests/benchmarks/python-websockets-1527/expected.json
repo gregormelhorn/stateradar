@@ -1,10 +1,25 @@
 {
-  "repo": "https://github.com/python-websockets/websockets",
-  "commit": "4d229bf9f583d593aa103287aee0a77c9fbc3a79",
-  "component": "connection",
-  "unspecified_cells": [
-    {"state": "ClosurePending", "event": "EV-11"}
-  ],
-  "expected_questions": ["Q-C1"],
-  "expected_phrases": ["connection_lost_waiter", "close_timeout", "still awaits"]
+ "repo": "https://github.com/python-websockets/websockets",
+ "commit": "4d229bf9f583d593aa103287aee0a77c9fbc3a79",
+ "component": "connection",
+ "unspecified_cells": [
+  {
+   "state": "ClosurePending",
+   "event": "EV-11"
+  }
+ ],
+ "expected_questions": [
+  "Q-C1"
+ ],
+ "expected_phrases": [
+  "connection_lost_waiter",
+  "close_timeout",
+  "still awaits"
+ ],
+ "dating": {
+  "issue_published": "2024-10-22",
+  "model": "claude-sonnet-4-20250514",
+  "model_release": "2025-05-14",
+  "model_cutoff": "2025-01-01"
+ }
 }

@@ -8,13 +8,16 @@ reference analysis, the other run, tests/, or the web); both matrices
 checker-green (check_matrix, guard proofs via `tools/guard_proofs.py`,
 dsc_check incl. doctrine mapping).
 
-## Protocol
+## Protocol (automated via tools/ensemble_convergence.py)
 
 1. Run `02-pilot.md` on `examples/device-connection/` in a fresh session.
 2. Run `02-pilot.md` on the same component in a second, independent
    fresh session.
-3. Diff the two disposition matrices cell by cell.
-4. Record the divergence count and rate below.
+3. Generate `analysis.json` from each run via `tools/gen_analysis_sidecar.py`.
+4. Run `python3 tools/ensemble_convergence.py run1/analysis.json run2/analysis.json -o merged.json --report convergence-report.md`.
+5. The tool aligns states and events, diffs cells, marks divergent
+   cells `UNSPECIFIED → Q`, and writes a convergence report.
+6. Exit code non-zero = divergent cells found = human review needed.
 
 ## Expected state space
 
@@ -94,5 +97,8 @@ contradictory findings — divergence was purely additive.
   method's softest joint; the roadmap's ensemble-convergence entry
   (#5) targets exactly this: intersection = confidence, symmetric
   difference = automatic Q candidates.
-- The alignment + diff performed here by hand-written script is the
-  natural seed for that ensemble tooling.
+- The alignment + diff, previously performed by hand-written script,
+  is now automated by `tools/ensemble_convergence.py` (roadmap §5).
+  The tool normalizes state names, aligns events by ID, computes
+  cell-level convergence, and mechanically marks divergent cells
+  as `UNSPECIFIED → Q`.
