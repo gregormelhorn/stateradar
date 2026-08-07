@@ -2,9 +2,10 @@
 
 **Component:** `examples/device-connection/device_connection.py`
 **Method:** Two independent Part-A pilot runs on the same component.
-**Status:** Baseline recorded 2026-08-07, re-recorded 2026-08-07 (pack v1.39).
-Both runs fresh sessions, independence enforced; both matrices
-checker-green.
+**Status:** Baseline recorded 2026-08-07, reconfirmed 2026-08-07 (pack v1.49, dsc_check green).
+Both runs fresh sessions, independence enforced; both sidecars
+dsc_check-clean with citations and completeness assertions backfilled
+for newer pack rules.
 
 ## Protocol (automated via tools/ensemble_convergence.py)
 
