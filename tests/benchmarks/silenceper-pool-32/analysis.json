@@ -1,6 +1,6 @@
 {
  "formatVersion": "1.0",
- "component": "silenceper/pool — channelPool",
+ "component": "silenceper/pool \u2014 channelPool",
  "states": [
   "Active_HasIdle",
   "Active_IdleExhausted_UnderCap",
@@ -8,136 +8,839 @@
   "Released"
  ],
  "events": [
-  {"id": "Get", "gate": "mutex + capacity check (openingConns vs maxActive, channel select)", "upstream_guards": ["caller must handle ErrClosed", "caller must handle ErrMaxActiveConnReached"]},
-  {"id": "Put", "gate": "mutex + nil check on conn; waiter queue vs idle queue priority", "upstream_guards": ["caller owns the connection being returned", "caller must not Put nil"]},
-  {"id": "Close", "gate": "mutex; close function non-nil; decrements openingConns", "upstream_guards": ["caller provides a connection obtained from the pool"]},
-  {"id": "Release", "gate": "mutex; conns==nil idempotency guard (second Release is no-op)", "upstream_guards": ["caller initiates graceful pool shutdown"]},
-  {"id": "FactoryFail", "gate": "factory() returns (nil, error) at channel.go:155 or NewChannelPool:82", "upstream_guards": ["user-provided Factory function installed at pool creation"]},
-  {"id": "IdleTimeout", "gate": "idleTimeout > 0 AND time.Now() after wrapConn.t + timeout", "upstream_guards": ["system clock monotonic", "idleTimeout configured at pool creation"]},
-  {"id": "PingFail", "gate": "c.ping != nil AND ping(conn) returns error", "upstream_guards": ["user-provided Ping function installed at pool creation"]},
-  {"id": "UV-Get-commission", "undesired": true},
-  {"id": "UV-Get-value", "undesired": true},
-  {"id": "UV-Put-loss", "undesired": true},
-  {"id": "UV-Put-duplication", "undesired": true},
-  {"id": "UV-Put-out-of-order", "undesired": true},
-  {"id": "UV-Put-commission", "undesired": true},
-  {"id": "UV-Close-duplication", "undesired": true},
-  {"id": "UV-Close-out-of-order", "undesired": true},
-  {"id": "UV-Close-contradiction", "undesired": true},
-  {"id": "UV-Release-duplication", "undesired": true},
-  {"id": "UV-Release-out-of-order", "undesired": true},
-  {"id": "UV-Release-contradiction", "undesired": true},
-  {"id": "UV-Release-commission", "undesired": true}
+  {
+   "id": "Get",
+   "gate": "mutex + capacity check (openingConns vs maxActive, channel select)",
+   "upstream_guards": [
+    "caller must handle ErrClosed",
+    "caller must handle ErrMaxActiveConnReached"
+   ]
+  },
+  {
+   "id": "Put",
+   "gate": "mutex + nil check on conn; waiter queue vs idle queue priority",
+   "upstream_guards": [
+    "caller owns the connection being returned",
+    "caller must not Put nil"
+   ]
+  },
+  {
+   "id": "Close",
+   "gate": "mutex; close function non-nil; decrements openingConns",
+   "upstream_guards": [
+    "caller provides a connection obtained from the pool"
+   ]
+  },
+  {
+   "id": "Release",
+   "gate": "mutex; conns==nil idempotency guard (second Release is no-op)",
+   "upstream_guards": [
+    "caller initiates graceful pool shutdown"
+   ]
+  },
+  {
+   "id": "FactoryFail",
+   "gate": "factory() returns (nil, error) at channel.go:155 or NewChannelPool:82",
+   "upstream_guards": [
+    "user-provided Factory function installed at pool creation"
+   ]
+  },
+  {
+   "id": "IdleTimeout",
+   "gate": "idleTimeout > 0 AND time.Now() after wrapConn.t + timeout",
+   "upstream_guards": [
+    "system clock monotonic",
+    "idleTimeout configured at pool creation"
+   ]
+  },
+  {
+   "id": "PingFail",
+   "gate": "c.ping != nil AND ping(conn) returns error",
+   "upstream_guards": [
+    "user-provided Ping function installed at pool creation"
+   ]
+  },
+  {
+   "id": "UV-Get-commission",
+   "undesired": true
+  },
+  {
+   "id": "UV-Get-value",
+   "undesired": true
+  },
+  {
+   "id": "UV-Put-loss",
+   "undesired": true
+  },
+  {
+   "id": "UV-Put-duplication",
+   "undesired": true
+  },
+  {
+   "id": "UV-Put-out-of-order",
+   "undesired": true
+  },
+  {
+   "id": "UV-Put-commission",
+   "undesired": true
+  },
+  {
+   "id": "UV-Close-duplication",
+   "undesired": true
+  },
+  {
+   "id": "UV-Close-out-of-order",
+   "undesired": true
+  },
+  {
+   "id": "UV-Close-contradiction",
+   "undesired": true
+  },
+  {
+   "id": "UV-Release-duplication",
+   "undesired": true
+  },
+  {
+   "id": "UV-Release-out-of-order",
+   "undesired": true
+  },
+  {
+   "id": "UV-Release-contradiction",
+   "undesired": true
+  },
+  {
+   "id": "UV-Release-commission",
+   "undesired": true
+  }
  ],
  "cells": [
-  {"state": "Active_HasIdle", "event": "Get", "disposition": "handle", "citation": {"file": "channel.go", "line": 108, "fragment": "case wrapConn := <-conns"}},
-  {"state": "Active_HasIdle", "event": "Put", "disposition": "handle", "citation": {"file": "channel.go", "line": 164, "fragment": "case c.conns <- &idleConn"}},
-  {"state": "Active_HasIdle", "event": "Close", "disposition": "handle", "citation": {"file": "channel.go", "line": 197, "fragment": "c.openingConns--"}},
-  {"state": "Active_HasIdle", "event": "Release", "disposition": "transition", "target": "Released", "citation": {"file": "channel.go", "line": 215, "fragment": "c.conns = nil"}},
-  {"state": "Active_HasIdle", "event": "FactoryFail", "disposition": "handle", "citation": {"file": "channel.go", "line": 155, "fragment": "conn, err := c.factory()"}},
-  {"state": "Active_HasIdle", "event": "IdleTimeout", "disposition": "handle", "citation": {"file": "channel.go", "line": 117, "fragment": "wrapConn.t.Add(timeout).Before(time.Now())"}},
-  {"state": "Active_HasIdle", "event": "PingFail", "disposition": "handle", "citation": {"file": "channel.go", "line": 124, "fragment": "c.Ping(wrapConn.conn)"}},
-
-  {"state": "Active_IdleExhausted_UnderCap", "event": "Get", "disposition": "handle", "citation": {"file": "channel.go", "line": 148, "fragment": "conn, err := c.factory()"}},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "Put", "disposition": "transition", "target": "Active_HasIdle", "citation": {"file": "channel.go", "line": 164, "fragment": "case c.conns <- &idleConn"}},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "Close", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "Release", "disposition": "transition", "target": "Released", "citation": {"file": "channel.go", "line": 215, "fragment": "c.conns = nil"}},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "FactoryFail", "disposition": "UNSPECIFIED", "q": "Q-05"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "IdleTimeout", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 148, "fragment": "No idle conns available"}},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "PingFail", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 148, "fragment": "No idle conns — factory path"}},
-
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "Get", "disposition": "defer (queued)", "citation": {"file": "channel.go", "line": 137, "fragment": "c.connReqs = append(c.connReqs, req)"}, "q": "Q-04"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "Put", "disposition": "handle", "citation": {"file": "channel.go", "line": 176, "fragment": "req <- connReq"}},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "Close", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "Release", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "FactoryFail", "disposition": "UNSPECIFIED", "q": "Q-05"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "IdleTimeout", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 132, "fragment": "openingConns >= maxActive"}},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "PingFail", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 132, "fragment": "openingConns >= maxActive"}},
-
-  {"state": "Released", "event": "Get", "disposition": "reject", "citation": {"file": "channel.go", "line": 99, "fragment": "return nil, ErrClosed"}},
-  {"state": "Released", "event": "Put", "disposition": "UNSPECIFIED", "q": "Q-03"},
-  {"state": "Released", "event": "Close", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 202, "fragment": "if c.close == nil { return nil }"}},
-  {"state": "Released", "event": "Release", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 225, "fragment": "if conns == nil { return }"}},
-  {"state": "Released", "event": "FactoryFail", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 218, "fragment": "c.factory = nil"}},
-  {"state": "Released", "event": "IdleTimeout", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 218, "fragment": "pool is closed — no connections remain"}},
-  {"state": "Released", "event": "PingFail", "disposition": "ignore (documented)", "citation": {"file": "channel.go", "line": 220, "fragment": "c.ping = nil"}},
-
-  {"state": "Active_HasIdle", "event": "UV-Get-commission", "disposition": "UNSPECIFIED", "q": "Q-UV-01"},
-  {"state": "Active_HasIdle", "event": "UV-Get-value", "disposition": "UNSPECIFIED", "q": "Q-UV-01"},
-  {"state": "Active_HasIdle", "event": "UV-Put-loss", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Active_HasIdle", "event": "UV-Put-duplication", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Active_HasIdle", "event": "UV-Put-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-03"},
-  {"state": "Active_HasIdle", "event": "UV-Put-commission", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Active_HasIdle", "event": "UV-Close-duplication", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_HasIdle", "event": "UV-Close-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_HasIdle", "event": "UV-Close-contradiction", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_HasIdle", "event": "UV-Release-duplication", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_HasIdle", "event": "UV-Release-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_HasIdle", "event": "UV-Release-contradiction", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_HasIdle", "event": "UV-Release-commission", "disposition": "UNSPECIFIED", "q": "Q-01"},
-
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Get-commission", "disposition": "UNSPECIFIED", "q": "Q-UV-01"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Get-value", "disposition": "UNSPECIFIED", "q": "Q-UV-01"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Put-loss", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Put-duplication", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Put-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-03"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Put-commission", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Close-duplication", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Close-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Close-contradiction", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Release-duplication", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Release-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Release-contradiction", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_IdleExhausted_UnderCap", "event": "UV-Release-commission", "disposition": "UNSPECIFIED", "q": "Q-01"},
-
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Get-commission", "disposition": "UNSPECIFIED", "q": "Q-UV-01"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Get-value", "disposition": "UNSPECIFIED", "q": "Q-UV-01"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Put-loss", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Put-duplication", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Put-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-03"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Put-commission", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Close-duplication", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Close-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Close-contradiction", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Release-duplication", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Release-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Release-contradiction", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Active_IdleExhausted_AtCapacity", "event": "UV-Release-commission", "disposition": "UNSPECIFIED", "q": "Q-01"},
-
-  {"state": "Released", "event": "UV-Get-commission", "disposition": "UNSPECIFIED", "q": "Q-UV-01"},
-  {"state": "Released", "event": "UV-Get-value", "disposition": "UNSPECIFIED", "q": "Q-UV-01"},
-  {"state": "Released", "event": "UV-Put-loss", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Released", "event": "UV-Put-duplication", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Released", "event": "UV-Put-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-03"},
-  {"state": "Released", "event": "UV-Put-commission", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Released", "event": "UV-Close-duplication", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Released", "event": "UV-Close-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Released", "event": "UV-Close-contradiction", "disposition": "UNSPECIFIED", "q": "Q-06"},
-  {"state": "Released", "event": "UV-Release-duplication", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Released", "event": "UV-Release-out-of-order", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Released", "event": "UV-Release-contradiction", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Released", "event": "UV-Release-commission", "disposition": "UNSPECIFIED", "q": "Q-01"}
+  {
+   "state": "Active_HasIdle",
+   "event": "Get",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 108,
+    "fragment": "case wrapConn := <-conns"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "Put",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 164,
+    "fragment": "case c.conns <- &idleConn"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "Close",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 197,
+    "fragment": "c.openingConns--"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "Release",
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 215,
+    "fragment": "c.conns = nil"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "FactoryFail",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 155,
+    "fragment": "conn, err := c.factory()"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "IdleTimeout",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 117,
+    "fragment": "wrapConn.t.Add(timeout).Before(time.Now())"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "PingFail",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 124,
+    "fragment": "c.Ping(wrapConn.conn)"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "Get",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 148,
+    "fragment": "conn, err := c.factory()"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "Put",
+   "disposition": "transition",
+   "target": "Active_HasIdle",
+   "citation": {
+    "file": "channel.go",
+    "line": 164,
+    "fragment": "case c.conns <- &idleConn"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "Close",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "Release",
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 215,
+    "fragment": "c.conns = nil"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "FactoryFail",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-05"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "IdleTimeout",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 148,
+    "fragment": "No idle conns available"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "PingFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 148,
+    "fragment": "No idle conns \u2014 factory path"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "Get",
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "q": "Q-04",
+   "questionRef": "Q-04"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "Put",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 176,
+    "fragment": "req <- connReq"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "Close",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "Release",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "FactoryFail",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-05"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "IdleTimeout",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 132,
+    "fragment": "openingConns >= maxActive"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "PingFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 132,
+    "fragment": "openingConns >= maxActive"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "Get",
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 99,
+    "fragment": "return nil, ErrClosed"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "Put",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03",
+   "questionRef": "Q-03"
+  },
+  {
+   "state": "Released",
+   "event": "Close",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 202,
+    "fragment": "if c.close == nil { return nil }"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "Release",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 225,
+    "fragment": "if conns == nil { return }"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "FactoryFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 218,
+    "fragment": "c.factory = nil"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "IdleTimeout",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 218,
+    "fragment": "pool is closed \u2014 no connections remain"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "PingFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "c.ping = nil"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Get-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-UV-01"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Get-value",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-UV-01"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Put-loss",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Put-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Put-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Put-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Close-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Close-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Close-contradiction",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Release-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Release-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Release-contradiction",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "UV-Release-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Get-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-UV-01"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Get-value",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-UV-01"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Put-loss",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Put-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Put-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Put-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Close-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Close-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Close-contradiction",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Release-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Release-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Release-contradiction",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "UV-Release-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Get-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-UV-01"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Get-value",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-UV-01"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Put-loss",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Put-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Put-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Put-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Close-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Close-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Close-contradiction",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Release-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Release-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Release-contradiction",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "UV-Release-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Get-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-UV-01"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Get-value",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-UV-01"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Put-loss",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Put-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Put-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Put-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Close-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Close-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Close-contradiction",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-06"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Release-duplication",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Release-out-of-order",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Release-contradiction",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Released",
+   "event": "UV-Release-commission",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  }
  ],
  "questions": [
-  {"id": "Q-01", "status": "OPEN", "fault": ["F-07", "F-20"], "trigger": "step-4 matrix walk", "text": "CRITICAL: Release() at channel.go:215 sets conns=nil, closes idle conns channel, iterates idle conns — but NEVER closes connReqs waiter channels. Goroutines blocked in Get() on <-req at channel.go:139 hang forever after pool termination. Pool terminal does not synchronize with Waiter lifecycle (PA-21). Fix: close each connReqs channel so waiters receive zero value and return ErrMaxActiveConnReached. Includes UV-Release-duplication, UV-Release-out-of-order, UV-Release-contradiction, UV-Release-commission."},
-  {"id": "Q-02", "status": "OPEN", "fault": ["F-12", "F-14", "F-17"], "trigger": "step-3 checklist", "text": "Put integrity: no ownership tracking or duplicate detection. UV-Put-loss: caller crashes without returning connection — openingConns stays elevated, pool capacity permanently reduced. UV-Put-duplication: caller returns same connection twice — first Put succeeds, second may corrupt waiter delivery. UV-Put-commission: pool accepts any connection regardless of origin. From run2 Q-02/Q-03/Q-06."},
-  {"id": "Q-03", "status": "OPEN", "fault": ["F-04", "F-15"], "trigger": "step-4 matrix walk", "text": "Put after Release: conns is nil so Put calls c.Close(conn) at channel.go:190. Close() then checks c.close==nil and is a silent no-op — the connection is leaked, openingConns is not decremented (already stale). No guard prevents Put on a closed pool from leaking connections. UV-Put-out-of-order covers the out-of-order arrival of Put after Release."},
-  {"id": "Q-04", "status": "OPEN", "fault": ["F-03"], "trigger": "step-4 matrix walk", "text": "Waiter-path Get inconsistency: AtCapacity×Get blocks on connReqs (defer queued). When a connection arrives via waiter delivery (channel.go:142-147), the code checks idleTimeout on the delivered connection but does NOT check ping validity. The idle-conn fast path checks both; the waiter path skips ping. From run1 Q-04."},
-  {"id": "Q-05", "status": "OPEN", "fault": ["F-01", "F-12"], "trigger": "step-4 matrix walk", "text": "FactoryFail handling: factory failure during Get() at channel.go:155 returns error to caller without decrementing openingConns or notifying waiters. The openingConns counter can drift. Same for factory failure in NewChannelPool which calls c.Release() — but Release doesn't clean up connReqs either. Merged from run1 Q-03."},
-  {"id": "Q-06", "status": "OPEN", "fault": ["F-05", "F-14"], "trigger": "step-4 matrix walk", "text": "SYS invariant violation: openingConns >= 0 can be broken. Close() at channel.go:211 unconditionally decrements openingConns with no guard against underflow. Double-close (UV-Close-duplication) or close-after-Release (UV-Close-out-of-order) can drive the counter negative. Close+Get race (UV-Close-contradiction) also possible. From run1 Q-06 and run2 Q-07/Q-08/Q-09."},
-  {"id": "Q-UV-01", "status": "OPEN", "fault": ["F-17", "F-18"], "trigger": "step-3 checklist", "text": "Get undesired variants: UV-Get-commission (spurious Get — any goroutine with a pool reference can call Get()), UV-Get-value (subtle value fault — Get after Release returns ErrClosed but the error may be ignored). From run2 Q-12."}
+  {
+   "id": "Q-01",
+   "status": "OPEN",
+   "fault": [
+    "F-07",
+    "F-20"
+   ],
+   "trigger": "step-4 matrix walk",
+   "text": "CRITICAL: Release() at channel.go:215 sets conns=nil, closes idle conns channel, iterates idle conns \u2014 but NEVER closes connReqs waiter channels. Goroutines blocked in Get() on <-req at channel.go:139 hang forever after pool termination. Pool terminal does not synchronize with Waiter lifecycle (PA-21). Fix: close each connReqs channel so waiters receive zero value and return ErrMaxActiveConnReached. Includes UV-Release-duplication, UV-Release-out-of-order, UV-Release-contradiction, UV-Release-commission."
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN",
+   "fault": [
+    "F-12",
+    "F-14",
+    "F-17"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Put integrity: no ownership tracking or duplicate detection. UV-Put-loss: caller crashes without returning connection \u2014 openingConns stays elevated, pool capacity permanently reduced. UV-Put-duplication: caller returns same connection twice \u2014 first Put succeeds, second may corrupt waiter delivery. UV-Put-commission: pool accepts any connection regardless of origin. From run2 Q-02/Q-03/Q-06."
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN",
+   "fault": [
+    "F-04",
+    "F-15"
+   ],
+   "trigger": "step-4 matrix walk",
+   "text": "Put after Release: conns is nil so Put calls c.Close(conn) at channel.go:190. Close() then checks c.close==nil and is a silent no-op \u2014 the connection is leaked, openingConns is not decremented (already stale). No guard prevents Put on a closed pool from leaking connections. UV-Put-out-of-order covers the out-of-order arrival of Put after Release."
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "step-4 matrix walk",
+   "text": "Waiter-path Get inconsistency: AtCapacity\u00d7Get blocks on connReqs (defer queued). When a connection arrives via waiter delivery (channel.go:142-147), the code checks idleTimeout on the delivered connection but does NOT check ping validity. The idle-conn fast path checks both; the waiter path skips ping. From run1 Q-04."
+  },
+  {
+   "id": "Q-05",
+   "status": "OPEN",
+   "fault": [
+    "F-01",
+    "F-12"
+   ],
+   "trigger": "step-4 matrix walk",
+   "text": "FactoryFail handling: factory failure during Get() at channel.go:155 returns error to caller without decrementing openingConns or notifying waiters. The openingConns counter can drift. Same for factory failure in NewChannelPool which calls c.Release() \u2014 but Release doesn't clean up connReqs either. Merged from run1 Q-03."
+  },
+  {
+   "id": "Q-06",
+   "status": "OPEN",
+   "fault": [
+    "F-05",
+    "F-14"
+   ],
+   "trigger": "step-4 matrix walk",
+   "text": "SYS invariant violation: openingConns >= 0 can be broken. Close() at channel.go:211 unconditionally decrements openingConns with no guard against underflow. Double-close (UV-Close-duplication) or close-after-Release (UV-Close-out-of-order) can drive the counter negative. Close+Get race (UV-Close-contradiction) also possible. From run1 Q-06 and run2 Q-07/Q-08/Q-09."
+  },
+  {
+   "id": "Q-UV-01",
+   "status": "OPEN",
+   "fault": [
+    "F-17",
+    "F-18"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Get undesired variants: UV-Get-commission (spurious Get \u2014 any goroutine with a pool reference can call Get()), UV-Get-value (subtle value fault \u2014 Get after Release returns ErrClosed but the error may be ignored). From run2 Q-12."
+  }
  ],
  "coverage": {
-  "Get": {"loss": "n/a: local call, no network", "delay": "n/a: synchronous", "duplication": "n/a: idempotent check (state==CONNECTED/CONNECTING)", "out-of-order": "n/a: synchronous", "contradiction": "n/a: single-threaded caller", "commission": "UV-Get-commission", "value": "UV-Get-value"},
-  "Put": {"loss": "UV-Put-loss", "delay": "n/a: synchronous", "duplication": "UV-Put-duplication", "out-of-order": "UV-Put-out-of-order", "contradiction": "n/a: mutex-protected", "commission": "UV-Put-commission", "value": "n/a: conn nil-check catches null"},
-  "Close": {"loss": "n/a: local call", "delay": "n/a: synchronous", "duplication": "UV-Close-duplication", "out-of-order": "UV-Close-out-of-order", "contradiction": "UV-Close-contradiction", "commission": "n/a: callers must hold a connection", "value": "n/a: conn nil-check catches null"},
-  "Release": {"loss": "n/a: local call", "delay": "n/a: synchronous", "duplication": "UV-Release-duplication", "out-of-order": "UV-Release-out-of-order", "contradiction": "UV-Release-contradiction", "commission": "UV-Release-commission", "value": "n/a: idempotent via conns==nil guard"},
-  "FactoryFail": {"loss": "n/a: factory returns error", "delay": "n/a: synchronous", "duplication": "n/a: one call per Get", "out-of-order": "n/a: synchronous", "contradiction": "n/a: per-call result", "commission": "n/a: only called internally", "value": "n/a: error value from factory"},
-  "IdleTimeout": {"loss": "n/a: timer fires or doesn't", "delay": "n/a: own category", "duplication": "n/a: single timer check", "out-of-order": "n/a: within Get handler", "contradiction": "n/a: within Get handler", "commission": "n/a: system timer", "value": "n/a: time comparison"},
-  "PingFail": {"loss": "n/a: ping returns error", "delay": "n/a: synchronous", "duplication": "n/a: single check", "out-of-order": "n/a: within Get handler", "contradiction": "n/a: within Get handler", "commission": "n/a: only called internally", "value": "n/a: error value from ping"}
+  "Get": {
+   "loss": "n/a: local call, no network",
+   "delay": "n/a: synchronous",
+   "duplication": "n/a: idempotent check (state==CONNECTED/CONNECTING)",
+   "out-of-order": "n/a: synchronous",
+   "contradiction": "n/a: single-threaded caller",
+   "commission": "UV-Get-commission",
+   "value": "UV-Get-value"
+  },
+  "Put": {
+   "loss": "UV-Put-loss",
+   "delay": "n/a: synchronous",
+   "duplication": "UV-Put-duplication",
+   "out-of-order": "UV-Put-out-of-order",
+   "contradiction": "n/a: mutex-protected",
+   "commission": "UV-Put-commission",
+   "value": "n/a: conn nil-check catches null"
+  },
+  "Close": {
+   "loss": "n/a: local call",
+   "delay": "n/a: synchronous",
+   "duplication": "UV-Close-duplication",
+   "out-of-order": "UV-Close-out-of-order",
+   "contradiction": "UV-Close-contradiction",
+   "commission": "n/a: callers must hold a connection",
+   "value": "n/a: conn nil-check catches null"
+  },
+  "Release": {
+   "loss": "n/a: local call",
+   "delay": "n/a: synchronous",
+   "duplication": "UV-Release-duplication",
+   "out-of-order": "UV-Release-out-of-order",
+   "contradiction": "UV-Release-contradiction",
+   "commission": "UV-Release-commission",
+   "value": "n/a: idempotent via conns==nil guard"
+  },
+  "FactoryFail": {
+   "loss": "n/a: factory returns error",
+   "delay": "n/a: synchronous",
+   "duplication": "n/a: one call per Get",
+   "out-of-order": "n/a: synchronous",
+   "contradiction": "n/a: per-call result",
+   "commission": "n/a: only called internally",
+   "value": "n/a: error value from factory"
+  },
+  "IdleTimeout": {
+   "loss": "n/a: timer fires or doesn't",
+   "delay": "n/a: own category",
+   "duplication": "n/a: single timer check",
+   "out-of-order": "n/a: within Get handler",
+   "contradiction": "n/a: within Get handler",
+   "commission": "n/a: system timer",
+   "value": "n/a: time comparison"
+  },
+  "PingFail": {
+   "loss": "n/a: ping returns error",
+   "delay": "n/a: synchronous",
+   "duplication": "n/a: single check",
+   "out-of-order": "n/a: within Get handler",
+   "contradiction": "n/a: within Get handler",
+   "commission": "n/a: only called internally",
+   "value": "n/a: error value from ping"
+  }
  },
  "completeness": {
-  "pairs": {"count": 0, "reason": "interaction pairs are in convergence/run*.json"},
-  "guardGroups": {"count": 0, "reason": "Go mutex + channel semantics are not formalizable in z3 integer arithmetic"}
- }
+  "pairs": {
+   "count": 0,
+   "reason": "interaction pairs are in convergence/run*.json"
+  },
+  "guardGroups": {
+   "count": 0,
+   "reason": "Go mutex + channel semantics are not formalizable in z3 integer arithmetic"
+  }
+ },
+ "invariants": [
+  {
+   "id": "INV-01",
+   "text": "openingConns >= 0 at all times (SYS invariant; underflow indicates double-Close or Close-after-Release accounting fault)",
+   "questionRef": "Q-06"
+  }
+ ]
 }
