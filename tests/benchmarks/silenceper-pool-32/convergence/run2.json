@@ -1,0 +1,697 @@
+{
+ "formatVersion": "1.0",
+ "component": "silenceper/pool \u2014 channelPool",
+ "packVersion": "v1.41",
+ "analyzedSha": "6084537e520652192f41aebfd88d822c00b9447a",
+ "watchPaths": [
+  "channel.go",
+  "pool.go"
+ ],
+ "states": [
+  "Active_HasIdle",
+  "Active_IdleExhausted_UnderCap",
+  "Active_IdleExhausted_AtCapacity",
+  "Released"
+ ],
+ "events": [
+  {
+   "id": "Get",
+   "undesired": false,
+   "gate": "mutex + conns==nil check (getConns) \u2192 ErrClosed; idle conn available \u2192 select case; else \u2192 capacity/connReqs/factory path",
+   "upstream_guards": [
+    "caller handles ErrClosed return",
+    "caller handles nil return on pool closed"
+   ]
+  },
+  {
+   "id": "Put",
+   "undesired": false,
+   "gate": "mutex + conn==nil rejection; conns==nil \u2192 close path; connReqs non-empty \u2192 serve waiter; else \u2192 idle channel (full \u2192 close conn)",
+   "upstream_guards": [
+    "caller owns the connection being returned",
+    "caller checks Put return error"
+   ]
+  },
+  {
+   "id": "Close",
+   "undesired": false,
+   "gate": "mutex + conn==nil rejection; close==nil \u2192 noop decrement; else \u2192 delegate to user close func + decrement openingConns",
+   "upstream_guards": [
+    "caller owns the connection being closed",
+    "caller must not use connection after Close"
+   ]
+  },
+  {
+   "id": "Release",
+   "undesired": false,
+   "gate": "mutex + conns==nil idempotency guard; sets conns/factory/ping/close to nil; closes conns channel; drains and closes idle connections",
+   "upstream_guards": [
+    "caller initiates graceful shutdown",
+    "caller ensures no further Get/Put after Release"
+   ]
+  },
+  {
+   "id": "FactoryCreate",
+   "undesired": false,
+   "gate": "factory != nil; triggered inside Get() when UnderCap",
+   "upstream_guards": [
+    "factory function provided at construction"
+   ]
+  },
+  {
+   "id": "FactoryFail",
+   "undesired": false,
+   "gate": "factory != nil; triggered inside Get() when UnderCap",
+   "upstream_guards": [
+    "factory function provided at construction"
+   ]
+  },
+  {
+   "id": "IdleTimeout",
+   "undesired": false,
+   "gate": "idleTimeout > 0; checked on idle conn pulled from conns channel during Get()",
+   "upstream_guards": [
+    "system clock monotonic"
+   ]
+  },
+  {
+   "id": "PingFail",
+   "undesired": false,
+   "gate": "ping != nil; checked on idle conn pulled from conns channel during Get()",
+   "upstream_guards": [
+    "ping function provided at construction"
+   ]
+  }
+ ],
+ "cells": [
+  {
+   "state": "Active_HasIdle",
+   "event": "Get",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 108,
+    "fragment": "case wrapConn := <-conns:"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "Put",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "Close",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "Release",
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "FactoryCreate",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 131,
+    "fragment": "c.mu.Lock()"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "FactoryFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 131,
+    "fragment": "c.mu.Lock()"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "IdleTimeout",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "wrapConn.t.Add(timeout).Before"
+   }
+  },
+  {
+   "state": "Active_HasIdle",
+   "event": "PingFail",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 124,
+    "fragment": "c.Ping(wrapConn.conn)"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "Get",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "Put",
+   "disposition": "transition",
+   "target": "Active_IdleAvailable",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "Close",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "Release",
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "FactoryCreate",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "FactoryFail",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 156,
+    "fragment": "return nil, err"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "IdleTimeout",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 131,
+    "fragment": "c.mu.Lock()"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_UnderCap",
+   "event": "PingFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 131,
+    "fragment": "c.mu.Lock()"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "Get",
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "Put",
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "Close",
+   "disposition": "transition",
+   "target": "Active_IdleExhausted_UnderCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "Release",
+   "disposition": "transition",
+   "target": "Shutdown",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "FactoryCreate",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 133,
+    "fragment": "if c.openingConns >= c.maxActive"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "FactoryFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 133,
+    "fragment": "if c.openingConns >= c.maxActive"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "IdleTimeout",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 133,
+    "fragment": "if c.openingConns >= c.maxActive"
+   }
+  },
+  {
+   "state": "Active_IdleExhausted_AtCapacity",
+   "event": "PingFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 133,
+    "fragment": "if c.openingConns >= c.maxActive"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "Get",
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "Put",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-04"
+  },
+  {
+   "state": "Released",
+   "event": "Close",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-08"
+  },
+  {
+   "state": "Released",
+   "event": "Release",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 234,
+    "fragment": "if conns == nil {"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "FactoryCreate",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 150,
+    "fragment": "if c.factory == nil"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "FactoryFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 150,
+    "fragment": "if c.factory == nil"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "IdleTimeout",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 105,
+    "fragment": "if conns == nil {"
+   }
+  },
+  {
+   "state": "Released",
+   "event": "PingFail",
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 105,
+    "fragment": "if conns == nil {"
+   }
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN",
+   "fault": [
+    "F-07",
+    "F-20"
+   ],
+   "trigger": "step-4 matrix walk",
+   "text": "CRITICAL: Release() does not close connReqs waiter channels. Goroutines blocked on <-req in Get() (channel.go:138) are never unblocked after pool termination. Release() at channel.go:216-236 sets conns=nil, factory=nil, close=nil, closes the conns channel, and drains idle connections \u2014 but never iterates c.connReqs to close individual waiter channels. Those goroutines receive neither a value nor a channel-close signal \u2014 they block forever. Pool terminal does not synchronize with Waiter lifecycle. Lifecycle coupling F-07: PoolReleased terminates the pool lifecycle but does not trigger cleanup in the WaitingCaller lifecycle. Missing transition: Release() \u2192 connReqs[i].close(). Expected: close each req chan so blocked callers receive ok==false and return ErrMaxActiveConnReached or ErrClosed."
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN",
+   "fault": [
+    "F-12"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Put/Close loss: caller crashes without returning/closing a connection. openingConns stays elevated, permanently consuming pool capacity. No idle-connection eviction goroutine exists \u2014 stale idle conns are only evicted on Get(), not proactively. Lost in-use connections are never recovered. Should the pool have a background reaper or timeout on openingConns?"
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN",
+   "fault": [
+    "F-14",
+    "F-03"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Put duplication: caller returns same connection twice. Pool has no duplicate-detection or ownership tracking. First Put succeeds (goes to idle/waiters), second Put may create duplicate idle entry or get closed if idle channel full. No error returned to caller. Should Put reject already-returned connections?"
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN",
+   "fault": [
+    "F-15",
+    "F-04"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Put after Release (out-of-order): conns is nil, Put falls through to c.Close(conn). But c.close is nil after Release \u2192 Close returns nil without actually closing the connection. openingConns is still decremented (channel.go:211). The connection is silently leaked and the counter drifts below zero. Should Put after Release return an error instead of silently no-opping?"
+  },
+  {
+   "id": "Q-05",
+   "status": "OPEN",
+   "fault": [
+    "F-16",
+    "F-07"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Put + Release race (contradiction): Release() sets c.conns=nil and closes the conns channel, then releases the lock and drains idle conns. Put() acquires lock between Release's lock/unlock and channel close, observes stale state, and may send to a channel that is about to be closed. The conn may be: (a) sent to conns before close \u2014 then closed by Release's drain loop; (b) sent to conns after close \u2014 panic on send to closed channel; (c) routed to a connReqs waiter whose channel is abandoned. None of these paths are guarded."
+  },
+  {
+   "id": "Q-06",
+   "status": "OPEN",
+   "fault": [
+    "F-18"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Spurious/foreign Put: pool accepts any connection regardless of origin. No ownership tracking or connection identity validation. A foreign connection inserted into the pool will be handed out to the next Get() caller, which will use a connection it doesn't own. This is a subtle-value fault (F-18): plausible payload, wrong identity."
+  },
+  {
+   "id": "Q-07",
+   "status": "OPEN",
+   "fault": [
+    "F-14",
+    "F-05"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Double Close: Close() decrements openingConns (channel.go:211) without checking if conn was already closed. Double-close on same conn decrements counter twice, potentially below zero. Counter corruption affects capacity tracking. Should Close() be idempotent per connection?"
+  },
+  {
+   "id": "Q-08",
+   "status": "OPEN",
+   "fault": [
+    "F-15",
+    "F-05"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Close after Release (out-of-order): c.close is nil \u2192 Close returns nil without closing the connection. openingConns still decremented (channel.go:211). Same pattern as Q-04: silent success, leaked connection, corrupted counter."
+  },
+  {
+   "id": "Q-09",
+   "status": "OPEN",
+   "fault": [
+    "F-16",
+    "F-04"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Close + Get race on same connection: Get() may hand out a connection (from idle channel or via factory) while Close() simultaneously closes that same connection. No per-connection lifecycle tracking. Caller may receive a closed or closing connection."
+  },
+  {
+   "id": "Q-10",
+   "status": "OPEN",
+   "fault": [
+    "F-17",
+    "F-05"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Spurious/foreign Close: pool accepts any conn for Close(), decrements openingConns regardless of whether the conn was ever owned by this pool. Counter drift accumulates over time, making capacity tracking unreliable."
+  },
+  {
+   "id": "Q-11",
+   "status": "OPEN",
+   "fault": [
+    "F-16",
+    "F-07"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Release + Get/Put contradiction: Release() acquires lock, nils fields, releases lock, then closes conns channel and drains idle conns OUTSIDE the lock. Between the unlock and the close(conns), concurrent Get()/Put() can observe conns==nil (shutdown) or the old conns channel (about to be closed). The window between mutex unlock and close(conns) is an unprotected race surface."
+  },
+  {
+   "id": "Q-12",
+   "status": "OPEN",
+   "fault": [
+    "F-17",
+    "F-07"
+   ],
+   "trigger": "step-3 checklist",
+   "text": "Spontaneous Release: any goroutine with a reference to the pool can call Release() and destroy it \u2014 closing all idle connections, orphaning waiters, and making the pool permanently unusable. No access control or ownership model. A spurious Release is indistinguishable from a legitimate shutdown."
+  }
+ ],
+ "coverage": {
+  "Get": {
+   "loss": "UV_Get_Loss \u2014 n/a: caller-side omission, pool has no timeout for unclaimed Get",
+   "delay": "UV_Get_Delay \u2014 same as base Get, later arrival",
+   "duplication": "UV_Get_Duplication \u2014 concurrent Gets are normal, each goroutine independent",
+   "out-of-order": "UV_Get_OutOfOrder \u2014 Get after Release \u2192 ErrClosed (channel.go:99)",
+   "contradiction": "UV_Get_Contradiction \u2192 Q-01: race with Release, nil channel receive blocks forever",
+   "commission": "UV_Get_Commission \u2014 n/a: Go method calls cannot be spuriously dispatched",
+   "value": "UV_Get_Value \u2014 n/a: Get() takes no arguments, no value fault surface"
+  },
+  "Put": {
+   "loss": "UV_Put_Loss \u2192 Q-02: connection never returned, capacity leak, no eviction goroutine",
+   "delay": "UV_Put_Delay \u2014 same as base Put",
+   "duplication": "UV_Put_Duplication \u2192 Q-03: no duplicate detection, second Put may duplicate idle entry",
+   "out-of-order": "UV_Put_OutOfOrder \u2192 Q-04: Put after Release, close=nil \u2192 silent leak, counter drift",
+   "contradiction": "UV_Put_Contradiction \u2192 Q-05: Put+Release race, channel send to closing/closing conns",
+   "commission": "UV_Put_Commission \u2192 Q-06: foreign conn accepted, no ownership tracking",
+   "value": "UV_Put_Value \u2014 reject: conn==nil \u2192 error (channel.go:184)"
+  },
+  "Close": {
+   "loss": "UV_Close_Loss \u2014 n/a: caller omission, same as Put loss (capacity leak)",
+   "delay": "UV_Close_Delay \u2014 same as base Close",
+   "duplication": "UV_Close_Duplication \u2192 Q-07: double Close decrements counter twice, no idempotency",
+   "out-of-order": "UV_Close_OutOfOrder \u2192 Q-08: Close after Release, close=nil \u2192 noop + counter drift",
+   "contradiction": "UV_Close_Contradiction \u2192 Q-09: Close+Get race, conn may be handed out while being closed",
+   "commission": "UV_Close_Commission \u2192 Q-10: foreign Close decrements counter, drifts capacity tracking",
+   "value": "UV_Close_Value \u2014 reject: conn==nil \u2192 error (channel.go:203)"
+  },
+  "Release": {
+   "loss": "UV_Release_Loss \u2014 n/a: application-level resource leak, outside pool lifecycle model",
+   "delay": "UV_Release_Delay \u2014 same as base Release",
+   "duplication": "UV_Release_Duplication \u2014 ignore (documented): conns==nil guard makes it idempotent (channel.go:225)",
+   "out-of-order": "UV_Release_OutOfOrder \u2014 ignore (documented): same as duplication, idempotent",
+   "contradiction": "UV_Release_Contradiction \u2192 Q-11: unprotected window between unlock and close(conns)",
+   "commission": "UV_Release_Commission \u2192 Q-12: no access control, any goroutine can destroy pool",
+   "value": "UV_Release_Value \u2014 n/a: Release() takes no arguments"
+  }
+ },
+ "pairs": [
+  {
+   "id": "P-01a",
+   "trace": "Get\u2192conn then Release before Put: goroutine gets conn from idle channel, another goroutine calls Release(). Release closes conns channel and drains idle connections. Get's conn is NOT in idle chan (already handed out) so it survives Release's drain. Put after Release \u2192 c.Close(conn) with close=nil \u2192 silent leak (Q-04)."
+  },
+  {
+   "id": "P-01b",
+   "trace": "Release then Get: Release sets conns=nil, Get returns ErrClosed. Clean rejection."
+  },
+  {
+   "id": "P-02a",
+   "trace": "Put then Release: Put adds conn to idle channel. Release closes conns and drains \u2014 the just-put conn is closed in the drain loop. Clean if Release happens after Put completes within lock."
+  },
+  {
+   "id": "P-02b",
+   "trace": "Release then Put: Release sets conns=nil. Put checks conns==nil, calls c.Close(conn) with close=nil \u2192 silent leak (Q-04)."
+  },
+  {
+   "id": "P-03a",
+   "trace": "Blocked Get then Release: Get() adds waiter to connReqs (channel.go:136), blocks on <-req (channel.go:138). Release never closes req channel \u2192 waiter blocks forever (Q-01)."
+  },
+  {
+   "id": "P-03b",
+   "trace": "Release then Get: Get sees conns==nil, returns ErrClosed. Clean."
+  },
+  {
+   "id": "P-04a",
+   "trace": "Put then Close on same conn: Put returns conn to idle/waiters. Close decrements openingConns. If the conn was Put to idle, Get may hand it out before Close. If Put served a waiter, Close targets a different conn (the owner still holds it). The association between Put and Close is caller-managed, not pool-managed (Q-09)."
+  },
+  {
+   "id": "P-04b",
+   "trace": "Close then Put on same conn: Close decrements openingConns and calls user close func. Put of the already-closed conn succeeds \u2014 pool accepts it (Q-06). The closed conn enters idle queue and will be handed to next Get caller."
+  },
+  {
+   "id": "P-05a",
+   "trace": "Double Release: first Release transitions to Shutdown. Second Release checks conns==nil and returns immediately (channel.go:225). Idempotent."
+  },
+  {
+   "id": "P-05b",
+   "trace": "Concurrent Releases: both check conns==nil under separate lock acquisitions, one wins the race. The winner closes conns and drains. The loser finds conns==nil and returns. Both idle conns drain loops are serialized by the conns==nil guard."
+  },
+  {
+   "id": "P-06a",
+   "trace": "Get at capacity then Put: Get blocks on connReqs. Put serves first waiter via req channel send. Waiter returns conn. Normal operation."
+  },
+  {
+   "id": "P-06b",
+   "trace": "Put then Get at capacity: Put serves a pre-existing waiter, or adds to idle. Get picks from idle. Normal."
+  }
+ ],
+ "guardGroups": [
+  {
+   "id": "G-01",
+   "outcome": "not-formalizable",
+   "reason": "external-call: factory() and ping() are user-provided functions. Their success/failure is controlled by external state (network, remote service)."
+  },
+  {
+   "id": "G-02",
+   "outcome": "not-formalizable",
+   "reason": "clock: IdleTimeout check depends on system clock and wall time. Go's time.Now() monotonicity is a runtime property outside the statechart boundary."
+  },
+  {
+   "id": "G-03",
+   "outcome": "not-formalizable",
+   "reason": "dynamic-state: Capacity guard (openingConns >= maxActive) depends on a runtime counter mutated by concurrent Get/Put/Close calls. The interleaving of these mutations is a concurrency-scheduling property outside single-threaded statechart reasoning."
+  },
+  {
+   "id": "G-04",
+   "outcome": "not-formalizable",
+   "reason": "dynamic-state: connReqs queue length is a dynamic counter. Waiter service order is FIFO by slice position. Formalization requires modeling concurrent append/remove, which crosses the single-event assumption boundary."
+  }
+ ],
+ "completeness": {
+  "pairs": {
+   "count": 0,
+   "reason": "Pairs section present with 12 traces covering all critical cross-source orderings."
+  },
+  "guardGroups": {
+   "count": 0,
+   "reason": "Guard groups present; all 4 are not-formalizable with categorized reasons."
+  },
+  "coverage": {
+   "count": 0,
+   "reason": "Coverage table present with all 4 sources \u00d7 7 UV categories documented."
+  }
+ },
+ "docLines": [
+  {
+   "id": "DOC-01",
+   "mapping": "cell",
+   "target": "Active_IdleAvailable x Get"
+  },
+  {
+   "id": "DOC-02",
+   "mapping": "cell",
+   "target": "Active_IdleAvailable x Put"
+  },
+  {
+   "id": "DOC-03",
+   "mapping": "cell",
+   "target": "Active_IdleAvailable x Close"
+  },
+  {
+   "id": "DOC-04",
+   "mapping": "cell",
+   "target": "Active_IdleAvailable x Release"
+  },
+  {
+   "id": "DOC-05",
+   "mapping": "cell",
+   "target": "Active_IdleExhausted_AtCapacity x Get"
+  },
+  {
+   "id": "DOC-06",
+   "mapping": "cell",
+   "target": "Active_IdleAvailable x IdleTimeout"
+  },
+  {
+   "id": "DOC-07",
+   "mapping": "cell",
+   "target": "Active_IdleAvailable x PingFailure"
+  },
+  {
+   "id": "DOC-08",
+   "mapping": "invariant",
+   "target": "SYS-InitialCap"
+  },
+  {
+   "id": "DOC-09",
+   "mapping": "invariant",
+   "target": "SYS-WaiterPriority"
+  }
+ ],
+ "behaviouralDrs": []
+}
