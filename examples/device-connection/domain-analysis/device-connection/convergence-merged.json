@@ -1,0 +1,537 @@
+{
+ "formatVersion": "1.0",
+ "component": "device-connection",
+ "packVersion": "",
+ "analyzedSha": "35567f274f011cd65a0fa726e0949f25ea457f54",
+ "watchPaths": [
+  "examples/device-connection/device_connection.py",
+  "examples/device-connection/README.md"
+ ],
+ "states": [
+  "connected",
+  "connecting",
+  "disconnected",
+  "failed",
+  "reconnecting"
+ ],
+ "events": [
+  {
+   "id": "UV-connect-commission",
+   "undesired": true,
+   "gate": "service-side state (component cannot distinguish from legitimate connect)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-contradiction",
+   "undesired": true,
+   "gate": "service-side state (interleaving with disconnect determines outcome)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-delay",
+   "undesired": true,
+   "gate": "service-side state (same as connect)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-duplication",
+   "undesired": true,
+   "gate": "service-side state (second connect may hit idempotent guard)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-loss",
+   "undesired": true,
+   "gate": "n/a — event never arrives",
+   "upstream_guards": [
+    "n/a"
+   ]
+  },
+  {
+   "id": "UV-connect-out-of-order",
+   "undesired": true,
+   "gate": "service-side state (connect processed after a later disconnect)",
+   "upstream_guards": [
+    "same as connect"
+   ]
+  },
+  {
+   "id": "UV-connect-value",
+   "undesired": true,
+   "gate": "n/a — connect() takes no payload",
+   "upstream_guards": [
+    "n/a"
+   ]
+  },
+  {
+   "id": "UV-disconnect-commission",
+   "undesired": true,
+   "gate": "service-side state (component cannot distinguish from legitimate disconnect)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-contradiction",
+   "undesired": true,
+   "gate": "service-side state (interleaving with connect determines outcome)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-delay",
+   "undesired": true,
+   "gate": "service-side state (same as disconnect)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-duplication",
+   "undesired": true,
+   "gate": "service-side state (second disconnect is idempotent)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-loss",
+   "undesired": true,
+   "gate": "n/a — event never arrives",
+   "upstream_guards": [
+    "n/a"
+   ]
+  },
+  {
+   "id": "UV-disconnect-out-of-order",
+   "undesired": true,
+   "gate": "service-side state (disconnect processed after a later connect)",
+   "upstream_guards": [
+    "same as disconnect"
+   ]
+  },
+  {
+   "id": "UV-disconnect-value",
+   "undesired": true,
+   "gate": "n/a — disconnect() takes no payload",
+   "upstream_guards": [
+    "n/a"
+   ]
+  },
+  {
+   "id": "backoff_elapsed",
+   "undesired": false,
+   "gate": "internal (asyncio.sleep completion)",
+   "upstream_guards": [
+    "n/a (internal event)"
+   ]
+  },
+  {
+   "id": "connect",
+   "undesired": false,
+   "gate": "service-side state (idempotent guard on CONNECTED/CONNECTING; FAILED guard raises)",
+   "upstream_guards": [
+    "validated upstream (caller ensures device exists)"
+   ]
+  },
+  {
+   "id": "connection_fails",
+   "undesired": false,
+   "gate": "internal (outcome of _attempt_connection)",
+   "upstream_guards": [
+    "n/a (internal event)"
+   ]
+  },
+  {
+   "id": "connection_succeeds",
+   "undesired": false,
+   "gate": "internal (outcome of _attempt_connection)",
+   "upstream_guards": [
+    "n/a (internal event)"
+   ]
+  },
+  {
+   "id": "connection_timeout",
+   "undesired": false,
+   "gate": "internal (outcome of _attempt_connection)",
+   "upstream_guards": [
+    "n/a (internal event)"
+   ]
+  },
+  {
+   "id": "disconnect",
+   "undesired": false,
+   "gate": "service-side state (no guard — always processes)",
+   "upstream_guards": [
+    "validated upstream (caller ensures device exists)"
+   ]
+  },
+  {
+   "id": "max_retries_exhausted",
+   "undesired": false,
+   "gate": "internal (retry_count >= max_retries check)",
+   "upstream_guards": [
+    "n/a (internal event)"
+   ]
+  }
+ ],
+ "cells": [
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "backoff_elapsed"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTED",
+   "event": "connect"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "connection_fails"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "connection_succeeds"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "connection_timeout"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTED",
+   "event": "disconnect"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTED",
+   "event": "max_retries_exhausted"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "CONNECTING",
+   "event": "backoff_elapsed"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "state": "CONNECTING",
+   "event": "connect"
+  },
+  {
+   "disposition": "transition",
+   "target": "RECONNECTING",
+   "state": "CONNECTING",
+   "event": "connection_fails"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTED",
+   "state": "CONNECTING",
+   "event": "connection_succeeds"
+  },
+  {
+   "disposition": "transition",
+   "target": "RECONNECTING",
+   "state": "CONNECTING",
+   "event": "connection_timeout"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "CONNECTING",
+   "event": "disconnect"
+  },
+  {
+   "state": "CONNECTING",
+   "event": "max_retries_exhausted",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-EC-01"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "DISCONNECTED",
+   "event": "backoff_elapsed"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTING",
+   "state": "DISCONNECTED",
+   "event": "connect"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "DISCONNECTED",
+   "event": "connection_fails"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "DISCONNECTED",
+   "event": "connection_succeeds"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "DISCONNECTED",
+   "event": "connection_timeout"
+  },
+  {
+   "state": "DISCONNECTED",
+   "event": "disconnect",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-EC-02"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "DISCONNECTED",
+   "event": "max_retries_exhausted"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "FAILED",
+   "event": "backoff_elapsed"
+  },
+  {
+   "disposition": "reject",
+   "state": "FAILED",
+   "event": "connect"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "FAILED",
+   "event": "connection_fails"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "FAILED",
+   "event": "connection_succeeds"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "FAILED",
+   "event": "connection_timeout"
+  },
+  {
+   "state": "FAILED",
+   "event": "disconnect",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-EC-03"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01",
+   "state": "FAILED",
+   "event": "max_retries_exhausted"
+  },
+  {
+   "disposition": "handle",
+   "state": "RECONNECTING",
+   "event": "backoff_elapsed"
+  },
+  {
+   "state": "RECONNECTING",
+   "event": "connect",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-EC-04"
+  },
+  {
+   "disposition": "transition",
+   "target": "RECONNECTING",
+   "state": "RECONNECTING",
+   "event": "connection_fails"
+  },
+  {
+   "disposition": "transition",
+   "target": "CONNECTED",
+   "state": "RECONNECTING",
+   "event": "connection_succeeds"
+  },
+  {
+   "disposition": "transition",
+   "target": "RECONNECTING",
+   "state": "RECONNECTING",
+   "event": "connection_timeout"
+  },
+  {
+   "disposition": "transition",
+   "target": "DISCONNECTED",
+   "state": "RECONNECTING",
+   "event": "disconnect"
+  },
+  {
+   "state": "RECONNECTING",
+   "event": "max_retries_exhausted",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-EC-05"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-05",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-EC-01",
+   "status": "OPEN",
+   "text": "Ensemble divergence at (CONNECTING, max_retries_exhausted): run1: transition→failed; run2: UNSPECIFIED. Multiple independent pilot runs disagree on the disposition. Human decision required."
+  },
+  {
+   "id": "Q-EC-02",
+   "status": "OPEN",
+   "text": "Ensemble divergence at (DISCONNECTED, disconnect): run1: handle; run2: ignore (documented). Multiple independent pilot runs disagree on the disposition. Human decision required."
+  },
+  {
+   "id": "Q-EC-03",
+   "status": "OPEN",
+   "text": "Ensemble divergence at (FAILED, disconnect): run1: transition→disconnected; run2: UNSPECIFIED. Multiple independent pilot runs disagree on the disposition. Human decision required."
+  },
+  {
+   "id": "Q-EC-04",
+   "status": "OPEN",
+   "text": "Ensemble divergence at (RECONNECTING, connect): run1: transition→connecting; run2: UNSPECIFIED. Multiple independent pilot runs disagree on the disposition. Human decision required."
+  },
+  {
+   "id": "Q-EC-05",
+   "status": "OPEN",
+   "text": "Ensemble divergence at (RECONNECTING, max_retries_exhausted): run1: transition→failed; run2: UNSPECIFIED. Multiple independent pilot runs disagree on the disposition. Human decision required."
+  }
+ ],
+ "behaviouralDrs": [],
+ "docLines": [
+  {
+   "id": "DOC-1",
+   "mapping": "cell",
+   "target": "(DISCONNECTED, connect), (CONNECTING, connect), (CONNECTED, connect)"
+  },
+  {
+   "id": "DOC-2",
+   "mapping": "cell",
+   "target": "(CONNECTING, disconnect), (RECONNECTING, disconnect)"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "cell",
+   "target": "(CONNECTING, connection_succeeds), (RECONNECTING, connection_succeeds)"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "invariant",
+   "target": "SYS-3"
+  },
+  {
+   "id": "DOC-4",
+   "mapping": "cell",
+   "target": "(CONNECTING, connection_fails), (CONNECTING, connection_timeout), (RECONNECTING, connection_fails), (RECONNECTING, connection_timeout)"
+  },
+  {
+   "id": "DOC-5",
+   "mapping": "cell",
+   "target": "(CONNECTING, max_retries_exhausted), (RECONNECTING, max_retries_exhausted), (FAILED, connect)"
+  },
+  {
+   "id": "DOC-5",
+   "mapping": "invariant",
+   "target": "SYS-1, SYS-4"
+  },
+  {
+   "id": "DOC-6",
+   "mapping": "cell",
+   "target": "(CONNECTING, disconnect), (RECONNECTING, disconnect)"
+  },
+  {
+   "id": "DOC-7",
+   "mapping": "cell",
+   "target": "(CONNECTING, connection_timeout), (RECONNECTING, connection_timeout)"
+  },
+  {
+   "id": "DOC-8",
+   "mapping": "invariant",
+   "target": "SYS-3 — retry_count=0 on connect; **gap**: reset happens before min_uptime elapses → Q-04"
+  },
+  {
+   "id": "DOC-9",
+   "mapping": "cell",
+   "target": "backoff jitter at `device_connection.py:113-114`"
+  }
+ ],
+ "completeness": {
+  "pairs": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from adversarial-traces.md before the component claims L4."
+  },
+  "guardGroups": {
+   "count": 0,
+   "reason": "the sidecar generator derives cells from disposition-matrix.md only; this section is not in the matrix. Merge it from guard-results.txt before the component claims L4."
+  }
+ },
+ "coverage": {
+  "connect": {
+   "loss": "applicable — async call may be dropped before dispatch",
+   "delay": "applicable — async call may be delayed",
+   "duplication": "applicable — caller may retry",
+   "out-of-order": "applicable — may arrive after a later disconnect",
+   "contradiction": "applicable — may race with disconnect",
+   "commission": "applicable — spurious wakeup or callback possible",
+   "value": "n/a: connect() takes no arguments; wrong-instance call is a caller error, not a payload fault"
+  },
+  "disconnect": {
+   "loss": "applicable — async call may be dropped before dispatch",
+   "delay": "applicable — async call may be delayed",
+   "duplication": "applicable — caller may retry",
+   "out-of-order": "applicable — may arrive after a later connect",
+   "contradiction": "applicable — may race with connect",
+   "commission": "applicable — spurious wakeup or callback possible",
+   "value": "n/a: disconnect() takes no arguments; wrong-instance call is a caller error, not a payload fault"
+  }
+ },
+ "ensembleConvergence": {
+  "runs": 2,
+  "convergenceRate": "85.7%",
+  "divergentCells": 5,
+  "newQuestions": 5,
+  "structuralFindings": 14
+ }
+}

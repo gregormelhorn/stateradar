@@ -2,12 +2,22 @@
 
 ## 1. CONVERGENCE.md — calibration data
 
-**Status:** ✅ Baseline recorded (2026-08-07, pack v1.37, 02-pilot
-v1.15): two independent runs, aligned base grid 47/49 convergent
-(4.1 % cell divergence, single root cause: one state-granularity
-decision), finding-level convergence 9/11 (82 %), zero contradictory
-findings. Variance concentrates in undesired-variant slicing — the
-input for roadmap entry 5 (ensemble convergence). Repeat per release.
+**Status:** ✅ Baselines recorded.
+
+**silenceper-pool-32** (2026-08-07, pack v1.37, 02-pilot v1.15): two independent
+runs, aligned base grid 47/49 convergent (4.1 % cell divergence, single root
+cause: one state-granularity decision), finding-level convergence 9/11 (82 %),
+zero contradictory findings.
+
+**device-connection** (2026-08-07, pack v1.49, 02-pilot v1.15): two independent
+runs, aligned 5-state × 7-event base grid 30/35 convergent (85.7 % cell
+convergence, five divergent cells → Q-EC-01 through Q-EC-05). 14 structural
+findings — all from undesired-variant slicing (run1 generated full UV
+checklist, run2 produced none). Finding-level convergence: 10 total questions
+(5 intra-run + 5 ensemble-divergence). Zero contradictory findings.
+
+Variance concentrates in undesired-variant slicing — the input for roadmap
+entry 5 (ensemble convergence). Repeat per release.
 
 ## 2. Synthetic example ("Device Connection")
 
