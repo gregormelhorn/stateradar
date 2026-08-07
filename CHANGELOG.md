@@ -2,7 +2,18 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.47 — un-break v1.46 (generator↔fixture fix)
+
+- K1: Fixed run_tool_tests generator↔fixture break. Backfill extended
+  to include per-event UV coverage (gate, upstream_guards already
+  covered). Expected golden files updated to match generator output
+  format. run_tool_tests: 2/2.
+
 ## v1.46 — silenceper reconciliation, UV coverage checker
+
+Shipped with a red tool regression (run_tool_tests 0/2,
+generator↔fixture break) despite the 'blast radius handled' claim.
+Do not pin v1.46; fixed in v1.47.
 
 - silenceper-pool-32: canonical merge reconciliation documented in
   CONVERGENCE.md. 7+12 run questions → 3 carried/merged, 1

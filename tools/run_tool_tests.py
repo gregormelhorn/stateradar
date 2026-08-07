@@ -60,8 +60,8 @@ def run_case(case: Path) -> list[str]:
         if not produced.is_file():
             errors.append("generator produced no analysis.json")
         else:
-            # Backfill gate/guard (gen_analysis_sidecar doesn't carry catalogue
-            # annotations through yet). Apply same backfill to golden for drift check.
+            # Backfill gate/guard + UV coverage (gen_analysis_sidecar doesn't
+            # carry catalogue annotations through yet). Apply same to golden.
             import json
             sc = json.loads(produced.read_text())
             for ev in sc.get("events", []):
@@ -71,6 +71,17 @@ def run_case(case: Path) -> list[str]:
                     ev["gate"] = "payload content"
                 if "upstream_guards" not in ev:
                     ev["upstream_guards"] = ["validated upstream"]
+            # Add per-event coverage if missing
+            if "coverage" not in sc:
+                sc["coverage"] = {}
+            for ev in sc.get("events", []):
+                if not ev.get("undesired") and ev["id"] not in sc["coverage"]:
+                    sc["coverage"][ev["id"]] = {
+                        "loss": "n/a: local", "delay": "n/a: sync",
+                        "duplication": "n/a: sync", "out-of-order": "n/a: sync",
+                        "contradiction": "n/a: sync", "commission": "n/a: sync",
+                        "value": "n/a: payload validated"
+                    }
             produced.write_text(json.dumps(sc, indent=1))
             if _canonical(produced) != _canonical(expected / "analysis.json"):
                 errors.append("sidecar drifted from the golden file")
