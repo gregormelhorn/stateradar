@@ -3,6 +3,8 @@
 **Find the missing transition.**
 
 **Open-source lifecycle contract verification for stateful software.**
+**Spec-driven development for temporal behaviour — with a checkable
+completeness criterion.**
 
 StateRadar reconstructs independently (1) what behaviour the
 requirements and documented contracts demand, (2) what state model the
@@ -113,6 +115,20 @@ progress after deadline expiry, the faulty dependence on the
 event-loop callback, and the gap between protocol, transport, and
 caller lifecycles.
 
+### grpc-go — stale backoff after an established connection
+
+On the frozen v1.18.0 tree, the `addrConn` pilot recorded Q-03: the
+reconnect sleep duration is computed once per loop iteration and
+consumed stale after a healthy connection dies — up to 120 seconds of
+dead air. The cross-connection backoff index was reset on success, the
+loop-local sleep value was not: "Ready + backoff reset" was two
+half-effects, not one atomic obligation. That is exactly what
+maintainers later fixed in PR #2669 ("client: reset backoff to 0
+after a connection is established"). The blind pass derived the same
+cells independently from the backoff contract alone. The pilot also
+exposed two pack harness defects, fixed the same day (see CHANGELOG
+v1.36).
+
 Earlier pilots on eight real-world components (reconnecting-websocket,
 gobreaker, recws, recloser, cenkalti/backoff, tungstenite-rs,
 tenacity) reached 93% tracker-bug coverage and surfaced eight new
@@ -165,7 +181,9 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 procedures — disjointness, coverage, boundary — that
                 per-run check_guards.py scripts delegate to),
                 requirements-dev.txt (pinned dev/CI dependencies),
-                templates/
+                run_benchmark (regression runner for tests/benchmarks:
+                clones each case's pinned commit and asserts the
+                expected findings), templates/
                 (the CI gate file + the per-component checker wrapper)
 formats/        analysis.schema.json + manifest.schema.json — the sidecar
                 and manifest contracts; rules.toml — the rules registry

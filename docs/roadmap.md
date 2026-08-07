@@ -2,11 +2,12 @@
 
 ## 1. CONVERGENCE.md — calibration data
 
-**Status:** Framework ready. `tests/device-connection/CONVERGENCE.md`
-has the protocol and template. Needs two independent pilot runs on the
-synthetic Device Connection component. Run the pilot twice in fresh
-sessions, diff the matrices, record the divergence rate. Repeat per
-release to establish a baseline.
+**Status:** ✅ Baseline recorded (2026-08-07, pack v1.37, 02-pilot
+v1.15): two independent runs, aligned base grid 47/49 convergent
+(4.1 % cell divergence, single root cause: one state-granularity
+decision), finding-level convergence 9/11 (82 %), zero contradictory
+findings. Variance concentrates in undesired-variant slicing — the
+input for roadmap entry 5 (ensemble convergence). Repeat per release.
 
 ## 2. Synthetic example ("Device Connection")
 

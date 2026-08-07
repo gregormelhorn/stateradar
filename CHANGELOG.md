@@ -14,10 +14,16 @@
   checker-candidate backlog is empty — every rule is now enforced by
   a checker with a red proof, a test, a lint, or a documented
   decision.**
+- CONVERGENCE baseline recorded (tests/device-connection): two
+  independent v1.15 pilot runs on the synthetic component — 47/49
+  aligned base cells convergent (4.1 % divergence, one granularity
+  root cause), 9/11 findings found by both, none contradictory;
+  variance sits in undesired-variant slicing (→ roadmap 5).
+- README: SDD positioning line; grpc-go joins the proven pilot cases;
+  run_benchmark added to the tools list.
 - Fixture repairs the new checks forced: golden/red-mini catalogues
   never listed UV-M1-dup in the events table; both matrices lacked an
   abstraction statement.
-
 - PA-22 graduates from lint to checker: invariants-and-lints.md
   carries a `<!-- doc-ids: ... -->` declaration plus a machine-readable
   `## Doctrine mapping` table (DOC-n → cell / invariant / constraint /

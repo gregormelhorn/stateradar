@@ -15,12 +15,15 @@ Remaining follow-ups, tracked as registry warnings (not silent):
   stdlib-only policy was dropped — `tools/guard_proofs.py` is the
   pack-shipped proof procedure with its own red cases, z3-solver is a
   pinned dev dependency (`tools/requirements-dev.txt`).
-* Six `checker_candidate` rules: PA-4, PA-7, PA-10, PA-17, PA-22, and
-  R-REQUIREMENT-SCOPE — the last one downgraded from a false
-  enforcement claim: AGENTS §5 advertised a scope-line checker that no
-  tool implements. The registry constraints surfaced it.
-* ODC backfill over the eleven existing pilot manifests (fault class ×
-  trigger per recorded finding).
+* Checker candidates: none left (2026-08-07). PA-17, PA-22, PA-4,
+  PA-10 and the scope-line rule became checkers with red selftests;
+  PA-7 was resolved by documented decision (bindings are discharged by
+  the fragment-citation discipline). R-REQUIREMENT-SCOPE had briefly
+  been a false enforcement claim the registry constraints exposed —
+  implemented for real the same day.
+* ODC backfill: done for the four in-repo benchmark cases; the seven
+  external-session pilots have no checked-in manifests. The grpc-go
+  pilot produced the first live ODC data (nine distinct detectors).
 
 ## Problem
 
