@@ -39,6 +39,15 @@ the connection is leaked, openingConns is not decremented (already stale).
 returns successfully without a second physical close; callers return or close all
 borrowed connections before releasing the pool.
 
+## Q-04: Waiter-path Ping validation (F-03)
+
+**Status:** ANSWERED — [DR-004](decisions/DR-004.yaml); to-be model and test generation pending.
+
+When `Ping` is configured, every connection must pass it before `Get()` returns
+that connection, including one delivered to a queued waiter. On Ping failure,
+the pool discards/closes the connection and retries acquisition; it does not
+return the failed connection or merely pass the Ping error through.
+
 ## Q-05: FactoryFail handling (F-01)
 
 Factory failure during Get() at channel.go:155 returns error to caller
