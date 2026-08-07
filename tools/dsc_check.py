@@ -174,6 +174,16 @@ def main() -> int:
             if trigger and trigger not in trigger_vocab:
                 E(f"question {q['id']}: trigger {trigger!r} not in ODC trigger vocabulary")
 
+    # R-GATE-TYPE + R-UPSTREAM-GUARD: presence check on base events
+    # (undesired variants inherit from their base event).
+    for ev in data.get("events", []):
+        if ev.get("undesired"):
+            continue  # UV events inherit gate/guard from their base
+        if not ev.get("gate"):
+            E(f"event {ev['id']}: missing gate-type annotation (R-GATE-TYPE)")
+        if not ev.get("upstream_guards"):
+            E(f"event {ev['id']}: missing upstream-guard annotation (R-UPSTREAM-GUARD)")
+
     # PA-22 doctrine-line mapping. The doc-ids declaration in
     # invariants-and-lints.md is the universe; every declared DOC-n
     # must map (sidecar docLines) to an existing cell, an invariant/

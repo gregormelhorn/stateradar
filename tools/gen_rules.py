@@ -143,7 +143,7 @@ def render_all(reg: dict) -> dict[str, str]:
 
 # -------------------------------------------------------------- constraints
 
-def constraints(reg: dict) -> tuple[list[str], list[str]]:
+def constraints(reg: dict, root: Path) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
     fault_ids = [f["id"] for f in reg.get("faults", [])]
@@ -225,6 +225,13 @@ def constraints(reg: dict) -> tuple[list[str], list[str]]:
         )
         if not has_target and r.get("enforcement") != "checker":
             warnings.append(f"dark rule (no prose anchor): {r['id']} — {r['title']}")
+        # Verify prose_ref file exists (section existence is best-effort)
+        pref = r.get("prose_ref", "")
+        if pref and "#" in pref:
+            fname = pref.split("#", 1)[0]
+            target_path = root / fname
+            if not target_path.is_file():
+                errors.append(f"{r['id']}: prose_ref file not found: {fname}")
 
     return errors, warnings
 
@@ -233,7 +240,7 @@ def constraints(reg: dict) -> tuple[list[str], list[str]]:
 
 def check(root: Path) -> tuple[list[str], list[str]]:
     reg = load(root)
-    errors, warnings = constraints(reg)
+    errors, warnings = constraints(reg, root)
     blocks = render_all(reg)
     used: set[str] = set()
     for rel in TARGETS:
@@ -310,20 +317,20 @@ def selftest() -> int:
     victim = next(r for r in broken["rules"]
                   if r.get("enforcement") == "checker" and r.get("selftest_ref"))
     del victim["selftest_ref"]
-    e, _ = constraints(broken)
+    e, _ = constraints(broken, ROOT)
     expect("checker without selftest_ref", True, e, "selftest_ref")
 
     # red 2: detects pointing at an unknown fault must fail
     broken = copy.deepcopy(reg)
     broken["rules"][0]["detects"] = ["F-99"]
-    e, _ = constraints(broken)
+    e, _ = constraints(broken, ROOT)
     expect("unknown fault id in detects", True, e, "F-99")
 
     # red 3: fault-model rule without detects must fail
     broken = copy.deepcopy(reg)
     victim = next(r for r in broken["rules"] if r.get("class") == "fault-model")
     victim.pop("detects", None)
-    e, _ = constraints(broken)
+    e, _ = constraints(broken, ROOT)
     expect("fault-model without detects", True, e, "without detects")
 
     # red 4: a drifted generated block must fail --check

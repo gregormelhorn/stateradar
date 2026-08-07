@@ -2,7 +2,21 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
-## v1.41 — registry deep-review: ODC data path, fault-catalogue corrections, dark-rule anchors
+## v1.42 — finish line: prose anchors, gate/guard checkers, warning budget zero
+
+- **F1:** Tags v1.38–v1.41 verified pushed via ls-remote.
+- **F2:** 31 dark rules now have prose_ref anchors pointing to their
+  normative prose in prompts/02-pilot.md, 00-methods-reference.md,
+  AGENTS.md, and 07-test-audit.md. gen_rules validates prose_ref file
+  existence. Red probe: removing prose_ref re-produces dark-rule warning.
+- **F3:** R-GATE-TYPE and R-UPSTREAM-GUARD implemented as dsc_check
+  presence checks on events. Schema gains optional `gate` (string) and
+  `upstream_guards` (string[]) on events. Red selftests for missing
+  gate/guard. All fixtures, benchmarks, and device-connection runs
+  backfilled. Registry: enforcement=checker, checker_candidate removed,
+  catches lines added. AGENTS.md §5 regenerated with two new entries.
+- **F4:** Warning budget is zero — any gen_rules warning is a defect.
+  66 rules, 22 fault classes, 0 warnings.
 
 - **RR1:** R-REQUIREMENT-SCOPE split into -a (semantic, prompt) and -b
   (mechanical scope line, checker). The checker no longer overclaims

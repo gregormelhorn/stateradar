@@ -49,6 +49,15 @@
      },
      "undesired": {
       "type": "boolean"
+     },
+     "gate": {
+      "type": "string",
+      "description": "R-GATE-TYPE: gate-type annotation for branching events"
+     },
+     "upstream_guards": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "R-UPSTREAM-GUARD: validations that happen upstream of this event"
      }
     }
    }

@@ -1,3 +1,4 @@
+<!-- rule:R-WEAK-TEST-AUDIT -->
 # Test Audit — Weak Tests and Coverage Prompt
 
 **How to use:** fill in the CONFIG block. Then paste this file into your coding agent at the repository root. The agent audits an existing test suite against the decided disposition matrix of one analyzed component. Its main goal: improve test and software quality. It finds weak tests that bind to implementation instead of behaviour. It finds redundant tests, coverage gaps, and deviations. It never changes, deletes, or weakens a test.

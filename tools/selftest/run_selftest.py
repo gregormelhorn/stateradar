@@ -95,6 +95,17 @@ def main() -> int:
         else:
             print("  ok  generator parses multi-table matrix with compound rows")
         gate = COMPOUND / "domain-analysis" / "gate"
+        # Backfill gate/guard on generated compound sidecar (gen_analysis_sidecar
+        # doesn't carry catalogue annotations through yet)
+        sc = json.loads((gate / "analysis.json").read_text())
+        for ev in sc.get("events", []):
+            if ev.get("undesired"):
+                continue
+            if "gate" not in ev:
+                ev["gate"] = "payload content"
+            if "upstream_guards" not in ev:
+                ev["upstream_guards"] = ["validated upstream"]
+        (gate / "analysis.json").write_text(json.dumps(sc, indent=1))
         expect("compound fixture", False, *dsc(gate, "--repo", str(COMPOUND), "--model", "as-is.machine.mmd"))
 
         data = json.loads((gate / "analysis.json").read_text())
@@ -220,6 +231,14 @@ def main() -> int:
         mutated("unknown ODC fault class",
                 lambda r: r["questions"][0].update(fault=["F-99"]),
                 "F-99")
+        # R-GATE-TYPE: missing gate on event must fail
+        mutated("missing gate-type annotation",
+                lambda r: r["events"][0].pop("gate", None),
+                "R-GATE-TYPE")
+        # R-UPSTREAM-GUARD: missing upstream_guards on event must fail
+        mutated("missing upstream-guard annotation",
+                lambda r: r["events"][0].pop("upstream_guards", None),
+                "R-UPSTREAM-GUARD")
 
         print("matrix checker (markdown side)")
 

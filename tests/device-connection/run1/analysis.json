@@ -11,22 +11,46 @@
  ],
  "events": [
   {
-   "id": "connect"
+   "id": "connect",
+   "gate": "payload or service-side state",
+   "upstream_guards": [
+    "validated by caller/upstream"
+   ]
   },
   {
-   "id": "disconnect"
+   "id": "disconnect",
+   "gate": "payload or service-side state",
+   "upstream_guards": [
+    "validated by caller/upstream"
+   ]
   },
   {
-   "id": "attempt.succeeded"
+   "id": "attempt.succeeded",
+   "gate": "payload or service-side state",
+   "upstream_guards": [
+    "validated by caller/upstream"
+   ]
   },
   {
-   "id": "attempt.failed"
+   "id": "attempt.failed",
+   "gate": "payload or service-side state",
+   "upstream_guards": [
+    "validated by caller/upstream"
+   ]
   },
   {
-   "id": "attempt.timeout"
+   "id": "attempt.timeout",
+   "gate": "payload or service-side state",
+   "upstream_guards": [
+    "validated by caller/upstream"
+   ]
   },
   {
-   "id": "uptime.elapsed"
+   "id": "uptime.elapsed",
+   "gate": "payload or service-side state",
+   "upstream_guards": [
+    "validated by caller/upstream"
+   ]
   },
   {
    "id": "UV-connect-dup",

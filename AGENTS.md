@@ -60,6 +60,7 @@ Never fill a specification gap with your own judgment, however plausible. Your v
 
 Run 06 first when the manifest reports staleness. Run 01 or 02 for a new component. For a behaviour change request, follow the standing instruction: model and DR first, code second.
 
+<!-- rule:R-DEFERRED-OPEN -->
 ## 4. Rules that do not bend
 
 1. **Never decide domain semantics.** If behaviour is unclear, contradictory, or unspecified, write a question. Treat a "benign" gap as a proposal inside the question. It is never a reason to omit the question.
@@ -96,6 +97,8 @@ The checkers catch the following defects. Do not fight them. (Generated from `fo
 * event classification present per catalogue event (PA-4)
 * abstraction statement in the matrix (PA-10)
 * scope lines on citing control traces
+* gate-type annotation presence on events
+* upstream-guard annotation presence on events
 <!-- /generated:rules -->
 
 ## 6. Failure modes seen in real runs

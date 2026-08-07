@@ -14,11 +14,19 @@
  "events": [
   {
    "id": "M1",
-   "undesired": false
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
   },
   {
    "id": "M2",
-   "undesired": false
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
   },
   {
    "id": "UV-M1-dup",

@@ -1,30 +1,122 @@
 {
  "formatVersion": "1.0",
  "component": "ensemble-test",
- "states": ["IDLE", "OPEN", "CLOSED", "IDLE_RETRIESEXHAUSTED"],
+ "states": [
+  "IDLE",
+  "OPEN",
+  "CLOSED",
+  "IDLE_RETRIESEXHAUSTED"
+ ],
  "events": [
-  {"id": "E1", "undesired": false},
-  {"id": "E2", "undesired": false},
-  {"id": "UV-E1-dup", "undesired": true},
-  {"id": "UV-E2-loss", "undesired": true}
+  {
+   "id": "E1",
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
+  },
+  {
+   "id": "E2",
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
+  },
+  {
+   "id": "UV-E1-dup",
+   "undesired": true
+  },
+  {
+   "id": "UV-E2-loss",
+   "undesired": true
+  }
  ],
  "cells": [
-  {"state": "IDLE", "event": "E1", "disposition": "transition", "target": "OPEN"},
-  {"state": "IDLE", "event": "E2", "disposition": "ignore (documented)"},
-  {"state": "IDLE", "event": "UV-E1-dup", "disposition": "reject"},
-  {"state": "IDLE", "event": "UV-E2-loss", "disposition": "handle"},
-  {"state": "IDLE_RETRIESEXHAUSTED", "event": "E1", "disposition": "handle"},
-  {"state": "IDLE_RETRIESEXHAUSTED", "event": "E2", "disposition": "ignore (documented)"},
-  {"state": "IDLE_RETRIESEXHAUSTED", "event": "UV-E1-dup", "disposition": "ignore (documented)"},
-  {"state": "IDLE_RETRIESEXHAUSTED", "event": "UV-E2-loss", "disposition": "handle"},
-  {"state": "OPEN", "event": "E1", "disposition": "handle"},
-  {"state": "OPEN", "event": "E2", "disposition": "transition", "target": "CLOSED"},
-  {"state": "OPEN", "event": "UV-E1-dup", "disposition": "transition", "target": "IDLE"},
-  {"state": "OPEN", "event": "UV-E2-loss", "disposition": "handle"},
-  {"state": "CLOSED", "event": "E1", "disposition": "reject"},
-  {"state": "CLOSED", "event": "E2", "disposition": "ignore (documented)"},
-  {"state": "CLOSED", "event": "UV-E1-dup", "disposition": "handle"},
-  {"state": "CLOSED", "event": "UV-E2-loss", "disposition": "handle"}
+  {
+   "state": "IDLE",
+   "event": "E1",
+   "disposition": "transition",
+   "target": "OPEN"
+  },
+  {
+   "state": "IDLE",
+   "event": "E2",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "IDLE",
+   "event": "UV-E1-dup",
+   "disposition": "reject"
+  },
+  {
+   "state": "IDLE",
+   "event": "UV-E2-loss",
+   "disposition": "handle"
+  },
+  {
+   "state": "IDLE_RETRIESEXHAUSTED",
+   "event": "E1",
+   "disposition": "handle"
+  },
+  {
+   "state": "IDLE_RETRIESEXHAUSTED",
+   "event": "E2",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "IDLE_RETRIESEXHAUSTED",
+   "event": "UV-E1-dup",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "IDLE_RETRIESEXHAUSTED",
+   "event": "UV-E2-loss",
+   "disposition": "handle"
+  },
+  {
+   "state": "OPEN",
+   "event": "E1",
+   "disposition": "handle"
+  },
+  {
+   "state": "OPEN",
+   "event": "E2",
+   "disposition": "transition",
+   "target": "CLOSED"
+  },
+  {
+   "state": "OPEN",
+   "event": "UV-E1-dup",
+   "disposition": "transition",
+   "target": "IDLE"
+  },
+  {
+   "state": "OPEN",
+   "event": "UV-E2-loss",
+   "disposition": "handle"
+  },
+  {
+   "state": "CLOSED",
+   "event": "E1",
+   "disposition": "reject"
+  },
+  {
+   "state": "CLOSED",
+   "event": "E2",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "CLOSED",
+   "event": "UV-E1-dup",
+   "disposition": "handle"
+  },
+  {
+   "state": "CLOSED",
+   "event": "UV-E2-loss",
+   "disposition": "handle"
+  }
  ],
  "questions": []
 }

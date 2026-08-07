@@ -1,25 +1,92 @@
 {
  "formatVersion": "1.0",
  "component": "ensemble-test",
- "states": ["Idle", "Open", "Closed"],
+ "states": [
+  "Idle",
+  "Open",
+  "Closed"
+ ],
  "events": [
-  {"id": "E1", "undesired": false},
-  {"id": "E2", "undesired": false},
-  {"id": "UV-E1-dup", "undesired": true}
+  {
+   "id": "E1",
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
+  },
+  {
+   "id": "E2",
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
+  },
+  {
+   "id": "UV-E1-dup",
+   "undesired": true
+  }
  ],
  "cells": [
-  {"state": "Idle", "event": "E1", "disposition": "transition", "target": "Open"},
-  {"state": "Idle", "event": "E2", "disposition": "ignore (documented)"},
-  {"state": "Idle", "event": "UV-E1-dup", "disposition": "UNSPECIFIED", "q": "Q-01"},
-  {"state": "Open", "event": "E1", "disposition": "handle"},
-  {"state": "Open", "event": "E2", "disposition": "transition", "target": "Closed"},
-  {"state": "Open", "event": "UV-E1-dup", "disposition": "UNSPECIFIED", "q": "Q-02"},
-  {"state": "Closed", "event": "E1", "disposition": "reject"},
-  {"state": "Closed", "event": "E2", "disposition": "ignore (documented)"},
-  {"state": "Closed", "event": "UV-E1-dup", "disposition": "handle"}
+  {
+   "state": "Idle",
+   "event": "E1",
+   "disposition": "transition",
+   "target": "Open"
+  },
+  {
+   "state": "Idle",
+   "event": "E2",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Idle",
+   "event": "UV-E1-dup",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Open",
+   "event": "E1",
+   "disposition": "handle"
+  },
+  {
+   "state": "Open",
+   "event": "E2",
+   "disposition": "transition",
+   "target": "Closed"
+  },
+  {
+   "state": "Open",
+   "event": "UV-E1-dup",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Closed",
+   "event": "E1",
+   "disposition": "reject"
+  },
+  {
+   "state": "Closed",
+   "event": "E2",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Closed",
+   "event": "UV-E1-dup",
+   "disposition": "handle"
+  }
  ],
  "questions": [
-  {"id": "Q-01", "status": "OPEN"},
-  {"id": "Q-02", "status": "OPEN"}
+  {
+   "id": "Q-01",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN"
+  }
  ]
 }

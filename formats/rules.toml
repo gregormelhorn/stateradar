@@ -358,6 +358,7 @@ class = "wellformedness"
 statement = "derived events may be defined as @T(predicate) WHEN condition"
 enforcement = "prompt"
 lineage = ["heitmeyer-tosem-1996"]
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -367,6 +368,7 @@ class = "wellformedness"
 statement = "invariants split NAT vs SYS"
 enforcement = "prompt"
 lineage = ["parnas-madey-1995"]
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -375,6 +377,7 @@ title = "NAT assumption boundary"
 class = "process"
 statement = "analysis may assume NAT, tests may not"
 enforcement = "prompt"
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -388,6 +391,7 @@ enforcement = "prompt"
 # file:line ("fragment") of its concrete symbol, checker-verified);
 # a separate bindings-section check would duplicate that.
 lineage = ["heninger-1980"]
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -397,6 +401,7 @@ class = "wellformedness"
 statement = "single-input assumption: one event to completion at a time"
 enforcement = "prompt"
 lineage = ["heninger-1980"]
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -405,6 +410,7 @@ title = "serializing dispatch seam"
 class = "process"
 statement = "tests require a serializing dispatch seam"
 enforcement = "test"
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -414,6 +420,7 @@ class = "fault-model"
 statement = "probe reentrancy from callbacks and event handlers"
 enforcement = "test"
 detects = ["F-11"]
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -435,6 +442,7 @@ title = "witness traces"
 class = "completeness"
 statement = "aim for a witness trace per matrix cell, not just happy paths"
 enforcement = "prompt"
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -446,6 +454,7 @@ enforcement = "test"
 checker_ref = "consumer CI: matrix-coverage.json ↔ cell-test map (04-testgen)"
 detects = ["F-01", "F-02", "F-03", "F-04"]
 lineage = ["gargantini-heitmeyer-1999", "binder-1999"]
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -469,6 +478,7 @@ statement = "the checklist categories are registry data (SHARD-aligned); extendi
 enforcement = "data"
 detects = ["F-12", "F-13", "F-14", "F-15", "F-16", "F-17", "F-18"]
 lineage = ["shard-pumfrey-mcdermid", "jaffe-leveson-1991"]
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -490,6 +500,7 @@ class = "process"
 statement = "the matrix is the primary review surface"
 enforcement = "prompt"
 lineage = ["heninger-1980"]
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -518,6 +529,7 @@ class = "process"
 statement = "render complex guards as AND/OR tables for human review"
 enforcement = "prompt"
 lineage = ["rsml-leveson-1994"]
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "v1.0"
 
 [[rules]]
@@ -550,6 +562,7 @@ title = "terminal-state naming"
 class = "process"
 statement = "terminal states named by their exit condition — they are the API contract"
 enforcement = "prompt"
+prose_ref = "prompts/00-methods-reference.md#pa-condensed"
 added_by = "pack:v1.32 (cenkalti/backoff)"
 
 [[rules]]
@@ -559,6 +572,7 @@ class = "process"
 statement = "language-runtime, OS, and performance behaviour are outside the statechart; findings there are `unverifiable-runtime`"
 enforcement = "human"
 lineage = ["parnas-madey-1995"]
+prose_ref = "prompts/00-methods-reference.md#testing-conventions"
 added_by = "pack:v1.32 (tenacity #534)"
 
 [[rules]]
@@ -568,6 +582,7 @@ class = "process"
 statement = "wrong return values are API-contract issues, wrong transitions are matrix issues; only the latter belong in the matrix"
 enforcement = "human"
 lineage = ["parnas-madey-1995"]
+prose_ref = "prompts/00-methods-reference.md#testing-conventions"
 added_by = "pack:v1.32 (tenacity #517)"
 
 [[rules]]
@@ -645,6 +660,7 @@ title = "never decide domain semantics"
 class = "process"
 statement = "unclear, contradictory, or unspecified behaviour becomes a question; benignity is a proposal inside the question, never a reason to omit it"
 enforcement = "prompt"
+prose_ref = "prompts/02-pilot.md#hard-rules"
 added_by = "v1.0"
 
 # Split in pack:v1.41 per the PA-3a/3b precedent: the semantic rule
@@ -656,6 +672,7 @@ title = "requirement-scope rule (semantic)"
 class = "process"
 statement = "a citation covers only the scenario its text describes: applying a requirement, doc line, or decision record to an ordering, race, or variant it does not address downgrades provenance to inferred and makes the cell a hole candidate"
 enforcement = "prompt"
+prose_ref = "prompts/02-pilot.md#hard-rules"
 added_by = "pack:v1.41 (split from R-REQUIREMENT-SCOPE)"
 
 [[rules]]
@@ -676,6 +693,7 @@ title = "read callee contracts"
 class = "process"
 statement = "missing error handling at a call site is not evidence that failures propagate; read and cite the callee's contract"
 enforcement = "prompt"
+prose_ref = "prompts/02-pilot.md#step-1-seam-contract"
 added_by = "02:v1.3"
 
 [[rules]]
@@ -684,6 +702,7 @@ title = "checks as executed code"
 class = "process"
 statement = "deliver checks as executed code, never as claims; a red checker means fix the artefact or fix the checker openly"
 enforcement = "prompt"
+prose_ref = "prompts/02-pilot.md#hard-rules"
 added_by = "v1.0"
 
 [[rules]]
@@ -692,6 +711,7 @@ title = "proposals are not decisions"
 class = "process"
 statement = "recommendations are labelled `proposed` and held loosely; pre-selection in the interview is presentation, not authority"
 enforcement = "prompt"
+prose_ref = "prompts/02-pilot.md#hard-rules"
 added_by = "v1.0"
 
 [[rules]]
@@ -701,6 +721,7 @@ class = "process"
 statement = "assert only through the declared seam: projected state, emitted effects, SYS invariants; never weaken a test to make it pass"
 enforcement = "test"
 detects = ["F-21"]
+prose_ref = "prompts/00-methods-reference.md#testing-conventions"
 added_by = "v1.0"
 
 [[rules]]
@@ -710,6 +731,7 @@ class = "process"
 statement = "Part B gets catalogue, requirements, and event contracts — never code, matrix, or prior analyses"
 enforcement = "prompt"
 detects = ["F-06", "F-19"]
+prose_ref = "prompts/02-pilot.md#part-b"
 added_by = "02:v1.1"
 
 [[rules]]
@@ -718,6 +740,7 @@ title = "deferred stays OPEN"
 class = "process"
 statement = "a deferred question blocks only its own cells and keeps status OPEN"
 enforcement = "prompt"
+prose_ref = "AGENTS.md#rules-that-do-not-bend"
 added_by = "v1.0"
 
 [[rules]]
@@ -870,6 +893,7 @@ title = "remembrance semantics"
 class = "wellformedness"
 statement = "every event family whose entities can end states what an ended entity leaves behind, in what bound, and what late references resolve to"
 enforcement = "prompt"
+prose_ref = "prompts/02-pilot.md#step-3-event-catalogue"
 added_by = "02:v1.4"
 
 [[rules]]
@@ -877,13 +901,12 @@ id = "R-GATE-TYPE"
 title = "gate-type annotation"
 class = "wellformedness"
 statement = "every branching event states its gate: payload content or service-side state — blind readers must not guess"
-enforcement = "prompt"
-# checker_candidate: catalogue/sidecar gains a per-event `gate` field;
-# the checker asserts presence on every branching event, analogous to
-# R-ASSERTED-ABSENCE.  Blind-reader divergence class 'artefact'
-# (missing gate-type) exists but is currently caught only by
-# post-hoc Part-B diff.
-checker_candidate = true
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (event gate presence)"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "gate-type annotation presence on events"
+catches_order = 22
+prose_ref = "prompts/02-pilot.md#step-3-event-catalogue"
 added_by = "02:v1.1"
 
 [[rules]]
@@ -891,12 +914,12 @@ id = "R-UPSTREAM-GUARD"
 title = "upstream-guard annotation"
 class = "wellformedness"
 statement = "every external event states which validations happen upstream, with citations, per deployment topology"
-enforcement = "prompt"
-# checker_candidate: catalogue/sidecar gains a per-external-event
-# `upstream_guards` field (list of {guard, citation, topology?});
-# the checker asserts presence on every external event.  Same
-# artefact-class driver as R-GATE-TYPE.
-checker_candidate = true
+enforcement = "checker"
+checker_ref = "tools/dsc_check.py (event upstream_guards presence)"
+selftest_ref = "tools/selftest/run_selftest.py"
+catches = "upstream-guard annotation presence on events"
+catches_order = 23
+prose_ref = "prompts/02-pilot.md#step-3-event-catalogue"
 added_by = "02:v1.3"
 
 [[rules]]
@@ -906,6 +929,7 @@ class = "fault-model"
 statement = "every mutex-held section states which events/callbacks fire inside it and the reentrancy contract per callback"
 enforcement = "prompt"
 detects = ["F-11", "F-22"]
+prose_ref = "prompts/02-pilot.md#step-3-event-catalogue"
 added_by = "02:v1.12 (gobreaker #37)"
 
 [[rules]]
@@ -982,6 +1006,7 @@ title = "finding verification pass"
 class = "process"
 statement = "every bug claim re-verified against the code before the matrix is finalized: memory ordering cited, sentinels classified, line numbers re-read, severity recalibrated"
 enforcement = "prompt"
+prose_ref = "prompts/02-pilot.md#step-8-finding-verification"
 added_by = "02:v1.13 (recloser)"
 
 [[rules]]
@@ -991,6 +1016,7 @@ class = "process"
 statement = "every generated test asserts all SYS invariants after every delivered event"
 enforcement = "test"
 detects = ["F-05"]
+prose_ref = "prompts/02-pilot.md#step-5-invariants"
 added_by = "v1.0"
 
 [[rules]]
@@ -1000,6 +1026,7 @@ class = "process"
 statement = "off-cycle audit judges the suite against the decided matrix: weak (structure-bound) tests first, then redundancy, deviations, gaps"
 enforcement = "prompt"
 detects = ["F-21"]
+prose_ref = "prompts/07-test-audit.md#weak-test-audit"
 added_by = "pack:v1.20"
 
 [[rules]]
@@ -1009,6 +1036,7 @@ class = "process"
 statement = "every finding records its fault class (F-xx) and its trigger — the detector that found it (checklist, lint, z3, part-B diff, cell test, reviewer cross-check)"
 enforcement = "prompt"
 lineage = ["chillarege-odc-1992"]
+prose_ref = "prompts/02-pilot.md#step-7-open-questions"
 added_by = "02:v1.14"
 
 [[rules]]

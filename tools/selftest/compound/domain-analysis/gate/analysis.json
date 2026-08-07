@@ -12,11 +12,19 @@
  "events": [
   {
    "id": "E1",
-   "undesired": false
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
   },
   {
    "id": "E2",
-   "undesired": false
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
   },
   {
    "id": "UV-E1",
@@ -24,7 +32,11 @@
   },
   {
    "id": "E3",
-   "undesired": false
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
   }
  ],
  "cells": [
@@ -123,11 +135,11 @@
  "questions": [
   {
    "id": "Q-01",
-   "status": "OPEN — human decision required"
+   "status": "OPEN \u2014 human decision required"
   },
   {
    "id": "Q-02",
-   "status": "OPEN — human decision required"
+   "status": "OPEN \u2014 human decision required"
   }
  ],
  "behaviouralDrs": [

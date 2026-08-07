@@ -1,1 +1,23 @@
-{"formatVersion":"1.0","component":"zero-test","states":["S0"],"events":[{"id":"E1"}],"cells":[{"state":"S0","event":"E1","disposition":"handle"}]}
+{
+ "formatVersion": "1.0",
+ "component": "zero-test",
+ "states": [
+  "S0"
+ ],
+ "events": [
+  {
+   "id": "E1",
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
+  }
+ ],
+ "cells": [
+  {
+   "state": "S0",
+   "event": "E1",
+   "disposition": "handle"
+  }
+ ]
+}

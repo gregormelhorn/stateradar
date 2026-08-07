@@ -1,1 +1,23 @@
-{"formatVersion":"1.0","component":"zero-test","states":["COMPLETELY_DIFFERENT"],"events":[{"id":"E1"}],"cells":[{"state":"COMPLETELY_DIFFERENT","event":"E1","disposition":"handle"}]}
+{
+ "formatVersion": "1.0",
+ "component": "zero-test",
+ "states": [
+  "COMPLETELY_DIFFERENT"
+ ],
+ "events": [
+  {
+   "id": "E1",
+   "gate": "payload content",
+   "upstream_guards": [
+    "validated upstream"
+   ]
+  }
+ ],
+ "cells": [
+  {
+   "state": "COMPLETELY_DIFFERENT",
+   "event": "E1",
+   "disposition": "handle"
+  }
+ ]
+}
