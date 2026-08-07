@@ -476,8 +476,31 @@ def main() -> int:
         help="analysis root relative to --root (default: domain-analysis)",
     )
     args = parser.parse_args()
-    root = Path(args.root).resolve()
-    analysis_root = root / args.analysis_dir
+
+    # Positional path form: accept the analysis directory itself, as dsc_check
+    # does. A directory containing disposition-matrix.md overrides name-based
+    # discovery. Paths and names cannot safely share one invocation.
+    path_args = [
+        Path(component) for component in args.components
+        if Path(component).is_dir()
+        and (Path(component) / "disposition-matrix.md").is_file()
+    ]
+    if path_args:
+        if len(path_args) != len(args.components):
+            print("error: mixing analysis-dir paths and component names — "
+                  "pass either paths or names, not both")
+            return 2
+        parents = {path.resolve().parent for path in path_args}
+        if len(parents) != 1:
+            print("error: analysis-dir paths must share one parent "
+                  "(the analysis root)")
+            return 2
+        analysis_root = parents.pop()
+        root = analysis_root.parent
+        args.components = [path.resolve().name for path in path_args]
+    else:
+        root = Path(args.root).resolve()
+        analysis_root = root / args.analysis_dir
     overlay = _load_overlay(analysis_root)
     src_index = _src_index(root, overlay)
 

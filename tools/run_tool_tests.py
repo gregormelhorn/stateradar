@@ -66,6 +66,30 @@ def run_case(case: Path) -> list[str]:
             if _canonical(produced) != _canonical(expected / "analysis.json"):
                 errors.append("sidecar drifted from the golden file")
 
+    # 1b. The analysis directory itself is a valid positional argument.
+    # Delete the copied output before running it: accepting a stale sidecar
+    # would make a no-op SKIP look like a successful generation.
+    if (expected / "analysis.json").is_file():
+        import shutil as _sh
+        import tempfile as _tf
+        with _tf.TemporaryDirectory() as td:
+            work = Path(td) / case.name
+            _sh.copytree(case, work)
+            prod2 = work / "domain-analysis" / "mini" / "analysis.json"
+            prod2.unlink()
+            relative_adir = (work / "domain-analysis" / "mini").relative_to(td)
+            r2 = subprocess.run(
+                [*_python(), str(TOOLS / "gen_analysis_sidecar.py"),
+                 str(relative_adir)],
+                cwd=td, capture_output=True, text=True,
+            )
+            if r2.returncode != 0 or not prod2.is_file():
+                errors.append(
+                    "positional path form failed: "
+                    f"{(r2.stdout or r2.stderr).strip()[:160]}")
+            elif _canonical(prod2) != _canonical(expected / "analysis.json"):
+                errors.append("positional path form drifted from the golden file")
+
     # 2. dsc_check verdict matches
     adir = case / "domain-analysis" / "mini"
     if adir.is_dir():

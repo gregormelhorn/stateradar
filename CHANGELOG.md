@@ -2,6 +2,20 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.49 — positional path form for the sidecar generator
+
+- `gen_analysis_sidecar` accepts the analysis directory itself as a
+  positional argument, exactly like `dsc_check`
+  (`gen_analysis_sidecar.py tests/golden-mini/domain-analysis/mini`).
+  The name-vs-path asymmetry produced a misleading "no disposition
+  matrix" SKIP; the original K1 acceptance command now passes verbatim.
+  Mixing paths and names, or using paths from different analysis roots,
+  is a hard error.
+- `run_tool_tests` gates the relative positional form in a temporary
+  fixture copy after deleting its pre-existing sidecar. This prevents a
+  no-op SKIP from passing on stale generated output; the positional form
+  must generate the same sidecar as the named form.
+
 ## v1.48 — real annotation pipeline, honest tooling
 
 - gen_analysis_sidecar parses `## Event annotations` in
