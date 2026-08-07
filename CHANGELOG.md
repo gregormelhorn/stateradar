@@ -2,7 +2,30 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
-## v1.49 — positional path form for the sidecar generator
+## v1.50 — matrix mutation checker, device-connection convergence
+
+- `tools/check_matrix_mutation.py`: opt-in cell-suite mutation checker.
+  Components declare a `matrix-mutation.json` with an argv `testCommand`
+  containing exactly one `{analysis_dir}`. The checker copies the
+  analysis directory, mutates one cell per isolated copy, runs the
+  declared command, and reports KILLED/SURVIVED/ERROR/BLOCKED.
+- Supported v1 mutations: transition→ignore, transition-target-swap,
+  handle→ignore. Golden-mini fixture proves weak-suite red and 9/9
+  kill green behavior. Seven selftest cases wired.
+- `matrix-mutation.json` registered as a Testgen artifact (19 pack
+  artifacts). Roadmap item #7 shipped.
+- Device-connection convergence baseline: two independent 02-pilot runs,
+  5-state × 21-event aligned grid, 105/105 cells convergent (100.0%),
+  0 structural findings. Ensemble convergence tool exit 0.
+- AGENTS.md: R-READ-PROMPTS rule — agents must read referenced prompt
+  files completely before producing output.
+- Silenceper living documentation: domain-analysis/summary.md index,
+  corrected Q-01…Q-06 status text, Q-07 explicit undesired Release
+  variant question, as-is/to-be split preserved.
+- README refreshed: stale versions fixed, proven pilot cases condensed,
+  mutation checker claim added, Claude Code integration path corrected.
+- Benchmarks README: 24 → 72 methodology rules, ODC table regenerated,
+  Oracle-confirmed (3/3) → (5/5).
 
 - `gen_analysis_sidecar` accepts the analysis directory itself as a
   positional argument, exactly like `dsc_check`

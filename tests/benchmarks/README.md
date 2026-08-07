@@ -25,7 +25,7 @@ Convergence `convergence/run*.json` recordings are raw pilot output
 and exempt from dsc_check; only the canonical merged sidecar is
 gate-checked.
 
-## Oracle-confirmed benchmarks (3/3)
+## Oracle-confirmed benchmarks (5/5)
 
 Caveat: The public issues may predate model training cutoff. New bugs
 above are the strongest independent-discovery evidence; these serve as
@@ -42,8 +42,8 @@ regression anchors.
 ## Totals
 
 12 pilots, 5 Oracle-confirmed, 11 bugs found, 6 GitHub issues filed,
-24 methodology rules (PA-1 through PA-24). The grpc-go-2669 case
-(2026-08-07, pack v1.36) is the first pilot run with ODC fields,
+72 methodology rules. The grpc-go-2669 case
+(2026-08-07, pack v1.50) is the first pilot run with ODC fields,
 SHARD categories, and blind-pass row-coverage checking end to end;
 its 15 non-oracle findings describe the frozen v1.18.0 tree and are
 unverified against current grpc-go.
