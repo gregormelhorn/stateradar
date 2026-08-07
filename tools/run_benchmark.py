@@ -95,10 +95,11 @@ def run_part_a(analysis_dir: Path, repo_dir: Path, model_path: Path | None = Non
     return json.loads(sidecar_path.read_text())
 
 
-def assert_expected(sidecar: dict, expected: dict) -> tuple[int, int, list[str]]:
-    """Assert expected findings are present. Returns (passed, failed, messages)."""
+def assert_expected(sidecar: dict, expected: dict) -> tuple[int, int, int, list[str]]:
+    """Assert expected findings are present. Returns (passed, failed, skipped, messages)."""
     passed = 0
     failed = 0
+    skipped = 0
     messages: list[str] = []
 
     # Check expected UNSPECIFIED cells
@@ -150,9 +151,10 @@ def assert_expected(sidecar: dict, expected: dict) -> tuple[int, int, list[str]]
             messages.append(f"  PASS: phrase '{phrase}' referenced in cells")
         else:
             # Don't fail on phrase check — sidecar doesn't carry full text
+            skipped += 1
             messages.append(f"  SKIP: phrase '{phrase}' — sidecar lacks full text")
 
-    return passed, failed, messages
+    return passed, failed, skipped, messages
 
 
 def run_benchmark(name: str) -> tuple[str, bool, str]:
@@ -202,9 +204,10 @@ def run_benchmark(name: str) -> tuple[str, bool, str]:
         if sidecar is None:
             return name, False, "\n".join(log_lines + ["  sidecar generation failed"])
 
-        passed, failed, msgs = assert_expected(sidecar, expected)
+        passed, failed, skipped, msgs = assert_expected(sidecar, expected)
         log_lines.extend(msgs)
-        log_lines.append(f"  Result: {passed} passed, {failed} failed")
+        skipped_str = f" ({skipped} skipped)" if skipped else ""
+        log_lines.append(f"  Result: {passed} passed{skipped_str}, {failed} failed")
         return name, failed == 0, "\n".join(log_lines)
 
 

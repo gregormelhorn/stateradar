@@ -27,7 +27,7 @@ optional dependency is missing. The agent
 may propose and challenge behaviour, but must not silently decide it —
 and the tests come from the specification, not from the code.
 
-**Version 1.38.**
+**Version 1.39.**
 
 ## The problem
 
@@ -139,21 +139,22 @@ bugs, two of them critical and reported upstream.
 Two independent, fresh-session pilot runs on the same component
 (`examples/device-connection/`) produced:
 
-- **4.1 % cell divergence** on the 7×7 aligned base grid (47/49 cells
-  convergent). Both divergent cells share one root cause: a single
-  state-granularity decision (`Disconnected_RetriesExhausted`).
-- **82 % finding-level convergence** (9/11 distinct findings found by
-  both runs). No contradictory findings — divergence was purely additive.
-- Variance concentrates in undesired-variant slicing (5 vs 3 UV columns).
-- The predicted FAILED-terminality divergence did **not** occur — both
-  runs modeled the disconnect backdoor identically.
+- **93.8 % cell convergence** on the 4×8 aligned base grid (30/32 cells
+  convergent). The two divergent cells reflect genuine open questions
+  both runs discovered independently (duplicate-connect semantics and
+  the FAILED backdoor).
+- **7 structural findings** reported separately from the cell rate:
+  state granularity differences (retry-count sub-states vs attempt-phase
+  sub-states) and undesired-variant slicing divergence (4 vs 3 UV columns).
+- ALLCAPS↔PascalCase normalization bridges naming conventions
+  automatically; qualifier-level structural differences are never masked.
 
 `tools/ensemble_convergence.py` automates the protocol: it normalizes
-state names (case-insensitive, never stripping qualifiers per PA-17
-Rule 4), aligns events by ID, diffs cells, reports structural
+state names (case-insensitive exact match only, never stripping qualifiers
+per PA-17 Rule 4), aligns events by ID, diffs cells, reports structural
 (granularity/slicing) divergence separately from cell convergence, and
-mechanically marks divergent cells `UNSPECIFIED → Q`. Full protocol at
-`tests/device-connection/CONVERGENCE.md`.
+mechanically marks divergent cells `UNSPECIFIED → Q`. Full protocol and
+recorded baseline at `tests/device-connection/CONVERGENCE.md`.
 
 ## Scope
 

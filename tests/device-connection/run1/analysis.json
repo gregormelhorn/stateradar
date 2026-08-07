@@ -1,0 +1,391 @@
+{
+ "formatVersion": "1.0",
+ "component": "device-connection",
+ "states": [
+  "Disconnected",
+  "Disconnected_RetriesExhausted",
+  "Connecting",
+  "Connected",
+  "Reconnecting",
+  "Failed"
+ ],
+ "events": [
+  {
+   "id": "connect"
+  },
+  {
+   "id": "disconnect"
+  },
+  {
+   "id": "attempt.succeeded"
+  },
+  {
+   "id": "attempt.failed"
+  },
+  {
+   "id": "attempt.timeout"
+  },
+  {
+   "id": "uptime.elapsed"
+  },
+  {
+   "id": "UV-connect-dup",
+   "undesired": true
+  },
+  {
+   "id": "UV-disconnect-dup",
+   "undesired": true
+  },
+  {
+   "id": "UV-stale-result",
+   "undesired": true
+  },
+  {
+   "id": "UV-connection-loss",
+   "undesired": true
+  }
+ ],
+ "cells": [
+  {
+   "state": "Disconnected",
+   "event": "connect",
+   "disposition": "transition",
+   "target": "Connecting"
+  },
+  {
+   "state": "Disconnected",
+   "event": "disconnect",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected",
+   "event": "attempt.succeeded",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected",
+   "event": "attempt.failed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected",
+   "event": "attempt.timeout",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected",
+   "event": "uptime.elapsed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected",
+   "event": "UV-connect-dup",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Disconnected",
+   "event": "UV-disconnect-dup",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected",
+   "event": "UV-stale-result",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected",
+   "event": "UV-connection-loss",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "connect",
+   "disposition": "transition",
+   "target": "Connecting"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "disconnect",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "attempt.succeeded",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "attempt.failed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "attempt.timeout",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "uptime.elapsed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "UV-connect-dup",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-01"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "UV-disconnect-dup",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "UV-stale-result",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Disconnected_RetriesExhausted",
+   "event": "UV-connection-loss",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connecting",
+   "event": "connect",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connecting",
+   "event": "disconnect",
+   "disposition": "transition",
+   "target": "Disconnected"
+  },
+  {
+   "state": "Connecting",
+   "event": "attempt.succeeded",
+   "disposition": "transition",
+   "target": "Connected"
+  },
+  {
+   "state": "Connecting",
+   "event": "attempt.failed",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Connecting",
+   "event": "attempt.timeout",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-02"
+  },
+  {
+   "state": "Connecting",
+   "event": "uptime.elapsed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connecting",
+   "event": "UV-connect-dup",
+   "disposition": "handle"
+  },
+  {
+   "state": "Connecting",
+   "event": "UV-disconnect-dup",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connecting",
+   "event": "UV-stale-result",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03"
+  },
+  {
+   "state": "Connecting",
+   "event": "UV-connection-loss",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-04"
+  },
+  {
+   "state": "Connected",
+   "event": "connect",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connected",
+   "event": "disconnect",
+   "disposition": "transition",
+   "target": "Disconnected"
+  },
+  {
+   "state": "Connected",
+   "event": "attempt.succeeded",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connected",
+   "event": "attempt.failed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connected",
+   "event": "attempt.timeout",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connected",
+   "event": "uptime.elapsed",
+   "disposition": "handle"
+  },
+  {
+   "state": "Connected",
+   "event": "UV-connect-dup",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connected",
+   "event": "UV-disconnect-dup",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Connected",
+   "event": "UV-stale-result",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03"
+  },
+  {
+   "state": "Connected",
+   "event": "UV-connection-loss",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-04"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "connect",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-05"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "disconnect",
+   "disposition": "transition",
+   "target": "Disconnected"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "attempt.succeeded",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "attempt.failed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "attempt.timeout",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "uptime.elapsed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "UV-connect-dup",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-05"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "UV-disconnect-dup",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "UV-stale-result",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03"
+  },
+  {
+   "state": "Reconnecting",
+   "event": "UV-connection-loss",
+   "disposition": "UNSPECIFIED",
+   "q": "Q-04"
+  },
+  {
+   "state": "Failed",
+   "event": "connect",
+   "disposition": "reject"
+  },
+  {
+   "state": "Failed",
+   "event": "disconnect",
+   "disposition": "transition",
+   "target": "Disconnected"
+  },
+  {
+   "state": "Failed",
+   "event": "attempt.succeeded",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Failed",
+   "event": "attempt.failed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Failed",
+   "event": "attempt.timeout",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Failed",
+   "event": "uptime.elapsed",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Failed",
+   "event": "UV-connect-dup",
+   "disposition": "reject"
+  },
+  {
+   "state": "Failed",
+   "event": "UV-disconnect-dup",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Failed",
+   "event": "UV-stale-result",
+   "disposition": "ignore (documented)"
+  },
+  {
+   "state": "Failed",
+   "event": "UV-connection-loss",
+   "disposition": "ignore (documented)"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN"
+  },
+  {
+   "id": "Q-05",
+   "status": "OPEN"
+  }
+ ]
+}

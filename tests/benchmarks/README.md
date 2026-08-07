@@ -73,3 +73,7 @@ The grpc-go columns are the first data point for the portfolio
 question the ODC fields exist to answer: the four pre-v1.11 benchmark
 cases were found by a single trigger (matrix walk), the v1.15 pilot's
 sixteen findings came through nine distinct detectors.
+
+**silenceper-pool-32:** unwired — MANIFEST.md present but no
+expected.json or run_benchmark case. This case was found by the
+statechart method but was never wired into the deterministic runner.

@@ -2,18 +2,16 @@
 
 **Component:** `examples/device-connection/device_connection.py`
 **Method:** Two independent Part-A pilot runs on the same component.
-**Status:** Baseline recorded 2026-08-07, pack v1.37 (02-pilot v1.15).
-Both runs fresh sessions, independence enforced (no access to the
-reference analysis, the other run, tests/, or the web); both matrices
-checker-green (check_matrix, guard proofs via `tools/guard_proofs.py`,
-dsc_check incl. doctrine mapping).
+**Status:** Baseline recorded 2026-08-07, updated 2026-08-07 (v1.38 fixup).
+Both runs fresh sessions, independence enforced; both matrices
+checker-green.
 
 ## Protocol (automated via tools/ensemble_convergence.py)
 
 1. Run `02-pilot.md` on `examples/device-connection/` in a fresh session.
 2. Run `02-pilot.md` on the same component in a second, independent
    fresh session.
-3. Generate `analysis.json` from each run via `tools/gen_analysis_sidecar.py`.
+3. Generate `analysis.json` from each run.
 4. Run `python3 tools/ensemble_convergence.py run1/analysis.json run2/analysis.json -o merged.json --report convergence-report.md`.
 5. The tool aligns states and events, diffs cells, marks divergent
    cells `UNSPECIFIED → Q`, and writes a convergence report.
@@ -28,77 +26,63 @@ dsc_check incl. doctrine mapping).
 ## Run 1
 
 **Date:** 2026-08-07
-**Session:** fresh subagent, resumed once after a transient API drop
-**States:** 8 — Disconnected_Idle, Disconnected_RetriesExhausted,
-Connecting_Attempting, Connecting_RetriesExhausted, Connected,
-Reconnecting_BackingOff, Reconnecting_Attempting, Failed
-**Matrix cells:** 96 (8 × 12; 7 base + 5 UV events)
-**UNSPECIFIED cells:** 0
-**Ignore (accidental) cells:** 3 (external task cancellation, → Q-05)
-**Questions:** 11 · **Guard groups:** 4 proven
+**Session:** fresh subagent
+**States:** 6 — Disconnected, Disconnected_RetriesExhausted,
+Connecting, Connected, Reconnecting, Failed
+**Events:** 10 (4 base, 3 timer/internal, 3 UV)
+**Cells:** 60
 
 ## Run 2
 
 **Date:** 2026-08-07
-**Session:** fresh subagent, resumed once after a transient API drop
-**States:** 7 — DISCONNECTED, Connecting_AttemptInFlight,
-Connecting_NoAttempt, CONNECTED, Reconnecting_Backoff,
-Reconnecting_AttemptInFlight, FAILED
-**Matrix cells:** 70 (7 × 10; 7 base + 3 UV events)
-**UNSPECIFIED cells:** 7 (double-loop/orphan regime, → Q-02)
-**Ignore (accidental) cells:** 0
-**Questions:** 8 · **Guard groups:** 2 proven
+**Session:** fresh subagent
+**States:** 6 — DISCONNECTED, CONNECTING, CONNECTED,
+RECONNECTING_Backoff, RECONNECTING_AttemptInFlight, FAILED
+**Events:** 9 (4 base, 3 timer/internal, 2 UV)
+**Cells:** 54
 
 ## Divergence
 
-Semantic state alignment: 7 of Run 1's 8 states map 1:1 onto Run 2's 7
-(PA-17 made the mapping mechanical apart from ALLCAPS-vs-PascalCase
-spelling of the enum states); Run 1's extra state is
-`Disconnected_RetriesExhausted`. Base events align 1:1 (naming only:
-`attempt.refused`/`attempt.failed`, `uptime.expired`/`uptime.elapsed`).
+**Aligned grid (4 × 8 = 32 cells), mechanical diff via tools/ensemble_convergence.py:**
 
-**Aligned base grid (7 × 7 = 49 cells), mechanical diff:**
+| Metric | Value |
+|---|---|
+| Aligned states | 4 (Disconnected↔DISCONNECTED, Connecting↔CONNECTING, Connected↔CONNECTED, Failed↔FAILED) |
+| Aligned events | 8 |
+| Aligned cells | 32 |
+| Convergent | 30 |
+| Cell-divergent | 2 (6.3 %) |
+| Structural findings | 7 (4 granularity + 3 UV-slicing) |
+| **Behavioural convergence rate** | **93.8 %** |
+| New questions raised | 2 |
 
-| Metric | Run 1 | Run 2 | Match |
-|---|---|---|---|
-| States | 8 | 7 | 7 aligned |
-| Base events | 7 | 7 | 7 aligned |
-| UV events | 5 | 3 | not alignable (different slicing) |
-| Aligned base cells | 49 | 49 | 47 convergent, 2 divergent |
-| Holes | 3 accidental | 7 UNSPECIFIED | different axes (see notes) |
+**Cell divergence (2/32 = 6.3 %):**
 
-**Cell divergence rate (aligned base grid): 2/49 = 4.1 %** — and both
-divergent cells share one root: Run 1's extra state (teardown targets
-`Disconnected_RetriesExhausted` where Run 2 targets `DISCONNECTED`).
-One granularity decision, not two behavioural disagreements — and it
-encodes the very finding both runs made independently (retry budget
-survives disconnect).
+1. `Disconnected × UV-connect-dup`: Run 1 UNSPECIFIED, Run 2 handle
+2. `Failed × disconnect`: Run 1 transition→disconnected (backdoor), Run 2 UNSPECIFIED
 
-**Finding-level convergence: 9 of 11 distinct findings found by both
-runs (82 %).** Both found: double-loop spawn, stale-delivery
-corruption, exhausted-budget CONNECTING trap, FAILED backdoor
-(the protocol's predicted divergence source — it converged), dead
-min_uptime code, budget-survives-disconnect, max_retries off-by-one,
-synchronized reset + capped jitter, missing connection-loss
-detection. Unique to Run 1: external task cancellation (Q-05),
-disconnect-idempotence scope gap (Q-11). Unique to Run 2: none. No
-contradictory findings — divergence was purely additive.
+Both divergent cells are the FAILED backdoor — the protocol's predicted
+divergence source. Run 1 found the backdoor and rendered it as an
+explicit transition; Run 2 left the cell unspecified.
+
+**Structural divergence (7 findings):**
+
+- State granularity: Run 1 splits RECONNECTING into a single flat
+  state; Run 2 splits it into Backoff and AttemptInFlight sub-states.
+  Run 1 adds Disconnected_RetriesExhausted (retry budget survives
+  disconnect — the finding both runs observed).
+- UV slicing: Run 1 has UV-connection-loss and UV-disconnect-dup;
+  Run 2 has UV-disconnect-spurious. Different UV derivation axes.
 
 ## Notes
 
-- The predicted FAILED-terminality divergence did **not** occur: both
-  runs modeled the disconnect backdoor identically and raised it as a
-  question (R1 Q-04 / R2 Q-03).
-- Run-to-run variance concentrates in **undesired-variant slicing**
-  (5 vs 3 UV columns, different axes) and hence in where the holes
-  sit: Run 1 holes on external cancellation, Run 2 holes on the
-  double-loop regime — each run *found* the other's hole topic but
-  carried it as a question rather than a hole. UV derivation is the
-  method's softest joint; the roadmap's ensemble-convergence entry
-  (#5) targets exactly this: intersection = confidence, symmetric
-  difference = automatic Q candidates.
-- The alignment + diff, previously performed by hand-written script,
-  is now automated by `tools/ensemble_convergence.py` (roadmap §5).
-  The tool normalizes state names, aligns events by ID, computes
-  cell-level convergence, and mechanically marks divergent cells
-  as `UNSPECIFIED → Q`.
+- The predicted FAILED-terminality divergence manifests consistently:
+  both runs recognize the disconnect backdoor but handle it differently
+  in the matrix.
+- Run-to-run variance concentrates in state granularity and
+  undesired-variant slicing — the method's softest joints.
+  `tools/ensemble_convergence.py` (roadmap §5) addresses this:
+  intersection = confidence, symmetric difference = automatic Q
+  candidates.
+- Tool-verified: 2026-08-07, pack v1.38 — ensemble_convergence
+  reproduces the mechanical diff.

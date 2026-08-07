@@ -402,6 +402,54 @@ def main() -> int:
     expect("ensemble divergent (3 runs)", True,
            *ens(ENS / "run1.json", ENS / "run2.json", ENS / "run3.json"),
            needle="divergent")
+    # Baseline acceptance: actual device-connection CONVERGENCE sidecars
+    DC = ROOT / "tests" / "device-connection"
+    rc, out = ens(DC / "run1" / "analysis.json", DC / "run2" / "analysis.json")
+    expect("ensemble baseline acceptance", True, rc, out, needle="93.8%")
+    if "Total aligned cells | 32" not in out:
+        failures.append(
+            f"ensemble baseline: expected 32 aligned cells, got:\n{out[:2000]}")
+    if "Structural findings" not in out:
+        failures.append("ensemble baseline: missing structural findings count")
+    else:
+        print("  ok  ensemble baseline acceptance (aligned grid 4×8, convergence 93.8%)")
+    # T3a: deterministic reports — run twice with identical inputs, byte-identical output
+    import hashlib
+    r1_out = ens(ENS / "run1.json", ENS / "run2.json")[1]
+    r2_out = ens(ENS / "run1.json", ENS / "run2.json")[1]
+    if r1_out != r2_out:
+        failures.append("ensemble: deterministic output failed — two runs differ")
+    else:
+        print("  ok  ensemble deterministic output (byte-identical on repeat)")
+    # T3b: zero-denominator — no aligned states
+    rc_z, out_z = ens(ENS / "zero1.json", ENS / "zero2.json")
+    expect("ensemble zero-alignment", True, rc_z, out_z, needle="n/a (no aligned cells)")
+    if "100.0%" in out_z:
+        failures.append("ensemble zero-alignment: must not report 100.0% with no cells")
+    # T3c: intra-run collision — two states normalize identically in same run
+    rc_c, out_c = ens(ENS / "collision.json", ENS / "collision.json")
+    if rc_c != 2:
+        failures.append(f"ensemble collision guard: expected exit 2, got {rc_c}\n{out_c[:500]}")
+    elif "Disconnected" not in out_c or "DISCONNECTED" not in out_c:
+        failures.append("ensemble collision guard: must name both originals")
+    expect("ensemble collision guard", True, rc_c, out_c, needle="intra-run collision")
+
+    # Baseline acceptance: device-connection CONVERGENCE sidecars
+    DEV = ROOT / "tests" / "device-connection"
+    rc, out = ens(DEV / "run1" / "analysis.json", DEV / "run2" / "analysis.json")
+    # Must exit 1 (has divergence)
+    if rc != 1:
+        failures.append(f"baseline acceptance: expected exit 1, got {rc}")
+    # Must report structural findings >= 3
+    if "Structural findings" not in out or "3" not in out:
+        failures.append("baseline acceptance: structural findings missing or < 3")
+    else:
+        print("  ok  ensemble baseline acceptance (exit 1, structural >= 3)")
+    # Aligned cell count must be 32 (4 states x 8 events)
+    if "Total aligned cells | 32" not in out:
+        failures.append(f"baseline acceptance: expected 32 aligned cells")
+    else:
+        print("  ok  ensemble baseline aligned cells = 32")
 
     print("benchmark dating protocol")
     import benchmark_evidence
@@ -420,6 +468,13 @@ def main() -> int:
         "model_release": "2025-05-14",
         "model_cutoff": "2025-01-01",
     }) == "regression", "pre-release issue must be regression"
+    # Red: issue published before model release must NOT be primary
+    assert benchmark_evidence.classify({
+        "issue_published": "2024-10-22",
+        "model": "claude-sonnet-4-20250514",
+        "model_release": "2025-05-22",
+        "model_cutoff": "2025-03-01",
+    }) == "regression", "pre-release issue must be regression, not primary"
     # Unknown: missing fields
     assert benchmark_evidence.classify(None) == "unknown", "missing dating is unknown"
     assert benchmark_evidence.classify({}) == "unknown", "empty dating is unknown"

@@ -969,6 +969,26 @@ lineage = ["chillarege-odc-1992"]
 added_by = "02:v1.14"
 
 [[rules]]
+id = "EC-1"
+title = "ensemble convergence"
+class = "process"
+statement = "ensemble convergence is the mechanical multi-run diff: divergent cells become UNSPECIFIED→Q; structural (granularity, UV-slicing) divergence is reported separately from the cell rate"
+enforcement = "checker"
+checker_ref = "tools/ensemble_convergence.py"
+selftest_ref = "tools/selftest/run_selftest.py (ensemble baseline acceptance, ensemble convergent, ensemble divergent, ensemble zero-alignment, ensemble collision guard)"
+added_by = "pack:v1.38"
+
+[[rules]]
+id = "BD-1"
+title = "benchmark evidence classification"
+class = "process"
+statement = "benchmark evidence classification: primary iff issue_published > model_release of the pinned snapshot; requires dating metadata (issue_published, model, model_release, model_cutoff) per case"
+enforcement = "checker"
+checker_ref = "tools/benchmark_evidence.py"
+selftest_ref = "tools/selftest/run_selftest.py (benchmark dating classification correct)"
+added_by = "pack:v1.38"
+
+[[rules]]
 id = "R-REGISTRY"
 title = "registry consistency"
 class = "wellformedness"

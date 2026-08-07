@@ -65,16 +65,29 @@ def _normalize_state(name: str) -> str:
 
 def _align_states(all_state_lists: list[list[str]]) -> tuple[
     dict[str, list[Optional[str]]],  # canonical → per-run original name or None
-    list[str],                        # structural findings
+    list[str],                        # structural findings (sorted)
 ]:
     """Align states across runs by case-insensitive name.
 
-    States present in all runs are aligned. States present in some
-    runs but not others are structural (granularity) divergence.
-
-    Returns (alignment, findings).
+    Also detects intra-run collisions: if two states of the SAME run
+    normalize to the same form, exit 2 immediately.
     """
     n_runs = len(all_state_lists)
+
+    # Check intra-run collisions first
+    for run_idx, states in enumerate(all_state_lists):
+        seen: dict[str, str] = {}
+        for s in states:
+            norm = _normalize_state(s)
+            if norm in seen:
+                print(
+                    f"ensemble_convergence: intra-run collision in run-{run_idx + 1}: "
+                    f"'{seen[norm]}' and '{s}' both normalize to '{norm}'",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+            seen[norm] = s
+
     # Collect all normalized forms and their per-run originals
     norm_to_originals: dict[str, list[Optional[str]]] = defaultdict(
         lambda: [None] * n_runs
@@ -103,7 +116,7 @@ def _align_states(all_state_lists: list[list[str]]) -> tuple[
                 + "; ".join(run_presence)
             )
 
-    return aligned, findings
+    return aligned, sorted(findings)
 
 
 # ---------------------------------------------------------------------------
@@ -156,7 +169,7 @@ def _align_events(all_event_lists: list[list[dict]]) -> tuple[
                 + "; ".join(run_presence)
             )
 
-    return aligned_ids, presence, findings
+    return aligned_ids, presence, sorted(findings)
 
 
 # ---------------------------------------------------------------------------
@@ -243,7 +256,7 @@ def _merge_cells(
         "target_divergent": 0,
         "hole_noise": 0,
         "new_questions": 0,
-        "convergence_rate": 0.0,
+        "convergence_rate": "n/a (no aligned cells)",
         "structural_findings": len(structural_findings),
         "structural_details": structural_findings,
     }
@@ -338,11 +351,12 @@ def _merge_cells(
     behavioural_cells = stats["total_aligned_cells"] - stats["hole_noise"]
     if behavioural_cells > 0:
         convergent_behavioural = stats["convergent"]
-        stats["convergence_rate"] = round(
-            convergent_behavioural / behavioural_cells * 100, 1
+        stats["convergence_rate"] = (
+            f"{round(convergent_behavioural / behavioural_cells * 100, 1)}%"
         )
-    else:
-        stats["convergence_rate"] = 100.0
+
+    # Sort merged cells deterministically by (state, event)
+    merged.sort(key=lambda c: (c["state"].lower(), c["event"]))
 
     return merged, questions, stats
 
@@ -403,7 +417,7 @@ def _render_report(
     lines.append(f"| Disposition-divergent | {stats['disposition_divergent']} |")
     lines.append(f"| Target-divergent | {stats['target_divergent']} |")
     lines.append(f"| Hole noise (non-behavioural) | {stats['hole_noise']} |")
-    lines.append(f"| **Behavioural convergence rate** | **{stats['convergence_rate']}%** |")
+    lines.append(f"| **Behavioural convergence rate** | **{stats['convergence_rate']}** |")
     lines.append(f"| New questions raised | {stats['new_questions']} |")
     lines.append(f"| Structural findings | {stats['structural_findings']} |")
     lines.append("")
@@ -556,7 +570,7 @@ def main() -> int:
             parts.append(f"{struct_div} structural")
         print(
             f"⚠ {', '.join(parts)} findings — {stats['new_questions']} "
-            f"questions raised. Convergence rate: {stats['convergence_rate']}%",
+            f"questions raised. Convergence rate: {stats['convergence_rate']}",
             file=sys.stderr,
         )
         return 1

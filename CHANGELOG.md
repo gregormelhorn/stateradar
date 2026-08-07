@@ -1,17 +1,63 @@
 # Changelog
 
-## v1.38 — ensemble convergence (roadmap §5)
+## v1.39 — ensemble hardening, registry coverage, benchmark dating fixup
+
+- **T1:** CHANGELOG v1.38 entry corrected — no longer claims suffix
+  stripping. Describes the shipped design: case-insensitive exact match,
+  structural divergence reported separately, exit non-zero on any
+  divergence.
+- **T2:** CONVERGENCE baseline re-recorded with real rerun sidecars.
+  `tests/device-connection/run{1,2}/analysis.json` — 6 states/10 events
+  and 6 states/9 events. Aligned grid 4×8=32 cells, 93.8% convergence,
+  7 structural findings. README Method reliability section updated.
+  Selftest asserts exit 1, 93.8% needle, aligned cell count=32,
+  structural findings present.
+- **T3:** Ensemble hardening. (a) Deterministic sorted output — merged
+  cells sorted by (state, event), structural findings sorted, byte-identical
+  on repeat (selftested). (b) Zero-denominator: when no aligned cells,
+  convergence_rate reports "n/a (no aligned cells)" — never 100.0%
+  (selftested). (c) Intra-run collision guard: two states of the same
+  run normalizing to the same form exit 2 naming both (selftested).
+- **T4:** Registry entries for new tools. EC-1 (ensemble convergence)
+  and BD-1 (benchmark evidence classification) added to
+  `formats/rules.toml`, both enforcement=checker with selftest_ref.
+  New constraint: every checker-shaped tool under tools/ must appear
+  in at least one rule's checker_ref; missing→warning (red probe
+  confirmed). Registry: 65 rules, 0 warnings.
+- **T5:** Benchmark dating fixup. model_release corrected to
+  2025-05-22, model_cutoff to 2025-03-01 per Anthropic documentation
+  (docs.aws.amazon.com/bedrock). Red selftest: pre-release issue
+  must classify as regression, not primary.
+  silenceper-pool-32 declared unwired in tests/benchmarks/README.md.
+- **T6:** Evidence runner SKIP visibility. Phrase checks that skip
+  now surface as "(N skipped)" in per-case result lines.
+- Regenerated derived blocks via `tools/gen_rules.py`.
+
+## v1.38 — ensemble convergence (roadmap §5) + benchmark dating protocol (roadmap §6)
 
 - `tools/ensemble_convergence.py`: takes N independent pilot sidecars,
-  normalizes state names (case-insensitive, strips qualifier suffixes,
-  maps ALLCAPS↔PascalCase), aligns events by ID, and computes
-  cell-level convergence. Divergent cells (disposition disagreement,
-  target disagreement, or presence divergence) are mechanically
-  marked `UNSPECIFIED → Q` with auto-generated Q-EC-nn questions
-  carrying a per-run divergence summary.
+  normalizes state names (case-insensitive exact match only — no suffix
+  stripping per PA-17 Rule 4; qualifiers are behaviorally significant),
+  aligns events by ID, and computes cell-level convergence. States or
+  events present in only some runs are reported as structural
+  (granularity / UV-slicing) divergence and excluded from the cell-rate
+  denominator. Divergent cells (disposition disagreement or target
+  disagreement on the aligned grid) are mechanically marked
+  `UNSPECIFIED → Q` with auto-generated Q-EC-nn questions carrying a
+  per-run divergence summary. Exit non-zero on any cell-level or
+  structural divergence.
+- **v1.38 fixup (9951db4):** Removed suffix-stripping from the state
+  normalizer. The initial implementation stripped trailing qualifiers
+  (`_RetriesExhausted`, `_Attempting`, `_BackingOff`), which would have
+  masked granularity divergence as convergence — exactly the signal the
+  tool exists to detect. PA-17 Rule 4: one state per behaviorally
+  distinct combination. Normalization bridges spelling (ALLCAPS↔PascalCase)
+  and lowercases transition targets for fingerprint comparison, never
+  alters structure. Non-matching states are structural divergence.
 - Green/red selftests wired into `tools/selftest/run_selftest.py`:
-  identical sidecars converge 100 % (exit 0), divergent sidecars
-  report divergence and exit non-zero for CI gating.
+  identical sidecars converge 100 % (exit 0), divergent sidecars
+  report divergence and exit non-zero for CI gating. ALLCAPS alignment,
+  granularity divergence, and UV-slicing divergence all selftested.
 - `tests/device-connection/CONVERGENCE.md` protocol updated:
   step 3–4 (hand-written diff and data entry) replaced by a single
   `ensemble_convergence.py` invocation.

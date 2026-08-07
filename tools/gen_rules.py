@@ -200,6 +200,23 @@ def constraints(reg: dict) -> tuple[list[str], list[str]]:
         if rf["fault"] not in fault_ids:
             errors.append(f"readme find {rf['text'][:40]!r}: unknown fault "
                           f"{rf['fault']}")
+
+    # C-n: every checker-shaped tool must be cited by at least one rule
+    _checker_tools = [
+        "tools/check_matrix.py",
+        "tools/check_reachability.py",
+        "tools/guard_proofs.py",
+        "tools/ensemble_convergence.py",
+        "tools/benchmark_evidence.py",
+        "tools/dsc_check.py",
+    ]
+    all_checker_refs = " ".join(
+        r.get("checker_ref", "") for r in reg.get("rules", [])
+    )
+    for tool in _checker_tools:
+        if tool not in all_checker_refs:
+            warnings.append(f"checker-shaped tool not cited by any rule: {tool}")
+
     return errors, warnings
 
 
