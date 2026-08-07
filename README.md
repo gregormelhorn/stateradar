@@ -27,7 +27,7 @@ optional dependency is missing. The agent
 may propose and challenge behaviour, but must not silently decide it —
 and the tests come from the specification, not from the code.
 
-**Version 1.49.**
+**Version 1.50.**
 
 ## The problem
 
@@ -139,25 +139,18 @@ bugs, two of them critical and reported upstream.
 Two independent, fresh-session pilot runs on the same component
 (`examples/device-connection/`) produced:
 
-- **93.8 % cell convergence** on the 4×8 aligned base grid (30/32 cells
-  convergent). The two divergent cells reflect genuine open questions
-  both runs discovered independently (duplicate-connect semantics and
-  the FAILED backdoor).
-- **7 structural findings** reported separately from the cell rate:
-  state granularity differences (retry-count sub-states vs attempt-phase
-  sub-states) and undesired-variant slicing divergence (4 vs 3 UV columns).
-- ALLCAPS↔PascalCase normalization bridges naming conventions
-  automatically; qualifier-level structural differences are never masked.
+- **100 % cell convergence** on the 5×21 aligned grid (105/105 cells
+  convergent). Both runs independently produced identical cell dispositions.
+- **Zero structural findings.** Both runs generated the full 21-event
+  catalogue (7 base + 14 UV variants) with identical state alignments.
+- **5 of 5** question IDs match between runs. Zero contradictory findings.
 
 `tools/ensemble_convergence.py` automates the protocol: it normalizes
 state names (case-insensitive exact match only, never stripping qualifiers
-per PA-17 Rule 4), aligns events by ID, diffs cells, reports structural
+per PA-17 Rule 4), aligns events by ID, diffs cells, reports structural
 (granularity/slicing) divergence separately from cell convergence, and
-mechanically marks divergent cells `UNSPECIFIED → Q`. Full protocol and
-recorded baseline at `tests/device-connection/CONVERGENCE.md`.
-
-Finding-level convergence: 3 of 5 question themes found by both runs;
-no contradictory findings — divergence is additive.
+mechanically marks divergent cells `UNSPECIFIED → Q`. Full protocol and
+recorded baseline at `examples/device-connection/CONVERGENCE.md`.
 
 ## Scope
 
