@@ -18,6 +18,15 @@ ErrMaxActiveConnReached.
 to terminal shutdown only and does not decide a capacity-exhaustion timeout
 policy.
 
+## Q-02: Put integrity (F-12, F-14, F-17)
+
+**Status:** ANSWERED — [DR-002](decisions/DR-002.yaml); to-be model and test generation pending.
+
+Lost, duplicate, and foreign `Put()` inputs are caller-contract assumptions.
+A caller must return or close exactly one genuine borrowed connection exactly
+once. The pool does not add lease identity or ownership tracking to recover a
+lost connection or detect a duplicate/foreign return.
+
 ## Q-03: Put after Release (F-04)
 
 Put() after Release: conns is nil so Put calls c.Close(conn) at

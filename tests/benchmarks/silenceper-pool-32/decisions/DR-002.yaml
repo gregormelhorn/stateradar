@@ -1,0 +1,19 @@
+id: DR-002
+date: 2026-08-07
+source_question: Q-02
+question: Who owns lost, duplicate, and foreign Put() returns?
+options:
+  - NAT: caller returns or closes exactly one genuine borrowed connection exactly once
+  - pool detects and rejects duplicate or foreign returns
+  - pool recovers capacity after caller loss
+  - defer
+decision: NAT: caller returns or closes exactly one genuine borrowed connection exactly once
+rationale: Project owner selected option 1 after review of reconstructed upstream owner intent. The raw-interface pool directly delivers Put() values to queued Get() requests and has no lease identity; caller misuse remains an environment assumption rather than added pool ownership tracking.
+links:
+  - "matrix: all states × UV-Put-loss"
+  - "matrix: all states × UV-Put-duplication"
+  - "matrix: all states × UV-Put-commission"
+  - "question: Q-02"
+  - "upstream: https://github.com/silenceper/pool/issues/36"
+  - "upstream: https://github.com/silenceper/pool/pull/29"
+status: accepted
