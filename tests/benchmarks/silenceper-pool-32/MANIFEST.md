@@ -24,3 +24,12 @@ ODC: fault F-07 (lifecycle coupling; secondary F-20 blocked progress after termi
 - **Lifecycle disagreement (PA-21):** Pool lifecycle terminates without
   synchronizing with Waiter lifecycle.
 - **Fix direction:** In `Release()`, iterate `connReqs` and close each channel.
+
+## Current analysis status
+
+This manifest preserves the frozen as-is oracle finding. The separate
+Resolution-only to-be artifact set is complete and checker-green. See the
+[living analysis index](domain-analysis/summary.md).
+
+This benchmark task does not include Testgen, upstream implementation,
+Reconcile, a release, a tag, or a push.

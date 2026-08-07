@@ -36,7 +36,7 @@ regression anchors.
 | 1 | valkey-glide | [#5803](https://github.com/valkey-io/valkey-glide/issues/5803) | Caller terminal, resource active |
 | 2 | python-websockets | [#1527](https://github.com/python-websockets/websockets/issues/1527) | Deadline expires, caller blocked |
 | 3 | meilisearch | [#6508](https://github.com/meilisearch/meilisearch/issues/6508) | Caller terminal, claim eligible |
-| 4 | silenceper/pool | [#32](https://github.com/silenceper/pool/issues/32) | connReqs never closed |
+| 4 | silenceper/pool | [#32](https://github.com/silenceper/pool/issues/32) | connReqs never closed ([current analysis](silenceper-pool-32/domain-analysis/summary.md)) |
 | 5 | grpc-go | [PR #2669](https://github.com/grpc/grpc-go/pull/2669) (fixes #2663/#2636) | Stale backoff after established connection (F-18) |
 
 ## Totals
