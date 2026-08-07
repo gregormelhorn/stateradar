@@ -2,7 +2,33 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.48 — real annotation pipeline, honest tooling
+
+- gen_analysis_sidecar parses `## Event annotations` in
+  event-catalogue.md (gate, upstream_guards, per-category UV coverage)
+  and carries them into the sidecar. The catalogue is the authoring
+  surface; the sidecar stays generated.
+- run_tool_tests: hollow backfill deleted — the drift check compares
+  raw generator output against the golden file. golden/red-mini
+  catalogues carry the real v1.46 annotation values (transcribed from
+  73515dd); fixtures regenerated from the generator. Red probe:
+  removing a catalogue annotation trips drift AND checker.
+- silenceper canonical sidecar: Released×Put → questionRef Q-03,
+  AtCapacity×Get → questionRef Q-04, INV-01 "openingConns >= 0"
+  bound to Q-06.
+- run_benchmark: one clone retry (transient network ≠ regression),
+  greppable `CASE <name>: OK|FAIL` per case, hard error when a
+  scheduled case goes unreported. Aggregation was verified correct.
+
 ## v1.47 — un-break v1.46 (generator↔fixture fix)
+
+**v1.48 correction of this entry:** the "generator↔fixture fix" was a
+hollow fix — a runner-side backfill injected identical synthetic
+coverage into both sides of the drift comparison, and golden-mini's
+honest absence placeholder (whose reason text prescribed the real fix)
+was deleted. Repaired in v1.48. The review-observed "1 failed" summary
+traced to a transient clone failure with no visible FAIL line, not an
+aggregation defect; prefer v1.48 over this tag.
 
 - K1: Fixed run_tool_tests generator↔fixture break. Backfill extended
   to include per-event UV coverage (gate, upstream_guards already
