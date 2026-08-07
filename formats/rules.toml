@@ -1070,6 +1070,67 @@ checker_ref = "tools/benchmark_evidence.py"
 selftest_ref = "tools/selftest/run_selftest.py (benchmark dating classification correct)"
 added_by = "pack:v1.38"
 
+
+[[rules]]
+id = "R-VERIFIED-COMPLETION"
+title = "completion means diff plus executed acceptance"
+class = "process"
+statement = "a task is complete when its changes are in the committed diff AND its acceptance commands were executed in-session; a completion claim lacking either is a defect of the same class as a red checker"
+enforcement = "prompt"
+prose_ref = "AGENTS.md#R-VERIFIED-COMPLETION"
+lineage = "session 2026-08-07/08 (pack-development observations)"
+added_by = "pack:v1.45"
+
+[[rules]]
+id = "R-RED-PROBE"
+title = "no mechanism without an observed failure"
+class = "process"
+statement = "every new checker, guard, or verification mechanism ships with its red probe executed and its output pasted; a mechanism whose failure path has never been observed does not count as built"
+enforcement = "prompt"
+prose_ref = "AGENTS.md#R-RED-PROBE"
+lineage = "session 2026-08-07/08 (pack-development observations)"
+added_by = "pack:v1.45"
+
+[[rules]]
+id = "R-REMOTE-TRUTH"
+title = "pushed means visible from the remote"
+class = "process"
+statement = "claims like pushed, tagged, or released are verified against the remote (git ls-remote or a fresh clone) and pasted; local state is a claim, remote state is a fact"
+enforcement = "prompt"
+prose_ref = "AGENTS.md#R-REMOTE-TRUTH"
+lineage = "session 2026-08-07/08 (pack-development observations)"
+added_by = "pack:v1.45"
+
+[[rules]]
+id = "R-GREEN-MAIN"
+title = "gates run before the push, not after"
+class = "process"
+statement = "the full gate set runs green before every commit to main; a red gate blocks the push, and a red CI after a push preempts all other work"
+enforcement = "prompt"
+prose_ref = "AGENTS.md#R-GREEN-MAIN"
+lineage = "session 2026-08-07/08 (pack-development observations)"
+added_by = "pack:v1.45"
+
+[[rules]]
+id = "R-REMEASURE"
+title = "reality wins over recorded numbers"
+class = "process"
+statement = "never adjust fixtures, expected values, or documented baselines to satisfy a failing check; re-measure, and update every surface that states the number in the same commit"
+enforcement = "prompt"
+prose_ref = "AGENTS.md#R-REMEASURE"
+lineage = "session 2026-08-07/08 (pack-development observations)"
+added_by = "pack:v1.45"
+
+[[rules]]
+id = "R-BLOCKED-HONESTY"
+title = "blocked is a valid result"
+class = "process"
+statement = "when a premise fails or a step cannot be completed, stop and record BLOCKED with a one-line reason; improvised substitutes and silent omissions are completion claims in disguise"
+enforcement = "prompt"
+prose_ref = "AGENTS.md#R-BLOCKED-HONESTY"
+lineage = "session 2026-08-07/08 (pack-development observations)"
+added_by = "pack:v1.45"
+
 [[rules]]
 id = "R-REGISTRY"
 title = "registry consistency"

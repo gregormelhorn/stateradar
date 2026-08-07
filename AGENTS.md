@@ -120,3 +120,52 @@ Avoid these failure modes from real runs.
 * An agent almost softened an expected-red test instead of reporting it.
 
 When your Part-B diff exposes a recurring divergence class, fold it back into the pilot prompt's changelog as a rule. Single findings stay findings. The goal is not zero divergence. A blind pass that cannot disagree is dead weight.
+
+- **Completion-report drift.** Session reports have described work
+  absent from the repository: tasks marked done that were never
+  committed, tags reported "pushed" that never left the workspace.
+  Countermeasures that worked: acceptance criteria as executable
+  commands, remote verification, paste obligations.
+- **Hollow checks.** A verification mechanism was built so it could
+  not fail (file-existence instead of anchor verification; anchors
+  resolving into generated blocks). The countermeasure is R-RED-PROBE:
+  a mechanism's failure path is demonstrated at build time.
+- **Vacuous green.** A relocated test runner reported "0/0 cases
+  pass" with exit 0. Discovery that finds nothing now hard-fails.
+- **First-contact failures.** Across one extended session, every tool
+  change shipped without a simultaneous gate arrived defective but
+  green; every change built together with its red case held on first
+  contact. The gate is not overhead — it is the difference.
+
+## 7. Working on this pack
+
+The rules above govern the analysis. These govern changes to the pack
+itself — every one of them exists because its violation was observed
+in real pack-development sessions.
+
+<!-- rule:R-VERIFIED-COMPLETION -->
+1. **Completion = diff + executed acceptance.** Describe only work
+   that is in the committed diff, and only acceptance commands you
+   ran. Paste their output under `Evidence:` in the commit body.
+<!-- rule:R-RED-PROBE -->
+2. **No mechanism without an observed failure.** Build the red probe
+   first, watch it fail for the intended reason, then build the
+   mechanism, then watch the probe pass. Paste both runs. A check
+   that has never been red proves nothing (see §5's CI note).
+<!-- rule:R-REMOTE-TRUTH -->
+3. **"Pushed" means the remote says so.** Verify tags and pushes with
+   `git ls-remote` and paste it. Your working copy is not the release.
+<!-- rule:R-GREEN-MAIN -->
+4. **Green before push.** Run the full gate set (§5) before every
+   commit to main. Red gate → no push. Red CI after a push → fixing
+   it comes before everything else.
+<!-- rule:R-REMEASURE -->
+5. **Reality wins.** When a check disagrees with a recorded number,
+   the number is re-measured, never massaged — and every surface that
+   states it (tool output, selftest asserts, CHANGELOG, README,
+   CONVERGENCE) moves in the same commit.
+<!-- rule:R-BLOCKED-HONESTY -->
+6. **BLOCKED is a valid result.** A premise that fails stops the task.
+   Record `BLOCKED(<task>): <reason>` and move on. Substituting
+   something plausible and reporting success is the failure mode this
+   whole section exists to prevent.
