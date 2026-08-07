@@ -29,9 +29,15 @@ lost connection or detect a duplicate/foreign return.
 
 ## Q-03: Put after Release (F-04)
 
+**Status:** ANSWERED — [DR-003](decisions/DR-003.yaml); to-be model and test generation pending.
+
 Put() after Release: conns is nil so Put calls c.Close(conn) at
 channel.go:190. Close() then checks c.close==nil and is a silent no-op —
 the connection is leaked, openingConns is not decremented (already stale).
+
+**Accepted decision:** this is a safe terminal no-op. `Put()` after `Release()`
+returns successfully without a second physical close; callers return or close all
+borrowed connections before releasing the pool.
 
 ## Q-05: FactoryFail handling (F-01)
 

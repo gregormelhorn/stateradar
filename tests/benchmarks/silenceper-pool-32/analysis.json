@@ -325,7 +325,8 @@
    "event": "Put",
    "disposition": "UNSPECIFIED",
    "q": "Q-03",
-   "questionRef": "Q-03"
+   "questionRef": "Q-03",
+   "dr": "DR-003"
   },
   {
    "state": "Released",
@@ -407,7 +408,8 @@
    "state": "Active_HasIdle",
    "event": "UV-Put-out-of-order",
    "disposition": "UNSPECIFIED",
-   "q": "Q-03"
+   "q": "Q-03",
+   "dr": "DR-003"
   },
   {
    "state": "Active_HasIdle",
@@ -488,7 +490,8 @@
    "state": "Active_IdleExhausted_UnderCap",
    "event": "UV-Put-out-of-order",
    "disposition": "UNSPECIFIED",
-   "q": "Q-03"
+   "q": "Q-03",
+   "dr": "DR-003"
   },
   {
    "state": "Active_IdleExhausted_UnderCap",
@@ -569,7 +572,8 @@
    "state": "Active_IdleExhausted_AtCapacity",
    "event": "UV-Put-out-of-order",
    "disposition": "UNSPECIFIED",
-   "q": "Q-03"
+   "q": "Q-03",
+   "dr": "DR-003"
   },
   {
    "state": "Active_IdleExhausted_AtCapacity",
@@ -650,7 +654,8 @@
    "state": "Released",
    "event": "UV-Put-out-of-order",
    "disposition": "UNSPECIFIED",
-   "q": "Q-03"
+   "q": "Q-03",
+   "dr": "DR-003"
   },
   {
    "state": "Released",
@@ -726,7 +731,7 @@
   },
   {
    "id": "Q-03",
-   "status": "OPEN",
+   "status": "ANSWERED — DR-003",
    "fault": [
     "F-04",
     "F-15"
@@ -776,7 +781,8 @@
  ],
  "behaviouralDrs": [
   "DR-001",
-  "DR-002"
+  "DR-002",
+  "DR-003"
  ],
  "coverage": {
   "Get": {

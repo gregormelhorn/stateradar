@@ -1,0 +1,17 @@
+id: DR-003
+date: 2026-08-07
+source_question: Q-03
+question: What should Put() do after Release()?
+options:
+  - safe terminal no-op; caller returns or closes borrowed connections before Release()
+  - physically close the returned connection
+  - return ErrClosed
+  - defer
+decision: safe terminal no-op; caller returns or closes borrowed connections before Release()
+rationale: Project owner selected option 1 after review of reconstructed upstream owner intent. Merged PR #10 made Close() after pool destruction a successful no-op rather than a panic; Put() after Release() follows that terminal route. This accepts the terminal no-op and assigns outstanding borrowed-connection cleanup to callers.
+links:
+  - "matrix: Released × Put"
+  - "matrix: all states × UV-Put-out-of-order"
+  - "question: Q-03"
+  - "upstream: https://github.com/silenceper/pool/pull/10"
+status: accepted
