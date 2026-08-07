@@ -1,5 +1,5 @@
 ---
-name: domain-statechart
+name: stateradar
 description: "Use when you analyze, modify, test, or review stateful components (lifecycles, connections, sessions, protocols, state machines, retries, timeouts, cancellation, recovery, queues, concurrent coordination), or when the user mentions a disposition matrix, decision records, domain-analysis/, open questions, or the statechart method. Enforces StateRadar lifecycle contract verification: model first, no silent domain decisions, checker-verified matrices, one test per matrix cell."
 ---
 
