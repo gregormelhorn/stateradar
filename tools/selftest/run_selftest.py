@@ -345,6 +345,36 @@ def main() -> int:
         }))
         expect("mutation checker blocks timed-out baseline", True,
                *mutation(baseline_timeout), needle="BLOCKED: baseline timeout=1s")
+
+        print("fault mutant checker")
+
+        def fault_check(adir: Path) -> tuple[int, str]:
+            r = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "check_fault_mutants.py"), str(adir)],
+                capture_output=True, text=True)
+            return r.returncode, (r.stdout + r.stderr).strip()
+
+        def component(tmp: Path, name: str) -> Path:
+            dst = tmp / name
+            shutil.copytree(ROOT / "tests" / "golden-mini", dst)
+            return dst
+
+        fdir = ROOT / "tests" / "golden-mini" / "domain-analysis" / "mini"
+        expect("fault mutant baseline kills F-04 sneak path", False,
+               *fault_check(fdir), needle="FAULT MUTANTS: OK")
+        rc, out = fault_check(fdir)
+        if "KILLED" not in out:
+            failures.append("fault mutant kill proof: no KILLED line\n" + out)
+        else:
+            print("  ok  fault mutant kill proof (passes)")
+
+        mirror = component(tmp, "mirror-suite")
+        cfg = json.loads((mirror / "domain-analysis" / "mini" / "fault-mutants.json").read_text())
+        cfg["testCommand"] = ["python3", "-c", "import sys; sys.exit(0)", "{analysis_dir}"]
+        (mirror / "domain-analysis" / "mini" / "fault-mutants.json").write_text(json.dumps(cfg))
+        expect("mirroring suite survives F-04 mutant (F-21 blind spot)", True,
+               *fault_check(mirror / "domain-analysis" / "mini"), needle="SURVIVED")
+
         # PA-13a (markdown table side): an empty coverage cell must fail
         d6 = tmp / "cm-red"
         shutil.copytree(gm, d6)

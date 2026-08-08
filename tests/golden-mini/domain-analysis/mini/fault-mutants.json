@@ -1,0 +1,15 @@
+{
+  "formatVersion": 1,
+  "testCommand": ["python3", "tests/test_cell_suite.py", "{analysis_dir}"],
+  "workingDirectory": "../..",
+  "timeoutSeconds": 5,
+  "mutants": [
+    {
+      "fault": "F-04",
+      "id": "F-04-sneak-path-Closed-M1",
+      "target": "src/mini.py",
+      "variant": "src/mutants/mini.F-04-sneak-path.py",
+      "cell": "Closed x M1"
+    }
+  ]
+}
