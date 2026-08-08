@@ -11,7 +11,7 @@ upstream discoveries reported as new GitHub issues.
 | recws-org/recws | 7 (2 critical) | #64 Shutdown panic, log.Fatalf kills process |
 | silenceper/pool | 1 | connReqs never closed on Release |
 | gobreaker | 1 | stale done() silently dropped (#122) |
-| meilisearch/meilisearch | 2 | D1 double release (#6578), D4 missing increment (#6577) |
+| meilisearch/meilisearch | 3 | D1 double release (#6578), D4 missing increment (#6577), S3 multipart cancel detach (#6510) |
 | pladaria/reconnecting-websocket | 1 critical | Terminal lock leak |
 | valkey-glide | 1 critical | Missing timeout→release transition |
 
@@ -25,7 +25,7 @@ Convergence `convergence/run*.json` recordings are raw pilot output
 and exempt from dsc_check; only the canonical merged sidecar is
 gate-checked.
 
-## Oracle-confirmed benchmarks (5/5)
+## Oracle-confirmed benchmarks (6/6)
 
 Caveat: The public issues may predate model training cutoff. New bugs
 above are the strongest independent-discovery evidence; these serve as
@@ -38,10 +38,11 @@ regression anchors.
 | 3 | meilisearch | [#6508](https://github.com/meilisearch/meilisearch/issues/6508) | Caller terminal, claim eligible |
 | 4 | silenceper/pool | [#32](https://github.com/silenceper/pool/issues/32) | connReqs never closed ([current analysis](silenceper-pool-32/domain-analysis/summary.md)) |
 | 5 | grpc-go | [PR #2669](https://github.com/grpc/grpc-go/pull/2669) (fixes #2663/#2636) | Stale backoff after established connection (F-18) |
+| 6 | meilisearch/s3 | [#6510](https://github.com/meilisearch/meilisearch/issues/6510) | Structured-cancellation: cancel detaches multipart uploads |
 
 ## Totals
 
-12 pilots, 5 Oracle-confirmed, 11 bugs found, 6 GitHub issues filed,
+12 pilots, 6 Oracle-confirmed, 12 bugs found, 6 GitHub issues filed,
 72 methodology rules. The grpc-go-2669 case
 (2026-08-07, pack v1.50) is the first pilot run with ODC fields,
 SHARD categories, and blind-pass row-coverage checking end to end;

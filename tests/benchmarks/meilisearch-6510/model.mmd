@@ -1,0 +1,25 @@
+stateDiagram-v2
+    [*] --> NoUpload
+
+    NoUpload --> UploadCreated: create_succeeds
+    NoUpload --> Aborted: create_fails
+
+    UploadCreated --> Uploading: part_ready
+    UploadCreated --> Aborted: cancel
+
+    Uploading --> Uploading: part_succeeds
+    Uploading --> Uploading: part_fails
+    Uploading --> Completed: all_parts_done
+    Uploading --> Aborted: part_permanent_fail
+    Uploading --> Aborted: cancel
+
+    Completed --> [*]
+    Aborted --> [*]
+
+    note right of Uploading
+        Q-02 (issue #6510):
+        cancel returns Err(AbortedTask)
+        but drops in_flight queue.
+        Child retry tasks detach,
+        no AbortMultipartUpload sent.
+    end note

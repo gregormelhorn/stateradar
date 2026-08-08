@@ -1,0 +1,38 @@
+{
+ "repo": "https://github.com/meilisearch/meilisearch",
+ "commit": "fff2ef5a42658b16a937d922aabc3fb7f89f2018",
+ "component": "meilisearch-s3-snapshot",
+ "unspecified_cells": [
+  {
+   "state": "Uploading",
+   "event": "cancel"
+  },
+  {
+   "state": "Uploading",
+   "event": "UV-cancel-duplication"
+  },
+  {
+   "state": "Uploading",
+   "event": "UV-cancel-out-of-order"
+  },
+  {
+   "state": "Uploading",
+   "event": "UV-cancel-commission"
+  }
+ ],
+ "expected_questions": [
+  "Q-02"
+ ],
+ "expected_phrases": [
+  "AbortedTask",
+  "JoinHandle",
+  "AbortMultipartUpload",
+  "detached"
+ ],
+ "dating": {
+  "issue_published": "2026-08-06",
+  "model": "claude-sonnet-4-20250514",
+  "model_release": "2025-05-22",
+  "model_cutoff": "2025-03-01"
+ }
+}
