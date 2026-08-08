@@ -1,69 +1,86 @@
 #!/usr/bin/env python3
-"""Golden-mini cell contract suite for matrix mutation checks."""
+"""Golden-mini behavioral cell suite: drives Mini through the declared seam."""
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 from pathlib import Path
 
-EXPECTED = {
-    "Idle": {
-        "M1": "transition →Open `mini.py:10`",
-        "M2": "ignore (documented) `mini.py:20`",
-        "UV-M1-dup": "handle (counted) `mini.py:30`",
-    },
-    "Open": {
-        "M1": "ignore (documented) `mini.py:40`",
-        "M2": "transition →Closed `mini.py:50`",
-        "UV-M1-dup": "handle (counted) `mini.py:60`",
-    },
-    "Closed": {
-        "M1": "reject `mini.py:70`",
-        "M2": "ignore (documented) `mini.py:80`",
-        "UV-M1-dup": "handle (counted) `mini.py:90`",
-    },
-}
+NAVIGATE = {"Idle": [], "Open": ["M1"], "Closed": ["M1", "M2"]}
+EVENTS = ["M1", "M2", "UV-M1-dup"]
 
 
-def parse_matrix(path: Path) -> dict[str, dict[str, str]]:
-    lines = [
-        line for line in path.read_text(encoding="utf-8").splitlines()
-        if line.startswith("|")
-    ]
-    if len(lines) < 3:
-        raise ValueError("matrix has no complete table")
-    header = [part.strip() for part in lines[0].strip("|").split("|")]
-    if header[0] != "state":
-        raise ValueError("matrix table has no state header")
-    events = header[1:]
-    result: dict[str, dict[str, str]] = {}
-    for line in lines[2:]:
-        cells = [part.strip() for part in line.strip("|").split("|")]
-        if len(cells) != len(header):
-            raise ValueError("matrix row has wrong cell count")
+def load_mini(component_root: Path):
+    spec = importlib.util.spec_from_file_location(
+        "mini_impl", component_root / "src" / "mini.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def parse_matrix(path: Path) -> dict[tuple[str, str], str]:
+    rows: dict[tuple[str, str], str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("|") or line.startswith("| state"):
+            continue
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        if len(cells) < 2 or set(cells[0]) <= {"-", ":"}:
+            continue
         state = cells[0].strip("*")
-        result[state] = dict(zip(events, cells[1:], strict=True))
-    return result
+        for event, raw in zip(EVENTS, cells[1:], strict=True):
+            token = raw.split("`")[0].strip()
+            rows[(state, event)] = token
+    return rows
+
+
+def check(module, state: str, event: str, expected: str) -> str | None:
+    kind = expected.split()[0]  # transition | handle | ignore | reject
+    m = module.Mini()
+    for nav in NAVIGATE[state]:
+        m.deliver(nav)
+    before = m.state
+    try:
+        outcome = m.deliver(event)
+    except module.RejectedError:
+        return None if kind == "reject" and m.state == before else (
+            f"expected {expected}, got reject"
+        )
+    if kind == "transition":
+        target = expected.split("→", 1)[1].strip()
+        if outcome == "transition" and m.state == target:
+            return None
+        return f"expected {expected}, got {outcome} state={m.state}"
+    if kind == "handle":
+        if outcome == "handled" and m.state == before:
+            return None
+        return f"expected handle, got {outcome} state={m.state}"
+    if kind == "ignore":
+        if outcome == "ignored" and m.state == before:
+            return None
+        return f"expected ignore, got {outcome} state={m.state}"
+    if kind == "reject":
+        return f"expected reject, got {outcome}"
+    return f"unknown disposition {expected}"
 
 
 def main(argv: list[str]) -> int:
     if len(argv) != 2:
         print("CELL SUITE: expected one analysis directory", file=sys.stderr)
         return 2
-    try:
-        actual = parse_matrix(Path(argv[1]) / "disposition-matrix.md")
-    except (OSError, ValueError) as exc:
-        print(f"CELL SUITE: {exc}", file=sys.stderr)
-        return 2
-    for state, events in EXPECTED.items():
-        for event, expected in events.items():
-            got = actual.get(state, {}).get(event)
-            if got != expected:
-                print(
-                    f"CELL SUITE: {state} × {event}: expected {expected!r}, got {got!r}",
-                    file=sys.stderr,
-                )
-                return 1
+    analysis_dir = Path(argv[1]).resolve()
+    component_root = Path(__file__).resolve().parent.parent
+    module = load_mini(component_root)
+    matrix = parse_matrix(analysis_dir / "disposition-matrix.md")
+    failures = 0
+    for (state, event), expected in sorted(matrix.items()):
+        problem = check(module, state, event, expected)
+        if problem:
+            print(f"MISMATCH {state} × {event}: {problem}")
+            failures += 1
+    if failures:
+        return 1
     print("CELL SUITE: OK")
     return 0
 
