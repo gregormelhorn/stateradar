@@ -375,6 +375,42 @@ def main() -> int:
         expect("mirroring suite survives F-04 mutant (F-21 blind spot)", True,
                *fault_check(mirror / "domain-analysis" / "mini"), needle="SURVIVED")
 
+        no_fm = component(tmp, "fault-no-config")
+        (no_fm / "domain-analysis" / "mini" / "fault-mutants.json").unlink()
+        expect("fault mutant rejects missing config", True,
+               *fault_check(no_fm / "domain-analysis" / "mini"),
+               needle="CONFIG ERROR: missing fault-mutants.json")
+
+        bad_ver = component(tmp, "fault-bad-version")
+        cfg = json.loads((bad_ver / "domain-analysis" / "mini" / "fault-mutants.json").read_text())
+        cfg["formatVersion"] = 2
+        (bad_ver / "domain-analysis" / "mini" / "fault-mutants.json").write_text(json.dumps(cfg))
+        expect("fault mutant rejects formatVersion 2", True,
+               *fault_check(bad_ver / "domain-analysis" / "mini"),
+               needle="CONFIG ERROR: formatVersion must be integer 1")
+
+        no_variant = component(tmp, "fault-no-variant")
+        (no_variant / "src" / "mutants" / "mini.F-04-sneak-path.py").unlink()
+        expect("fault mutant rejects missing variant file", True,
+               *fault_check(no_variant / "domain-analysis" / "mini"),
+               needle="missing variant file")
+
+        no_ph = component(tmp, "fault-no-placeholder")
+        cfg = json.loads((no_ph / "domain-analysis" / "mini" / "fault-mutants.json").read_text())
+        cfg["testCommand"] = ["python3", "tests/test_cell_suite.py"]
+        (no_ph / "domain-analysis" / "mini" / "fault-mutants.json").write_text(json.dumps(cfg))
+        expect("fault mutant rejects missing placeholder", True,
+               *fault_check(no_ph / "domain-analysis" / "mini"),
+               needle="exactly one {analysis_dir}")
+
+        blocked = component(tmp, "fault-blocked")
+        cfg = json.loads((blocked / "domain-analysis" / "mini" / "fault-mutants.json").read_text())
+        cfg["testCommand"] = ["python3", "-c", "raise SystemExit(3)", "{analysis_dir}"]
+        (blocked / "domain-analysis" / "mini" / "fault-mutants.json").write_text(json.dumps(cfg))
+        expect("fault mutant blocks failed baseline", True,
+               *fault_check(blocked / "domain-analysis" / "mini"),
+               needle="BLOCKED: baseline exit=3")
+
         # PA-13a (markdown table side): an empty coverage cell must fail
         d6 = tmp / "cm-red"
         shutil.copytree(gm, d6)
