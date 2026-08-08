@@ -151,7 +151,9 @@ tools/          consistency checker, dsc_check (the pack-shipped sidecar
                 (empty matrix grids), dsc_compose (cross-model report),
                 check_matrix (the generic per-component checker),
                 check_matrix_mutation (runs declared cell suites against
-                isolated matrix mutants), check_reachability (semantic state
+                isolated matrix mutants), check_fault_mutants (runs declared
+                cell suites against hand-authored implementation mutants per
+                fault class), check_reachability (semantic state
                 reachability),
                 dsc_stamp (validate + pin the manifest),
                 dsc_blind (blind-pass assembly + diff),

@@ -42,6 +42,7 @@ ARTIFACTS = {  # filename -> prompts that define/produce it
     "to-be.machine.mmd": ["03-resolution.md"],
     "matrix-coverage.json": ["04-testgen.md"],
     "matrix-mutation.json": ["04-testgen.md"],
+    "fault-mutants.json": ["04-testgen.md"],
     "deviation-report.md": ["04-testgen.md"],
     "seam.md": ["04-testgen.md"],
     "test-coverage-map.md": ["07-test-audit.md"],

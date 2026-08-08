@@ -97,6 +97,43 @@ python3 tools/check_matrix_mutation.py domain-analysis/<component>
 A surviving mutant is a coverage finding. Do not weaken or skip a cell test to
 make a mutant survive or pass.
 
+#### Fault-class hardening (`fault-mutants.json`)
+
+Optionally, harden the suite against hand-authored implementation mutants
+per fault class. An **F-04 sneak-path** mutant changes one `ignore (documented)`
+or `reject` cell to accept the event instead. The suite must detect and kill it:
+the behavioral check for that cell must fail.
+
+Write `fault-mutants.json` beside `disposition-matrix.md`:
+
+```json
+{
+  "formatVersion": 1,
+  "testCommand": ["python3", "tests/test_cell_suite.py", "{analysis_dir}"],
+  "workingDirectory": "../..",
+  "timeoutSeconds": 5,
+  "mutants": [
+    {
+      "fault": "F-04",
+      "id": "F-04-sneak-path-Closed-M1",
+      "target": "src/mini.py",
+      "variant": "src/mutants/mini.F-04-sneak-path.py",
+      "cell": "Closed x M1"
+    }
+  ]
+}
+```
+
+`testCommand` is an argv array. It contains `{analysis_dir}` exactly once.
+The checker replaces that token with an isolated analysis copy:
+
+```bash
+python3 tools/check_fault_mutants.py domain-analysis/<component>
+```
+
+A surviving mutant is a suite finding. Never weaken or skip a cell test
+to make a mutant survive or pass.
+
 ### Step 5 — Run and report
 
 Run the full suite. Write `deviation-report.md`: every failing test is a deviation of the current code from the approved model, listed as `cell / expected (DR) / observed (file:line)`. Under "report only", this list is the implementation worklist. Stop here. Under "yes, smallest change": implement the smallest change per deviation, cite the DR, and rerun until green. Never resolve a deviation by touching the test.
