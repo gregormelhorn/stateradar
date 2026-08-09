@@ -77,108 +77,163 @@ partb_vocab_tail = "Without these definitions a blind pass applies `reject` and 
 id = "F-01"
 name = "missing transition"
 binder = "missing-transition"
+level = "matrix"
+observability = "n/a"
 
 [[faults]]
 id = "F-02"
 name = "transfer fault"
 binder = "transfer-fault"
+level = "matrix"
+observability = "n/a"
 
 [[faults]]
 id = "F-03"
 name = "output fault"
 binder = "output-fault"
+level = "implementation"
+observability = "high"
+precondition = "emitted effects projected by the seam"
 
 [[faults]]
 id = "F-04"
 name = "sneak path"
 binder = "sneak-path"
+level = "matrix"
+observability = "n/a"
 
 [[faults]]
 id = "F-05"
 name = "corrupt state"
 binder = "corrupt-state"
+level = "implementation"
+observability = "high"
+precondition = "counter or context variable projected by the suite"
 
 [[faults]]
 id = "F-06"
 name = "trap door"
 binder = "trap-door"
+level = "none"
+observability = "n/a"
+none_reason = "undocumented entry/exit paths are found by matrix totality (PA-14 round-tripping), not by code mutation"
 
 [[faults]]
 id = "F-07"
 name = "lifecycle coupling"
 source = "PA-21 (valkey-glide #5803, python-websockets #1527, Meilisearch #6508)"
+level = "implementation"
+observability = "low"
+precondition = "multi-track suite modeling caller and internal lifecycles separately"
 
 [[faults]]
 id = "F-08"
 name = "double release"
 source = "PA-23 (Meilisearch #6578)"
+level = "implementation"
+observability = "high"
+precondition = "release count or released-state projected"
 
 [[faults]]
 id = "F-09"
 name = "cancellation leak"
 source = "PA-24 (Meilisearch #6508)"
+level = "implementation"
+observability = "medium"
+precondition = "seam supports cancel plus a post-cancel resource probe"
 
 [[faults]]
 id = "F-10"
 name = "synchronized reset herd"
 source = "02:v1.11 (reconnecting-websocket #200)"
+level = "none"
+observability = "n/a"
+none_reason = "multi-instance aggregate; needs an aggregate harness, not a per-component mutation"
 
 [[faults]]
 id = "F-11"
 name = "callback deadlock"
 source = "02:v1.12 (gobreaker #37)"
+level = "implementation"
+observability = "medium"
+precondition = "suite timeout catches the hang deterministically; deterministic callback-reentrancy delivery into a locked component"
 
 [[faults]]
 id = "F-12"
 name = "loss / omission"
 shard = "omission"
+level = "matrix"
+observability = "n/a"
 
 [[faults]]
 id = "F-13"
 name = "delay / late"
 shard = "late"
+level = "implementation"
+observability = "medium"
+precondition = "clock injection in the seam (delay + absolute due-offset doctrine, v1.24)"
 
 [[faults]]
 id = "F-14"
 name = "duplication"
 shard = "commission (repeat)"
+level = "implementation"
+observability = "high"
+precondition = "idempotence observable via repeated delivery plus counter"
 
 [[faults]]
 id = "F-15"
 name = "out-of-order / stale"
 # late is exclusively F-13 (delay); F-15 covers early/out-of-order/stale
 shard = "sequence/early"
+level = "matrix"
+observability = "n/a"
 
 [[faults]]
 id = "F-16"
 name = "contradictory input"
 shard = "value (coarse)"
+level = "matrix"
+observability = "n/a"
 
 [[faults]]
 id = "F-17"
 name = "spontaneous commission"
 shard = "commission"
+level = "matrix"
+observability = "n/a"
 
 [[faults]]
 id = "F-18"
 name = "subtle value fault"
 shard = "value (subtle)"
+level = "implementation"
+observability = "medium"
+precondition = "payload-effect projection; plausible-but-wrong payload crafting in the seam"
 
 [[faults]]
 id = "F-19"
 name = "unimplemented requirement"
 source = "PA-22"
+level = "none"
+observability = "n/a"
+none_reason = "doctrine-mapping finding, not a mutation operator"
 
 [[faults]]
 id = "F-20"
 name = "blocked progress after terminal event"
 source = "python-websockets #1527"
+level = "matrix"
+observability = "n/a"
 
 [[faults]]
 id = "F-21"
 name = "mirroring test (structure-bound)"
 source = "07-test-audit"
 artifact = "test-suite"
+level = "none"
+observability = "n/a"
+none_reason = "suite property (mirroring test), not a component fault"
 
 [[faults]]
 id = "F-22"
@@ -188,6 +243,9 @@ name = "control stopped too soon / applied too long"
 # controlled process, a resource held past its owner's lifetime where
 # no F-07/F-09 coupling explains it.
 lineage = "leveson-thomas-stpa-2018"
+level = "implementation"
+observability = "medium"
+precondition = "same clock seam as F-13"
 
 # ---------------------------------------------------------------------------
 # Undesired-variant checklist categories (PA-13b data; SHARD-aligned).

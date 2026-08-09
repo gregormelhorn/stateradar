@@ -192,6 +192,32 @@ def constraints(reg: dict, root: Path) -> tuple[list[str], list[str]]:
         if f["id"] not in detected:
             warnings.append(f"fault class without detector: "
                             f"{f['id']} ({f['name']})")
+
+    LEVELS = {"matrix", "implementation", "none"}
+    OBS = {"high", "medium", "low", "n/a"}
+    for f in reg.get("faults", []):
+        fid = f.get("id", "?")
+        level = f.get("level")
+        if level not in LEVELS:
+            errors.append(f"fault {fid}: level missing or not in {sorted(LEVELS)}")
+        obs = f.get("observability")
+        if obs not in OBS:
+            errors.append(f"fault {fid}: observability missing or not in {sorted(OBS)}")
+        if level in LEVELS:
+            if level == "implementation":
+                if obs == "n/a":
+                    errors.append(f"fault {fid}: implementation class with observability n/a")
+                if not f.get("precondition"):
+                    errors.append(f"fault {fid}: implementation class without precondition")
+            else:
+                if obs != "n/a":
+                    errors.append(f"fault {fid}: {level} class must have observability n/a")
+                if "precondition" in f:
+                    errors.append(f"fault {fid}: {level} class must not carry precondition")
+            if level == "none" and not f.get("none_reason"):
+                errors.append(f"fault {fid}: none class without none_reason")
+            if level != "none" and "none_reason" in f:
+                errors.append(f"fault {fid}: {level} class must not carry none_reason")
     for uc in reg.get("uv_categories", []):
         if uc["fault"] not in fault_ids:
             errors.append(f"uv category {uc['label']!r}: unknown fault "
@@ -384,6 +410,60 @@ def selftest() -> int:
     # green: the real tree passes
     e, _ = check(ROOT)
     expect("working tree", False, e)
+
+    def fault_by_id(reg, fid):
+        return next(f for f in reg["faults"] if f["id"] == fid)
+
+    # red: implementation class without precondition
+    broken = copy.deepcopy(reg)
+    fault_by_id(broken, "F-03").pop("precondition", None)
+    e, _ = constraints(broken, ROOT)
+    expect("implementation without precondition", True, e, "without precondition")
+
+    # red: implementation class with observability n/a
+    broken = copy.deepcopy(reg)
+    fault_by_id(broken, "F-03")["observability"] = "n/a"
+    e, _ = constraints(broken, ROOT)
+    expect("implementation with n/a observability", True, e, "observability n/a")
+
+    # red: matrix class with real observability
+    broken = copy.deepcopy(reg)
+    fault_by_id(broken, "F-01")["observability"] = "high"
+    e, _ = constraints(broken, ROOT)
+    expect("matrix class with observability high", True, e,
+           "must have observability n/a")
+
+    # red: none class without none_reason
+    broken = copy.deepcopy(reg)
+    fault_by_id(broken, "F-06").pop("none_reason", None)
+    e, _ = constraints(broken, ROOT)
+    expect("none class without none_reason", True, e, "without none_reason")
+
+    # red: bad level value
+    broken = copy.deepcopy(reg)
+    fault_by_id(broken, "F-01")["level"] = "both"
+    e, _ = constraints(broken, ROOT)
+    expect("bad level value", True, e, "not in")
+
+    # red: bad observability value
+    broken = copy.deepcopy(reg)
+    fault_by_id(broken, "F-01")["observability"] = "extreme"
+    e, _ = constraints(broken, ROOT)
+    expect("bad observability value", True, e, "not in")
+
+    # red: non-implementation class carrying precondition
+    broken = copy.deepcopy(reg)
+    fault_by_id(broken, "F-01")["precondition"] = "leftover from a bad migration"
+    e, _ = constraints(broken, ROOT)
+    expect("matrix class carrying precondition", True, e,
+           "must not carry precondition")
+
+    # red: non-none class carrying none_reason
+    broken = copy.deepcopy(reg)
+    fault_by_id(broken, "F-01")["none_reason"] = "leftover from a bad migration"
+    e, _ = constraints(broken, ROOT)
+    expect("matrix class carrying none_reason", True, e,
+           "must not carry none_reason")
 
     if failures:
         print("GEN_RULES SELFTEST: FAIL")
