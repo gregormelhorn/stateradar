@@ -178,7 +178,7 @@ def run(adir: Path) -> int:
             mutant_copy = copy_component(config.component_root, tmp, mutant.identifier)
             target_path = mutant_copy / mutant.target
             variant_path = mutant_copy / mutant.variant
-            target_path.write_text(variant_path.read_text(encoding="utf-8"))
+            target_path.write_text(variant_path.read_text(encoding="utf-8"), encoding="utf-8")
             result = run_command(config, mutant_copy)
             if result.timed_out or result.launch_error:
                 errors += 1

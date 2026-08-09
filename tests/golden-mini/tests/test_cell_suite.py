@@ -41,6 +41,7 @@ def check(module, state: str, event: str, expected: str) -> str | None:
     for nav in NAVIGATE[state]:
         m.deliver(nav)
     before = m.state
+    before_count = m.dup_count
     try:
         outcome = m.deliver(event)
     except module.RejectedError:
@@ -53,9 +54,9 @@ def check(module, state: str, event: str, expected: str) -> str | None:
             return None
         return f"expected {expected}, got {outcome} state={m.state}"
     if kind == "handle":
-        if outcome == "handled" and m.state == before:
+        if outcome == "handled" and m.state == before and m.dup_count == before_count + 1:
             return None
-        return f"expected handle, got {outcome} state={m.state}"
+        return f"expected handle (counter {before_count}→{m.dup_count}), got {outcome} state={m.state}"
     if kind == "ignore":
         if outcome == "ignored" and m.state == before:
             return None
@@ -73,6 +74,9 @@ def main(argv: list[str]) -> int:
     component_root = Path(__file__).resolve().parent.parent
     module = load_mini(component_root)
     matrix = parse_matrix(analysis_dir / "disposition-matrix.md")
+    if not matrix:
+        print("CELL SUITE: no matrix cells parsed", file=sys.stderr)
+        return 2
     failures = 0
     for (state, event), expected in sorted(matrix.items()):
         problem = check(module, state, event, expected)

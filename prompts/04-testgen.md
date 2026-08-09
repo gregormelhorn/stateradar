@@ -131,6 +131,10 @@ The checker replaces that token with an isolated analysis copy:
 python3 tools/check_fault_mutants.py domain-analysis/<component>
 ```
 
+The `testCommand` must invoke the suite by relative path so the checker
+runs the copied script inside the temporary component copy; an absolute
+path would exercise the pristine implementation and every mutant would survive.
+
 A surviving mutant is a suite finding. Never weaken or skip a cell test
 to make a mutant survive or pass.
 
