@@ -7,6 +7,7 @@ Usage: python3 tools/check_matrix_mutation.py <analysis-dir>
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -193,14 +194,19 @@ def ignore_or_reject_to_handle(cell: Cell) -> str | None:
 
     Eligible: 'ignore (documented)' and 'reject'. Holes ('ignore (accidental)',
     'UNSPECIFIED') and 'defer (queued)' are never mutated - see the wave spec.
-    The source annotation is dropped so the replacement reads 'handle', not
-    'handle (documented)'; only the citation suffix survives.
+
+    Only the trailing citation survives. Everything else the source cell carried
+    is dropped, because an annotation that documented the old disposition is a
+    lie under the new one: 'ignore (documented) DR-005; reason `f:1`' must become
+    'handle `f:1`', never 'handle DR-005; reason `f:1`', which would read as if
+    DR-005 authorised handling. This is the wart handle_to_ignore still has.
     """
     for token in ("ignore (documented)", "reject"):
         if cell.raw == token:
             return "handle"
         if cell.raw.startswith(token + " "):
-            return f"handle{cell.raw[len(token):]}"
+            citation = re.search(r"`[^`]+`\s*$", cell.raw)
+            return f"handle {citation.group(0).strip()}" if citation else "handle"
     return None
 
 

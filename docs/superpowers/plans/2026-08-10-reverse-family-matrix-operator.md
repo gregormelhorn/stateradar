@@ -19,6 +19,29 @@
 - Never resolve a `SURVIVED` mutant by weakening the suite or adjusting an expected count. A survivor stops the wave and is reported.
 - No release, tag, or push.
 
+## Amendments made during execution
+
+Two defects were found after this plan was first written. Both are already
+applied above; they are recorded here so a reader diffing plan against spec
+does not see an unexplained divergence.
+
+1. **The hole case needs its own `matrix-mutation.json`** (Task A, Step 1b).
+   `sidecar()` copies the analysis dir to a temp path, but the copied config's
+   `workingDirectory` is the relative `"../.."`, which does not survive the
+   copy. The checker then cannot find the test command and stops at
+   `BLOCKED: baseline exit=2` before running a single mutation. The fix writes
+   a fresh config with an absolute `workingDirectory`. Verified not to mask the
+   assertion: with the family absent the hole case still reports `killed=9`,
+   so `killed=12` still goes red.
+
+2. **The mutator keeps only the trailing citation** (Task A, Step 3). The first
+   version sliced after the disposition token and preserved everything else, so
+   `ignore (documented) DR-005; reason \`f:1\`` became
+   `handle DR-005; reason \`f:1\`` — a mutant reading as if DR-005 authorised
+   handling. Golden-mini has no annotated ignore cell, so no gate could catch
+   it; the silenceper benchmark matrix does have that shape. A selftest case
+   that builds an annotated cell was added, observed red, then fixed.
+
 ## Spec deviations (read before starting)
 
 The spec `docs/superpowers/specs/2026-08-10-reverse-family-matrix-operator-design.md` lists `CHANGELOG.md` under "surfaces that move". **That is wrong and this plan overrides it.** Verified at HEAD:
@@ -203,9 +226,12 @@ def ignore_or_reject_to_handle(cell: Cell) -> str | None:
         if cell.raw == token:
             return "handle"
         if cell.raw.startswith(token + " "):
-            return f"handle{cell.raw[len(token):]}"
+            citation = re.search(r"`[^`]+`\s*$", cell.raw)
+            return f"handle {citation.group(0).strip()}" if citation else "handle"
     return None
 ```
+
+This needs `import re` at the top of `tools/check_matrix_mutation.py`, after `import json`.
 
 - [ ] **Step 4: Wire it into `build_mutations`**
 

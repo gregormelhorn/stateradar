@@ -337,6 +337,28 @@ def main() -> int:
         else:
             print("  ok  ignore-to-handle replacement drops the (documented) annotation (passes)")
 
+        # Golden-mini has no annotated ignore cell, so the assertion above cannot
+        # see an annotation that is not the disposition token itself. Real matrices
+        # do: e.g. 'ignore (documented) DR-005; reason `file:line`'. Build that shape
+        # and require the replacement to keep only the citation.
+        annotated = sidecar(tmp, gm)
+        ann_mx = annotated / "disposition-matrix.md"
+        ann_mx.write_text(ann_mx.read_text().replace(
+            "| **Open** | ignore (documented) `mini.py:22` |",
+            "| **Open** | ignore (documented) DR-005; stays shut `mini.py:22` |"))
+        (annotated / "matrix-mutation.json").write_text(json.dumps({
+            "formatVersion": 1,
+            "testCommand": ["python3", "tests/test_cell_suite.py", "{analysis_dir}"],
+            "workingDirectory": str(ROOT / "tests" / "golden-mini"),
+            "timeoutSeconds": 5,
+        }))
+        rc_ann, out_ann = mutation(annotated)
+        if "new='handle `mini.py:22`'" not in out_ann:
+            failures.append("ignore-to-handle must keep only the citation from an "
+                            "annotated cell; expected new='handle `mini.py:22`'\n" + out_ann)
+        else:
+            print("  ok  ignore-to-handle strips a DR annotation, keeps the citation (passes)")
+
         no_placeholder = sidecar(tmp, gm)
         (no_placeholder / "matrix-mutation.json").write_text(json.dumps({
             "formatVersion": 1,
