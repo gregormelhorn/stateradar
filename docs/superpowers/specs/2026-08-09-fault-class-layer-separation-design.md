@@ -189,10 +189,16 @@ Fehlererkennung in the report** — never "class checked off":
 ## Verification
 
 This spec ships with the registry migration: `rules.toml` gains the four
-fields on all 22 fault entries in one atomic change, `gen_rules` validates
-the closed vocabularies and the `none_reason` requirement, and a red
-selftest proves a `none` class without a reason and a bad `level` value
-each fail. The migration is mechanical but has blast radius — `gen_rules`
+fields on all 22 fault entries in one atomic change. `gen_rules` enforces
+all of them: closed vocabularies for `level` and `observability`, the
+`n/a`-iff constraint (`observability = "n/a"` exactly on non-implementation
+classes), `precondition` required on implementation classes and absent
+elsewhere, and `none_reason` required on `none` classes and absent
+elsewhere. The red selftest proves each rule fails on its own bad input:
+a bad `level` value, an implementation class with `n/a` observability, an
+implementation class without `precondition`, a `matrix` class carrying a
+real observability value, and a `none` class without `none_reason`. The
+migration is mechanical but has blast radius — `gen_rules`
 renders into `00-methods-reference`, `02-pilot`, AGENTS §5, and the README
 finds list — so the acceptance bar is: `gen_rules --check` and
 `--selftest` green, all 22 entries migrated atomically, and the
