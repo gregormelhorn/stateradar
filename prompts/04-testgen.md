@@ -143,6 +143,28 @@ path would exercise the pristine implementation and every mutant would survive.
 A surviving mutant is a suite finding. Never weaken or skip a cell test
 to make a mutant survive or pass.
 
+##### Optional: derived variant files (`mutant-generation.json`)
+
+`fault-mutants.json` stays the execution contract. A component may also
+ship `mutant-generation.json` beside it. That file binds a mutant ID to
+one exact source block and one replacement block, so the variant file is
+derived instead of hand-edited. Check it for drift:
+
+```bash
+python3 tools/gen_mutant_variants.py --check domain-analysis/<component>
+python3 tools/gen_mutant_variants.py domain-analysis/<component>
+```
+
+Check mode compares the derived content against the tracked variant file
+and reports `DRIFT`. Write mode regenerates the variant files. A binding
+that needs a projection the config does not declare reports `BLOCKED`.
+Mutants with no binding stay hand-authored and report `UNBOUND`.
+
+Golden-mini derives its `F-01`, `F-02`, and `F-05` variants this way. That
+is a fixture bridge against hand-authored drift. It does not change layer
+ownership: `F-01` and `F-02` stay matrix-level families, `F-05` stays
+implementation-level, and `F-04` stays hand-authored.
+
 ### Step 5 — Run and report
 
 Run the full suite. Write `deviation-report.md`: every failing test is a deviation of the current code from the approved model, listed as `cell / expected (DR) / observed (file:line)`. Under "report only", this list is the implementation worklist. Stop here. Under "yes, smallest change": implement the smallest change per deviation, cite the DR, and rerun until green. Never resolve a deviation by touching the test.

@@ -82,7 +82,13 @@ golden-mini suite kills every supported mutant.
 (F-01, F-02, F-04, F-05). The `fault-mutants.json` contract and
 `tools/check_fault_mutants.py` prove a behavioral cell suite kills one
 hand-authored implementation mutant per class while a mirroring suite
-survives. Remaining classes pending; binder-driven generation deferred.
+survives. Remaining classes pending. Golden-mini now derives the F-01,
+F-02, and F-05 fixture variants from component-local bindings
+(`mutant-generation.json` plus `tools/gen_mutant_variants.py`). This
+removes hand-authored drift in the fixture. It does not broaden operator
+ownership: F-01 and F-02 remain matrix-level families, F-05 remains
+implementation-level, and F-04 stays hand-authored. Broader binder-driven
+generation and real-component coverage remain pending.
 
 **Prior status:** Planned — after 7, together with the F-catalogue. Meta's
 ACH (FSE 2025) generates few, fault-class-targeted mutants and then
