@@ -431,6 +431,70 @@ def main() -> int:
                *fault_check(blocked / "domain-analysis" / "mini"),
                needle="BLOCKED: baseline exit=3")
 
+        print("binder-driven mutant generation")
+
+        def gen_check(adir: Path, *extra: str) -> tuple[int, str]:
+            r = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "gen_mutant_variants.py"), "--check", str(adir), *extra],
+                capture_output=True, text=True)
+            return r.returncode, (r.stdout + r.stderr).strip()
+
+        def gen_cfg_path(root: Path) -> Path:
+            return root / "domain-analysis" / "mini" / "mutant-generation.json"
+
+        rc, out = gen_check(ROOT / "tests" / "golden-mini" / "domain-analysis" / "mini")
+        expect("generator check mode green on golden-mini", False, rc, out,
+               needle="MUTANT GENERATION: OK")
+        if "checked=3" not in out:
+            failures.append("generator green case: expected checked=3\n" + out)
+        elif "DRIFT" in out or "BLOCKED" in out:
+            failures.append("generator green case: unexpected DRIFT/BLOCKED line\n" + out)
+        else:
+            print("  ok  generator green case checked=3 without DRIFT/BLOCKED (passes)")
+
+        gen_drift = component(tmp, "gen-drift")
+        tampered = gen_drift / "src" / "mutants" / "mini.F-02-transfer-fault.py"
+        tampered.write_text(tampered.read_text() + "\n# hand edit that the binder never produced\n")
+        rc, out = gen_check(gen_drift / "domain-analysis" / "mini")
+        expect("generator detects drift in a tracked variant", True, rc, out,
+               needle="DRIFT F-02-transfer-fault-Open-M2")
+        if "drift=1" not in out:
+            failures.append("generator drift case: expected drift=1\n" + out)
+        else:
+            print("  ok  generator drift case drift=1 (fails as required)")
+
+        gen_blocked = component(tmp, "gen-blocked")
+        cfg = json.loads(gen_cfg_path(gen_blocked).read_text())
+        cfg["projections"].pop("dup_count")
+        gen_cfg_path(gen_blocked).write_text(json.dumps(cfg, indent=2))
+        rc, out = gen_check(gen_blocked / "domain-analysis" / "mini")
+        expect("generator blocks F-05 on an undeclared projection", True, rc, out,
+               needle="BLOCKED F-05-corrupt-state-Open-UV-M1-dup projection dup_count undeclared")
+        if "blocked=1" not in out:
+            failures.append("generator blocked case: expected blocked=1\n" + out)
+        else:
+            print("  ok  generator blocked case blocked=1 (fails as required)")
+
+        gen_badmatch = component(tmp, "gen-badmatch")
+        cfg = json.loads(gen_cfg_path(gen_badmatch).read_text())
+        cfg["bindings"][0]["match"][2] = '                self.state = "NoSuchState"'
+        gen_cfg_path(gen_badmatch).write_text(json.dumps(cfg, indent=2))
+        rc, out = gen_check(gen_badmatch / "domain-analysis" / "mini")
+        expect("generator rejects a binding that matches no source block", True, rc, out,
+               needle="CONFIG ERROR: binding F-01-missing-transition-Open-M2: matches=0")
+        if "errors=1" not in out:
+            failures.append("generator bad-match case: expected errors=1\n" + out)
+        else:
+            print("  ok  generator bad-match case errors=1 (fails as required)")
+
+        gen_dup = component(tmp, "gen-duplicate")
+        cfg = json.loads(gen_cfg_path(gen_dup).read_text())
+        cfg["bindings"].append(json.loads(json.dumps(cfg["bindings"][0])))
+        gen_cfg_path(gen_dup).write_text(json.dumps(cfg, indent=2))
+        expect("generator rejects a duplicate binding id", True,
+               *gen_check(gen_dup / "domain-analysis" / "mini"),
+               needle="CONFIG ERROR: duplicate binding id F-01-missing-transition-Open-M2")
+
         # PA-13a (markdown table side): an empty coverage cell must fail
         d6 = tmp / "cm-red"
         shutil.copytree(gm, d6)
