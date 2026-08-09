@@ -59,29 +59,6 @@ Never fill a specification gap with your own judgment, however plausible. Your v
 ```
 
 Run 06 first when the manifest reports staleness. Run 01 or 02 for a new component. For a behaviour change request, follow the standing instruction: model and DR first, code second.
-
-## Delegation
-
-Always delegate to a subagent. Never do the work in-process, and never ask
-which of the two I want — that decision is already made.
-
-The only exception: trivial single-file lookups where launching a child
-costs more than the task. Do those in-process without asking.
-
-Do not ask whether to delegate. Route by task type and report the result:
-
-- Understanding unfamiliar code before changing it -> scout, then continue.
-- Any external fact, version, price, or API detail -> researcher. Never
-  answer from memory.
-- Implementation against an approved plan -> worker.
-- After every worker run that produced a diff -> reviewer, in a fresh
-  session, before you summarize to me.
-- Any plan or spec you produce -> reviewer before you show it to me.
-- A decision that would be expensive to reverse -> oracle.
-
-Ask me only when the task itself is ambiguous — never to confirm which
-agent to use.
-
 ## 4. Rules that do not bend
 
 <!-- rule:R-NO-SILENT-DECISIONS -->
