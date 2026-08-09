@@ -104,6 +104,11 @@ per fault class. An **F-04 sneak-path** mutant changes one `ignore (documented)`
 or `reject` cell to accept the event instead. The suite must detect and kill it:
 the behavioral check for that cell must fail.
 
+The same pattern defines F-01 (a `transition →X` cell does not
+transition), F-02 (a `transition →X` cell lands in the wrong target), and
+F-05 (a `handle` cell corrupts the counted state). Golden-mini ships one
+killed mutant per class as the fixture proof.
+
 Write `fault-mutants.json` beside `disposition-matrix.md`:
 
 ```json

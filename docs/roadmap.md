@@ -78,10 +78,11 @@ golden-mini suite kills every supported mutant.
 
 ## 8. ACH-style fault-class mutants (testgen upgrade)
 
-**Status:** 🔶 Partially shipped — F-04 sneak-path end-to-end. The
-`fault-mutants.json` contract and `tools/check_fault_mutants.py` prove a
-behavioral cell suite kills a sneak-path implementation mutant while a
-mirroring suite survives. Remaining fault classes pending.
+**Status:** 🔶 Partially shipped — 4 of 22 fault classes operationalized
+(F-01, F-02, F-04, F-05). The `fault-mutants.json` contract and
+`tools/check_fault_mutants.py` prove a behavioral cell suite kills one
+hand-authored implementation mutant per class while a mirroring suite
+survives. Remaining classes pending; binder-driven generation deferred.
 
 **Prior status:** Planned — after 7, together with the F-catalogue. Meta's
 ACH (FSE 2025) generates few, fault-class-targeted mutants and then

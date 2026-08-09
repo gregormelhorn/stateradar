@@ -360,13 +360,33 @@ def main() -> int:
             return dst
 
         fdir = ROOT / "tests" / "golden-mini" / "domain-analysis" / "mini"
-        expect("fault mutant baseline kills F-04 sneak path", False,
-               *fault_check(fdir), needle="FAULT MUTANTS: OK")
         rc, out = fault_check(fdir)
+        expect("fault mutant baseline kills all four fixture mutants", False,
+               rc, out, needle="FAULT MUTANTS: OK")
+        if "killed=4" not in out:
+            failures.append("fault mutant count: expected killed=4\n" + out)
+        else:
+            print("  ok  fault mutant count killed=4 (passes)")
         if "KILLED" not in out:
             failures.append("fault mutant kill proof: no KILLED line\n" + out)
         else:
             print("  ok  fault mutant kill proof (passes)")
+
+        import difflib
+        base = (ROOT / "tests" / "golden-mini" / "src" / "mini.py").read_text().splitlines()
+        for variant_name in [
+            "mini.F-01-missing-transition.py",
+            "mini.F-02-transfer-fault.py",
+            "mini.F-04-sneak-path.py",
+            "mini.F-05-corrupt-state.py",
+        ]:
+            variant = (ROOT / "tests" / "golden-mini" / "src" / "mutants" / variant_name).read_text().splitlines()
+            hunks = [l for l in difflib.unified_diff(base, variant, lineterm="")
+                     if l.startswith(("+", "-")) and not l.startswith(("+++", "---"))]
+            if len(hunks) == 0 or len(hunks) > 8:
+                failures.append(f"{variant_name}: expected a small single-region diff, got {len(hunks)} changed lines")
+            else:
+                print(f"  ok  {variant_name} single-region diff (passes)")
 
         mirror = component(tmp, "mirror-suite")
         cfg = json.loads((mirror / "domain-analysis" / "mini" / "fault-mutants.json").read_text())
