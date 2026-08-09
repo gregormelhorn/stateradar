@@ -59,7 +59,7 @@
 - Consumes: the entry-values table above; the existing `check()` and
   `selftest()` structure in `tools/gen_rules.py`.
 - Produces: `--check` green on the migrated registry; `--selftest` green
-  with five new red cases.
+  with eight new red cases.
 
 - [ ] **Step 0: Capture the pre-migration baseline**
 
@@ -67,15 +67,21 @@ A migration that must change nothing outside the registry diffs against a
 baseline, never against constants remembered at plan-writing time:
 
 ```bash
-{
+(
+  set -e
   python3 tools/gen_rules.py --check
+  python3 tools/gen_rules.py --selftest
   uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py
   python3 tools/check_pack_consistency.py
   python3 tools/run_tool_tests.py
   python3 tools/run_benchmark.py
   python3 tools/benchmark_evidence.py
-} > /tmp/registry-migration-baseline.txt 2>&1; echo "baseline rc=$? (expected 0)"
+) > /tmp/registry-migration-baseline.txt 2>&1; echo "baseline rc=$? (expected 0)"
 ```
+
+The subshell runs `set -e`: the recorded rc is the FIRST failing gate's
+status, never the last command's. `rc=0` exists only when every gate
+passed — a mid-list failure cannot be masked by a green tail.
 
 Expected: exit 0, and the file holds the current green outputs. The only
 fact hardcoded anywhere in this plan is 22 fault classes — the number this
@@ -120,7 +126,8 @@ In the `check()` function, after the existing fault-detector loop
 python3 tools/gen_rules.py --check
 ```
 
-Expected: nonzero exit with 22+ errors listing missing `level` fields.
+Expected: nonzero exit with **44 errors** — 22 missing-level and 22
+missing-observability (no `continue`: every unmigrated entry reports both).
 This proves the validation works and that migration is required. Paste the
 output into the commit body as the red probe.
 
@@ -176,7 +183,7 @@ git diff --stat -- prompts/00-methods-reference.md prompts/02-pilot.md AGENTS.md
 
 Expected: empty diff.
 
-- [ ] **Step 5: Add five red selftest cases to `selftest()`**
+- [ ] **Step 5: Add eight red selftest cases to `selftest()`**
 
 Following the existing pattern in `tools/gen_rules.py`'s `selftest()`
 (which copies the registry into a temp dir, mutates the copy, and expects
@@ -241,7 +248,8 @@ adapt; the snippets show intent, not copy-paste API.
 - [ ] **Step 6: Full gate set, proven by baseline diff**
 
 ```bash
-{
+(
+  set -e
   python3 tools/gen_rules.py --check
   python3 tools/gen_rules.py --selftest
   uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py
@@ -249,17 +257,19 @@ adapt; the snippets show intent, not copy-paste API.
   python3 tools/run_tool_tests.py
   python3 tools/run_benchmark.py
   python3 tools/benchmark_evidence.py
-} > /tmp/registry-migration-after.txt 2>&1; echo "after rc=$? (expected 0)"
+) > /tmp/registry-migration-after.txt 2>&1; echo "after rc=$? (expected 0)"
 
 diff /tmp/registry-migration-baseline.txt /tmp/registry-migration-after.txt
 git diff --check
 git status --short
 ```
 
-Expected: `after rc=0`. The diff shows ONLY additions from the new
-selftest red cases and the migration itself — every benchmark, artifact,
-and evidence line identical to the baseline. Any other difference is a
-finding, not something to reconcile silently.
+Expected: `after rc=0`. The expected delta is EXACTLY the eight new red
+case lines in the `--selftest` section — verified against the tool:
+`gen_rules --selftest` prints one line per case and a fixed
+`GEN_RULES SELFTEST: OK` tail, with no summary count that could drift.
+Every benchmark, artifact, and evidence line identical to the baseline.
+Any other difference is a finding, not something to reconcile silently.
 
 - [ ] **Step 7: Commit**
 
@@ -270,7 +280,7 @@ git commit -m "Migrate fault registry to layer-separation schema" \
   -m "All 22 fault entries gain level/observability(/precondition|none_reason); gen_rules enforces closed vocabularies and conditional requirements; eight red selftest cases prove the rules fail on bad input.
 
 Evidence:
-- Red probe: gen_rules --check on the unmigrated registry failed listing 22 missing-level errors
+- Red probe: gen_rules --check on the unmigrated registry failed with 44 errors (22 missing-level, 22 missing-observability — no continue, so each unmigrated entry reports both)
 - gen_rules --check: RULES REGISTRY: OK (0 warnings, 22 fault classes)
 - gen_rules --selftest: OK with 8 new red cases
 - Rendered output unchanged (empty diff on 00/02/AGENTS/README)
