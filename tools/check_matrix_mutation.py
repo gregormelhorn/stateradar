@@ -188,6 +188,22 @@ def handle_to_ignore(cell: Cell) -> str | None:
     return None
 
 
+def ignore_or_reject_to_handle(cell: Cell) -> str | None:
+    """Reverse family: a decided no-action cell claims it acts.
+
+    Eligible: 'ignore (documented)' and 'reject'. Holes ('ignore (accidental)',
+    'UNSPECIFIED') and 'defer (queued)' are never mutated - see the wave spec.
+    The source annotation is dropped so the replacement reads 'handle', not
+    'handle (documented)'; only the citation suffix survives.
+    """
+    for token in ("ignore (documented)", "reject"):
+        if cell.raw == token:
+            return "handle"
+        if cell.raw.startswith(token + " "):
+            return f"handle{cell.raw[len(token):]}"
+    return None
+
+
 def build_mutations(states: tuple[str, ...], cells: list[Cell]) -> list[Mutation]:
     pending: list[tuple[str, str, str, str, Cell]] = []
     for cell in cells:
@@ -199,6 +215,9 @@ def build_mutations(states: tuple[str, ...], cells: list[Cell]) -> list[Mutation
         replacement = handle_to_ignore(cell)
         if replacement is not None:
             pending.append((cell.state, cell.event, "handle-to-ignore", replacement, cell))
+        replacement = ignore_or_reject_to_handle(cell)
+        if replacement is not None:
+            pending.append((cell.state, cell.event, "ignore-to-handle", replacement, cell))
 
     mutations: list[Mutation] = []
     for number, (state, event, kind, replacement, cell) in enumerate(sorted(pending), start=1):

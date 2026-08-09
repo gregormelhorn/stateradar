@@ -72,7 +72,8 @@ Classification logic selftest wired into run_selftest.py.
 **Status:** ✅ Shipped. `tools/check_matrix_mutation.py` runs a declared cell
 suite against isolated temporary matrix copies. A component opts in with
 `matrix-mutation.json`. The checker supports transition-to-ignore, transition
-target-swap, and handle-to-ignore mutations. It reports killed and surviving
+target-swap, handle-to-ignore, and the reverse ignore/reject-to-handle
+mutations. It reports killed and surviving
 mutants. The deterministic selftest proves a weak suite fails and the
 golden-mini suite kills every supported mutant.
 

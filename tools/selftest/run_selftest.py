@@ -297,11 +297,45 @@ def main() -> int:
             "workingDirectory": ".",
             "timeoutSeconds": 5,
         }))
+        rc_weak, out_weak = mutation(weak)
         expect("mutation checker reports weak suite survivors", True,
-               *mutation(weak), needle="SURVIVED")
+               rc_weak, out_weak, needle="SURVIVED")
+        if "kind=ignore-to-handle" not in out_weak:
+            failures.append("weak suite: expected an ignore-to-handle survivor\n" + out_weak)
+        else:
+            print("  ok  weak suite survives an ignore-to-handle mutant (fails as required)")
 
+        hole = sidecar(tmp, gm)
+        hole_mx = hole / "disposition-matrix.md"
+        hole_mx.write_text(hole_mx.read_text().replace(
+            "| **Open** | ignore (documented) `mini.py:22` |",
+            "| **Open** | ignore (accidental) → Q-01 |"))
+        (hole / "matrix-mutation.json").write_text(json.dumps({
+            "formatVersion": 1,
+            "testCommand": ["python3", "tests/test_cell_suite.py", "{analysis_dir}"],
+            "workingDirectory": str(ROOT / "tests" / "golden-mini"),
+            "timeoutSeconds": 5,
+        }))
+        rc_hole, out_hole = mutation(hole)
+        expect("mutation checker leaves hole cells unmutated", False,
+               rc_hole, out_hole, needle="MUTATION CHECK: OK")
+        if "killed=12" not in out_hole:
+            failures.append("hole cell: expected killed=12 (one fewer than 13)\n" + out_hole)
+        else:
+            print("  ok  hole cell produces no ignore-to-handle mutant (passes)")
+
+        rc_gm, out_gm = mutation(gm)
         expect("mutation checker golden-mini kills supported mutants", False,
-               *mutation(gm), needle="MUTATION CHECK: OK")
+               rc_gm, out_gm, needle="MUTATION CHECK: OK")
+        if "killed=13" not in out_gm:
+            failures.append("matrix mutation count: expected killed=13\n" + out_gm)
+        else:
+            print("  ok  matrix mutation count killed=13 (passes)")
+        if "new='handle `mini.py:28`'" not in out_gm:
+            failures.append("ignore-to-handle must drop the source annotation, "
+                            "not carry it into the replacement\n" + out_gm)
+        else:
+            print("  ok  ignore-to-handle replacement drops the (documented) annotation (passes)")
 
         no_placeholder = sidecar(tmp, gm)
         (no_placeholder / "matrix-mutation.json").write_text(json.dumps({

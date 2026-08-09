@@ -172,7 +172,8 @@ behaviour. Two mutation layers answer that, and they measure different
 things:
 
 **Spec mutants** (`tools/check_matrix_mutation.py`) mutate the *matrix* —
-`transition → ignore`, target swap, `handle → ignore` — and run the declared
+`transition → ignore`, target swap, `handle → ignore`, and the reverse
+`ignore`/`reject → handle` — and run the declared
 cell suite against unchanged code. A suite that stays green is reading its
 own hardcoded expectations, not the spec. Vacuous green has nowhere to hide.
 

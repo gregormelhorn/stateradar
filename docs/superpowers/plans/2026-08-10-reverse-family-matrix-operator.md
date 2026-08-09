@@ -144,6 +144,12 @@ with:
         hole_mx.write_text(hole_mx.read_text().replace(
             "| **Open** | ignore (documented) `mini.py:22` |",
             "| **Open** | ignore (accidental) → Q-01 |"))
+        (hole / "matrix-mutation.json").write_text(json.dumps({
+            "formatVersion": 1,
+            "testCommand": ["python3", "tests/test_cell_suite.py", "{analysis_dir}"],
+            "workingDirectory": str(ROOT / "tests" / "golden-mini"),
+            "timeoutSeconds": 5,
+        }))
         rc_hole, out_hole = mutation(hole)
         expect("mutation checker leaves hole cells unmutated", False,
                rc_hole, out_hole, needle="MUTATION CHECK: OK")
