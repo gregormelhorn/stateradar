@@ -1,0 +1,75 @@
+{
+  "formatVersion": 1,
+  "workingDirectory": "../..",
+  "source": "src/mini.py",
+  "projections": {
+    "dup_count": {
+      "kind": "counter",
+      "provenBy": "F-05-corrupt-state-Open-UV-M1-dup"
+    }
+  },
+  "bindings": [
+    {
+      "fault": "F-01",
+      "binder": "missing-transition",
+      "id": "F-01-missing-transition-Open-M2",
+      "cell": "Open x M2",
+      "variant": "src/mutants/mini.F-01-missing-transition.py",
+      "mode": "replace-block",
+      "match": [
+        "        if event == \"M2\":",
+        "            if self.state == \"Open\":",
+        "                self.state = \"Closed\"",
+        "                return \"transition\"",
+        "            return \"ignored\""
+      ],
+      "replace": [
+        "        if event == \"M2\":",
+        "            if self.state == \"Open\":",
+        "                return \"ignored\"  # F-01 missing transition: Open x M2 never fires",
+        "            return \"ignored\""
+      ]
+    },
+    {
+      "fault": "F-02",
+      "binder": "transfer-fault",
+      "id": "F-02-transfer-fault-Open-M2",
+      "cell": "Open x M2",
+      "variant": "src/mutants/mini.F-02-transfer-fault.py",
+      "mode": "replace-block",
+      "match": [
+        "        if event == \"M2\":",
+        "            if self.state == \"Open\":",
+        "                self.state = \"Closed\"",
+        "                return \"transition\"",
+        "            return \"ignored\""
+      ],
+      "replace": [
+        "        if event == \"M2\":",
+        "            if self.state == \"Open\":",
+        "                self.state = \"Idle\"  # F-02 transfer fault: Open x M2 lands in Idle",
+        "                return \"transition\"",
+        "            return \"ignored\""
+      ]
+    },
+    {
+      "fault": "F-05",
+      "binder": "corrupt-state",
+      "id": "F-05-corrupt-state-Open-UV-M1-dup",
+      "cell": "Open x UV-M1-dup",
+      "variant": "src/mutants/mini.F-05-corrupt-state.py",
+      "mode": "replace-block",
+      "requiresProjection": "dup_count",
+      "match": [
+        "        if event == \"UV-M1-dup\":",
+        "            self.dup_count += 1",
+        "            return \"handled\""
+      ],
+      "replace": [
+        "        if event == \"UV-M1-dup\":",
+        "            self.dup_count += 2  # F-05 corrupt state: counter moves by the wrong amount",
+        "            return \"handled\""
+      ]
+    }
+  ]
+}
