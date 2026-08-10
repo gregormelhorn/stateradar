@@ -53,6 +53,20 @@
       ]
     },
     {
+      "fault": "F-04",
+      "binder": "sneak-path",
+      "id": "F-04-sneak-path-Closed-M1",
+      "cell": "Closed x M1",
+      "variant": "src/mutants/mini.F-04-sneak-path.py",
+      "mode": "replace-block",
+      "match": [
+        "            raise RejectedError(\"M1 rejected in Closed\")"
+      ],
+      "replace": [
+        "            return \"ignored\"  # F-04 sneak path: Closed x M1 accepted"
+      ]
+    },
+    {
       "fault": "F-05",
       "binder": "corrupt-state",
       "id": "F-05-corrupt-state-Open-UV-M1-dup",

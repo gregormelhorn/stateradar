@@ -561,12 +561,12 @@ def main() -> int:
         rc, out = gen_check(ROOT / "tests" / "golden-mini" / "domain-analysis" / "mini")
         expect("generator check mode green on golden-mini", False, rc, out,
                needle="MUTANT GENERATION: OK")
-        if "checked=3" not in out:
-            failures.append("generator green case: expected checked=3\n" + out)
-        elif "DRIFT" in out or "BLOCKED" in out:
-            failures.append("generator green case: unexpected DRIFT/BLOCKED line\n" + out)
+        if "checked=4" not in out:
+            failures.append("generator green case: expected checked=4\n" + out)
+        elif "DRIFT" in out or "BLOCKED" in out or "UNBOUND" in out:
+            failures.append("generator green case: unexpected DRIFT/BLOCKED/UNBOUND line\n" + out)
         else:
-            print("  ok  generator green case checked=3 without DRIFT/BLOCKED (passes)")
+            print("  ok  generator green case checked=4 without DRIFT/BLOCKED/UNBOUND (passes)")
 
         gen_drift = component(tmp, "gen-drift")
         tampered = gen_drift / "src" / "mutants" / "mini.F-02-transfer-fault.py"

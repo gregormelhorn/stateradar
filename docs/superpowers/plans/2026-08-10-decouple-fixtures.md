@@ -101,7 +101,7 @@ If any `BLOCKED(preflight)` line prints, do not edit a file or start Task A. Pas
 - Produces `MUTANT GENERATION: OK (checked=4 drift=0 blocked=0 errors=0)` with no `UNBOUND` line.
 - Preserves `FAULT MUTANTS: OK (killed=4 survived=0 errors=0 blocked=0)` and leaves the tracked F-04 variant absent from `git status --short` after write mode.
 
-- [ ] **Step 1: Make the generator green-case selftest require four bound variants**
+- [x] **Step 1: Make the generator green-case selftest require four bound variants**
 
 In `tools/selftest/run_selftest.py`, replace this exact current text:
 
@@ -127,7 +127,7 @@ with this exact text:
 
 Do not add a binding yet. This assertion must observe the current three-bound/one-unbound state as red first.
 
-- [ ] **Step 2: Observe the selftest red before F-04 is bound**
+- [x] **Step 2: Observe the selftest red before F-04 is bound**
 
 ```bash
 out=$(uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1)
@@ -164,7 +164,7 @@ ASSERT RED AS REQUIRED
 
 Paste the complete value of `$out` into the Task-A report and commit body. If the failure is absent, duplicated, or accompanied by a different selftest failure, stop with `BLOCKED(task-A): generator-count red probe differs from the measured three-bound state`.
 
-- [ ] **Step 3: Construct the wrong-replacement byte-identity red probe**
+- [x] **Step 3: Construct the wrong-replacement byte-identity red probe**
 
 This temporary copy deliberately generates the unmutated `raise` line for F-04. It must drift from the tracked sneak-path file. It modifies only `mktemp` data, never the repository.
 
@@ -223,7 +223,7 @@ ASSERT RED AS REQUIRED
 
 Paste this complete output. It is the R-RED-PROBE proving that a one-line mismatch is detectable before the real binding is introduced.
 
-- [ ] **Step 4: Add the exact F-04 `replace-block` binding**
+- [x] **Step 4: Add the exact F-04 `replace-block` binding**
 
 In `tests/golden-mini/domain-analysis/mini/mutant-generation.json`, replace this exact current F-05 object:
 
@@ -289,7 +289,7 @@ with this exact text:
 
 Do not run write mode in this step. The next step is the mandatory check-mode proof against the unchanged tracked F-04 reference file.
 
-- [ ] **Step 5: Prove byte identity in generator check mode before any write**
+- [x] **Step 5: Prove byte identity in generator check mode before any write**
 
 ```bash
 out=$(python3 tools/gen_mutant_variants.py --check tests/golden-mini/domain-analysis/mini 2>&1)
@@ -324,7 +324,7 @@ ASSERT OK: check-mode byte identity
 
 Paste this complete output. If it prints `DRIFT`, stop exactly here with the printed `BLOCKED(task-A)` line. **Never run write mode and never change `mini.F-04-sneak-path.py` to make this check pass.**
 
-- [ ] **Step 6: Run write mode and prove it leaves F-04 unmodified**
+- [x] **Step 6: Run write mode and prove it leaves F-04 unmodified**
 
 ```bash
 out=$(python3 tools/gen_mutant_variants.py tests/golden-mini/domain-analysis/mini 2>&1)
@@ -368,7 +368,7 @@ ASSERT OK: write mode preserved the tracked F-04 file
 
 Paste this complete output. The `GENERATED F-04` line names an attempted write; the empty F-04 status and zero F-04 diff prove its bytes were already identical.
 
-- [ ] **Step 7: Observe the Task-A selftest green**
+- [x] **Step 7: Observe the Task-A selftest green**
 
 ```bash
 out=$(uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1)
@@ -398,7 +398,7 @@ exit=0
 ASSERT OK
 ```
 
-- [ ] **Step 8: Run Task A’s independent full gate**
+- [x] **Step 8: Run Task A’s independent full gate**
 
 ```bash
 expect_line() {
@@ -461,7 +461,7 @@ diff-check: clean
 
 Every line above is followed by `exit=0` and `ASSERT OK`. Paste the complete gate output into the Task-A report and commit body.
 
-- [ ] **Step 9: Verify Task-A source-file scope before tracking checkboxes**
+- [x] **Step 9: Verify Task-A source-file scope before tracking checkboxes**
 
 ```bash
 expected='tests/golden-mini/domain-analysis/mini/mutant-generation.json
@@ -484,63 +484,30 @@ tools/selftest/run_selftest.py
 ASSERT OK: Task-A source-file scope
 ```
 
-- [ ] **Step 10: Tick Task-A checkboxes in this same work session and commit Task A**
+- [x] **Step 10: Tick Task-A checkboxes in this same work session and commit Task A**
 
 First replace these exact current checkbox lines in this plan with the exact checked lines. Do not change any Task-B text.
 
 ```python
 from pathlib import Path
 
+# Tick only real checkbox lines: those that START a line. The step titles also
+# appear indented inside this very code block, so a plain substring replace
+# double-matches and aborts. Line-anchored matching is what makes a
+# checkbox-ticking script safe to embed in the file it edits.
 path = Path("docs/superpowers/plans/2026-08-10-decouple-fixtures.md")
-text = path.read_text(encoding="utf-8")
-replacements = [
-    (
-        "- [ ] **Step 1: Make the generator green-case selftest require four bound variants**",
-        "- [x] **Step 1: Make the generator green-case selftest require four bound variants**",
-    ),
-    (
-        "- [ ] **Step 2: Observe the selftest red before F-04 is bound**",
-        "- [x] **Step 2: Observe the selftest red before F-04 is bound**",
-    ),
-    (
-        "- [ ] **Step 3: Construct the wrong-replacement byte-identity red probe**",
-        "- [x] **Step 3: Construct the wrong-replacement byte-identity red probe**",
-    ),
-    (
-        "- [ ] **Step 4: Add the exact F-04 `replace-block` binding**",
-        "- [x] **Step 4: Add the exact F-04 `replace-block` binding**",
-    ),
-    (
-        "- [ ] **Step 5: Prove byte identity in generator check mode before any write**",
-        "- [x] **Step 5: Prove byte identity in generator check mode before any write**",
-    ),
-    (
-        "- [ ] **Step 6: Run write mode and prove it leaves F-04 unmodified**",
-        "- [x] **Step 6: Run write mode and prove it leaves F-04 unmodified**",
-    ),
-    (
-        "- [ ] **Step 7: Observe the Task-A selftest green**",
-        "- [x] **Step 7: Observe the Task-A selftest green**",
-    ),
-    (
-        "- [ ] **Step 8: Run Task A’s independent full gate**",
-        "- [x] **Step 8: Run Task A’s independent full gate**",
-    ),
-    (
-        "- [ ] **Step 9: Verify Task-A source-file scope before tracking checkboxes**",
-        "- [x] **Step 9: Verify Task-A source-file scope before tracking checkboxes**",
-    ),
-    (
-        "- [ ] **Step 10: Tick Task-A checkboxes in this same work session and commit Task A**",
-        "- [x] **Step 10: Tick Task-A checkboxes in this same work session and commit Task A**",
-    ),
-]
-for old, new in replacements:
-    if text.count(old) != 1:
-        raise SystemExit(f"checkbox replacement count is not one: {old}")
-    text = text.replace(old, new)
-path.write_text(text, encoding="utf-8")
-print("TASK A CHECKBOXES: OK (10/10 ticked before commit)")
+lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+start = next(i for i, l in enumerate(lines) if l.startswith("### Task A"))
+end = next(i for i, l in enumerate(lines) if l.startswith("## Task B"))
+ticked = 0
+for i in range(start, end):
+    if lines[i].startswith("- [ ] **Step"):
+        lines[i] = lines[i].replace("- [ ] **Step", "- [x] **Step", 1)
+        ticked += 1
+if ticked != 10:
+    raise SystemExit(f"expected to tick 10 Task-A checkboxes, ticked {ticked}")
+path.write_text("".join(lines), encoding="utf-8")
+print(f"TASK A CHECKBOXES: OK ({ticked}/10 ticked before commit)")
 ```
 
 Run that exact script with `python3 - <<'PY'` / `PY`, then commit exactly these files:
