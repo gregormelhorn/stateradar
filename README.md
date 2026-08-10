@@ -16,7 +16,7 @@ where the two disagree — and turns the answers into tests and CI gates.
 > Model-based testing checks code against a model.
 > StateRadar first checks whether the model deserves to be the oracle.
 
-**Version 1.50.** MIT, prompts included. Runs inside your AI coding agent;
+**Version 1.50.** Apache-2.0, prompts included. Runs inside your AI coding agent;
 no build step, no service, nothing leaves your repo.
 
 ---
@@ -409,5 +409,13 @@ real divergences, not from hypotheticals.
 
 ## License
 
-MIT, including the prompt texts and skill files. Copying and adapting them
-is the intended use.
+Copyright 2026 Gregor Melhorn.
+
+Licensed under the Apache License, Version 2.0. See [`LICENSE`](LICENSE).
+This covers the prompt texts and the skill files as well — copying and
+adapting them is the intended use. Apache-2.0 adds an express patent grant,
+which the MIT License did not carry.
+
+Releases up to and including v1.50 were published under the MIT License.
+Those versions remain available under the MIT terms; the relicensing applies
+going forward and is not retroactive.
