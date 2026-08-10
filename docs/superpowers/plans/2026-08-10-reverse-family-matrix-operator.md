@@ -753,3 +753,60 @@ Out of scope for this wave:
 - `CHANGELOG.md` and any version bump
 - `grpc-go addrConn`, `F-08`, the clock seam
 - real-component coverage
+
+---
+
+## Execution evidence (durable record)
+
+Both waves' red probes were run and observed. Neither commit body carried the
+transcript, and two independent reviews raised the same gap: an R-RED-PROBE
+claim whose only referent is a gitignored subagent artefact is not
+self-evidencing. The transcripts are recorded here, in a tracked file, so the
+claim has a durable home. This is the countermeasure — the ledger under
+`.superpowers/` cannot serve, because it is gitignored.
+
+### Task A, Step 2 — four assertions red before the mutator existed
+
+Run against `617a628`, with all four assertions added and `ignore_or_reject_to_handle`
+not yet written:
+
+```text
+ - matrix mutation count: expected killed=13
+   ... MUTATION CHECK: OK (killed=9 survived=0 errors=0 blocked=0)
+ - hole cell: expected killed=12 (one fewer than 13)
+   ... (actual killed=9)
+ - weak suite: expected an ignore-to-handle survivor
+ - ignore-to-handle must drop the source annotation, not carry it into the replacement
+SELFTEST_EXIT=1
+```
+
+Exactly four failure blocks. The `mutation checker leaves hole cells unmutated`
+`expect()` passed, which is why the count assertion two lines below it is the
+load-bearing one.
+
+### Task B, Step 0b — three assertions red before the UV column existed
+
+Run against `e88cc13`, with the counts moved to 16/15 and the UV pin added,
+before `UV-M2-stale` was introduced:
+
+```text
+SELFTEST: FAIL
+ - weak suite: the ignore-to-handle survivor must include a UV cell
+   - that is the shape the family exists for
+   ... MUTATION CHECK: FAIL (killed=0 survived=13 errors=0 blocked=0)
+ - hole cell: expected killed=15 (one fewer than 16)
+   ... MUTATION CHECK: OK (killed=12 survived=0 errors=0 blocked=0)
+ - matrix mutation count: expected killed=16
+   ... MUTATION CHECK: OK (killed=13 survived=0 errors=0 blocked=0)
+exit=1
+```
+
+Exactly three, each for the intended reason.
+
+### Standing rule for future waves
+
+R-RED-PROBE in `AGENTS.md` §7 already says "Paste both runs". It is satisfied
+by pasting into the **commit body**, not into a subagent report. When a worker
+reports a red probe, the reviewer of that commit must be able to find the
+transcript in `git show`. If it is missing, the commit is incomplete even
+though every gate is green.
