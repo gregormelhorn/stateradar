@@ -31,6 +31,10 @@
   {
    "id": "UV-M1-dup",
    "undesired": true
+  },
+  {
+   "id": "UV-M2-stale",
+   "undesired": true
   }
  ],
  "cells": [
@@ -66,6 +70,15 @@
    "disposition": "ignore (documented)",
    "citation": {
     "file": "src/mini.py",
+    "line": 33
+   },
+   "state": "Idle",
+   "event": "UV-M2-stale"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
     "line": 22
    },
    "state": "Open",
@@ -89,6 +102,15 @@
    },
    "state": "Open",
    "event": "UV-M1-dup"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 33
+   },
+   "state": "Open",
+   "event": "UV-M2-stale"
   },
   {
    "disposition": "reject",
@@ -116,6 +138,15 @@
    },
    "state": "Closed",
    "event": "UV-M1-dup"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 33
+   },
+   "state": "Closed",
+   "event": "UV-M2-stale"
   }
  ],
  "questions": [],
@@ -144,7 +175,7 @@
    "loss": "n/a: local",
    "delay": "n/a: sync",
    "duplication": "n/a: sync",
-   "out-of-order": "n/a: sync",
+   "out-of-order": "UV-M2-stale",
    "contradiction": "n/a: sync",
    "commission": "n/a: sync",
    "value": "n/a: payload validated"

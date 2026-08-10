@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 NAVIGATE = {"Idle": [], "Open": ["M1"], "Closed": ["M1", "M2"]}
-EVENTS = ["M1", "M2", "UV-M1-dup"]
+EVENTS = ["M1", "M2", "UV-M1-dup", "UV-M2-stale"]
 
 
 def load_mini(component_root: Path):

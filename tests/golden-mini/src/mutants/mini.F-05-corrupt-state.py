@@ -29,4 +29,6 @@ class Mini:
         if event == "UV-M1-dup":
             self.dup_count += 2  # F-05 corrupt state: counter moves by the wrong amount
             return "handled"
+        if event == "UV-M2-stale":
+            return "ignored"
         raise ValueError(event)

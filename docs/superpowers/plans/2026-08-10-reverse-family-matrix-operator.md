@@ -42,6 +42,30 @@ does not see an unexplained divergence.
    it; the silenceper benchmark matrix does have that shape. A selftest case
    that builds an annotated cell was added, observed red, then fixed.
 
+3. **Task B Step 6 scopes the generator with `--root tests/golden-mini`**
+   (Task B, Step 6). The plan's `--root . --analysis-dir
+   tests/golden-mini/domain-analysis mini` invocation makes
+   `gen_analysis_sidecar._src_index` walk the whole repo — no SRC_ROOTS base
+   exists at the repo root, so it falls back to root and an unsorted walk,
+   where `tools/selftest/src/mini.py` shadows `tests/golden-mini/src/mini.py`
+   (first hit wins). Every cell citation then reads `tools/selftest/src/mini.py`
+   and `dsc_check --repo tests/golden-mini` fails with twelve
+   `citation: tools/selftest/src/mini.py does not exist` errors. `--root
+   tests/golden-mini` is the correct scope: it reproduces the committed golden
+   sidecar byte-for-byte and yields `DSC CHECK: OK (3 states x 4 events,
+   12 cells, 0 guard groups)`. The `--repo tests/golden-mini` dsc_check flag
+   is untouched.
+
+4. **The selftest's part-B fixtures follow the live catalogue** (Task B, Step
+   11). `run_selftest.py` builds its inline blind tables and validates them
+   against the golden-mini catalogue via `part_b_pack.py --check`, so adding
+   the `UV-M2-stale` event to the catalogue necessarily broke the two green
+   cases (`blind table complete`, `blind table finer than one row per id`)
+   with `missing row: UV-M2-stale`. The two red cases were extended too, but
+   only to keep each failing for its stated reason alone: `partial` now
+   reports only `missing row: UV-M1-dup`, and `dup` only `duplicated
+   checklist entry: M2` (verified by direct `part_b_pack --check` runs).
+
 ## Spec deviations (read before starting)
 
 The spec `docs/superpowers/specs/2026-08-10-reverse-family-matrix-operator-design.md` lists `CHANGELOG.md` under "surfaces that move". **That is wrong and this plan overrides it.** Verified at HEAD:
@@ -59,7 +83,7 @@ So: `README.md` (living capability description) and `docs/roadmap.md` (living st
 | Path | Responsibility |
 |---|---|
 | `tools/check_matrix_mutation.py` | The `ignore-to-handle` mutator and its wiring. |
-| `tools/selftest/run_selftest.py` | Kill-count assertions and the family's red cases. |
+| `tools/selftest/run_selftest.py` | Kill-count assertions, the family's red cases, and the part-B blind-table fixtures (lines 611-651, keyed to the live catalogue: each new catalogue event needs a row + checklist tick there). |
 | `README.md:174-175` | Living family list shown to readers. |
 | `docs/roadmap.md` item 7 | Living family list for the mutation checker. |
 | `docs/roadmap.md` item 8 | Fault-class claim accounting (F-15 claimed, four still not). |
@@ -548,7 +572,7 @@ If you see `ValueError`, `EVENTS` and the matrix columns are out of sync — fix
 - [ ] **Step 6: Regenerate the sidecar and refresh the golden copy**
 
 ```bash
-uv run --with jsonschema python3 tools/gen_analysis_sidecar.py --root . --analysis-dir tests/golden-mini/domain-analysis mini
+uv run --with jsonschema python3 tools/gen_analysis_sidecar.py --root tests/golden-mini
 cp tests/golden-mini/domain-analysis/mini/analysis.json tests/golden-mini/expected/analysis.json
 uv run --with jsonschema python3 tools/dsc_check.py tests/golden-mini/domain-analysis/mini --repo tests/golden-mini
 ```

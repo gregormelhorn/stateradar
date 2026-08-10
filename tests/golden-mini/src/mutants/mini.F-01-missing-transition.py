@@ -28,4 +28,6 @@ class Mini:
         if event == "UV-M1-dup":
             self.dup_count += 1
             return "handled"
+        if event == "UV-M2-stale":
+            return "ignored"
         raise ValueError(event)

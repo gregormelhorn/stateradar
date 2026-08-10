@@ -302,8 +302,13 @@ def main() -> int:
                rc_weak, out_weak, needle="SURVIVED")
         if "kind=ignore-to-handle" not in out_weak:
             failures.append("weak suite: expected an ignore-to-handle survivor\n" + out_weak)
+        elif not any("kind=ignore-to-handle" in line and "event=UV-M2-stale" in line
+                     for line in out_weak.splitlines()):
+            failures.append("weak suite: the ignore-to-handle survivor must include a "
+                            "UV cell - that is the shape the family exists for\n" + out_weak)
         else:
-            print("  ok  weak suite survives an ignore-to-handle mutant (fails as required)")
+            print("  ok  weak suite survives an ignore-to-handle mutant on a UV cell "
+                  "(fails as required)")
 
         hole = sidecar(tmp, gm)
         hole_mx = hole / "disposition-matrix.md"
@@ -319,18 +324,18 @@ def main() -> int:
         rc_hole, out_hole = mutation(hole)
         expect("mutation checker leaves hole cells unmutated", False,
                rc_hole, out_hole, needle="MUTATION CHECK: OK")
-        if "killed=12" not in out_hole:
-            failures.append("hole cell: expected killed=12 (one fewer than 13)\n" + out_hole)
+        if "killed=15" not in out_hole:
+            failures.append("hole cell: expected killed=15 (one fewer than 16)\n" + out_hole)
         else:
             print("  ok  hole cell produces no ignore-to-handle mutant (passes)")
 
         rc_gm, out_gm = mutation(gm)
         expect("mutation checker golden-mini kills supported mutants", False,
                rc_gm, out_gm, needle="MUTATION CHECK: OK")
-        if "killed=13" not in out_gm:
-            failures.append("matrix mutation count: expected killed=13\n" + out_gm)
+        if "killed=16" not in out_gm:
+            failures.append("matrix mutation count: expected killed=16\n" + out_gm)
         else:
-            print("  ok  matrix mutation count killed=13 (passes)")
+            print("  ok  matrix mutation count killed=16 (passes)")
         if "new='handle `mini.py:28`'" not in out_gm:
             failures.append("ignore-to-handle must drop the source annotation, "
                             "not carry it into the replacement\n" + out_gm)
@@ -614,11 +619,12 @@ def main() -> int:
                 capture_output=True, text=True)
             return r.returncode, (r.stdout + r.stderr).strip()
 
-        checklist = "\n- [x] M1\n- [x] M2\n- [x] UV-M1-dup\n"
+        checklist = "\n- [x] M1\n- [x] M2\n- [x] UV-M1-dup\n- [x] UV-M2-stale\n"
         full = tmp / "blind-full.md"
         full.write_text("| id | disposition |\n|---|---|\n"
                         "| M1 | handle |\n| M2 | reject |\n"
-                        "| UV-M1-dup | ignore (documented) |\n" + checklist)
+                        "| UV-M1-dup | ignore (documented) |\n"
+                        "| UV-M2-stale | ignore (documented) |\n" + checklist)
         expect("blind table complete", False, *pbp(full))
         # a finer-grained table (several situation rows per event id,
         # cross-references in prose cells) is MORE information — must pass
@@ -627,13 +633,15 @@ def main() -> int:
                         "| **M1** | Idle | handle |\n"
                         "| M1 | Open (after M2, see UV-M1-dup) | reject |\n"
                         "| M2 | any | reject |\n"
-                        "| UV-M1-dup | any | ignore (documented) |\n" + checklist)
+                        "| UV-M1-dup | any | ignore (documented) |\n"
+                        "| UV-M2-stale | any | ignore (documented) |\n" + checklist)
         expect("blind table finer than one row per id", False, *pbp(fine))
         # R-BLIND-ROW-COVERAGE: a missing catalogue row must fail
         partial = tmp / "blind-partial.md"
         partial.write_text("| id | disposition |\n|---|---|\n"
                            "| M1 | handle |\n| M2 | reject |\n"
-                           "\n- [x] M1\n- [x] M2\n")
+                           "| UV-M2-stale | ignore (documented) |\n"
+                           "\n- [x] M1\n- [x] M2\n- [x] UV-M2-stale\n")
         expect("blind table missing row", True, *pbp(partial),
                needle="missing row: UV-M1-dup")
         # a duplicated checklist tick must fail — coverage must be countable
@@ -641,6 +649,7 @@ def main() -> int:
         dup.write_text("| id | disposition |\n|---|---|\n"
                        "| M1 | handle |\n| M2 | reject |\n"
                        "| UV-M1-dup | ignore (documented) |\n"
+                       "| UV-M2-stale | ignore (documented) |\n"
                        + checklist + "- [x] M2\n")
         expect("duplicated checklist tick", True, *pbp(dup),
                needle="duplicated checklist entry: M2")
