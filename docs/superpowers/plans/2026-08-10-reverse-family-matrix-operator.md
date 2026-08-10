@@ -102,7 +102,7 @@ So: `README.md` (living capability description) and `docs/roadmap.md` (living st
 **Files:**
 - Add: `docs/superpowers/plans/2026-08-10-reverse-family-matrix-operator.md`
 
-- [ ] **Step 1: Confirm a clean starting tree**
+- [x] **Step 1: Confirm a clean starting tree**
 
 This plan was committed by its author before handoff, so every later `git status --short` check is meaningful.
 
@@ -129,7 +129,7 @@ If the tree is dirty, stop and report `BLOCKED(task-0): working tree not clean a
 - Produces: mutation `kind` string `"ignore-to-handle"`, consumed by Task B's selftest assertions.
 - Produces: `MUTATION CHECK: OK (killed=13 ...)` on golden-mini, which Task B raises to 16.
 
-- [ ] **Step 1a: Write the failing count assertion**
+- [x] **Step 1a: Write the failing count assertion**
 
 All four assertions go in **before** the mutator exists, so each one is observed red first (R-RED-PROBE). Apply Step 1a and Step 1b together, then run Step 2 once.
 
@@ -152,7 +152,7 @@ with:
             print("  ok  matrix mutation count killed=13 (passes)")
 ```
 
-- [ ] **Step 1b: Write the other three failing assertions**
+- [x] **Step 1b: Write the other three failing assertions**
 
 Still in `tools/selftest/run_selftest.py`, replace this exact block (currently lines 293-302):
 
@@ -218,7 +218,7 @@ Then, immediately after the `killed=13` block you added in Step 1a, append:
 
 Note on that last case: a naive implementation slicing after `"ignore"` instead of `"ignore (documented)"` produces `new='handle (documented) \`mini.py:28\`'` and fails this assertion. That is its red state.
 
-- [ ] **Step 2: Run the selftest and watch all four assertions fail**
+- [x] **Step 2: Run the selftest and watch all four assertions fail**
 
 ```bash
 uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py
@@ -233,7 +233,7 @@ Expected: nonzero exit, with **all four** of these failure blocks present, becau
 
 If fewer than four fail, or any fails for a different reason, stop and report. **Paste this output into the task report** — this is the R-RED-PROBE evidence that all four assertions can fail.
 
-- [ ] **Step 3: Implement the mutator**
+- [x] **Step 3: Implement the mutator**
 
 In `tools/check_matrix_mutation.py`, insert this function immediately after `handle_to_ignore` (which ends at line 188, just before `def build_mutations`):
 
@@ -257,7 +257,7 @@ def ignore_or_reject_to_handle(cell: Cell) -> str | None:
 
 This needs `import re` at the top of `tools/check_matrix_mutation.py`, after `import json`.
 
-- [ ] **Step 4: Wire it into `build_mutations`**
+- [x] **Step 4: Wire it into `build_mutations`**
 
 In `build_mutations`, after the existing `handle_to_ignore` block (lines 199-201), add:
 
@@ -267,7 +267,7 @@ In `build_mutations`, after the existing `handle_to_ignore` block (lines 199-201
             pending.append((cell.state, cell.event, "ignore-to-handle", replacement, cell))
 ```
 
-- [ ] **Step 5: Run the checker and confirm the four new mutants**
+- [x] **Step 5: Run the checker and confirm the four new mutants**
 
 ```bash
 python3 tools/check_matrix_mutation.py tests/golden-mini/domain-analysis/mini
@@ -284,7 +284,7 @@ Expected: `MUTATION CHECK: OK (killed=13 survived=0 errors=0 blocked=0)`, with f
 
 **Paste the four `kind=ignore-to-handle` lines into the task report.** If any says `SURVIVED`, stop and report it as a finding.
 
-- [ ] **Step 6: Run the full selftest**
+- [x] **Step 6: Run the full selftest**
 
 ```bash
 uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py
@@ -301,7 +301,7 @@ Expected: `SELFTEST: OK`, including these four lines:
 
 **Paste those four lines into the task report.**
 
-- [ ] **Step 7: Update the two living prose surfaces**
+- [x] **Step 7: Update the two living prose surfaces**
 
 In `README.md`, replace lines 174-175 exactly:
 
@@ -333,7 +333,7 @@ target-swap, handle-to-ignore, and the reverse ignore/reject-to-handle
 mutations. It reports killed and surviving
 ```
 
-- [ ] **Step 8: Run the full gate set**
+- [x] **Step 8: Run the full gate set**
 
 ```bash
 python3 tools/check_matrix_mutation.py tests/golden-mini/domain-analysis/mini
@@ -361,7 +361,7 @@ Expected:
 - `git diff --check` silent
 - `git status --short` lists the four intended files. It may also list `?? docs/superpowers/plans/2026-08-10-reverse-family-matrix-operator.md` if the plan was not committed in Task 0; that one untracked file is expected and is not a finding.
 
-- [ ] **Step 9: Commit Task A**
+- [x] **Step 9: Commit Task A**
 
 ```bash
 git add tools/check_matrix_mutation.py tools/selftest/run_selftest.py README.md docs/roadmap.md
@@ -396,7 +396,7 @@ git commit -m "Add reverse matrix mutation family: ignore/reject to handle" \
 - Consumes: `kind=ignore-to-handle` from Task A.
 - Produces: `MUTATION CHECK: OK (killed=16 ...)`.
 
-- [ ] **Step 0a: Move the counts and add the UV pin (red probe, before any fixture change)**
+- [x] **Step 0a: Move the counts and add the UV pin (red probe, before any fixture change)**
 
 The assertions move first so each is observed red before the fixture makes it pass.
 
@@ -429,7 +429,7 @@ with:
                   "(fails as required)")
 ```
 
-- [ ] **Step 0b: Run the selftest and watch the three assertions fail**
+- [x] **Step 0b: Run the selftest and watch the three assertions fail**
 
 ```bash
 uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py
@@ -443,7 +443,7 @@ Expected: nonzero exit, with all three failing because `UV-M2-stale` does not ex
 
 **Paste this output.** It is the R-RED-PROBE evidence for Task B.
 
-- [ ] **Step 1: Add the event to the implementation**
+- [x] **Step 1: Add the event to the implementation**
 
 In `tests/golden-mini/src/mini.py`, insert **after** line 31 (`            return "handled"`) and **before** line 32 (`        raise ValueError(event)`):
 
@@ -469,7 +469,7 @@ Expected:
         raise ValueError(event)
 ```
 
-- [ ] **Step 2: Add the matrix column and fix the abstraction count**
+- [x] **Step 2: Add the matrix column and fix the abstraction count**
 
 In `tests/golden-mini/domain-analysis/mini/disposition-matrix.md`, replace lines 5-6:
 
@@ -505,7 +505,7 @@ with:
 | **Closed** | reject `mini.py:23` | ignore (documented) `mini.py:28` | handle (counted) `mini.py:30` | ignore (documented) `mini.py:33` |
 ```
 
-- [ ] **Step 3: Add the catalogue entry and bind the coverage category**
+- [x] **Step 3: Add the catalogue entry and bind the coverage category**
 
 In `tests/golden-mini/domain-analysis/mini/event-catalogue.md`:
 
@@ -541,7 +541,7 @@ with:
 
 Leave `### M1`'s coverage untouched, and give `UV-M2-stale` **no** annotation section — undesired variants inherit gate and upstream guards from their base event (`tools/dsc_check.py:178-185`), exactly as `UV-M1-dup` does today.
 
-- [ ] **Step 4: Add the event to the cell suite**
+- [x] **Step 4: Add the event to the cell suite**
 
 In `tests/golden-mini/tests/test_cell_suite.py`, replace line 11:
 
@@ -557,7 +557,7 @@ EVENTS = ["M1", "M2", "UV-M1-dup", "UV-M2-stale"]
 
 Leave `NAVIGATE` (line 10) unchanged — the new event is never used to navigate. Order matters: `parse_matrix` uses `zip(EVENTS, cells[1:], strict=True)` at line 32, so `EVENTS` must match the matrix column order exactly or the suite raises `ValueError`.
 
-- [ ] **Step 5: Run the cell suite directly and confirm it is green**
+- [x] **Step 5: Run the cell suite directly and confirm it is green**
 
 ```bash
 ( cd tests/golden-mini && python3 tests/test_cell_suite.py domain-analysis/mini ); rc=$?; echo "exit=$rc"; test "$rc" -eq 0 && echo "ASSERT OK" || echo "ASSERT FAILED"
@@ -569,7 +569,7 @@ The explicit `test` is deliberate: `cmd; echo "exit=$?"` prints the right number
 
 If you see `ValueError`, `EVENTS` and the matrix columns are out of sync — fix that before continuing.
 
-- [ ] **Step 6: Regenerate the sidecar and refresh the golden copy**
+- [x] **Step 6: Regenerate the sidecar and refresh the golden copy**
 
 ```bash
 uv run --with jsonschema python3 tools/gen_analysis_sidecar.py --root tests/golden-mini
@@ -583,7 +583,7 @@ Expected: the generator reports `3 states x 4 events = 12 cells`, and `DSC CHECK
 
 Never hand-edit either JSON file. If `dsc_check` reds on `UV coverage` or `R-GATE-TYPE`, the catalogue edit in Step 3 is incomplete — fix Step 3, do not patch the JSON.
 
-- [ ] **Step 7: Regenerate the mutant variants**
+- [x] **Step 7: Regenerate the mutant variants**
 
 The three generated variants are full copies of `src/mini.py`, so they are now stale. Prove it, then fix it:
 
@@ -604,7 +604,7 @@ python3 tools/gen_mutant_variants.py --check tests/golden-mini/domain-analysis/m
 
 Expected: three `GENERATED` lines, then `MUTANT GENERATION: OK (checked=3 drift=0 blocked=0 errors=0)`.
 
-- [ ] **Step 8: Confirm the fault-mutant contract still holds**
+- [x] **Step 8: Confirm the fault-mutant contract still holds**
 
 ```bash
 python3 tools/check_fault_mutants.py tests/golden-mini/domain-analysis/mini
@@ -614,7 +614,7 @@ Expected: `BASELINE: OK`, four `KILLED` lines, `FAULT MUTANTS: OK (killed=4 surv
 
 A survivor here means the regenerated variants no longer express their fault. Stop and report.
 
-- [ ] **Step 9: Confirm the new column produces three more kills**
+- [x] **Step 9: Confirm the new column produces three more kills**
 
 ```bash
 python3 tools/check_matrix_mutation.py tests/golden-mini/domain-analysis/mini
@@ -624,7 +624,7 @@ Expected: `MUTATION CHECK: OK (killed=16 survived=0 errors=0 blocked=0)`, includ
 
 **Paste those three lines.** They are the whole point of the wave: the reverse family executing on an undesired-variant cell.
 
-- [ ] **Step 10: Confirm the counts moved in Step 0a are intact**
+- [x] **Step 10: Confirm the counts moved in Step 0a are intact**
 
 No edit is needed here: the three assertions were already moved in Step 0a. Confirm they are still present and unmodified:
 
@@ -634,7 +634,7 @@ grep -c 'killed=16\|killed=15\|event=UV-M2-stale' tools/selftest/run_selftest.py
 
 Expected: `5` or more. If it reports `0`, Step 0a was skipped — go back and do it, then re-run Step 0b before continuing.
 
-- [ ] **Step 11: Run the full selftest**
+- [x] **Step 11: Run the full selftest**
 
 ```bash
 uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py
@@ -649,7 +649,7 @@ Expected: `SELFTEST: OK`, including:
   ok  ignore-to-handle replacement drops the (documented) annotation (passes)
 ```
 
-- [ ] **Step 12: Update roadmap item 8 with honest class accounting**
+- [x] **Step 12: Update roadmap item 8 with honest class accounting**
 
 In `docs/roadmap.md` item 8, replace this sentence:
 
@@ -672,7 +672,7 @@ class, so each needs its own column. F-20 needs a terminal-progress shape,
 which is not a UV column at all. Those four remain unclaimed.
 ```
 
-- [ ] **Step 13: Run the full gate set**
+- [x] **Step 13: Run the full gate set**
 
 ```bash
 python3 tools/check_matrix_mutation.py tests/golden-mini/domain-analysis/mini
@@ -701,7 +701,7 @@ Expected:
 - `REACHABILITY CHECK: OK`
 - `git diff --check` silent
 
-- [ ] **Step 14: Commit Task B**
+- [x] **Step 14: Commit Task B**
 
 ```bash
 git add tests/golden-mini/src/mini.py \
@@ -727,7 +727,7 @@ git commit -m "Run the reverse family on a UV cell: golden-mini UV-M2-stale" \
 - roadmap item 8: F-15 claimed; F-12/F-16/F-17/F-20 named unclaimed with reasons"
 ```
 
-- [ ] **Step 15: STOP**
+- [x] **Step 15: STOP**
 
 Report:
 
@@ -810,3 +810,33 @@ by pasting into the **commit body**, not into a subagent report. When a worker
 reports a red probe, the reviewer of that commit must be able to find the
 transcript in `git show`. If it is missing, the commit is incomplete even
 though every gate is green.
+
+---
+
+## Wave outcome
+
+Both tasks complete. Commits, in order:
+
+| commit | what |
+|---|---|
+| `aefa287` | design spec |
+| `617a628` | this plan |
+| `0b51ad2` | Task A — the `ignore-to-handle` family, `killed=9 → 13` |
+| `e88cc13` | Task A defect fix — strip annotations, keep only the citation |
+| `08c2224` | Task B — `UV-M2-stale` column, `killed=13 → 16`, F-15 claimed |
+| `7f237aa` | CI sidecar scope, found while executing Task B Step 6 |
+| `457d430` | red-probe transcripts recorded durably |
+
+Released in `v1.51`.
+
+Four plan defects were found during execution, all by the executing agent
+stopping rather than improvising, and all fixed with supervisor approval:
+the hole-case config, the mutator's annotation handling, the sidecar
+`--root` scope, and the part-B blind fixtures. Every one is recorded in
+"Amendments made during execution" above.
+
+**Checkbox discipline:** the boxes above were ticked after the fact, from
+commit evidence, because neither executing agent maintained them during the
+run. A plan whose state says "nothing done" while the work is committed is
+the completion-drift failure in `AGENTS.md` §6 wearing the opposite mask.
+Future waves: tick the box in the same step that produces the commit.
