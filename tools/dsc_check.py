@@ -137,6 +137,22 @@ def main() -> int:
             v = cats.get(cat)
             if v is None or v == [] or v == "":
                 E(f"coverage: {src}/{cat} is empty (variant ids or 'n/a: reason')")
+
+    # A coverage value may be an asserted absence, prose, one variant id, or
+    # several ids. Only UV-prefixed tokens are variant-reference claims: they
+    # must resolve to an event in this sidecar. Prose and pair references stay
+    # legal because they do not make such a claim.
+    event_ids = {event["id"] for event in data.get("events", [])}
+    for base, categories in data.get("coverage", {}).items():
+        for category, value in categories.items():
+            values = value if isinstance(value, list) else [value]
+            for item in values:
+                if not isinstance(item, str):
+                    continue
+                for variant_id in re.findall(r"\bUV-[\w-]+\b", item):
+                    if variant_id not in event_ids:
+                        E(f"UV binding: coverage {base}/{category} names {variant_id}, "
+                          "which is not an event")
     for q in data.get("questions", []):
         if q.get("status", "").split(" ")[0] not in Q_STATUS:
             E(f"question {q.get('id')}: status {q.get('status')!r} invalid")

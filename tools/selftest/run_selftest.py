@@ -245,6 +245,29 @@ def main() -> int:
                 lambda r: r["events"][0].pop("upstream_guards", None),
                 "R-UPSTREAM-GUARD")
 
+        # PA-13a: coverage values may be asserted absence, prose, or one/more
+        # existing UV ids. Only a UV-prefixed reference is a resolvable claim.
+        legal_uv_bindings = sidecar(tmp, FLAT)
+        raw = json.loads((legal_uv_bindings / "analysis.json").read_text())
+        for event in raw["events"]:
+            if event["id"] == "UV1":
+                event["id"] = "UV-present"
+        for cell in raw["cells"]:
+            if cell["event"] == "UV1":
+                cell["event"] = "UV-present"
+        raw["coverage"]["E1"].update({
+            "loss": "applicable — transport may drop this call",
+            "delay": "UV-present, UV-present",
+            "duplication": ["UV-present", "UV-present"],
+            "out-of-order": ["P-01a", "P-01b"],
+        })
+        (legal_uv_bindings / "analysis.json").write_text(json.dumps(raw))
+        expect("UV binding permits prose and known variants", False,
+               *dsc(legal_uv_bindings))
+        mutated("phantom UV coverage binding",
+                lambda r: r["coverage"]["E1"].update(loss="UV-does-not-exist"),
+                "UV binding: coverage E1/loss names UV-does-not-exist, which is not an event")
+
         # J3: UV coverage must bind at zero UV events
         d = sidecar(tmp, FLAT)
         raw = json.loads((d / "analysis.json").read_text())
