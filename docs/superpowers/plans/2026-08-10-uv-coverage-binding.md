@@ -267,7 +267,7 @@ Evidence:
 - Does not produce an unbound-UV diagnostic.
 - Leaves golden-mini at `MUTATION CHECK: OK (killed=16 survived=0 errors=0 blocked=0)`.
 
-- [ ] **Step 1: Add the Task-A selftest cases before the checker implementation**
+- [x] **Step 1: Add the Task-A selftest cases before the checker implementation**
 
 In `tools/selftest/run_selftest.py`, replace this exact current text (lines 243-248):
 
@@ -314,7 +314,7 @@ with this exact text:
         # J3: UV coverage must bind at zero UV events
 ```
 
-- [ ] **Step 2: Observe the selftest assertion red before the checker exists**
+- [x] **Step 2: Observe the selftest assertion red before the checker exists**
 
 ```bash
 out=$(uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1)
@@ -345,7 +345,7 @@ ASSERT RED AS REQUIRED
 
 Paste the complete `out` value into the task report and eventual Task-A commit body. If another new failure appears, stop with `BLOCKED(task-A): phantom selftest red probe has an unexpected failure`.
 
-- [ ] **Step 3: Implement the phantom-only checker**
+- [x] **Step 3: Implement the phantom-only checker**
 
 In `tools/dsc_check.py`, replace this exact current text (lines 135-140):
 
@@ -387,7 +387,7 @@ with this exact text:
 
 Do not change the existing `CATEGORIES`, `uv_categories`, `base_events`, or J3 loop. The new rule validates only explicit `UV-` reference claims, so it must not inspect every non-`n/a:` coverage value.
 
-- [ ] **Step 4: Run the constructed checker red probe and observe the exact diagnostic**
+- [x] **Step 4: Run the constructed checker red probe and observe the exact diagnostic**
 
 ```bash
 tmp=$(mktemp -d)
@@ -425,7 +425,7 @@ ASSERT RED AS REQUIRED
 
 Paste this complete output into the task report and Task-A commit body. This is the R-RED-PROBE evidence for the shipped checker.
 
-- [ ] **Step 5: Run the selftest after the checker exists**
+- [x] **Step 5: Run the selftest after the checker exists**
 
 ```bash
 out=$(uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1)
@@ -456,7 +456,7 @@ exit=0
 ASSERT OK
 ```
 
-- [ ] **Step 6: Confirm the real golden-mini sidecar stays green**
+- [x] **Step 6: Confirm the real golden-mini sidecar stays green**
 
 ```bash
 out=$(uv run --with jsonschema python3 tools/dsc_check.py tests/golden-mini/domain-analysis/mini --repo tests/golden-mini 2>&1)
@@ -480,7 +480,7 @@ exit=0
 ASSERT OK
 ```
 
-- [ ] **Step 7: Run the Task-A independent full gate**
+- [x] **Step 7: Run the Task-A independent full gate**
 
 ```bash
 expect_line() {
@@ -543,7 +543,7 @@ diff-check: clean
 
 Every successful command also prints `exit=0` and `ASSERT OK`. Paste all output into the Task-A report.
 
-- [ ] **Step 8: Verify Task-A file scope before committing**
+- [x] **Step 8: Verify Task-A file scope before committing**
 
 ```bash
 expected='tools/dsc_check.py
@@ -566,7 +566,7 @@ tools/selftest/run_selftest.py
 ASSERT OK: Task-A file scope
 ```
 
-- [ ] **Step 9: Commit Task A**
+- [x] **Step 9: Commit Task A**
 
 ```bash
 git add tools/dsc_check.py tools/selftest/run_selftest.py
