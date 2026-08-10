@@ -347,18 +347,48 @@ def main() -> int:
         rc_hole, out_hole = mutation(hole)
         expect("mutation checker leaves hole cells unmutated", False,
                rc_hole, out_hole, needle="MUTATION CHECK: OK")
-        if "killed=15" not in out_hole:
-            failures.append("hole cell: expected killed=15 (one fewer than 16)\n" + out_hole)
+        if "killed=24" not in out_hole:
+            failures.append("hole cell: expected killed=24 (one fewer than 25)\n" + out_hole)
         else:
             print("  ok  hole cell produces no ignore-to-handle mutant (passes)")
 
         rc_gm, out_gm = mutation(gm)
         expect("mutation checker golden-mini kills supported mutants", False,
                rc_gm, out_gm, needle="MUTATION CHECK: OK")
-        if "killed=16" not in out_gm:
-            failures.append("matrix mutation count: expected killed=16\n" + out_gm)
+        if "killed=25" not in out_gm:
+            failures.append("matrix mutation count: expected killed=25\n" + out_gm)
         else:
-            print("  ok  matrix mutation count killed=16 (passes)")
+            print("  ok  matrix mutation count killed=25 (passes)")
+        ignore_to_handle = [line for line in out_gm.splitlines()
+                            if "kind=ignore-to-handle" in line]
+        if len(ignore_to_handle) != 16:
+            failures.append("matrix mutation family: expected 16 ignore-to-handle mutants, "
+                            f"got {len(ignore_to_handle)}\n" + out_gm)
+        else:
+            print("  ok  matrix mutation family has 16 ignore-to-handle mutants (passes)")
+        for event in ("UV-M1-lost", "UV-M2-conflict", "UV-M1-spurious"):
+            actual = sum("KILLED" in line and "kind=ignore-to-handle" in line
+                         and f"event={event}" in line
+                         for line in out_gm.splitlines())
+            if actual != 3:
+                failures.append("UV matrix mutation: expected three KILLED ignore-to-handle "
+                                f"mutants for {event}, got {actual}\n" + out_gm)
+            else:
+                print(f"  ok  UV matrix mutation has three KILLED {event} mutants (passes)")
+        coverage = json.loads((gm / "analysis.json").read_text())["coverage"]
+        expected_bindings = {
+            ("M1", "duplication"): "UV-M1-dup",
+            ("M1", "loss"): "UV-M1-lost",
+            ("M2", "contradiction"): "UV-M2-conflict",
+            ("M1", "commission"): "UV-M1-spurious",
+        }
+        for (base, category), event in expected_bindings.items():
+            actual = coverage.get(base, {}).get(category)
+            if actual != event:
+                failures.append("UV coverage binding: expected "
+                                f"{base}/{category}={event!r}, got {actual!r}")
+            else:
+                print(f"  ok  UV coverage binding {base}/{category}={event} (passes)")
         if "new='handle `mini.py:28`'" not in out_gm:
             failures.append("ignore-to-handle must drop the source annotation, "
                             "not carry it into the replacement\n" + out_gm)
@@ -644,12 +674,17 @@ def main() -> int:
                 capture_output=True, text=True)
             return r.returncode, (r.stdout + r.stderr).strip()
 
-        checklist = "\n- [x] M1\n- [x] M2\n- [x] UV-M1-dup\n- [x] UV-M2-stale\n"
+        checklist = ("\n- [x] M1\n- [x] M2\n- [x] UV-M1-dup\n"
+                     "- [x] UV-M2-stale\n- [x] UV-M1-lost\n"
+                     "- [x] UV-M2-conflict\n- [x] UV-M1-spurious\n")
         full = tmp / "blind-full.md"
         full.write_text("| id | disposition |\n|---|---|\n"
                         "| M1 | handle |\n| M2 | reject |\n"
                         "| UV-M1-dup | ignore (documented) |\n"
-                        "| UV-M2-stale | ignore (documented) |\n" + checklist)
+                        "| UV-M2-stale | ignore (documented) |\n"
+                        "| UV-M1-lost | ignore (documented) |\n"
+                        "| UV-M2-conflict | ignore (documented) |\n"
+                        "| UV-M1-spurious | reject |\n" + checklist)
         expect("blind table complete", False, *pbp(full))
         # a finer-grained table (several situation rows per event id,
         # cross-references in prose cells) is MORE information — must pass
@@ -659,25 +694,54 @@ def main() -> int:
                         "| M1 | Open (after M2, see UV-M1-dup) | reject |\n"
                         "| M2 | any | reject |\n"
                         "| UV-M1-dup | any | ignore (documented) |\n"
-                        "| UV-M2-stale | any | ignore (documented) |\n" + checklist)
+                        "| UV-M2-stale | any | ignore (documented) |\n"
+                        "| UV-M1-lost | any | ignore (documented) |\n"
+                        "| UV-M2-conflict | any | ignore (documented) |\n"
+                        "| UV-M1-spurious | any | reject |\n" + checklist)
         expect("blind table finer than one row per id", False, *pbp(fine))
-        # R-BLIND-ROW-COVERAGE: a missing catalogue row must fail
+        # R-BLIND-ROW-COVERAGE: only the UV-M1-dup row is absent; its
+        # checklist tick stays present so this case fails for one reason.
         partial = tmp / "blind-partial.md"
         partial.write_text("| id | disposition |\n|---|---|\n"
                            "| M1 | handle |\n| M2 | reject |\n"
                            "| UV-M2-stale | ignore (documented) |\n"
-                           "\n- [x] M1\n- [x] M2\n- [x] UV-M2-stale\n")
-        expect("blind table missing row", True, *pbp(partial),
+                           "| UV-M1-lost | ignore (documented) |\n"
+                           "| UV-M2-conflict | ignore (documented) |\n"
+                           "| UV-M1-spurious | reject |\n"
+                           "\n- [x] M1\n- [x] M2\n- [x] UV-M1-dup\n"
+                           "- [x] UV-M2-stale\n- [x] UV-M1-lost\n"
+                           "- [x] UV-M2-conflict\n- [x] UV-M1-spurious\n")
+        rc_partial, out_partial = pbp(partial)
+        expect("blind table missing row", True, rc_partial, out_partial,
                needle="missing row: UV-M1-dup")
+        partial_errors = [line for line in out_partial.splitlines()
+                          if line.startswith(" - ")]
+        expected_partial_errors = [
+            " - missing row: UV-M1-dup (no table row keyed by it)",
+        ]
+        if partial_errors != expected_partial_errors:
+            failures.append("blind partial: expected only missing row: UV-M1-dup\n" + out_partial)
+        else:
+            print("  ok  blind partial fails only for missing row UV-M1-dup (passes)")
         # a duplicated checklist tick must fail — coverage must be countable
         dup = tmp / "blind-dup.md"
         dup.write_text("| id | disposition |\n|---|---|\n"
                        "| M1 | handle |\n| M2 | reject |\n"
                        "| UV-M1-dup | ignore (documented) |\n"
                        "| UV-M2-stale | ignore (documented) |\n"
+                       "| UV-M1-lost | ignore (documented) |\n"
+                       "| UV-M2-conflict | ignore (documented) |\n"
+                       "| UV-M1-spurious | reject |\n"
                        + checklist + "- [x] M2\n")
-        expect("duplicated checklist tick", True, *pbp(dup),
+        rc_dup, out_dup = pbp(dup)
+        expect("duplicated checklist tick", True, rc_dup, out_dup,
                needle="duplicated checklist entry: M2")
+        dup_errors = [line for line in out_dup.splitlines() if line.startswith(" - ")]
+        expected_dup_errors = [" - duplicated checklist entry: M2 (2x)"]
+        if dup_errors != expected_dup_errors:
+            failures.append("blind dup: expected only duplicated checklist entry: M2\n" + out_dup)
+        else:
+            print("  ok  blind dup fails only for duplicated checklist M2 (passes)")
 
     print("guard proofs (z3, PA-1/PA-2)")
     sys.path.insert(0, str(ROOT / "tools"))

@@ -30,4 +30,10 @@ class Mini:
             return "handled"
         if event == "UV-M2-stale":
             return "ignored"
+        if event == "UV-M1-lost":
+            return "ignored"
+        if event == "UV-M2-conflict":
+            return "ignored"
+        if event == "UV-M1-spurious":
+            raise RejectedError("UV-M1-spurious rejected")
         raise ValueError(event)

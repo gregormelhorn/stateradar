@@ -35,6 +35,18 @@
   {
    "id": "UV-M2-stale",
    "undesired": true
+  },
+  {
+   "id": "UV-M1-lost",
+   "undesired": true
+  },
+  {
+   "id": "UV-M2-conflict",
+   "undesired": true
+  },
+  {
+   "id": "UV-M1-spurious",
+   "undesired": true
   }
  ],
  "cells": [
@@ -79,6 +91,33 @@
    "disposition": "ignore (documented)",
    "citation": {
     "file": "src/mini.py",
+    "line": 35
+   },
+   "state": "Idle",
+   "event": "UV-M1-lost"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 37
+   },
+   "state": "Idle",
+   "event": "UV-M2-conflict"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 39
+   },
+   "state": "Idle",
+   "event": "UV-M1-spurious"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
     "line": 22
    },
    "state": "Open",
@@ -111,6 +150,33 @@
    },
    "state": "Open",
    "event": "UV-M2-stale"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 35
+   },
+   "state": "Open",
+   "event": "UV-M1-lost"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 37
+   },
+   "state": "Open",
+   "event": "UV-M2-conflict"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 39
+   },
+   "state": "Open",
+   "event": "UV-M1-spurious"
   },
   {
    "disposition": "reject",
@@ -147,6 +213,33 @@
    },
    "state": "Closed",
    "event": "UV-M2-stale"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 35
+   },
+   "state": "Closed",
+   "event": "UV-M1-lost"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 37
+   },
+   "state": "Closed",
+   "event": "UV-M2-conflict"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 39
+   },
+   "state": "Closed",
+   "event": "UV-M1-spurious"
   }
  ],
  "questions": [],
@@ -163,12 +256,12 @@
  },
  "coverage": {
   "M1": {
-   "loss": "n/a: local",
+   "loss": "UV-M1-lost",
    "delay": "n/a: sync",
-   "duplication": "n/a: sync",
+   "duplication": "UV-M1-dup",
    "out-of-order": "n/a: sync",
    "contradiction": "n/a: sync",
-   "commission": "n/a: sync",
+   "commission": "UV-M1-spurious",
    "value": "n/a: payload validated"
   },
   "M2": {
@@ -176,7 +269,7 @@
    "delay": "n/a: sync",
    "duplication": "n/a: sync",
    "out-of-order": "UV-M2-stale",
-   "contradiction": "n/a: sync",
+   "contradiction": "UV-M2-conflict",
    "commission": "n/a: sync",
    "value": "n/a: payload validated"
   }

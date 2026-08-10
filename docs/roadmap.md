@@ -91,12 +91,17 @@ ownership: F-01 and F-02 remain matrix-level families, F-05 remains
 implementation-level, and F-04 stays hand-authored. Broader binder-driven
 generation and real-component coverage remain pending.
 
-The reverse matrix family (ignore/reject → handle) now ships, and golden-mini
-carries a `UV-M2-stale` column so the family runs on an undesired-variant
-cell. That claims **F-15** (out-of-order/stale) with fixture proof. It does
-**not** claim F-12, F-16, or F-17: the registry binds one UV category to one
-class, so each needs its own column. F-20 needs a terminal-progress shape,
-which is not a UV column at all. Those four remain unclaimed.
+The reverse matrix family (ignore/reject → handle) now runs on all four
+matrix-level undesired-variant shapes in golden-mini: `UV-M1-lost` (F-12
+loss), `UV-M2-stale` (F-15 out-of-order/stale), `UV-M2-conflict` (F-16
+contradiction), and `UV-M1-spurious` (F-17 spontaneous commission). Each
+column has three KILLED reverse-family mutants. This claims **F-12**,
+**F-15**, **F-16**, and **F-17** with fixture proof.
+
+It does **not** claim F-13, F-14, or F-18: delay, duplication, and value are
+implementation-level in the registry. `UV-M1-dup` is a matrix shape, not an
+F-14 implementation mutant. F-20 needs a terminal-progress shape, which is
+not a UV column at all.
 
 **Prior status:** Planned — after 7, together with the F-catalogue. Meta's
 ACH (FSE 2025) generates few, fault-class-targeted mutants and then
