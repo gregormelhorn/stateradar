@@ -641,7 +641,7 @@ ASSERT OK: Task-A commit exists and tree is clean
 - Produces explicit sidecar coverage bindings `M1/duplication=UV-M1-dup`, `M1/loss=UV-M1-lost`, `M2/contradiction=UV-M2-conflict`, and `M1/commission=UV-M1-spurious`.
 - Produces the **derived, unverified-at-plan-time target** `MUTATION CHECK: OK (killed=25 survived=0 errors=0 blocked=0)` and 16 `ignore-to-handle` mutations.
 
-- [ ] **Step 1: Add count, UV-shape, and binding assertions before fixture changes**
+- [x] **Step 1: Add count, UV-shape, and binding assertions before fixture changes**
 
 In `tools/selftest/run_selftest.py`, replace this exact current hole-count block (lines 327-330):
 
@@ -711,7 +711,7 @@ with this exact text:
         if "new='handle `mini.py:28`'" not in out_gm:
 ```
 
-- [ ] **Step 2: Make the two deliberate Part-B red cases assert exactly one stated reason**
+- [x] **Step 2: Make the two deliberate Part-B red cases assert exactly one stated reason**
 
 In `tools/selftest/run_selftest.py`, replace this exact current text (lines 645-655):
 
@@ -762,7 +762,7 @@ with this exact text:
             print("  ok  blind dup fails only for duplicated checklist M2 (passes)")
 ```
 
-- [ ] **Step 3: Observe all Task-B assertions red before changing the fixture**
+- [x] **Step 3: Observe all Task-B assertions red before changing the fixture**
 
 ```bash
 out=$(uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1)
@@ -801,7 +801,7 @@ ASSERT RED AS REQUIRED
 
 Paste the complete `out` value into the task report and Task-B commit body. If the number, event name, binding, or failure reason differs, stop with `BLOCKED(task-B): red assertion output differs from the declared target`.
 
-- [ ] **Step 4: Add the three event branches to the base implementation**
+- [x] **Step 4: Add the three event branches to the base implementation**
 
 In `tests/golden-mini/src/mini.py`, replace this exact current text (lines 32-34):
 
@@ -827,7 +827,7 @@ with this exact text:
 
 This append-only placement preserves all existing citations through `mini.py:33`; the three new citations will be `mini.py:35`, `mini.py:37`, and `mini.py:39`.
 
-- [ ] **Step 5: Synchronize the hand-authored F-04 variant with the new base branches**
+- [x] **Step 5: Synchronize the hand-authored F-04 variant with the new base branches**
 
 In `tests/golden-mini/src/mutants/mini.F-04-sneak-path.py`, replace this exact current text (lines 29-32):
 
@@ -857,7 +857,7 @@ with this exact text:
 
 Do not run `gen_mutant_variants.py` for this file: F-04 is deliberately `UNBOUND` and hand-authored.
 
-- [ ] **Step 6: Expand the disposition matrix in exact column order**
+- [x] **Step 6: Expand the disposition matrix in exact column order**
 
 In `tests/golden-mini/domain-analysis/mini/disposition-matrix.md`, replace this exact current text (lines 5-13):
 
@@ -887,7 +887,7 @@ to the seven-event catalogue.
 | **Closed** | reject `mini.py:23` | ignore (documented) `mini.py:28` | handle (counted) `mini.py:30` | ignore (documented) `mini.py:33` | ignore (documented) `mini.py:35` | ignore (documented) `mini.py:37` | reject `mini.py:39` |
 ```
 
-- [ ] **Step 7: Declare and explicitly bind every Task-B catalogue event**
+- [x] **Step 7: Declare and explicitly bind every Task-B catalogue event**
 
 In `tests/golden-mini/domain-analysis/mini/event-catalogue.md`, replace this exact current declaration and table (lines 3-10):
 
@@ -958,7 +958,7 @@ with this exact text:
 
 The `M1/duplication` line is the pre-existing data correction moved from Task A. The four explicit bindings are an executable Task-B obligation because Task A deliberately cannot detect a missing binding.
 
-- [ ] **Step 8: Make `EVENTS` match the matrix column order**
+- [x] **Step 8: Make `EVENTS` match the matrix column order**
 
 In `tests/golden-mini/tests/test_cell_suite.py`, replace this exact current line (line 11):
 
@@ -974,7 +974,7 @@ EVENTS = ["M1", "M2", "UV-M1-dup", "UV-M2-stale", "UV-M1-lost", "UV-M2-conflict"
 
 Do not change `NAVIGATE`. Each new event is delivered only after navigation to the state under test.
 
-- [ ] **Step 9: Update all four inline Part-B fixtures and make their declared red reasons exact**
+- [x] **Step 9: Update all four inline Part-B fixtures and make their declared red reasons exact**
 
 After Step 2, replace this exact current block in `tools/selftest/run_selftest.py` (from the current `checklist` assignment through the duplicate-case assertion):
 
@@ -1105,7 +1105,7 @@ with this exact text:
             print("  ok  blind dup fails only for duplicated checklist M2 (passes)")
 ```
 
-- [ ] **Step 10: Run the expanded cell suite directly**
+- [x] **Step 10: Run the expanded cell suite directly**
 
 ```bash
 out=$(cd tests/golden-mini && python3 tests/test_cell_suite.py domain-analysis/mini 2>&1)
@@ -1128,7 +1128,7 @@ exit=0
 ASSERT OK
 ```
 
-- [ ] **Step 11: Regenerate the sidecar in the correct fixture scope**
+- [x] **Step 11: Regenerate the sidecar in the correct fixture scope**
 
 ```bash
 out=$(uv run --with jsonschema python3 tools/gen_analysis_sidecar.py --root tests/golden-mini 2>&1)
@@ -1151,7 +1151,7 @@ exit=0
 ASSERT OK
 ```
 
-- [ ] **Step 12: Refresh the golden sidecar copy without hand-editing JSON**
+- [x] **Step 12: Refresh the golden sidecar copy without hand-editing JSON**
 
 ```bash
 cp tests/golden-mini/domain-analysis/mini/analysis.json tests/golden-mini/expected/analysis.json
@@ -1174,7 +1174,7 @@ SIDECAR COPY: OK
 ASSERT OK
 ```
 
-- [ ] **Step 13: Check the regenerated sidecar with the correct repository root**
+- [x] **Step 13: Check the regenerated sidecar with the correct repository root**
 
 ```bash
 out=$(uv run --with jsonschema python3 tools/dsc_check.py tests/golden-mini/domain-analysis/mini --repo tests/golden-mini 2>&1)
@@ -1197,7 +1197,7 @@ exit=0
 ASSERT OK
 ```
 
-- [ ] **Step 14: Verify all four explicit coverage bindings independently**
+- [x] **Step 14: Verify all four explicit coverage bindings independently**
 
 ```bash
 python3 - <<'PY'
@@ -1241,7 +1241,7 @@ exit=0
 ASSERT OK
 ```
 
-- [ ] **Step 15: Prove generated F-01/F-02/F-05 variants are stale before regeneration**
+- [x] **Step 15: Prove generated F-01/F-02/F-05 variants are stale before regeneration**
 
 ```bash
 python3 tools/gen_mutant_variants.py --check tests/golden-mini/domain-analysis/mini
@@ -1269,7 +1269,7 @@ ASSERT RED AS REQUIRED
 
 Paste this complete output into the task report and Task-B commit body.
 
-- [ ] **Step 16: Regenerate and check the three bound variants**
+- [x] **Step 16: Regenerate and check the three bound variants**
 
 ```bash
 out=$(python3 tools/gen_mutant_variants.py tests/golden-mini/domain-analysis/mini 2>&1)
@@ -1306,7 +1306,7 @@ MUTANT GENERATION: OK (checked=3 drift=0 blocked=0 errors=0)
 ASSERT OK
 ```
 
-- [ ] **Step 17: Confirm the four fault-mutant contracts and the F-04 synchronization**
+- [x] **Step 17: Confirm the four fault-mutant contracts and the F-04 synchronization**
 
 ```bash
 out=$(python3 tools/check_fault_mutants.py tests/golden-mini/domain-analysis/mini 2>&1)
@@ -1354,7 +1354,7 @@ exit=0
 ASSERT OK
 ```
 
-- [ ] **Step 18: Measure the derived matrix-mutation target and require all nine new UV kills**
+- [x] **Step 18: Measure the derived matrix-mutation target and require all nine new UV kills**
 
 ```bash
 python3 - <<'PY'
@@ -1405,7 +1405,7 @@ ASSERT OK
 
 If the summary or any per-event count differs, stop with `BLOCKED(task-B): derived count mismatch` and paste the full checker output. Do not change counts, the roadmap, or assertions.
 
-- [ ] **Step 19: Run the full selftest after all fixture changes**
+- [x] **Step 19: Run the full selftest after all fixture changes**
 
 ```bash
 out=$(uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1)
@@ -1438,7 +1438,7 @@ exit=0
 ASSERT OK
 ```
 
-- [ ] **Step 20: Update roadmap item 8 with exact, non-overclaiming accounting**
+- [x] **Step 20: Update roadmap item 8 with exact, non-overclaiming accounting**
 
 In `docs/roadmap.md`, replace this exact current paragraph (lines 94-99):
 
@@ -1469,7 +1469,7 @@ not a UV column at all.
 
 This prose is review-only; the executable evidence is Steps 14 and 18. Do not alter `CHANGELOG.md` or the version.
 
-- [ ] **Step 21: Run the Task-B independent full gate**
+- [x] **Step 21: Run the Task-B independent full gate**
 
 ```bash
 expect_line() {
@@ -1532,7 +1532,7 @@ diff-check: clean
 
 Every successful command also prints `exit=0` and `ASSERT OK`. Paste all output into the Task-B report.
 
-- [ ] **Step 22: Verify Task-B file scope before committing**
+- [x] **Step 22: Verify Task-B file scope before committing**
 
 ```bash
 expected='docs/roadmap.md
@@ -1575,7 +1575,7 @@ tools/selftest/run_selftest.py
 ASSERT OK: Task-B file scope
 ```
 
-- [ ] **Step 23: Commit Task B**
+- [x] **Step 23: Commit Task B**
 
 ```bash
 git add docs/roadmap.md \
