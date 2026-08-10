@@ -442,10 +442,12 @@ def main() -> int:
             "mini.F-05-corrupt-state.py",
         ]:
             variant = (ROOT / "tests" / "golden-mini" / "src" / "mutants" / variant_name).read_text().splitlines()
-            hunks = [l for l in difflib.unified_diff(base, variant, lineterm="")
-                     if l.startswith(("+", "-")) and not l.startswith(("+++", "---"))]
-            if len(hunks) == 0 or len(hunks) > 8:
-                failures.append(f"{variant_name}: expected a small single-region diff, got {len(hunks)} changed lines")
+            regions = [op for op in difflib.SequenceMatcher(None, base, variant).get_opcodes()
+                       if op[0] != "equal"]
+            if len(regions) != 1:
+                failures.append(f"{variant_name}: a fault variant must differ from the base in exactly "
+                                f"one region, got {len(regions)}. More than one region means the variant "
+                                f"has drifted from the base and its kill no longer proves its fault class.")
             else:
                 print(f"  ok  {variant_name} single-region diff (passes)")
 
