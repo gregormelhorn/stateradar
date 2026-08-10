@@ -116,7 +116,7 @@ mutation at all, is scored `KILLED` (exit=1). The existing guard bounds total
 changed lines (1..8); F-04 sits at 3, so it stays green while carrying two
 separate diff regions.
 
-- [ ] **Step 1: Switch the assertion from line count to region count**
+- [x] **Step 1: Switch the assertion from line count to region count**
 
 In `tools/selftest/run_selftest.py`, replace this exact current text:
 
@@ -144,7 +144,7 @@ with:
                 print(f"  ok  {variant_name} single-region diff (passes)")
 ```
 
-- [ ] **Step 2: Observe it red against F-04, and only F-04**
+- [x] **Step 2: Observe it red against F-04, and only F-04**
 
 ```bash
 uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1 | grep -E 'single-region|exactly one region'
@@ -158,7 +158,7 @@ If F-04 is not the only failure, stop and report `BLOCKED(task-0)` with the
 full output. **Paste this output** — it is the R-RED-PROBE evidence, and
 unlike Task A's it did not need constructing.
 
-- [ ] **Step 3: Resynchronise F-04 with the base**
+- [x] **Step 3: Resynchronise F-04 with the base**
 
 In `tests/golden-mini/src/mutants/mini.F-04-sneak-path.py`, insert the branch
 that the previous wave added to the base but never carried across. Insert it
@@ -174,7 +174,7 @@ Do **not** change the F-04 mutation itself. The only intended difference from
 the base stays `return "ignored"  # F-04 sneak path: Closed x M1 accepted`
 where the base raises `RejectedError`.
 
-- [ ] **Step 4: Confirm exactly one region, and that F-04 still dies from its own mutation**
+- [x] **Step 4: Confirm exactly one region, and that F-04 still dies from its own mutation**
 
 ```bash
 python3 - <<'PY'
@@ -202,7 +202,7 @@ Expected: exactly one line, `MISMATCH Closed × M1: expected reject, got ignored
 and **no `Traceback` and no `ValueError`**. **Paste this.** A traceback here
 means the resynchronisation is incomplete.
 
-- [ ] **Step 5: Run the full gate**
+- [x] **Step 5: Run the full gate**
 
 ```bash
 python3 tools/check_fault_mutants.py tests/golden-mini/domain-analysis/mini | tail -1
@@ -222,7 +222,7 @@ Expected: `FAULT MUTANTS: OK (killed=4 survived=0 errors=0 blocked=0)`,
 `2/2 cases pass`, `git diff --check` silent, and `git status --short` listing
 only the two Task-0 files.
 
-- [ ] **Step 6: Commit Task 0**
+- [x] **Step 6: Commit Task 0**
 
 ```bash
 git add tools/selftest/run_selftest.py tests/golden-mini/src/mutants/mini.F-04-sneak-path.py
