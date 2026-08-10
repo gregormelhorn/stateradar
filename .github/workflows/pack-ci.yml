@@ -29,7 +29,16 @@ jobs:
         run: python tools/run_tool_tests.py
       # The reachability checker runs semantic analysis on the sidecar.
       # It verifies all states are reachable and terminal states are marked.
+      #
+      # --root must scope the generator to the component. With --root . it
+      # walks the whole repo, and tools/selftest/src/mini.py shadows
+      # tests/golden-mini/src/mini.py (first hit wins, unsorted walk), so every
+      # citation is emitted against the wrong file. dsc_check below is what
+      # makes that visible: before this was fixed, the regenerated sidecar
+      # carried 12x "citation: tools/selftest/src/mini.py does not exist" and
+      # nothing in CI looked, because reachability reads only states and events.
       - name: reachability check (golden-mini)
         run: |
-          python tools/gen_analysis_sidecar.py --root . --analysis-dir tests/golden-mini/domain-analysis mini
+          python tools/gen_analysis_sidecar.py --root tests/golden-mini
+          python tools/dsc_check.py tests/golden-mini/domain-analysis/mini --repo tests/golden-mini
           python tools/check_reachability.py tests/golden-mini/domain-analysis/mini
