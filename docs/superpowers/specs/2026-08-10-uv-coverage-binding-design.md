@@ -33,42 +33,79 @@ Two failure directions are currently invisible:
 The second is the more dangerous of the two: it is an unearned coverage
 claim, which is the failure class this pack exists to prevent.
 
-## Task A: bind UV columns to coverage entries
+## Task A: reject phantom coverage bindings
 
-Add one rule to `tools/dsc_check.py`:
+> **Corrected after the first planning attempt.** The original version of
+> this section specified a two-directional rule and a category match. A
+> read-only survey by the planning agent, reproduced and measured, showed
+> both were wrong. The measurements are recorded below because they are the
+> reason for the narrower contract, and because the next wave needs them.
 
-> Every event with `undesired: true` must be named by exactly one coverage
-> entry, under some base event, in a category whose registry `fault` matches
-> the class the variant stands for. Conversely, every coverage entry that
-> names a variant id must name one that exists in `events`.
+### What was wrong
 
-v1 scope, deliberately narrow: check **referential integrity in both
-directions**. Do *not* try to infer which category a variant belongs to from
-its name — `UV-M1-dup` is not parsed for the substring `dup`. Name-derived
-semantics would be a guess dressed as a check.
+1. **The category match is not mechanically checkable.** The section asked
+   that a variant sit "in a category whose registry `fault` matches the class
+   the variant stands for", while also forbidding name-derived inference.
+   `formats/analysis.schema.json` gives an event only `id` and `undesired`;
+   nothing records which UV category a variant belongs to. Those two
+   requirements contradict each other. Dropped.
+2. **The contract recognised two value forms; there are three.** Real
+   coverage values include prose that asserts applicability without naming a
+   variant, e.g. `examples/device-connection/.../run1`:
+   `connect/loss = "applicable — async call may be dropped by the transport"`.
+   Treating every non-`n/a:` value as a variant id would flag 12 such entries
+   per run as phantom bindings. That is a defect in the rule, not the data.
+3. **The blast radius was never measured.** The rule lands in
+   `tools/dsc_check.py`, which is global, while the spec budgeted only
+   golden-mini.
 
-So the rule is:
+### Measured, at commit 42bbec5
 
-- every `undesired` event id appears in at least one `coverage[base][cat]`
-- every coverage value that is not an `n/a: <reason>` string resolves to an
-  existing `undesired` event id
-- a coverage value may list several variant ids
+| direction | violations | artifacts |
+|---|---|---|
+| phantom (coverage names a UV id that is not an event) | **0** | — |
+| unbound (a UV event no coverage entry names) | **41** | 13 |
 
-Error strings, following the existing style at `dsc_check.py:194-202`:
+The newer analyses (`silenceper-pool-32`, `meilisearch-6510`,
+`meilisearch-s3-snapshot`) bind cleanly; the older ones do not. The practice
+improved and the old artifacts were never migrated.
+
+### The rule this wave ships
+
+Phantom direction only:
+
+> Every `UV-`-prefixed token appearing in a coverage value must name an event
+> that exists in `events`.
+
+Three value forms stay legal: `n/a: <reason>`, one or more variant ids, and
+prose that names no variant. Only a token that *looks like a variant
+reference* is resolved.
+
+Error string, following the style at `dsc_check.py:194-202`:
 
 ```
-UV binding: <event-id> is an undesired variant with no coverage entry naming it
 UV binding: coverage <base>/<cat> names <id>, which is not an event
 ```
 
-**Red probe is already available and must be used:** golden-mini at HEAD
-fails the first rule for `UV-M1-dup`. Run the new checker before fixing the
-fixture, observe that exact error, then fix `M1.duplication` from
-`"n/a: sync"` to `"UV-M1-dup"` and watch it go green. A rule whose red state
-was never observed proves nothing.
+This catches the more dangerous direction — an unearned coverage claim,
+where the analysis asserts a variant it does not carry.
 
-The fixture fix belongs to Task A, not Task B, because the defect predates
-both.
+**Red probe must be constructed, not found.** There are 0 phantom violations
+today, so the plan must build one in a temp copy (a coverage value naming an
+invented id such as `UV-does-not-exist`), observe the exact error, and only
+then trust the rule.
+
+### The unbound direction is explicitly deferred
+
+41 violations across 13 artifacts, including 14 per device-connection run,
+plus the two selftest fixtures. That is a migration wave with its own
+measured red probe — the same shape as the fault-registry migration and its
+44-error probe. It is **not** folded in here.
+
+**Honest consequence:** Task A therefore protects Task B only from the
+coverage side. If Task B added a UV column and bound nothing, no checker
+would object. The plan must make binding an explicit, separately verified
+step for each new column rather than relying on a gate.
 
 ## Task B: the three remaining matrix-level UV columns
 
@@ -127,11 +164,16 @@ It does **not** earn:
 
 ## Ordering
 
-Task A ships first, and not only because its defect predates Task B. Once
-the binding rule exists, Task B **cannot** add a UV column and forget to bind
-its coverage entry — the checker turns that omission red. Task A is the gate
-that protects Task B's work. Reversing the order would mean adding three
-columns under no such protection.
+Task A ships first, but the original justification for that no longer holds
+and is withdrawn: with only the phantom direction enforced, the checker does
+**not** turn a forgotten binding red. Task A still goes first because Task B
+writes three new coverage bindings, and the phantom rule verifies that each
+one resolves to an event that actually exists — which catches a typo'd or
+misspelled variant id at the moment it is introduced.
+
+Golden-mini's `M1.duplication` defect (`"n/a: sync"` while a `UV-M1-dup`
+column exists) moves to **Task B**, where the coverage bindings are edited
+anyway. It is a data correction, not a red probe for the shipped rule.
 
 ## Known trap, inherited from the last wave
 
@@ -147,6 +189,10 @@ Likewise: the sidecar is regenerated with `--root tests/golden-mini`, never
 ## Non-goals
 
 - no name-derived category inference in the binding rule
+- no unbound-direction rule, and no migration of the 41 unbound variants
+  across 13 artifacts — named as the next wave, with the count measured here
+- no UV-category metadata in the schema (the prerequisite for ever checking
+  a category match)
 - no F-20 progress shape
 - no implementation-level classes (F-13, F-14, F-18)
 - no `defer` family — its recorded trigger has not occurred
