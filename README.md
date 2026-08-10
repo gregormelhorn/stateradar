@@ -16,7 +16,7 @@ where the two disagree — and turns the answers into tests and CI gates.
 > Model-based testing checks code against a model.
 > StateRadar first checks whether the model deserves to be the oracle.
 
-**Version 1.50.** Apache-2.0, prompts included. Runs inside your AI coding agent;
+**Version 1.51.** Apache-2.0, prompts included. Runs inside your AI coding agent;
 no build step, no service, nothing leaves your repo.
 
 ---

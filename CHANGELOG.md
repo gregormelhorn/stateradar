@@ -2,6 +2,52 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.51 — ACH fault-class mutants, binder generation, reverse matrix family
+
+- **Project relicensed from MIT to Apache-2.0** as of commit `888ea7b`.
+  `LICENSE` now carries the unmodified official Apache-2.0 text. The change
+  adds an express patent grant. It is not retroactive: releases up to and
+  including v1.50 were published under MIT and remain available under those
+  terms. Done while the project still has no external contributors.
+- `tools/check_fault_mutants.py`: ACH-style fault-class mutant checker.
+  A component declares `fault-mutants.json`; the checker swaps one
+  hand-authored implementation variant per fault class into an isolated
+  copy and requires the behavioural cell suite to kill it. Golden-mini
+  proves `killed=4` across F-01, F-02, F-04, F-05, while a mirroring suite
+  lets them survive (the F-21 blind spot).
+- Golden-mini became a real state machine with a behavioural cell suite
+  that asserts through the declared seam only — projected state, the
+  `dup_count` counter, and the rejection signal.
+- `formats/rules.toml`: fault registry migrated to a layer-separation
+  schema. Each F-class now carries `level` (matrix / implementation /
+  none), an optional `binder`, and an observability rating, so matrix-level
+  and implementation-level operators stop being conflated.
+- `tools/gen_mutant_variants.py` plus `mutant-generation.json`: variant
+  files are derived from component-local bindings instead of hand-edited.
+  Generate and `--check` modes; `--check` reports `DRIFT`, an undeclared
+  projection reports `BLOCKED`, and unbound mutants report `UNBOUND`.
+  Golden-mini derives its F-01, F-02, and F-05 variants this way.
+- `tools/check_matrix_mutation.py`: new reverse family
+  `ignore/reject → handle`. Every prior family moved away from action, so a
+  suite that never drives an ignored or rejected event was invisible to all
+  of them. Golden-mini gained a `UV-M2-stale` column so the family runs on
+  an undesired-variant cell, which is the shape it exists for. Kill count
+  moved 9 → 16. Only the trailing citation survives into the replacement,
+  so an annotation that documented the old disposition cannot be carried
+  into the new one.
+- Roadmap item 8 accounting: 4 of 22 fault classes operationalised, plus
+  **F-15** claimed with fixture proof. F-12, F-16, and F-17 each need their
+  own UV column and F-20 needs a terminal-progress shape, so those four
+  stay explicitly unclaimed.
+- CI: `gen_analysis_sidecar` was invoked with `--root .`, which walks the
+  whole repository, where `tools/selftest/src/mini.py` shadows the fixture
+  and poisoned every regenerated citation. Nothing noticed, because the
+  only following step read states and events. Scoped to
+  `--root tests/golden-mini` and a `dsc_check` step added so the defect can
+  go red.
+- New benchmark: `meilisearch-6510`, S3 multipart cancel/detach.
+- README restructured; SDD scratch under `.superpowers/` untracked.
+
 ## v1.50 — matrix mutation checker, device-connection convergence
 
 - `tools/check_matrix_mutation.py`: opt-in cell-suite mutation checker.
