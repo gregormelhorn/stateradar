@@ -33,6 +33,77 @@ Two failure directions are currently invisible:
 The second is the more dangerous of the two: it is an unearned coverage
 claim, which is the failure class this pack exists to prevent.
 
+## Task 0: make the F-04 kill proof honest again
+
+Found while scoping this wave, and it outranks everything below it: the
+hand-authored F-04 variant no longer proves what `FAULT MUTANTS: OK` claims.
+
+The previous wave appended a `UV-M2-stale` branch to `src/mini.py`. F-04 is
+hand-authored, so it was not carried along. Its diff against the base is now
+two *separate* regions — the intended sneak-path mutation, plus a whole event
+branch that is simply missing.
+
+Measured consequence:
+
+```text
+F-04 as the target:   MISMATCH Closed × M1: expected reject, got ignored
+                      then Traceback ... ValueError at the missing branch
+
+Pseudo-mutant, ONLY the UV-M2-stale branch removed,
+sneak-path mutation NOT applied:            exit=1  -> counted as KILLED
+unmodified mini.py:                          exit=0  -> correct
+```
+
+A "mutant" that does not contain the F-04 mutation at all is scored KILLED.
+So F-04's contribution to `killed=4` proves only that the suite crashes when
+an event handler is missing. That is the vacuous-green shape from `AGENTS.md`
+§6, and it passed every gate plus two independent reviews, because all of
+them read the count and none asked *why* the mutant died.
+
+### Why the existing guard missed it
+
+`tools/selftest/run_selftest.py:447` bounds the **total changed lines**
+(`1..8`), not the number of changed regions. F-04 sits at 3 changed lines, so
+it stays green. This is exactly the weakness recorded as "minor (deferred)"
+in the earlier SDD ledger: *"bounds total changed lines, not region count"*.
+It has now cost a real proof.
+
+### The fix
+
+Count **regions**, not lines. Measured today with
+`difflib.SequenceMatcher` non-equal opcodes:
+
+| variant | regions | lines |
+|---|---|---|
+| `mini.F-01-missing-transition.py` | 1 | 2 |
+| `mini.F-02-transfer-fault.py` | 1 | 1 |
+| `mini.F-04-sneak-path.py` | **2** | 3 |
+| `mini.F-05-corrupt-state.py` | 1 | 1 |
+
+Perfectly discriminating: a `regions == 1` assertion is red today for exactly
+F-04 and green for the other three. **The red probe already exists** — it does
+not need constructing, unlike Task A's.
+
+Task 0 therefore: switch the assertion to region counting, observe it red
+against F-04, synchronise F-04 with the base branch, observe it green.
+
+### What Task 0 deliberately does not do
+
+It does not verify that a mutant dies from its **declared cell**
+(`fault-mutants.json` already records `cell: "Closed x M1"`). That would be
+the stronger guarantee, and it was considered and rejected for this wave:
+`check_fault_mutants.py` reads only the exit code, and `testCommand` is free
+per component — golden-mini prints `MISMATCH <state> × <event>`, another
+component would print pytest output. Checking the cause requires a declared
+output contract for every cell suite, which touches `prompts/04-testgen.md`
+and every future component. That is its own wave, named here so it is not
+lost.
+
+Region counting is the narrower guarantee: it catches drift of hand-authored
+variants, which is the failure that actually occurred. Converting F-04 to
+binder generation would make the drift structurally impossible and is the
+other named follow-up.
+
 ## Task A: reject phantom coverage bindings
 
 > **Corrected after the first planning attempt.** The original version of
@@ -171,7 +242,13 @@ It does **not** earn:
 
 ## Ordering
 
-Task A ships first, but the original justification for that no longer holds
+Task 0 ships before both. Its defect exists at HEAD, independent of this
+wave, and Task B appends three more branches to `src/mini.py` — which would
+drive F-04 further apart under a guard that cannot see it. Fixing the guard
+first means Task B's own F-04 synchronisation step is protected by a check
+rather than by the executor remembering.
+
+Task A then ships before Task B, but the original justification for that no longer holds
 and is withdrawn: with only the phantom direction enforced, the checker does
 **not** turn a forgotten binding red. Task A still goes first because Task B
 writes three new coverage bindings, and the phantom rule verifies that each
@@ -212,6 +289,9 @@ Likewise: the sidecar is regenerated with `--root tests/golden-mini`, never
 - no implementation-level classes (F-13, F-14, F-18)
 - no `defer` family — its recorded trigger has not occurred
 - no `handle_to_ignore` annotation-wart fix (separate, named follow-up)
+- no declared output contract for cell suites, and therefore no
+  "died from the declared cell" check — named follow-up, see Task 0
+- no conversion of F-04 to binder generation — named follow-up
 - no CHANGELOG entry or version bump inside the wave
 - no release, tag, or push
 
