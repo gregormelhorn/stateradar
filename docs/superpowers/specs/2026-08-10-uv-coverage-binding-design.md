@@ -64,7 +64,14 @@ claim, which is the failure class this pack exists to prevent.
 | direction | violations | artifacts |
 |---|---|---|
 | phantom (coverage names a UV id that is not an event) | **0** | — |
-| unbound (a UV event no coverage entry names) | **41** | 13 |
+| unbound (a UV event no coverage entry names) | **41** | 10 of 13 |
+
+Counting definition, because a looser phrasing here already caused one
+misreading: 13 files named `analysis.json` carry UV events; **10** of them
+have at least one unbound variant; **41** unbound variants in total. Widening
+the scan to every JSON containing an `events` key yields 14 files and 59
+variants, but the extra ones are convergence and ensemble artifacts that are
+not `dsc_check` inputs. The 41/10 figures are the ones a migration must move.
 
 The newer analyses (`silenceper-pool-32`, `meilisearch-6510`,
 `meilisearch-s3-snapshot`) bind cleanly; the older ones do not. The practice
@@ -183,6 +190,14 @@ checklist), because they are validated against the live catalogue. Three new
 events means three new rows and three new ticks in each. This cost the last
 wave a mid-flight stop; the plan must carry it as an explicit step.
 
+While touching those fixtures, fix an inherited imprecision found during
+planning: the `partial` fixture currently omits both the `UV-M1-dup` row and
+its checklist tick, so it fails with two errors when its stated reason is the
+missing row alone. Add the `UV-M1-dup` tick while leaving its row absent, so
+the missing row becomes its sole failure. A deliberately-red case that fails
+for two reasons stops proving the one it names. This is pre-existing, not a
+regression, but the fixtures are open anyway.
+
 Likewise: the sidecar is regenerated with `--root tests/golden-mini`, never
 `--root .`, and `dsc_check` runs with `--repo tests/golden-mini`.
 
@@ -214,8 +229,11 @@ python3 tools/run_benchmark.py
 git diff --check
 ```
 
-Expected after Task A: `DSC CHECK: OK`, with the new rule proven red first
-against `UV-M1-dup`, and `MUTATION CHECK` unchanged at `killed=16`.
+Expected after Task A: `DSC CHECK: OK` on every existing fixture, with the
+new rule proven red first against a **constructed** violation in a temp copy
+(a coverage value naming an invented id such as `UV-does-not-exist`), and
+`MUTATION CHECK` unchanged at `killed=16`. There is no naturally-occurring
+phantom violation to use — that count is 0.
 
 Expected after Task B: `DSC CHECK: OK (3 states x 7 events, 21 cells, ...)`,
 `MUTATION CHECK: OK (killed=25 ...)`, `FAULT MUTANTS: OK (killed=4 ...)`
