@@ -86,21 +86,56 @@ returns non-zero for internal errors too.
 
 ## The contract
 
-A cell suite must print one line per failing cell, on stdout:
+> **Corrected during execution.** The first version of this section had one
+> line and claimed its *presence* proved the suite reached its assertions. That
+> was wrong, and the red probe caught it — see "The correction" below.
+
+A cell suite must print **two** things on stdout.
+
+One line per failing cell:
 
 ```text
 CELL FAIL <state> x <event>
 ```
 
+And one completion line, on every path that reaches the end of the cell loop:
+
+```text
+CELL SUITE: <n> cells checked, <m> failed
+```
+
 ASCII `x` as the separator, matching how `fault-mutants.json` already declares
-`cell`. The existing human-readable `MISMATCH … × …` line stays; the new line is
-additional, so nothing that reads the old output breaks.
+`cell`. The existing human-readable `MISMATCH … × …` line stays, as does
+`CELL SUITE: OK` on success, so nothing that reads the old output breaks.
 
-The line is a claim with two consequences:
+The division of labour:
 
-- **its presence** means the suite reached its assertions and reported a
-  verdict, rather than dying on the way
-- **its content** names which cells the suite judged wrong
+- the **completion line** proves the suite ran to the end rather than dying
+  part-way
+- the **cell lines** name which cells the suite judged wrong
+
+### The correction
+
+The original design had only the per-cell line and asserted that its presence
+proved a clean run. Executing the red probe refuted that immediately:
+
+```text
+Red probe a), against the one-line contract:
+  MUT-001 KILLED fault=F-04 cell=Closed x M1 exit=1
+  FAULT MUTANTS: OK (killed=4 survived=0 errors=0 blocked=0)   <- should have blocked
+```
+
+The historical hollow F-04 reports `CELL FAIL Closed x M1` **correctly** and
+*then* crashes on a later cell, because cells are visited in sorted order. So
+the declared cell was present and the mutant scored `KILLED` — the exact defect
+this wave exists to remove, surviving the first version of its own fix.
+
+A per-cell line proves that *one* assertion was reached, not that the suite
+finished. Only a line that requires the loop to complete can carry that claim.
+
+Worth recording: had only red probe b) ("wrong cell") been built — the more
+obvious check — the flaw would have shipped. Probe a) was the one that
+addressed the case the wave is about.
 
 ## The rule
 
@@ -109,14 +144,17 @@ In `check_fault_mutants.py`, for each mutant:
 | observation | verdict |
 |---|---|
 | exit 0 | `SURVIVED` (unchanged) |
-| exit ≠ 0, ≥1 `CELL FAIL` line, declared cell among them | `KILLED` |
-| exit ≠ 0, ≥1 `CELL FAIL` line, declared cell **not** among them | `KILLED (wrong cell)` — a finding, exit non-zero |
-| exit ≠ 0, **no** `CELL FAIL` line | `BLOCKED: suite did not report a cell failure` |
+| exit ≠ 0, **no completion line** | `BLOCKED: suite did not run to completion` |
+| exit ≠ 0, completion line, **no** `CELL FAIL` line | `BLOCKED: suite reported no cell failure` |
+| exit ≠ 0, completion line, ≥1 `CELL FAIL`, declared cell among them | `KILLED` |
+| exit ≠ 0, completion line, ≥1 `CELL FAIL`, declared cell **not** among them | `KILLED (wrong cell)` — a finding, exit non-zero |
 
-The last row is the one that matters. A mutant that makes the suite crash is
-not evidence that the suite catches the fault, so it must not be counted as a
-kill. `BLOCKED` rather than `ERROR` because the pack's doctrine is that an
-ambiguous outcome is stated, never guessed.
+The completion-line row is the one that matters, and it must be checked
+**before** the cell rows — a crashing suite can still have emitted a valid cell
+line before dying, which is precisely how the first version of this rule failed.
+A mutant that crashes the suite is not evidence that the suite catches the
+fault, so it must not count as a kill. `BLOCKED` rather than `ERROR` because the
+pack's doctrine is that an ambiguous outcome is stated, never guessed.
 
 Note the rule deliberately requires the declared cell to be **among** the
 reported cells, not the only one. That is the corrected criterion; the strict

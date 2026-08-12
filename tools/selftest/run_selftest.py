@@ -547,6 +547,34 @@ def main() -> int:
                *fault_check(blocked / "domain-analysis" / "mini"),
                needle="BLOCKED: baseline exit=3")
 
+        # Cell-failure contract. A non-zero exit is not evidence of a kill: the
+        # suite must have run to completion AND named the declared cell. These
+        # three cases are the reason the contract exists - the first one is the
+        # hollow kill proof this fixture actually shipped once.
+        crashing = component(tmp, "fault-crashing-suite")
+        crash_variant = crashing / "src" / "mutants" / "mini.F-04-sneak-path.py"
+        crash_variant.write_text(crash_variant.read_text().replace(
+            '        if event == "UV-M2-stale":\n            return "ignored"\n', ""))
+        expect("fault mutant blocks a crashing suite instead of counting a kill", True,
+               *fault_check(crashing / "domain-analysis" / "mini"),
+               needle="BLOCKED: suite did not run to completion")
+
+        wrong_cell = component(tmp, "fault-wrong-cell")
+        cfg = json.loads((wrong_cell / "domain-analysis" / "mini" / "fault-mutants.json").read_text())
+        cfg["mutants"][0]["cell"] = "Idle x M2"
+        (wrong_cell / "domain-analysis" / "mini" / "fault-mutants.json").write_text(json.dumps(cfg))
+        expect("fault mutant reports a kill from an undeclared cell", True,
+               *fault_check(wrong_cell / "domain-analysis" / "mini"),
+               needle="WRONG CELL: declared 'Idle x M2'")
+
+        no_contract = component(tmp, "fault-no-contract")
+        suite_path = no_contract / "tests" / "test_cell_suite.py"
+        suite_path.write_text(suite_path.read_text().replace(
+            '            print(f"CELL FAIL {state} x {event}")\n', ""))
+        expect("fault mutant blocks a suite that ignores the cell-failure contract", True,
+               *fault_check(no_contract / "domain-analysis" / "mini"),
+               needle="BLOCKED: suite reported no cell failure")
+
         print("binder-driven mutant generation")
 
         def gen_check(adir: Path, *extra: str) -> tuple[int, str]:

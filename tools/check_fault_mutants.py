@@ -155,9 +155,40 @@ def _print_verdict(
     )
 
 
+COMPLETION_MARKER = " cells checked, "
+
+
+def reported_cells(output: str) -> list[str]:
+    """Cells the suite reported as failing, per the cell-failure contract."""
+    cells = []
+    for line in output.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("CELL FAIL "):
+            cells.append(stripped[len("CELL FAIL "):].strip())
+    return cells
+
+
+def suite_completed(output: str) -> bool:
+    """Whether the suite ran to the end of its cell loop.
+
+    Per-cell 'CELL FAIL' lines are not sufficient evidence on their own. A suite
+    can report one failing cell and then crash on a later one - that is exactly
+    how a hollow kill proof arose in this fixture, and the declared cell was
+    present in the output, so checking the cells alone would not have caught it.
+    The completion line 'CELL SUITE: <n> cells checked, <m> failed' is only
+    reached if the loop finished, which is what separates a clean failure from a
+    crash. The exit code cannot: Python returns 1 for an unhandled exception,
+    and pytest returns non-zero for internal errors too.
+    """
+    return any(
+        line.strip().startswith("CELL SUITE: ") and COMPLETION_MARKER in line
+        for line in output.splitlines()
+    )
+
+
 def run(adir: Path) -> int:
     config, mutants = load_config(adir)
-    killed = survived = errors = 0
+    killed = survived = errors = blocked = 0
 
     with tempfile.TemporaryDirectory(prefix="fault-mutants-") as raw_tmp:
         tmp = Path(raw_tmp)
@@ -187,13 +218,40 @@ def run(adir: Path) -> int:
                 survived += 1
                 _print_verdict(number, mutant, "SURVIVED", result)
             else:
-                killed += 1
-                _print_verdict(number, mutant, "KILLED", result)
+                cells = reported_cells(result.output)
+                if not suite_completed(result.output):
+                    # The suite did not reach the end of its cell loop, so it
+                    # crashed or does not implement the contract. Either way the
+                    # non-zero exit is not evidence that the suite catches the
+                    # fault, and must not count as a kill.
+                    blocked += 1
+                    _print_verdict(number, mutant, "BLOCKED", result)
+                    print("  BLOCKED: suite did not run to completion "
+                          "(no 'CELL SUITE: <n> cells checked, <m> failed' line)")
+                elif not cells:
+                    # Ran to completion but named no failing cell, while exiting
+                    # non-zero. The verdict cannot be attributed to any cell.
+                    blocked += 1
+                    _print_verdict(number, mutant, "BLOCKED", result)
+                    print(f"  BLOCKED: suite reported no cell failure "
+                          f"(expected a 'CELL FAIL {mutant.cell}' line)")
+                elif mutant.cell not in cells:
+                    # The declared cell must be AMONG the reported cells, not
+                    # the only one: a fault in one branch legitimately breaks
+                    # several cells. But it must be there.
+                    killed += 1
+                    blocked += 1
+                    _print_verdict(number, mutant, "KILLED (wrong cell)", result)
+                    print(f"  WRONG CELL: declared {mutant.cell!r}, "
+                          f"suite reported {cells}")
+                else:
+                    killed += 1
+                    _print_verdict(number, mutant, "KILLED", result)
 
-    if survived or errors:
+    if survived or errors or blocked:
         print(
             f"FAULT MUTANTS: FAIL (killed={killed} survived={survived} "
-            f"errors={errors} blocked=0)"
+            f"errors={errors} blocked={blocked})"
         )
         return 1
     print(

@@ -78,11 +78,24 @@ def main(argv: list[str]) -> int:
         print("CELL SUITE: no matrix cells parsed", file=sys.stderr)
         return 2
     failures = 0
+    checked = 0
     for (state, event), expected in sorted(matrix.items()):
+        checked += 1
         problem = check(module, state, event, expected)
         if problem:
+            # Human-readable diagnosis, plus the machine-readable cell-failure
+            # contract line. The contract line uses ASCII 'x', matching how
+            # fault-mutants.json declares a cell.
             print(f"MISMATCH {state} × {event}: {problem}")
+            print(f"CELL FAIL {state} x {event}")
             failures += 1
+    # Completion marker, printed on every path that reaches the end of the loop.
+    # A per-cell failure line alone is NOT enough for a checker to trust a
+    # verdict: a suite can report one failing cell and then crash on a later
+    # one, which is exactly how a hollow kill proof arose in this fixture. Only
+    # a line that requires the loop to finish separates a clean failure from a
+    # crash, because the exit code cannot.
+    print(f"CELL SUITE: {checked} cells checked, {failures} failed")
     if failures:
         return 1
     print("CELL SUITE: OK")
