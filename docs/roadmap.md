@@ -82,13 +82,15 @@ golden-mini suite kills every supported mutant.
 **Status:** 🔶 Partially shipped — 4 of 22 fault classes operationalized
 (F-01, F-02, F-04, F-05). The `fault-mutants.json` contract and
 `tools/check_fault_mutants.py` prove a behavioral cell suite kills one
-hand-authored implementation mutant per class while a mirroring suite
+implementation mutant per class while a mirroring suite
 survives. Remaining classes pending. Golden-mini now derives the F-01,
 F-02, and F-05 fixture variants from component-local bindings
 (`mutant-generation.json` plus `tools/gen_mutant_variants.py`). This
 removes hand-authored drift in the fixture. It does not broaden operator
-ownership: F-01 and F-02 remain matrix-level families, F-05 remains
-implementation-level, and F-04 stays hand-authored. Broader binder-driven
+ownership: F-01 and F-02 remain matrix-level families and F-05 remains
+implementation-level. **F-04 is now generated too**, so no golden-mini fault
+variant is hand-authored and none can drift; the region-counting selftest gate
+remains as a guard for any future hand-authored variant. Broader binder-driven
 generation and real-component coverage remain pending.
 
 The reverse matrix family (ignore/reject → handle) now runs on all four
@@ -102,6 +104,18 @@ It does **not** claim F-13, F-14, or F-18: delay, duplication, and value are
 implementation-level in the registry. `UV-M1-dup` is a matrix shape, not an
 F-14 implementation mutant. F-20 needs a terminal-progress shape, which is
 not a UV column at all.
+
+Kill proofs are now cause-checked rather than exit-code-correlated. A cell
+suite must print `CELL FAIL <state> x <event>` per failing cell and
+`CELL SUITE: <n> cells checked, <m> failed` on completion; without both,
+`check_fault_mutants.py` reports `BLOCKED` instead of `KILLED`, and a kill whose
+declared cell is absent from the reported ones is reported as
+`KILLED (wrong cell)`. This closed a real hollow proof: F-04 once reported its
+cell correctly and then crashed on a later one, so a pseudo-mutant carrying no
+fault at all also scored `KILLED`. The contract is documented for future
+components in `prompts/04-testgen.md`. `check_matrix_mutation.py` was left
+unchanged, because its 25 mutants were measured to die at exactly the mutated
+cell with zero crashes.
 
 **Prior status:** Planned — after 7, together with the F-catalogue. Meta's
 ACH (FSE 2025) generates few, fault-class-targeted mutants and then

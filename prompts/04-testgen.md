@@ -55,6 +55,61 @@ collection requires unique basenames across the domain suite, and
 component adopts the same name (dobby, 2026-08-05: three collisions in
 one week).
 
+#### The cell-failure contract (required for mutation checking)
+
+A suite that a mutation checker will run must report **two** things on stdout.
+
+One line per failing cell:
+
+```text
+CELL FAIL <state> x <event>
+```
+
+And one completion line, printed on every path that reaches the end of the
+cell loop — including the failing path:
+
+```text
+CELL SUITE: <n> cells checked, <m> failed
+```
+
+Use ASCII `x` as the separator, matching how `fault-mutants.json` declares
+`cell`. Human-readable output stays as it is; these lines are additional.
+
+**Why both are required.** `tools/check_fault_mutants.py` cannot otherwise tell
+a caught mutant from a crashed suite. A non-zero exit proves neither: Python
+returns 1 for an unhandled exception, and pytest returns non-zero for internal
+errors too. The completion line is the only thing that proves the suite
+finished; the cell lines say what it judged wrong.
+
+One line is not enough, and this is not hypothetical. Golden-mini once shipped
+a variant that reported its failing cell correctly and *then* crashed on a
+later cell, because cells are visited in sorted order. The declared cell was
+present in the output, so a presence-only rule scored it `KILLED` — while a
+pseudo-mutant containing no fault at all scored `KILLED` too. The kill proof was
+hollow for two waves.
+
+**Consequence for a suite that omits either line:** every mutant reports
+`BLOCKED`, never `KILLED`. That is deliberate. Without the lines the checker
+would have to guess whether a non-zero exit meant a catch or a crash, and
+guessing is what produced the hollow proof. Compare `SURVIVED`: it must never be
+ambiguous between "the suite is weak" and "the mutant was never observable".
+
+The checker's verdict order, so the reason a mutant is rejected is predictable:
+
+| observation | verdict |
+|---|---|
+| exit 0 | `SURVIVED` |
+| exit ≠ 0, no completion line | `BLOCKED: suite did not run to completion` |
+| exit ≠ 0, completed, no `CELL FAIL` | `BLOCKED: suite reported no cell failure` |
+| exit ≠ 0, completed, declared cell among the reported ones | `KILLED` |
+| exit ≠ 0, completed, declared cell absent | `KILLED (wrong cell)` — a finding |
+
+Note the last two rows: the declared cell must be **among** the reported cells,
+not the only one. A fault in one branch legitimately breaks several cells — in
+golden-mini, three of four fault mutants report more cells than they declare,
+because about eight implementation branches serve 21 matrix cells. Requiring an
+exact match would reject correct mutants.
+
 ### Step 3 — Scenario tests
 
 Convert each adversarial trace from `adversarial-traces.md` whose question has a DR into a multi-event scenario test. Assert the decided outcome and the SYS invariants at every step. Skip undecided traces and list them.
