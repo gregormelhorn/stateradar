@@ -665,52 +665,72 @@ def main() -> int:
 
         print("part-B row coverage")
 
-        def pbp(blind: Path) -> tuple[int, str]:
+        def pbp(blind: Path, repo: Path = ROOT / "tests" / "golden-mini") -> tuple[int, str]:
             r = subprocess.run(
                 [sys.executable, str(ROOT / "tools" / "part_b_pack.py"),
                  "domain-analysis/mini",
-                 "--repo", str(ROOT / "tests" / "golden-mini"),
+                 "--repo", str(repo),
                  "--check", str(blind)],
                 capture_output=True, text=True)
             return r.returncode, (r.stdout + r.stderr).strip()
 
-        checklist = ("\n- [x] M1\n- [x] M2\n- [x] UV-M1-dup\n"
-                     "- [x] UV-M2-stale\n- [x] UV-M1-lost\n"
-                     "- [x] UV-M2-conflict\n- [x] UV-M1-spurious\n")
+        def catalogue_event_ids(catalogue: Path) -> list[str]:
+            import re
+
+            match = re.search(r"<!-- event-ids: (.+?) -->",
+                              catalogue.read_text(encoding="utf-8"))
+            if not match:
+                raise ValueError("catalogue: no event-ids declaration comment")
+            return match.group(1).split()
+
+        def blind_table(ids: list[str], *, fine: bool = False,
+                        omit_row=(), omit_tick=(), duplicate_tick=()) -> str:
+            dispositions = {
+                "M1": "handle",
+                "M2": "reject",
+                "UV-M1-spurious": "reject",
+            }
+            if fine:
+                header = "| id | situation | disposition |\n|---|---|---|\n"
+                rows: list[str] = []
+                for ident in ids:
+                    if ident in omit_row:
+                        continue
+                    if ident == "M1":
+                        rows.extend((
+                            "| **M1** | Idle | handle |",
+                            "| M1 | Open (after M2, see UV-M1-dup) | reject |",
+                        ))
+                    else:
+                        rows.append(
+                            f"| {ident} | any | {dispositions.get(ident, 'ignore (documented)')} |")
+            else:
+                header = "| id | disposition |\n|---|---|\n"
+                rows = [
+                    f"| {ident} | {dispositions.get(ident, 'ignore (documented)')} |"
+                    for ident in ids
+                    if ident not in omit_row
+                ]
+            ticks = "\n".join(f"- [x] {ident}" for ident in ids
+                              if ident not in omit_tick)
+            extra = "".join(f"\n- [x] {ident}" for ident in duplicate_tick)
+            return header + "\n".join(rows) + "\n\n" + ticks + extra + "\n"
+
+        ids = catalogue_event_ids(
+            ROOT / "tests" / "golden-mini" / "domain-analysis" / "mini"
+            / "event-catalogue.md")
         full = tmp / "blind-full.md"
-        full.write_text("| id | disposition |\n|---|---|\n"
-                        "| M1 | handle |\n| M2 | reject |\n"
-                        "| UV-M1-dup | ignore (documented) |\n"
-                        "| UV-M2-stale | ignore (documented) |\n"
-                        "| UV-M1-lost | ignore (documented) |\n"
-                        "| UV-M2-conflict | ignore (documented) |\n"
-                        "| UV-M1-spurious | reject |\n" + checklist)
+        full.write_text(blind_table(ids))
         expect("blind table complete", False, *pbp(full))
         # a finer-grained table (several situation rows per event id,
         # cross-references in prose cells) is MORE information — must pass
         fine = tmp / "blind-fine.md"
-        fine.write_text("| id | situation | disposition |\n|---|---|---|\n"
-                        "| **M1** | Idle | handle |\n"
-                        "| M1 | Open (after M2, see UV-M1-dup) | reject |\n"
-                        "| M2 | any | reject |\n"
-                        "| UV-M1-dup | any | ignore (documented) |\n"
-                        "| UV-M2-stale | any | ignore (documented) |\n"
-                        "| UV-M1-lost | any | ignore (documented) |\n"
-                        "| UV-M2-conflict | any | ignore (documented) |\n"
-                        "| UV-M1-spurious | any | reject |\n" + checklist)
+        fine.write_text(blind_table(ids, fine=True))
         expect("blind table finer than one row per id", False, *pbp(fine))
         # R-BLIND-ROW-COVERAGE: only the UV-M1-dup row is absent; its
         # checklist tick stays present so this case fails for one reason.
         partial = tmp / "blind-partial.md"
-        partial.write_text("| id | disposition |\n|---|---|\n"
-                           "| M1 | handle |\n| M2 | reject |\n"
-                           "| UV-M2-stale | ignore (documented) |\n"
-                           "| UV-M1-lost | ignore (documented) |\n"
-                           "| UV-M2-conflict | ignore (documented) |\n"
-                           "| UV-M1-spurious | reject |\n"
-                           "\n- [x] M1\n- [x] M2\n- [x] UV-M1-dup\n"
-                           "- [x] UV-M2-stale\n- [x] UV-M1-lost\n"
-                           "- [x] UV-M2-conflict\n- [x] UV-M1-spurious\n")
+        partial.write_text(blind_table(ids, omit_row={"UV-M1-dup"}))
         rc_partial, out_partial = pbp(partial)
         expect("blind table missing row", True, rc_partial, out_partial,
                needle="missing row: UV-M1-dup")
@@ -725,14 +745,7 @@ def main() -> int:
             print("  ok  blind partial fails only for missing row UV-M1-dup (passes)")
         # a duplicated checklist tick must fail — coverage must be countable
         dup = tmp / "blind-dup.md"
-        dup.write_text("| id | disposition |\n|---|---|\n"
-                       "| M1 | handle |\n| M2 | reject |\n"
-                       "| UV-M1-dup | ignore (documented) |\n"
-                       "| UV-M2-stale | ignore (documented) |\n"
-                       "| UV-M1-lost | ignore (documented) |\n"
-                       "| UV-M2-conflict | ignore (documented) |\n"
-                       "| UV-M1-spurious | reject |\n"
-                       + checklist + "- [x] M2\n")
+        dup.write_text(blind_table(ids, duplicate_tick={"M2"}))
         rc_dup, out_dup = pbp(dup)
         expect("duplicated checklist tick", True, rc_dup, out_dup,
                needle="duplicated checklist entry: M2")
@@ -742,6 +755,45 @@ def main() -> int:
             failures.append("blind dup: expected only duplicated checklist entry: M2\n" + out_dup)
         else:
             print("  ok  blind dup fails only for duplicated checklist M2 (passes)")
+
+        growth_repo = tmp / "blind-growth-repo"
+        shutil.copytree(ROOT / "tests" / "golden-mini", growth_repo)
+        growth_catalogue = growth_repo / "domain-analysis" / "mini" / "event-catalogue.md"
+        growth_catalogue.write_text(growth_catalogue.read_text().replace(
+            "<!-- event-ids: M1 M2 UV-M1-dup UV-M2-stale UV-M1-lost UV-M2-conflict UV-M1-spurious -->",
+            "<!-- event-ids: M1 M2 UV-M1-dup UV-M2-stale UV-M1-lost UV-M2-conflict UV-M1-spurious M3-growth -->",
+            1))
+        growth_ids = catalogue_event_ids(growth_catalogue)
+        growth_full = tmp / "blind-growth-full.md"
+        growth_full.write_text(blind_table(growth_ids))
+        expect("blind table grows with catalogue", False, *pbp(growth_full, growth_repo))
+        growth_fine = tmp / "blind-growth-fine.md"
+        growth_fine.write_text(blind_table(growth_ids, fine=True))
+        expect("blind fine table grows with catalogue", False, *pbp(growth_fine, growth_repo))
+        growth_partial = tmp / "blind-growth-partial.md"
+        growth_partial.write_text(blind_table(growth_ids, omit_row={"UV-M1-dup"}))
+        rc_growth_partial, out_growth_partial = pbp(growth_partial, growth_repo)
+        expect("blind partial grows with catalogue", True,
+               rc_growth_partial, out_growth_partial, needle="missing row: UV-M1-dup")
+        growth_partial_errors = [line for line in out_growth_partial.splitlines()
+                                 if line.startswith(" - ")]
+        if growth_partial_errors != expected_partial_errors:
+            failures.append("blind growth partial: expected only missing row: UV-M1-dup\n"
+                            + out_growth_partial)
+        else:
+            print("  ok  blind partial grows and still fails only for UV-M1-dup (passes)")
+        growth_dup = tmp / "blind-growth-dup.md"
+        growth_dup.write_text(blind_table(growth_ids, duplicate_tick={"M2"}))
+        rc_growth_dup, out_growth_dup = pbp(growth_dup, growth_repo)
+        expect("blind dup grows with catalogue", True,
+               rc_growth_dup, out_growth_dup, needle="duplicated checklist entry: M2")
+        growth_dup_errors = [line for line in out_growth_dup.splitlines()
+                             if line.startswith(" - ")]
+        if growth_dup_errors != expected_dup_errors:
+            failures.append("blind growth dup: expected only duplicated checklist entry: M2\n"
+                            + out_growth_dup)
+        else:
+            print("  ok  blind dup grows and still fails only for M2 (passes)")
 
     print("guard proofs (z3, PA-1/PA-2)")
     sys.path.insert(0, str(ROOT / "tools"))

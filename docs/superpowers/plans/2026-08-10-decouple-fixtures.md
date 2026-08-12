@@ -702,7 +702,7 @@ edit a file or begin Task B.
 - Preserves exact current normal-case Part-B output and the two one-reason-only
   red outputs; preserves all measured pack gates listed above.
 
-- [ ] **Step 1: Make the Part-B wrapper accept the temporary probe repository**
+- [x] **Step 1: Make the Part-B wrapper accept the temporary probe repository**
 
 The following edit script contains the exact current text and exact replacement
 text. It must print its one success line or stop.
@@ -749,7 +749,7 @@ PBP REPOSITORY PARAMETER: INSTALLED
 This is test scaffolding only. Do not add the catalogue parser or table helper
 until the next step’s literal fixture has been observed red.
 
-- [ ] **Step 2: Add the literal-fixture growth assertion before adding the helper**
+- [x] **Step 2: Add the literal-fixture growth assertion before adding the helper**
 
 ```bash
 python3 - <<'PY'
@@ -793,7 +793,7 @@ LITERAL GROWTH RED PROBE: INSTALLED
 The only new ID is `M3-growth`, placed only in the temporary copy’s declaration
 comment. Do not edit the live catalogue or add a real event.
 
-- [ ] **Step 3: Observe the literal fixture fail the growth probe**
+- [x] **Step 3: Observe the literal fixture fail the growth probe**
 
 ```bash
 out=$(uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1)
@@ -831,7 +831,7 @@ the required observed failure: today’s literal has neither a table row nor a
 checklist tick for the declaration-only new ID. If the output differs at all,
 stop with `BLOCKED(task-B)`; do not add the helper.
 
-- [ ] **Step 4: Add the declaration parser and one table builder**
+- [x] **Step 4: Add the declaration parser and one table builder**
 
 ```bash
 python3 - <<'PY'
@@ -927,7 +927,7 @@ The parser pattern and missing-declaration message intentionally match
 list: it preserves only measured exceptional dispositions while a future
 identifier receives `ignore (documented)`.
 
-- [ ] **Step 5: Replace the full and fine literals with calls to the builder**
+- [x] **Step 5: Replace the full and fine literals with calls to the builder**
 
 ```bash
 python3 - <<'PY'
@@ -991,7 +991,7 @@ FULL AND FINE FIXTURES: DERIVED
 This preserves every current full/fine row shown in the exact old/new text;
 only the seven-ID enumeration and shared checklist disappear.
 
-- [ ] **Step 6: Replace partial and duplicated-tick literals with named helper violations**
+- [x] **Step 6: Replace partial and duplicated-tick literals with named helper violations**
 
 ```bash
 python3 - <<'PY'
@@ -1091,7 +1091,7 @@ PARTIAL AND DUP FIXTURES: DERIVED
 `UV-M1-dup` tick is generated from the complete `ids` input and the partial
 case keeps its single intended error structurally.
 
-- [ ] **Step 7: Replace the literal red probe with all four generated growth checks**
+- [x] **Step 7: Replace the literal red probe with all four generated growth checks**
 
 ```bash
 python3 - <<'PY'
@@ -1170,7 +1170,7 @@ catalogue event. `growth_full` and `growth_fine` must pass; `growth_partial`
 and `growth_dup` must include `M3-growth` while retaining exactly their one
 intentional failure each.
 
-- [ ] **Step 8: Observe the complete Part-B fixture suite green**
+- [x] **Step 8: Observe the complete Part-B fixture suite green**
 
 ```bash
 out=$(uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1)
@@ -1224,7 +1224,7 @@ Paste this complete displayed output. The two lines ending in `fails as
 required` are expected: their following lines prove each failure contains no
 second error and still grows with `M3-growth`.
 
-- [ ] **Step 9: Verify Task-B source-file scope before changing tracking boxes**
+- [x] **Step 9: Verify Task-B source-file scope before changing tracking boxes**
 
 ```bash
 expected='tools/selftest/run_selftest.py'
@@ -1248,7 +1248,7 @@ ASSERT OK: Task-B source-file scope
 Paste this complete output. In particular, `tools/part_b_pack.py`, the live
 catalogue, and every Task-A file must be absent.
 
-- [ ] **Step 10: Run Task B’s independent full gate**
+- [x] **Step 10: Run Task B’s independent full gate**
 
 ```bash
 expect_line() {
@@ -1313,7 +1313,7 @@ Every line above is followed by `exit=0` and `ASSERT OK`. Paste the complete
 gate output into the Task-B report and the commit body. A changed count or any
 red gate is `BLOCKED(task-B)`.
 
-- [ ] **Step 11: Tick Task-B checkboxes in this work session and commit Task B**
+- [x] **Step 11: Tick Task-B checkboxes in this work session and commit Task B**
 
 Run this exact line-anchored checkbox script. It intentionally searches only
 real lines that start with `- [ ] **Step`; the same text appears indented inside
