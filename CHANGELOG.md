@@ -2,6 +2,57 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.52 — UV coverage binding, fixture decoupling, cell-failure contract
+
+- **Cell-failure contract.** `KILLED` used to mean nothing more than a
+  non-zero exit code: `check_fault_mutants.py` never read the suite output. A
+  cell suite must now print `CELL FAIL <state> x <event>` per failing cell and
+  `CELL SUITE: <n> cells checked, <m> failed` on completion. Without the
+  completion line a mutant reports `BLOCKED`, not `KILLED`; a kill whose
+  declared cell is absent from the reported ones reports
+  `KILLED (wrong cell)`. The declared cell must be **among** the reported
+  cells, not the only one — three of four golden-mini fault mutants legitimately
+  break several cells, because about eight implementation branches serve 21
+  matrix cells. Documented for future components in `prompts/04-testgen.md`.
+- This closed a real hollow proof. F-04 had drifted out of sync with the base,
+  so it reported its cell correctly and *then* crashed on a later one; a
+  pseudo-mutant carrying no fault at all also scored `KILLED`. The defect
+  survived every gate and two independent reviews, because all of them read the
+  count and none asked why the mutant died.
+- **All four golden-mini fault variants are now generated.** F-04 was the last
+  hand-authored one and had drifted twice. Its diff against the base is a single
+  line, exactly the `replace-block` shape the generator already supported, so no
+  tool change was needed. Proven by byte identity: check mode passed before
+  write mode, and write mode left the tracked reference unmodified.
+- The fault-variant selftest now counts **diff regions instead of changed
+  lines**. The old bound (1..8 lines) let F-04 sit at 3 changed lines across two
+  separate regions and stay green.
+- **Part-B blind fixtures are derived from the catalogue** instead of being
+  four inline literals. They had broken in four consecutive waves, each repaired
+  by hand. The two deliberately-red cases are now named violations
+  (`omit_row`, `duplicate_tick`) of a generated table, so each fails for exactly
+  its stated reason. `part_b_pack.py` is unchanged — its three checks were
+  always right; only fixture construction was wrong.
+- **Phantom UV coverage bindings rejected.** `dsc_check.py` now resolves every
+  `UV-`-prefixed token in a coverage value to an existing event. Prose and
+  `n/a: <reason>` stay legal. 0 violations existed, so the red probe is
+  constructed; the unbound direction is deliberately out of scope, with 41
+  unbound variants across 10 of 13 artifacts measured for a later migration.
+- **F-12, F-16, and F-17 claimed with fixture proof.** Golden-mini gained
+  `UV-M1-lost`, `UV-M2-conflict`, and `UV-M1-spurious`, so the reverse matrix
+  family now runs on all four matrix-level undesired-variant shapes. Matrix is
+  3 states × 7 events = 21 cells; matrix-mutation kill count 16 → 25.
+  `UV-M1-spurious` is a `reject` cell on purpose, so the reverse family is
+  exercised against `reject` on a UV column and not only on an ordinary event.
+- Not claimed, and stated as such in roadmap item 8: F-13, F-14, and F-18 are
+  implementation-level, and F-20 needs a terminal-progress shape rather than a
+  UV column.
+- CI fix: `gen_analysis_sidecar` was invoked with `--root .`, which walks the
+  whole repository, where `tools/selftest/src/mini.py` shadows the fixture and
+  poisoned every regenerated citation. Nothing noticed, because the only step
+  after it read states and events. Scoped to `--root tests/golden-mini`, with a
+  `dsc_check` step added so the class of defect can go red.
+
 ## v1.51 — ACH fault-class mutants, binder generation, reverse matrix family
 
 - **Project relicensed from MIT to Apache-2.0** as of commit `888ea7b`.
