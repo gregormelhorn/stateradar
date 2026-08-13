@@ -2,6 +2,55 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## v1.53 — F-14 duplication, ignore-cell projections, structural unreachability
+
+- **F-14 (duplication) claimed — 5 of 22 classes.** It cost more than F-05
+  despite sharing the `dup_count` projection, because its registry precondition
+  is "idempotence observable via **repeated delivery** plus counter": a
+  projection alone is not enough, the suite needs a *delivery rule*. The cell
+  suite now reads which events are duplication variants from the sidecar's
+  coverage bindings — never from the event name — and delivers those twice, as
+  `prompts/04-testgen.md` had required all along.
+- The finding that forced it: an idempotence break whose *second* delivery
+  escalated state passed all 21 cells unnoticed (`MUT-005 SURVIVED fault=F-14`).
+  A single delivery cannot observe idempotence by definition, so the reference
+  fixture had been contradicting the pack's own instruction. Without the
+  delivery rule an "F-14 mutant" would only have been a second F-05 under
+  another name.
+- **`ignore` cells now assert no effect, not merely unchanged state.** The
+  `ignore` branch checked outcome and state but never the projected counter,
+  while `handle` had always checked it — an asymmetry with no reason. An ignored
+  event could mutate `dup_count` unnoticed across all eight `ignore` cells.
+  Gated by a real mutant (`FAULT MUTANTS: killed=6`), so the check cannot be
+  softened later without a red gate.
+- **Structural unreachability, without an eighth disposition.** Researched best
+  practice keeps three categories distinct — *event ignored*, *can't happen*,
+  *error* — and the pack's vocabulary carries only two, so four real analyses
+  had improvised four different workarounds. The resolution: unreachability is
+  a property of the **environment**, not a behaviour of the component, and the
+  upstream-guard annotation already existed to express it. An unreachable cell
+  keeps a defensive disposition — prefer `reject` — and names the guarantee in
+  `upstream_guards`. An ignored breach would be a silent breach.
+- golden-mini gained `svc-ack`, its **first internal event**, with three
+  different dispositions across one column: `reject` in `Idle` (unreachable, no
+  `M1` was delivered), `handle` in `Open`, `ignore (documented)` in `Closed`.
+  The unreachable cell is deliberately the defensive one. Matrix is now
+  3 states × 8 events = 24 cells; matrix-mutation kill count 25 → 28.
+- `UV-M2-stale`'s description was widened to match its category. It read "stale
+  close after shutdown" — only *too late* — while sitting in three cells where
+  `M2` had never acted, so two of them were *early*, not stale. The registry
+  covered both directions all along (`shard: sequence/early`); only the
+  description was narrow. A description fix, not a model change.
+- Roadmap item 10 added: **machine-readable cell rationale**. Measured at
+  v1.52: 339 `ignore (documented)` cells across all sidecars, **0** carrying a
+  machine-readable rationale, so "ignored because harmless" and "ignored
+  because it cannot occur" are indistinguishable to any tool. The field must
+  come before any checker, or the checker would have to match prose for words
+  like "unreachable" — the heuristic this pack forbids for UV categories.
+- Fixture decoupling paid off: this is the first wave in five where adding a
+  catalogue event needed **no** manual part-B fixture repair. The
+  `run_selftest.py` diff carried counts only.
+
 ## v1.52 — UV coverage binding, fixture decoupling, cell-failure contract
 
 - **Cell-failure contract.** `KILLED` used to mean nothing more than a
