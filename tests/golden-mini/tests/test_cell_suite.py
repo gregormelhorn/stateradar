@@ -93,9 +93,15 @@ def check(module, state: str, event: str, expected: str,
                 f"over {deliveries} deliveries), got {outcome} "
                 f"counter={m.dup_count} state={m.state}")
     if kind == "ignore":
-        if outcome == "ignored" and m.state == before:
+        # 'ignore' means no effect, so every projection must be untouched - not
+        # just the state. Checking only outcome and state let an ignored event
+        # mutate the dup_count counter unnoticed, while the 'handle' branch had
+        # always asserted the counter. The asymmetry had no reason.
+        if (outcome == "ignored" and m.state == before
+                and m.dup_count == before_count):
             return None
-        return f"expected ignore, got {outcome} state={m.state}"
+        return (f"expected ignore with no effect, got {outcome} state={m.state} "
+                f"counter={before_count}→{m.dup_count}")
     if kind == "reject":
         return f"expected reject, got {outcome}"
     return f"unknown disposition {expected}"

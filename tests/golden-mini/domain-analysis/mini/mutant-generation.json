@@ -105,6 +105,24 @@
         "                self.state = \"Closed\"",
         "            return \"handled\""
       ]
+    },
+    {
+      "fault": "F-05",
+      "binder": "corrupt-state",
+      "id": "F-05-corrupt-state-Idle-UV-M2-stale",
+      "cell": "Idle x UV-M2-stale",
+      "variant": "src/mutants/mini.F-05-corrupt-state-ignore.py",
+      "mode": "replace-block",
+      "requiresProjection": "dup_count",
+      "match": [
+        "        if event == \"UV-M2-stale\":",
+        "            return \"ignored\""
+      ],
+      "replace": [
+        "        if event == \"UV-M2-stale\":",
+        "            self.dup_count += 1  # F-05 corrupt state: an ignored event mutates a projected counter",
+        "            return \"ignored\""
+      ]
     }
   ]
 }
