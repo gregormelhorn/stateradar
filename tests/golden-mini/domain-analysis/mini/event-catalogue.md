@@ -7,7 +7,7 @@
 | M1 | open | operator | external | id | op | svc |
 | M2 | close | operator | external | id | op | svc |
 | UV-M1-dup | duplicate open | operator | external | id | op | svc |
-| UV-M2-stale | stale close after shutdown | operator | external | id | op | svc |
+| UV-M2-stale | out-of-order close: early or after shutdown | operator | external | id | op | svc |
 | UV-M1-lost | lost open | operator | external | id | op | svc |
 | UV-M2-conflict | contradictory close | operator | external | id | op | svc |
 | UV-M1-spurious | spurious open | operator | external | id | op | svc |
