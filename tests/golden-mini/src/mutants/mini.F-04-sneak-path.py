@@ -37,4 +37,14 @@ class Mini:
             return "ignored"
         if event == "UV-M1-spurious":
             raise RejectedError("UV-M1-spurious rejected")
+        if event == "svc-ack":
+            if self.state == "Idle":
+                # Structurally unreachable: the service only acknowledges a
+                # delivered M1, so no ack can exist here. Rejecting makes a
+                # breach of that upstream guarantee loud instead of silent.
+                raise RejectedError("svc-ack without a delivered M1")
+            if self.state == "Open":
+                self.dup_count += 1
+                return "handled"
+            return "ignored"
         raise ValueError(event)

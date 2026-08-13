@@ -47,6 +47,14 @@
   {
    "id": "UV-M1-spurious",
    "undesired": true
+  },
+  {
+   "id": "svc-ack",
+   "undesired": false,
+   "gate": "correlation id matches a delivered M1",
+   "upstream_guards": [
+    "the service emits an ack only in response to a delivered M1; an ack without one cannot reach this boundary"
+   ]
   }
  ],
  "cells": [
@@ -115,6 +123,15 @@
    "event": "UV-M1-spurious"
   },
   {
+   "disposition": "reject",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 45
+   },
+   "state": "Idle",
+   "event": "svc-ack"
+  },
+  {
    "disposition": "ignore (documented)",
    "citation": {
     "file": "src/mini.py",
@@ -179,6 +196,15 @@
    "event": "UV-M1-spurious"
   },
   {
+   "disposition": "handle",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 47
+   },
+   "state": "Open",
+   "event": "svc-ack"
+  },
+  {
    "disposition": "reject",
    "citation": {
     "file": "src/mini.py",
@@ -240,6 +266,15 @@
    },
    "state": "Closed",
    "event": "UV-M1-spurious"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "src/mini.py",
+    "line": 49
+   },
+   "state": "Closed",
+   "event": "svc-ack"
   }
  ],
  "questions": [],
@@ -272,6 +307,15 @@
    "contradiction": "UV-M2-conflict",
    "commission": "n/a: sync",
    "value": "n/a: payload validated"
+  },
+  "svc-ack": {
+   "loss": "n/a: local",
+   "delay": "n/a: sync",
+   "duplication": "n/a: sync",
+   "out-of-order": "n/a: sync",
+   "contradiction": "n/a: sync",
+   "commission": "n/a: sync",
+   "value": "n/a: correlation id checked"
   }
  }
 }

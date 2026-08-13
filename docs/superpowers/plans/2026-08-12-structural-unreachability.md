@@ -49,7 +49,7 @@ Expected: `TREE CLEAN` with no file lines above it, and `SPEC PRESENT`. If the t
 - Regenerate: `analysis.json`, `expected/analysis.json`, the six mutant variants
 - Modify: `tools/selftest/run_selftest.py` (counts only, after measuring)
 
-- [ ] **Step 1: Add the implementation**
+- [x] **Step 1: Add the implementation**
 
 In `tests/golden-mini/src/mini.py`, replace this exact block:
 
@@ -89,7 +89,7 @@ The implementing lines — the ones the matrix cites — are **45** (reject), **
 are counted; an earlier draft of this plan forgot them and cited 42/44/46, which
 would have pointed the matrix at comment text.
 
-- [ ] **Step 2: Add the matrix column and fix the abstraction count**
+- [x] **Step 2: Add the matrix column and fix the abstraction count**
 
 In `disposition-matrix.md`, replace `to the seven-event catalogue.` with `to the eight-event catalogue.`
 
@@ -113,7 +113,7 @@ Then append one cell to each of the three state rows, before the trailing `|`:
 - `**Open**` row: ` handle (counted) \`mini.py:47\` |`
 - `**Closed**` row: ` ignore (documented) \`mini.py:49\` |`
 
-- [ ] **Step 3: Declare the event in the catalogue**
+- [x] **Step 3: Declare the event in the catalogue**
 
 Replace the `event-ids` comment:
 
@@ -149,7 +149,7 @@ Add this annotation block after the `### M2` block. **`svc-ack` is not a UV even
   - value: n/a: correlation id checked
 ```
 
-- [ ] **Step 4: Add the event to the cell suite**
+- [x] **Step 4: Add the event to the cell suite**
 
 In `tests/golden-mini/tests/test_cell_suite.py`, replace:
 
@@ -166,7 +166,7 @@ EVENTS = ["M1", "M2", "UV-M1-dup", "UV-M2-stale", "UV-M1-lost", "UV-M2-conflict"
 
 `EVENTS` order must match the matrix column order — `zip(..., strict=True)` couples them. Leave `NAVIGATE` unchanged.
 
-- [ ] **Step 5: Run the cell suite directly**
+- [x] **Step 5: Run the cell suite directly**
 
 ```bash
 ( cd tests/golden-mini && python3 tests/test_cell_suite.py domain-analysis/mini ); rc=$?
@@ -177,7 +177,7 @@ Expected: `CELL SUITE: 24 cells checked, 0 failed`, then `CELL SUITE: OK`, `exit
 
 A failure here means a disposition and the implementation disagree — report it, do not adjust either to match.
 
-- [ ] **Step 6: Regenerate the sidecar and refresh the golden copy**
+- [x] **Step 6: Regenerate the sidecar and refresh the golden copy**
 
 ```bash
 uv run --with jsonschema python3 tools/gen_analysis_sidecar.py --root tests/golden-mini
@@ -190,7 +190,7 @@ Expected: `DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)`.
 
 If it reds on `R-GATE-TYPE`, `R-UPSTREAM-GUARD`, or UV coverage, Step 3 is incomplete — fix Step 3, never the JSON.
 
-- [ ] **Step 7: Prove the variants are stale, then regenerate**
+- [x] **Step 7: Prove the variants are stale, then regenerate**
 
 ```bash
 python3 tools/gen_mutant_variants.py --check tests/golden-mini/domain-analysis/mini; rc=$?
@@ -206,7 +206,7 @@ python3 tools/gen_mutant_variants.py --check tests/golden-mini/domain-analysis/m
 
 Expected: `MUTANT GENERATION: OK (checked=6 drift=0 blocked=0 errors=0)`.
 
-- [ ] **Step 8: Measure the new mutation count**
+- [x] **Step 8: Measure the new mutation count**
 
 ```bash
 python3 tools/check_fault_mutants.py tests/golden-mini/domain-analysis/mini | tail -1
@@ -216,7 +216,7 @@ python3 tools/check_matrix_mutation.py tests/golden-mini/domain-analysis/mini | 
 
 Expected: `FAULT MUTANTS: OK (killed=6 ...)` unchanged, three lines with `event=svc-ack` all `KILLED`, and a `MUTATION CHECK` summary. The derived target is `killed=28`; **if the real number differs, stop and report `BLOCKED(task-A): derived count mismatch` with the actual output.** Do not adjust anything to reach 28.
 
-- [ ] **Step 9: Confirm the part-B fixtures grew by themselves**
+- [x] **Step 9: Confirm the part-B fixtures grew by themselves**
 
 ```bash
 uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run_selftest.py 2>&1 | grep -E 'blind table|grows with catalogue'
@@ -224,7 +224,7 @@ uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run
 
 Expected: all part-B cases still behave as before, with no manual fixture edit. They were derived from the catalogue in v1.52; this is the first added event since, so it is the first wave that should need **no** part-B repair step. If a part-B case fails, that is a finding about the derivation — report it.
 
-- [ ] **Step 10: Update the selftest counts to the measured values**
+- [x] **Step 10: Update the selftest counts to the measured values**
 
 Update the matrix-mutation count assertion in `tools/selftest/run_selftest.py` from `killed=25` to the number measured in Step 8, including its failure message and its `ok` print. Change nothing else.
 
@@ -236,7 +236,7 @@ uv run --with-requirements tools/requirements-dev.txt python3 tools/selftest/run
 
 Expected: `SELFTEST: OK`.
 
-- [ ] **Step 11: Run the full gate**
+- [x] **Step 11: Run the full gate**
 
 ```bash
 python3 tools/check_fault_mutants.py tests/golden-mini/domain-analysis/mini | tail -1
@@ -254,7 +254,7 @@ git status --short
 
 Expected: all green, `2/2 cases pass`, `6 passed, 0 failed`, `REACHABILITY CHECK: OK`, `diff-check clean`, and `git status --short` listing only the intended files.
 
-- [ ] **Step 12: Tick Task-A checkboxes and commit**
+- [x] **Step 12: Tick Task-A checkboxes and commit**
 
 Tick with line-anchored matching — a substring replacer fails because these titles also appear inside this block:
 

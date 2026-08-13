@@ -347,25 +347,25 @@ def main() -> int:
         rc_hole, out_hole = mutation(hole)
         expect("mutation checker leaves hole cells unmutated", False,
                rc_hole, out_hole, needle="MUTATION CHECK: OK")
-        if "killed=24" not in out_hole:
-            failures.append("hole cell: expected killed=24 (one fewer than 25)\n" + out_hole)
+        if "killed=27" not in out_hole:
+            failures.append("hole cell: expected killed=27 (one fewer than 28)\n" + out_hole)
         else:
             print("  ok  hole cell produces no ignore-to-handle mutant (passes)")
 
         rc_gm, out_gm = mutation(gm)
         expect("mutation checker golden-mini kills supported mutants", False,
                rc_gm, out_gm, needle="MUTATION CHECK: OK")
-        if "killed=25" not in out_gm:
-            failures.append("matrix mutation count: expected killed=25\n" + out_gm)
+        if "killed=28" not in out_gm:
+            failures.append("matrix mutation count: expected killed=28\n" + out_gm)
         else:
-            print("  ok  matrix mutation count killed=25 (passes)")
+            print("  ok  matrix mutation count killed=28 (passes)")
         ignore_to_handle = [line for line in out_gm.splitlines()
                             if "kind=ignore-to-handle" in line]
-        if len(ignore_to_handle) != 16:
-            failures.append("matrix mutation family: expected 16 ignore-to-handle mutants, "
+        if len(ignore_to_handle) != 18:
+            failures.append("matrix mutation family: expected 18 ignore-to-handle mutants, "
                             f"got {len(ignore_to_handle)}\n" + out_gm)
         else:
-            print("  ok  matrix mutation family has 16 ignore-to-handle mutants (passes)")
+            print("  ok  matrix mutation family has 18 ignore-to-handle mutants (passes)")
         for event in ("UV-M1-lost", "UV-M2-conflict", "UV-M1-spurious"):
             actual = sum("KILLED" in line and "kind=ignore-to-handle" in line
                          and f"event={event}" in line
