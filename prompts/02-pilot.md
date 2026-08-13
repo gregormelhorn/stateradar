@@ -151,6 +151,14 @@ Add the variants to the catalogue. They receive matrix columns like any other ev
 
 **Upstream-guard annotation.** For every external event, state which validations happen upstream of this boundary (with citations into the upstream code) and which are absent here. Do this per deployment topology when more than one exists. A guard the catalogue does not mention will be re-invented or falsely assumed by every blind reader.
 
+When an upstream guarantee makes a (state, event) cell structurally
+unreachable, do not invent a "cannot happen" disposition and do not leave the
+cell on `ignore`. Keep a defensive disposition — prefer `reject` — and name the
+guarantee in the upstream-guard annotation. The disposition covers the breach;
+the annotation explains why it should never occur. An ignored breach is a
+silent breach, and unreachability is a property of the environment, not a
+behaviour of the component.
+
 **Lock-discipline annotation.** For every mutex-held section in the
 component: state which events or callbacks fire inside the critical
 section. Record the reentrancy contract — may event handlers or user

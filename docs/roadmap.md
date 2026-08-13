@@ -152,6 +152,19 @@ whether the machine finds rules eleven human-run pilots did not.
 Order of operations is already right: measurement harness first,
 optimizer second.
 
+## 10. Machine-readable cell rationale
+
+**Status:** Planned. Measured at v1.52: 339 `ignore (documented)` cells across
+all sidecars, **0** carrying a machine-readable rationale. Every justification
+lives in matrix cell prose, where no checker reaches it — so "ignored because
+harmless" and "ignored because it cannot occur" are indistinguishable to any
+tool. Structural unreachability is expressed today through a defensive
+disposition plus the upstream-guard annotation (see `prompts/02-pilot.md`);
+a rationale field would let a checker verify that such a claim cites its
+guarantee. Building that checker first would mean matching prose for words like
+"unreachable" — the kind of heuristic this pack forbids for UV categories, so
+the field comes first.
+
 ## Positioning note (for the README, task-8 sweep)
 
 Spec-Driven Development became the mainstream answer to vibe-coding

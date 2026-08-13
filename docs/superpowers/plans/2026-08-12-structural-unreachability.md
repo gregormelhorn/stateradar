@@ -300,7 +300,7 @@ proof, the three event=svc-ack mutant lines, and every gate summary."
 
 Independent of Task A's fixture work; run it in a separate worker after Task A commits.
 
-- [ ] **Step 1: Write the rule into the pilot prompt**
+- [x] **Step 1: Write the rule into the pilot prompt**
 
 In `prompts/02-pilot.md`, find the paragraph beginning `**Upstream-guard annotation.**` and append this to it:
 
@@ -314,7 +314,7 @@ silent breach, and unreachability is a property of the environment, not a
 behaviour of the component.
 ```
 
-- [ ] **Step 2: Add the roadmap item**
+- [x] **Step 2: Add the roadmap item**
 
 In `docs/roadmap.md`, add a new item after the last numbered one:
 
@@ -333,7 +333,7 @@ guarantee. Building that checker first would mean matching prose for words like
 the field comes first.
 ```
 
-- [ ] **Step 3: Verify and commit**
+- [x] **Step 3: Verify and commit**
 
 ```bash
 python3 tools/check_pack_consistency.py 2>&1 | tail -1
