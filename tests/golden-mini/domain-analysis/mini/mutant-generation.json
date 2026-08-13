@@ -84,6 +84,27 @@
         "            self.dup_count += 2  # F-05 corrupt state: counter moves by the wrong amount",
         "            return \"handled\""
       ]
+    },
+    {
+      "fault": "F-14",
+      "binder": "duplication",
+      "id": "F-14-duplication-Idle-UV-M1-dup",
+      "cell": "Idle x UV-M1-dup",
+      "variant": "src/mutants/mini.F-14-duplication.py",
+      "mode": "replace-block",
+      "requiresProjection": "dup_count",
+      "match": [
+        "        if event == \"UV-M1-dup\":",
+        "            self.dup_count += 1",
+        "            return \"handled\""
+      ],
+      "replace": [
+        "        if event == \"UV-M1-dup\":",
+        "            self.dup_count += 1",
+        "            if self.dup_count >= 2:  # F-14 duplication: repeat is not idempotent",
+        "                self.state = \"Closed\"",
+        "            return \"handled\""
+      ]
     }
   ]
 }

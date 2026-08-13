@@ -79,8 +79,8 @@ golden-mini suite kills every supported mutant.
 
 ## 8. ACH-style fault-class mutants (testgen upgrade)
 
-**Status:** 🔶 Partially shipped — 4 of 22 fault classes operationalized
-(F-01, F-02, F-04, F-05). The `fault-mutants.json` contract and
+**Status:** 🔶 Partially shipped — 5 of 22 fault classes operationalized
+(F-01, F-02, F-04, F-05, F-14). The `fault-mutants.json` contract and
 `tools/check_fault_mutants.py` prove a behavioral cell suite kills one
 implementation mutant per class while a mirroring suite
 survives. Remaining classes pending. Golden-mini now derives the F-01,
@@ -100,10 +100,21 @@ contradiction), and `UV-M1-spurious` (F-17 spontaneous commission). Each
 column has three KILLED reverse-family mutants. This claims **F-12**,
 **F-15**, **F-16**, and **F-17** with fixture proof.
 
-It does **not** claim F-13, F-14, or F-18: delay, duplication, and value are
-implementation-level in the registry. `UV-M1-dup` is a matrix shape, not an
-F-14 implementation mutant. F-20 needs a terminal-progress shape, which is
-not a UV column at all.
+It does **not** claim F-13 or F-18: delay needs clock injection and value needs
+payload-effect projection. F-20 needs a terminal-progress shape, which is not a
+UV column at all.
+
+**F-14 (duplication) is now claimed** — 5 of 22 classes operationalised. It cost
+more than F-05 despite the same `dup_count` projection, because its registry
+precondition is "idempotence observable via repeated delivery plus counter": a
+projection alone is not enough, the suite needs a *delivery rule*. The suite now
+reads which events are duplication variants from the sidecar's coverage
+bindings — never from the event name — and delivers those twice, as
+`prompts/04-testgen.md` has required all along. The measured finding that forced
+this: an idempotence break whose second delivery escalated state passed all 21
+cells unnoticed (`MUT-005 SURVIVED fault=F-14`), because a single delivery
+cannot observe idempotence by definition. Without the delivery rule an "F-14
+mutant" would only have been a second F-05 under another name.
 
 Kill proofs are now cause-checked rather than exit-code-correlated. A cell
 suite must print `CELL FAIL <state> x <event>` per failing cell and

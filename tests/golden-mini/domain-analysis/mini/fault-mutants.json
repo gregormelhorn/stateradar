@@ -1,6 +1,10 @@
 {
   "formatVersion": 1,
-  "testCommand": ["python3", "tests/test_cell_suite.py", "{analysis_dir}"],
+  "testCommand": [
+    "python3",
+    "tests/test_cell_suite.py",
+    "{analysis_dir}"
+  ],
   "workingDirectory": "../..",
   "timeoutSeconds": 5,
   "mutants": [
@@ -31,6 +35,13 @@
       "target": "src/mini.py",
       "variant": "src/mutants/mini.F-05-corrupt-state.py",
       "cell": "Open x UV-M1-dup"
+    },
+    {
+      "fault": "F-14",
+      "id": "F-14-duplication-Idle-UV-M1-dup",
+      "target": "src/mini.py",
+      "variant": "src/mutants/mini.F-14-duplication.py",
+      "cell": "Idle x UV-M1-dup"
     }
   ]
 }

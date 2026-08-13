@@ -477,10 +477,10 @@ def main() -> int:
         rc, out = fault_check(fdir)
         expect("fault mutant baseline kills all four fixture mutants", False,
                rc, out, needle="FAULT MUTANTS: OK")
-        if "killed=4" not in out:
-            failures.append("fault mutant count: expected killed=4\n" + out)
+        if "killed=5" not in out:
+            failures.append("fault mutant count: expected killed=5\n" + out)
         else:
-            print("  ok  fault mutant count killed=4 (passes)")
+            print("  ok  fault mutant count killed=5 (passes)")
         if "KILLED" not in out:
             failures.append("fault mutant kill proof: no KILLED line\n" + out)
         else:
@@ -493,6 +493,7 @@ def main() -> int:
             "mini.F-02-transfer-fault.py",
             "mini.F-04-sneak-path.py",
             "mini.F-05-corrupt-state.py",
+            "mini.F-14-duplication.py",
         ]:
             variant = (ROOT / "tests" / "golden-mini" / "src" / "mutants" / variant_name).read_text().splitlines()
             regions = [op for op in difflib.SequenceMatcher(None, base, variant).get_opcodes()
@@ -589,12 +590,12 @@ def main() -> int:
         rc, out = gen_check(ROOT / "tests" / "golden-mini" / "domain-analysis" / "mini")
         expect("generator check mode green on golden-mini", False, rc, out,
                needle="MUTANT GENERATION: OK")
-        if "checked=4" not in out:
-            failures.append("generator green case: expected checked=4\n" + out)
+        if "checked=5" not in out:
+            failures.append("generator green case: expected checked=5\n" + out)
         elif "DRIFT" in out or "BLOCKED" in out or "UNBOUND" in out:
             failures.append("generator green case: unexpected DRIFT/BLOCKED/UNBOUND line\n" + out)
         else:
-            print("  ok  generator green case checked=4 without DRIFT/BLOCKED/UNBOUND (passes)")
+            print("  ok  generator green case checked=5 without DRIFT/BLOCKED/UNBOUND (passes)")
 
         gen_drift = component(tmp, "gen-drift")
         tampered = gen_drift / "src" / "mutants" / "mini.F-02-transfer-fault.py"
@@ -614,10 +615,10 @@ def main() -> int:
         rc, out = gen_check(gen_blocked / "domain-analysis" / "mini")
         expect("generator blocks F-05 on an undeclared projection", True, rc, out,
                needle="BLOCKED F-05-corrupt-state-Open-UV-M1-dup projection dup_count undeclared")
-        if "blocked=1" not in out:
-            failures.append("generator blocked case: expected blocked=1\n" + out)
+        if "blocked=2" not in out:
+            failures.append("generator blocked case: expected blocked=2 (F-05 and F-14 both require dup_count)\n" + out)
         else:
-            print("  ok  generator blocked case blocked=1 (fails as required)")
+            print("  ok  generator blocked case blocked=2 (fails as required)")
 
         gen_badmatch = component(tmp, "gen-badmatch")
         cfg = json.loads(gen_cfg_path(gen_badmatch).read_text())

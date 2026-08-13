@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -35,15 +36,46 @@ def parse_matrix(path: Path) -> dict[tuple[str, str], str]:
     return rows
 
 
-def check(module, state: str, event: str, expected: str) -> str | None:
+def duplication_variants(analysis_dir: Path) -> set[str]:
+    """Event ids the sidecar binds to the 'duplication' UV category.
+
+    Read from coverage bindings, never inferred from the event name: a name is
+    a label, a binding is a declaration. `prompts/04-testgen.md` requires
+    'duplication = deliver twice', and idempotence is unobservable on a single
+    delivery - a fault that only escalates on the repeat passes every cell.
+    """
+    sidecar = analysis_dir / "analysis.json"
+    if not sidecar.is_file():
+        return set()
+    coverage = json.loads(sidecar.read_text(encoding="utf-8")).get("coverage", {})
+    variants: set[str] = set()
+    for categories in coverage.values():
+        if not isinstance(categories, dict):
+            continue
+        value = categories.get("duplication")
+        if not isinstance(value, str) or value.startswith("n/a"):
+            continue
+        variants.update(token for token in value.split() if token.startswith("UV-"))
+    return variants
+
+
+def check(module, state: str, event: str, expected: str,
+          duplicates: set[str] = frozenset()) -> str | None:
     kind = expected.split()[0]  # transition | handle | ignore | reject
+    # A duplication variant is delivered twice; every other event once.
+    deliveries = 2 if event in duplicates else 1
     m = module.Mini()
     for nav in NAVIGATE[state]:
         m.deliver(nav)
     before = m.state
     before_count = m.dup_count
     try:
-        outcome = m.deliver(event)
+        for _ in range(deliveries):
+            outcome = m.deliver(event)
+            if m.state != before and kind in ("handle", "ignore"):
+                # Catch an escalation on any delivery, not only the last one.
+                return (f"expected {expected} to leave the state unchanged across "
+                        f"{deliveries} deliveries, state moved {before}->{m.state}")
     except module.RejectedError:
         return None if kind == "reject" and m.state == before else (
             f"expected {expected}, got reject"
@@ -54,9 +86,12 @@ def check(module, state: str, event: str, expected: str) -> str | None:
             return None
         return f"expected {expected}, got {outcome} state={m.state}"
     if kind == "handle":
-        if outcome == "handled" and m.state == before and m.dup_count == before_count + 1:
+        if (outcome == "handled" and m.state == before
+                and m.dup_count == before_count + deliveries):
             return None
-        return f"expected handle (counter {before_count}→{m.dup_count}), got {outcome} state={m.state}"
+        return (f"expected handle (counter {before_count}→{before_count + deliveries} "
+                f"over {deliveries} deliveries), got {outcome} "
+                f"counter={m.dup_count} state={m.state}")
     if kind == "ignore":
         if outcome == "ignored" and m.state == before:
             return None
@@ -77,11 +112,12 @@ def main(argv: list[str]) -> int:
     if not matrix:
         print("CELL SUITE: no matrix cells parsed", file=sys.stderr)
         return 2
+    duplicates = duplication_variants(analysis_dir)
     failures = 0
     checked = 0
     for (state, event), expected in sorted(matrix.items()):
         checked += 1
-        problem = check(module, state, event, expected)
+        problem = check(module, state, event, expected, duplicates)
         if problem:
             # Human-readable diagnosis, plus the machine-readable cell-failure
             # contract line. The contract line uses ASCII 'x', matching how
