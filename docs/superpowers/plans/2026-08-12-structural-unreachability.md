@@ -83,7 +83,11 @@ Appending keeps every existing citation line stable. Verify:
 sed -n '38,50p' tests/golden-mini/src/mini.py
 ```
 
-Expected: the new branch occupies lines 40-46 and `raise ValueError(event)` is line 47.
+Expected: the new branch occupies lines 40-49 and `raise ValueError(event)` is line 50.
+The implementing lines — the ones the matrix cites — are **45** (reject), **47**
+(handle) and **49** (ignore). The three comment lines are part of the branch and
+are counted; an earlier draft of this plan forgot them and cited 42/44/46, which
+would have pointed the matrix at comment text.
 
 - [ ] **Step 2: Add the matrix column and fix the abstraction count**
 
@@ -105,9 +109,9 @@ with:
 
 Then append one cell to each of the three state rows, before the trailing `|`:
 
-- `**Idle**` row: ` reject \`mini.py:42\` |`
-- `**Open**` row: ` handle (counted) \`mini.py:44\` |`
-- `**Closed**` row: ` ignore (documented) \`mini.py:46\` |`
+- `**Idle**` row: ` reject \`mini.py:45\` |`
+- `**Open**` row: ` handle (counted) \`mini.py:47\` |`
+- `**Closed**` row: ` ignore (documented) \`mini.py:49\` |`
 
 - [ ] **Step 3: Declare the event in the catalogue**
 
