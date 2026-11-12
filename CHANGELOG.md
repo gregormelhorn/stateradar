@@ -2,6 +2,75 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## Unreleased — model routing on DeepSeek Flash and Jev
+
+- **Local model routing.** `tools/local_models.py` sends bounded drafts and
+  the blind Part B to DeepSeek Flash and narrow source-grounded judgments to
+  Jev (`flash`, `jev`, `jev-batch`, `blind`), with a per-pilot SQLite cost
+  ledger (`tools/local_budget.py`) and an offline evaluator for saved
+  `jev-batch` results against independently reviewed labels
+  (`tools/jev_eval.py`).
+- **Draft and verify.** New `draft-verify` command: Flash drafts cited claims
+  and questions as JSON, code rejects malformed drafts and checks every
+  citation, and Jev judges only the citable claims in one batch. Failed
+  citations, all draft questions and, if Jev fails, the paid draft are kept.
+  Red probe: `tools/selftest/test_draft_verify.py` failed 7/7 before the
+  command existed.
+- **02-pilot v1.16 — Model routing section.** Steps 1, 6, 8 and Part B route
+  through these commands when both API keys are set. Drafts seed a step and
+  never bound it; a Jev judgment may add a question and never removes one or
+  sets provenance; Part B is never done by the Part-A agent, also when `blind`
+  fails. An ordering counts as source-backed only when Jev's choice is
+  `supported` and its scope probability is at least 0.5; the cut-off is
+  provisional and uncalibrated and can only add questions. The skill, the
+  pilot command and AGENTS.md §8 follow.
+- **Provider hardening from the TypeSafe and DeepSeek docs.** HTTP 429, 503
+  and 529 are retried up to three times (numeric `Retry-After` up to 60 s,
+  otherwise backoff); the timeout is 120 s per attempt. Red probe: the three
+  new retry tests in `tools/selftest/test_jev_local.py` failed (3 of 5) before
+  the retry existed. `docs/local-model-routing.md` records Jev's 64k/32k
+  context limits, model aliases, and the vendor-threshold caveat.
+- **First live smoke run** (device-connection example, 8,245 microdollars, no
+  provider errors; outputs in `docs/evidence/routing-smoke-2026-11-13/`).
+  Fixes from it: the ordering rule above (a `supported` ordering had scope
+  0.11); `blind` keeps the dispatched package as `<output stem>.package.md`
+  instead of printing a deleted temp path; `draft-verify` prints a summary.
+- **Review round (3 reviewers).** `blind` passes contracts through the
+  contract reader and refuses a whole source file, so implementation code
+  cannot reach the blind pass; failed requests name their reservation for
+  `settle`; output directories are checked before anything is paid for;
+  citation fragments must be a single line of at least four non-space
+  characters; SQLite errors are reported instead of raised; `jev` and
+  `jev-batch` take `--model` and `jev-batch` takes `--output`; the unmetered
+  `jev_local.evaluate` path is removed. Each code mechanism has a red test
+  first.
+- **Review round 2.** `blind` takes only prepared `.md`/`.txt`/`.rst` files
+  for requirements and contracts and gains `--package-only` to inspect the
+  package before anything is sent; the pilot treats off-vocabulary blind rows
+  as `vocabulary-drift` that is mapped explicitly or becomes a question. HTTP
+  error bodies (such as `max_tokens_exceeded`) reach the agent; a ledger
+  failure after a paid answer prints the answer and the `settle` command; an
+  invalid Jev answer keeps its settled usage in `draft-verify`; truncated HTTP
+  responses name their reservation; `--output` may not be a directory; draft
+  parsing finds the JSON object even with braces in surrounding prose. Red
+  tests first for each mechanism; `jev --model` gained a CLI test.
+- **Review round 3.** A ledger failure at the Jev step of `draft-verify`
+  keeps the paid answer as `verification.unrecorded_response` with a map from
+  question names to claim ids; the draft parser accepts exactly one object
+  with `claims` and `questions` lists and refuses an echoed template
+  placeholder; a real `blind` run requires the inspected
+  `<output stem>.package.md` and refuses if the inputs changed. Pilot rule 7
+  requires verbatim contract text headed by `file:line` and the same prepared
+  files for the fallback dispatch; requirements may select one section with
+  `FILE.md:PATTERN`. Red tests first.
+- **Review round 4.** The draft parser skips objects nested inside one it
+  has already decoded; `blind` sends the package assembler's report to stderr
+  so stdout carries only its JSON with the kept package path; the refusal
+  message names `FILE:PATTERN` for requirements; the docs show the two-step
+  `blind` call; a test covers requirement section selection.
+- Not changed: no automatic acceptance or escalation; the cascade plan's
+  evaluation stages remain open.
+
 ## v1.53 — F-14 duplication, ignore-cell projections, structural unreachability
 
 - **F-14 (duplication) claimed — 5 of 22 classes.** It cost more than F-05

@@ -170,3 +170,25 @@ in real pack-development sessions.
    Record `BLOCKED(<task>): <reason>` and move on. Substituting
    something plausible and reporting success is the failure mode this
    whole section exists to prevent.
+
+## 8. Local model routing
+
+When `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` are set, route StateRadar
+analysis through `tools/local_models.py` as the "Model routing" section of
+`prompts/02-pilot.md` specifies: DeepSeek Flash for bounded drafting and
+the blind Part B, Jev for narrow source-grounded judgments. Without the
+keys, do Steps 1, 6 and 8 yourself. `draft-verify` lets Flash propose cited
+claims and questions as JSON; code checks every citation and Jev judges
+the citable claims in one batch. `jev-batch` evaluates several claim or
+event-ordering checks against one source. Drafts seed a step and never
+bound it: you still do the complete step and review every returned
+judgment against its source, including apparently confident answers. A Jev
+response is a proposal: it may add a question, but it never removes one,
+resolves a hole, sets provenance, or establishes a requirement. Part B is
+never done by the Part-A agent: pass `blind` only the catalogue,
+requirements prose, and prepared contract text, and if it fails, dispatch
+a fresh blind session; never write or repair a blind table yourself.
+
+Use one ledger per pilot. Its default $2 covers calls made through this
+tool. The calling agent's own costs are separate. See
+`docs/local-model-routing.md` for commands, accounting limits, and recovery.

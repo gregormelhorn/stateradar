@@ -1,0 +1,6 @@
+[
+  {"id": "S1", "kind": "claim", "statement": "When max_retries is exhausted, the component enters FAILED state.", "line": 26, "fragment": "the component enters FAILED state"},
+  {"id": "O1", "kind": "ordering", "statement": "disconnect() is called after the component has entered FAILED, and the component stays in FAILED.", "line": 27, "fragment": "The component remains in"},
+  {"id": "O2", "kind": "ordering", "statement": "A connection attempt succeeds after disconnect() was already called during CONNECTING, and the component then enters CONNECTED.", "line": 17, "fragment": "When a connection attempt succeeds, the component enters CONNECTED"},
+  {"id": "C1", "kind": "claim", "statement": "Calling connect() while in FAILED state starts a new connection attempt.", "line": 9, "fragment": "initiates a connection attempt"}
+]

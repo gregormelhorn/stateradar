@@ -1,8 +1,18 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.15.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.16.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.16 — model routing: when the local model workflow is configured,
+  DeepSeek Flash drafts the bounded extraction work and the blind Part B,
+  and Jev checks cited claims and the requirement-scope line
+  (`tools/local_models.py draft-verify`, `jev-batch`, `blind`). The calling
+  agent still does every step in full; a model judgment may add a question
+  but never removes one or sets provenance. Part B is never done by the
+  Part-A agent, also when `blind` fails. An ordering counts as source-backed
+  only when Jev's choice and its separate scope probability both back it
+  (first live run: `supported` with scope 0.11); the 0.5 cut-off is
+  provisional. Nothing is accepted automatically.
 * v1.15 — check_guards.py delegates the proof procedures (disjointness,
   coverage, boundary probes) to the pack library `tools/guard_proofs.py`
   instead of reimplementing z3 boilerplate per component — the same
@@ -87,6 +97,31 @@ You perform a domain-behaviour analysis of one stateful component. You analyze. 
 4. **Requirement-scope rule.** A citation covers only the scenario that the cited text describes. If you apply a requirement, doc line, or recorded decision to an ordering, race, or variant it does not address: downgrade the provenance to `inferred` and treat the cell as a hole candidate. Written down is not the same as decided for this case.
 5. Model what the code does, not what it should do. The desired design comes later, after a human resolves the open questions. Do not produce a to-be model in this run.
 6. The component may have no real temporal behaviour: no lifecycle, no asynchronous events, no retries, no timeouts, no cancellation. In that case say so, explain briefly, and stop. A negative result is a valid result.
+
+### Model routing — DeepSeek Flash drafts, Jev checks
+
+Use this routing when `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` are set (see the pack's `docs/local-model-routing.md`). Otherwise do Steps 1, 6 and 8 yourself and write `model routing: not configured` in `summary.md`. When it is on, write `model routing: on (unevaluated, cascade plan stage 3)` in `summary.md`, so routed and agent-only runs are never compared as equals. All commands below are subcommands of the pack's `tools/local_models.py`. Create one ledger for this pilot outside the repository, pass it to every call, and pin `--model jev-1.14.0` (or the version you record) on every Jev call.
+
+| Step | Route | Your part |
+|---|---|---|
+| 1 Extraction, doctrine-line sweep | `draft-verify <source> <task>` once per requirements, doc, code, or test file, with a task that names the step and the items to extract | The drafts seed Step 1; you still do the complete step (rule 3) |
+| 6 Control traces that cite a requirement or decision | `jev-batch` against the original requirements or DR file, one `ordering` check per cited fragment, quoted as on the scope line | You decide the scope line from the quoted text (rule 5) |
+| 8 Line-number accuracy | `jev-batch` with one `claim` check per cited behavioural claim, batched per file | Re-read every cited line yourself as Step 8 requires; Jev only orders the re-reading |
+| Part B | `blind` (Flash, packaged inputs only) | Check the package and the table, then classify (rule 7) |
+
+Rules for every routed step:
+
+1. **Drafts are proposals.** A Flash claim enters an artifact only after you read its cited line. Re-cite or drop every claim whose `citation_check` is not `ok`, and say which in `extraction.md`.
+2. **Jev may add a question, never remove one.** A Jev answer is never the reason to drop a claim, a finding, or a question: dropping requires your own re-read, recorded with the line. A `supported` answer never upgrades provenance to `explicit-requirement`, never resolves a hole, and never replaces the requirement-scope rule. If Jev returns `contradicted` or `unclear` for a claim you keep, write why you keep it, or raise a question.
+3. **Drafts seed Step 1; they do not bound it.** Do your own complete pass over each file and record every item the drafts missed. Cross-file contradictions, reachable state combinations, and the seam-contract sweep are yours: a drafted claim about a seam's failure behaviour stays `inferred` until you cite the callee contract. Check the doctrine list against the requirements text sentence by sentence.
+4. **Ordering checks read both answers.** Every `ordering` result carries a `choice` and an independent `ordering_scope_probability`; they often disagree (first live run: `supported` with scope 0.11 for an ordering the text never describes). A Jev result never establishes scope. If the choice is not `supported`, or the scope probability is below 0.5, the ordering is not source-backed and a drafted ordering claim becomes a question. The 0.5 is provisional and uncalibrated (see the cascade plan): it can only add questions, and a result above it backs nothing by itself.
+5. **Scope line.** On a Step-6 control trace you decide *cited text contemplates this ordering: yes/no* from the quoted text, then add `jev: <choice>, scope <probability>`, or `jev: failed (<reason>)`, or `jev: not run (<reason>)`. With routing on, `not run` is allowed only when the ledger is exhausted; every `failed` or `not run` is listed in `summary.md`. If you write `yes` and Jev does not back the ordering under rule 4, the control verdict is void: raise a question that cites both. Record every run that Jev answered; never re-run an answered check with another fragment or another source to change its result. A batch rejected before Jev answered (for example a citation error) has no result: correct it and run it again. The source is the original requirements or DR file, never an analysis artifact such as `extraction.md`.
+6. **Carry every draft question forward.** Each entry in a draft's `questions` list ends as a Q in Step 7 or as a reasoned fold into an existing Q.
+7. **Part B is never done by you.** You have seen the code and the matrix. `blind` takes only prepared text files (`.md`, `.txt`, `.rst`): requirements prose (a whole file, or one section selected with `FILE.md:PATTERN`), and a whole contracts file into which you copied each contract docstring or schema description verbatim, headed by its `file:line`, with no added, summarised, or reworded text; it refuses source files and class specs. First run `blind … --package-only`, read `<output stem>.package.md`, and confirm it holds no implementation code; then run `blind` without the flag and without changing the inputs. The real run sends only that inspected package and refuses if the inputs changed. If code reaches a sent package anyway, discard the blind output, record the contamination in `part-b-diff.md`, and re-dispatch with clean inputs. A passing coverage check proves row presence only: confirm the pair count against the pairs table. A row whose disposition word is outside the closed vocabulary is listed as `vocabulary-drift` in `part-b-diff.md`; classify it only where its described behaviour maps unambiguously to one vocabulary value, and state that mapping. If the behaviour differs from the matrix it is a `divergence` with a Q; if it is ambiguous, raise a Q. If `blind` fails or routing is not configured, dispatch a fresh blind session as the Part B dispatch notes describe, with the same prepared text files and no `FILE:Class` specs; never write, edit, rewrite, or complete a blind table yourself.
+8. **Failures are results.** A rejected draft, an incomplete response, an API error, or an exceeded ledger stops that call only. Record it in `summary.md` and do Steps 1, 6 or 8 yourself (Part B: rule 7; an oversized source: rule 9, which takes precedence). A `citation fragment missing` error from `jev-batch` is a correction: fix the citation or raise a question, then re-run the batch with every check. Never retry by loosening the task, dropping a check, or weakening the citation check.
+9. **Excerpts keep their line numbers.** Split a file only when a call fails with HTTP 400 and the error text names `max_tokens_exceeded`. Cut on line boundaries, record each excerpt's start line, and add `start - 1` to every cited line before it enters an artifact.
+
+End `summary.md` with the ledger file name (not its full path), the output of `local_models.py --ledger <path> status`, and every failed or skipped model call.
 
 ### Step 0 — Scope statement
 
@@ -422,7 +457,7 @@ Run this in a **new** agent session with no access to the as-is model, the matri
 > The disposition vocabulary you must use (from the methods reference): `transition → <target>` | `handle` (stays in the state, does something) | `ignore (documented)` | `ignore (accidental)` | `defer (queued)` | `reject` (a declared refusal signal: error, diagnostic, nack) | `UNSPECIFIED`. Without these definitions a blind pass applies `reject` and `handle` to identical semantics interchangeably (dobby trigger-service, 2026-08-05: four vocabulary-only "divergences").
 <!-- /generated:rules -->
 
-Then diff its table against `disposition-matrix.md` (an agent that sees both may do this diff).
+With model routing configured, dispatch this pass with `tools/local_models.py blind`: it packages the catalogue and the prepared text files you pass (it refuses source files), sends them to DeepSeek Flash in a fresh request, and runs the row-coverage check; follow rule 7 of the routing section. Then diff its table against `disposition-matrix.md` (an agent that sees both may do this diff).
 
 Dispatch notes (learned the hard way, dobby 2026-08-05): inline the
 inputs VERBATIM in the dispatch — a placeholder payload is the known

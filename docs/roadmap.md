@@ -1,5 +1,37 @@
 # Roadmap (post-v1.33)
 
+## Current priorities
+
+This is the project's existing roadmap. The entries below preserve historical
+status reports and measurements from their stated versions; they are not a
+fresh audit of every feature. The following outstanding work links to those
+entries and separates the new model-routing plan from shipped capabilities.
+
+1. **Measure cost-aware model routing.** Flash drafting, Jev batches, the
+   `draft-verify` chain, a local ledger, and an offline batch evaluator exist,
+   and `prompts/02-pilot.md` (v1.16) routes Steps 1, 6, 8 and Part B through
+   them. Next build independently reviewed examples, split held-out components
+   or issues, and measure errors, coverage, time, and total cost of the routed
+   pilot against the agent-only pilot. Only then evaluate selective
+   escalation. Automatic acceptance and escalation are not implemented.
+   Details: [model cascade plan](plan-model-cascade.md) and
+   [entry 11](#11-cost-aware-model-routing-deepseek-flash--jev).
+2. **Broaden mutation coverage and validate on real components.** Continue
+   [fault-class mutants](#8-ach-style-fault-class-mutants-testgen-upgrade):
+   add supported classes and component bindings with observed red probes and
+   behavioral kill evidence. Some fault shapes need additional observability;
+   fixture results alone do not prove coverage on a consuming component.
+3. **Make disposition rationale machine-readable.** Design and validate a
+   representation for cell rationale before building checks that depend on it.
+   See [machine-readable cell rationale](#10-machine-readable-cell-rationale).
+4. **Evaluate bounded prompt optimization.** After sufficient independent
+   benchmark cases exist, test a small sub-prompt against held-out cases; see
+   [GEPA experiment](#9-gepa-experiment-the-feedback-loop-as-an-algorithm).
+   Keep this separate from assuming that a more stable model answer is correct.
+5. **Expand semantic reachability when needed.** The existing checker covers
+   the minimal model; hierarchy and parallel regions remain a possible
+   follow-up, described under [semantic analysis](#3-xstate--semantic-analysis).
+
 ## 1. CONVERGENCE.md — calibration data
 
 **Status:** ✅ Baselines recorded.
@@ -164,6 +196,52 @@ a rationale field would let a checker verify that such a claim cites its
 guarantee. Building that checker first would mean matching prose for words like
 "unreachable" — the kind of heuristic this pack forbids for UV categories, so
 the field comes first.
+
+## 11. Cost-aware model routing (DeepSeek Flash + Jev)
+
+**Status:** 🔶 Partially shipped (unreleased). `tools/local_models.py` sends
+bounded drafts and the blind Part B to DeepSeek Flash and source-grounded
+claim and ordering checks to Jev (`flash`, `jev`, `jev-batch`, `blind`,
+`draft-verify`). A per-pilot SQLite ledger reserves estimated costs;
+`tools/jev_eval.py` scores a saved batch against independently reviewed
+labels. The pilot prompt's "Model routing" section maps Steps 1, 6, 8 and
+Part B to these commands; a Jev judgment may add a question and never
+removes one. 429/503/529 responses are retried with `Retry-After`.
+
+Open, in order:
+
+1. **Full routed pilot.** A first live smoke run (2026-11-13,
+   device-connection example, 8,245 microdollars in total; outputs in
+   `docs/evidence/routing-smoke-2026-11-13/`) exercised `draft-verify`,
+   `jev-batch` and `blind` without provider errors. Its findings: Jev's
+   ordering `choice` and scope probability disagree (`supported` with scope
+   0.11), now handled by the pilot's routing rule 4; the same claim scored
+   0.71 or 1.0 depending on the cited fragment; the blind coverage check saw 0
+   pair orderings because the example catalogue carries no `P-` ids, so it
+   cannot fail on missing pairs; and Flash's blind table used disposition
+   wording outside the closed vocabulary, which the coverage check does not
+   test. Next run a whole pilot on the routed path, record failures, rejected
+   drafts and the ledger total in `summary.md`, and compare with an agent-only
+   run of the same component.
+2. **Labelled evaluation set.** Collect attributed, independently reviewed
+   labels for claim and requirement-scope checks across components (stage 1
+   of the cascade plan), including races outside a requirement's scope and
+   seam-contract cases. Keep a held-out group per component or issue.
+3. **Calibrated thresholds, then escalation.** TypeSafe's cookbooks use
+   vendor-calibrated cut-offs (0.7 per-field gate, 0.8 citation auto-accept,
+   0.3/0.7 Noul bands). StateRadar adopts none of them until the labelled set
+   supports a value. The pilot's provisional 0.5 scope cut-off is
+   question-only (it can void a verdict, never accept one) and is the first
+   value to calibrate; any escalation policy is compared end to end against
+   the prior workflow.
+4. **Known limits to design around.** Jev accepts 64k tokens per request and
+   32k per question, so long sources need excerpting with provenance; English
+   is its primary language, so non-English requirements need a measured
+   accuracy check; aliases move with releases, so measurements pin
+   `jev-1.14.0`. The ledger counts only calls through the tool, not the
+   calling agent.
+5. **Prompt research.** Repetition and nonce-based consistency studies, and
+   feature discovery only after the labelled set exists (see entry 9).
 
 ## Positioning note (for the README, task-8 sweep)
 

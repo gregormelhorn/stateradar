@@ -23,6 +23,8 @@ Assemble:
   --requirements FILE:PATTERN only lines from the first PATTERN match
                               to the next markdown heading of the same
                               or higher level (or EOF)
+  --contracts FILE.py:A,B     class blocks (docstring and fields) only
+  --contracts FILE.md         a prepared contract-text file, whole
 
 Validate a blind output:
   python3 tools/part_b_pack.py <analysis-dir> --check blind_output.md
@@ -80,13 +82,21 @@ def _read_requirements(spec: str, repo: Path) -> str:
 
 
 def _read_contracts(spec: str, repo: Path) -> str:
-    """FILE:Class1,Class2 → docstring + fields blocks per class."""
+    """FILE:Class1,Class2 → docstring + fields blocks per class.
+
+    A prepared contract-text file (.md, .txt, .rst) may be passed whole. A
+    source file always needs class names: the blind pass must never receive
+    implementation code.
+    """
     file_part, _, classes = spec.partition(":")
     path = repo / file_part
     if not path.is_file():
         raise ValueError(f"contracts file missing: {path}")
     if not classes:
-        raise ValueError(f"contracts spec needs class names: {spec!r}")
+        if path.suffix.lower() in (".md", ".txt", ".rst"):
+            return path.read_text(encoding="utf-8")
+        raise ValueError(f"contracts spec needs class names for a source file: {spec!r} "
+                         "(or extract the contract text into a .md file)")
     lines = path.read_text(encoding="utf-8").splitlines()
     out: list[str] = []
     for cls in classes.split(","):

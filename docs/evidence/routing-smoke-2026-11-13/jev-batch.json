@@ -1,0 +1,71 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "796b6f7212bab1af6e4a17ecc752dbca689fa7d804884482a2bad74f0f77822a",
+  "input_tokens": 1556,
+  "cost_microdollars": 66,
+  "reservation_microdollars": 290,
+  "checks": {
+    "S1": {
+      "kind": "claim",
+      "statement": "When max_retries is exhausted, the component enters FAILED state.",
+      "source": "examples/device-connection/README.md",
+      "line": 26,
+      "fragment": "the component enters FAILED state",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.71,
+        "contradicted": 0.0,
+        "unclear": 0.29
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "O1": {
+      "kind": "ordering",
+      "statement": "disconnect() is called after the component has entered FAILED, and the component stays in FAILED.",
+      "source": "examples/device-connection/README.md",
+      "line": 27,
+      "fragment": "The component remains in",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.29,
+        "contradicted": 0.09,
+        "unclear": 0.62
+      },
+      "confidence": 0.43,
+      "review_required": true,
+      "ordering_scope_probability": 0.03
+    },
+    "O2": {
+      "kind": "ordering",
+      "statement": "A connection attempt succeeds after disconnect() was already called during CONNECTING, and the component then enters CONNECTED.",
+      "source": "examples/device-connection/README.md",
+      "line": 17,
+      "fragment": "When a connection attempt succeeds, the component enters CONNECTED",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.45,
+        "unclear": 0.55
+      },
+      "confidence": 0.33,
+      "review_required": true,
+      "ordering_scope_probability": 0.02
+    },
+    "C1": {
+      "kind": "claim",
+      "statement": "Calling connect() while in FAILED state starts a new connection attempt.",
+      "source": "examples/device-connection/README.md",
+      "line": 9,
+      "fragment": "initiates a connection attempt",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.05,
+        "contradicted": 0.32,
+        "unclear": 0.63
+      },
+      "confidence": 0.44,
+      "review_required": true
+    }
+  }
+}
