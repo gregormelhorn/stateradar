@@ -21,6 +21,50 @@ checks citations and results, runs the deterministic checkers, and carries
 forward every uncertainty and question. Jev returns a probability; it does
 not establish a domain decision.
 
+### Batch semantic checks
+
+Use `jev-batch` to evaluate independent claims and event orderings against
+the same source file in one request. Supply a JSON array such as:
+
+```json
+[
+  {"id": "C1", "kind": "claim", "statement": "The component stays failed.", "line": 12, "fragment": "remains in FAILED"},
+  {"id": "O1", "kind": "ordering", "statement": "A disconnect occurs after failure.", "line": 12, "fragment": "remains in FAILED"}
+]
+```
+
+```bash
+python3 tools/local_models.py --ledger "$ledger" jev-batch \
+  /path/to/source.md /path/to/checks.json --model jev-1.14.0 > /path/to/review.json
+```
+
+Each `line` is a one-based line in the source file and each `fragment` must
+occur within three lines of it. Missing fragments, invalid lines, duplicate
+IDs and incomplete responses fail. All questions see the same source and
+are evaluated independently. Prepare a separate batch for another source.
+The response includes the source path and content hash, citation, statement,
+model version, choice probabilities, token usage, and cost. Every result
+is marked for review. Ordering checks also receive an independently evaluated
+`ordering_scope_probability` for whether the fragment contemplates the exact
+sequence. The Choice and Noul answers may disagree; preserve both and examine
+the source. Confidence and repeatability do not establish correctness. Follow
+the requirement-scope rule and raise a question when its conditions require
+one. An API error after reservation keeps the reservation until reconciled.
+Omit `--model` to use `jev-latest`; pin a specific available version for
+comparable measurements.
+
+When comparing prompts, use held-out, independently labelled examples and
+repeat both batched and individual calls with the same source and questions.
+Measure per-option probabilities and Noul probabilities, elapsed time, and
+input tokens. Repeated evaluations can include a changing, irrelevant nonce
+in the state to avoid replaying cached responses. The TypeSafe cookbooks on
+[parallel questions](https://docs.typesafe.ai/cookbooks/parallel_questions),
+[Choice consistency](https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook),
+[Noul consistency](https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook),
+and [feature discovery](https://docs.typesafe.ai/cookbooks/autoresearch_feature_discovery)
+describe these techniques. Feature discovery needs a labelled dataset and a
+held-out evaluation; it is not part of the batch command.
+
 For Part B, put requirements and normative event contract text in separate
 files. Select their contents before running the command. The catalogue lives
 in the analysis directory. The call receives only the assembled package and

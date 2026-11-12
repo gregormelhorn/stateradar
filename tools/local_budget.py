@@ -1,6 +1,7 @@
 """Persistent reservations for metered local model calls, in microdollars."""
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 
@@ -13,7 +14,7 @@ class Budget:
         if limit is not None and (isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0):
             raise ValueError("budget limit must be a positive integer")
         self.path = path
-        with sqlite3.connect(self.path, isolation_level=None) as db:
+        with closing(sqlite3.connect(self.path, isolation_level=None)) as db:
             db.execute("BEGIN IMMEDIATE")
             db.execute("CREATE TABLE IF NOT EXISTS config (limit_amount INTEGER NOT NULL)")
             db.execute("CREATE TABLE IF NOT EXISTS calls (id INTEGER PRIMARY KEY, provider TEXT NOT NULL, amount INTEGER NOT NULL, status TEXT NOT NULL)")
@@ -28,13 +29,13 @@ class Budget:
 
     @property
     def limit(self) -> int:
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db:
             return db.execute("SELECT limit_amount FROM config").fetchone()[0]
 
     def set_limit(self, limit: int) -> None:
         if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
             raise ValueError("budget limit must be a positive integer")
-        with sqlite3.connect(self.path, isolation_level=None) as db:
+        with closing(sqlite3.connect(self.path, isolation_level=None)) as db:
             db.execute("BEGIN IMMEDIATE")
             db.execute("UPDATE config SET limit_amount = ?", (limit,))
             db.commit()
@@ -42,7 +43,7 @@ class Budget:
     def reserve(self, provider: str, amount: int) -> int:
         if not provider or isinstance(amount, bool) or not isinstance(amount, int) or amount <= 0:
             raise ValueError("a provider and positive reservation are required")
-        with sqlite3.connect(self.path, isolation_level=None) as db:
+        with closing(sqlite3.connect(self.path, isolation_level=None)) as db:
             db.execute("BEGIN IMMEDIATE")
             total = db.execute("SELECT COALESCE(SUM(amount), 0) FROM calls").fetchone()[0]
             limit = db.execute("SELECT limit_amount FROM config").fetchone()[0]
@@ -54,18 +55,18 @@ class Budget:
             return cursor.lastrowid
 
     def total(self) -> int:
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db:
             return db.execute("SELECT COALESCE(SUM(amount), 0) FROM calls").fetchone()[0]
 
     def calls(self):
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db:
             return [{"id": row[0], "provider": row[1], "amount_microdollars": row[2], "status": row[3]}
                     for row in db.execute("SELECT id, provider, amount, status FROM calls ORDER BY id")]
 
     def settle(self, reservation: int, actual: int) -> None:
         if isinstance(actual, bool) or not isinstance(actual, int) or actual < 0:
             raise ValueError("actual amount must be a nonnegative integer")
-        with sqlite3.connect(self.path, isolation_level=None) as db:
+        with closing(sqlite3.connect(self.path, isolation_level=None)) as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT amount, status FROM calls WHERE id = ?", (reservation,)).fetchone()
             if row is None or row[1] != "reserved":

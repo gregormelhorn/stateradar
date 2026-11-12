@@ -1,4 +1,7 @@
 import importlib.util
+import contextlib
+import io
+import json
 import sys
 import tempfile
 import unittest
@@ -43,6 +46,121 @@ class ModelTest(unittest.TestCase):
                 result = local_models.jev(budget, "source", "question?", "key")
             self.assertEqual(result["probability"], 0.8)
             self.assertEqual(budget.total(), 5)
+
+    def test_batch_sends_one_shared_source_and_keeps_identifiers(self):
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            checks = [
+                {"id": "C1", "kind": "claim", "statement": "The device remains failed.", "fragment": "remains failed", "line": 1},
+                {"id": "O1", "kind": "ordering", "statement": "Disconnect after failure", "fragment": "remains failed", "line": 1},
+            ]
+            choice = {"type": "choice", "choice": "unclear", "confidence": 0.3,
+                      "probabilities": {"supported": 0.2, "contradicted": 0.2, "unclear": 0.6}}
+            response = {"model": "jev-test", "usage": {"input_tokens": 100}, "answers": {
+                "choice_0": choice, "choice_1": choice, "scope_1": {"type": "noul", "noul": 0.15}}}
+            with patch.object(local_models, "post_json", return_value=response) as post:
+                result = local_models.jev_batch(budget, "The device remains failed.", "requirements.md", checks, "key", model="jev-1.14.0")
+            self.assertEqual(list(result["checks"]), ["C1", "O1"])
+            self.assertEqual(result["checks"]["O1"]["source"], "requirements.md")
+            self.assertTrue(result["checks"]["O1"]["review_required"])
+            self.assertEqual(result["checks"]["O1"]["ordering_scope_probability"], 0.15)
+            self.assertEqual(len(post.call_args.args[1]["questions"]), 3)
+            self.assertEqual(post.call_args.args[1]["questions"]["scope_1"]["type"], "noul")
+            self.assertEqual(post.call_args.args[1]["model"], "jev-1.14.0")
+            self.assertEqual(budget.total(), 5)
+
+    def test_batch_rejects_missing_fragment_before_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            checks = [{"id": "C1", "kind": "claim", "statement": "claim", "fragment": "absent", "line": 1}]
+            with patch.object(local_models, "post_json") as post:
+                with self.assertRaisesRegex(ValueError, "fragment"):
+                    local_models.jev_batch(budget, "source", "source.md", checks, "key")
+            post.assert_not_called()
+            self.assertEqual(budget.total(), 0)
+
+    def test_batch_missing_answer_fails_after_recording_usage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            checks = [{"id": "C1", "kind": "claim", "statement": "claim", "fragment": "source", "line": 1}]
+            response = {"model": "jev-test", "usage": {"input_tokens": 100}, "answers": {}}
+            with patch.object(local_models, "post_json", return_value=response):
+                with self.assertRaisesRegex(ValueError, "answer"):
+                    local_models.jev_batch(budget, "source", "source.md", checks, "key")
+            self.assertEqual(budget.total(), 5)
+
+    def test_batch_missing_scope_answer_does_not_produce_a_verdict(self):
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            check = {"id": "O1", "kind": "ordering", "statement": "ordering", "fragment": "source", "line": 1}
+            choice = {"type": "choice", "choice": "unclear", "confidence": 0.3,
+                      "probabilities": {"supported": 0.2, "contradicted": 0.2, "unclear": 0.6}}
+            response = {"model": "jev-test", "usage": {"input_tokens": 100}, "answers": {"choice_0": choice}}
+            with patch.object(local_models, "post_json", return_value=response):
+                with self.assertRaisesRegex(ValueError, "answer"):
+                    local_models.jev_batch(budget, "source", "source.md", [check], "key")
+            self.assertEqual(budget.total(), 5)
+
+    def test_batch_rejects_fragment_far_from_cited_line(self):
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            checks = [{"id": "C1", "kind": "claim", "statement": "claim", "fragment": "target", "line": 1}]
+            source = "first\n" + "other\n" * 8 + "target\n"
+            with patch.object(local_models, "post_json") as post:
+                with self.assertRaisesRegex(ValueError, "near"):
+                    local_models.jev_batch(budget, source, "source.md", checks, "key")
+            post.assert_not_called()
+
+    def test_batch_rejects_duplicate_ids_before_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            check = {"id": "C1", "kind": "claim", "statement": "claim", "fragment": "source", "line": 1}
+            with patch.object(local_models, "post_json") as post:
+                with self.assertRaisesRegex(ValueError, "duplicate"):
+                    local_models.jev_batch(budget, "source", "source.md", [check, check], "key")
+            post.assert_not_called()
+
+    def test_batch_rejects_invalid_probability_after_accounting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            check = {"id": "C1", "kind": "claim", "statement": "claim", "fragment": "source", "line": 1}
+            response = {"model": "jev-test", "usage": {"input_tokens": 100}, "answers": {
+                "choice_0": {"type": "choice", "choice": "supported", "confidence": 0.7,
+                       "probabilities": {"supported": 1.1, "contradicted": 0, "unclear": 0}}}}
+            with patch.object(local_models, "post_json", return_value=response):
+                with self.assertRaisesRegex(ValueError, "invalid choice"):
+                    local_models.jev_batch(budget, "source", "source.md", [check], "key")
+            self.assertEqual(budget.total(), 5)
+
+    def test_batch_rejects_inconsistent_distribution(self):
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            check = {"id": "C1", "kind": "claim", "statement": "claim", "fragment": "source", "line": 1}
+            response = {"model": "jev-test", "usage": {"input_tokens": 100}, "answers": {
+                "choice_0": {"type": "choice", "choice": "supported", "confidence": 1.0,
+                             "probabilities": {"supported": 0.9, "contradicted": 0.9, "unclear": 0.9}}}}
+            with patch.object(local_models, "post_json", return_value=response):
+                with self.assertRaisesRegex(ValueError, "distribution"):
+                    local_models.jev_batch(budget, "source", "source.md", [check], "key")
+            self.assertEqual(budget.total(), 5)
+
+    def test_batch_cli_reads_source_and_check_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.md"
+            source.write_text("source", encoding="utf-8")
+            checks = root / "checks.json"
+            checks.write_text(json.dumps([{"id": "C1", "kind": "claim", "statement": "claim",
+                                           "fragment": "source", "line": 1}]))
+            response = {"model": "jev-test", "usage": {"input_tokens": 100}, "answers": {
+                "choice_0": {"type": "choice", "choice": "supported", "confidence": 1.0,
+                             "probabilities": {"supported": 1.0, "contradicted": 0.0, "unclear": 0.0}}}}
+            argv = ["local_models.py", "--ledger", str(root / "budget.db"), "jev-batch", str(source), str(checks)]
+            output = io.StringIO()
+            with patch.object(sys, "argv", argv), patch.dict("os.environ", {"TYPESAFE_API_KEY": "key"}), \
+                    patch.object(local_models, "post_json", return_value=response), contextlib.redirect_stdout(output):
+                self.assertEqual(local_models.main(), 0)
+            self.assertEqual(json.loads(output.getvalue())["checks"]["C1"]["source"], str(source))
 
     def test_missing_usage_keeps_reservation(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -180,6 +180,10 @@ input and reviews the returned proposals against their sources. Use the
 `blind` command for Part B: provide only the event catalogue, requirements,
 and normative event contract text. Run the returned coverage check and
 investigate failures. Follow the full pilot prompt and retain every question.
+For multiple claim or event-ordering checks against the same source, use
+`jev-batch` to evaluate them together. Review every returned judgment against
+the source, including apparently confident answers. A Jev response is a
+proposal and does not itself resolve a hole or establish a requirement.
 
 Use one ledger per pilot. Its default $2 covers calls made through this
 tool. The calling agent's own costs are separate. See

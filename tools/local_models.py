@@ -6,6 +6,7 @@ only the supplied material. Costs are reserved in a local SQLite ledger.
 """
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -77,13 +78,7 @@ def jev(budget, source, question, key):
         raise ValueError("source, question, and key are required")
     payload = {"model": "jev-latest", "state": {"source": source},
                "questions": {"judgment": {"type": "noul", "instructions": question}}}
-    estimated_input = len(json.dumps(payload, ensure_ascii=False).encode("utf-8")) + 1000
-    reserved = max(1, math.ceil(estimated_input * 0.042))
-    ticket = budget.reserve("jev", reserved)
-    response = post_json(JEV_URL, payload, key)
-    input_tokens = _tokens(_usage(response).get("input_tokens"))
-    cost = math.ceil(input_tokens * 0.042)
-    budget.settle(ticket, cost)
+    response, input_tokens, cost, reserved = _jev_request(budget, payload, key)
     try:
         probability = response["answers"]["judgment"]["noul"]
         model = response["model"]
@@ -93,6 +88,115 @@ def jev(budget, source, question, key):
         raise ValueError("Jev returned an invalid probability")
     return {"model": model, "probability": probability, "input_tokens": input_tokens,
             "cost_microdollars": cost, "reservation_microdollars": reserved}
+
+
+def _jev_request(budget, payload, key):
+    estimated_input = len(json.dumps(payload, ensure_ascii=False).encode("utf-8")) + 1000
+    reserved = max(1, math.ceil(estimated_input * 0.042))
+    ticket = budget.reserve("jev", reserved)
+    response = post_json(JEV_URL, payload, key)
+    input_tokens = _tokens(_usage(response).get("input_tokens"))
+    cost = math.ceil(input_tokens * 0.042)
+    budget.settle(ticket, cost)
+    return response, input_tokens, cost, reserved
+
+
+def jev_batch(budget, source, source_ref, checks, key, model="jev-latest"):
+    """Evaluate independent cited claims or ordering checks against one source."""
+    if not all(isinstance(x, str) and x.strip() for x in (source, source_ref, key, model)):
+        raise ValueError("source, source reference, key, and model are required")
+    if not isinstance(checks, list) or not checks:
+        raise ValueError("checks must be a nonempty list")
+    questions = {}
+    seen_ids = set()
+    source_lines = source.splitlines()
+    for index, check in enumerate(checks):
+        if not isinstance(check, dict):
+            raise ValueError("each check must be an object")
+        ident, kind = check.get("id"), check.get("kind")
+        statement, fragment, line = check.get("statement"), check.get("fragment"), check.get("line")
+        if not all(isinstance(x, str) and x.strip() for x in (ident, statement, fragment)):
+            raise ValueError("each check requires a nonempty id, statement, and fragment")
+        if ident in seen_ids:
+            raise ValueError(f"duplicate check id: {ident}")
+        seen_ids.add(ident)
+        if kind not in ("claim", "ordering"):
+            raise ValueError(f"unknown check kind: {kind}")
+        if isinstance(line, bool) or not isinstance(line, int) or not 1 <= line <= len(source_lines):
+            raise ValueError(f"{ident}: citation line is outside source")
+        window = "\n".join(source_lines[max(0, line - 4):min(len(source_lines), line + 3)])
+        if fragment not in window:
+            raise ValueError(f"{ident}: citation fragment missing near line {line}")
+        if kind == "ordering":
+            instruction = ("Does the cited fragment itself explicitly contemplate this specific event ordering? "
+                           "Use the surrounding source only to interpret the fragment. "
+                           "A general requirement does not establish an unmentioned ordering. ")
+        else:
+            instruction = ("Does the cited fragment support this specific claim? "
+                           "Use the surrounding source only to interpret the fragment. ")
+        questions[f"choice_{index}"] = {
+            "type": "choice",
+            "instructions": instruction + f"Claim or ordering: {statement}\nCited fragment: {fragment}",
+            "criteria": {
+                "supported": "The cited fragment explicitly supports the claim or contemplates the specific ordering.",
+                "contradicted": "The cited fragment explicitly contradicts the claim or rules out the specific ordering.",
+                "unclear": "The cited fragment does not establish either conclusion, or the evidence is insufficient.",
+            },
+        }
+        if kind == "ordering":
+            questions[f"scope_{index}"] = {
+                "type": "noul",
+                "instructions": {
+                    "question": "Does the cited fragment explicitly describe or contemplate this particular sequence of events?",
+                    "fragment": fragment,
+                    "sequence": statement,
+                    "scope": "Consider only the fragment. An event missing from the fragment or an unmentioned event ordering is insufficient.",
+                },
+                "criteria": {
+                    "true": "The fragment describes the relevant events and the specific order between them.",
+                    "false": "At least one event or its ordering is not described in the fragment.",
+                },
+            }
+    payload = {"model": model, "state": {"source": source}, "questions": questions}
+    response, input_tokens, cost, reserved = _jev_request(budget, payload, key)
+    answers = response.get("answers")
+    if not isinstance(answers, dict) or set(answers) != set(questions):
+        raise ValueError("Jev response has missing or unexpected answers; usage was recorded")
+    model = response.get("model")
+    if not isinstance(model, str) or not model:
+        raise ValueError("Jev response lacks a model; usage was recorded")
+    results = {}
+    for index, check in enumerate(checks):
+        answer = answers[f"choice_{index}"]
+        if not isinstance(answer, dict):
+            raise ValueError("Jev response has an invalid answer; usage was recorded")
+        choice = answer.get("choice")
+        probabilities = answer.get("probabilities")
+        confidence = answer.get("confidence")
+        if (answer.get("type") != "choice" or choice not in ("supported", "contradicted", "unclear")
+                or not isinstance(probabilities, dict) or set(probabilities) != {"supported", "contradicted", "unclear"}
+                or any(isinstance(p, bool) or not isinstance(p, (int, float)) or not 0 <= p <= 1
+                       for p in probabilities.values())
+                or isinstance(confidence, bool) or not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1):
+            raise ValueError("Jev response has an invalid choice answer; usage was recorded")
+        if abs(sum(probabilities.values()) - 1) > 0.03 or probabilities[choice] < max(probabilities.values()):
+            raise ValueError("Jev response has an inconsistent probability distribution; usage was recorded")
+        results[check["id"]] = {"kind": check["kind"], "statement": check["statement"],
+                                "source": source_ref, "line": check["line"], "fragment": check["fragment"],
+                                "choice": choice, "probabilities": probabilities,
+                                "confidence": confidence, "review_required": True}
+        if check["kind"] == "ordering":
+            scope = answers[f"scope_{index}"]
+            if not isinstance(scope, dict) or scope.get("type") != "noul":
+                raise ValueError("Jev response has an invalid ordering scope answer; usage was recorded")
+            probability = scope.get("noul")
+            if (isinstance(probability, bool) or not isinstance(probability, (int, float))
+                    or not 0 <= probability <= 1):
+                raise ValueError("Jev response has an invalid ordering scope probability; usage was recorded")
+            results[check["id"]]["ordering_scope_probability"] = probability
+    return {"model": model, "source_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
+            "input_tokens": input_tokens, "cost_microdollars": cost,
+            "reservation_microdollars": reserved, "checks": results}
 
 
 def blind(budget, args, key):
@@ -143,6 +247,10 @@ def main():
     jev_parser = commands.add_parser("jev")
     jev_parser.add_argument("input", type=Path)
     jev_parser.add_argument("question")
+    batch_parser = commands.add_parser("jev-batch")
+    batch_parser.add_argument("input", type=Path, help="UTF-8 source shared by the checks")
+    batch_parser.add_argument("checks", type=Path, help="JSON array of checks")
+    batch_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
     blind_parser = commands.add_parser("blind")
     blind_parser.add_argument("analysis")
     blind_parser.add_argument("--repo", default=".")
@@ -166,6 +274,9 @@ def main():
             result = flash(budget, args.input.read_text(encoding="utf-8"), os.environ.get("DEEPSEEK_API_KEY"), args.max_tokens)
         elif args.command == "blind":
             return blind(budget, args, os.environ.get("DEEPSEEK_API_KEY"))
+        elif args.command == "jev-batch":
+            result = jev_batch(budget, args.input.read_text(encoding="utf-8"), str(args.input),
+                               json.loads(args.checks.read_text(encoding="utf-8")), os.environ.get("TYPESAFE_API_KEY"), args.model)
         else:
             result = jev(budget, args.input.read_text(encoding="utf-8"), args.question, os.environ.get("TYPESAFE_API_KEY"))
         print(json.dumps(result, ensure_ascii=False, indent=2))
