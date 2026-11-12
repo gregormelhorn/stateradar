@@ -100,7 +100,7 @@ Use this routing when `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` are set (see the
 
 | Step | Route | Your part |
 |---|---|---|
-| 1 Extraction, doctrine-line sweep | `draft-verify <source> <task>` once per requirements, doc, code, or test file, with a task that names the step and the items to extract | Consolidate the drafts into `extraction.md` |
+| 1 Extraction, doctrine-line sweep | `draft-verify <source> <task>` once per requirements, doc, code, or test file, with a task that names the step and the items to extract; split a file that exceeds Jev's context limit into excerpts | Consolidate the drafts into `extraction.md` |
 | 6 Control traces that cite a requirement or decision | `jev-batch` with one `ordering` check per cited fragment | Record the result on the scope line |
 | 8 Line-number accuracy | `jev-batch` with one `claim` check per cited behavioural claim, batched per file | Correct the citation or raise a question |
 | Part B | `blind` (Flash, packaged inputs only) | Classify the diff as described in Part B |

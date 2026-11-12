@@ -9,20 +9,44 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 
+# TypeSafe documents 429 (rate limit) and 529 (overloaded) as retryable with
+# exponential backoff and Retry-After; DeepSeek uses 429 and 503. Other errors
+# fail at once. Its cookbooks use a 120 s client timeout for batched requests.
+RETRY_STATUSES = {429, 503, 529}
+MAX_RETRIES = 3
+TIMEOUT_SECONDS = 120
+
+
+def _retry_delay(error, attempt):
+    header = error.headers.get("Retry-After") if error.headers else None
+    try:
+        return min(max(float(header), 0.0), 60.0)
+    except (TypeError, ValueError):
+        return min(2.0 ** attempt, 30.0)
+
+
 def post_json(url, payload, key):
-    request = urllib.request.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-        method="POST",
-    )
-    with urllib.request.urlopen(request, timeout=60) as response:
-        return json.load(response)
+    data = json.dumps(payload).encode("utf-8")
+    for attempt in range(MAX_RETRIES + 1):
+        request = urllib.request.Request(
+            url,
+            data=data,
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as error:
+            if error.code not in RETRY_STATUSES or attempt == MAX_RETRIES:
+                raise
+            time.sleep(_retry_delay(error, attempt))
 
 
 def evaluate(source, question, key):

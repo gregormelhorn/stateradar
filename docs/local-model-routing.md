@@ -149,6 +149,31 @@ blind inputs and follow `prompts/02-pilot.md` for the diff, divergence
 classification, and questions. The coverage checker checks row presence,
 not whether the predictions are correct.
 
+## Provider limits (checked 2026-11-12)
+
+From the TypeSafe and DeepSeek documentation:
+
+* Jev accepts at most 64k tokens per request (source plus all questions) and
+  32k per question (source plus one question). A larger request fails with
+  HTTP 400 `max_tokens_exceeded`; split the source into excerpts instead of
+  enabling the slower long-context mode. English is Jev's primary language;
+  checks over other languages are less accurate.
+* `jev-latest` and `jev-preview` currently resolve to `jev-1.14.0`. Aliases
+  move with releases, so pin the versioned ID for comparable measurements.
+  The response's `model` field records the version that answered.
+* There is no batch endpoint: `jev-batch` sends all questions for one source
+  in one request, which TypeSafe's parallel-questions cookbook shows gives the
+  same answers as separate calls at a fraction of the input cost.
+* `deepseek-flash` is the current Flash model name; DeepSeek serves it as
+  DeepSeek-V4.1-Flash-1017. Off-peak rates are half the peak rates used for
+  the reservation below.
+* Both clients retry HTTP 429, 503 and 529 up to three times, honouring
+  `Retry-After`, with a 120-second timeout per attempt. Other errors fail at
+  once. A retried request stays within the same ledger reservation.
+* The cookbook thresholds (for example 0.7 in the SDE cascade, 0.8 for
+  citation auto-acceptance) are calibrated on the vendor's data. They are not
+  StateRadar acceptance rules; see the [cascade plan](plan-model-cascade.md).
+
 ## Accounting and recovery
 
 The tool reserves an estimated maximum before each request using byte length,

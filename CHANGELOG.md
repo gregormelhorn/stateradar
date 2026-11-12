@@ -19,6 +19,11 @@
   question and never removes one; a `yes` scope line that Jev does not support
   voids the control verdict. The skill, the pilot command and AGENTS.md §8
   point to the routing.
+- **Provider hardening from the TypeSafe and DeepSeek docs.** HTTP 429, 503
+  and 529 are retried up to three times with `Retry-After`; the timeout is
+  120 s per attempt. Red probe: `tools/selftest/test_jev_local.py` failed 3/3
+  before the retry existed. `docs/local-model-routing.md` records Jev's
+  64k/32k context limits, model aliases, and the vendor-threshold caveat.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 
