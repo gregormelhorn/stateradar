@@ -53,6 +53,44 @@ one. An API error after reservation keeps the reservation until reconciled.
 Omit `--model` to use `jev-latest`; pin a specific available version for
 comparable measurements.
 
+### Evaluate a batch against reviewed examples
+
+`tools/jev_eval.py` compares one saved batch with independently reviewed labels.
+It runs locally and makes no provider calls. The labels use the same source
+hash and check identity as the batch, plus an attributed reviewer and the
+expected verdict. For example, if the saved batch was produced from the exact
+source and check shown below, a label file has this shape (replace the example
+hash with the batch's actual `source_sha256`):
+
+```json
+{
+  "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "checks": {
+    "C1": {
+      "kind": "claim", "statement": "The component stays failed.",
+      "source": "/path/to/source.md", "line": 12,
+      "fragment": "remains in FAILED", "expected": "supported",
+      "reviewer": "attributed independent reviewer"
+    }
+  }
+}
+```
+
+```bash
+python3 tools/jev_eval.py /path/to/labels.json /path/to/review.json
+```
+
+The reviewer must decide labels independently of the model result. The tool
+checks attribution is present, but cannot establish reviewer independence or
+whether a label is correct. It requires identical case IDs, source hashes and
+check identities and refuses empty or mismatched datasets. It reports the
+confusion matrix, exact matches, IDs judged supported against a non-supported
+label, unclear IDs, and the batch's reported input tokens and estimated cost.
+It does not evaluate the separate ordering-scope probability, choose a
+threshold, or include the costs of any other calls. Review all judgments and
+keep any unresolved domain question open. See [the cascade plan](plan-model-cascade.md)
+for dataset and end-to-end evaluation requirements.
+
 When comparing prompts, use held-out, independently labelled examples and
 repeat both batched and individual calls with the same source and questions.
 Measure per-option probabilities and Noul probabilities, elapsed time, and
