@@ -131,11 +131,16 @@ class DraftVerifyTest(unittest.TestCase):
                     contextlib.redirect_stderr(stderr):
                 self.assertEqual(local_models.main(), 1)
             self.assertIn("TYPESAFE_API_KEY", stderr.getvalue())
+            stdout = io.StringIO()
             with patch.object(sys, "argv", argv), \
                     patch.dict("os.environ", {"DEEPSEEK_API_KEY": "fk", "TYPESAFE_API_KEY": "jk"}), \
                     patch.object(local_models, "post_json", side_effect=fake_post), \
-                    contextlib.redirect_stdout(io.StringIO()):
+                    contextlib.redirect_stdout(stdout):
                 self.assertEqual(local_models.main(), 0)
+            summary = json.loads(stdout.getvalue())
+            self.assertNotIn("claims", summary, "stdout carries a summary, the full result goes to --output")
+            self.assertEqual(summary["claims_total"], 1)
+            self.assertEqual(summary["output"], str(out))
             self.assertEqual(json.loads(out.read_text())["claims"]["C1"]["jev"]["choice"], "supported")
 
 

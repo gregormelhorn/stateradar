@@ -11,7 +11,6 @@ import json
 import math
 import os
 import sys
-import tempfile
 import urllib.error
 from pathlib import Path
 
@@ -303,31 +302,33 @@ def blind(budget, args, key):
     if not args.requirements or not args.contracts:
         raise ValueError("blind pass requires requirements and event contracts")
     pack_root = Path(__file__).resolve().parent.parent
-    with tempfile.TemporaryDirectory() as temporary:
-        package_path = Path(temporary) / "package.md"
-        package_args = argparse.Namespace(
-            repo=args.repo, analysis_dir=args.analysis,
-            requirements=args.requirements + args.contracts,
-            contracts=[], out=str(package_path), for_dispatch=False,
-        )
-        if part_b_pack.assemble(package_args, pack_root) != 0:
-            raise ValueError("blind input package failed validation")
-        package = package_path.read_text(encoding="utf-8")
-        package += ("\nThe coverage checklist must use one exact line per event or pair "
-                    "in the form '- [x] EVENT_ID', with no other text on that line.\n")
-        try:
-            result = flash(budget, package, key, args.max_tokens)
-        except IncompleteResponse as error:
-            args.output.write_text(error.result["text"], encoding="utf-8")
-            raise
-        args.output.write_text(result["text"], encoding="utf-8")
-        print(json.dumps({k: v for k, v in result.items() if k != "text"}, indent=2))
-        check_args = argparse.Namespace(repo=args.repo, analysis_dir=args.analysis, check=str(args.output))
-        status = part_b_pack.check(check_args)
-        if result["finish_reason"] != "stop":
-            print("PART-B: incomplete provider response", file=sys.stderr)
-            return 1
-        return status
+    # Keep the exact dispatched package next to the output: it is the record of
+    # what the blind pass saw, and a temporary path would be gone after the run.
+    package_path = args.output.with_suffix(".package.md")
+    package_args = argparse.Namespace(
+        repo=args.repo, analysis_dir=args.analysis,
+        requirements=args.requirements + args.contracts,
+        contracts=[], out=str(package_path), for_dispatch=False,
+    )
+    if part_b_pack.assemble(package_args, pack_root) != 0:
+        raise ValueError("blind input package failed validation")
+    package = package_path.read_text(encoding="utf-8")
+    package += ("\nThe coverage checklist must use one exact line per event or pair "
+                "in the form '- [x] EVENT_ID', with no other text on that line.\n")
+    package_path.write_text(package, encoding="utf-8")
+    try:
+        result = flash(budget, package, key, args.max_tokens)
+    except IncompleteResponse as error:
+        args.output.write_text(error.result["text"], encoding="utf-8")
+        raise
+    args.output.write_text(result["text"], encoding="utf-8")
+    print(json.dumps({k: v for k, v in result.items() if k != "text"}, indent=2))
+    check_args = argparse.Namespace(repo=args.repo, analysis_dir=args.analysis, check=str(args.output))
+    status = part_b_pack.check(check_args)
+    if result["finish_reason"] != "stop":
+        print("PART-B: incomplete provider response", file=sys.stderr)
+        return 1
+    return status
 
 
 def main():
@@ -393,6 +394,15 @@ def main():
                 args.output.with_suffix(".draft.txt").write_text(error.text, encoding="utf-8")
                 raise
             args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            claims = result["claims"].values()
+            choices = {}
+            for claim in claims:
+                if claim["jev"]:
+                    choices[claim["jev"]["choice"]] = choices.get(claim["jev"]["choice"], 0) + 1
+            result = {"output": str(args.output), "claims_total": len(result["claims"]),
+                      "citation_failures": sum(claim["citation_check"] != "ok" for claim in claims),
+                      "jev_choices": choices, "questions": len(result["questions"]),
+                      "draft": result["draft"], "verification": result["verification"]}
         elif args.command == "jev-batch":
             result = jev_batch(budget, args.input.read_text(encoding="utf-8"), str(args.input),
                                json.loads(args.checks.read_text(encoding="utf-8")), os.environ.get("TYPESAFE_API_KEY"), args.model)

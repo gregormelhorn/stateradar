@@ -216,6 +216,10 @@ class ModelTest(unittest.TestCase):
             with patch.object(local_models, "flash", side_effect=fake_flash):
                 self.assertEqual(local_models.blind(budget, args, "key"), 0)
             self.assertTrue(args.output.is_file())
+            package = root / "blind.package.md"
+            self.assertTrue(package.is_file(), "the dispatched package is kept next to the output")
+            self.assertIn("requirement details", package.read_text())
+            self.assertNotIn("SECRET MATRIX", package.read_text())
 
     def test_blind_missing_coverage_fails(self):
         with tempfile.TemporaryDirectory() as directory:

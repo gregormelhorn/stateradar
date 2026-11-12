@@ -24,6 +24,14 @@
   120 s per attempt. Red probe: `tools/selftest/test_jev_local.py` failed 3/3
   before the retry existed. `docs/local-model-routing.md` records Jev's
   64k/32k context limits, model aliases, and the vendor-threshold caveat.
+- **First live smoke run** (device-connection example, $0.008): no provider
+  errors. Fixes from it: the pilot reads Jev's ordering `choice` and scope
+  probability together (a `supported` ordering with scope 0.11 was otherwise
+  evidence); `blind` keeps the dispatched package as `<output>.package.md`
+  instead of printing a deleted temp path; `draft-verify` prints a summary
+  instead of the full result. Open findings (pairs missing from the example
+  catalogue, blind vocabulary drift, fragment sensitivity) are in roadmap
+  entry 11.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

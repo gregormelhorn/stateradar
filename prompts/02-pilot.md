@@ -8,7 +8,9 @@
   and Jev checks cited claims and the requirement-scope line
   (`tools/local_models.py draft-verify`, `jev-batch`, `blind`). The calling
   agent consolidates and reviews; a model judgment may add a question but
-  never removes one. Nothing is accepted automatically.
+  never removes one. An ordering counts as source-backed only when Jev's
+  choice and its separate scope probability both back it (first live run:
+  `supported` with scope 0.11). Nothing is accepted automatically.
 * v1.15 — check_guards.py delegates the proof procedures (disjointness,
   coverage, boundary probes) to the pack library `tools/guard_proofs.py`
   instead of reimplementing z3 boilerplate per component — the same
@@ -109,9 +111,10 @@ Rules for every routed step:
 
 1. **Drafts are proposals.** A Flash claim enters an artifact only after you read its cited line. Re-cite or drop every claim whose `citation_check` is not `ok`, and say which in `extraction.md`.
 2. **Jev may add a question, never remove one.** If Jev returns `contradicted` or `unclear` for a claim you keep, re-read the source and write why you keep it, or raise a question. A `supported` answer does not resolve a hole, establish a requirement, or replace the requirement-scope rule.
-3. **Scope line.** On a Step-6 control trace, write `jev: <choice>, scope <probability>` next to *cited text contemplates this ordering: yes/no*. If you write `yes` and Jev's choice is not `supported`, the control verdict is void: raise a question that cites both.
-4. **Carry every draft question forward.** Each entry in a draft's `questions` list ends as a Q in Step 7 or as a reasoned fold into an existing Q.
-5. **Failures are results.** A rejected draft, an incomplete response, an API error, or an exceeded ledger stops that call only. Record it in `summary.md` and do the step yourself. Never retry by loosening the task or the citation check.
+3. **Ordering checks read both answers.** Every `ordering` result carries a `choice` and an independent `ordering_scope_probability`. They often disagree: the first live run returned `supported` with scope 0.17 and 0.11 for orderings the text never describes. Treat an ordering as source-backed only when the choice is `supported` **and** the scope probability is at least 0.5. Anything else is not evidence: a drafted ordering claim becomes a question, not an `explicit-requirement`. This only adds questions; it is not an acceptance threshold.
+4. **Scope line.** On a Step-6 control trace, write `jev: <choice>, scope <probability>` next to *cited text contemplates this ordering: yes/no*. If you write `yes` and Jev does not back the ordering under rule 3, the control verdict is void: raise a question that cites both.
+5. **Carry every draft question forward.** Each entry in a draft's `questions` list ends as a Q in Step 7 or as a reasoned fold into an existing Q.
+6. **Failures are results.** A rejected draft, an incomplete response, an API error, or an exceeded ledger stops that call only. Record it in `summary.md` and do the step yourself. Never retry by loosening the task or the citation check.
 
 End `summary.md` with the ledger path, the output of `local_models.py --ledger <path> status`, and every failed or skipped model call.
 

@@ -77,7 +77,8 @@ python3 tools/local_models.py --ledger "$ledger" draft-verify \
 
 The result records the source path and hash, the Flash and Jev usage, every
 claim with its citation check and Jev judgment, and every draft question.
-Everything is marked for review; nothing is accepted. `prompts/02-pilot.md`
+The command prints a summary (counts, citation failures, Jev choices,
+usage); the full result is only in the output file. Everything is marked for review; nothing is accepted. `prompts/02-pilot.md`
 ("Model routing") says which pilot steps use this command and how the
 calling agent consolidates the result. The command needs both API keys.
 
@@ -144,6 +145,8 @@ python3 tools/local_models.py --ledger "$ledger" blind domain-analysis/component
   --contracts docs/event-contracts.md --output /path/to/blind-output.md
 ```
 
+The exact package sent to Flash is kept next to the output as
+`<output>.package.md`, as the record of what the blind pass saw.
 The calling agent must review the catalogue and supplied files for suitable
 blind inputs and follow `prompts/02-pilot.md` for the diff, divergence
 classification, and questions. The coverage checker checks row presence,

@@ -210,10 +210,17 @@ removes one. 429/503/529 responses are retried with `Retry-After`.
 
 Open, in order:
 
-1. **First routed pilot end to end.** The pack's selftests mock the HTTP
-   layer, and the routed pilot has not yet run end to end. Run one pilot with
-   a fresh ledger, record failures, rejected drafts and the ledger total in
-   `summary.md`, and compare with an agent-only run of the same component.
+1. **Full routed pilot.** A first live smoke run (2026-11-13, device-connection
+   example, $0.008 in total) exercised `draft-verify`, `jev-batch` and `blind`
+   without provider errors. Its findings: Jev's ordering `choice` and scope
+   probability disagree (`supported` with scope 0.11), now handled by the pilot's
+   rule 3; the same claim scored 0.71 or 1.0 depending on the cited fragment;
+   the blind coverage check saw 0 pair orderings because the example catalogue
+   carries no `P-` ids, so it cannot fail on missing pairs; and Flash's blind
+   table used disposition wording outside the closed vocabulary, which the
+   coverage check does not test. Next run a whole pilot on the routed path,
+   record failures, rejected drafts and the ledger total in `summary.md`, and
+   compare with an agent-only run of the same component.
 2. **Labelled evaluation set.** Collect attributed, independently reviewed
    labels for claim and requirement-scope checks across components (stage 1
    of the cascade plan), including races outside a requirement's scope and
