@@ -210,26 +210,30 @@ removes one. 429/503/529 responses are retried with `Retry-After`.
 
 Open, in order:
 
-1. **Full routed pilot.** A first live smoke run (2026-11-13, device-connection
-   example, $0.008 in total) exercised `draft-verify`, `jev-batch` and `blind`
-   without provider errors. Its findings: Jev's ordering `choice` and scope
-   probability disagree (`supported` with scope 0.11), now handled by the pilot's
-   rule 3; the same claim scored 0.71 or 1.0 depending on the cited fragment;
-   the blind coverage check saw 0 pair orderings because the example catalogue
-   carries no `P-` ids, so it cannot fail on missing pairs; and Flash's blind
-   table used disposition wording outside the closed vocabulary, which the
-   coverage check does not test. Next run a whole pilot on the routed path,
-   record failures, rejected drafts and the ledger total in `summary.md`, and
-   compare with an agent-only run of the same component.
+1. **Full routed pilot.** A first live smoke run (2026-11-13,
+   device-connection example, 8,245 microdollars in total; outputs in
+   `docs/evidence/routing-smoke-2026-11-13/`) exercised `draft-verify`,
+   `jev-batch` and `blind` without provider errors. Its findings: Jev's
+   ordering `choice` and scope probability disagree (`supported` with scope
+   0.11), now handled by the pilot's routing rule 4; the same claim scored
+   0.71 or 1.0 depending on the cited fragment; the blind coverage check saw 0
+   pair orderings because the example catalogue carries no `P-` ids, so it
+   cannot fail on missing pairs; and Flash's blind table used disposition
+   wording outside the closed vocabulary, which the coverage check does not
+   test. Next run a whole pilot on the routed path, record failures, rejected
+   drafts and the ledger total in `summary.md`, and compare with an agent-only
+   run of the same component.
 2. **Labelled evaluation set.** Collect attributed, independently reviewed
    labels for claim and requirement-scope checks across components (stage 1
    of the cascade plan), including races outside a requirement's scope and
    seam-contract cases. Keep a held-out group per component or issue.
 3. **Calibrated thresholds, then escalation.** TypeSafe's cookbooks use
-   vendor-calibrated cut-offs (0.7 per-field gate, 0.8 citation
-   auto-accept, 0.3/0.7 Noul bands). StateRadar adopts none of them until the
-   labelled set supports a value; any escalation policy is compared end to end
-   against the prior workflow.
+   vendor-calibrated cut-offs (0.7 per-field gate, 0.8 citation auto-accept,
+   0.3/0.7 Noul bands). StateRadar adopts none of them until the labelled set
+   supports a value. The pilot's provisional 0.5 scope cut-off is
+   question-only (it can void a verdict, never accept one) and is the first
+   value to calibrate; any escalation policy is compared end to end against
+   the prior workflow.
 4. **Known limits to design around.** Jev accepts 64k tokens per request and
    32k per question, so long sources need excerpting with provenance; English
    is its primary language, so non-English requirements need a measured

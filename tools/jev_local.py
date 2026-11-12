@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ask Jev one bounded question about a supplied source passage.
+"""Ask Jev one bounded question about a supplied source passage (metered).
 
 Results are advisory. The caller retains the source and decides what to do
 with the returned probability.
@@ -7,7 +7,9 @@ with the returned probability.
 
 import argparse
 import json
+import math
 import os
+import sqlite3
 import sys
 import time
 import urllib.error
@@ -26,9 +28,12 @@ TIMEOUT_SECONDS = 120
 def _retry_delay(error, attempt):
     header = error.headers.get("Retry-After") if error.headers else None
     try:
-        return min(max(float(header), 0.0), 60.0)
+        seconds = float(header)
     except (TypeError, ValueError):
+        seconds = math.nan  # absent, or an HTTP date: use backoff
+    if not math.isfinite(seconds):
         return min(2.0 ** attempt, 30.0)
+    return min(max(seconds, 0.0), 60.0)
 
 
 def post_json(url, payload, key):
@@ -49,28 +54,6 @@ def post_json(url, payload, key):
             time.sleep(_retry_delay(error, attempt))
 
 
-def evaluate(source, question, key):
-    payload = {
-        "model": "jev-latest",
-        "state": {"source": source},
-        "questions": {
-            "ordering": {"type": "noul", "instructions": question},
-        },
-    }
-    response = post_json("https://api.typesafe.ai/v1/systemone", payload, key)
-    try:
-        probability = response["answers"]["ordering"]["noul"]
-        input_tokens = response["usage"]["input_tokens"]
-        model = response["model"]
-    except (KeyError, TypeError) as error:
-        raise ValueError("Jev response lacks an answer, model, or token usage") from error
-    if isinstance(probability, bool) or not isinstance(probability, (int, float)) or not 0 <= probability <= 1:
-        raise ValueError("Jev returned an invalid probability")
-    if isinstance(input_tokens, bool) or not isinstance(input_tokens, int) or input_tokens < 0:
-        raise ValueError("Jev returned invalid token usage")
-    return {"model": model, "probability": probability, "input_tokens": input_tokens}
-
-
 def main():
     from local_budget import Budget, BudgetExceeded
     from local_models import jev
@@ -87,7 +70,7 @@ def main():
     try:
         budget = Budget(args.ledger, args.limit_microdollars)
         result = jev(budget, args.source.read_text(encoding="utf-8"), args.question, key)
-    except (OSError, ValueError, BudgetExceeded, urllib.error.URLError) as error:
+    except (OSError, ValueError, BudgetExceeded, urllib.error.URLError, sqlite3.Error) as error:
         print(f"Jev request failed: {error}", file=sys.stderr)
         return 1
     print(json.dumps(result, indent=2))

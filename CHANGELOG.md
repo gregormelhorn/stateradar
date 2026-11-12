@@ -7,31 +7,42 @@
 - **Local model routing.** `tools/local_models.py` sends bounded drafts and
   the blind Part B to DeepSeek Flash and narrow source-grounded judgments to
   Jev (`flash`, `jev`, `jev-batch`, `blind`), with a per-pilot SQLite cost
-  ledger (`tools/local_budget.py`) and an offline evaluator against
-  independently reviewed labels (`tools/jev_eval.py`).
+  ledger (`tools/local_budget.py`) and an offline evaluator for saved
+  `jev-batch` results against independently reviewed labels
+  (`tools/jev_eval.py`).
 - **Draft and verify.** New `draft-verify` command: Flash drafts cited claims
   and questions as JSON, code rejects malformed drafts and checks every
   citation, and Jev judges only the citable claims in one batch. Failed
-  citations and all draft questions are kept. Red probe:
-  `tools/selftest/test_draft_verify.py` failed 7/7 before the command existed.
+  citations, all draft questions and, if Jev fails, the paid draft are kept.
+  Red probe: `tools/selftest/test_draft_verify.py` failed 7/7 before the
+  command existed.
 - **02-pilot v1.16 — Model routing section.** Steps 1, 6, 8 and Part B route
-  through these commands when both API keys are set. A Jev judgment may add a
-  question and never removes one; a `yes` scope line that Jev does not support
-  voids the control verdict. The skill, the pilot command and AGENTS.md §8
-  point to the routing.
+  through these commands when both API keys are set. Drafts seed a step and
+  never bound it; a Jev judgment may add a question and never removes one or
+  sets provenance; Part B is never done by the Part-A agent, also when `blind`
+  fails. An ordering counts as source-backed only when Jev's choice is
+  `supported` and its scope probability is at least 0.5; the cut-off is
+  provisional and uncalibrated and can only add questions. The skill, the
+  pilot command and AGENTS.md §8 follow.
 - **Provider hardening from the TypeSafe and DeepSeek docs.** HTTP 429, 503
-  and 529 are retried up to three times with `Retry-After`; the timeout is
-  120 s per attempt. Red probe: `tools/selftest/test_jev_local.py` failed 3/3
-  before the retry existed. `docs/local-model-routing.md` records Jev's
-  64k/32k context limits, model aliases, and the vendor-threshold caveat.
-- **First live smoke run** (device-connection example, $0.008): no provider
-  errors. Fixes from it: the pilot reads Jev's ordering `choice` and scope
-  probability together (a `supported` ordering with scope 0.11 was otherwise
-  evidence); `blind` keeps the dispatched package as `<output>.package.md`
-  instead of printing a deleted temp path; `draft-verify` prints a summary
-  instead of the full result. Open findings (pairs missing from the example
-  catalogue, blind vocabulary drift, fragment sensitivity) are in roadmap
-  entry 11.
+  and 529 are retried up to three times (numeric `Retry-After` up to 60 s,
+  otherwise backoff); the timeout is 120 s per attempt. Red probe: the three
+  new retry tests in `tools/selftest/test_jev_local.py` failed (3 of 5) before
+  the retry existed. `docs/local-model-routing.md` records Jev's 64k/32k
+  context limits, model aliases, and the vendor-threshold caveat.
+- **First live smoke run** (device-connection example, 8,245 microdollars, no
+  provider errors; outputs in `docs/evidence/routing-smoke-2026-11-13/`).
+  Fixes from it: the ordering rule above (a `supported` ordering had scope
+  0.11); `blind` keeps the dispatched package as `<output stem>.package.md`
+  instead of printing a deleted temp path; `draft-verify` prints a summary.
+- **Review round (3 reviewers).** `blind` passes contracts through the
+  contract reader and refuses a whole source file, so implementation code
+  cannot reach the blind pass; failed requests name their reservation for
+  `settle`; output directories are checked before anything is paid for;
+  citation fragments must be a single line of at least four non-space
+  characters; SQLite errors are reported instead of raised; `jev` and
+  `jev-batch` take `--model` and `jev-batch` takes `--output`; the unmetered
+  `jev_local.evaluate` path is removed. Each fix has a red test first.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

@@ -1,8 +1,8 @@
 # Local model routing
 
 The implemented commands support bounded drafting, a draft-and-verify chain,
-batched semantic checks and offline evaluation. They do not automatically accept a draft or route difficult
-cases to a stronger model. The next pilot and its evaluation criteria are in
+batched semantic checks and offline evaluation. They do not automatically
+accept a draft or route difficult cases to a stronger model. The next pilot and its evaluation criteria are in
 the [model cascade plan](plan-model-cascade.md); broader project work is in the
 [roadmap](roadmap.md).
 
@@ -17,8 +17,12 @@ ledger="$HOME/.local/state/stateradar/example-pilot.sqlite"
 python3 tools/local_models.py --ledger "$ledger" status
 python3 tools/local_models.py --ledger "$ledger" flash /path/to/task-and-source.txt
 python3 tools/local_models.py --ledger "$ledger" jev /path/to/source.txt \
-  'Does the source explicitly describe the specified event ordering?'
+  'Does the source explicitly describe the specified event ordering?' --model jev-1.14.0
 ```
+
+A new ledger takes its limit from `--limit-microdollars` on the first call
+(default 2,000,000). The flag only sets the initial limit: passing a
+different value to an existing ledger fails, so change it with `set-limit`.
 
 The Flash input must include the task and the source excerpts needed to do
 it. Each invocation is a fresh text-only call. Flash cannot browse the repo
@@ -41,11 +45,12 @@ the same source file in one request. Supply a JSON array such as:
 
 ```bash
 python3 tools/local_models.py --ledger "$ledger" jev-batch \
-  /path/to/source.md /path/to/checks.json --model jev-1.14.0 > /path/to/review.json
+  /path/to/source.md /path/to/checks.json --model jev-1.14.0 --output /path/to/batch.json
 ```
 
-Each `line` is a one-based line in the source file and each `fragment` must
-occur within three lines of it. Missing fragments, invalid lines, duplicate
+Each `line` is a one-based integer line in the source file. Each `fragment`
+is a single line of at least four non-space characters that occurs on a line
+within three lines of it, the pack-wide citation window. Missing fragments, invalid lines, duplicate
 IDs and incomplete responses fail. All questions see the same source and
 are evaluated independently. Prepare a separate batch for another source.
 The response includes the source path and content hash, citation, statement,
@@ -65,26 +70,38 @@ comparable measurements.
 task and the numbered source and must answer with JSON: a `claims` list
 (`id`, `kind` = `claim` or `ordering`, `statement`, `line`, `fragment`) and a
 `questions` list. Code rejects a draft that is not this structure; the raw
-text is saved next to the output as `<output>.draft.txt`. Each claim's
+text is saved next to the output with the extension replaced
+(`--output review.json` gives `review.draft.txt`). Each claim's
 citation is then checked against the source with the same rule as
 `jev-batch`. Claims that fail keep their reason in `citation_check` and are
 never sent to Jev. The citable claims go to Jev in one batch.
 
 ```bash
 python3 tools/local_models.py --ledger "$ledger" draft-verify \
-  docs/requirements.md /path/to/task.md --output /path/to/review.json
+  docs/requirements.md /path/to/task.md --output /path/to/draft-review.json \
+  --model jev-1.14.0
 ```
 
 The result records the source path and hash, the Flash and Jev usage, every
 claim with its citation check and Jev judgment, and every draft question.
 The command prints a summary (counts, citation failures, Jev choices,
-usage); the full result is only in the output file. Everything is marked for review; nothing is accepted. `prompts/02-pilot.md`
+usage); the full result is only in the output file. If Jev fails after the
+draft was paid for, the result is still written, with the error in
+`verification.error` and no Jev judgments, and the command exits 1.
+Everything is marked for review; nothing is accepted. `prompts/02-pilot.md`
 ("Model routing") says which pilot steps use this command and how the
-calling agent consolidates the result. The command needs both API keys.
+calling agent consolidates the result, including the rule that an ordering
+counts as source-backed only when Jev's choice is `supported` and its scope
+probability is at least 0.5. That cut-off is provisional and uncalibrated: it
+can only turn an ordering into a question and never accepts one. The command
+needs both API keys. Every command that takes `--output` checks the directory
+is writable before any request is made.
 
 ### Evaluate a batch against reviewed examples
 
-`tools/jev_eval.py` compares one saved batch with independently reviewed labels.
+`tools/jev_eval.py` compares one saved `jev-batch` result (its `--output`
+file or redirected stdout) with independently reviewed labels. It does not
+read `draft-verify` output, which nests the judgments under `claims`.
 It runs locally and makes no provider calls. The labels use the same source
 hash and check identity as the batch, plus an attributed reviewer and the
 expected verdict. For example, if the saved batch was produced from the exact
@@ -106,7 +123,7 @@ hash with the batch's actual `source_sha256`):
 ```
 
 ```bash
-python3 tools/jev_eval.py /path/to/labels.json /path/to/review.json
+python3 tools/jev_eval.py /path/to/labels.json /path/to/batch.json
 ```
 
 The reviewer must decide labels independently of the model result. The tool
@@ -133,11 +150,16 @@ describe these techniques. Feature discovery needs a labelled dataset and a
 held-out evaluation; it is not part of the batch command.
 
 For Part B, put requirements and normative event contract text in separate
-files. Select their contents before running the command. The catalogue lives
+files. Select their contents before running the command. `--contracts` takes
+a prepared `.md`, `.txt` or `.rst` file whole, or `FILE.py:ClassA,ClassB` for
+the class blocks only; a source file without class names is refused, so the
+blind pass never receives implementation code. The catalogue lives
 in the analysis directory. The call receives only the assembled package and
 no tools or conversation history. The command checks the returned table with
 the existing Part-B coverage checker and returns a failure for missing rows,
-missing checklist ticks, or truncated output.
+missing checklist ticks, or truncated output. It does not check the
+disposition vocabulary, and it only requires pair rows when the catalogue
+carries `P-` ids.
 
 ```bash
 python3 tools/local_models.py --ledger "$ledger" blind domain-analysis/component \
@@ -145,8 +167,10 @@ python3 tools/local_models.py --ledger "$ledger" blind domain-analysis/component
   --contracts docs/event-contracts.md --output /path/to/blind-output.md
 ```
 
-The exact package sent to Flash is kept next to the output as
-`<output>.package.md`, as the record of what the blind pass saw.
+The exact package sent to Flash is kept next to the output with the
+extension replaced (`blind-output.md` gives `blind-output.package.md`), as the
+record of what the blind pass saw. If `blind` fails, the Part-A agent never
+writes the table itself; it dispatches a fresh blind session.
 The calling agent must review the catalogue and supplied files for suitable
 blind inputs and follow `prompts/02-pilot.md` for the diff, divergence
 classification, and questions. The coverage checker checks row presence,
@@ -165,14 +189,17 @@ From the TypeSafe and DeepSeek documentation:
   move with releases, so pin the versioned ID for comparable measurements.
   The response's `model` field records the version that answered.
 * There is no batch endpoint: `jev-batch` sends all questions for one source
-  in one request, which TypeSafe's parallel-questions cookbook shows gives the
-  same answers as separate calls at a fraction of the input cost.
+  in one request. TypeSafe's parallel-questions cookbook reports the same
+  answers as separate calls at a fraction of the input cost; this is not
+  measured for StateRadar.
 * `deepseek-flash` is the current Flash model name; DeepSeek serves it as
   DeepSeek-V4.1-Flash-1017. Off-peak rates are half the peak rates used for
   the reservation below.
-* Both clients retry HTTP 429, 503 and 529 up to three times, honouring
-  `Retry-After`, with a 120-second timeout per attempt. Other errors fail at
-  once. A retried request stays within the same ledger reservation.
+* Both clients retry HTTP 429, 503 and 529 up to three times, with a
+  120-second timeout per attempt. A numeric `Retry-After` is honoured up to
+  60 seconds; an absent, non-finite or HTTP-date value falls back to
+  exponential backoff (1, 2, 4 s). Other errors fail at once. A retried
+  request stays within the same ledger reservation.
 * The cookbook thresholds (for example 0.7 in the SDE cascade, 0.8 for
   citation auto-acceptance) are calibrated on the vendor's data. They are not
   StateRadar acceptance rules; see the [cascade plan](plan-model-cascade.md).
@@ -193,11 +220,12 @@ future calls when the limit is exceeded. Timeouts, invalid usage responses,
 and interrupted calls retain their reservations, since their actual costs
 are unknown. Concurrent calls to one ledger reserve using SQLite transactions.
 The ledger covers only calls through these tools. The main agent or any
-other provider has separate billing, so the proposed $3 for strong-model
-review is a planning allowance and is not enforced here. Failed requests
+other provider has separate billing, so any budget for strong-model review
+is not enforced here. Failed requests
 and provider billing changes may also make the ledger differ from an invoice.
 
-Inspect reservations with `status`. After checking the provider's usage,
+A failed request reports its reservation id in the error. Inspect
+reservations with `status`. After checking the provider's usage,
 reconcile an uncertain call with `settle CALL_ID ACTUAL_MICRODOLLARS`.
 Change the limit deliberately with `set-limit MICRODOLLARS`.
 

@@ -112,6 +112,81 @@ class DraftVerifyTest(unittest.TestCase):
         self.assertIn("outside source", result["claims"]["C1"]["citation_check"])
         self.assertIsNone(result["verification"])
 
+    def test_fence_with_preamble_or_one_line_is_accepted(self):
+        body = json.dumps({"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1,
+                                       "fragment": "connects"}], "questions": []})
+        for draft in ("Here is the result:\n```json\n" + body + "\n```", "```json " + body + "```"):
+            with tempfile.TemporaryDirectory() as directory:
+                result, _ = self.run_cascade(draft, Budget(Path(directory) / "usage.db", 1_000_000))
+            self.assertEqual(result["claims"]["C1"]["citation_check"], "ok")
+
+    def test_jev_failure_keeps_the_paid_draft(self):
+        draft = json.dumps({"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1,
+                                        "fragment": "connects"}], "questions": ["Q?"]})
+
+        def fake_post(url, payload, key):
+            if url == local_models.FLASH_URL:
+                return flash_response(draft)
+            raise OSError("HTTP Error 400")
+
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1_000_000)
+            with patch.object(local_models, "post_json", side_effect=fake_post):
+                result = local_models.draft_verify(budget, SOURCE, "req.md", "task", "fk", "jk")
+        self.assertIn("HTTP Error 400", result["verification"]["error"])
+        self.assertEqual(result["claims"]["C1"]["citation_check"], "ok")
+        self.assertIsNone(result["claims"]["C1"]["jev"])
+        self.assertEqual(result["questions"], ["Q?"])
+
+    def test_cli_rejects_unwritable_output_before_any_call(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "req.md").write_text(SOURCE, encoding="utf-8")
+            (root / "task.md").write_text("task", encoding="utf-8")
+            argv = ["local_models.py", "--ledger", str(root / "b.db"), "draft-verify", str(root / "req.md"),
+                    str(root / "task.md"), "--output", str(root / "missing" / "review.json")]
+            with patch.object(sys, "argv", argv), \
+                    patch.dict("os.environ", {"DEEPSEEK_API_KEY": "fk", "TYPESAFE_API_KEY": "jk"}), \
+                    patch.object(local_models, "post_json") as post, contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(local_models.main(), 1)
+            post.assert_not_called()
+
+    def test_cli_saves_rejected_draft_text(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "req.md").write_text(SOURCE, encoding="utf-8")
+            (root / "task.md").write_text("task", encoding="utf-8")
+            argv = ["local_models.py", "--ledger", str(root / "b.db"), "draft-verify", str(root / "req.md"),
+                    str(root / "task.md"), "--output", str(root / "review.json")]
+            with patch.object(sys, "argv", argv), \
+                    patch.dict("os.environ", {"DEEPSEEK_API_KEY": "fk", "TYPESAFE_API_KEY": "jk"}), \
+                    patch.object(local_models, "post_json", return_value=flash_response("no json here")), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(local_models.main(), 1)
+            self.assertEqual((root / "review.draft.txt").read_text(), "no json here")
+
+    def test_cli_exits_nonzero_but_writes_result_when_jev_fails(self):
+        draft = json.dumps({"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1,
+                                        "fragment": "connects"}], "questions": []})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "req.md").write_text(SOURCE, encoding="utf-8")
+            (root / "task.md").write_text("task", encoding="utf-8")
+            argv = ["local_models.py", "--ledger", str(root / "b.db"), "draft-verify", str(root / "req.md"),
+                    str(root / "task.md"), "--output", str(root / "review.json")]
+
+            def fake_post(url, payload, key):
+                if url == local_models.FLASH_URL:
+                    return flash_response(draft)
+                raise OSError("timeout")
+
+            with patch.object(sys, "argv", argv), \
+                    patch.dict("os.environ", {"DEEPSEEK_API_KEY": "fk", "TYPESAFE_API_KEY": "jk"}), \
+                    patch.object(local_models, "post_json", side_effect=fake_post), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(local_models.main(), 1)
+            self.assertIn("timeout", json.loads((root / "review.json").read_text())["verification"]["error"])
+
     def test_cli_writes_result_and_requires_both_keys(self):
         draft = json.dumps({"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1, "fragment": "connects"}],
                             "questions": []})

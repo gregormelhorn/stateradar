@@ -1,0 +1,416 @@
+{
+  "source": "examples/device-connection/README.md",
+  "source_sha256": "796b6f7212bab1af6e4a17ecc752dbca689fa7d804884482a2bad74f0f77822a",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 724,
+    "output_tokens": 2077,
+    "cost_microdollars": 2710,
+    "reservation_microdollars": 6093
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 4762,
+    "cost_microdollars": 201,
+    "reservation_microdollars": 874
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "Calling connect() initiates a connection attempt.",
+      "line": 9,
+      "fragment": "Calling `connect()` initiates a connection attempt.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "Calling connect() when already connected or connecting is a no-op.",
+      "line": 9,
+      "fragment": "If already",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.78,
+          "contradicted": 0.0,
+          "unclear": 0.22
+        },
+        "confidence": 0.67
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "Calling disconnect() cancels any pending connection attempt.",
+      "line": 13,
+      "fragment": "Calling `disconnect()` cancels any pending connection attempt",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "Calling disconnect() returns the component to DISCONNECTED state.",
+      "line": 14,
+      "fragment": "returns the component to DISCONNECTED state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "When a connection attempt succeeds, the component enters CONNECTED state.",
+      "line": 17,
+      "fragment": "When a connection attempt succeeds, the component enters CONNECTED",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "When a connection attempt succeeds, the retry counter resets to zero.",
+      "line": 18,
+      "fragment": "the retry counter resets to zero.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.92,
+          "contradicted": 0.0,
+          "unclear": 0.08
+        },
+        "confidence": 0.88
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "When a connection attempt fails (network error or timeout), the component retries up to max_retries attempts.",
+      "line": 21,
+      "fragment": "When a connection attempt fails (network error or timeout), the",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.78,
+          "contradicted": 0.0,
+          "unclear": 0.22
+        },
+        "confidence": 0.67
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "Retries use exponential backoff between attempts.",
+      "line": 22,
+      "fragment": "attempts with exponential",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "The backoff includes random jitter.",
+      "line": 23,
+      "fragment": "The backoff includes random jitter.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "When max_retries is exhausted, the component enters FAILED state.",
+      "line": 26,
+      "fragment": "When `max_retries` is exhausted, the component enters FAILED state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "After retry exhaustion, no further connection attempts are made.",
+      "line": 27,
+      "fragment": "No further connection attempts are made.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "The component remains in FAILED state permanently.",
+      "line": 28,
+      "fragment": "FAILED state permanently.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "Calling disconnect() during CONNECTING or RECONNECTING cancels the connection attempt.",
+      "line": 31,
+      "fragment": "Calling `disconnect()` during CONNECTING or RECONNECTING cancels",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "Calling disconnect() during CONNECTING or RECONNECTING returns to DISCONNECTED.",
+      "line": 32,
+      "fragment": "the connection attempt and returns to DISCONNECTED.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.0,
+          "unclear": 0.07
+        },
+        "confidence": 0.89
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "If a connection attempt does not complete within connect_timeout, it is treated as a failure.",
+      "line": 35,
+      "fragment": "If a connection attempt does not complete within `connect_timeout`,",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.69,
+          "contradicted": 0.0,
+          "unclear": 0.31
+        },
+        "confidence": 0.53
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "A connection attempt that times out is retried.",
+      "line": 36,
+      "fragment": "it is treated as a failure and retried.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "A connection that survives for at least min_uptime is considered stable.",
+      "line": 39,
+      "fragment": "A connection that survives for at least `min_uptime` is considered",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.89,
+          "contradicted": 0.0,
+          "unclear": 0.11
+        },
+        "confidence": 0.83
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "The retry counter has already been reset on successful connect.",
+      "line": 40,
+      "fragment": "The retry counter has already been reset on successful",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C19": {
+      "kind": "claim",
+      "statement": "Retry backoff includes random jitter to prevent thundering herd when multiple instances share the same device.",
+      "line": 44,
+      "fragment": "Retry backoff includes random jitter to prevent thundering herd",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C20": {
+      "kind": "ordering",
+      "statement": "A connection attempt fails, then the component retries up to max_retries attempts with backoff.",
+      "line": 21,
+      "fragment": "When a connection attempt fails (network error or timeout), the",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98,
+        "ordering_scope_probability": 0.5
+      }
+    },
+    "C21": {
+      "kind": "ordering",
+      "statement": "When max_retries is exhausted, the component enters FAILED state, after which no further attempts are made.",
+      "line": 26,
+      "fragment": "When `max_retries` is exhausted, the component enters FAILED state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.78,
+          "contradicted": 0.0,
+          "unclear": 0.22
+        },
+        "confidence": 0.67,
+        "ordering_scope_probability": 0.17
+      }
+    },
+    "C22": {
+      "kind": "ordering",
+      "statement": "A successful connection causes the component to enter CONNECTED state and the retry counter then resets to zero.",
+      "line": 17,
+      "fragment": "When a connection attempt succeeds, the component enters CONNECTED",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.5,
+          "contradicted": 0.01,
+          "unclear": 0.49
+        },
+        "confidence": 0.25,
+        "ordering_scope_probability": 0.11
+      }
+    },
+    "C23": {
+      "kind": "ordering",
+      "statement": "A connect_timeout expiry is treated as failure and then retried.",
+      "line": 36,
+      "fragment": "it is treated as a failure and retried.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98,
+        "ordering_scope_probability": 0.63
+      }
+    }
+  },
+  "questions": [
+    "R-01: what exactly counts as 'already connected or connecting' — does RECONNECTING also make connect() a no-op?",
+    "R-02 vs R-06: R-02 says disconnect() cancels any pending attempt and returns to DISCONNECTED; R-06 says the same for CONNECTING/RECONNECTING. Are these redundant or do they cover different states?",
+    "R-04: is 'up to max_retries attempts' the total attempt count including the initial attempt, or the number of retries after the first failure?",
+    "R-04: what is the exact backoff formula (base, multiplier, cap) and jitter distribution?",
+    "R-04: does the retry counter increment on each failed attempt, and what is its initial value?",
+    "R-04/R-05: after retry exhaustion, does 'No further connection attempts are made' also block a subsequent connect() call, or does it only apply to automatic retries?",
+    "R-05: 'remains in FAILED state permanently' — does this conflict with R-01/connect() or with disconnect(), i.e., is FAILED a terminal state even for user-initiated actions?",
+    "R-05: is there any way to exit FAILED state (e.g., a reset), and if not, how does a new connection ever occur?",
+    "R-06: does 'RECONNECTING' state exist as a distinct state from CONNECTING, and when is it entered? It is not defined in R-01 through R-09.",
+    "R-07: is the timeout per attempt, and does a timeout count against max_retries?",
+    "R-07 vs R-04: R-04 lists 'network error or timeout' as failures; R-07 separately treats timeout as failure. Is there one timeout rule or two?",
+    "R-08: 'min_uptime' — what happens if the connection drops before min_uptime elapses? Is the retry counter reset again or not?",
+    "R-08: is 'stable' a distinct state, and does reaching min_uptime trigger any behavior beyond being 'considered stable'?",
+    "R-03/R-08: R-03 says the retry counter resets to zero when a connection succeeds; R-08 says it 'has already been reset on successful connect.' Are these the same event, and what is the ordering relative to entering CONNECTED?",
+    "R-01/R-02: does connect() have any effect in FAILED state (no-op, error, or new attempt)? No requirement addresses connect() from FAILED.",
+    "R-01: what is the behavior of calling connect() while already in CONNECTED vs RECONNECTING vs FAILED vs DISCONNECTED — only 'connected or connecting' is specified.",
+    "Interplay of disconnect() during backoff wait: R-02 says it cancels any pending connection attempt; does that include a scheduled retry during backoff?",
+    "Ordering gap: R-08 mentions 'min_uptime' stability, but no requirement describes what happens when a stable connection subsequently drops (reconnect behavior, retry counter state).",
+    "Ordering gap: R-05's 'permanently' versus R-02's disconnect() returning to DISCONNECTED — which applies if disconnect() is called while FAILED?",
+    "Ambiguity: R-04 says jitter is included in backoff, and R-09 restates it. Is R-09 a separate requirement or a duplicate of R-04?",
+    "Unspecified: what constitutes 'success' for a connection attempt, and does min_uptime relate to success or only to stability after CONNECTED?"
+  ],
+  "review_required": true
+}

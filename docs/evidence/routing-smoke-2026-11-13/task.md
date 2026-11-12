@@ -1,0 +1,1 @@
+Step 1 doctrine-line sweep: list every normative requirement sentence (R-01..R-09 and any other 'must'/'remains'/'never' sentence) as a claim citing its line, plus ordering claims for any explicitly described event sequence. Put every ambiguity or unspecified case into questions.

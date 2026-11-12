@@ -10,6 +10,7 @@ import hashlib
 import json
 import math
 import os
+import sqlite3
 import sys
 import urllib.error
 from pathlib import Path
@@ -20,6 +21,21 @@ import part_b_pack
 
 FLASH_URL = "https://api.deepseek.com/chat/completions"
 JEV_URL = "https://api.typesafe.ai/v1/systemone"
+
+
+class ProviderError(ValueError):
+    """A request failed after its cost was reserved; the reservation stays until settled."""
+
+    def __init__(self, ticket, error):
+        super().__init__(f"request failed ({error}); reservation {ticket} kept: check the provider's "
+                         f"usage, then run 'settle {ticket} <actual microdollars>'")
+
+
+def _post(ticket, url, payload, key):
+    try:
+        return post_json(url, payload, key)
+    except (OSError, ValueError) as error:  # URLError and HTTPError are OSErrors
+        raise ProviderError(ticket, error) from error
 
 
 class IncompleteResponse(ValueError):
@@ -49,7 +65,7 @@ def flash(budget, prompt, key, max_tokens=4096):
     ticket = budget.reserve("deepseek-flash", reserved)
     payload = {"model": "deepseek-flash", "messages": [{"role": "user", "content": prompt}],
                "max_tokens": max_tokens, "thinking": {"type": "disabled"}}
-    response = post_json(FLASH_URL, payload, key)
+    response = _post(ticket, FLASH_URL, payload, key)
     usage = _usage(response)
     prompt_tokens = _tokens(usage.get("prompt_tokens"))
     output_tokens = _tokens(usage.get("completion_tokens"))
@@ -72,10 +88,10 @@ def flash(budget, prompt, key, max_tokens=4096):
     return result
 
 
-def jev(budget, source, question, key):
+def jev(budget, source, question, key, model="jev-latest"):
     if not source or not question or not key:
         raise ValueError("source, question, and key are required")
-    payload = {"model": "jev-latest", "state": {"source": source},
+    payload = {"model": model, "state": {"source": source},
                "questions": {"judgment": {"type": "noul", "instructions": question}}}
     response, input_tokens, cost, reserved = _jev_request(budget, payload, key)
     try:
@@ -93,19 +109,29 @@ def _jev_request(budget, payload, key):
     estimated_input = len(json.dumps(payload, ensure_ascii=False).encode("utf-8")) + 1000
     reserved = max(1, math.ceil(estimated_input * 0.042))
     ticket = budget.reserve("jev", reserved)
-    response = post_json(JEV_URL, payload, key)
+    response = _post(ticket, JEV_URL, payload, key)
     input_tokens = _tokens(_usage(response).get("input_tokens"))
     cost = math.ceil(input_tokens * 0.042)
     budget.settle(ticket, cost)
     return response, input_tokens, cost, reserved
 
 
+MIN_FRAGMENT = 4
+
+
 def _citation_error(source_lines, line, fragment):
-    """Return why a line/fragment citation fails against the source, or None."""
-    if isinstance(line, bool) or not isinstance(line, int) or not 1 <= line <= len(source_lines):
+    """Return why a line/fragment citation fails against the source, or None.
+
+    The fragment must be one line of at least MIN_FRAGMENT non-space characters,
+    found within the pack-wide window of three lines around the cited line.
+    """
+    if isinstance(line, bool) or not isinstance(line, int):
+        return "citation line is not an integer"
+    if not 1 <= line <= len(source_lines):
         return "citation line is outside source"
-    window = "\n".join(source_lines[max(0, line - 4):min(len(source_lines), line + 3)])
-    if not isinstance(fragment, str) or not fragment.strip() or fragment not in window:
+    if not isinstance(fragment, str) or "\n" in fragment or len("".join(fragment.split())) < MIN_FRAGMENT:
+        return f"citation fragment must be a single line of at least {MIN_FRAGMENT} non-space characters"
+    if not any(fragment in text for text in source_lines[max(0, line - 4):min(len(source_lines), line + 3)]):
         return f"citation fragment missing near line {line}"
     return None
 
@@ -235,13 +261,17 @@ Source ({source_ref}), one line per number:
 
 def _parse_draft(text):
     body = text.strip()
-    if body.startswith("```"):
-        body = body.split("\n", 1)[1] if "\n" in body else ""
-        body = body.rsplit("```", 1)[0]
     try:
         draft = json.loads(body)
     except json.JSONDecodeError as error:
-        raise InvalidDraft(f"not JSON ({error.msg})", text) from error
+        # Tolerate a preamble or a code fence around one JSON object; nothing else.
+        start, end = body.find("{"), body.rfind("}")
+        try:
+            draft = json.loads(body[start:end + 1]) if 0 <= start < end else None
+        except json.JSONDecodeError:
+            draft = None
+        if draft is None:
+            raise InvalidDraft(f"not JSON ({error.msg})", text) from error
     if not isinstance(draft, dict) or not isinstance(draft.get("claims"), list):
         raise InvalidDraft("a claims list is required", text)
     questions = draft.get("questions")
@@ -286,12 +316,18 @@ def draft_verify(budget, source, source_ref, task, flash_key, jev_key, model="je
             citable.append({key: claim[key] for key in ("id", "kind", "statement", "line", "fragment")})
     verification = None
     if citable:
-        verification = jev_batch(budget, source, source_ref, citable, jev_key, model)
+        try:
+            verification = jev_batch(budget, source, source_ref, citable, jev_key, model)
+        except (ValueError, OSError, BudgetExceeded) as error:
+            # The Flash draft is paid for: keep it and its citation checks.
+            verification = {"error": str(error)}
+    if verification and "checks" in verification:
         for ident, judged in verification["checks"].items():
             results[ident]["jev"] = {key: judged[key] for key in judged
                                      if key in ("choice", "probabilities", "confidence", "ordering_scope_probability")}
         verification = {key: verification[key] for key in ("model", "input_tokens", "cost_microdollars",
                                                            "reservation_microdollars")}
+        verification["error"] = None
     draft_meta = {key: drafted[key] for key in drafted if key != "text"}
     return {"source": source_ref, "source_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
             "draft": draft_meta, "verification": verification, "claims": results,
@@ -307,8 +343,8 @@ def blind(budget, args, key):
     package_path = args.output.with_suffix(".package.md")
     package_args = argparse.Namespace(
         repo=args.repo, analysis_dir=args.analysis,
-        requirements=args.requirements + args.contracts,
-        contracts=[], out=str(package_path), for_dispatch=False,
+        requirements=args.requirements, contracts=args.contracts,
+        out=str(package_path), for_dispatch=False,
     )
     if part_b_pack.assemble(package_args, pack_root) != 0:
         raise ValueError("blind input package failed validation")
@@ -324,11 +360,7 @@ def blind(budget, args, key):
     args.output.write_text(result["text"], encoding="utf-8")
     print(json.dumps({k: v for k, v in result.items() if k != "text"}, indent=2))
     check_args = argparse.Namespace(repo=args.repo, analysis_dir=args.analysis, check=str(args.output))
-    status = part_b_pack.check(check_args)
-    if result["finish_reason"] != "stop":
-        print("PART-B: incomplete provider response", file=sys.stderr)
-        return 1
-    return status
+    return part_b_pack.check(check_args)
 
 
 def main():
@@ -348,10 +380,12 @@ def main():
     jev_parser = commands.add_parser("jev")
     jev_parser.add_argument("input", type=Path)
     jev_parser.add_argument("question")
+    jev_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
     batch_parser = commands.add_parser("jev-batch")
     batch_parser.add_argument("input", type=Path, help="UTF-8 source shared by the checks")
     batch_parser.add_argument("checks", type=Path, help="JSON array of checks")
     batch_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+    batch_parser.add_argument("--output", type=Path, help="also write the result JSON to this file")
     draft_parser = commands.add_parser("draft-verify", help="Flash drafts cited claims; Jev judges them")
     draft_parser.add_argument("input", type=Path, help="UTF-8 source the claims must cite")
     draft_parser.add_argument("task", type=Path, help="UTF-8 file with the bounded drafting task")
@@ -366,6 +400,11 @@ def main():
     blind_parser.add_argument("--output", type=Path, required=True)
     blind_parser.add_argument("--max-tokens", type=int, default=8192)
     args = parser.parse_args()
+    for path in [getattr(args, "output", None)]:
+        # Fail before anything is paid for if the result cannot be written.
+        if path is not None and (not path.parent.is_dir() or not os.access(path.parent, os.W_OK)):
+            print(f"LOCAL MODELS: output directory {path.parent} does not exist or is not writable", file=sys.stderr)
+            return 1
     try:
         budget = Budget(args.ledger, args.limit_microdollars)
         if args.command == "status":
@@ -394,6 +433,7 @@ def main():
                 args.output.with_suffix(".draft.txt").write_text(error.text, encoding="utf-8")
                 raise
             args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            failed = result["verification"] is not None and result["verification"]["error"]
             claims = result["claims"].values()
             choices = {}
             for claim in claims:
@@ -403,18 +443,25 @@ def main():
                       "citation_failures": sum(claim["citation_check"] != "ok" for claim in claims),
                       "jev_choices": choices, "questions": len(result["questions"]),
                       "draft": result["draft"], "verification": result["verification"]}
+            if failed:
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+                print(f"LOCAL MODELS: Jev verification failed; draft kept in {args.output}: {failed}", file=sys.stderr)
+                return 1
         elif args.command == "jev-batch":
             result = jev_batch(budget, args.input.read_text(encoding="utf-8"), str(args.input),
                                json.loads(args.checks.read_text(encoding="utf-8")), os.environ.get("TYPESAFE_API_KEY"), args.model)
+            if args.output:
+                args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         else:
-            result = jev(budget, args.input.read_text(encoding="utf-8"), args.question, os.environ.get("TYPESAFE_API_KEY"))
+            result = jev(budget, args.input.read_text(encoding="utf-8"), args.question,
+                         os.environ.get("TYPESAFE_API_KEY"), args.model)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except IncompleteResponse as error:
         print(json.dumps(error.result, ensure_ascii=False, indent=2))
         print(f"LOCAL MODELS: {error}", file=sys.stderr)
         return 1
-    except (OSError, ValueError, BudgetExceeded, urllib.error.URLError) as error:
+    except (OSError, ValueError, BudgetExceeded, urllib.error.URLError, sqlite3.Error) as error:
         print(f"LOCAL MODELS: {error}", file=sys.stderr)
         return 1
 

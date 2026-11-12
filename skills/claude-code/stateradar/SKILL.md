@@ -39,10 +39,11 @@ Determine the state of the component in question and follow the matching prompt:
 
 When `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` are set, route the pilot's
 bounded work through the pack's `tools/local_models.py` as `02-pilot.md`
-("Model routing") specifies: `draft-verify` for extraction drafts, `jev-batch`
-for cited-claim and requirement-scope checks, `blind` for Part B. You
-consolidate and review every result. A model judgment may add a question;
-it never removes one or decides domain semantics.
+("Model routing") specifies: `draft-verify` to seed extraction, `jev-batch`
+for cited-claim and requirement-scope checks, `blind` for Part B. You still do
+every step in full and review every result. A model judgment may add a
+question; it never removes one, sets provenance, or decides domain semantics.
+Part B is never done by you, also when `blind` fails.
 
 ## Non-negotiable rules (all stages)
 

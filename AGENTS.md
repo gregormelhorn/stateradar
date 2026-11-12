@@ -173,22 +173,21 @@ in real pack-development sessions.
 
 ## 8. Local model routing
 
-For StateRadar analysis in this workspace, use `tools/local_models.py` for
-bounded drafting and extraction with DeepSeek Flash, and for narrow
-source-grounded judgments with Jev. The calling agent supplies the exact
-input and reviews the returned proposals against their sources. Use
-`draft-verify` for bounded drafting: Flash proposes cited claims and
-questions as JSON, code checks every citation, and Jev judges the citable
-claims in one batch. Claims with failed citations are kept with the reason
-and never reach Jev. `prompts/02-pilot.md` ("Model routing") maps the
-pilot steps to these commands. Use the `blind` command for Part B: provide
-only the event catalogue, requirements, and normative event contract text.
-Run the returned coverage check and investigate failures. Follow the full
-pilot prompt and retain every question. For multiple claim or
-event-ordering checks against the same source, use `jev-batch` to evaluate
-them together. Review every returned judgment against the source,
-including apparently confident answers. A Jev response is a proposal and
-does not itself resolve a hole or establish a requirement.
+When `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` are set, route StateRadar
+analysis through `tools/local_models.py` as the "Model routing" section of
+`prompts/02-pilot.md` specifies: DeepSeek Flash for bounded drafting and
+the blind Part B, Jev for narrow source-grounded judgments. Without the
+keys, do Steps 1, 6 and 8 yourself. `draft-verify` lets Flash propose cited
+claims and questions as JSON; code checks every citation and Jev judges
+the citable claims in one batch. `jev-batch` evaluates several claim or
+event-ordering checks against one source. Drafts seed a step and never
+bound it: you still do the complete step and review every returned
+judgment against its source, including apparently confident answers. A Jev
+response is a proposal: it may add a question, but it never removes one,
+resolves a hole, sets provenance, or establishes a requirement. Part B is
+never done by the Part-A agent: pass `blind` only the catalogue,
+requirements prose, and prepared contract text, and if it fails, dispatch
+a fresh blind session; never write or repair a blind table yourself.
 
 Use one ledger per pilot. Its default $2 covers calls made through this
 tool. The calling agent's own costs are separate. See
