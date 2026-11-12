@@ -1,0 +1,30 @@
+[
+ {
+  "id": "T1",
+  "kind": "claim",
+  "statement": "TestPool_Get expects Get to return ErrMaxActiveConnReached after MaximumCap connections have been taken.",
+  "line": 94,
+  "fragment": "if err != ErrMaxActiveConnReached {"
+ },
+ {
+  "id": "T2",
+  "kind": "claim",
+  "statement": "TestPool_Close asserts that Len returns 0 after Release.",
+  "line": 161,
+  "fragment": "if p.Len() != 0 {"
+ },
+ {
+  "id": "T3",
+  "kind": "claim",
+  "statement": "TestPoolConcurrent contains no assertion.",
+  "line": 166,
+  "fragment": "func TestPoolConcurrent(t *testing.T) {"
+ },
+ {
+  "id": "T4",
+  "kind": "claim",
+  "statement": "TestPool_Close asserts that Get returns an error after Release.",
+  "line": 157,
+  "fragment": "if err == nil {"
+ }
+]

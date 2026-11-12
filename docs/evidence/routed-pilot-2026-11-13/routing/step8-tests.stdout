@@ -1,0 +1,69 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "f6073a935a778fa28c765eb0c351aa4e56294b3c7b4df618621838ffabce19eb",
+  "input_tokens": 2681,
+  "cost_microdollars": 113,
+  "reservation_microdollars": 390,
+  "checks": {
+    "T1": {
+      "kind": "claim",
+      "statement": "TestPool_Get expects Get to return ErrMaxActiveConnReached after MaximumCap connections have been taken.",
+      "source": "../pool/channel_rpc_test.go",
+      "line": 94,
+      "fragment": "if err != ErrMaxActiveConnReached {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.89,
+        "contradicted": 0.04,
+        "unclear": 0.07
+      },
+      "confidence": 0.83,
+      "review_required": true
+    },
+    "T2": {
+      "kind": "claim",
+      "statement": "TestPool_Close asserts that Len returns 0 after Release.",
+      "source": "../pool/channel_rpc_test.go",
+      "line": 161,
+      "fragment": "if p.Len() != 0 {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "T3": {
+      "kind": "claim",
+      "statement": "TestPoolConcurrent contains no assertion.",
+      "source": "../pool/channel_rpc_test.go",
+      "line": 166,
+      "fragment": "func TestPoolConcurrent(t *testing.T) {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.45,
+        "contradicted": 0.01,
+        "unclear": 0.54
+      },
+      "confidence": 0.31,
+      "review_required": true
+    },
+    "T4": {
+      "kind": "claim",
+      "statement": "TestPool_Close asserts that Get returns an error after Release.",
+      "source": "../pool/channel_rpc_test.go",
+      "line": 157,
+      "fragment": "if err == nil {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.01,
+        "unclear": 0.04
+      },
+      "confidence": 0.92,
+      "review_required": true
+    }
+  }
+}

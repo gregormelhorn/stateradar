@@ -1,0 +1,1963 @@
+{
+  "formatVersion": "1.0",
+  "component": "channelPool",
+  "packVersion": "02-pilot v1.16 @ da655aa",
+  "analyzedSha": "6084537e520652192f41aebfd88d822c00b9447a",
+  "watchPaths": [
+    "channel.go",
+    "pool.go"
+  ],
+  "states": [
+    "Open_Idle",
+    "Open_Empty_BelowCap",
+    "Open_Empty_AtCap",
+    "Open_Waiting",
+    "Open_Waiting_CapacityFree",
+    "Released",
+    "Released_WaitersStranded"
+  ],
+  "events": [
+    {
+      "id": "get",
+      "undesired": false,
+      "gate": "service-side state — idle set non-empty, then `openingConns >= maxActive`, then factory nil; a taken connection is further gated by its age and the Ping callback",
+      "upstream_guards": [
+        "none — no upstream validation exists; the library is called directly by user code",
+        "no rate or concurrency limit upstream of Get"
+      ]
+    },
+    {
+      "id": "put",
+      "undesired": false,
+      "gate": "payload content (nil check), then service-side state — conns nil (released), then waiters present, then idle set full",
+      "upstream_guards": [
+        "none — the pool does not verify that the connection came from this pool or is not already idle; only nil is rejected (channel.go:168)"
+      ]
+    },
+    {
+      "id": "close_conn",
+      "undesired": false,
+      "gate": "payload content (nil check), then service-side state — the close callback is nil after Release",
+      "upstream_guards": [
+        "none — the pool does not verify that the connection came from this pool",
+        "is checked out",
+        "or was not closed before; only nil is rejected (channel.go:203)"
+      ]
+    },
+    {
+      "id": "ping",
+      "undesired": false,
+      "gate": "payload content (nil check) only; the call goes straight to the ping callback without the mutex and without a nil check of the callback",
+      "upstream_guards": [
+        "none — callers are not told whether a Ping callback is configured; NewChannelPool accepts a nil Ping (channel.go:78)"
+      ]
+    },
+    {
+      "id": "release",
+      "undesired": false,
+      "gate": "service-side state — conns already nil (released before)",
+      "upstream_guards": [
+        "none — nothing prevents Release while user goroutines still hold connections or wait; ownership of the call is not enforced (any holder of the Pool may call it)"
+      ]
+    },
+    {
+      "id": "len",
+      "undesired": false,
+      "gate": "service-side state — conns nil gives 0",
+      "upstream_guards": [
+        "none"
+      ]
+    },
+    {
+      "id": "idle_expired",
+      "undesired": false,
+      "gate": "payload content — the stored timestamp of the taken connection plus IdleTimeout versus now; disabled when IdleTimeout <= 0",
+      "upstream_guards": [
+        "none — expiry is evaluated only inside Get",
+        "lazily; no background reaper exists"
+      ]
+    },
+    {
+      "id": "ping_failed",
+      "undesired": false,
+      "gate": "external callback result — the Ping callback's error for a connection taken from the idle set",
+      "upstream_guards": [
+        "none — evaluated only when a Ping callback is configured (channel.go:123) and only on the idle path",
+        "not on the handoff path"
+      ]
+    },
+    {
+      "id": "factory_error",
+      "undesired": false,
+      "gate": "external callback result — non-nil error from the Factory callback",
+      "upstream_guards": [
+        "none — the factory is called only when no idle connection was ready and openingConns < maxActive (channel.go:133",
+        ":150)"
+      ]
+    },
+    {
+      "id": "handoff",
+      "undesired": false,
+      "gate": "service-side state — connReqs non-empty when Put holds the mutex",
+      "upstream_guards": [
+        "none — Put removes the waiter from connReqs before the send (channel.go:180-183)",
+        "so each waiter channel receives at most one send"
+      ]
+    },
+    {
+      "id": "UV-01",
+      "undesired": true
+    },
+    {
+      "id": "UV-02",
+      "undesired": true
+    },
+    {
+      "id": "UV-03",
+      "undesired": true
+    },
+    {
+      "id": "UV-04",
+      "undesired": true
+    },
+    {
+      "id": "UV-05",
+      "undesired": true
+    },
+    {
+      "id": "UV-06",
+      "undesired": true
+    },
+    {
+      "id": "UV-07",
+      "undesired": true
+    },
+    {
+      "id": "UV-08",
+      "undesired": true
+    },
+    {
+      "id": "UV-09",
+      "undesired": true
+    },
+    {
+      "id": "UV-10",
+      "undesired": true
+    },
+    {
+      "id": "UV-11",
+      "undesired": true
+    },
+    {
+      "id": "UV-12",
+      "undesired": true
+    }
+  ],
+  "cells": [
+    {
+      "disposition": "transition",
+      "target": "Open_Empty_BelowCap",
+      "citation": {
+        "file": "channel.go",
+        "line": 129
+      },
+      "state": "Open_Idle",
+      "event": "get"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 190
+      },
+      "state": "Open_Idle",
+      "event": "put"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Idle",
+      "event": "close_conn"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 220
+      },
+      "state": "Open_Idle",
+      "event": "ping"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released",
+      "citation": {
+        "file": "channel.go",
+        "line": 227
+      },
+      "state": "Open_Idle",
+      "event": "release"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 247
+      },
+      "state": "Open_Idle",
+      "event": "len"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 118
+      },
+      "state": "Open_Idle",
+      "event": "idle_expired"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 125
+      },
+      "state": "Open_Idle",
+      "event": "ping_failed"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 110
+      },
+      "state": "Open_Idle",
+      "event": "factory_error"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 179
+      },
+      "state": "Open_Idle",
+      "event": "handoff"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 133
+      },
+      "state": "Open_Idle",
+      "event": "UV-01"
+    },
+    {
+      "disposition": "transition",
+      "target": "Open_Empty_AtCap",
+      "citation": {
+        "file": "channel.go",
+        "line": 159
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "get"
+    },
+    {
+      "disposition": "transition",
+      "target": "Open_Idle",
+      "citation": {
+        "file": "channel.go",
+        "line": 190
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "put"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "close_conn"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 220
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "ping"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released",
+      "citation": {
+        "file": "channel.go",
+        "line": 227
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "release"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 247
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "len"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 110
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "idle_expired"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 110
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "ping_failed"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 157
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "factory_error"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 179
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "handoff"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 133
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-01"
+    },
+    {
+      "disposition": "transition",
+      "target": "Open_Waiting",
+      "citation": {
+        "file": "channel.go",
+        "line": 135
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "get"
+    },
+    {
+      "disposition": "transition",
+      "target": "Open_Idle",
+      "citation": {
+        "file": "channel.go",
+        "line": 190
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "put"
+    },
+    {
+      "disposition": "transition",
+      "target": "Open_Empty_BelowCap",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "close_conn"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 220
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "ping"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released",
+      "citation": {
+        "file": "channel.go",
+        "line": 227
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "release"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 247
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "len"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 110
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "idle_expired"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 110
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "ping_failed"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 133
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "factory_error"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 179
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "handoff"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 133
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-01"
+    },
+    {
+      "disposition": "defer (queued)",
+      "citation": {
+        "file": "channel.go",
+        "line": 135
+      },
+      "state": "Open_Waiting",
+      "event": "get"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 183
+      },
+      "state": "Open_Waiting",
+      "event": "put"
+    },
+    {
+      "disposition": "transition",
+      "target": "Open_Waiting_CapacityFree",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Waiting",
+      "event": "close_conn"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 220
+      },
+      "state": "Open_Waiting",
+      "event": "ping"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released_WaitersStranded",
+      "citation": {
+        "file": "channel.go",
+        "line": 227
+      },
+      "state": "Open_Waiting",
+      "event": "release"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 247
+      },
+      "state": "Open_Waiting",
+      "event": "len"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 144
+      },
+      "state": "Open_Waiting",
+      "event": "idle_expired"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-07",
+      "citation": {
+        "file": "channel.go",
+        "line": 141
+      },
+      "state": "Open_Waiting",
+      "event": "ping_failed"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 133
+      },
+      "state": "Open_Waiting",
+      "event": "factory_error"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 148
+      },
+      "state": "Open_Waiting",
+      "event": "handoff"
+    },
+    {
+      "disposition": "defer (queued)",
+      "citation": {
+        "file": "channel.go",
+        "line": 137
+      },
+      "state": "Open_Waiting",
+      "event": "UV-01"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 110
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "get"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 183
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "put"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "close_conn"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 220
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "ping"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released_WaitersStranded",
+      "citation": {
+        "file": "channel.go",
+        "line": 227
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "release"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 247
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "len"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 118
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "idle_expired"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 125
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "ping_failed"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 157
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "factory_error"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 148
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "handoff"
+    },
+    {
+      "disposition": "defer (queued)",
+      "citation": {
+        "file": "channel.go",
+        "line": 137
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-01"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 106
+      },
+      "state": "Released",
+      "event": "get"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "citation": {
+        "file": "channel.go",
+        "line": 176
+      },
+      "state": "Released",
+      "event": "put"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "citation": {
+        "file": "channel.go",
+        "line": 208
+      },
+      "state": "Released",
+      "event": "close_conn"
+    },
+    {
+      "disposition": "UNSPECIFIED",
+      "q": "Q-05",
+      "citation": {
+        "file": "channel.go",
+        "line": 220
+      },
+      "state": "Released",
+      "event": "ping"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 234
+      },
+      "state": "Released",
+      "event": "release"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 247
+      },
+      "state": "Released",
+      "event": "len"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 105
+      },
+      "state": "Released",
+      "event": "idle_expired"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 105
+      },
+      "state": "Released",
+      "event": "ping_failed"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 105
+      },
+      "state": "Released",
+      "event": "factory_error"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 174
+      },
+      "state": "Released",
+      "event": "handoff"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 105
+      },
+      "state": "Released",
+      "event": "UV-01"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 106
+      },
+      "state": "Released_WaitersStranded",
+      "event": "get"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released_WaitersStranded",
+      "event": "put"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released_WaitersStranded",
+      "event": "close_conn"
+    },
+    {
+      "disposition": "UNSPECIFIED",
+      "q": "Q-05",
+      "citation": {
+        "file": "channel.go",
+        "line": 220
+      },
+      "state": "Released_WaitersStranded",
+      "event": "ping"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 234
+      },
+      "state": "Released_WaitersStranded",
+      "event": "release"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 247
+      },
+      "state": "Released_WaitersStranded",
+      "event": "len"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 105
+      },
+      "state": "Released_WaitersStranded",
+      "event": "idle_expired"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 105
+      },
+      "state": "Released_WaitersStranded",
+      "event": "ping_failed"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 105
+      },
+      "state": "Released_WaitersStranded",
+      "event": "factory_error"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-01",
+      "citation": {
+        "file": "channel.go",
+        "line": 174
+      },
+      "state": "Released_WaitersStranded",
+      "event": "handoff"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-01",
+      "citation": {
+        "file": "channel.go",
+        "line": 137
+      },
+      "state": "Released_WaitersStranded",
+      "event": "UV-01"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-10",
+      "citation": {
+        "file": "channel.go",
+        "line": 159
+      },
+      "state": "Open_Idle",
+      "event": "UV-02"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 190
+      },
+      "state": "Open_Idle",
+      "event": "UV-03"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 172
+      },
+      "state": "Open_Idle",
+      "event": "UV-04"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 190
+      },
+      "state": "Open_Idle",
+      "event": "UV-05"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 169
+      },
+      "state": "Open_Idle",
+      "event": "UV-06"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Idle",
+      "event": "UV-07"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Idle",
+      "event": "UV-08"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 204
+      },
+      "state": "Open_Idle",
+      "event": "UV-09"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released",
+      "citation": {
+        "file": "channel.go",
+        "line": 226
+      },
+      "state": "Open_Idle",
+      "event": "UV-10"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 218
+      },
+      "state": "Open_Idle",
+      "event": "UV-11"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 110
+      },
+      "state": "Open_Idle",
+      "event": "UV-12"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-10",
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-02"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 190
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-03"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 172
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-04"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 190
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-05"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 169
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-06"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-07"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-08"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 204
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-09"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released",
+      "citation": {
+        "file": "channel.go",
+        "line": 226
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-10"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 218
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-11"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 154
+      },
+      "state": "Open_Empty_BelowCap",
+      "event": "UV-12"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-10",
+      "state": "Open_Empty_AtCap",
+      "event": "UV-02"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 190
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-03"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 172
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-04"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 190
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-05"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 169
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-06"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-07"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-08"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 204
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-09"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released",
+      "citation": {
+        "file": "channel.go",
+        "line": 226
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-10"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 218
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-11"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 133
+      },
+      "state": "Open_Empty_AtCap",
+      "event": "UV-12"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-10",
+      "state": "Open_Waiting",
+      "event": "UV-02"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 183
+      },
+      "state": "Open_Waiting",
+      "event": "UV-03"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 172
+      },
+      "state": "Open_Waiting",
+      "event": "UV-04"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 183
+      },
+      "state": "Open_Waiting",
+      "event": "UV-05"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 169
+      },
+      "state": "Open_Waiting",
+      "event": "UV-06"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Waiting",
+      "event": "UV-07"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Waiting",
+      "event": "UV-08"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 204
+      },
+      "state": "Open_Waiting",
+      "event": "UV-09"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released_WaitersStranded",
+      "citation": {
+        "file": "channel.go",
+        "line": 226
+      },
+      "state": "Open_Waiting",
+      "event": "UV-10"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 218
+      },
+      "state": "Open_Waiting",
+      "event": "UV-11"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 133
+      },
+      "state": "Open_Waiting",
+      "event": "UV-12"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-10",
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-02"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 183
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-03"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 172
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-04"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 183
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-05"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 169
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-06"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-07"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 211
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-08"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 204
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-09"
+    },
+    {
+      "disposition": "transition",
+      "target": "Released_WaitersStranded",
+      "citation": {
+        "file": "channel.go",
+        "line": 226
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-10"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 218
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-11"
+    },
+    {
+      "disposition": "handle",
+      "citation": {
+        "file": "channel.go",
+        "line": 154
+      },
+      "state": "Open_Waiting_CapacityFree",
+      "event": "UV-12"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-10",
+      "state": "Released",
+      "event": "UV-02"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released",
+      "event": "UV-03"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released",
+      "event": "UV-04"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released",
+      "event": "UV-05"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 169
+      },
+      "state": "Released",
+      "event": "UV-06"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released",
+      "event": "UV-07"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released",
+      "event": "UV-08"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 204
+      },
+      "state": "Released",
+      "event": "UV-09"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 234
+      },
+      "state": "Released",
+      "event": "UV-10"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 218
+      },
+      "state": "Released",
+      "event": "UV-11"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 105
+      },
+      "state": "Released",
+      "event": "UV-12"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-10",
+      "state": "Released_WaitersStranded",
+      "event": "UV-02"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released_WaitersStranded",
+      "event": "UV-03"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released_WaitersStranded",
+      "event": "UV-04"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released_WaitersStranded",
+      "event": "UV-05"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 169
+      },
+      "state": "Released_WaitersStranded",
+      "event": "UV-06"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released_WaitersStranded",
+      "event": "UV-07"
+    },
+    {
+      "disposition": "ignore (accidental)",
+      "q": "Q-04",
+      "state": "Released_WaitersStranded",
+      "event": "UV-08"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 204
+      },
+      "state": "Released_WaitersStranded",
+      "event": "UV-09"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 234
+      },
+      "state": "Released_WaitersStranded",
+      "event": "UV-10"
+    },
+    {
+      "disposition": "reject",
+      "citation": {
+        "file": "channel.go",
+        "line": 218
+      },
+      "state": "Released_WaitersStranded",
+      "event": "UV-11"
+    },
+    {
+      "disposition": "ignore (documented)",
+      "citation": {
+        "file": "channel.go",
+        "line": 105
+      },
+      "state": "Released_WaitersStranded",
+      "event": "UV-12"
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-01",
+      "status": "OPEN",
+      "fault": [
+        "F-07",
+        "F-20"
+      ],
+      "trigger": "step-4 matrix walk"
+    },
+    {
+      "id": "Q-02",
+      "status": "OPEN",
+      "fault": [
+        "F-01",
+        "F-20"
+      ],
+      "trigger": "step-5 lint"
+    },
+    {
+      "id": "Q-03",
+      "status": "OPEN",
+      "fault": [
+        "F-04"
+      ],
+      "trigger": "adversarial trace"
+    },
+    {
+      "id": "Q-04",
+      "status": "OPEN",
+      "fault": [
+        "F-15",
+        "F-09"
+      ],
+      "trigger": "step-4 matrix walk"
+    },
+    {
+      "id": "Q-05",
+      "status": "OPEN",
+      "fault": [
+        "F-15",
+        "F-03"
+      ],
+      "trigger": "step-4 matrix walk"
+    },
+    {
+      "id": "Q-06",
+      "status": "OPEN",
+      "fault": [
+        "F-19",
+        "F-07"
+      ],
+      "trigger": "doctrine mapping"
+    },
+    {
+      "id": "Q-07",
+      "status": "OPEN",
+      "fault": [
+        "F-19"
+      ],
+      "trigger": "doctrine mapping"
+    },
+    {
+      "id": "Q-08",
+      "status": "OPEN",
+      "fault": [
+        "F-03"
+      ],
+      "trigger": "doctrine mapping"
+    },
+    {
+      "id": "Q-09",
+      "status": "OPEN",
+      "fault": [
+        "F-13",
+        "F-19"
+      ],
+      "trigger": "step-5 lint"
+    },
+    {
+      "id": "Q-10",
+      "status": "OPEN",
+      "fault": [
+        "F-12"
+      ],
+      "trigger": "step-3 checklist"
+    },
+    {
+      "id": "Q-11",
+      "status": "OPEN",
+      "fault": [
+        "F-14",
+        "F-18",
+        "F-08"
+      ],
+      "trigger": "step-3 checklist"
+    },
+    {
+      "id": "Q-12",
+      "status": "OPEN",
+      "fault": [
+        "F-11"
+      ],
+      "trigger": "step-3 lock-discipline annotation"
+    },
+    {
+      "id": "Q-13",
+      "status": "OPEN",
+      "fault": [
+        "F-19"
+      ],
+      "trigger": "doctrine mapping"
+    },
+    {
+      "id": "Q-14",
+      "status": "OPEN",
+      "fault": [
+        "F-06"
+      ],
+      "trigger": "pairs table + z3 proof"
+    },
+    {
+      "id": "Q-15",
+      "status": "OPEN",
+      "fault": [
+        "F-19"
+      ],
+      "trigger": "step-1 extraction"
+    },
+    {
+      "id": "Q-16",
+      "status": "OPEN",
+      "fault": [
+        "F-03"
+      ],
+      "trigger": "step-5 lint"
+    },
+    {
+      "id": "Q-17",
+      "status": "OPEN",
+      "fault": [
+        "F-15",
+        "F-07"
+      ],
+      "trigger": "adversarial trace"
+    },
+    {
+      "id": "Q-18",
+      "status": "OPEN",
+      "fault": [
+        "F-10"
+      ],
+      "trigger": "multi-instance probes"
+    },
+    {
+      "id": "Q-19",
+      "status": "OPEN",
+      "fault": [
+        "F-21"
+      ],
+      "trigger": "step-2 test replay"
+    },
+    {
+      "id": "Q-20",
+      "status": "OPEN",
+      "fault": [
+        "F-19"
+      ],
+      "trigger": "adversarial trace"
+    },
+    {
+      "id": "Q-21",
+      "status": "OPEN",
+      "fault": [
+        "F-19"
+      ],
+      "trigger": "adversarial trace"
+    },
+    {
+      "id": "Q-22",
+      "status": "OPEN",
+      "fault": [
+        "F-19"
+      ],
+      "trigger": "adversarial trace"
+    },
+    {
+      "id": "Q-23",
+      "status": "OPEN",
+      "fault": [
+        "F-19"
+      ],
+      "trigger": "adversarial trace"
+    }
+  ],
+  "behaviouralDrs": [],
+  "docLines": [
+    {
+      "id": "DOC-1",
+      "mapping": "rejected",
+      "target": "describes the value type (interface{}) for versatility; prescribes no behaviour of the pool's state machine"
+    },
+    {
+      "id": "DOC-2",
+      "mapping": "invariant",
+      "target": "SYS-5"
+    },
+    {
+      "id": "DOC-3",
+      "mapping": "invariant",
+      "target": "SYS-6"
+    },
+    {
+      "id": "DOC-4",
+      "mapping": "cell",
+      "target": "Open_Empty_AtCap x get"
+    },
+    {
+      "id": "DOC-5",
+      "mapping": "cell",
+      "target": "Open_Waiting x put"
+    },
+    {
+      "id": "DOC-6",
+      "mapping": "invariant",
+      "target": "SYS-7"
+    },
+    {
+      "id": "DOC-7",
+      "mapping": "cell",
+      "target": "Open_Idle x len"
+    },
+    {
+      "id": "DOC-8",
+      "mapping": "invariant",
+      "target": "SYS-2"
+    },
+    {
+      "id": "DOC-9",
+      "mapping": "invariant",
+      "target": "SYS-5"
+    },
+    {
+      "id": "DOC-10",
+      "mapping": "cell",
+      "target": "Released x get"
+    },
+    {
+      "id": "DOC-11",
+      "mapping": "cell",
+      "target": "Open_Waiting x UV-01"
+    },
+    {
+      "id": "DOC-12",
+      "mapping": "invariant",
+      "target": "SYS-11"
+    },
+    {
+      "id": "DOC-13",
+      "mapping": "invariant",
+      "target": "SYS-8"
+    },
+    {
+      "id": "DOC-14",
+      "mapping": "invariant",
+      "target": "SYS-9"
+    },
+    {
+      "id": "DOC-15",
+      "mapping": "invariant",
+      "target": "SYS-7"
+    },
+    {
+      "id": "DOC-16",
+      "mapping": "rejected",
+      "target": "implementation-efficiency remark (README_ZH_CN.md:13); prescribes no behaviour"
+    }
+  ],
+  "coverage": {
+    "get": {
+      "loss": "n/a: a Get that is never made changes no pool state; a Get that has started cannot be abandoned by its caller (no cancellation parameter, channel.go:103)",
+      "delay": "UV-01",
+      "duplication": "n/a: a repeated Get is an independent second request; Get carries no request identity to duplicate",
+      "out-of-order": "covered by the base column in the Released rows (a Get after Release is an ordinary Get in state Released) and by pair P-01",
+      "contradiction": "covered by pair P-01 (Get vs Release); concurrent Gets from different users are normal operation serialized by the mutex",
+      "commission": "n/a: Get is only issued by a user call; nothing inside the boundary issues Get spontaneously",
+      "value": "n/a: Get has no payload"
+    },
+    "put": {
+      "loss": "UV-02",
+      "delay": "n/a: a late Put is an ordinary later Put; a Put that arrives after Release is the base column in the Released rows (pair P-02)",
+      "duplication": "UV-03",
+      "out-of-order": "covered by the base column in the Released rows and by pair P-02",
+      "contradiction": "UV-04",
+      "commission": "UV-05",
+      "value": "UV-06"
+    },
+    "close_conn": {
+      "loss": "n/a: a connection that is neither Put nor Closed is UV-02",
+      "delay": "n/a: a late Close is an ordinary later Close; after Release it is the base column in the Released rows (pair P-03)",
+      "duplication": "UV-07",
+      "out-of-order": "covered by the base column in the Released rows and by pair P-03",
+      "contradiction": "UV-04",
+      "commission": "UV-08",
+      "value": "UV-09"
+    },
+    "ping": {
+      "loss": "n/a: Ping is a stateless pass-through; a missing call changes no pool state",
+      "delay": "n/a: Ping holds no lock and changes no state; its latency is the callback's",
+      "duplication": "n/a: stateless pass-through, a repeat changes no pool state",
+      "out-of-order": "covered by the base column in the Released rows (callback cleared by Release) and by pair P-04",
+      "contradiction": "covered by pair P-04 (Ping vs Release)",
+      "commission": "n/a: Ping is only issued by a user call",
+      "value": "UV-11"
+    },
+    "release": {
+      "loss": "n/a: a pool that is never released stays in its Open state; there is no event to dispose (the idle connections stay open until process exit)",
+      "delay": "n/a: Release is synchronous; overlaps of its unlocked drain phase with user calls are the pairs P-01..P-05",
+      "duplication": "UV-10",
+      "out-of-order": "n/a: Release is the terminal lifecycle command; a second Release is UV-10, and there is no later lifecycle stage for it to arrive stale into",
+      "contradiction": "covered by pairs P-01..P-05 (Release vs user calls)",
+      "commission": "covered by pairs P-01..P-05: an unexpected Release from any holder races with user calls exactly as the owner's Release does",
+      "value": "n/a: Release has no payload"
+    },
+    "len": {
+      "loss": "n/a: read-only query, no state change",
+      "delay": "n/a: read-only query; the result is a snapshot and may be stale on return (inferred)",
+      "duplication": "n/a: read-only query",
+      "out-of-order": "covered by the base column in the Released rows and by pair P-05",
+      "contradiction": "covered by pair P-05 (Len vs Release)",
+      "commission": "n/a: only issued by a user call",
+      "value": "n/a: no payload"
+    },
+    "idle_expired": {
+      "loss": "n/a: internal evaluation inside Get, nothing to lose",
+      "delay": "n/a: lazy by design of the code — an expired connection stays idle until a Get takes it (recorded as extraction fact, no timer exists)",
+      "duplication": "n/a: each taken connection is evaluated once per take",
+      "out-of-order": "n/a: evaluated synchronously in the Get that took the connection",
+      "contradiction": "n/a: a single evaluation per take",
+      "commission": "n/a: only evaluated on a connection Get has taken",
+      "value": "n/a: the timestamp is set by the pool itself (channel.go:88, :184, :190); a handed-off connection's age restarts at Put"
+    },
+    "ping_failed": {
+      "loss": "n/a: internal, synchronous result",
+      "delay": "n/a: a slow Ping callback delays only the calling Get (no lock held, channel.go:220)",
+      "duplication": "n/a: one call per taken connection",
+      "out-of-order": "n/a: synchronous within one Get",
+      "contradiction": "n/a: single result",
+      "commission": "n/a: only produced by a call the pool made",
+      "value": "n/a: any non-nil error discards the connection; the error value is not inspected"
+    },
+    "factory_error": {
+      "loss": "n/a: internal, synchronous result",
+      "delay": "UV-12",
+      "duplication": "n/a: one call per Get iteration",
+      "out-of-order": "n/a: synchronous under the mutex",
+      "contradiction": "n/a: single result",
+      "commission": "n/a: only produced by a call the pool made",
+      "value": "n/a: any non-nil error is returned to the Get caller unchanged"
+    },
+    "handoff": {
+      "loss": "n/a: the waiter channel has capacity 1 (channel.go:134) and the send happens under the mutex; the waiting Get cannot abandon its receive (no cancellation), so a sent connection is always received",
+      "delay": "n/a: delivery is a buffered send; the waiter wakes when scheduled",
+      "duplication": "n/a: the waiter is removed from the queue before the single send",
+      "out-of-order": "n/a: FIFO — Put always serves connReqs[0] (channel.go:180)",
+      "contradiction": "n/a: one Put per handoff under the mutex",
+      "commission": "n/a: only Put sends on a waiter channel; nothing ever closes one (the `!ok` branch at channel.go:138 has no producer)",
+      "value": "n/a: the connection is the one passed to Put; its timestamp is reset to now (channel.go:184)"
+    }
+  },
+  "pairs": [
+    {
+      "id": "P-01a",
+      "trace": "T-P01a"
+    },
+    {
+      "id": "P-01b",
+      "trace": "T-P01b"
+    },
+    {
+      "id": "P-02a",
+      "trace": "T-P02a"
+    },
+    {
+      "id": "P-02b",
+      "trace": "T-P02b"
+    },
+    {
+      "id": "P-03a",
+      "trace": "T-P03a"
+    },
+    {
+      "id": "P-03b",
+      "trace": "T-P03b"
+    },
+    {
+      "id": "P-04a",
+      "trace": "T-P04a"
+    },
+    {
+      "id": "P-04b",
+      "trace": "T-P04b"
+    },
+    {
+      "id": "P-05a",
+      "trace": "T-P05a"
+    },
+    {
+      "id": "P-05b",
+      "trace": "T-P05b"
+    }
+  ],
+  "guardGroups": [
+    {
+      "id": "G-01",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-02",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-03",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-04",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-05",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-08",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-06",
+      "outcome": "not-formalizable",
+      "reason": "external-call: the Ping callback result (channel.go:124) decides one branch; inspection (unproven): branches are checked in sequence nil -> expired -> ping -> accept, so they are disjoint by order; coverage by the final return (channel.go:129)"
+    },
+    {
+      "id": "G-07",
+      "outcome": "not-formalizable",
+      "reason": "dynamic-state: ok depends on whether any goroutine closes the waiter channel; inspection (unproven): no statement in channel.go closes a req channel, so the !ok branch (channel.go:138-139) is unreachable as-is"
+    }
+  ]
+}

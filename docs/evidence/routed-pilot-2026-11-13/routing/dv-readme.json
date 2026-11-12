@@ -1,0 +1,262 @@
+{
+  "source": "pool/README.md",
+  "source_sha256": "f1ee56748fe3bf0567a05c4c5a284dfe752b952ae9c9cada76e7687d4dcdbfb2",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 1172,
+    "output_tokens": 948,
+    "cost_microdollars": 1490,
+    "reservation_microdollars": 6549
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 3330,
+    "cost_microdollars": 140,
+    "reservation_microdollars": 608,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The connection supports setting a maximum idle time.",
+      "line": 13,
+      "fragment": "The connection supports setting the maximum idle time",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "A connection that exceeds the idle timeout will be closed and discarded.",
+      "line": 13,
+      "fragment": "the timeout connection will be closed and discarded",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.0,
+          "unclear": 0.04
+        },
+        "confidence": 0.94
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "Users can set a ping method used to check the connectivity of a connection.",
+      "line": 14,
+      "fragment": "Support user setting `ping` method, used to check the connectivity of connection",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "An invalid connection will be discarded.",
+      "line": 14,
+      "fragment": "invalid connection will be discarded",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "When the connection pool is full, connection waiting is supported.",
+      "line": 15,
+      "fragment": "When the connection pool is full, support for connection waiting",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "Put returns a connection to the connection pool when the connection is no longer in use.",
+      "line": 52,
+      "fragment": "Put the connection back into the connection pool, when the connection is no longer in use",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "Release releases all connections in the connection pool, when resources need to be destroyed.",
+      "line": 55,
+      "fragment": "Release all connections in the connection pool, when resources need to be destroyed",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "Len views the number of connections in the current connection pool.",
+      "line": 58,
+      "fragment": "View the number of connections in the current connection pool",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "The connection pool is initialized with an initial number of connections of 5.",
+      "line": 30,
+      "fragment": "Initialize the number of connections to 5",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "The maximum idle connection count is configurable.",
+      "line": 30,
+      "fragment": "the maximum idle connection is 20",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.79,
+          "contradicted": 0.0,
+          "unclear": 0.21
+        },
+        "confidence": 0.68
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "The maximum concurrent connection count is configurable.",
+      "line": 30,
+      "fragment": "the maximum concurrent connection is 30",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.9,
+          "contradicted": 0.0,
+          "unclear": 0.1
+        },
+        "confidence": 0.85
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "Get gets a connection from the connection pool.",
+      "line": 46,
+      "fragment": "Get a connection from the connection pool",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C13": {
+      "kind": "ordering",
+      "statement": "A connection returned via Put is placed back into the connection pool when it is no longer in use, before it can be reused.",
+      "line": 52,
+      "fragment": "Put the connection back into the connection pool, when the connection is no longer in use",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.67,
+          "contradicted": 0.0,
+          "unclear": 0.33
+        },
+        "confidence": 0.5,
+        "ordering_scope_probability": 0.27
+      }
+    },
+    "C14": {
+      "kind": "ordering",
+      "statement": "When the connection pool is full, a connection waits for the pool rather than failing immediately.",
+      "line": 15,
+      "fragment": "When the connection pool is full, support for connection waiting",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0,
+        "ordering_scope_probability": 0.79
+      }
+    }
+  },
+  "questions": [
+    "What happens to connections that are waiting when the pool is full and a connection becomes available?",
+    "What happens to a connection after Release is called on the pool?",
+    "Does Get trigger a ping check before returning the connection?",
+    "What happens to a ping failure at the time of Get versus at idle timeout expiry?",
+    "Is the idle timeout checked during Get, during Put, or periodically?",
+    "Are idle connections (exceeding idle timeout) closed and discarded only when fetched, or proactively?",
+    "Is there an ordering relationship between Get and the ping/invalid-connection discard check?",
+    "What happens if Put is called with a connection when the pool is at MaxCap?",
+    "Does Release close connections using the configured Close function?",
+    "Is the maximum idle connection count (MaxIdle) the same as the maximum concurrent connection count (MaxCap), and how do they interact?",
+    "What is the behaviour of Len after Release has been called?",
+    "Does idle timeout expiry occur before or after a ping check?"
+  ],
+  "review_required": true
+}

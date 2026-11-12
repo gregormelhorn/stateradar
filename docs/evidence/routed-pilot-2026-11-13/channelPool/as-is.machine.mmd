@@ -1,0 +1,28 @@
+stateDiagram-v2
+    %% channelPool as-is (silenceper/pool @ 6084537). Edges labelled "(doc)" are
+    %% documenting edges: they record a change driven by a guard inside a handle cell.
+    [*] --> Open_Idle: NewChannelPool (InitialCap > 0)
+    [*] --> Open_Empty_BelowCap: NewChannelPool (InitialCap = 0, MaxCap > 0)
+    [*] --> Open_Empty_AtCap: NewChannelPool (MaxCap = 0 accepted, G-01)
+
+    state Open {
+        Open_Idle --> Open_Empty_BelowCap: get (doc: last idle taken, below cap)
+        Open_Idle --> Open_Empty_AtCap: get (doc: last idle taken, at cap)
+        Open_Idle --> Open_Waiting_CapacityFree: get (doc: enqueue race, idle refilled after select)
+        Open_Empty_BelowCap --> Open_Idle: put
+        Open_Empty_BelowCap --> Open_Empty_AtCap: get (doc: factory reaches MaxCap)
+        Open_Empty_AtCap --> Open_Idle: put
+        Open_Empty_AtCap --> Open_Empty_BelowCap: close_conn
+        Open_Empty_AtCap --> Open_Waiting: get
+        Open_Waiting --> Open_Empty_AtCap: put / handoff (doc: last waiter served)
+        Open_Waiting --> Open_Waiting_CapacityFree: close_conn
+        Open_Waiting --> Open_Waiting_CapacityFree: idle_expired (doc: woken Get closes expired handoff)
+        Open_Waiting_CapacityFree --> Open_Idle: put / handoff (doc: last waiter served, idle remains)
+        Open_Waiting_CapacityFree --> Open_Empty_BelowCap: put / handoff (doc: last waiter served, below cap)
+    }
+
+    Open_Idle --> Released: release / UV-10
+    Open_Empty_BelowCap --> Released: release / UV-10
+    Open_Empty_AtCap --> Released: release / UV-10
+    Open_Waiting --> Released_WaitersStranded: release / UV-10 (waiters never signalled)
+    Open_Waiting_CapacityFree --> Released_WaitersStranded: release / UV-10 (waiters never signalled)

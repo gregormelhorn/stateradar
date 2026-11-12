@@ -1,0 +1,7 @@
+[
+ {"id":"O1","kind":"ordering","statement":"A connection is put back into the pool with Put, and afterwards Release is called; Release closes that idle connection.","line":55,"fragment":"Release all connections in the connection pool"},
+ {"id":"O2","kind":"ordering","statement":"The pool is full and a Get waits; afterwards a Put returns a connection and the waiting Get receives it.","line":15,"fragment":"When the connection pool is full, support for connection waiting"},
+ {"id":"O3","kind":"ordering","statement":"A connection stays idle longer than the maximum idle time and afterwards a Get takes it; the pool closes and discards it instead of returning it.","line":13,"fragment":"the timeout connection will be closed and discarded"},
+ {"id":"O4","kind":"ordering","statement":"A Get is waiting because the pool is full, and afterwards Release is called; the waiting Get then returns.","line":55,"fragment":"Release all connections in the connection pool"},
+ {"id":"O5","kind":"ordering","statement":"Release is called, and afterwards Put is called with a connection that was obtained before Release; the connection is closed.","line":55,"fragment":"Release all connections in the connection pool"}
+]

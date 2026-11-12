@@ -1,0 +1,89 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "f1ee56748fe3bf0567a05c4c5a284dfe752b952ae9c9cada76e7687d4dcdbfb2",
+  "input_tokens": 2482,
+  "cost_microdollars": 105,
+  "reservation_microdollars": 462,
+  "checks": {
+    "O1": {
+      "kind": "ordering",
+      "statement": "A connection is put back into the pool with Put, and afterwards Release is called; Release closes that idle connection.",
+      "source": "../pool/README.md",
+      "line": 55,
+      "fragment": "Release all connections in the connection pool",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.38,
+        "contradicted": 0.0,
+        "unclear": 0.62
+      },
+      "confidence": 0.43,
+      "review_required": true,
+      "ordering_scope_probability": 0.03
+    },
+    "O2": {
+      "kind": "ordering",
+      "statement": "The pool is full and a Get waits; afterwards a Put returns a connection and the waiting Get receives it.",
+      "source": "../pool/README.md",
+      "line": 15,
+      "fragment": "When the connection pool is full, support for connection waiting",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.23,
+        "contradicted": 0.0,
+        "unclear": 0.77
+      },
+      "confidence": 0.66,
+      "review_required": true,
+      "ordering_scope_probability": 0.04
+    },
+    "O3": {
+      "kind": "ordering",
+      "statement": "A connection stays idle longer than the maximum idle time and afterwards a Get takes it; the pool closes and discards it instead of returning it.",
+      "source": "../pool/README.md",
+      "line": 13,
+      "fragment": "the timeout connection will be closed and discarded",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.24,
+        "contradicted": 0.0,
+        "unclear": 0.76
+      },
+      "confidence": 0.64,
+      "review_required": true,
+      "ordering_scope_probability": 0.05
+    },
+    "O4": {
+      "kind": "ordering",
+      "statement": "A Get is waiting because the pool is full, and afterwards Release is called; the waiting Get then returns.",
+      "source": "../pool/README.md",
+      "line": 55,
+      "fragment": "Release all connections in the connection pool",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.02,
+        "unclear": 0.98
+      },
+      "confidence": 0.97,
+      "review_required": true,
+      "ordering_scope_probability": 0.02
+    },
+    "O5": {
+      "kind": "ordering",
+      "statement": "Release is called, and afterwards Put is called with a connection that was obtained before Release; the connection is closed.",
+      "source": "../pool/README.md",
+      "line": 55,
+      "fragment": "Release all connections in the connection pool",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.01,
+        "contradicted": 0.02,
+        "unclear": 0.97
+      },
+      "confidence": 0.96,
+      "review_required": true,
+      "ordering_scope_probability": 0.02
+    }
+  }
+}

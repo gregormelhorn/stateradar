@@ -1,0 +1,1298 @@
+{
+  "source": "pool/channel.go",
+  "source_sha256": "fd57c54c8d03d2208f611cf12f49a91571923c27127b87e164b1205fd65949ec",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 2788,
+    "output_tokens": 5163,
+    "cost_microdollars": 7032,
+    "reservation_microdollars": 17271
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 14366,
+    "cost_microdollars": 604,
+    "reservation_microdollars": 2444,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The channelPool struct holds a mutex mu of type sync.RWMutex.",
+      "line": 41,
+      "fragment": "mu                       sync.RWMutex",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "The conns field is declared as a channel of *idleConn.",
+      "line": 42,
+      "fragment": "conns                    chan *idleConn",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "The factory field holds a function returning (interface{}, error); its nil-ness is used as a closed indicator.",
+      "line": 43,
+      "fragment": "factory                  func() (interface{}, error)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.51,
+          "contradicted": 0.05,
+          "unclear": 0.44
+        },
+        "confidence": 0.26
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "The close field holds a function taking interface{} and returning error.",
+      "line": 44,
+      "fragment": "close                    func(interface{}) error",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "The ping field holds a function taking interface{} and returning error.",
+      "line": 45,
+      "fragment": "ping                     func(interface{}) error",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "The pool tracks idleTimeout and waitTimeOut durations.",
+      "line": 46,
+      "fragment": "idleTimeout, waitTimeOut time.Duration",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.9,
+          "contradicted": 0.0,
+          "unclear": 0.1
+        },
+        "confidence": 0.85
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "maxActive is the pool's max active connection limit.",
+      "line": 47,
+      "fragment": "maxActive                int",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.26,
+          "contradicted": 0.0,
+          "unclear": 0.74
+        },
+        "confidence": 0.61
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "openingConns is a counter of currently-open connections.",
+      "line": 48,
+      "fragment": "openingConns             int",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.06,
+          "contradicted": 0.01,
+          "unclear": 0.93
+        },
+        "confidence": 0.89
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "connReqs is a slice of wait-queue channels, one per waiting Get caller.",
+      "line": 49,
+      "fragment": "connReqs                 []chan connReq",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.39,
+          "contradicted": 0.01,
+          "unclear": 0.6
+        },
+        "confidence": 0.4
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "An idleConn wraps a connection and the time it was stored.",
+      "line": 52,
+      "fragment": "conn interface{}",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.19,
+          "contradicted": 0.0,
+          "unclear": 0.81
+        },
+        "confidence": 0.72
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "NewChannelPool validates that InitialCap <= MaxIdle, MaxCap >= MaxIdle, and InitialCap >= 0.",
+      "line": 59,
+      "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "NewChannelPool rejects a nil Factory.",
+      "line": 62,
+      "fragment": "if poolConfig.Factory == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "NewChannelPool rejects a nil Close function.",
+      "line": 65,
+      "fragment": "if poolConfig.Close == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "NewChannelPool creates the conns channel with capacity MaxIdle.",
+      "line": 70,
+      "fragment": "conns:        make(chan *idleConn, poolConfig.MaxIdle),",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "NewChannelPool sets maxActive from MaxCap.",
+      "line": 74,
+      "fragment": "maxActive:    poolConfig.MaxCap,",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "NewChannelPool initializes openingConns to InitialCap prior to filling the pool.",
+      "line": 75,
+      "fragment": "openingConns: poolConfig.InitialCap,",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.03,
+          "unclear": 0.1
+        },
+        "confidence": 0.8
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "ping is only set when poolConfig.Ping is non-nil.",
+      "line": 78,
+      "fragment": "if poolConfig.Ping != nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "NewChannelPool calls factory InitialCap times to fill the pool.",
+      "line": 82,
+      "fragment": "for i := 0; i < poolConfig.InitialCap; i++ {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C19": {
+      "kind": "claim",
+      "statement": "On factory error during fill, NewChannelPool calls c.Release() and returns an error.",
+      "line": 85,
+      "fragment": "c.Release()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C20": {
+      "kind": "claim",
+      "statement": "On successful factory call during fill, the wrapped idleConn is stored in conns with the current time.",
+      "line": 88,
+      "fragment": "c.conns <- &idleConn{conn: conn, t: time.Now()}",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C21": {
+      "kind": "claim",
+      "statement": "getConns takes c.mu.Lock, copies c.conns, then unlocks.",
+      "line": 96,
+      "fragment": "c.mu.Lock()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.28,
+          "contradicted": 0.11,
+          "unclear": 0.61
+        },
+        "confidence": 0.42
+      }
+    },
+    "C22": {
+      "kind": "claim",
+      "statement": "getConns returns the copied conns channel under the lock.",
+      "line": 99,
+      "fragment": "return conns",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "contradicted",
+        "probabilities": {
+          "supported": 0.04,
+          "contradicted": 0.55,
+          "unclear": 0.41
+        },
+        "confidence": 0.33
+      }
+    },
+    "C23": {
+      "kind": "claim",
+      "statement": "Get returns ErrClosed when getConns returns a nil conns channel.",
+      "line": 105,
+      "fragment": "if conns == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C24": {
+      "kind": "claim",
+      "statement": "Get receives an idleConn from the conns channel in a select case.",
+      "line": 110,
+      "fragment": "case wrapConn := <-conns:",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C25": {
+      "kind": "claim",
+      "statement": "Get returns ErrClosed if the received wrapConn is nil.",
+      "line": 111,
+      "fragment": "if wrapConn == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C26": {
+      "kind": "claim",
+      "statement": "Get applies idleTimeout only when idleTimeout > 0.",
+      "line": 115,
+      "fragment": "if timeout := c.idleTimeout; timeout > 0 {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C27": {
+      "kind": "claim",
+      "statement": "Get discards and closes an idle connection whose timestamp plus idleTimeout is before now.",
+      "line": 116,
+      "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C28": {
+      "kind": "claim",
+      "statement": "When an idle connection times out, Get calls c.Close(wrapConn.conn) and continues the loop.",
+      "line": 118,
+      "fragment": "c.Close(wrapConn.conn)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C29": {
+      "kind": "claim",
+      "statement": "Get pings a connection only if c.ping is non-nil.",
+      "line": 123,
+      "fragment": "if c.ping != nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C30": {
+      "kind": "claim",
+      "statement": "On ping failure, Get calls c.Close(wrapConn.conn) and continues the loop.",
+      "line": 124,
+      "fragment": "if err := c.Ping(wrapConn.conn); err != nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C31": {
+      "kind": "claim",
+      "statement": "On successful validation, Get returns wrapConn.conn.",
+      "line": 129,
+      "fragment": "return wrapConn.conn, nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.0,
+          "unclear": 0.07
+        },
+        "confidence": 0.89
+      }
+    },
+    "C32": {
+      "kind": "claim",
+      "statement": "The default select branch in Get triggers when the conns channel has no immediately-available connection.",
+      "line": 130,
+      "fragment": "default:",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.81,
+          "contradicted": 0.0,
+          "unclear": 0.19
+        },
+        "confidence": 0.72
+      }
+    },
+    "C33": {
+      "kind": "claim",
+      "statement": "In the default branch, Get takes c.mu.Lock.",
+      "line": 131,
+      "fragment": "c.mu.Lock()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.01,
+          "unclear": 0.12
+        },
+        "confidence": 0.8
+      }
+    },
+    "C34": {
+      "kind": "claim",
+      "statement": "When openingConns >= maxActive, Get creates a buffered connReq channel and appends it to connReqs under the lock.",
+      "line": 133,
+      "fragment": "if c.openingConns >= c.maxActive {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C35": {
+      "kind": "claim",
+      "statement": "A wait-queue request channel is created with buffer size 1.",
+      "line": 134,
+      "fragment": "req := make(chan connReq, 1)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C36": {
+      "kind": "claim",
+      "statement": "The new request channel is appended to connReqs.",
+      "line": 135,
+      "fragment": "c.connReqs = append(c.connReqs, req)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C37": {
+      "kind": "claim",
+      "statement": "After enqueuing, Get unlocks mu before blocking on req.",
+      "line": 136,
+      "fragment": "c.mu.Unlock()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.01,
+          "unclear": 0.02
+        },
+        "confidence": 0.96
+      }
+    },
+    "C38": {
+      "kind": "claim",
+      "statement": "Get blocks on receiving from its request channel.",
+      "line": 137,
+      "fragment": "ret, ok := <-req",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C39": {
+      "kind": "claim",
+      "statement": "If the request channel was closed, Get returns ErrMaxActiveConnReached.",
+      "line": 139,
+      "fragment": "return nil, ErrMaxActiveConnReached",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.88,
+          "contradicted": 0.01,
+          "unclear": 0.11
+        },
+        "confidence": 0.82
+      }
+    },
+    "C40": {
+      "kind": "claim",
+      "statement": "On a handed-off idle connection, Get applies idleTimeout validation against its timestamp.",
+      "line": 141,
+      "fragment": "if timeout := c.idleTimeout; timeout > 0 {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.77,
+          "contradicted": 0.01,
+          "unclear": 0.22
+        },
+        "confidence": 0.66
+      }
+    },
+    "C41": {
+      "kind": "claim",
+      "statement": "A handed-off idle connection past idleTimeout is closed and Get continues.",
+      "line": 144,
+      "fragment": "c.Close(ret.idleConn.conn)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.85,
+          "contradicted": 0.02,
+          "unclear": 0.13
+        },
+        "confidence": 0.77
+      }
+    },
+    "C42": {
+      "kind": "claim",
+      "statement": "Get returns the handed-off connection when it passes validation.",
+      "line": 148,
+      "fragment": "return ret.idleConn.conn, nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.89,
+          "contradicted": 0.0,
+          "unclear": 0.11
+        },
+        "confidence": 0.83
+      }
+    },
+    "C43": {
+      "kind": "claim",
+      "statement": "When openingConns < maxActive but factory is nil, Get unlocks and returns ErrClosed.",
+      "line": 150,
+      "fragment": "if c.factory == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.81,
+          "contradicted": 0.06,
+          "unclear": 0.13
+        },
+        "confidence": 0.72
+      }
+    },
+    "C44": {
+      "kind": "claim",
+      "statement": "Under lock, if factory is non-nil, Get invokes c.factory().",
+      "line": 154,
+      "fragment": "conn, err := c.factory()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.77,
+          "contradicted": 0.01,
+          "unclear": 0.22
+        },
+        "confidence": 0.66
+      }
+    },
+    "C45": {
+      "kind": "claim",
+      "statement": "On factory error in Get, mu is unlocked and the error returned.",
+      "line": 155,
+      "fragment": "if err != nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.82,
+          "contradicted": 0.0,
+          "unclear": 0.18
+        },
+        "confidence": 0.73
+      }
+    },
+    "C46": {
+      "kind": "claim",
+      "statement": "On successful factory call in Get, openingConns is incremented.",
+      "line": 159,
+      "fragment": "c.openingConns++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C47": {
+      "kind": "claim",
+      "statement": "Get returns the newly created connection after unlocking mu.",
+      "line": 161,
+      "fragment": "return conn, nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.52,
+          "contradicted": 0.07,
+          "unclear": 0.41
+        },
+        "confidence": 0.28
+      }
+    },
+    "C48": {
+      "kind": "claim",
+      "statement": "Put rejects a nil connection with an error.",
+      "line": 168,
+      "fragment": "if conn == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C49": {
+      "kind": "claim",
+      "statement": "Put takes c.mu.Lock at entry.",
+      "line": 172,
+      "fragment": "c.mu.Lock()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.0,
+          "unclear": 0.07
+        },
+        "confidence": 0.89
+      }
+    },
+    "C50": {
+      "kind": "claim",
+      "statement": "If c.conns is nil, Put unlocks and returns c.Close(conn).",
+      "line": 174,
+      "fragment": "if c.conns == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C51": {
+      "kind": "claim",
+      "statement": "Put checks connReqs length under the lock and takes the first waiter if any.",
+      "line": 179,
+      "fragment": "if l := len(c.connReqs); l > 0 {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C52": {
+      "kind": "claim",
+      "statement": "Put shifts connReqs by copying c.connReqs[1:] into it and truncating the last slot.",
+      "line": 181,
+      "fragment": "copy(c.connReqs, c.connReqs[1:])",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.56,
+          "contradicted": 0.31,
+          "unclear": 0.13
+        },
+        "confidence": 0.34
+      }
+    },
+    "C53": {
+      "kind": "claim",
+      "statement": "Put sends a connReq carrying the connection to the first waiter.",
+      "line": 183,
+      "fragment": "req <- connReq{",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C54": {
+      "kind": "claim",
+      "statement": "After a handoff to a waiter, Put unlocks and returns nil.",
+      "line": 186,
+      "fragment": "c.mu.Unlock()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C55": {
+      "kind": "claim",
+      "statement": "With no waiters, Put attempts a non-blocking send to c.conns under the lock.",
+      "line": 190,
+      "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.01,
+          "unclear": 0.12
+        },
+        "confidence": 0.8
+      }
+    },
+    "C56": {
+      "kind": "claim",
+      "statement": "If the conns channel full-send fails, Put unlocks and calls c.Close(conn).",
+      "line": 196,
+      "fragment": "return c.Close(conn)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.01,
+          "unclear": 0.05
+        },
+        "confidence": 0.91
+      }
+    },
+    "C57": {
+      "kind": "claim",
+      "statement": "Close rejects a nil connection with an error.",
+      "line": 203,
+      "fragment": "if conn == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.9,
+          "contradicted": 0.01,
+          "unclear": 0.09
+        },
+        "confidence": 0.85
+      }
+    },
+    "C58": {
+      "kind": "claim",
+      "statement": "Close takes c.mu.Lock with defer unlock.",
+      "line": 206,
+      "fragment": "c.mu.Lock()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.46,
+          "contradicted": 0.01,
+          "unclear": 0.53
+        },
+        "confidence": 0.3
+      }
+    },
+    "C59": {
+      "kind": "claim",
+      "statement": "If c.close is nil, Close returns nil without decrementing openingConns.",
+      "line": 208,
+      "fragment": "if c.close == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "contradicted",
+        "probabilities": {
+          "supported": 0.08,
+          "contradicted": 0.83,
+          "unclear": 0.09
+        },
+        "confidence": 0.74
+      }
+    },
+    "C60": {
+      "kind": "claim",
+      "statement": "Close decrements openingConns before invoking the close callback.",
+      "line": 211,
+      "fragment": "c.openingConns--",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C61": {
+      "kind": "claim",
+      "statement": "Close invokes c.close(conn) under the held lock.",
+      "line": 212,
+      "fragment": "return c.close(conn)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.89,
+          "contradicted": 0.01,
+          "unclear": 0.1
+        },
+        "confidence": 0.83
+      }
+    },
+    "C62": {
+      "kind": "claim",
+      "statement": "Ping rejects a nil connection with an error.",
+      "line": 217,
+      "fragment": "if conn == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.9,
+          "contradicted": 0.0,
+          "unclear": 0.1
+        },
+        "confidence": 0.85
+      }
+    },
+    "C63": {
+      "kind": "claim",
+      "statement": "Ping invokes c.ping(conn) without acquiring mu.",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.82,
+          "contradicted": 0.01,
+          "unclear": 0.17
+        },
+        "confidence": 0.73
+      }
+    },
+    "C64": {
+      "kind": "claim",
+      "statement": "Release takes c.mu.Lock.",
+      "line": 225,
+      "fragment": "c.mu.Lock()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C65": {
+      "kind": "claim",
+      "statement": "Release sets c.conns to nil, signaling closed state.",
+      "line": 227,
+      "fragment": "c.conns = nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.0,
+          "unclear": 0.07
+        },
+        "confidence": 0.89
+      }
+    },
+    "C66": {
+      "kind": "claim",
+      "statement": "Release nils c.factory.",
+      "line": 228,
+      "fragment": "c.factory = nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C67": {
+      "kind": "claim",
+      "statement": "Release nils c.ping.",
+      "line": 229,
+      "fragment": "c.ping = nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C68": {
+      "kind": "claim",
+      "statement": "Release saves the close function and then nils c.close.",
+      "line": 231,
+      "fragment": "c.close = nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.83,
+          "contradicted": 0.01,
+          "unclear": 0.16
+        },
+        "confidence": 0.74
+      }
+    },
+    "C69": {
+      "kind": "claim",
+      "statement": "Release unlocks mu before draining the channel.",
+      "line": 232,
+      "fragment": "c.mu.Unlock()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C70": {
+      "kind": "claim",
+      "statement": "Release returns early if the previously-captured conns channel was nil.",
+      "line": 234,
+      "fragment": "if conns == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C71": {
+      "kind": "claim",
+      "statement": "Release closes the conns channel.",
+      "line": 238,
+      "fragment": "close(conns)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C72": {
+      "kind": "claim",
+      "statement": "Release iterates over the drained connections and calls the captured closeFun on each.",
+      "line": 239,
+      "fragment": "for wrapConn := range conns {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C73": {
+      "kind": "claim",
+      "statement": "Release invokes closeFun(wrapConn.conn) on each drained connection.",
+      "line": 241,
+      "fragment": "closeFun(wrapConn.conn)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C74": {
+      "kind": "claim",
+      "statement": "Len returns the length of the conns channel obtained via getConns.",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C75": {
+      "kind": "ordering",
+      "statement": "Put hands a connection to a waiting Get (which blocked on req) after Get has unlocked mu; the connection's timestamp is the time of the handoff.",
+      "line": 184,
+      "fragment": "idleConn: &idleConn{conn: conn, t: time.Now()},",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.34,
+          "contradicted": 0.1,
+          "unclear": 0.56
+        },
+        "confidence": 0.34,
+        "ordering_scope_probability": 0.05
+      }
+    },
+    "C76": {
+      "kind": "ordering",
+      "statement": "Release while a Get is blocked on its request channel closes conns but does not close or signal the individual connReqs entries.",
+      "line": 238,
+      "fragment": "close(conns)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.06,
+          "contradicted": 0.02,
+          "unclear": 0.92
+        },
+        "confidence": 0.88,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C77": {
+      "kind": "ordering",
+      "statement": "After Release nils c.close, a subsequent Put on a non-nil connection sees c.conns==nil, calls c.Close(conn), which finds c.close==nil and returns nil without invoking any close callback.",
+      "line": 176,
+      "fragment": "return c.Close(conn)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.47,
+          "contradicted": 0.14,
+          "unclear": 0.39
+        },
+        "confidence": 0.2,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C78": {
+      "kind": "claim",
+      "statement": "Close decrements openingConns only when c.close is non-nil; when close is nil the decrement is skipped.",
+      "line": 208,
+      "fragment": "if c.close == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.61,
+          "contradicted": 0.34,
+          "unclear": 0.05
+        },
+        "confidence": 0.42
+      }
+    }
+  },
+  "questions": [
+    "Is UpdateMaxActive absent intentionally, or is maxActive never mutable after construction?",
+    "During NewChannelPool fill, factory errors call c.Release() and return an error; Release's drain uses closeFun on already-filled conns. Is invoking Close on those partial connections the intended cleanup, and is openingConns consistent after that?",
+    "Get's wait-queue branch blocks on <-req with no waitTimeOut selection, even though waitTimeOut is a struct field. What is waitTimeOut for, and where is it enforced?",
+    "Release closes c.conns but never closes the connReqs channels; what happens to a Get blocked on <-req when Release runs concurrently? Is the waiter leaked forever?",
+    "Put's zeroing of the last slot: c.connReqs = c.connReqs[:l-1] leaves the trailing entry's channel reference reachable via the old backing array (copy moves elements but the last slot still references the last request). Is that intentional retention?",
+    "When Get receives a timed-out connection in the wait-queue branch, it calls c.Close and `continue`s, but does not decrement any request accounting; is the waiter expected to re-enqueue with a fresh connReq?",
+    "Put's wait-queue handoff sends on req while holding c.mu; concurrently a Get in the select branch could be trying c.mu.Lock in default. Is the lock ordering safe against blocking, given the request channel has buffer 1?",
+    "In Get's default branch, c.factory() is invoked while mu is held; arbitrary factory work blocks all Put/Close/Release. Is that intended?",
+    "Close decrements openingConns only when c.close is non-nil; after Release nils close, Close becomes a no-op that does not decrement openingConns. Is that consistent with the intended invariant openingConns == live connections?",
+    "Get's default branch increments openingConns after factory succeeds, but the number of connections created may exceed maxActive if multiple Gs race via the wait-queue path. What is the specified invariant between openingConns and maxActive?",
+    "Get checks `conns == nil` from a snapshot acquired via getConns; a concurrent Release may close the returned conns channel just after the check, causing Get to receive a zero-value *idleConn rather than ErrClosed. What is the intended closed-detection protocol?",
+    "Put on a closed pool calls c.Close(conn) after Release has removed close; is silently returning nil (rather than an error like ErrClosed) intended for a Put after Release?",
+    "Len reads len(c.getConns()); getConns returns the channel snapshot but Len may race with a Release that closes it. Is Len defined after Release (should it panic or return 0)?",
+    "In NewChannelPool, openingConns is initialized to InitialCap before attempting factory calls. If a factory call fails mid-fill, Release closes previously created connections; is openingConns then accurate, given Release never decrements it?",
+    "Get's idle timeout is checked after a connection is dequeued, not periodically in the background; is idle-timeout expiry only enforced lazily on retrieval (there is no idle-timeout goroutine)?",
+    "Ping is invoked from Get while outside mu (getConns unlocked mu before), but Close also takes mu; is calling c.Ping in Get re-entrant with any callback that might call back into the pool?",
+    "Put applies idleConn timestamp at handoff using time.Now() rather than preserving the existing conn timestamp; is the connection's idle age expected to reset on every Put?",
+    "When idle timeout is 0 (IdleTimeout==0), all idle-timeout checks are skipped; is 0 defined as 'never expire' rather than 'immediately expire'?",
+    "Get's default branch checks `c.openingConns >= c.maxActive` and falls into the wait-queue branch; if c.maxActive <= 0 the pool waits before ever attempting factory. What is the specified behavior when MaxCap==0?",
+    "Release iterates `for wrapConn := range conns` on the closed channel and calls closeFun with c.mu not held; concurrently, Get may still hold a reference to the same conns channel via getConns. Can a connection be returned to a closed channel or a Get produce a zero-value on closed channel?",
+    "Ping wrapper does not check whether c.ping is nil and will nil-deref; but Get only calls Ping when c.ping != nil. Is direct user call to Ping on a pool with no Ping callback defined?",
+    "In Get's timeout-recovery path, after c.Close(wrapConn.conn) the loop continues and re-enters select; because select prefers whichever case is ready, a freshly Put connection could be chosen and immediately re-tested. Is starvation/looping after repeated ping failures guarded?",
+    "Does any code close the individual channels stored in connReqs, and if so, where (line 139's ErrMaxActiveConnReached branch implies a sender that closes, but none is present in the file)?"
+  ],
+  "review_required": true
+}

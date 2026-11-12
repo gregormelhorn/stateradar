@@ -1,0 +1,156 @@
+[
+ {
+  "id": "K1",
+  "kind": "claim",
+  "statement": "Release sets conns, factory, ping and close to nil and does not modify connReqs.",
+  "line": 227,
+  "fragment": "c.conns = nil"
+ },
+ {
+  "id": "K2",
+  "kind": "claim",
+  "statement": "The only place that returns ErrMaxActiveConnReached is the branch where the waiter channel is closed, and no statement in the file closes a waiter channel.",
+  "line": 139,
+  "fragment": "return nil, ErrMaxActiveConnReached"
+ },
+ {
+  "id": "K3",
+  "kind": "claim",
+  "statement": "Close decrements openingConns without signalling or removing any waiter in connReqs.",
+  "line": 211,
+  "fragment": "c.openingConns--"
+ },
+ {
+  "id": "K4",
+  "kind": "claim",
+  "statement": "When conns is nil, Put returns the result of Close(conn).",
+  "line": 176,
+  "fragment": "return c.Close(conn)"
+ },
+ {
+  "id": "K5",
+  "kind": "claim",
+  "statement": "When the close callback is nil, Close returns nil without decrementing openingConns and without closing the connection.",
+  "line": 209,
+  "fragment": "return nil"
+ },
+ {
+  "id": "K6",
+  "kind": "claim",
+  "statement": "Ping calls c.ping without checking whether it is nil and without taking the mutex.",
+  "line": 220,
+  "fragment": "return c.ping(conn)"
+ },
+ {
+  "id": "K7",
+  "kind": "claim",
+  "statement": "Get calls the factory while holding the mutex.",
+  "line": 154,
+  "fragment": "conn, err := c.factory()"
+ },
+ {
+  "id": "K8",
+  "kind": "claim",
+  "statement": "Close calls the close callback while holding the mutex.",
+  "line": 212,
+  "fragment": "return c.close(conn)"
+ },
+ {
+  "id": "K9",
+  "kind": "claim",
+  "statement": "When a Get receives a connection from its waiter channel, it checks the idle timeout but does not call Ping.",
+  "line": 141,
+  "fragment": "if timeout := c.idleTimeout; timeout > 0 {"
+ },
+ {
+  "id": "K10",
+  "kind": "claim",
+  "statement": "In Get, the select that tests for an idle connection runs before the mutex is acquired in the default branch.",
+  "line": 131,
+  "fragment": "c.mu.Lock()"
+ },
+ {
+  "id": "K11",
+  "kind": "claim",
+  "statement": "The waitTimeOut field is declared but never assigned or read.",
+  "line": 46,
+  "fragment": "idleTimeout, waitTimeOut time.Duration"
+ },
+ {
+  "id": "K12",
+  "kind": "claim",
+  "statement": "Put removes the first waiter from connReqs before sending the connection to it.",
+  "line": 180,
+  "fragment": "req := c.connReqs[0]"
+ },
+ {
+  "id": "K13",
+  "kind": "claim",
+  "statement": "Release closes only the connections buffered in the conns channel, after releasing the mutex.",
+  "line": 241,
+  "fragment": "closeFun(wrapConn.conn)"
+ },
+ {
+  "id": "K14",
+  "kind": "claim",
+  "statement": "Get returns ErrClosed when its snapshot of conns is nil.",
+  "line": 106,
+  "fragment": "return nil, ErrClosed"
+ },
+ {
+  "id": "K15",
+  "kind": "claim",
+  "statement": "Len returns the number of connections buffered in the conns channel snapshot.",
+  "line": 247,
+  "fragment": "return len(c.getConns())"
+ },
+ {
+  "id": "K16",
+  "kind": "claim",
+  "statement": "When Get discards an expired idle connection it ignores the error returned by Close.",
+  "line": 118,
+  "fragment": "c.Close(wrapConn.conn)"
+ },
+ {
+  "id": "K17",
+  "kind": "claim",
+  "statement": "NewChannelPool sets openingConns to InitialCap before it creates the initial connections.",
+  "line": 75,
+  "fragment": "openingConns: poolConfig.InitialCap,"
+ },
+ {
+  "id": "K18",
+  "kind": "claim",
+  "statement": "The capacity validation accepts InitialCap = 0, MaxIdle = 0 and MaxCap = 0.",
+  "line": 59,
+  "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {"
+ },
+ {
+  "id": "K19",
+  "kind": "claim",
+  "statement": "A second Release returns early because its snapshot of conns is nil.",
+  "line": 234,
+  "fragment": "if conns == nil {"
+ },
+ {
+  "id": "K20",
+  "kind": "claim",
+  "statement": "Put gives a handed-off connection a new timestamp of the current time.",
+  "line": 184,
+  "fragment": "idleConn: &idleConn{conn: conn, t: time.Now()},"
+ },
+ {
+  "id": "K21",
+  "kind": "claim",
+  "statement": "Put does not check whether the connection is already in the pool before enqueueing it.",
+  "line": 190,
+  "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+ },
+ {
+  "id": "K22",
+  "kind": "claim",
+  "statement": "After discarding an expired idle connection Get continues its loop with no bound on the number of iterations.",
+  "line": 119,
+  "fragment": "continue"
+ }
+]
