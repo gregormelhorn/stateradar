@@ -48,7 +48,12 @@ def evaluate(source, question, key):
 
 
 def main():
+    from local_budget import Budget, BudgetExceeded
+    from local_models import jev
+
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--ledger", type=Path, required=True, help="budget ledger")
+    parser.add_argument("--limit-microdollars", type=int)
     parser.add_argument("source", type=Path, help="UTF-8 source passage to send to Jev")
     parser.add_argument("question", help="A single yes/no question about the passage")
     args = parser.parse_args()
@@ -56,8 +61,9 @@ def main():
     if not key:
         parser.error("TYPESAFE_API_KEY is not set")
     try:
-        result = evaluate(args.source.read_text(encoding="utf-8"), args.question, key)
-    except (OSError, ValueError, urllib.error.URLError) as error:
+        budget = Budget(args.ledger, args.limit_microdollars)
+        result = jev(budget, args.source.read_text(encoding="utf-8"), args.question, key)
+    except (OSError, ValueError, BudgetExceeded, urllib.error.URLError) as error:
         print(f"Jev request failed: {error}", file=sys.stderr)
         return 1
     print(json.dumps(result, indent=2))

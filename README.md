@@ -143,6 +143,10 @@ uv run --with-requirements tools/requirements-dev.txt \
   python3 tools/dsc_check.py domain-analysis/<component>
 ```
 
+For an optional local workflow using DeepSeek Flash for bounded drafts and
+Jev for narrow judgments, see [local model routing](docs/local-model-routing.md).
+The workflow records estimated API costs for these calls in a per-pilot ledger.
+
 After stage 04 the discipline is CI-enforced in *your* repo. Breaking a
 disposition, a decision link, a guard proof, or cell coverage breaks the
 build.

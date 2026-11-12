@@ -23,6 +23,11 @@ jobs:
       # snake_case manifest key each FAIL. A green-only run proves nothing.
       - name: deterministic-layer selftest
         run: python tools/selftest/run_selftest.py
+      - name: local model routing selftests
+        run: |
+          python tools/selftest/test_local_budget.py
+          python tools/selftest/test_local_models.py
+          python tools/selftest/test_jev_local.py
       # The tool regression runner executes the pack tools against golden
       # fixtures and asserts expected output. Hard-fails on zero cases.
       - name: tool regression tests

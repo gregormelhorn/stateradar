@@ -170,3 +170,17 @@ in real pack-development sessions.
    Record `BLOCKED(<task>): <reason>` and move on. Substituting
    something plausible and reporting success is the failure mode this
    whole section exists to prevent.
+
+## 8. Local model routing
+
+For StateRadar analysis in this workspace, use `tools/local_models.py`
+for bounded drafting and extraction with DeepSeek Flash, and for narrow
+source-grounded judgments with Jev. The calling agent supplies the exact
+input and reviews the returned proposals against their sources. Use the
+`blind` command for Part B: provide only the event catalogue, requirements,
+and normative event contract text. Run the returned coverage check and
+investigate failures. Follow the full pilot prompt and retain every question.
+
+Use one ledger per pilot. Its default $2 covers calls made through this
+tool. The calling agent's own costs are separate. See
+`docs/local-model-routing.md` for commands, accounting limits, and recovery.
