@@ -322,6 +322,7 @@ class ModelTest(unittest.TestCase):
             budget = Budget(root / "budget.db", 2_000_000)
             args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
                              contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=False)
+            self.inspect_package(budget, args)
             def fake_flash(_budget, prompt, _key, max_tokens):
                 self.assertNotIn("SECRET MATRIX", prompt)
                 self.assertIn("requirement details", prompt)
@@ -344,8 +345,36 @@ class ModelTest(unittest.TestCase):
             (root / "contracts.md").write_text("contract details " * 30)
             args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
                              contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=False)
+            budget = Budget(root / "budget.db", 2_000_000)
+            self.inspect_package(budget, args)
             with patch.object(local_models, "flash", return_value={"text": "no rows", "finish_reason": "stop"}):
-                self.assertNotEqual(local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key"), 0)
+                self.assertNotEqual(local_models.blind(budget, args, "key"), 0)
+
+    def inspect_package(self, budget, args):
+        inspect = Namespace(**{**vars(args), "package_only": True})
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(local_models.blind(budget, inspect, "key"), 0)
+
+    def test_blind_sends_only_the_inspected_package(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            analysis = root / "analysis"
+            analysis.mkdir()
+            (analysis / "event-catalogue.md").write_text("<!-- event-ids: E01 -->\n" + "event details " * 30)
+            (root / "requirements.md").write_text("requirement details " * 30)
+            (root / "contracts.md").write_text("contract details " * 30)
+            budget = Budget(root / "budget.db", 2_000_000)
+            args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
+                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=False)
+            with patch.object(local_models, "flash") as flash:
+                with self.assertRaisesRegex(ValueError, "package-only"):
+                    local_models.blind(budget, args, "key")
+                self.inspect_package(budget, args)
+                (root / "contracts.md").write_text("changed after inspection " * 30)
+                with self.assertRaisesRegex(ValueError, "differs from the inspected"):
+                    local_models.blind(budget, args, "key")
+                flash.assert_not_called()
+            self.assertIn("contract details", (root / "blind.package.md").read_text())
 
 
 if __name__ == "__main__":

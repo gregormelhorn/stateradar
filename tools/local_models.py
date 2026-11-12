@@ -13,6 +13,7 @@ import math
 import os
 import sqlite3
 import sys
+import tempfile
 import urllib.error
 from pathlib import Path
 
@@ -51,7 +52,7 @@ class LedgerError(ValueError):
 
     def __init__(self, ticket, cost, response, error):
         self.response = response
-        super().__init__(f"ledger update failed ({error}); the answer is printed above; "
+        super().__init__(f"ledger update failed ({error}); the paid answer is reported with this error; "
                          f"run 'settle {ticket} {cost}' once the ledger is free")
 
 
@@ -294,30 +295,39 @@ Source ({source_ref}), one line per number:
 """
 
 
+PLACEHOLDER = "..."
+
+
 def _parse_draft(text):
     body = text.strip()
     try:
         draft = json.loads(body)
     except json.JSONDecodeError as error:
-        # Tolerate prose or a code fence around one JSON object: take the first
-        # position where a complete object with a claims list decodes.
-        draft = None
+        # Tolerate prose or a code fence around exactly one draft object. Every
+        # decodable object with a claims list and a questions list is a candidate;
+        # more than one (for example an echoed template) is ambiguous.
+        candidates = []
         decoder = json.JSONDecoder()
         for start in (i for i, char in enumerate(body) if char == "{"):
             try:
                 candidate, _ = decoder.raw_decode(body, start)
             except json.JSONDecodeError:
                 continue
-            if isinstance(candidate, dict) and "claims" in candidate:
-                draft = candidate
-                break
-        if draft is None:
+            if (isinstance(candidate, dict) and isinstance(candidate.get("claims"), list)
+                    and isinstance(candidate.get("questions"), list)):
+                candidates.append(candidate)
+        if len(candidates) > 1:
+            raise InvalidDraft(f"{len(candidates)} draft objects found; exactly one is required", text) from error
+        if not candidates:
             raise InvalidDraft(f"not JSON ({error.msg})", text) from error
+        draft = candidates[0]
     if not isinstance(draft, dict) or not isinstance(draft.get("claims"), list):
         raise InvalidDraft("a claims list is required", text)
     questions = draft.get("questions")
     if not isinstance(questions, list) or not all(isinstance(q, str) and q.strip() for q in questions):
         raise InvalidDraft("a questions list of nonempty strings is required", text)
+    if any(q.strip() == PLACEHOLDER for q in questions):
+        raise InvalidDraft("a question repeats the template placeholder", text)
     seen = set()
     for claim in draft["claims"]:
         if not isinstance(claim, dict):
@@ -325,6 +335,8 @@ def _parse_draft(text):
         ident = claim.get("id")
         if not all(isinstance(claim.get(k), str) and claim[k].strip() for k in ("id", "statement", "fragment")):
             raise InvalidDraft("each claim requires a nonempty id, statement, and fragment", text)
+        if PLACEHOLDER in (claim["statement"].strip(), claim["fragment"].strip()):
+            raise InvalidDraft(f"{ident}: repeats the template placeholder", text)
         if ident in seen:
             raise InvalidDraft(f"duplicate claim id {ident}", text)
         seen.add(ident)
@@ -359,6 +371,13 @@ def draft_verify(budget, source, source_ref, task, flash_key, jev_key, model="je
     if citable:
         try:
             verification = jev_batch(budget, source, source_ref, citable, jev_key, model)
+        except LedgerError as error:
+            # Jev answered and was paid, but the ledger is unavailable: keep the answer.
+            verification = {"error": str(error), "unrecorded_response": error.response,
+                            "question_claims": {f"{prefix}_{index}": check["id"]
+                                                for index, check in enumerate(citable)
+                                                for prefix in ("choice", "scope")
+                                                if prefix == "choice" or check["kind"] == "ordering"}}
         except (ValueError, OSError, BudgetExceeded, sqlite3.Error) as error:
             # The Flash draft is paid for: keep it and its citation checks.
             verification = {"error": str(error)}
@@ -393,20 +412,29 @@ def blind(budget, args, key):
     # Keep the exact dispatched package next to the output: it is the record of
     # what the blind pass saw, and a temporary path would be gone after the run.
     package_path = args.output.with_suffix(".package.md")
-    package_args = argparse.Namespace(
-        repo=args.repo, analysis_dir=args.analysis,
-        requirements=args.requirements, contracts=args.contracts,
-        out=str(package_path), for_dispatch=False,
-    )
-    if part_b_pack.assemble(package_args, pack_root) != 0:
-        raise ValueError("blind input package failed validation")
-    package = package_path.read_text(encoding="utf-8")
+    package_only = getattr(args, "package_only", False)
+    if not package_only and not package_path.is_file():
+        raise ValueError(f"run blind with --package-only first and read {package_path}")
+    with tempfile.TemporaryDirectory() as scratch:
+        assembled = Path(scratch) / "package.md"
+        package_args = argparse.Namespace(
+            repo=args.repo, analysis_dir=args.analysis,
+            requirements=args.requirements, contracts=args.contracts,
+            out=str(assembled), for_dispatch=False,
+        )
+        if part_b_pack.assemble(package_args, pack_root) != 0:
+            raise ValueError("blind input package failed validation")
+        package = assembled.read_text(encoding="utf-8")
     package += ("\nThe coverage checklist must use one exact line per event or pair "
                 "in the form '- [x] EVENT_ID', with no other text on that line.\n")
-    package_path.write_text(package, encoding="utf-8")
-    if getattr(args, "package_only", False):
+    if package_only:
+        package_path.write_text(package, encoding="utf-8")
         print(json.dumps({"package": str(package_path), "characters": len(package)}, indent=2))
         return 0
+    if package_path.read_text(encoding="utf-8") != package:
+        # Send only what the agent inspected.
+        raise ValueError(f"the inputs changed: the package differs from the inspected {package_path}; "
+                         "run --package-only again and read it")
     try:
         result = flash(budget, package, key, args.max_tokens)
     except IncompleteResponse as error:

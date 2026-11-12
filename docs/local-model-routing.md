@@ -157,11 +157,13 @@ held-out evaluation; it is not part of the batch command.
 
 For Part B, put requirements and normative event contract text in separate
 files. Select their contents before running the command. `blind` takes only
-prepared `.md`, `.txt` or `.rst` files, whole, for both `--requirements` and
-`--contracts`; it refuses source files and `FILE:Class` specs, so the blind
-pass never receives implementation code. Run it once with `--package-only` to
-write `<output stem>.package.md` without any call, read the package, then run
-it without the flag. The catalogue lives
+prepared `.md`, `.txt` or `.rst` files: requirements may select one section
+with `FILE.md:PATTERN`, contracts are whole files of verbatim docstrings or
+schema descriptions. It refuses source files and `FILE:Class` specs, so the
+blind pass never receives implementation code. Run it once with
+`--package-only` to write `<output stem>.package.md` without any call, read
+the package, then run it without the flag. The real run requires that package,
+sends exactly it, and refuses if the inputs have changed since. The catalogue lives
 in the analysis directory. The call receives only the assembled package and
 no tools or conversation history. The command checks the returned table with
 the existing Part-B coverage checker and returns a failure for missing rows,
@@ -235,7 +237,9 @@ and provider billing changes may also make the ledger differ from an invoice.
 A failed request reports its reservation id, and for an HTTP error the start
 of the provider's error body (for example `max_tokens_exceeded`). If the
 provider answered but the ledger could not record it (a locked database), the
-answer is printed and the error names the exact `settle` command. If Jev
+answer is printed (in `draft-verify`, kept as `verification.unrecorded_response`
+with a `question_claims` map to claim ids) and the error names the exact
+`settle` command. If Jev
 answers but the answer fails validation, `draft-verify` records its settled
 tokens and cost next to the error. Inspect
 reservations with `status`. After checking the provider's usage,

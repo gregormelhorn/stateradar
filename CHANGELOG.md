@@ -54,6 +54,15 @@
   responses name their reservation; `--output` may not be a directory; draft
   parsing finds the JSON object even with braces in surrounding prose. Red
   tests first for each mechanism; `jev --model` gained a CLI test.
+- **Review round 3.** A ledger failure at the Jev step of `draft-verify`
+  keeps the paid answer as `verification.unrecorded_response` with a map from
+  question names to claim ids; the draft parser accepts exactly one object
+  with `claims` and `questions` lists and refuses an echoed template
+  placeholder; a real `blind` run requires the inspected
+  `<output stem>.package.md` and refuses if the inputs changed. Pilot rule 7
+  requires verbatim contract text headed by `file:line` and the same prepared
+  files for the fallback dispatch; requirements may select one section with
+  `FILE.md:PATTERN`. Red tests first.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

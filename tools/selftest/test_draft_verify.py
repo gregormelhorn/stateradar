@@ -177,6 +177,42 @@ class DraftVerifyTest(unittest.TestCase):
                 result, _ = self.run_cascade(draft, Budget(Path(directory) / "usage.db", 1_000_000))
             self.assertEqual(result["claims"]["C1"]["citation_check"], "ok")
 
+    def test_ledger_failure_at_jev_settle_keeps_the_paid_answer(self):
+        draft = json.dumps({"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1,
+                                        "fragment": "connects"}], "questions": []})
+        import sqlite3
+        real_settle = Budget.settle
+        calls = []
+
+        def flaky_settle(budget, ticket, cost):
+            calls.append(ticket)
+            if len(calls) == 2:
+                raise sqlite3.OperationalError("database is locked")
+            return real_settle(budget, ticket, cost)
+
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(Budget, "settle", flaky_settle):
+                result, _ = self.run_cascade(draft, Budget(Path(directory) / "usage.db", 1_000_000))
+        verification = result["verification"]
+        self.assertIn("settle", verification["error"])
+        self.assertNotIn("printed above", verification["error"])
+        self.assertIn("choice_0", verification["unrecorded_response"]["answers"])
+        self.assertEqual(verification["question_claims"]["choice_0"], "C1")
+
+    def test_parser_skips_wrong_shape_and_refuses_two_drafts_or_placeholders(self):
+        real = {"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1,
+                            "fragment": "connects"}], "questions": []}
+        with tempfile.TemporaryDirectory() as directory:
+            result, _ = self.run_cascade('note {"claims": "oops"} then ' + json.dumps(real),
+                                         Budget(Path(directory) / "usage.db", 1_000_000))
+        self.assertEqual(result["claims"]["C1"]["citation_check"], "ok")
+        echo = {"claims": [{"id": "C1", "kind": "claim", "statement": "...", "line": 1, "fragment": "..."}],
+                "questions": ["..."]}
+        for text in ("Example: " + json.dumps(echo) + " Answer: " + json.dumps(real), json.dumps(echo)):
+            with tempfile.TemporaryDirectory() as directory:
+                with self.assertRaises(local_models.InvalidDraft):
+                    self.run_cascade(text, Budget(Path(directory) / "usage.db", 1_000_000))
+
     def test_cli_rejects_output_that_is_a_directory(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
