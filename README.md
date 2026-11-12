@@ -17,7 +17,8 @@ where the two disagree — and turns the answers into tests and CI gates.
 > StateRadar first checks whether the model deserves to be the oracle.
 
 **Version 1.53.** Apache-2.0, prompts included. Runs inside your AI coding agent;
-no build step, no service, nothing leaves your repo.
+no build step or StateRadar service. The optional local model workflow sends the
+supplied text to the configured model providers.
 
 ---
 
@@ -143,9 +144,22 @@ uv run --with-requirements tools/requirements-dev.txt \
   python3 tools/dsc_check.py domain-analysis/<component>
 ```
 
-For an optional local workflow using DeepSeek Flash for bounded drafts and
-Jev for narrow judgments, see [local model routing](docs/local-model-routing.md).
-The workflow records estimated API costs for these calls in a per-pilot ledger.
+### Cost-aware model workflow
+
+The optional [local model workflow](docs/local-model-routing.md) uses DeepSeek
+Flash for bounded drafts and extraction, and Jev for narrow source-grounded
+checks. Independent checks against the same source can be batched. Code checks
+citations and structure; a reviewing agent inspects every model judgment, and
+the human owner decides domain semantics. The blind Part B keeps its restricted
+inputs. A per-pilot ledger estimates the cost of calls made through the tools;
+it does not cover the calling agent or other providers.
+
+The [model cascade plan](docs/plan-model-cascade.md) sets out the next steps:
+independently reviewed cases, a held-out quality and cost comparison, and only
+then a calibrated experiment that escalates selected cases to stronger review.
+Automatic acceptance or escalation is not enabled, and end-to-end savings are
+not yet established. See the [project roadmap](docs/roadmap.md) for this and
+other outstanding work.
 
 After stage 04 the discipline is CI-enforced in *your* repo. Breaking a
 disposition, a decision link, a guard proof, or cell coverage breaks the

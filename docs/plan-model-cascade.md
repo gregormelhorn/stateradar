@@ -4,6 +4,22 @@ Status: evaluation tooling started; no automatic acceptance or escalation policy
 is enabled. The purpose is to reduce expensive model work while measuring both
 quality and the complete cost of a pilot. The human owner retains all domain
 decisions; deterministic pack checks and the blind Part B remain mandatory.
+The current commands and their accounting limits are documented in
+[local model routing](local-model-routing.md); other project priorities are in
+the [roadmap](roadmap.md).
+
+## Next pilot
+
+Identify existing source-grounded examples whose expected verdicts can be
+reviewed independently of Jev. Record their evidence, attributed reviewer,
+component or issue, and whether the case belongs to development or an untouched
+held-out group. Keep unsupported or unresolved domain semantics as questions.
+Run the current batch and offline evaluator on the development cases first,
+then compare a chosen candidate against the existing workflow on the held-out
+group. Record any missing inputs, API failures and excluded cases rather than
+silently dropping them. Do not treat the evaluator's reviewer field alone as
+proof of independence. Record the stronger-model cost separately from the
+local ledger until an end-to-end accounting mechanism exists.
 
 ## Stages
 

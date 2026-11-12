@@ -1,5 +1,34 @@
 # Roadmap (post-v1.33)
 
+## Current priorities
+
+This is the project's existing roadmap. The entries below preserve historical
+status reports and measurements from their stated versions; they are not a
+fresh audit of every feature. The following outstanding work links to those
+entries and separates the new model-routing plan from shipped capabilities.
+
+1. **Measure cost-aware model routing.** Flash drafting, Jev batches, a local
+   ledger, and an offline batch evaluator exist. Next build independently
+   reviewed examples, split held-out components or issues, and measure errors,
+   coverage, time, and total cost. Only then evaluate selective escalation.
+   Automatic acceptance and escalation are not implemented. Details and
+   acceptance boundaries: [model cascade plan](plan-model-cascade.md).
+2. **Broaden mutation coverage and validate on real components.** Continue
+   [fault-class mutants](#8-ach-style-fault-class-mutants-testgen-upgrade):
+   add supported classes and component bindings with observed red probes and
+   behavioral kill evidence. Some fault shapes need additional observability;
+   fixture results alone do not prove coverage on a consuming component.
+3. **Make disposition rationale machine-readable.** Design and validate a
+   representation for cell rationale before building checks that depend on it.
+   See [machine-readable cell rationale](#10-machine-readable-cell-rationale).
+4. **Evaluate bounded prompt optimization.** After sufficient independent
+   benchmark cases exist, test a small sub-prompt against held-out cases; see
+   [GEPA experiment](#9-gepa-experiment-the-feedback-loop-as-an-algorithm).
+   Keep this separate from assuming that a more stable model answer is correct.
+5. **Expand semantic reachability when needed.** The existing checker covers
+   the minimal model; hierarchy and parallel regions remain a possible
+   follow-up, described under [semantic analysis](#3-xstate--semantic-analysis).
+
 ## 1. CONVERGENCE.md — calibration data
 
 **Status:** ✅ Baselines recorded.

@@ -1,5 +1,11 @@
 # Local model routing
 
+The implemented commands support bounded drafting, batched semantic checks and
+offline evaluation. They do not automatically accept a draft or route difficult
+cases to a stronger model. The next pilot and its evaluation criteria are in
+the [model cascade plan](plan-model-cascade.md); broader project work is in the
+[roadmap](roadmap.md).
+
 This optional workflow sends supplied text to DeepSeek and TypeSafe. Set
 `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` in the environment. Each pilot
 uses a separate SQLite ledger stored outside the repository. The default
