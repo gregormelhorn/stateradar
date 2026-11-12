@@ -1,8 +1,14 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.15.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.16.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.16 — model routing: when the local model workflow is configured,
+  DeepSeek Flash drafts the bounded extraction work and the blind Part B,
+  and Jev checks cited claims and the requirement-scope line
+  (`tools/local_models.py draft-verify`, `jev-batch`, `blind`). The calling
+  agent consolidates and reviews; a model judgment may add a question but
+  never removes one. Nothing is accepted automatically.
 * v1.15 — check_guards.py delegates the proof procedures (disjointness,
   coverage, boundary probes) to the pack library `tools/guard_proofs.py`
   instead of reimplementing z3 boilerplate per component — the same
@@ -87,6 +93,27 @@ You perform a domain-behaviour analysis of one stateful component. You analyze. 
 4. **Requirement-scope rule.** A citation covers only the scenario that the cited text describes. If you apply a requirement, doc line, or recorded decision to an ordering, race, or variant it does not address: downgrade the provenance to `inferred` and treat the cell as a hole candidate. Written down is not the same as decided for this case.
 5. Model what the code does, not what it should do. The desired design comes later, after a human resolves the open questions. Do not produce a to-be model in this run.
 6. The component may have no real temporal behaviour: no lifecycle, no asynchronous events, no retries, no timeouts, no cancellation. In that case say so, explain briefly, and stop. A negative result is a valid result.
+
+### Model routing — DeepSeek Flash drafts, Jev checks
+
+Use this routing when `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` are set (see the pack's `docs/local-model-routing.md`). Otherwise do the step yourself and write `model routing: not configured` in `summary.md`. All commands below are subcommands of the pack's `tools/local_models.py`. Create one ledger for this pilot outside the repository and pass it to every call.
+
+| Step | Route | Your part |
+|---|---|---|
+| 1 Extraction, doctrine-line sweep | `draft-verify <source> <task>` once per requirements, doc, code, or test file, with a task that names the step and the items to extract | Consolidate the drafts into `extraction.md` |
+| 6 Control traces that cite a requirement or decision | `jev-batch` with one `ordering` check per cited fragment | Record the result on the scope line |
+| 8 Line-number accuracy | `jev-batch` with one `claim` check per cited behavioural claim, batched per file | Correct the citation or raise a question |
+| Part B | `blind` (Flash, packaged inputs only) | Classify the diff as described in Part B |
+
+Rules for every routed step:
+
+1. **Drafts are proposals.** A Flash claim enters an artifact only after you read its cited line. Re-cite or drop every claim whose `citation_check` is not `ok`, and say which in `extraction.md`.
+2. **Jev may add a question, never remove one.** If Jev returns `contradicted` or `unclear` for a claim you keep, re-read the source and write why you keep it, or raise a question. A `supported` answer does not resolve a hole, establish a requirement, or replace the requirement-scope rule.
+3. **Scope line.** On a Step-6 control trace, write `jev: <choice>, scope <probability>` next to *cited text contemplates this ordering: yes/no*. If you write `yes` and Jev's choice is not `supported`, the control verdict is void: raise a question that cites both.
+4. **Carry every draft question forward.** Each entry in a draft's `questions` list ends as a Q in Step 7 or as a reasoned fold into an existing Q.
+5. **Failures are results.** A rejected draft, an incomplete response, an API error, or an exceeded ledger stops that call only. Record it in `summary.md` and do the step yourself. Never retry by loosening the task or the citation check.
+
+End `summary.md` with the ledger path, the output of `local_models.py --ledger <path> status`, and every failed or skipped model call.
 
 ### Step 0 — Scope statement
 
@@ -422,7 +449,7 @@ Run this in a **new** agent session with no access to the as-is model, the matri
 > The disposition vocabulary you must use (from the methods reference): `transition → <target>` | `handle` (stays in the state, does something) | `ignore (documented)` | `ignore (accidental)` | `defer (queued)` | `reject` (a declared refusal signal: error, diagnostic, nack) | `UNSPECIFIED`. Without these definitions a blind pass applies `reject` and `handle` to identical semantics interchangeably (dobby trigger-service, 2026-08-05: four vocabulary-only "divergences").
 <!-- /generated:rules -->
 
-Then diff its table against `disposition-matrix.md` (an agent that sees both may do this diff).
+With model routing configured, dispatch this pass with `tools/local_models.py blind`: it assembles exactly these inputs, sends them to DeepSeek Flash in a fresh request, and runs the row-coverage check. Then diff its table against `disposition-matrix.md` (an agent that sees both may do this diff).
 
 Dispatch notes (learned the hard way, dobby 2026-08-05): inline the
 inputs VERBATIM in the dispatch — a placeholder payload is the known

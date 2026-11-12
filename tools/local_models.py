@@ -101,6 +101,16 @@ def _jev_request(budget, payload, key):
     return response, input_tokens, cost, reserved
 
 
+def _citation_error(source_lines, line, fragment):
+    """Return why a line/fragment citation fails against the source, or None."""
+    if isinstance(line, bool) or not isinstance(line, int) or not 1 <= line <= len(source_lines):
+        return "citation line is outside source"
+    window = "\n".join(source_lines[max(0, line - 4):min(len(source_lines), line + 3)])
+    if not isinstance(fragment, str) or not fragment.strip() or fragment not in window:
+        return f"citation fragment missing near line {line}"
+    return None
+
+
 def jev_batch(budget, source, source_ref, checks, key, model="jev-latest"):
     """Evaluate independent cited claims or ordering checks against one source."""
     if not all(isinstance(x, str) and x.strip() for x in (source, source_ref, key, model)):
@@ -122,11 +132,9 @@ def jev_batch(budget, source, source_ref, checks, key, model="jev-latest"):
         seen_ids.add(ident)
         if kind not in ("claim", "ordering"):
             raise ValueError(f"unknown check kind: {kind}")
-        if isinstance(line, bool) or not isinstance(line, int) or not 1 <= line <= len(source_lines):
-            raise ValueError(f"{ident}: citation line is outside source")
-        window = "\n".join(source_lines[max(0, line - 4):min(len(source_lines), line + 3)])
-        if fragment not in window:
-            raise ValueError(f"{ident}: citation fragment missing near line {line}")
+        error = _citation_error(source_lines, line, fragment)
+        if error:
+            raise ValueError(f"{ident}: {error}")
         if kind == "ordering":
             instruction = ("Does the cited fragment itself explicitly contemplate this specific event ordering? "
                            "Use the surrounding source only to interpret the fragment. "
@@ -199,6 +207,98 @@ def jev_batch(budget, source, source_ref, checks, key, model="jev-latest"):
             "reservation_microdollars": reserved, "checks": results}
 
 
+class InvalidDraft(ValueError):
+    """A Flash draft that is not the required JSON structure. Keeps the raw text."""
+
+    def __init__(self, message, text):
+        self.text = text
+        super().__init__(f"Flash draft rejected: {message}; usage was recorded")
+
+
+DRAFT_INSTRUCTIONS = """You draft source-grounded claims for a StateRadar analysis. You propose; you do not decide.
+
+Task:
+{task}
+
+Rules:
+- Use only the numbered source below. Do not use outside knowledge.
+- Each claim cites ONE source line number and a short fragment copied verbatim from that line.
+- kind is "claim" for a statement of behaviour or requirement, "ordering" for a specific sequence of events.
+- A general requirement does not establish an ordering it does not mention: put such cases into questions.
+- Put every gap, contradiction, ambiguity, or unspecified behaviour into questions. Do not resolve it.
+- Answer with JSON only, no prose, exactly in this shape:
+{{"claims": [{{"id": "C1", "kind": "claim", "statement": "...", "line": 1, "fragment": "..."}}], "questions": ["..."]}}
+
+Source ({source_ref}), one line per number:
+{numbered}
+"""
+
+
+def _parse_draft(text):
+    body = text.strip()
+    if body.startswith("```"):
+        body = body.split("\n", 1)[1] if "\n" in body else ""
+        body = body.rsplit("```", 1)[0]
+    try:
+        draft = json.loads(body)
+    except json.JSONDecodeError as error:
+        raise InvalidDraft(f"not JSON ({error.msg})", text) from error
+    if not isinstance(draft, dict) or not isinstance(draft.get("claims"), list):
+        raise InvalidDraft("a claims list is required", text)
+    questions = draft.get("questions")
+    if not isinstance(questions, list) or not all(isinstance(q, str) and q.strip() for q in questions):
+        raise InvalidDraft("a questions list of nonempty strings is required", text)
+    seen = set()
+    for claim in draft["claims"]:
+        if not isinstance(claim, dict):
+            raise InvalidDraft("each claim must be an object", text)
+        ident = claim.get("id")
+        if not all(isinstance(claim.get(k), str) and claim[k].strip() for k in ("id", "statement", "fragment")):
+            raise InvalidDraft("each claim requires a nonempty id, statement, and fragment", text)
+        if ident in seen:
+            raise InvalidDraft(f"duplicate claim id {ident}", text)
+        seen.add(ident)
+        if claim.get("kind") not in ("claim", "ordering"):
+            raise InvalidDraft(f"{ident}: unknown kind {claim.get('kind')!r}", text)
+    return draft["claims"], questions
+
+
+def draft_verify(budget, source, source_ref, task, flash_key, jev_key, model="jev-latest", max_tokens=4096):
+    """Flash drafts cited claims, code checks the citations, Jev judges the citable ones.
+
+    Nothing is accepted automatically. Claims with failed citations are kept with the
+    reason and never sent to Jev; every draft question is carried forward.
+    """
+    if not all(isinstance(x, str) and x.strip() for x in (source, source_ref, task, flash_key, jev_key)):
+        raise ValueError("source, source reference, task, and both API keys are required")
+    source_lines = source.splitlines()
+    numbered = "\n".join(f"{number}: {text}" for number, text in enumerate(source_lines, 1))
+    prompt = DRAFT_INSTRUCTIONS.format(task=task.strip(), source_ref=source_ref, numbered=numbered)
+    drafted = flash(budget, prompt, flash_key, max_tokens)
+    claims, questions = _parse_draft(drafted["text"])
+    results, citable = {}, []
+    for claim in claims:
+        entry = {key: claim.get(key) for key in ("kind", "statement", "line", "fragment")}
+        error = _citation_error(source_lines, claim.get("line"), claim["fragment"])
+        entry["citation_check"] = error or "ok"
+        entry["jev"] = None
+        results[claim["id"]] = entry
+        if not error:
+            citable.append({key: claim[key] for key in ("id", "kind", "statement", "line", "fragment")})
+    verification = None
+    if citable:
+        verification = jev_batch(budget, source, source_ref, citable, jev_key, model)
+        for ident, judged in verification["checks"].items():
+            results[ident]["jev"] = {key: judged[key] for key in judged
+                                     if key in ("choice", "probabilities", "confidence", "ordering_scope_probability")}
+        verification = {key: verification[key] for key in ("model", "input_tokens", "cost_microdollars",
+                                                           "reservation_microdollars")}
+    draft_meta = {key: drafted[key] for key in drafted if key != "text"}
+    return {"source": source_ref, "source_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
+            "draft": draft_meta, "verification": verification, "claims": results,
+            "questions": questions, "review_required": True}
+
+
 def blind(budget, args, key):
     if not args.requirements or not args.contracts:
         raise ValueError("blind pass requires requirements and event contracts")
@@ -251,6 +351,12 @@ def main():
     batch_parser.add_argument("input", type=Path, help="UTF-8 source shared by the checks")
     batch_parser.add_argument("checks", type=Path, help="JSON array of checks")
     batch_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+    draft_parser = commands.add_parser("draft-verify", help="Flash drafts cited claims; Jev judges them")
+    draft_parser.add_argument("input", type=Path, help="UTF-8 source the claims must cite")
+    draft_parser.add_argument("task", type=Path, help="UTF-8 file with the bounded drafting task")
+    draft_parser.add_argument("--output", type=Path, required=True, help="JSON result file")
+    draft_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+    draft_parser.add_argument("--max-tokens", type=int, default=4096)
     blind_parser = commands.add_parser("blind")
     blind_parser.add_argument("analysis")
     blind_parser.add_argument("--repo", default=".")
@@ -274,6 +380,19 @@ def main():
             result = flash(budget, args.input.read_text(encoding="utf-8"), os.environ.get("DEEPSEEK_API_KEY"), args.max_tokens)
         elif args.command == "blind":
             return blind(budget, args, os.environ.get("DEEPSEEK_API_KEY"))
+        elif args.command == "draft-verify":
+            flash_key, jev_key = os.environ.get("DEEPSEEK_API_KEY"), os.environ.get("TYPESAFE_API_KEY")
+            missing = [name for name, value in (("DEEPSEEK_API_KEY", flash_key), ("TYPESAFE_API_KEY", jev_key)) if not value]
+            if missing:
+                raise ValueError(f"draft-verify needs {' and '.join(missing)}")
+            try:
+                result = draft_verify(budget, args.input.read_text(encoding="utf-8"), str(args.input),
+                                      args.task.read_text(encoding="utf-8"), flash_key, jev_key,
+                                      args.model, args.max_tokens)
+            except InvalidDraft as error:
+                args.output.with_suffix(".draft.txt").write_text(error.text, encoding="utf-8")
+                raise
+            args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         elif args.command == "jev-batch":
             result = jev_batch(budget, args.input.read_text(encoding="utf-8"), str(args.input),
                                json.loads(args.checks.read_text(encoding="utf-8")), os.environ.get("TYPESAFE_API_KEY"), args.model)

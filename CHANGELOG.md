@@ -2,6 +2,26 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## Unreleased — model routing on DeepSeek Flash and Jev
+
+- **Local model routing.** `tools/local_models.py` sends bounded drafts and
+  the blind Part B to DeepSeek Flash and narrow source-grounded judgments to
+  Jev (`flash`, `jev`, `jev-batch`, `blind`), with a per-pilot SQLite cost
+  ledger (`tools/local_budget.py`) and an offline evaluator against
+  independently reviewed labels (`tools/jev_eval.py`).
+- **Draft and verify.** New `draft-verify` command: Flash drafts cited claims
+  and questions as JSON, code rejects malformed drafts and checks every
+  citation, and Jev judges only the citable claims in one batch. Failed
+  citations and all draft questions are kept. Red probe:
+  `tools/selftest/test_draft_verify.py` failed 7/7 before the command existed.
+- **02-pilot v1.16 — Model routing section.** Steps 1, 6, 8 and Part B route
+  through these commands when both API keys are set. A Jev judgment may add a
+  question and never removes one; a `yes` scope line that Jev does not support
+  voids the control verdict. The skill, the pilot command and AGENTS.md §8
+  point to the routing.
+- Not changed: no automatic acceptance or escalation; the cascade plan's
+  evaluation stages remain open.
+
 ## v1.53 — F-14 duplication, ignore-cell projections, structural unreachability
 
 - **F-14 (duplication) claimed — 5 of 22 classes.** It cost more than F-05

@@ -35,6 +35,15 @@ Determine the state of the component in question and follow the matching prompt:
    component → run `07-test-audit.md`. The audit classifies every test and cell.
    Deletion and weakening stay human decisions.
 
+## Model routing (DeepSeek Flash + Jev)
+
+When `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` are set, route the pilot's
+bounded work through the pack's `tools/local_models.py` as `02-pilot.md`
+("Model routing") specifies: `draft-verify` for extraction drafts, `jev-batch`
+for cited-claim and requirement-scope checks, `blind` for Part B. You
+consolidate and review every result. A model judgment may add a question;
+it never removes one or decides domain semantics.
+
 ## Non-negotiable rules (all stages)
 
 - Never silently decide ambiguous domain semantics; raise `UNSPECIFIED` + a question.

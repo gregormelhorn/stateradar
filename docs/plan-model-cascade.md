@@ -36,11 +36,14 @@ local ledger until an end-to-end accounting mechanism exists.
    false support, missed defects, unnecessary escalations, and end-to-end
    coverage and time; include human review cost where feasible. The local ledger
    does not count the calling agent's or other providers' costs.
-3. **Draft and verify (planned).** Have Flash propose bounded extraction or
-   classification, validate required structure and citations in code, then
-   batch narrow Jev questions over shared evidence. Preserve every claim and
-   incomplete or failed check. Work spanning multiple sources needs all
-   relevant evidence and provenance; a single source is not a callee contract.
+3. **Draft and verify (started).** `local_models.py draft-verify` implements
+   the single-source chain and the pilot prompt routes Steps 1, 6, 8 and Part
+   B through the models; the evaluation of this routing is still open. Have
+   Flash propose bounded extraction or classification, validate required
+   structure and citations in code, then batch narrow Jev questions over
+   shared evidence. Preserve every claim and incomplete or failed check. Work
+   spanning multiple sources needs all relevant evidence and provenance; a
+   single source is not a callee contract.
 4. **Calibrated escalation experiment (planned).** Only after the labelled
    evaluation supports it, select an explicit policy for source gaps, invalid
    output, contradictory and uncertain judgments, and provider failures. Send

@@ -173,17 +173,22 @@ in real pack-development sessions.
 
 ## 8. Local model routing
 
-For StateRadar analysis in this workspace, use `tools/local_models.py`
-for bounded drafting and extraction with DeepSeek Flash, and for narrow
+For StateRadar analysis in this workspace, use `tools/local_models.py` for
+bounded drafting and extraction with DeepSeek Flash, and for narrow
 source-grounded judgments with Jev. The calling agent supplies the exact
-input and reviews the returned proposals against their sources. Use the
-`blind` command for Part B: provide only the event catalogue, requirements,
-and normative event contract text. Run the returned coverage check and
-investigate failures. Follow the full pilot prompt and retain every question.
-For multiple claim or event-ordering checks against the same source, use
-`jev-batch` to evaluate them together. Review every returned judgment against
-the source, including apparently confident answers. A Jev response is a
-proposal and does not itself resolve a hole or establish a requirement.
+input and reviews the returned proposals against their sources. Use
+`draft-verify` for bounded drafting: Flash proposes cited claims and
+questions as JSON, code checks every citation, and Jev judges the citable
+claims in one batch. Claims with failed citations are kept with the reason
+and never reach Jev. `prompts/02-pilot.md` ("Model routing") maps the
+pilot steps to these commands. Use the `blind` command for Part B: provide
+only the event catalogue, requirements, and normative event contract text.
+Run the returned coverage check and investigate failures. Follow the full
+pilot prompt and retain every question. For multiple claim or
+event-ordering checks against the same source, use `jev-batch` to evaluate
+them together. Review every returned judgment against the source,
+including apparently confident answers. A Jev response is a proposal and
+does not itself resolve a hole or establish a requirement.
 
 Use one ledger per pilot. Its default $2 covers calls made through this
 tool. The calling agent's own costs are separate. See

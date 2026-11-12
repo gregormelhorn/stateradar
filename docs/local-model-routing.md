@@ -1,7 +1,7 @@
 # Local model routing
 
-The implemented commands support bounded drafting, batched semantic checks and
-offline evaluation. They do not automatically accept a draft or route difficult
+The implemented commands support bounded drafting, a draft-and-verify chain,
+batched semantic checks and offline evaluation. They do not automatically accept a draft or route difficult
 cases to a stronger model. The next pilot and its evaluation criteria are in
 the [model cascade plan](plan-model-cascade.md); broader project work is in the
 [roadmap](roadmap.md).
@@ -58,6 +58,28 @@ the requirement-scope rule and raise a question when its conditions require
 one. An API error after reservation keeps the reservation until reconciled.
 Omit `--model` to use `jev-latest`; pin a specific available version for
 comparable measurements.
+
+### Draft and verify
+
+`draft-verify` chains the two models for one source file. Flash receives the
+task and the numbered source and must answer with JSON: a `claims` list
+(`id`, `kind` = `claim` or `ordering`, `statement`, `line`, `fragment`) and a
+`questions` list. Code rejects a draft that is not this structure; the raw
+text is saved next to the output as `<output>.draft.txt`. Each claim's
+citation is then checked against the source with the same rule as
+`jev-batch`. Claims that fail keep their reason in `citation_check` and are
+never sent to Jev. The citable claims go to Jev in one batch.
+
+```bash
+python3 tools/local_models.py --ledger "$ledger" draft-verify \
+  docs/requirements.md /path/to/task.md --output /path/to/review.json
+```
+
+The result records the source path and hash, the Flash and Jev usage, every
+claim with its citation check and Jev judgment, and every draft question.
+Everything is marked for review; nothing is accepted. `prompts/02-pilot.md`
+("Model routing") says which pilot steps use this command and how the
+calling agent consolidates the result. The command needs both API keys.
 
 ### Evaluate a batch against reviewed examples
 

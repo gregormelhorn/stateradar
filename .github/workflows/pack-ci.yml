@@ -29,6 +29,7 @@ jobs:
           python tools/selftest/test_local_models.py
           python tools/selftest/test_jev_local.py
           python tools/selftest/test_jev_eval.py
+          python tools/selftest/test_draft_verify.py
       # The tool regression runner executes the pack tools against golden
       # fixtures and asserts expected output. Hard-fails on zero cases.
       - name: tool regression tests

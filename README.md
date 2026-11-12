@@ -148,7 +148,10 @@ uv run --with-requirements tools/requirements-dev.txt \
 
 The optional [local model workflow](docs/local-model-routing.md) uses DeepSeek
 Flash for bounded drafts and extraction, and Jev for narrow source-grounded
-checks. Independent checks against the same source can be batched. Code checks
+checks. Independent checks against the same source can be batched, and
+`draft-verify` chains both: Flash drafts cited claims, code checks the
+citations, Jev judges them. The pilot prompt routes extraction, scope checks,
+citation verification and the blind Part B through these commands. Code checks
 citations and structure; a reviewing agent inspects every model judgment, and
 the human owner decides domain semantics. The blind Part B keeps its restricted
 inputs. A per-pilot ledger estimates the cost of calls made through the tools;
