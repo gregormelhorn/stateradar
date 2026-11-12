@@ -138,6 +138,58 @@ class DraftVerifyTest(unittest.TestCase):
         self.assertIsNone(result["claims"]["C1"]["jev"])
         self.assertEqual(result["questions"], ["Q?"])
 
+    def test_ledger_error_in_jev_step_keeps_the_draft(self):
+        import sqlite3
+        draft = json.dumps({"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1,
+                                        "fragment": "connects"}], "questions": []})
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1_000_000)
+            original = budget.reserve
+            def reserve(provider, amount):
+                if provider == "jev":
+                    raise sqlite3.OperationalError("database is locked")
+                return original(provider, amount)
+            budget.reserve = reserve
+            with patch.object(local_models, "post_json", return_value=flash_response(draft)):
+                result = local_models.draft_verify(budget, SOURCE, "req.md", "task", "fk", "jk")
+        self.assertIn("database is locked", result["verification"]["error"])
+
+    def test_invalid_jev_answer_reports_its_settled_usage(self):
+        draft = json.dumps({"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1,
+                                        "fragment": "connects"}], "questions": []})
+        def fake_post(url, payload, key):
+            if url == local_models.FLASH_URL:
+                return flash_response(draft)
+            return {"model": "jev-test", "usage": {"input_tokens": 100}, "answers": {}}
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1_000_000)
+            with patch.object(local_models, "post_json", side_effect=fake_post):
+                result = local_models.draft_verify(budget, SOURCE, "req.md", "task", "fk", "jk")
+        self.assertEqual(result["verification"]["input_tokens"], 100)
+        self.assertEqual(result["verification"]["cost_microdollars"], 5)
+        self.assertIn("answers", result["verification"]["error"])
+
+    def test_brace_in_preamble_or_trailer_still_parses(self):
+        body = json.dumps({"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1,
+                                       "fragment": "connects"}], "questions": []})
+        for draft in ("Here {is} it:\n```json\n" + body + "\n```\nHope {this} helps", body + "\n{trailing}"):
+            with tempfile.TemporaryDirectory() as directory:
+                result, _ = self.run_cascade(draft, Budget(Path(directory) / "usage.db", 1_000_000))
+            self.assertEqual(result["claims"]["C1"]["citation_check"], "ok")
+
+    def test_cli_rejects_output_that_is_a_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "req.md").write_text(SOURCE, encoding="utf-8")
+            (root / "task.md").write_text("task", encoding="utf-8")
+            argv = ["local_models.py", "--ledger", str(root / "b.db"), "draft-verify", str(root / "req.md"),
+                    str(root / "task.md"), "--output", str(root)]
+            with patch.object(sys, "argv", argv), \
+                    patch.dict("os.environ", {"DEEPSEEK_API_KEY": "fk", "TYPESAFE_API_KEY": "jk"}), \
+                    patch.object(local_models, "post_json") as post, contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(local_models.main(), 1)
+            post.assert_not_called()
+
     def test_cli_rejects_unwritable_output_before_any_call(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

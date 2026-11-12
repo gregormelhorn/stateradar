@@ -6,12 +6,15 @@ First live run of the model routing on the maintainer's machine, against
 These files are the unedited outputs; `ledger-status.json` was read
 afterwards at e4f5243 (the ledger format is unchanged).
 
+All commands ran as `python3 tools/local_models.py --ledger "$ledger" …` from
+a worktree of that commit, with `$out` the output directory:
+
 | File | Command |
 |---|---|
-| `task.md`, `draft-verify.json` | `draft-verify examples/device-connection/README.md task.md --output draft-verify.json --model jev-1.14.0` |
-| `checks.json`, `jev-batch.json` | `jev-batch examples/device-connection/README.md checks.json --model jev-1.14.0` |
-| `blind.md`, `blind.stdout` | `blind examples/device-connection/domain-analysis/device-connection/run1 --requirements examples/device-connection/README.md --contracts examples/device-connection/README.md` |
-| `ledger-status.json` | `status` |
+| `task.md`, `draft-verify.json` | `draft-verify examples/device-connection/README.md "$out/task.md" --output "$out/draft-verify.json" --model jev-1.14.0` |
+| `checks.json`, `jev-batch.json` | `jev-batch examples/device-connection/README.md "$out/checks.json" --model jev-1.14.0 > "$out/jev-batch.json"` (that commit had no `--output` on `jev-batch`) |
+| `blind.md`, `blind.stdout` | `blind examples/device-connection/domain-analysis/device-connection/run1 --repo . --requirements examples/device-connection/README.md --contracts examples/device-connection/README.md --output "$out/blind.md" > "$out/blind.stdout"` |
+| `ledger-status.json` | `status > ledger-status.json` |
 
 What the files show:
 

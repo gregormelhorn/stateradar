@@ -38,6 +38,86 @@ class ModelTest(unittest.TestCase):
             self.assertEqual(budget.calls()[0]["status"], "reserved")
             self.assertEqual(budget.total(), budget.calls()[0]["amount_microdollars"])
 
+    def test_truncated_http_response_names_the_reservation(self):
+        import http.client
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            with patch.object(local_models, "post_json", side_effect=http.client.IncompleteRead(b"{")):
+                with self.assertRaisesRegex(local_models.ProviderError, "reservation 1 kept"):
+                    local_models.jev(budget, "source", "question?", "key")
+
+    def test_settle_failure_keeps_the_paid_answer(self):
+        import sqlite3
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            response = {"model": "jev-test", "usage": {"input_tokens": 100},
+                        "answers": {"judgment": {"noul": 0.8}}}
+            def settle(ticket, amount):
+                raise sqlite3.OperationalError("database is locked")
+            budget.settle = settle
+            with patch.object(local_models, "post_json", return_value=response):
+                with self.assertRaises(local_models.LedgerError) as caught:
+                    local_models.jev(budget, "source", "question?", "key")
+            self.assertEqual(caught.exception.response, response)
+            self.assertIn("settle 1 5", str(caught.exception))
+
+    def test_http_error_body_reaches_the_agent(self):
+        import urllib.error
+        error = urllib.error.HTTPError("https://example.test", 400, "Bad Request", {},
+                                       io.BytesIO(b'{"error": "max_tokens_exceeded"}'))
+        with tempfile.TemporaryDirectory() as directory:
+            budget = Budget(Path(directory) / "usage.db", 1000)
+            with patch.object(local_models, "post_json", side_effect=error):
+                with self.assertRaisesRegex(local_models.ProviderError, "max_tokens_exceeded"):
+                    local_models.jev(budget, "source", "question?", "key")
+
+    def test_jev_cli_passes_pinned_model(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "source.md").write_text("source text", encoding="utf-8")
+            response = {"model": "jev-1.14.0", "usage": {"input_tokens": 10}, "answers": {"judgment": {"noul": 0.4}}}
+            argv = ["local_models.py", "--ledger", str(root / "b.db"), "jev", str(root / "source.md"),
+                    "Is it?", "--model", "jev-1.14.0"]
+            with patch.object(sys, "argv", argv), patch.dict("os.environ", {"TYPESAFE_API_KEY": "key"}), \
+                    patch.object(local_models, "post_json", return_value=response) as post, \
+                    contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(local_models.main(), 0)
+            self.assertEqual(post.call_args.args[1]["model"], "jev-1.14.0")
+
+    def test_blind_refuses_source_code_requirements_and_class_contracts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            analysis = root / "analysis"
+            analysis.mkdir()
+            (analysis / "event-catalogue.md").write_text("<!-- event-ids: E01 -->\n" + "event details " * 30)
+            (root / "requirements.md").write_text("requirement details " * 30)
+            (root / "reqs.py").write_text("# requirements\n" + "x = 1\n" * 60)
+            (root / "ev.py").write_text("class Ev:\n    def f(self):\n        return secret_impl()\n" * 20)
+            budget = Budget(root / "budget.db", 2_000_000)
+            for requirements, contracts in ((["reqs.py"], ["requirements.md"]), (["requirements.md"], ["ev.py:Ev"])):
+                args = Namespace(repo=str(root), analysis="analysis", requirements=requirements,
+                                 contracts=contracts, output=root / "blind.md", max_tokens=1000, package_only=False)
+                with patch.object(local_models, "flash") as flash:
+                    with self.assertRaisesRegex(ValueError, "prepared text file"):
+                        local_models.blind(budget, args, "key")
+                    flash.assert_not_called()
+
+    def test_blind_package_only_makes_no_call(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            analysis = root / "analysis"
+            analysis.mkdir()
+            (analysis / "event-catalogue.md").write_text("<!-- event-ids: E01 -->\n" + "event details " * 30)
+            (root / "requirements.md").write_text("requirement details " * 30)
+            (root / "contracts.md").write_text("contract details " * 30)
+            args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
+                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=True)
+            with patch.object(local_models, "flash") as flash, contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key"), 0)
+                flash.assert_not_called()
+            self.assertIn("contract details", (root / "blind.package.md").read_text())
+            self.assertFalse((root / "blind.md").exists())
+
     def test_sqlite_errors_are_reported_not_raised(self):
         with tempfile.TemporaryDirectory() as directory:
             argv = ["local_models.py", "--ledger", str(Path(directory) / "missing" / "b.db"), "status"]
@@ -241,7 +321,7 @@ class ModelTest(unittest.TestCase):
             (root / "disposition-matrix.md").write_text("SECRET MATRIX")
             budget = Budget(root / "budget.db", 2_000_000)
             args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
-                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000)
+                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=False)
             def fake_flash(_budget, prompt, _key, max_tokens):
                 self.assertNotIn("SECRET MATRIX", prompt)
                 self.assertIn("requirement details", prompt)
@@ -254,31 +334,6 @@ class ModelTest(unittest.TestCase):
             self.assertIn("requirement details", package.read_text())
             self.assertNotIn("SECRET MATRIX", package.read_text())
 
-    def test_blind_never_sends_a_whole_source_file_as_contract(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            analysis = root / "analysis"
-            analysis.mkdir()
-            (analysis / "event-catalogue.md").write_text("<!-- event-ids: E01 -->\n" + "event details " * 30)
-            (root / "requirements.md").write_text("requirement details " * 30)
-            (root / "ev.py").write_text('class Ev:\n    """Contract: an event is delivered once."""\n'
-                                        + "    pass\n" * 40 + "\ndef helper():\n    IMPLEMENTATION_DETAIL = 1\n")
-            budget = Budget(root / "budget.db", 2_000_000)
-            args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
-                             contracts=["ev.py"], output=root / "blind.md", max_tokens=1000)
-            with patch.object(local_models, "flash") as flash:
-                with self.assertRaisesRegex(ValueError, "class names"):
-                    local_models.blind(budget, args, "key")
-                flash.assert_not_called()
-            args.contracts = ["ev.py:Ev"]
-            def fake_flash(_budget, prompt, _key, max_tokens):
-                self.assertIn("INPUT 3: EVENT CONTRACT TEXTS", prompt)
-                self.assertIn("delivered once", prompt)
-                self.assertNotIn("IMPLEMENTATION_DETAIL", prompt)
-                return {"text": "| E01 | handle |\n\n- [x] E01\n", "finish_reason": "stop"}
-            with patch.object(local_models, "flash", side_effect=fake_flash):
-                self.assertEqual(local_models.blind(budget, args, "key"), 0)
-
     def test_blind_missing_coverage_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -288,7 +343,7 @@ class ModelTest(unittest.TestCase):
             (root / "requirements.md").write_text("requirement details " * 30)
             (root / "contracts.md").write_text("contract details " * 30)
             args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
-                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000)
+                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=False)
             with patch.object(local_models, "flash", return_value={"text": "no rows", "finish_reason": "stop"}):
                 self.assertNotEqual(local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key"), 0)
 

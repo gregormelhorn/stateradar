@@ -2,8 +2,9 @@
 
 The implemented commands support bounded drafting, a draft-and-verify chain,
 batched semantic checks and offline evaluation. They do not automatically
-accept a draft or route difficult cases to a stronger model. The next pilot and its evaluation criteria are in
-the [model cascade plan](plan-model-cascade.md); broader project work is in the
+accept a draft or route difficult cases to a stronger model. The next pilot
+and its evaluation criteria are in the [model cascade
+plan](plan-model-cascade.md); broader project work is in the
 [roadmap](roadmap.md).
 
 This optional workflow sends supplied text to DeepSeek and TypeSafe. Set
@@ -48,21 +49,22 @@ python3 tools/local_models.py --ledger "$ledger" jev-batch \
   /path/to/source.md /path/to/checks.json --model jev-1.14.0 --output /path/to/batch.json
 ```
 
-Each `line` is a one-based integer line in the source file. Each `fragment`
-is a single line of at least four non-space characters that occurs on a line
-within three lines of it, the pack-wide citation window. Missing fragments, invalid lines, duplicate
-IDs and incomplete responses fail. All questions see the same source and
-are evaluated independently. Prepare a separate batch for another source.
-The response includes the source path and content hash, citation, statement,
-model version, choice probabilities, token usage, and cost. Every result
-is marked for review. Ordering checks also receive an independently evaluated
-`ordering_scope_probability` for whether the fragment contemplates the exact
-sequence. The Choice and Noul answers may disagree; preserve both and examine
-the source. Confidence and repeatability do not establish correctness. Follow
-the requirement-scope rule and raise a question when its conditions require
-one. An API error after reservation keeps the reservation until reconciled.
-Omit `--model` to use `jev-latest`; pin a specific available version for
-comparable measurements.
+Each `line` is a one-based integer line in the source file. Each `fragment` is
+a single line of at least four non-space characters that occurs on a line
+within three lines of it, the pack-wide citation window. The `draft-verify`
+prompt asks Flash for the cited line itself; the check accepts the window.
+Missing fragments, invalid lines, duplicate IDs and incomplete responses fail.
+All questions see the same source and are evaluated independently. Prepare a
+separate batch for another source. The response includes the source path and
+content hash, citation, statement, model version, choice probabilities, token
+usage, and cost. Every result is marked for review. Ordering checks also
+receive an independently evaluated `ordering_scope_probability` for whether
+the fragment contemplates the exact sequence. The Choice and Noul answers may
+disagree; preserve both and examine the source. Confidence and repeatability
+do not establish correctness. Follow the requirement-scope rule and raise a
+question when its conditions require one. An API error after reservation keeps
+the reservation until reconciled. Omit `--model` to use `jev-latest`; pin a
+specific available version for comparable measurements.
 
 ### Draft and verify
 
@@ -94,8 +96,8 @@ calling agent consolidates the result, including the rule that an ordering
 counts as source-backed only when Jev's choice is `supported` and its scope
 probability is at least 0.5. That cut-off is provisional and uncalibrated: it
 can only turn an ordering into a question and never accepts one. The command
-needs both API keys. Every command that takes `--output` checks the directory
-is writable before any request is made.
+needs both API keys. Every command that takes `--output` checks before any
+request that the output is not a directory and its directory is writable.
 
 ### Evaluate a batch against reviewed examples
 
@@ -134,26 +136,32 @@ confusion matrix, exact matches, IDs judged supported against a non-supported
 label, unclear IDs, and the batch's reported input tokens and estimated cost.
 It does not evaluate the separate ordering-scope probability, choose a
 threshold, or include the costs of any other calls. Review all judgments and
-keep any unresolved domain question open. See [the cascade plan](plan-model-cascade.md)
-for dataset and end-to-end evaluation requirements.
+keep any unresolved domain question open. See [the cascade
+plan](plan-model-cascade.md) for dataset and end-to-end evaluation
+requirements.
 
 When comparing prompts, use held-out, independently labelled examples and
 repeat both batched and individual calls with the same source and questions.
 Measure per-option probabilities and Noul probabilities, elapsed time, and
-input tokens. Repeated evaluations can include a changing, irrelevant nonce
-in the state to avoid replaying cached responses. The TypeSafe cookbooks on
+input tokens. Repeated evaluations can include a changing, irrelevant nonce in
+the state to avoid replaying cached responses. The TypeSafe cookbooks on
 [parallel questions](https://docs.typesafe.ai/cookbooks/parallel_questions),
-[Choice consistency](https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook),
-[Noul consistency](https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook),
-and [feature discovery](https://docs.typesafe.ai/cookbooks/autoresearch_feature_discovery)
+[Choice
+consistency](https://docs.typesafe.ai/cookbooks/consistency_choice_cookbook),
+[Noul
+consistency](https://docs.typesafe.ai/cookbooks/consistency_noul_cookbook),
+and [feature
+discovery](https://docs.typesafe.ai/cookbooks/autoresearch_feature_discovery)
 describe these techniques. Feature discovery needs a labelled dataset and a
 held-out evaluation; it is not part of the batch command.
 
 For Part B, put requirements and normative event contract text in separate
-files. Select their contents before running the command. `--contracts` takes
-a prepared `.md`, `.txt` or `.rst` file whole, or `FILE.py:ClassA,ClassB` for
-the class blocks only; a source file without class names is refused, so the
-blind pass never receives implementation code. The catalogue lives
+files. Select their contents before running the command. `blind` takes only
+prepared `.md`, `.txt` or `.rst` files, whole, for both `--requirements` and
+`--contracts`; it refuses source files and `FILE:Class` specs, so the blind
+pass never receives implementation code. Run it once with `--package-only` to
+write `<output stem>.package.md` without any call, read the package, then run
+it without the flag. The catalogue lives
 in the analysis directory. The call receives only the assembled package and
 no tools or conversation history. The command checks the returned table with
 the existing Part-B coverage checker and returns a failure for missing rows,
@@ -224,7 +232,12 @@ other provider has separate billing, so any budget for strong-model review
 is not enforced here. Failed requests
 and provider billing changes may also make the ledger differ from an invoice.
 
-A failed request reports its reservation id in the error. Inspect
+A failed request reports its reservation id, and for an HTTP error the start
+of the provider's error body (for example `max_tokens_exceeded`). If the
+provider answered but the ledger could not record it (a locked database), the
+answer is printed and the error names the exact `settle` command. If Jev
+answers but the answer fails validation, `draft-verify` records its settled
+tokens and cost next to the error. Inspect
 reservations with `status`. After checking the provider's usage,
 reconcile an uncertain call with `settle CALL_ID ACTUAL_MICRODOLLARS`.
 Change the limit deliberately with `set-limit MICRODOLLARS`.

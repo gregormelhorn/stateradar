@@ -7,6 +7,7 @@ only the supplied material. Costs are reserved in a local SQLite ledger.
 
 import argparse
 import hashlib
+import http.client
 import json
 import math
 import os
@@ -34,8 +35,39 @@ class ProviderError(ValueError):
 def _post(ticket, url, payload, key):
     try:
         return post_json(url, payload, key)
-    except (OSError, ValueError) as error:  # URLError and HTTPError are OSErrors
+    except urllib.error.HTTPError as error:
+        # The body carries the provider's reason (e.g. max_tokens_exceeded).
+        try:
+            body = error.read(500).decode("utf-8", "replace").strip()
+        except Exception:  # the body is diagnostic only
+            body = ""
+        raise ProviderError(ticket, f"{error}{': ' + body if body else ''}") from error
+    except (OSError, ValueError, http.client.HTTPException) as error:  # URLError is an OSError
         raise ProviderError(ticket, error) from error
+
+
+class LedgerError(ValueError):
+    """The provider answered and was paid, but the ledger could not record it."""
+
+    def __init__(self, ticket, cost, response, error):
+        self.response = response
+        super().__init__(f"ledger update failed ({error}); the answer is printed above; "
+                         f"run 'settle {ticket} {cost}' once the ledger is free")
+
+
+def _settle(budget, ticket, cost, response):
+    try:
+        budget.settle(ticket, cost)
+    except sqlite3.Error as error:
+        raise LedgerError(ticket, cost, response, error) from error
+
+
+class JevAnswerError(ValueError):
+    """Jev answered and was charged, but the answer failed validation."""
+
+    def __init__(self, message, input_tokens, cost):
+        self.input_tokens, self.cost = input_tokens, cost
+        super().__init__(message)
 
 
 class IncompleteResponse(ValueError):
@@ -70,7 +102,7 @@ def flash(budget, prompt, key, max_tokens=4096):
     prompt_tokens = _tokens(usage.get("prompt_tokens"))
     output_tokens = _tokens(usage.get("completion_tokens"))
     cost = math.ceil(prompt_tokens * 0.3 + output_tokens * 1.2)
-    budget.settle(ticket, cost)
+    _settle(budget, ticket, cost, response)
     try:
         choice = response["choices"][0]
         content = choice["message"]["content"]
@@ -112,7 +144,7 @@ def _jev_request(budget, payload, key):
     response = _post(ticket, JEV_URL, payload, key)
     input_tokens = _tokens(_usage(response).get("input_tokens"))
     cost = math.ceil(input_tokens * 0.042)
-    budget.settle(ticket, cost)
+    _settle(budget, ticket, cost, response)
     return response, input_tokens, cost, reserved
 
 
@@ -192,41 +224,44 @@ def jev_batch(budget, source, source_ref, checks, key, model="jev-latest"):
             }
     payload = {"model": model, "state": {"source": source}, "questions": questions}
     response, input_tokens, cost, reserved = _jev_request(budget, payload, key)
-    answers = response.get("answers")
-    if not isinstance(answers, dict) or set(answers) != set(questions):
-        raise ValueError("Jev response has missing or unexpected answers; usage was recorded")
-    model = response.get("model")
-    if not isinstance(model, str) or not model:
-        raise ValueError("Jev response lacks a model; usage was recorded")
-    results = {}
-    for index, check in enumerate(checks):
-        answer = answers[f"choice_{index}"]
-        if not isinstance(answer, dict):
-            raise ValueError("Jev response has an invalid answer; usage was recorded")
-        choice = answer.get("choice")
-        probabilities = answer.get("probabilities")
-        confidence = answer.get("confidence")
-        if (answer.get("type") != "choice" or choice not in ("supported", "contradicted", "unclear")
-                or not isinstance(probabilities, dict) or set(probabilities) != {"supported", "contradicted", "unclear"}
-                or any(isinstance(p, bool) or not isinstance(p, (int, float)) or not 0 <= p <= 1
-                       for p in probabilities.values())
-                or isinstance(confidence, bool) or not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1):
-            raise ValueError("Jev response has an invalid choice answer; usage was recorded")
-        if abs(sum(probabilities.values()) - 1) > 0.03 or probabilities[choice] < max(probabilities.values()):
-            raise ValueError("Jev response has an inconsistent probability distribution; usage was recorded")
-        results[check["id"]] = {"kind": check["kind"], "statement": check["statement"],
-                                "source": source_ref, "line": check["line"], "fragment": check["fragment"],
-                                "choice": choice, "probabilities": probabilities,
-                                "confidence": confidence, "review_required": True}
-        if check["kind"] == "ordering":
-            scope = answers[f"scope_{index}"]
-            if not isinstance(scope, dict) or scope.get("type") != "noul":
-                raise ValueError("Jev response has an invalid ordering scope answer; usage was recorded")
-            probability = scope.get("noul")
-            if (isinstance(probability, bool) or not isinstance(probability, (int, float))
-                    or not 0 <= probability <= 1):
-                raise ValueError("Jev response has an invalid ordering scope probability; usage was recorded")
-            results[check["id"]]["ordering_scope_probability"] = probability
+    try:
+        answers = response.get("answers")
+        if not isinstance(answers, dict) or set(answers) != set(questions):
+            raise ValueError("Jev response has missing or unexpected answers; usage was recorded")
+        model = response.get("model")
+        if not isinstance(model, str) or not model:
+            raise ValueError("Jev response lacks a model; usage was recorded")
+        results = {}
+        for index, check in enumerate(checks):
+            answer = answers[f"choice_{index}"]
+            if not isinstance(answer, dict):
+                raise ValueError("Jev response has an invalid answer; usage was recorded")
+            choice = answer.get("choice")
+            probabilities = answer.get("probabilities")
+            confidence = answer.get("confidence")
+            if (answer.get("type") != "choice" or choice not in ("supported", "contradicted", "unclear")
+                    or not isinstance(probabilities, dict) or set(probabilities) != {"supported", "contradicted", "unclear"}
+                    or any(isinstance(p, bool) or not isinstance(p, (int, float)) or not 0 <= p <= 1
+                           for p in probabilities.values())
+                    or isinstance(confidence, bool) or not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1):
+                raise ValueError("Jev response has an invalid choice answer; usage was recorded")
+            if abs(sum(probabilities.values()) - 1) > 0.03 or probabilities[choice] < max(probabilities.values()):
+                raise ValueError("Jev response has an inconsistent probability distribution; usage was recorded")
+            results[check["id"]] = {"kind": check["kind"], "statement": check["statement"],
+                                    "source": source_ref, "line": check["line"], "fragment": check["fragment"],
+                                    "choice": choice, "probabilities": probabilities,
+                                    "confidence": confidence, "review_required": True}
+            if check["kind"] == "ordering":
+                scope = answers[f"scope_{index}"]
+                if not isinstance(scope, dict) or scope.get("type") != "noul":
+                    raise ValueError("Jev response has an invalid ordering scope answer; usage was recorded")
+                probability = scope.get("noul")
+                if (isinstance(probability, bool) or not isinstance(probability, (int, float))
+                        or not 0 <= probability <= 1):
+                    raise ValueError("Jev response has an invalid ordering scope probability; usage was recorded")
+                results[check["id"]]["ordering_scope_probability"] = probability
+    except ValueError as error:
+        raise JevAnswerError(str(error), input_tokens, cost) from error
     return {"model": model, "source_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
             "input_tokens": input_tokens, "cost_microdollars": cost,
             "reservation_microdollars": reserved, "checks": results}
@@ -264,12 +299,18 @@ def _parse_draft(text):
     try:
         draft = json.loads(body)
     except json.JSONDecodeError as error:
-        # Tolerate a preamble or a code fence around one JSON object; nothing else.
-        start, end = body.find("{"), body.rfind("}")
-        try:
-            draft = json.loads(body[start:end + 1]) if 0 <= start < end else None
-        except json.JSONDecodeError:
-            draft = None
+        # Tolerate prose or a code fence around one JSON object: take the first
+        # position where a complete object with a claims list decodes.
+        draft = None
+        decoder = json.JSONDecoder()
+        for start in (i for i, char in enumerate(body) if char == "{"):
+            try:
+                candidate, _ = decoder.raw_decode(body, start)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(candidate, dict) and "claims" in candidate:
+                draft = candidate
+                break
         if draft is None:
             raise InvalidDraft(f"not JSON ({error.msg})", text) from error
     if not isinstance(draft, dict) or not isinstance(draft.get("claims"), list):
@@ -318,9 +359,11 @@ def draft_verify(budget, source, source_ref, task, flash_key, jev_key, model="je
     if citable:
         try:
             verification = jev_batch(budget, source, source_ref, citable, jev_key, model)
-        except (ValueError, OSError, BudgetExceeded) as error:
+        except (ValueError, OSError, BudgetExceeded, sqlite3.Error) as error:
             # The Flash draft is paid for: keep it and its citation checks.
             verification = {"error": str(error)}
+            if isinstance(error, JevAnswerError):
+                verification.update(input_tokens=error.input_tokens, cost_microdollars=error.cost)
     if verification and "checks" in verification:
         for ident, judged in verification["checks"].items():
             results[ident]["jev"] = {key: judged[key] for key in judged
@@ -334,9 +377,18 @@ def draft_verify(budget, source, source_ref, task, flash_key, jev_key, model="je
             "questions": questions, "review_required": True}
 
 
+TEXT_SUFFIXES = (".md", ".txt", ".rst")
+
+
 def blind(budget, args, key):
     if not args.requirements or not args.contracts:
         raise ValueError("blind pass requires requirements and event contracts")
+    for spec in args.requirements + args.contracts:
+        # Flash gets prepared prose only: no source file, no class blocks.
+        name = spec.split(":", 1)[0]
+        if Path(name).suffix.lower() not in TEXT_SUFFIXES or (spec in args.contracts and ":" in spec):
+            raise ValueError(f"blind takes only a prepared text file ({', '.join(TEXT_SUFFIXES)}), "
+                             f"whole, for requirements and contracts: {spec!r}")
     pack_root = Path(__file__).resolve().parent.parent
     # Keep the exact dispatched package next to the output: it is the record of
     # what the blind pass saw, and a temporary path would be gone after the run.
@@ -352,6 +404,9 @@ def blind(budget, args, key):
     package += ("\nThe coverage checklist must use one exact line per event or pair "
                 "in the form '- [x] EVENT_ID', with no other text on that line.\n")
     package_path.write_text(package, encoding="utf-8")
+    if getattr(args, "package_only", False):
+        print(json.dumps({"package": str(package_path), "characters": len(package)}, indent=2))
+        return 0
     try:
         result = flash(budget, package, key, args.max_tokens)
     except IncompleteResponse as error:
@@ -399,11 +454,14 @@ def main():
     blind_parser.add_argument("--contracts", action="append", required=True)
     blind_parser.add_argument("--output", type=Path, required=True)
     blind_parser.add_argument("--max-tokens", type=int, default=8192)
+    blind_parser.add_argument("--package-only", action="store_true",
+                              help="write <output stem>.package.md for inspection; make no call")
     args = parser.parse_args()
     for path in [getattr(args, "output", None)]:
         # Fail before anything is paid for if the result cannot be written.
-        if path is not None and (not path.parent.is_dir() or not os.access(path.parent, os.W_OK)):
-            print(f"LOCAL MODELS: output directory {path.parent} does not exist or is not writable", file=sys.stderr)
+        if path is not None and (path.is_dir() or not path.parent.is_dir() or not os.access(path.parent, os.W_OK)):
+            print(f"LOCAL MODELS: output {path} is a directory, or {path.parent} does not exist or is not writable",
+                  file=sys.stderr)
             return 1
     try:
         budget = Budget(args.ledger, args.limit_microdollars)
@@ -457,6 +515,10 @@ def main():
                          os.environ.get("TYPESAFE_API_KEY"), args.model)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
+    except LedgerError as error:
+        print(json.dumps(error.response, ensure_ascii=False, indent=2))
+        print(f"LOCAL MODELS: {error}", file=sys.stderr)
+        return 1
     except IncompleteResponse as error:
         print(json.dumps(error.result, ensure_ascii=False, indent=2))
         print(f"LOCAL MODELS: {error}", file=sys.stderr)

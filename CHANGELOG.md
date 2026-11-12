@@ -42,7 +42,18 @@
   citation fragments must be a single line of at least four non-space
   characters; SQLite errors are reported instead of raised; `jev` and
   `jev-batch` take `--model` and `jev-batch` takes `--output`; the unmetered
-  `jev_local.evaluate` path is removed. Each fix has a red test first.
+  `jev_local.evaluate` path is removed. Each code mechanism has a red test
+  first.
+- **Review round 2.** `blind` takes only prepared `.md`/`.txt`/`.rst` files
+  for requirements and contracts and gains `--package-only` to inspect the
+  package before anything is sent; the pilot treats off-vocabulary blind rows
+  as `vocabulary-drift` that is mapped explicitly or becomes a question. HTTP
+  error bodies (such as `max_tokens_exceeded`) reach the agent; a ledger
+  failure after a paid answer prints the answer and the `settle` command; an
+  invalid Jev answer keeps its settled usage in `draft-verify`; truncated HTTP
+  responses name their reservation; `--output` may not be a directory; draft
+  parsing finds the JSON object even with braces in surrounding prose. Red
+  tests first for each mechanism; `jev --model` gained a CLI test.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 
