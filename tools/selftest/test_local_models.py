@@ -118,6 +118,21 @@ class ModelTest(unittest.TestCase):
             self.assertIn("contract details", (root / "blind.package.md").read_text())
             self.assertFalse((root / "blind.md").exists())
 
+    def test_blind_stdout_names_only_the_kept_package(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            analysis = root / "analysis"
+            analysis.mkdir()
+            (analysis / "event-catalogue.md").write_text("<!-- event-ids: E01 -->\n" + "event details " * 30)
+            (root / "requirements.md").write_text("requirement details " * 30)
+            (root / "contracts.md").write_text("contract details " * 30)
+            args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
+                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=True)
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key"), 0)
+            self.assertEqual(json.loads(out.getvalue())["package"], str(root / "blind.package.md"))
+
     def test_sqlite_errors_are_reported_not_raised(self):
         with tempfile.TemporaryDirectory() as directory:
             argv = ["local_models.py", "--ledger", str(Path(directory) / "missing" / "b.db"), "status"]
@@ -354,6 +369,22 @@ class ModelTest(unittest.TestCase):
         inspect = Namespace(**{**vars(args), "package_only": True})
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(local_models.blind(budget, inspect, "key"), 0)
+
+    def test_blind_requirements_may_select_one_section(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            analysis = root / "analysis"
+            analysis.mkdir()
+            (analysis / "event-catalogue.md").write_text("<!-- event-ids: E01 -->\n" + "event details " * 30)
+            (root / "requirements.md").write_text("# Other\n" + "unrelated text " * 30 + "\n# Link\n"
+                                                  + "selected requirement " * 30 + "\n")
+            (root / "contracts.md").write_text("contract details " * 30)
+            args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md:# Link"],
+                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=True)
+            self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
+            package = (root / "blind.package.md").read_text()
+            self.assertIn("selected requirement", package)
+            self.assertNotIn("unrelated text", package)
 
     def test_blind_sends_only_the_inspected_package(self):
         with tempfile.TemporaryDirectory() as directory:

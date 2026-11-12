@@ -6,6 +6,7 @@ only the supplied material. Costs are reserved in a local SQLite ledger.
 """
 
 import argparse
+import contextlib
 import hashlib
 import http.client
 import json
@@ -306,11 +307,13 @@ def _parse_draft(text):
         # Tolerate prose or a code fence around exactly one draft object. Every
         # decodable object with a claims list and a questions list is a candidate;
         # more than one (for example an echoed template) is ambiguous.
-        candidates = []
+        candidates, covered = [], 0
         decoder = json.JSONDecoder()
         for start in (i for i, char in enumerate(body) if char == "{"):
+            if start < covered:  # inside an object that already decoded
+                continue
             try:
-                candidate, _ = decoder.raw_decode(body, start)
+                candidate, covered = decoder.raw_decode(body, start)
             except json.JSONDecodeError:
                 continue
             if (isinstance(candidate, dict) and isinstance(candidate.get("claims"), list)
@@ -406,8 +409,8 @@ def blind(budget, args, key):
         # Flash gets prepared prose only: no source file, no class blocks.
         name = spec.split(":", 1)[0]
         if Path(name).suffix.lower() not in TEXT_SUFFIXES or (spec in args.contracts and ":" in spec):
-            raise ValueError(f"blind takes only a prepared text file ({', '.join(TEXT_SUFFIXES)}), "
-                             f"whole, for requirements and contracts: {spec!r}")
+            raise ValueError(f"blind takes only prepared text files ({', '.join(TEXT_SUFFIXES)}): "
+                             f"requirements as FILE or FILE:PATTERN, contracts as a whole FILE: {spec!r}")
     pack_root = Path(__file__).resolve().parent.parent
     # Keep the exact dispatched package next to the output: it is the record of
     # what the blind pass saw, and a temporary path would be gone after the run.
@@ -422,7 +425,11 @@ def blind(budget, args, key):
             requirements=args.requirements, contracts=args.contracts,
             out=str(assembled), for_dispatch=False,
         )
-        if part_b_pack.assemble(package_args, pack_root) != 0:
+        # assemble reports on stdout and names the temporary file: keep stdout
+        # for blind's own JSON and pass the report to stderr.
+        with contextlib.redirect_stdout(sys.stderr):
+            assembled_ok = part_b_pack.assemble(package_args, pack_root) == 0
+        if not assembled_ok:
             raise ValueError("blind input package failed validation")
         package = assembled.read_text(encoding="utf-8")
     package += ("\nThe coverage checklist must use one exact line per event or pair "

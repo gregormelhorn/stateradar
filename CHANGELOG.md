@@ -63,6 +63,11 @@
   requires verbatim contract text headed by `file:line` and the same prepared
   files for the fallback dispatch; requirements may select one section with
   `FILE.md:PATTERN`. Red tests first.
+- **Review round 4.** The draft parser skips objects nested inside one it
+  has already decoded; `blind` sends the package assembler's report to stderr
+  so stdout carries only its JSON with the kept package path; the refusal
+  message names `FILE:PATTERN` for requirements; the docs show the two-step
+  `blind` call; a test covers requirement section selection.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

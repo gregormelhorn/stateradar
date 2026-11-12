@@ -162,19 +162,22 @@ with `FILE.md:PATTERN`, contracts are whole files of verbatim docstrings or
 schema descriptions. It refuses source files and `FILE:Class` specs, so the
 blind pass never receives implementation code. Run it once with
 `--package-only` to write `<output stem>.package.md` without any call, read
-the package, then run it without the flag. The real run requires that package,
-sends exactly it, and refuses if the inputs have changed since. The catalogue lives
-in the analysis directory. The call receives only the assembled package and
-no tools or conversation history. The command checks the returned table with
-the existing Part-B coverage checker and returns a failure for missing rows,
-missing checklist ticks, or truncated output. It does not check the
+the package, then run it without the flag. The real run requires that
+package, sends exactly it, and refuses if the inputs have changed since. The
+catalogue lives in the analysis directory. The call receives only the
+assembled package and no tools or conversation history. The command checks
+the returned table with the existing Part-B coverage checker and returns a
+failure for missing rows, missing checklist ticks, or truncated output. It does not check the
 disposition vocabulary, and it only requires pair rows when the catalogue
 carries `P-` ids.
 
 ```bash
-python3 tools/local_models.py --ledger "$ledger" blind domain-analysis/component \
-  --repo /path/to/repo --requirements docs/requirements.md \
-  --contracts docs/event-contracts.md --output /path/to/blind-output.md
+blind_args=(blind domain-analysis/component --repo /path/to/repo \
+  --requirements docs/requirements.md --contracts docs/event-contracts.md \
+  --output /path/to/blind-output.md)
+python3 tools/local_models.py --ledger "$ledger" "${blind_args[@]}" --package-only
+# read /path/to/blind-output.package.md, then send exactly that package:
+python3 tools/local_models.py --ledger "$ledger" "${blind_args[@]}"
 ```
 
 The exact package sent to Flash is kept next to the output with the

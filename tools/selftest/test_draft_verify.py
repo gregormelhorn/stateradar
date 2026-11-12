@@ -213,6 +213,13 @@ class DraftVerifyTest(unittest.TestCase):
                 with self.assertRaises(local_models.InvalidDraft):
                     self.run_cascade(text, Budget(Path(directory) / "usage.db", 1_000_000))
 
+    def test_parser_ignores_objects_nested_inside_the_draft(self):
+        nested = {"claims": [{"id": "C1", "kind": "claim", "statement": "s", "line": 1, "fragment": "connects",
+                              "note": {"claims": [], "questions": []}}], "questions": []}
+        with tempfile.TemporaryDirectory() as directory:
+            result, _ = self.run_cascade("Draft:\n" + json.dumps(nested), Budget(Path(directory) / "usage.db", 1_000_000))
+        self.assertEqual(result["claims"]["C1"]["citation_check"], "ok")
+
     def test_cli_rejects_output_that_is_a_directory(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
