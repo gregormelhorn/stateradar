@@ -7,12 +7,15 @@ status reports and measurements from their stated versions; they are not a
 fresh audit of every feature. The following outstanding work links to those
 entries and separates the new model-routing plan from shipped capabilities.
 
-1. **Measure cost-aware model routing.** Flash drafting, Jev batches, a local
-   ledger, and an offline batch evaluator exist. Next build independently
-   reviewed examples, split held-out components or issues, and measure errors,
-   coverage, time, and total cost. Only then evaluate selective escalation.
-   Automatic acceptance and escalation are not implemented. Details and
-   acceptance boundaries: [model cascade plan](plan-model-cascade.md).
+1. **Measure cost-aware model routing.** Flash drafting, Jev batches, the
+   `draft-verify` chain, a local ledger, and an offline batch evaluator exist,
+   and `prompts/02-pilot.md` (v1.16) routes Steps 1, 6, 8 and Part B through
+   them. Next build independently reviewed examples, split held-out components
+   or issues, and measure errors, coverage, time, and total cost of the routed
+   pilot against the agent-only pilot. Only then evaluate selective
+   escalation. Automatic acceptance and escalation are not implemented.
+   Details: [model cascade plan](plan-model-cascade.md) and
+   [entry 11](#11-cost-aware-model-routing-deepseek-flash--jev).
 2. **Broaden mutation coverage and validate on real components.** Continue
    [fault-class mutants](#8-ach-style-fault-class-mutants-testgen-upgrade):
    add supported classes and component bindings with observed red probes and
@@ -193,6 +196,41 @@ a rationale field would let a checker verify that such a claim cites its
 guarantee. Building that checker first would mean matching prose for words like
 "unreachable" — the kind of heuristic this pack forbids for UV categories, so
 the field comes first.
+
+## 11. Cost-aware model routing (DeepSeek Flash + Jev)
+
+**Status:** 🔶 Partially shipped (unreleased). `tools/local_models.py` sends
+bounded drafts and the blind Part B to DeepSeek Flash and source-grounded
+claim and ordering checks to Jev (`flash`, `jev`, `jev-batch`, `blind`,
+`draft-verify`). A per-pilot SQLite ledger reserves estimated costs;
+`tools/jev_eval.py` scores a saved batch against independently reviewed
+labels. The pilot prompt's "Model routing" section maps Steps 1, 6, 8 and
+Part B to these commands; a Jev judgment may add a question and never
+removes one. 429/503/529 responses are retried with `Retry-After`.
+
+Open, in order:
+
+1. **First routed pilot end to end.** The pack's selftests mock the HTTP
+   layer, and the routed pilot has not yet run end to end. Run one pilot with
+   a fresh ledger, record failures, rejected drafts and the ledger total in
+   `summary.md`, and compare with an agent-only run of the same component.
+2. **Labelled evaluation set.** Collect attributed, independently reviewed
+   labels for claim and requirement-scope checks across components (stage 1
+   of the cascade plan), including races outside a requirement's scope and
+   seam-contract cases. Keep a held-out group per component or issue.
+3. **Calibrated thresholds, then escalation.** TypeSafe's cookbooks use
+   vendor-calibrated cut-offs (0.7 per-field gate, 0.8 citation
+   auto-accept, 0.3/0.7 Noul bands). StateRadar adopts none of them until the
+   labelled set supports a value; any escalation policy is compared end to end
+   against the prior workflow.
+4. **Known limits to design around.** Jev accepts 64k tokens per request and
+   32k per question, so long sources need excerpting with provenance; English
+   is its primary language, so non-English requirements need a measured
+   accuracy check; aliases move with releases, so measurements pin
+   `jev-1.14.0`. The ledger counts only calls through the tool, not the
+   calling agent.
+5. **Prompt research.** Repetition and nonce-based consistency studies, and
+   feature discovery only after the labelled set exists (see entry 9).
 
 ## Positioning note (for the README, task-8 sweep)
 
