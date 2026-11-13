@@ -124,11 +124,14 @@ def _read_contracts(spec: str, repo: Path) -> str:
 # and an optional ("fragment"). The fragment may hold unescaped or
 # typographic quotes and even "host:5432" tokens, so it ends at a
 # quote-paren followed by a boundary, or at the last quote-paren before a
-# later citation (one preceded by a space, comma or parenthesis) on the
-# line (_FRAG_END); else at the first quote-paren.
+# later citation of a source or prose file (preceded by a space, comma or
+# parenthesis) on the line (_FRAG_END); else at the first quote-paren.
 _FILE = r"[\w./-]+\.[A-Za-z]{1,4}"
+# A later citation names a source or prose file by its extension, so a
+# "db.example.com:5432" token inside a fragment is never one.
+_SRC_FILE = r"[\w./-]+\.(?:go|py|pyi|ts|tsx|js|jsx|mjs|java|kt|kts|rs|c|h|cc|cpp|hpp|cs|rb|php|swift|scala|m|mm|sh|sql|proto|md|txt|rst|adoc|toml|ya?ml|json)"
 _FRAG_END = (r"[\"\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)"
-             r"|(?:(?![\"\u201d]\s*\)).)*?[\s,(]" + _FILE + r"`?:\d+(?:-\d+)?(?=`?\s*\(|[,;)|]|$))")
+             r"|(?:(?![\"\u201d]\s*\)).)*?[\s,(]" + _SRC_FILE + r"`?:\d)")
 _CITE = re.compile(
     r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
     r"(`?\s*\(\s*[\"\u201c](.+?)" + _FRAG_END +
@@ -217,7 +220,8 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
                   lambda m: m.group(0) if m.group(0).lstrip(" \t→") in keep_ids else _MARK, text)
     # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12",
     # "see DR-002"; "see" in prose stays.
-    text = re.sub(r"\b(?:[Ss]ee|[Cc]f\.)[ \t]*(?=\x00)", "", text)
+    text = re.sub(r"\b(?=[A-Z])(?i:see|cf\.)[ \t]*(?=\x00)", "\x01", text)  # a sentence start
+    text = re.sub(r"\b(?i:see|cf\.)[ \t]*(?=\x00)", "", text)
     text = re.sub(r"(?:\b(?:recorded as\s+)?lints?\s*|\b[Ff]inding\s*(?::\s*)?)(?=\x00)", "", text)
     # Parentheses that held only removed ids, then the ids with their separators.
     text = re.sub(r"(?m)(^[ \t]*)?\((?:[\s,;]|\x00)*\x00(?:[\s,;]|\x00)*\)(?(1)[ \t]*)",
@@ -235,6 +239,10 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     # and doubled spaces ("see DR-002; then" -> "; then").
     text = re.sub(r"[,;][ \t]*([,;])", r"\1", text)
     text = re.sub(r"(?<=\S)[ \t]{2,}(?=[^\s|])", " ", text)
+    # A sentence that started with a removed label starts with a capital, and
+    # one left as bare punctuation ("Cf. DR-002.") goes.
+    text = re.sub(r"\x01[ \t]*([a-z])", lambda m: m.group(1).upper(), text)
+    text = re.sub(r"\x01[ \t]*[.;,]+[ \t]*", "", text).replace("\x01", "")
     return re.sub(r"(?<=[^\s|])[ \t]+$", "", text, flags=re.M)
 
 

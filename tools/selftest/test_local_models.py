@@ -523,7 +523,16 @@ class ModelTest(unittest.TestCase):
                          "The pool behaves as callers see. What the waiter does not see, the owner does.")
         self.assertEqual(strip('client.go:40 ("f("a") dial db.example.com:5432") |'), "client.go |")
         self.assertEqual(strip('client.go:40 ("f("a") dial db.example.com:5432 now") |'), "client.go |")
-        self.assertEqual(strip("See Q-01 for details."), "for details.")
+        self.assertEqual(strip("See Q-01 for details."), "For details.")
+        self.assertEqual(strip("x. Cf. DR-002. y"), "x. y")
+        self.assertEqual(strip("SEE Q-01 for details."), "For details.")
+        # A later bare citation followed by prose still ends a fragment with inner quote-parens.
+        for text, want in (('| e | channel.go:50 ("f("a") + g()") then channel.go:52 holds the rest |',
+                            "| e | channel.go then channel.go holds the rest |"),
+                           ('channel.go:139 ("return nil, errors.New("connection closed")") and channel.go:140 returns',
+                            "channel.go and channel.go returns"),
+                           ('channel.go:10 ("f("a") g") pool.go:3 holds the lock', "channel.go pool.go holds the lock")):
+            self.assertEqual(strip(text), want)
         # A reference word left at the end of a cell or line goes too.
         self.assertEqual(strip("| a; see T-F05 and L-4 |\nx, cf. Q-1\n"), "| a |\nx\n")
         # Quotes are kept by exact path: vendor/lib/README.md does not ride on README.md.
