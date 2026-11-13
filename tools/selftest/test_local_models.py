@@ -525,6 +525,14 @@ class ModelTest(unittest.TestCase):
         self.assertIn("- gate (observed in code): service-side state", marked)
         self.assertIn("- upstream_guards (observed in code): none", marked)
         self.assertIn("* E01 — gate: state", marked, "only list fields are relabelled")
+        # Field spellings and closing hashes (review round 1).
+        self.assertEqual(mark("## Remembrance ##\n- **Gate:** x\n- **upstream_guards**: y\n"),
+                         f"## Remembrance {label} ##\n- **Gate (observed in code):** x\n"
+                         "- **upstream_guards (observed in code)**: y\n")
+        # A catalogue without code-derived sections is left alone, and a blind
+        # table without marks prints no independence line.
+        plain = "<!-- event-ids: E01 -->\n## Events\n\n- payload: none\n- gateway: x\n"
+        self.assertEqual(mark(plain), plain)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             args = self.make_blind_inputs(root, catalogue=catalogue)
@@ -542,6 +550,14 @@ class ModelTest(unittest.TestCase):
                                                     "key"), 0)
             self.assertIn("PART-B INDEPENDENCE: 2 rows marked as-is (not independent): E01, E02 (closed)",
                           err.getvalue())
+            unmarked = "| Event | Expected |\n|---|---|\n| E01 | handle |\n| E02 | reject |\n\n- [x] E01\n- [x] E02\n"
+            err = io.StringIO()
+            with patch.object(local_models, "flash", return_value={"text": unmarked, "finish_reason": "stop"}), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+                self.assertEqual(local_models.blind(budget, Namespace(**{**vars(args), "package_only": False}),
+                                                    "key"), 0)
+            self.assertIn("PART-B COVERAGE: OK", err.getvalue())
+            self.assertNotIn("PART-B INDEPENDENCE", err.getvalue())
 
     def test_blind_refuses_a_package_with_a_leftover_fragment(self):
         # Method review round 7: an unescaped "|" inside a fragment on a table

@@ -292,8 +292,9 @@ Open, in order:
    followed after the agent-only run (02-pilot v1.19). Its candidate rule
    for as-is prose reaching Part B (remembrance and upstream statements carry
    the provenance "observed in code") became 02-pilot v1.20: the package
-   labels those sections, and Part B marks the rows that rest on them. Its `timing.md` shows where the 37 minutes went: about 70 s of
-   Flash and Jev calls, about 3.5 minutes of `go test` (mostly three waits
+   labels those sections, and Part B marks the rows that rest on them.
+   Its `timing.md` shows where the 37 minutes went: about 70 s of Flash and
+   Jev calls, about 3.5 minutes of `go test` (mostly three waits
    on the hanging `TestPool_Get`'s 60-second timeout) and about 32 minutes
    of the steering agent's own work, which includes the pack's tool runs
    (not timed separately). Timed agent-only run (done 2026-11-13,

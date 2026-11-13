@@ -243,20 +243,26 @@
   of an ODC field counts, and the first one wins. No committed matrix or
   sidecar is affected. Red-first selftests for each.
 - **Part B sees which catalogue text comes from the code; 02-pilot v1.20.** In
-  both silenceper/pool runs of 2026-11-13, Part B read the catalogue's gate,
-  remembrance, upstream-guard and lock-discipline annotations as documented
-  intent, so its agreement on those rows was not independent, and the pilot
-  agent had to find each such row by reading. `part_b_pack.py` now labels
-  those headings, plus the event annotations and the undesired-coverage table,
+  the second routed pilot and the agent-only run (silenceper/pool,
+  2026-11-13), Part B read the catalogue's gate, remembrance, upstream-guard
+  and lock-discipline annotations as documented intent, so its agreement on
+  those rows was not independent, and the pilot agent had to find each such
+  row by reading. `part_b_pack.py` now labels those headings, plus the event
+  annotations and the undesired-coverage table,
   `(observed in code, not documented intent)`, and each `gate:` and
-  `upstream_guards:` field `(observed in code)`, without adding a line. The
-  Part-B task asks for `as-is:` at the start of the behaviour cell of a row
-  that rests only on such text, and the coverage check lists those rows
-  (`PART-B INDEPENDENCE`, information, not a failure). On both runs'
-  catalogues it labels six headings each, and 18 fields (agent-only run) and
-  12 (routed run). Prose outside those sections, such as an event-table cell,
-  is still only caught by reading (rule 7). `dsc_blind.py`, which sends the catalogue verbatim and is not used
-  by 02-pilot, is unchanged. Red-first selftest.
+  `upstream_guards:` list field `(observed in code)`, without adding a line.
+  The Part-B task asks for `as-is:` at the start of the behaviour cell of a
+  row that rests only on such text, and the coverage check (`blind`, or
+  `part_b_pack.py --check`) lists those rows (`PART-B INDEPENDENCE`,
+  information, not a failure). On both runs' catalogues it labels six headings
+  each, and 18 fields (agent-only run) and 12 (routed run). The `as-is:` mark
+  is Part B's own report, not a measurement: Part B can rest on labelled text
+  without marking the row, so rule 7's reading stays the check, and prose
+  outside those sections, such as an event-table cell, is still caught only
+  that way. A per-event list derived from the labels would flag every event,
+  since each one carries a gate and an upstream-guard field. `dsc_blind.py`,
+  which sends the catalogue verbatim and is not used by 02-pilot, is
+  unchanged. Red-first selftest.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

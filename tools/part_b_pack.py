@@ -399,21 +399,26 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
 # Catalogue sections and per-event fields that 02-pilot Step 3 fills from the
 # code (gate, remembrance, upstream guard, lock discipline, the event
 # annotations and the coverage table). Part B needs them to read the events,
-# but they state what the implementation does, and both pilots of 2026-11-13
-# saw Part B take them as documented intent. The package keeps them and labels
-# their provenance; the instruction asks Part B to mark rows that rest on them.
+# but they state what the implementation does, and the second routed pilot and
+# the agent-only run of 2026-11-13 saw Part B take them as documented intent.
+# The package keeps them and labels their provenance; the instruction asks
+# Part B to mark rows that rest on them.
+# That mark is Part B's own report, not a measurement: rule 7's reading stays
+# the check. A per-event list from the labels would not help, since 02-pilot
+# gives every event a gate and an upstream-guard field.
 OBSERVED = "observed in code, not documented intent"
 _OBSERVED_HEADING = re.compile(
     r"(?im)^(#{1,6}[ \t]+(?=[^\n]*\b(?:gate[- ]type|remembrance|upstream[- ]guards?|lock[- ]discipline"
-    r"|event[ \t]+annotations?|undesired[- ]coverage)\b)[^\n]*?)[ \t]*$")
-_OBSERVED_FIELD = re.compile(r"(?m)^([ \t]*[-*][ \t]+)(gate|upstream_guards)[ \t]*:")
+    r"|event[ \t]+annotations?|undesired[- ]coverage)\b)[^\n]*?)([ \t]+#+)?[ \t]*$")
+# "- gate:", "- **gate:**" and "- **gate**:", in any case.
+_OBSERVED_FIELD = re.compile(r"(?im)^([ \t]*[-*][ \t]+\**)(gate|upstream_guards)(?=\**[ \t]*:)")
 
 
 def mark_observed(text: str) -> str:
     """Label the catalogue's code-derived sections and fields (no line is added)."""
-    text = _OBSERVED_HEADING.sub(lambda m: m.group(1) if OBSERVED in m.group(1)
-                                 else f"{m.group(1)} ({OBSERVED})", text)
-    return _OBSERVED_FIELD.sub(r"\1\2 (observed in code):", text)
+    text = _OBSERVED_HEADING.sub(lambda m: m.group(0) if OBSERVED in m.group(1)
+                                 else f"{m.group(1)} ({OBSERVED}){m.group(2) or ''}", text)
+    return _OBSERVED_FIELD.sub(r"\1\2 (observed in code)", text)
 
 
 _AS_IS_ROW = re.compile(r"\|[ \t*_`]*as-is:", re.I)
