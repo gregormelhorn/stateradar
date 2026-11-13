@@ -333,7 +333,7 @@ def _parse_doc_map(path: Path) -> list[DocLine]:
         return []
     # The table ends at the next heading of any level: a '###' sub-section
     # may hold other '| DOC-' rows (agent-only run 2026-11-13).
-    block = re.split(r"\n#", text.split("## Doctrine mapping")[1], maxsplit=1)[0]
+    block = re.split(r"\n#{1,6}[ \t]", text.split("## Doctrine mapping")[1], maxsplit=1)[0]
     rows: list[DocLine] = []
     for line in block.split("\n"):
         s = line.strip()
@@ -418,6 +418,11 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
     # A header without '| **' state rows is a prose table whose first
     # column happens to be headed "State"; it declares no events
     # (agent-only run 2026-11-13: phantom event "Condition").
+    for block_events, block_rows in blocks:
+        if not block_rows:
+            print(f"note {component}: table headed "
+                  f"{', '.join(e['id'] for e in block_events) or '(no events)'} has no "
+                  "'| **' state rows; it declares no events", file=sys.stderr)
     blocks = [b for b in blocks if b[1]]
 
     events: list[Event] = []
@@ -446,6 +451,29 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
             if state not in states:
                 states.append(state)
             row_index.append((block_events, row, state, fam if leaf else None))
+
+    # A declared state without a '| **' row is named on stderr: rows that
+    # lost their bold markers would otherwise drop their table silently
+    # (review of the prose-table fix, which no longer counts row-less
+    # headers). Terminal states (PA-18) may have no row, and committed
+    # matrices list transient states without rows, so this is a note, not
+    # an error. Declarations separate names with commas or spaces.
+    decl = re.search(r"<!--\s*states:(.*?)-->", text, re.S)
+    if decl:
+        rest = decl.group(1)
+        names = set(states)
+        term = re.search(r"<!--\s*terminal:(.*?)-->", text, re.S)
+        if term:
+            names.update(n for n in re.split(r"[\s,;]+", term.group(1)) if n)
+        for _, _, state, family in row_index:
+            if family:
+                names.update((family, state[len(family):].strip()))
+        for name in sorted(names, key=len, reverse=True):
+            rest = re.sub(r"(?<![\w.-])" + re.escape(name) + r"(?![\w.-])", " ", rest)
+        missing = [w for w in re.split(r"[\s,;]+", rest) if w]
+        if missing:
+            print(f"note {component}: declared states without a '| **' row: "
+                  f"{', '.join(missing)}", file=sys.stderr)
 
     cells: list[Cell] = []
     unresolved: set[str] = set()

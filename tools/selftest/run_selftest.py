@@ -223,11 +223,24 @@ def main() -> int:
                                  "--root", str(pt)], capture_output=True, text=True)
         pt_events = [e["id"] for e in json.loads(
             (pt / "domain-analysis" / "gate" / "analysis.json").read_text()).get("events", [])]
-        if pt_run.returncode != 0 or "Condition" in pt_events:
+        if pt_run.returncode != 0 or "Condition" in pt_events or "state rows" not in pt_run.stderr:
             failures.append(f"prose 'State' table parsed as a matrix block: {pt_events}"
                             f"{pt_run.stdout}{pt_run.stderr}")
         else:
             print("  ok  a prose table headed 'State' adds no events")
+        # Review of that fix: a real matrix whose rows lost their bold markers
+        # now drops its table, so the missing declared states are named.
+        ub = sidecar(tmp, COMPOUND)
+        ub_matrix = ub / "domain-analysis" / "gate" / "disposition-matrix.md"
+        ub_matrix.write_text(ub_matrix.read_text().replace("| **Closed**", "| Closed"))
+        ub_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                 "--root", str(ub)], capture_output=True, text=True)
+        if "declared states without a '| **' row: Closed" not in ub_run.stderr:
+            failures.append(f"unbolded matrix rows dropped silently:{ub_run.stdout}{ub_run.stderr}")
+        elif "declared states without" in pt_run.stderr:
+            failures.append(f"prose table reported missing states: {pt_run.stderr}")
+        else:
+            print("  ok  unbolded matrix rows are named; a prose table is not")
         # Same run: '| DOC-' rows of a '###' sub-section after the doctrine
         # table were read as doctrine mappings.
         dm = tmp / "doc-map.md"
