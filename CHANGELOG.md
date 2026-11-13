@@ -26,7 +26,7 @@
   `examples/device-connection/domain-analysis/device-connection/run2`,
   `domain-analysis/meilisearch-s3-snapshot`, `tests/benchmarks/grpc-go-2669`,
   `tests/benchmarks/meilisearch-6510` and the routed-pilot evidence in
-  `docs/evidence/`; `tests/red-mini` is red by design and still fails with
+  `docs/evidence/`, each with a note saying so; `tests/red-mini` is red by design and still fails with
   its expected lines. Regenerate a sidecar from a fragment-cited matrix before
   running dsc_check on it. Overlay `extra_citations` to code files need a `fragment` too.
   `formatVersion` stays `"1.0"`: no field was added or renamed, and rule 3
@@ -36,8 +36,12 @@
   `src_exts`); it now warns once per component and cited file it cannot
   resolve, because such a citation, a test file outside those roots for
   example, is dropped together with its fragment check. A cited prose
-  document gets a pointer to overlay `extra_citations`; text such as
-  `host:5432` without a source or prose extension stays quiet.
+  document gets a pointer to overlay `extra_citations`, a cited config file
+  (`.yaml`, `.json`, ...) or a source extension in the wrong case names
+  `src_exts`; text such as `host:5432` without a known file extension stays
+  quiet. A cell's citation is now the first `file:line` token that resolves,
+  so a `host:5432` earlier in the cell no longer hides it. The two mutation
+  runners share one helper (`tools/subprocess_text.py`) for timeout output.
 - **Sidecar types.** `tools/sidecar_types.py` mirrors the schema as
   TypedDicts; a selftest fails when properties, required keys or enum values
   drift between the two. It found the question `note` the generator emits and

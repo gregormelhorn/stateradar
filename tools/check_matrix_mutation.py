@@ -17,6 +17,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
+from subprocess_text import as_text
+
 PLACEHOLDER = "{analysis_dir}"
 DEFAULT_TIMEOUT_SECONDS = 30
 
@@ -205,7 +207,8 @@ def trailing_citation(raw: str) -> str | None:
 
     The last, not the first: a mutant keeps the citation that ends the cell,
     as before the fragment rule. The sidecar generator records the first
-    citation instead; the two differ only in a cell that cites twice.
+    citation that resolves to a source file instead; the two differ only in
+    a cell that cites twice.
     """
     text = raw.rstrip()
     for end in (len(text), len(text) - 1 if text.endswith(")") else -1):
@@ -289,12 +292,6 @@ def command_for(config: Config, analysis_dir: Path) -> list[str]:
     return [str(analysis_dir) if part == PLACEHOLDER else part for part in config.command]
 
 
-def _text(stream: bytes | str | None) -> str:
-    if stream is None:
-        return ""
-    return stream.decode(errors="replace") if isinstance(stream, bytes) else stream
-
-
 def run_command(config: Config, analysis_dir: Path) -> CommandResult:
     started = time.monotonic()
     try:
@@ -309,7 +306,7 @@ def run_command(config: Config, analysis_dir: Path) -> CommandResult:
     except subprocess.TimeoutExpired as exc:
         # The partial output arrives as bytes even with text=True, and either
         # stream may be None: decode each one before joining them.
-        output = _text(exc.stdout) + _text(exc.stderr)
+        output = as_text(exc.stdout) + as_text(exc.stderr)
         return CommandResult(None, output, time.monotonic() - started, timed_out=True)
     except OSError as exc:
         return CommandResult(None, str(exc), time.monotonic() - started, launch_error=str(exc))

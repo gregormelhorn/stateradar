@@ -244,10 +244,18 @@ def main() -> int:
         unres_matrix.write_text(unres_text.replace(
             '`mini.py:19` ("self.state = \\"Open\\"")', '`test_cell_suite.py:3` ("import")', 1).replace(
             '`mini.py:22` ("return \\"ignored\\"")', '`requirements.md:3` ("closed")', 1).replace(
-            '`mini.py:23` ("raise RejectedError")', 'reject (dials db.example.com:5432)', 1))
+            '`mini.py:23` ("raise RejectedError")', '(dials db.example.com:5432)', 1).replace(
+            '`mini.py:26` ("self.state = \\"Closed\\"")', '`config.yaml:3` ("retries: 3")', 1).replace(
+            '`mini.py:47` ("self.dup_count += 1")', '`Mini.PY:47` ("self.dup_count += 1")', 1))
+        # A second component citing the same files: one line per component.
+        shutil.copytree(unres_matrix.parent, unres_matrix.parent.with_name("mini2"))
         unres_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
                                     "--root", str(unres)], capture_output=True, text=True)
         warn_lines = [ln for ln in unres_run.stderr.splitlines() if ln.startswith("warning:")]
+        if not any(ln.startswith("warning: mini2: citations of test_cell_suite.py") for ln in warn_lines):
+            failures.append("generator warns per component: no mini2 line\n" + (unres_run.stderr or "no stderr"))
+        else:
+            print("  ok  generator warns per component")
         for label, needle_text, want_warning in (
                 ("generator warns about an unresolved test-file citation",
                  "warning: mini: citations of test_cell_suite.py dropped: the file is not under "
@@ -255,6 +263,12 @@ def main() -> int:
                 ("generator points a prose citation to the overlay",
                  "warning: mini: citations of requirements.md dropped: matrix citations resolve "
                  "to source files only", True),
+                ("generator warns about a cited config file",
+                 "warning: mini: citations of config.yaml dropped: its extension is not a source "
+                 "extension", True),
+                ("generator names the case of a source extension",
+                 "warning: mini: citations of Mini.PY dropped: its extension is not a source "
+                 "extension (sidecar-overlay.yaml: src_exts, matched case-sensitively)", True),
                 ("generator stays quiet on host:port text", "db.example.com", False)):
             seen = any(needle_text in ln for ln in warn_lines)
             if seen != want_warning:
@@ -262,8 +276,24 @@ def main() -> int:
                                 + (unres_run.stderr or "no stderr"))
             else:
                 print(f"  ok  {label}")
-        if len(warn_lines) != 2:
-            failures.append(f"generator warnings: expected one line per file (2), got {warn_lines}")
+        if len(warn_lines) != 8:
+            failures.append(f"generator warnings: expected one line per component and file (8), "
+                            f"got {warn_lines}")
+
+        # A host:port earlier in the cell must not hide the citation after it.
+        hostfirst = sidecar(tmp, golden)
+        hostfirst_matrix = hostfirst / "domain-analysis" / "mini" / "disposition-matrix.md"
+        hostfirst_matrix.write_text(hostfirst_matrix.read_text().replace(
+            '`mini.py:19` ("self.state = \\"Open\\"")',
+            'via db.example.com:5432 `mini.py:19` ("self.state = \\"Open\\"")', 1))
+        subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                        "--root", str(hostfirst)], capture_output=True, text=True)
+        hostfirst_cits = [c.get("citation", {}).get("line") for c in json.loads(
+            (hostfirst_matrix.parent / "analysis.json").read_text())["cells"]]
+        if 19 not in hostfirst_cits:
+            failures.append("generator keeps a citation after host:port text: mini.py:19 dropped")
+        else:
+            print("  ok  generator keeps a citation after host:port text")
 
         # The rule covers code and test citations only: a requirements
         # document is cited without a fragment, and an empty fragment is

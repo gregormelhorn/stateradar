@@ -26,6 +26,8 @@ Per-project overlay (optional): <analysis-root>/sidecar-overlay.yaml
     - {component: stream-tracker, state: none, event: S2,
        file: src/escape_monitor/server/ingest/streams.py, line: 186,
        fragment: StaleEpochError}
+  src_roots: [lib, cmd]          # directories searched for cited files
+  src_exts: [".go", ".proto"]    # with the leading dot; case-sensitive
 
 Usage: python3 tools/gen_analysis_sidecar.py [--root REPO] [component ...]
 """
@@ -183,6 +185,11 @@ def _parse_events(header: str) -> list[Event]:
 
 
 PROSE_EXTS = (".md", ".markdown", ".txt", ".rst", ".adoc")
+# Config and schema files a cell may cite as observed behaviour. They are not
+# indexed unless a project adds them to src_exts, so their citations are
+# dropped, and the generator says so (see generate()).
+CONFIG_EXTS = (".yaml", ".yml", ".json", ".toml", ".ini", ".cfg", ".conf", ".xml", ".sql",
+               ".sh", ".tf", ".hcl")
 
 
 def _parse_cell(
@@ -241,11 +248,17 @@ def _parse_cell(
     # file:line, optionally followed by ("fragment") (02-pilot rule 3). Keep
     # the fragment: dsc_check verifies it near the cited line. Read it from
     # the unstripped text, because inline-code stripping can alter it.
-    cit = re.search(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw)
+    # The first token that resolves is the citation, so a host:port or a
+    # version string earlier in the cell does not hide it. When none
+    # resolves, every candidate goes to `unresolved`; the caller drops the
+    # ones that are not file names.
+    found = list(re.finditer(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw))
+    cit = next((m for m in found if src_index.get(Path(m.group(1)).name)),
+               found[0] if found else None)
     if cit:
         path = src_index.get(Path(cit.group(1)).name)
         if not path and unresolved is not None:
-            unresolved.add(cit.group(1))
+            unresolved.update(m.group(1) for m in found)
         if path:
             citation: Citation = {"file": path, "line": int(cit.group(2))}
             cell["citation"] = citation
@@ -392,17 +405,23 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
             cells.append({**body, "state": state, "event": event["id"]})
 
     # Loud, not silent: a dropped citation drops its fragment check too (a test
-    # file outside the source roots, say). One line per component and file;
-    # tokens without a source or prose extension (host:port, versions) are
-    # not citations and stay quiet.
-    src_exts = {ext.lower() for ext in (overlay["src_exts"] or SRC_EXTS)}
+    # file outside the source roots, say). One line per component and file.
+    # Only tokens with a known file extension count; anything else in a cell
+    # that looks like name.ext:N (host:port, versions) is not a citation and
+    # stays quiet. Source extensions are matched as _src_index matches them,
+    # case-sensitively, so the reason names the real cause.
+    src_exts = tuple(overlay["src_exts"] or SRC_EXTS)
+    src_exts_lower = {ext.lower() for ext in src_exts}
     for name in sorted(unresolved):
         ext = Path(name).suffix.lower()
-        if ext in PROSE_EXTS:
+        if name.endswith(src_exts):
+            reason = "the file is not under the source roots (sidecar-overlay.yaml: src_roots)"
+        elif ext in PROSE_EXTS:
             reason = ("matrix citations resolve to source files only; cite a prose document "
                       "through sidecar-overlay.yaml extra_citations")
-        elif ext in src_exts:
-            reason = "the file is not under the source roots (sidecar-overlay.yaml: src_roots)"
+        elif ext in CONFIG_EXTS or ext in src_exts_lower:
+            reason = ("its extension is not a source extension (sidecar-overlay.yaml: src_exts, "
+                      "matched case-sensitively)")
         else:
             continue
         print(f"warning: {component}: citations of {name} dropped: {reason}", file=sys.stderr)

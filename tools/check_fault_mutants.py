@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
+from subprocess_text import as_text
+
 PLACEHOLDER = "{analysis_dir}"
 DEFAULT_TIMEOUT_SECONDS = 30
 
@@ -123,12 +125,6 @@ def command_for(command: tuple[str, ...], analysis_dir: Path) -> list[str]:
     return [str(analysis_dir) if part == PLACEHOLDER else part for part in command]
 
 
-def _text(stream: bytes | str | None) -> str:
-    if stream is None:
-        return ""
-    return stream.decode(errors="replace") if isinstance(stream, bytes) else stream
-
-
 def run_command(config: Config, root_copy: Path) -> CommandResult:
     analysis_dir = root_copy / config.rel_analysis
     started = time.monotonic()
@@ -144,7 +140,7 @@ def run_command(config: Config, root_copy: Path) -> CommandResult:
     except subprocess.TimeoutExpired as exc:
         # The partial output arrives as bytes even with text=True, and either
         # stream may be None: decode each one before joining them.
-        output = _text(exc.stdout) + _text(exc.stderr)
+        output = as_text(exc.stdout) + as_text(exc.stderr)
         return CommandResult(None, output, time.monotonic() - started, timed_out=True)
     except OSError as exc:
         return CommandResult(None, str(exc), time.monotonic() - started, launch_error=str(exc))
