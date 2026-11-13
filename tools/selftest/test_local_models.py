@@ -567,6 +567,22 @@ class ModelTest(unittest.TestCase):
         # Backstop: a fragment the patterns could not end is reported.
         self.assertEqual(local_models.part_b_pack.leftover_fragments('a channel.go ("if x {") b README.md ("ok")',
                                                                      frozenset({"README.md"})), ['channel.go ("'])
+        # Code names in prose are not reported when only cited file names count.
+        self.assertEqual(local_models.part_b_pack.leftover_fragments(
+            'Calls `c.Get("key")` then errors.New("closed"); channel.go ("x', frozenset(),
+            frozenset({"channel.go"})), ['channel.go ("'])
+        # A table row never loses or gains a cell (round 6): fragments end inside their cell.
+        P = local_models.part_b_pack
+        for text, want in (('| s2 | channel.go:5 ("x") tail prose | other cell ("quoted prose") | third |',
+                            '| s2 | channel.go tail prose | other cell ("quoted prose") | third |'),
+                           ('| v | channel.go:7 ("a \\| b") then | x ("y") |', '| v | channel.go then | x ("y") |'),
+                           ('| w | channel.go:7 ("if a || f("b") {") | pool.go:2 ("c") |', '| w | channel.go | pool.go |')):
+            got = strip(text, later_names=frozenset({"pool.go"}))
+            self.assertEqual(got, want)
+            self.assertEqual(P.changed_table_rows(text, got), [])
+        self.assertEqual(P.changed_table_rows("| a | b |", "| a b |"), ["| a b |"])
+        # A wrapped code line that starts with "||" is prose, not a table row.
+        self.assertIsNone(P._TABLE_ROW.match("|| len(c.conns) == 0 {\")),"))
         # A host whose ending looks like a file extension is not a later citation.
         self.assertEqual(strip('client.go:40 ("f("a") dial api.example.rs:8443 now") |'), "client.go |")
         # A removed sentence-initial label keeps the capital after "," or ";", in parentheses and in cells.

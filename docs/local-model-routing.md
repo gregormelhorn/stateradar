@@ -175,13 +175,15 @@ rule 3 puts code into those fragments; file names stay, and so does a quote
 cited from a Part B source: the `--requirements` and `--contracts` files, or a
 prose file (`.md`, `.txt`, `.rst`, `.adoc`) that a doctrine line cites,
 matched by exact path relative to `--repo`. A quote from a file of the
-analysis directory is removed. A code fragment never crosses a table cell (on
-a table row an unescaped `|` is a cell bar; elsewhere it is code such as `a ||
-b`): it ends where its quotes balance before a boundary, otherwise at the last
-quote-paren before the next citation (a file the catalogue cites with a
-fragment, or one under `--repo` by path or base name), a cell bar or the end
-of the line, and a file name still followed by a quote after stripping is
-reported on stderr. Q-, PA-, SYS-, NAT- and DR- ids are always removed. An L-,
+analysis directory is removed. A code fragment never crosses a table cell (a
+table row starts with a single `|`, so catalogue tables need leading bars; on
+it a lone unescaped `|` is a cell bar, while `\|` and `||` are code, and
+elsewhere every `|` is code such as `a || b`): it ends where its quotes
+balance before a boundary, otherwise at the last quote-paren before the next
+citation (a file the catalogue cites with a fragment, or one under `--repo` by
+path or base name), a cell bar or the end of the line. Two backstops report
+on stderr: a cited file name still followed by a quote after stripping, and a
+table row whose number of cell bars changed. Q-, PA-, SYS-, NAT- and DR- ids are always removed. An L-,
 G-, F- or T- id stays only when the requirements, the contracts or the quoted
 text of a doctrine line use it (a doctrine line's gloss is Part A's and does
 not count), so a domain term such as `T-1` that the requirements use survives;

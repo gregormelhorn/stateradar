@@ -168,11 +168,17 @@ def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
     # by its own ("quote") (code such as errors.New("x") is not one). Neither
     # a fragment nor a quote pair crosses it.
     nxt = (r"[\s,(](?:" + later + r"`?:\d|[\w./-]+\.(?:md|txt|rst|adoc)`?\s*\(\s*" + q_open + r")")
-    plain = r"(?:(?!" + nxt + r")[^\"\u201c\u201d\n])"
-    ch = r"(?:(?!" + nxt + r")(?:\\\||[^|\n]))" if table else r"(?:(?!" + nxt + r")[^\n])"
-    bar = r"|\|" if table else ""
-    # 1. Quotes balanced inside, closed by a quote-paren before a boundary
-    #    (this may cross an unescaped "|" of code even on a table row).
+    # On a table row a lone unescaped "|" is a cell bar; "\|" and "||" are code.
+    if table:
+        plain = r"(?:(?!" + nxt + r")(?:\\\||\|\||[^\"\u201c\u201d|\n]))"
+        ch = r"(?:(?!" + nxt + r")(?:\\\||\|\||[^|\n]))"
+        bar = r"|(?<![|\\])\|(?!\|)"
+    else:
+        plain = r"(?:(?!" + nxt + r")[^\"\u201c\u201d\n])"
+        ch = r"(?:(?!" + nxt + r")[^\n])"
+        bar = ""
+    # 1. Quotes balanced inside, closed by a quote-paren before a boundary;
+    #    on a table row neither the fragment nor a quote pair crosses a cell.
     balanced = (r"((?:" + plain + r"|" + q_open + plain + r"*" + q_close + r")*?)"
                 + q_close + r"\s*\)(?=\s*(?:[),;|]|\u2014|$))")
     # 2. Otherwise the last quote-paren before the next citation, a cell bar
@@ -185,10 +191,15 @@ def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
         r"|`?\s*\(\s*" + q_open + last + r")?", re.M)
 
 
+# A table row starts with a cell bar; a wrapped code line starting "||" is not one.
+# Catalogue tables must use leading bars (rows without one are read as prose).
+_TABLE_ROW = re.compile(r"\s*\|(?!\|)")
+
+
 def sub_citations(text: str, names: frozenset, repl) -> str:
     """Apply repl to every citation, choosing the table-row pattern per line."""
     prose, table = cite_pattern(names), cite_pattern(names, table=True)
-    return "\n".join((table if line.lstrip().startswith("|") else prose).sub(repl, line)
+    return "\n".join((table if _TABLE_ROW.match(line) else prose).sub(repl, line)
                       for line in text.split("\n"))
 
 
@@ -197,8 +208,26 @@ def sub_citations(text: str, names: frozenset, repl) -> str:
 _LEFT_FRAGMENT = re.compile("(" + _FILE + r")`?\s*\(\s*[\"\u201c]")
 
 
-def leftover_fragments(text: str, keep_quotes_from: frozenset = frozenset()) -> list[str]:
-    return [m.group(0) for m in _LEFT_FRAGMENT.finditer(text) if _norm(m.group(1)) not in keep_quotes_from]
+_CELL_BAR = re.compile(r"(?<![|\\])\|(?!\|)")
+
+
+def changed_table_rows(before: str, after: str) -> list[str]:
+    """Table rows whose number of cell bars changed (second backstop)."""
+    a, b = before.split("\n"), after.split("\n")
+    if len(a) != len(b):
+        return []
+    return [y.strip()[:80] for x, y in zip(a, b)
+            if _TABLE_ROW.match(x) and len(_CELL_BAR.findall(x)) != len(_CELL_BAR.findall(y))]
+
+
+def leftover_fragments(text: str, keep_quotes_from: frozenset = frozenset(),
+                       cited: frozenset | None = None) -> list[str]:
+    """Report name ("... left after stripping. With cited, only names the
+    original text cited as file:N count, so code such as errors.New("x") in
+    prose is not reported."""
+    return [m.group(0) for m in _LEFT_FRAGMENT.finditer(text)
+            if _norm(m.group(1)) not in keep_quotes_from
+            and (cited is None or Path(m.group(1)).name in cited)]
 
 
 # Prose source documents: a quote cited from one of them is the normative
@@ -391,7 +420,11 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     if blind_doctrine:
         blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", blind_doctrine))
     blocks += sources
-    left = leftover_fragments(blind_copy + "\n" + blind_doctrine, keep_quotes)
+    shifted = changed_table_rows(catalogue, blind_copy)
+    if shifted:
+        print("PART-B PACK: table rows whose cell count changed in stripping (check them, rule 7): "
+              + "; ".join(shifted[:10]), file=sys.stderr)
+    left = leftover_fragments(blind_copy + "\n" + blind_doctrine, keep_quotes, later)
     if left:
         print("PART-B PACK: possible code fragments left after a citation (check the package, rule 7): "
               + "; ".join(left[:10]), file=sys.stderr)
