@@ -631,6 +631,14 @@ def main() -> int:
     draft_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
     draft_parser.add_argument("--max-tokens", type=int, default=12000,
                               help="Flash output budget (a 248-line source needed about 5,200; 4096 truncated it)")
+    cells_parser = commands.add_parser("draft-cells",
+                                       help="Flash drafts matrix cells for given states and events; Jev judges each")
+    cells_parser.add_argument("input", type=Path, help="UTF-8 source the cells must cite")
+    cells_parser.add_argument("task", type=Path, help="JSON file: states (name, condition), events (id, gist), notes")
+    cells_parser.add_argument("--output", type=Path, required=True,
+                              help="JSON result file; the matrix block is written next to it as .md")
+    cells_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+    cells_parser.add_argument("--max-tokens", type=int, default=16384, help="Flash output budget")
     blind_parser = commands.add_parser("blind")
     blind_parser.add_argument("analysis")
     blind_parser.add_argument("--repo", default=".")
@@ -696,6 +704,39 @@ def main() -> int:
             if failed:
                 print(json.dumps(result, ensure_ascii=False, indent=2))
                 print(f"LOCAL MODELS: Jev verification failed; draft kept in {args.output}: {failed}", file=sys.stderr)
+                return 1
+        elif args.command == "draft-cells":
+            import draft_cells  # imports this module; loaded only for this command
+            flash_key, jev_key = os.environ.get("DEEPSEEK_API_KEY"), os.environ.get("TYPESAFE_API_KEY")
+            if not flash_key or not jev_key:
+                raise ValueError("draft-cells needs DEEPSEEK_API_KEY and TYPESAFE_API_KEY")
+            try:
+                cells = draft_cells.draft_cells(budget, args.input.read_text(encoding="utf-8"), str(args.input),
+                                                args.task.read_text(encoding="utf-8"), flash_key, jev_key,
+                                                args.model, args.max_tokens)
+            except (InvalidDraft, draft_cells.local_models.InvalidDraft) as error:
+                args.output.with_suffix(".draft.txt").write_text(error.text, encoding="utf-8")
+                raise
+            except (IncompleteResponse, draft_cells.local_models.IncompleteResponse) as error:
+                saved = args.output.with_suffix(".draft.txt")
+                saved.write_text(error.result["text"], encoding="utf-8")
+                print(f"LOCAL MODELS: {error}; draft kept in {saved}", file=sys.stderr)
+                return 1
+            args.output.write_text(json.dumps(cells, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            args.output.with_suffix(".md").write_text(cells["matrix"], encoding="utf-8")
+            cell_choices: dict[str, int] = {}
+            for cell in cells["cells"]:
+                if "jev" in cell:
+                    cell_choices[cell["jev"]["choice"]] = cell_choices.get(cell["jev"]["choice"], 0) + 1
+            result = {"output": str(args.output), "matrix": str(args.output.with_suffix(".md")),
+                      "cells_total": len(cells["cells"]),
+                      "cells_with_problems": sum(bool(c["problems"]) for c in cells["cells"]),
+                      "missing": len(cells["missing"]), "jev_choices": cell_choices,
+                      "questions": len(cells["questions"]), "draft": cells["draft"],
+                      "verification": cells["verification"]}
+            if cells["verification"] and cells["verification"].get("error"):
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+                print(f"LOCAL MODELS: Jev verification failed; draft kept in {args.output}", file=sys.stderr)
                 return 1
         elif args.command == "jev-batch":
             result = jev_batch(budget, args.input.read_text(encoding="utf-8"), str(args.input),

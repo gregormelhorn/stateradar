@@ -242,6 +242,53 @@
   outcome is a note (`--strict` fails on it); only the bold or list-item form
   of an ODC field counts, and the first one wins. No committed matrix or
   sidecar is affected. Red-first selftests for each.
+- **Part B sees which catalogue text comes from the code; 02-pilot v1.20.** In
+  the second routed pilot and the agent-only run (silenceper/pool,
+  2026-11-13), Part B read the catalogue's gate, remembrance, upstream-guard
+  and lock-discipline annotations as documented intent, so its agreement on
+  those rows was not independent, and the pilot agent had to find each such
+  row by reading. `part_b_pack.py` now labels those headings, plus the event
+  annotations and the undesired-coverage table,
+  `(observed in code, not documented intent)`, and each `gate:` and
+  `upstream_guards:` list field `(observed in code)`, without adding a line.
+  The Part-B task asks for `as-is:` at the start of the behaviour cell of a
+  row that rests only on such text, and the coverage check (`blind`, or
+  `part_b_pack.py --check`) lists each row that holds the mark anywhere
+  (`PART-B INDEPENDENCE`,
+  information, not a failure). On both runs' catalogues it labels six headings
+  each, and 18 fields (agent-only run) and 12 (routed run). The `as-is:` mark
+  is Part B's own report, not a measurement: Part B can rest on labelled text
+  without marking the row, so rule 7's reading stays the check, and prose
+  outside those sections, such as an event-table cell, is still caught only
+  that way. A per-event list derived from the labels would flag every event,
+  since each one carries a gate and an upstream-guard field. `dsc_blind.py`,
+  which sends the catalogue verbatim and is not used by 02-pilot, is
+  unchanged. Red-first selftest.
+- **`draft-cells` and the routing variant `flash-writes`; 02-pilot v1.21.**
+  Both silenceper/pool cost measurements put 99.8 % of the routed cost on the
+  steering agent, so roadmap entry 11 item 2 tests whether Flash can write the
+  bulk text while the agent decides. New `local_models.py draft-cells`
+  (`tools/draft_cells.py`): the agent gives the states with their conditions
+  and the events, Flash drafts one cited cell per pair, code checks each cell
+  (vocabulary, target, citation, duplicates, missing pairs), one Jev batch
+  judges every clean cell as a claim, and a matrix block in the 02-pilot cell
+  form with a review list is written next to the JSON. Holes and cells with a
+  problem carry `→ Q-?` and missing cells `MISSING`, so the checker fails
+  until the agent decides them. A fragment with a `|` keeps its longest
+  verbatim piece without one and a note's `|` becomes `/`, since every matrix
+  tool splits rows on `|`; state names and event ids must be one word.
+  02-pilot v1.21 adds the variant, used only when the run brief names it:
+  Step-1 drafts are the extraction (routing rule 3 suspended, agent additions
+  marked), the matrix comes from `draft-cells`, as-is tests are drafted by
+  Flash from the agent's plan, and `summary.md` records step start times.
+  `draft_cells.py compare` counts, from the drafts and the run's
+  `analysis.json`, each drafted cell as unchanged, changed or dropped by Jev
+  choice, so the count does not rest on the agent's report. Rule 10
+  (finding-neutral tasks) covers the cells task. Roadmap entry 11 item 2 fixes
+  the comparator (the second routed pilot) and the four conditions under which
+  the variant holds before the run. New selftest `test_draft_cells.py` in CI,
+  including a rendered matrix through `gen_analysis_sidecar.py`. No pilot has
+  run with it yet.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 
