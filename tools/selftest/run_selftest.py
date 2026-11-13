@@ -191,6 +191,65 @@ def main() -> int:
                *dsc(bad / "domain-analysis" / "gate", "--repo", str(bad), "--model", "as-is.machine.mmd"),
                needle="fragment")
 
+        print("sidecar schema on generator output (fragment required on code citations)")
+        # The generator's raw output is validated against the pack schema
+        # directly, not only through dsc_check: a fixture that dsc_check
+        # skipped or a backfill that patched over a gap must not hide a
+        # sidecar the schema rejects.
+        validator = jsonschema.Draft202012Validator(
+            json.loads((ROOT / "formats" / "analysis.schema.json").read_text(encoding="utf-8")))
+
+        def schema_errors(doc: object) -> list[str]:
+            return sorted(f"{'/'.join(map(str, e.absolute_path))}: {e.message}"
+                          for e in validator.iter_errors(doc))
+
+        golden = ROOT / "tests" / "golden-mini"
+        for label, src_root, comp_name in (("compound", COMPOUND, "gate"),
+                                           ("golden-mini", golden, "mini")):
+            fresh = sidecar(tmp, src_root)
+            gen_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                      "--root", str(fresh)], capture_output=True, text=True)
+            out_path = fresh / "domain-analysis" / comp_name / "analysis.json"
+            if gen_run.returncode != 0 or not out_path.is_file():
+                failures.append(f"generator on {label} for the schema check:\n"
+                                f"{gen_run.stdout}{gen_run.stderr}")
+                continue
+            errs = schema_errors(json.loads(out_path.read_text(encoding="utf-8")))
+            expect(f"generator output on {label} is schema-valid", False, 1 if errs else 0,
+                   "\n".join(errs))
+
+        # Red: a code citation whose ("fragment") was left out. Before the
+        # schema required it, this sidecar passed and the fragment check
+        # silently skipped the cell.
+        nofrag = sidecar(tmp, COMPOUND)
+        nofrag_matrix = nofrag / "domain-analysis" / "gate" / "disposition-matrix.md"
+        nofrag_matrix.write_text(nofrag_matrix.read_text().replace(
+            'gate.ts:28 ("throw new ClosedError")', "gate.ts:28"))
+        subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                        "--root", str(nofrag)], capture_output=True, text=True)
+        nofrag_sc = json.loads((nofrag / "domain-analysis" / "gate" / "analysis.json").read_text())
+        errs = schema_errors(nofrag_sc)
+        expect("generated code citation without a fragment", True, 1 if errs else 0,
+               "\n".join(errs) or "no schema errors",
+               needle="'fragment' is a required property")
+        expect("dsc_check on a code citation without a fragment", True,
+               *dsc(nofrag / "domain-analysis" / "gate", "--repo", str(nofrag)),
+               needle="'fragment' is a required property")
+
+        # The rule covers code and test citations only: a requirements
+        # document is cited without a fragment, and an empty fragment is
+        # no fragment.
+        base_doc = json.loads((FLAT / "analysis.json").read_text(encoding="utf-8"))
+        cell = next(c for c in base_doc["cells"] if c.get("citation"))
+        for label, citation, want_fail in (
+                ("requirements citation without a fragment",
+                 {"file": "docs/requirements.md", "line": 3}, False),
+                ("code citation with an empty fragment",
+                 {"file": "src/mini.py", "line": 3, "fragment": ""}, True)):
+            cell["citation"] = citation
+            errs = schema_errors(base_doc)
+            expect(label, want_fail, 1 if errs else 0, "\n".join(errs) or "no schema errors")
+
         print("silent omission (v1.20: absence must be asserted)")
         d = sidecar(tmp, FLAT)
         raw = json.loads((d / "analysis.json").read_text())
@@ -419,10 +478,15 @@ def main() -> int:
             print("  ok  weak suite survives an ignore-to-handle mutant on a UV cell "
                   "(fails as required)")
 
+        # Golden-mini's (Open, M1) cell, citation with its ("fragment").
+        OPEN_M1_CITATION = '`mini.py:22` ("return \\"ignored\\"")'
+        OPEN_M1_CELL = "| **Open** | ignore (documented) " + OPEN_M1_CITATION + " |"
+        if OPEN_M1_CELL not in (gm / "disposition-matrix.md").read_text():
+            failures.append(f"golden-mini fixture changed: {OPEN_M1_CELL!r} not in the matrix")
         hole = sidecar(tmp, gm)
         hole_mx = hole / "disposition-matrix.md"
         hole_mx.write_text(hole_mx.read_text().replace(
-            "| **Open** | ignore (documented) `mini.py:22` |",
+            OPEN_M1_CELL,
             "| **Open** | ignore (accidental) → Q-01 |"))
         (hole / "matrix-mutation.json").write_text(json.dumps({
             "formatVersion": 1,
@@ -475,7 +539,9 @@ def main() -> int:
                                 f"{base}/{category}={event!r}, got {actual!r}")
             else:
                 print(f"  ok  UV coverage binding {base}/{category}={event} (passes)")
-        if "new='handle `mini.py:28`'" not in out_gm:
+        # The kept citation includes its ("fragment"); the regex once stopped at
+        # the backtick and dropped the whole citation from fragment-cited cells.
+        if "new='handle `mini.py:28` (\"return \\\\\"ignored\\\\\"\")'" not in out_gm:
             failures.append("ignore-to-handle must drop the source annotation, "
                             "not carry it into the replacement\n" + out_gm)
         else:
@@ -488,8 +554,8 @@ def main() -> int:
         annotated = sidecar(tmp, gm)
         ann_mx = annotated / "disposition-matrix.md"
         ann_mx.write_text(ann_mx.read_text().replace(
-            "| **Open** | ignore (documented) `mini.py:22` |",
-            "| **Open** | ignore (documented) DR-005; stays shut `mini.py:22` |"))
+            OPEN_M1_CELL,
+            "| **Open** | ignore (documented) DR-005; stays shut " + OPEN_M1_CITATION + " |"))
         (annotated / "matrix-mutation.json").write_text(json.dumps({
             "formatVersion": 1,
             "testCommand": ["python3", "tests/test_cell_suite.py", "{analysis_dir}"],
@@ -497,9 +563,10 @@ def main() -> int:
             "timeoutSeconds": 5,
         }))
         rc_ann, out_ann = mutation(annotated)
-        if "new='handle `mini.py:22`'" not in out_ann:
+        want_ann = "new='handle `mini.py:22` (\"return \\\\\"ignored\\\\\"\")'"
+        if want_ann not in out_ann:
             failures.append("ignore-to-handle must keep only the citation from an "
-                            "annotated cell; expected new='handle `mini.py:22`'\n" + out_ann)
+                            f"annotated cell; expected {want_ann}\n" + out_ann)
         else:
             print("  ok  ignore-to-handle strips a DR annotation, keeps the citation (passes)")
 

@@ -189,6 +189,11 @@ def handle_to_ignore(cell: Cell) -> str | None:
     return None
 
 
+# A trailing `file:line`, optionally followed by its ("fragment") - the form
+# 02-pilot rule 3 requires on code citations and the sidecar schema enforces.
+_TRAILING_CITATION = re.compile(r'`[^`]+`(?:\s*\(\s*"(?:[^"\\]|\\.)*"\s*\))?\s*$')
+
+
 def ignore_or_reject_to_handle(cell: Cell) -> str | None:
     """Reverse family: a decided no-action cell claims it acts.
 
@@ -197,15 +202,15 @@ def ignore_or_reject_to_handle(cell: Cell) -> str | None:
 
     Only the trailing citation survives. Everything else the source cell carried
     is dropped, because an annotation that documented the old disposition is a
-    lie under the new one: 'ignore (documented) DR-005; reason `f:1`' must become
-    'handle `f:1`', never 'handle DR-005; reason `f:1`', which would read as if
+    lie under the new one: 'ignore (documented) DR-005; reason `f:1` ("x")' must
+    become 'handle `f:1` ("x")', never 'handle DR-005; reason `f:1`', which would read as if
     DR-005 authorised handling. This is the wart handle_to_ignore still has.
     """
     for token in ("ignore (documented)", "reject"):
         if cell.raw == token:
             return "handle"
         if cell.raw.startswith(token + " "):
-            citation = re.search(r"`[^`]+`\s*$", cell.raw)
+            citation = _TRAILING_CITATION.search(cell.raw)
             return f"handle {citation.group(0).strip()}" if citation else "handle"
     return None
 

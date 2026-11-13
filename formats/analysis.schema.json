@@ -112,8 +112,22 @@
         "type": "integer"
        },
        "fragment": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
        }
+      },
+      "$comment": "02-pilot rule 3: an observed-in-code or observed-in-tests citation carries a verbatim fragment, which dsc_check verifies near the cited line. A citation of a prose document (an explicit-requirement) needs none.",
+      "if": {
+       "properties": {
+        "file": {
+         "pattern": "\\.(md|markdown|txt|rst|adoc)$"
+        }
+       }
+      },
+      "else": {
+       "required": [
+        "fragment"
+       ]
       }
      }
     }
