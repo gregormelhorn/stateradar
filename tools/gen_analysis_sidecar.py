@@ -390,6 +390,16 @@ def _load_overlay(analysis_root: Path) -> Overlay:
     }
 
 
+NOTES: list[str] = []
+
+
+def _note(message: str) -> None:
+    """A finding that does not stop generation; --strict turns it into a
+    failure of the run."""
+    NOTES.append(message)
+    print(f"note {message}", file=sys.stderr)
+
+
 def generate(component: str, analysis_root: Path, src_index: dict[str, str], overlay: Overlay) -> Sidecar | None:
     """Build the sidecar for one component (None when skipped)."""
     adir = analysis_root / component
@@ -415,14 +425,14 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         elif s.startswith("| **") and blocks:
             blocks[-1][1].append(s)
 
+    for block_events, block_rows in blocks:
+        if not block_rows:
+            _note(f"{component}: table headed "
+                  f"{', '.join(e['id'] for e in block_events) or '(no events)'} has no "
+                  "'| **' state rows; it declares no events")
     # A header without '| **' state rows is a prose table whose first
     # column happens to be headed "State"; it declares no events
     # (agent-only run 2026-11-13: phantom event "Condition").
-    for block_events, block_rows in blocks:
-        if not block_rows:
-            print(f"note {component}: table headed "
-                  f"{', '.join(e['id'] for e in block_events) or '(no events)'} has no "
-                  "'| **' state rows; it declares no events", file=sys.stderr)
     blocks = [b for b in blocks if b[1]]
 
     events: list[Event] = []
@@ -472,8 +482,8 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
             rest = re.sub(r"(?<![\w.-])" + re.escape(name) + r"(?![\w.-])", " ", rest)
         missing = [w for w in re.split(r"[\s,;]+", rest) if w]
         if missing:
-            print(f"note {component}: declared states without a '| **' row: "
-                  f"{', '.join(missing)}", file=sys.stderr)
+            _note(f"{component}: declared states without a '| **' row: "
+                  f"{', '.join(missing)}")
 
     cells: list[Cell] = []
     unresolved: set[str] = set()
@@ -647,6 +657,11 @@ def main() -> int:
         default="domain-analysis",
         help="analysis root relative to --root (default: domain-analysis)",
     )
+    parser.add_argument(
+        "--strict", action="store_true",
+        help="exit 1 when the run printed a note (a dropped table, a declared "
+             "state without a row)",
+    )
     args = parser.parse_args()
 
     # Positional path form: accept the analysis directory itself, as dsc_check
@@ -696,6 +711,9 @@ def main() -> int:
             f"{len(data['events'])} events = {len(data['cells'])} cells, "
             f"{len(data['questions'])} questions, DRs {data['behaviouralDrs']}"
         )
+    if args.strict and NOTES:
+        print(f"error: --strict and {len(NOTES)} note(s) above")
+        return 1
     return 0
 
 

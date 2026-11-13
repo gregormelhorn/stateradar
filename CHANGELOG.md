@@ -211,20 +211,20 @@
   steering agent decides" the next step. `INDEX.md` lists the run's tool
   problems; the sidecar generator's prose-table and doctrine-table parsing
   and the Part-B id-removal debris were newly recorded (fixed below).
-- **Tool fixes from the agent-only run.** `gen_analysis_sidecar.py`: a
-  prose table whose first header cell is "State" no longer opens a matrix
-  block (it added a phantom event without an error). Behaviour change: a
-  header needs `| **` state rows to declare events; a dropped header and
-  any declared state without a `| **` row (terminal states exempt) are
-  named on stderr, so a matrix whose rows lost their bold markers is not
-  dropped silently. The doctrine-mapping table ends at the next heading of
-  any level, so `| DOC-` rows of a `###` sub-section are no longer read as
-  mappings. `part_b_pack.py`: removing an id before a comma
-  takes the space before it ("guard group, branch discard"), an article
+- **Tool fixes from the agent-only run.** `gen_analysis_sidecar.py`: a prose
+  table whose first header cell is "State" no longer opens a matrix block (it
+  added a phantom event without an error). Behaviour change: a header needs
+  `| **` state rows to declare events; a dropped header and any declared state
+  without a `| **` row (terminal states exempt) are named on stderr, so a
+  matrix whose rows lost their bold markers is not dropped silently;
+  `--strict` makes such a note fail the run. The doctrine-mapping table ends
+  at the next heading of any level, so `| DOC-` rows of a `###` sub-section
+  are no longer read as mappings. `part_b_pack.py`: removing an id before a
+  comma takes the space before it ("guard group, branch discard"), an article
   before a clause-final id goes ("itself."), and a file name repeated in a
   comma list once its line numbers are gone is kept once ("(channel.go)");
-  "a.go and a.go" stays, since `and` may join two clauses. Red-first tests
-  for each.
+  "a.go and a.go" stays, since `and` may join two clauses. Red-first tests for
+  each.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

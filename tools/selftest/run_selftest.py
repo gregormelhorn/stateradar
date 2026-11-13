@@ -241,6 +241,16 @@ def main() -> int:
             failures.append(f"prose table reported missing states: {pt_run.stderr}")
         else:
             print("  ok  unbolded matrix rows are named; a prose table is not")
+        ub_strict = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                    "--root", str(ub), "--strict"], capture_output=True, text=True)
+        ok_strict = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                    "--root", str(sidecar(tmp, COMPOUND)), "--strict"],
+                                   capture_output=True, text=True)
+        if ub_strict.returncode != 1 or ok_strict.returncode != 0:
+            failures.append(f"--strict exit codes {ub_strict.returncode}, {ok_strict.returncode} "
+                            f"(want 1, 0):{ub_strict.stdout}{ok_strict.stdout}{ok_strict.stderr}")
+        else:
+            print("  ok  --strict fails on a note and passes a clean matrix")
         # Same run: '| DOC-' rows of a '###' sub-section after the doctrine
         # table were read as doctrine mappings.
         dm = tmp / "doc-map.md"
