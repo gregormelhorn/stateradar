@@ -12,6 +12,11 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -r tools/requirements-dev.txt
+      # mypy over tools/ and tools/selftest/ (config: mypy.ini). Its first
+      # run on main found 34 errors, one a real crash: both mutation
+      # runners died on bytes + str in their timeout path.
+      - name: type check
+        run: mypy
       - run: python tools/check_pack_consistency.py
       # The rules-registry selftest proves gen_rules --check can go red:
       # a checker rule without a selftest, an unknown fault id, and a

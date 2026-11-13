@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 
-def load_graph(analysis_dir: Path) -> tuple[set[str], str, set[str], dict[str, set[str]], set[str], set[str]]:
+def load_graph(analysis_dir: Path) -> tuple[set[str], str | None, set[str], dict[str, set[str]], set[str], set[str]]:
     """Load states, events, transitions, and terminal states from analysis.json.
 
     Returns (states, initial, events, adjacency, terminals, events_with_transitions).

@@ -326,8 +326,8 @@ def main() -> int:
 
     # Fragment citations (file reads cached: the profiler, not the compiler)
     @lru_cache(maxsize=None)
-    def _lines(path: str) -> tuple[str, ...] | None:
-        f = repo / path
+    def _lines(root: Path, path: str) -> tuple[str, ...] | None:
+        f = root / path
         if not f.exists():
             return None
         return tuple(f.read_text(encoding="utf-8", errors="replace").splitlines())
@@ -337,7 +337,7 @@ def main() -> int:
             cit = c.get("citation")
             if not cit:
                 continue
-            cached = _lines(cit["file"])
+            cached = _lines(repo, cit["file"])
             if cached is None:
                 E(f"citation: {cit['file']} does not exist"); continue
             lines = list(cached)
@@ -358,24 +358,24 @@ def main() -> int:
     # wrongly-cased watchPaths runs the diff UNFILTERED and false-stales
     # everything — fail loudly instead (dobby session, 2026-08-05).
     mf = adir / "manifest.json"
-    m: dict = {}
+    manifest: dict = {}
     if mf.exists():
-        m = json.loads(mf.read_text(encoding="utf-8"))
-        for key in ("component", "watchPaths", "analyzedSha"):
-            if key not in m:
-                E(f"manifest: required key {key!r} missing")
-        if "watch_paths" in m and "watchPaths" not in m:
+        manifest = json.loads(mf.read_text(encoding="utf-8"))
+        for required in ("component", "watchPaths", "analyzedSha"):
+            if required not in manifest:
+                E(f"manifest: required key {required!r} missing")
+        if "watch_paths" in manifest and "watchPaths" not in manifest:
             E("manifest: key is 'watch_paths' (snake_case) — the pack key is "
               "camelCase 'watchPaths'; rename it (empty lookups skip the path filter)")
-        if "watchPaths" in m and not m["watchPaths"]:
+        if "watchPaths" in manifest and not manifest["watchPaths"]:
             E("manifest: watchPaths is empty — the staleness diff would run unfiltered")
-    if repo and mf.exists() and m.get("watchPaths") and "watch_paths" not in m:
-        sha = m.get("analyzedSha", "WORKTREE")
+    if repo and mf.exists() and manifest.get("watchPaths") and "watch_paths" not in manifest:
+        sha = manifest.get("analyzedSha", "WORKTREE")
         if sha != "WORKTREE":
             try:
                 out = subprocess.run(
                     ["git", "-C", str(repo), "diff", "--name-only", f"{sha}..HEAD", "--"]
-                    + m.get("watchPaths", []),
+                    + manifest.get("watchPaths", []),
                     capture_output=True, text=True, check=True).stdout.strip()
                 if out:
                     E("stale: watched paths changed since analyzedSha:\n  " + out.replace("\n", "\n  "))

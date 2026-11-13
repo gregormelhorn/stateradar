@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from local_budget import Budget
 
 spec = importlib.util.spec_from_file_location("local_models", Path(__file__).resolve().parents[1] / "local_models.py")
+assert spec is not None and spec.loader is not None
 local_models = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(local_models)
 

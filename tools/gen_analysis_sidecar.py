@@ -26,6 +26,8 @@ Per-project overlay (optional): <analysis-root>/sidecar-overlay.yaml
     - {component: stream-tracker, state: none, event: S2,
        file: src/escape_monitor/server/ingest/streams.py, line: 186,
        fragment: StaleEpochError}
+  src_roots: [lib, cmd]          # directories searched for cited files
+  src_exts: [".go", ".proto"]    # with the leading dot; case-sensitive
 
 Usage: python3 tools/gen_analysis_sidecar.py [--root REPO] [component ...]
 """
@@ -38,6 +40,25 @@ import os
 import re
 import sys
 from pathlib import Path
+from typing import Any, TypedDict, cast
+
+from sidecar_types import (Cell, CellBody, Citation, Completeness, Disposition, DocLine, Event,
+                           Question, Sidecar)
+
+
+class Overlay(TypedDict):
+    """sidecar-overlay.yaml, read as untrusted YAML (values are not validated)."""
+    skip: dict[str, str]
+    question_aliases: dict[str, dict[str, str]]
+    extra_citations: list[dict[str, Any]]
+    src_roots: list[str]
+    src_exts: list[str]
+
+
+class EventAnnotation(TypedDict):
+    gate: str | None
+    upstream_guards: list[str]
+    coverage: dict[str, str]
 
 
 SRC_ROOTS = ["src", "lib", "app", "pkg", "internal"]
@@ -47,7 +68,7 @@ SKIP_DIRS = {".git", "node_modules", "dist", "build", "target", "vendor",
              "__pycache__", ".venv", "venv"}
 
 
-def _src_index(root: Path, overlay: dict) -> dict[str, str]:
+def _src_index(root: Path, overlay: Overlay) -> dict[str, str]:
     """Basename → repo-relative path for every source file (best effort).
 
     The pack claims any implementation language works, so the index must
@@ -90,7 +111,7 @@ def _strip_markdown(text: str) -> str:
     return text.strip()
 
 
-def _parse_event_annotations(cat_path: Path) -> dict[str, dict]:
+def _parse_event_annotations(cat_path: Path) -> dict[str, EventAnnotation]:
     """Parse the '## Event annotations' section of event-catalogue.md.
 
     Per-event block::
@@ -116,8 +137,8 @@ def _parse_event_annotations(cat_path: Path) -> dict[str, dict]:
     nxt = re.search(r"^## ", body, re.M)
     if nxt:
         body = body[: nxt.start()]
-    out: dict[str, dict] = {}
-    cur: dict | None = None
+    out: dict[str, EventAnnotation] = {}
+    cur: EventAnnotation | None = None
     in_cov = False
     for line in body.splitlines():
         h = re.match(r"^### (\S+)", line)
@@ -152,9 +173,9 @@ def _parse_event_annotations(cat_path: Path) -> dict[str, dict]:
     return out
 
 
-def _parse_events(header: str) -> list[dict]:
+def _parse_events(header: str) -> list[Event]:
     """Header row cells after the first: 'P1 `put`' / 'UV-P1 `duplicate`'."""
-    events = []
+    events: list[Event] = []
     for cell in header.strip().strip("|").split("|")[1:]:
         token = cell.strip().split()[0] if cell.strip() else ""
         if not token:
@@ -163,60 +184,123 @@ def _parse_events(header: str) -> list[dict]:
     return events
 
 
+PROSE_EXTS = (".md", ".markdown", ".txt", ".rst", ".adoc")
+# Config and schema files a cell may cite as observed behaviour. They are not
+# indexed unless a project adds them to src_exts, so their citations are
+# dropped, and the generator says so (see generate()).
+CONFIG_EXTS = (".yaml", ".yml", ".json", ".toml", ".ini", ".cfg", ".conf", ".xml", ".sql",
+               ".sh", ".tf", ".hcl")
+
+
+_CIT_TOKEN = r"[\w./-]+\.[A-Za-z]{1,4}:\d+"
+_FRAG_OPEN = re.compile(r'(?:-\d+)?`?\s*\(\s*["\u201c]')
+_FRAG_END_AT_BOUNDARY = re.compile(r'["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$))')
+_FRAG_END_ANY = re.compile(r'["\u201d]\s*\)')
+_NEXT_FRAGMENT_CITATION = re.compile(_CIT_TOKEN + r'`?\s*\(\s*["\u201c]')
+
+
+def _outside_fragments(raw: str) -> str:
+    """The cell text with each citation's quoted fragment blanked out.
+
+    A fragment opens with ("  or (\u201c right after a file:line and may hold
+    unescaped quotes, so it ends where the fragment extractor in _parse_cell
+    ends it: at the first quote-paren followed by a boundary (")", ",", ";",
+    "|", an em dash or the end), searched only up to the next fragment-cited
+    file:line; failing that, at the first quote-paren before it.
+    """
+    spans: list[tuple[int, int]] = []
+    pos = 0
+    while (tok := re.compile(_CIT_TOKEN).search(raw, pos)) is not None:
+        opener = _FRAG_OPEN.match(raw, tok.end())
+        if opener is None:
+            pos = tok.end()
+            continue
+        nxt = _NEXT_FRAGMENT_CITATION.search(raw, opener.end())
+        limit = nxt.start() if nxt else len(raw)
+        end = (_FRAG_END_AT_BOUNDARY.search(raw, opener.end(), limit)
+               or _FRAG_END_ANY.search(raw, opener.end(), limit))
+        stop = end.end() if end else limit
+        spans.append((opener.start(), stop))
+        pos = stop
+    for start, stop in reversed(spans):
+        raw = raw[:start] + " " + raw[stop:]
+    return raw
+
+
 def _parse_cell(
     text: str,
     family: str | None,
     states: list[str],
     src_index: dict[str, str],
-) -> dict:
-    """One matrix cell → sidecar cell."""
+    unresolved: set[str] | None = None,
+) -> CellBody:
+    """One matrix cell → sidecar cell, without its state and event.
+
+    A cited file name that does not resolve through src_index is added to
+    `unresolved` (the caller reports it): the citation is dropped.
+    """
     raw = _strip_markdown(text.strip())
-    cell: dict = {}
     q = re.search(r"Q-[\w-]+", raw)
     dr = re.search(r"DR-\d+", raw)
+    disposition: Disposition
+    target: str | None = None
+    hole_q = q.group(0) if q else None  # kept only on hole cells
 
     if "UNSPECIFIED" in raw:
-        cell["disposition"] = "UNSPECIFIED"
-        if q:
-            cell["q"] = q.group(0)
+        disposition = "UNSPECIFIED"
     elif raw.startswith("transition"):
-        cell["disposition"] = "transition"
+        disposition = "transition"
+        hole_q = None
         m = re.search(r"→\s*`?([A-Za-z_][\w-]*)", raw)
         if m:
             target = m.group(1)
-            if target in states:
-                cell["target"] = target
-            elif family and f"{family} {target}" in states:
-                cell["target"] = f"{family} {target}"
-            else:
-                cell["target"] = target  # the checker flags invalid targets
+            if target not in states and family and f"{family} {target}" in states:
+                target = f"{family} {target}"
+            # an unknown target is kept: the checker flags it
     elif raw.startswith("handle"):
-        cell["disposition"] = "handle"
+        disposition, hole_q = "handle", None
     elif raw.startswith("reject") or raw.startswith("`reject"):
-        cell["disposition"] = "reject"
+        disposition, hole_q = "reject", None
     elif raw.startswith("defer"):
-        cell["disposition"] = "defer (queued)"
+        disposition, hole_q = "defer (queued)", None
     elif raw.startswith("ignore"):
-        cell["disposition"] = (
-            "ignore (accidental)" if "accidental" in raw else "ignore (documented)"
-        )
-        if "accidental" in raw and q:
-            cell["q"] = q.group(0)
+        if "accidental" in raw:
+            disposition = "ignore (accidental)"
+        else:
+            disposition, hole_q = "ignore (documented)", None
     else:
-        cell["disposition"] = "UNSPECIFIED"
-        if q:
-            cell["q"] = q.group(0)
+        disposition = "UNSPECIFIED"
 
+    # Key order (disposition, target or q, dr, citation) is part of the
+    # golden sidecars, which are compared byte for byte.
+    cell: CellBody = {"disposition": disposition}
+    if target is not None:
+        cell["target"] = target
+    if hole_q is not None:
+        cell["q"] = hole_q
     if dr:
         cell["dr"] = dr.group(0)
     # file:line, optionally followed by ("fragment") (02-pilot rule 3). Keep
     # the fragment: dsc_check verifies it near the cited line. Read it from
     # the unstripped text, because inline-code stripping can alter it.
-    cit = re.search(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw)
+    # The first token that resolves is the citation, so a host:port or a
+    # version string earlier in the cell does not hide it. Every candidate
+    # that does not resolve goes to `unresolved`, also next to a resolved
+    # one (a cell records one citation, so a second one is dropped); the
+    # caller drops the candidates that are not file names.
+    # Candidates come from the cell without its quoted fragments: a fragment
+    # may quote "mini.py:19" or "app.json:12" (a log line, a stack trace),
+    # which is neither the citation nor a dropped one.
+    outside = _outside_fragments(raw)
+    found = list(re.finditer(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", outside))
+    if unresolved is not None:
+        unresolved.update(m.group(1) for m in found if not src_index.get(Path(m.group(1)).name))
+    cit = next((m for m in found if src_index.get(Path(m.group(1)).name)), None)
     if cit:
         path = src_index.get(Path(cit.group(1)).name)
         if path:
-            cell["citation"] = {"file": path, "line": int(cit.group(2))}
+            citation: Citation = {"file": path, "line": int(cit.group(2))}
+            cell["citation"] = citation
             # The fragment may hold unescaped or typographic quotes and
             # "host:5432" tokens: it ends at a quote-paren followed by a
             # boundary, or at the last one before a later citation on the line.
@@ -233,11 +317,11 @@ def _parse_cell(
             frag = (re.search(head + r"(.+?)" + end, text, re.M)
                     or re.search(head + r'(.+?)["\u201d]\s*\)', text))
             if frag:
-                cell["citation"]["fragment"] = frag.group(1).replace('\\"', '"')
+                citation["fragment"] = frag.group(1).replace('\\"', '"')
     return cell
 
 
-def _parse_doc_map(path: Path) -> list[dict]:
+def _parse_doc_map(path: Path) -> list[DocLine]:
     """PA-22 doctrine mapping: parse the machine-readable table under
     '## Doctrine mapping' in invariants-and-lints.md into sidecar
     docLines. Row format: | DOC-n | cell/invariant/constraint/rejected
@@ -248,7 +332,7 @@ def _parse_doc_map(path: Path) -> list[dict]:
     if "## Doctrine mapping" not in text:
         return []
     block = text.split("## Doctrine mapping")[1].split("\n## ")[0]
-    rows = []
+    rows: list[DocLine] = []
     for line in block.split("\n"):
         s = line.strip()
         if not s.startswith("| DOC-"):
@@ -260,12 +344,12 @@ def _parse_doc_map(path: Path) -> list[dict]:
     return rows
 
 
-def _parse_questions(path: Path) -> list[dict]:
+def _parse_questions(path: Path) -> list[Question]:
     """open-questions.md → [{id, status}] pairs (DECIDED → RESOLVED)."""
     if not path.is_file():
         return []
-    questions = []
-    current: dict | None = None
+    questions: list[Question] = []
+    current: Question | None = None
     for line in path.read_text().split("\n"):
         # 'Q-01', '## Q-01: title' and '**Q-01**' all open a question.
         m = re.match(r"^(?:#{1,6}\s+|\*\*)?(Q-(?:[A-Z]+-)*\d[\w-]*?)(?=[\s:*.,)\u2014]|$)", line.strip())
@@ -281,9 +365,9 @@ def _parse_questions(path: Path) -> list[dict]:
     return questions
 
 
-def _load_overlay(analysis_root: Path) -> dict:
+def _load_overlay(analysis_root: Path) -> Overlay:
     """sidecar-overlay.yaml — skip list, question aliases, citations."""
-    empty = {"skip": {}, "question_aliases": {}, "extra_citations": [],
+    empty: Overlay = {"skip": {}, "question_aliases": {}, "extra_citations": [],
              "src_roots": [], "src_exts": []}
     path = analysis_root / "sidecar-overlay.yaml"
     if not path.is_file():
@@ -304,7 +388,7 @@ def _load_overlay(analysis_root: Path) -> dict:
     }
 
 
-def generate(component: str, analysis_root: Path, src_index: dict[str, str], overlay: dict) -> dict | None:
+def generate(component: str, analysis_root: Path, src_index: dict[str, str], overlay: Overlay) -> Sidecar | None:
     """Build the sidecar for one component (None when skipped)."""
     adir = analysis_root / component
     matrix_path = adir / "disposition-matrix.md"
@@ -316,7 +400,7 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
 
     # Tables: a header line (first cell contains "state", no ** or ---)
     # opens a block; "| **" rows belong to the current block.
-    blocks: list[tuple[list[dict], list[str]]] = []
+    blocks: list[tuple[list[Event], list[str]]] = []
     for ln in text.split("\n"):
         s = ln.strip()
         if (
@@ -329,7 +413,7 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         elif s.startswith("| **") and blocks:
             blocks[-1][1].append(s)
 
-    events: list[dict] = []
+    events: list[Event] = []
     seen_events: set[str] = set()
     for block_events, _ in blocks:
         for event in block_events:
@@ -340,7 +424,7 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
     # Two passes: collect every state first (transition targets resolve
     # against the full list), then parse the cells.
     states: list[str] = []
-    row_index: list[tuple[list[dict], str, str, str | None]] = []
+    row_index: list[tuple[list[Event], str, str, str | None]] = []
     for block_events, block_rows in blocks:
         for row in block_rows:
             label = row.strip().strip("|").split("|")[0].strip()
@@ -356,14 +440,37 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
                 states.append(state)
             row_index.append((block_events, row, state, fam if leaf else None))
 
-    cells: list[dict] = []
+    cells: list[Cell] = []
+    unresolved: set[str] = set()
     for block_events, row, state, family in row_index:
         parts = row.strip().strip("|").split("|")[1:]
         for event, cell_text in zip(block_events, parts, strict=True):
-            cell = _parse_cell(cell_text, family, states, src_index)
-            cell["state"] = state
-            cell["event"] = event["id"]
-            cells.append(cell)
+            body = _parse_cell(cell_text, family, states, src_index, unresolved)
+            # Key order as before (parsed keys, then state and event): the
+            # golden sidecars are compared byte for byte.
+            cells.append({**body, "state": state, "event": event["id"]})
+
+    # Loud, not silent: a dropped citation drops its fragment check too (a test
+    # file outside the source roots, say). One line per component and file.
+    # Only tokens with a known file extension count; anything else in a cell
+    # that looks like name.ext:N (host:port, versions) is not a citation and
+    # stays quiet. Source extensions are matched as _src_index matches them,
+    # case-sensitively, so the reason names the real cause.
+    src_exts = tuple(overlay["src_exts"] or SRC_EXTS)
+    src_exts_lower = {ext.lower() for ext in src_exts}
+    for name in sorted(unresolved):
+        ext = Path(name).suffix.lower()
+        if name.endswith(src_exts):
+            reason = "the file is not under the source roots (sidecar-overlay.yaml: src_roots)"
+        elif ext in PROSE_EXTS:
+            reason = ("matrix citations resolve to source files only; cite a prose document "
+                      "through sidecar-overlay.yaml extra_citations")
+        elif ext in CONFIG_EXTS or ext in src_exts_lower:
+            reason = ("its extension is not a source extension (sidecar-overlay.yaml: src_exts, "
+                      "matched case-sensitively)")
+        else:
+            continue
+        print(f"warning: {component}: citations of {name} dropped: {reason}", file=sys.stderr)
 
     # PA-18 terminal states: <!-- terminal: A, B, C --> auto-generates
     # ignore (documented) cells for every event, eliminating repetitive
@@ -377,14 +484,13 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
                 states.append(ts)
         # Add cells for terminal states that don't already have rows
         existing = {(c["state"], c["event"]) for c in cells}
-        default_cit = {"citation": {"file": "disposition-matrix.md",
-                        "line": 0, "fragment": "terminal state declaration"}}
         for ts in terminal_states:
             for ev in events:
                 if (ts, ev["id"]) not in existing:
                     cells.append({"state": ts, "event": ev["id"],
                                   "disposition": "ignore (documented)",
-                                  **default_cit})
+                                  "citation": {"file": "disposition-matrix.md", "line": 0,
+                                               "fragment": "terminal state declaration"}})
 
     # Overlay citations for cells whose matrix text carries neither.
     for cell in cells:
@@ -399,9 +505,11 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
                     and extra.get("state") == cell["state"]
                     and extra.get("event") == cell["event"]
                 ):
-                    cell["citation"] = {
+                    # Overlay YAML is not validated here: a citation missing
+                    # its file or line is caught by the schema in dsc_check.
+                    cell["citation"] = cast(Citation, {
                         k: v for k, v in extra.items() if k in ("file", "line", "fragment")
-                    }
+                    })
 
     doc_lines = _parse_doc_map(adir / "invariants-and-lints.md")
 
@@ -411,7 +519,7 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         qid = cell.get("q")
         if qid and qid not in known:
             alias = overlay["question_aliases"].get(qid) or {}
-            entry = {"id": qid, "status": alias.get("status", "OPEN")}
+            entry: Question = {"id": qid, "status": alias.get("status", "OPEN")}
             if alias.get("canonical"):
                 entry["note"] = f"consolidated under {alias['canonical']}"
             questions.append(entry)
@@ -430,15 +538,16 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         ann = annotations.get(ev["id"])
         if not ann:
             continue
-        if ann.get("gate") is not None:
-            ev["gate"] = ann["gate"]
+        gate = ann["gate"]
+        if gate is not None:
+            ev["gate"] = gate
         if ann.get("upstream_guards"):
             ev["upstream_guards"] = ann["upstream_guards"]
     catalogue_coverage = {
         eid: ann["coverage"] for eid, ann in annotations.items()
         if ann.get("coverage")}
 
-    data = {
+    data: Sidecar = {
         "formatVersion": "1.0",
         "component": component,
         "packVersion": str(manifest.get("pack_version", "")),
@@ -461,14 +570,15 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
     absent = ("the sidecar generator derives cells from disposition-matrix.md "
               "only; this section is not in the matrix. Merge it from {src} "
               "before the component claims L4.")
-    data["completeness"] = {
+    completeness: Completeness = {
         "pairs": {"count": 0, "reason": absent.format(src="adversarial-traces.md")},
         "guardGroups": {"count": 0, "reason": absent.format(src="guard-results.txt")},
         "coverage": {"count": 0, "reason": absent.format(src="event-catalogue.md")},
     }
+    data["completeness"] = completeness
     if catalogue_coverage:
         data["coverage"] = catalogue_coverage
-        data["completeness"].pop("coverage", None)
+        completeness.pop("coverage", None)
 
     # A hand-merged sidecar keeps its real sections: never regress one to
     # an absence assertion just because this run could not derive it.
@@ -478,11 +588,17 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
             prior = json.loads(out.read_text())
         except json.JSONDecodeError:
             prior = {}
-        for section in ("pairs", "guardGroups", "coverage"):
-            if prior.get(section) and not data.get(section):
-                data[section] = prior[section]
-                data["completeness"].pop(section, None)
-        if not data["completeness"]:
+        # Spelled out per section: TypedDict keys must be literals.
+        if prior.get("pairs") and not data.get("pairs"):
+            data["pairs"] = prior["pairs"]
+            completeness.pop("pairs", None)
+        if prior.get("guardGroups") and not data.get("guardGroups"):
+            data["guardGroups"] = prior["guardGroups"]
+            completeness.pop("guardGroups", None)
+        if prior.get("coverage") and not data.get("coverage"):
+            data["coverage"] = prior["coverage"]
+            completeness.pop("coverage", None)
+        if not completeness:
             data.pop("completeness")
     return data
 

@@ -42,7 +42,7 @@ import json
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TypedDict
 
 
 # ---------------------------------------------------------------------------
@@ -147,7 +147,7 @@ def _align_events(all_event_lists: list[list[dict]]) -> tuple[
 
     aligned_ids: list[str] = []
     for cid in canonical_ids:
-        row = [None] * n_runs
+        row: list[Optional[str]] = [None] * n_runs
         for run_idx, events in enumerate(all_event_lists):
             for e in events:
                 if e["id"] == cid:
@@ -229,6 +229,19 @@ def _divergence_class(fingerprints: list[Optional[str]]) -> str:
 # Merged output
 # ---------------------------------------------------------------------------
 
+class ConvergenceStats(TypedDict):
+    """Counters of _merge_cells; convergence_rate is a display string."""
+    total_aligned_cells: int
+    convergent: int
+    disposition_divergent: int
+    target_divergent: int
+    hole_noise: int
+    new_questions: int
+    convergence_rate: str
+    structural_findings: int
+    structural_details: list[str]
+
+
 def _merge_cells(
     aligned_states: dict[str, list[Optional[str]]],
     aligned_events: list[str],
@@ -236,7 +249,7 @@ def _merge_cells(
     cell_indices: list[dict[tuple[str, str], dict]],
     runs_metadata: list[dict],
     structural_findings: list[str],
-) -> tuple[list[dict], list[dict], dict]:
+) -> tuple[list[dict], list[dict], ConvergenceStats]:
     """Merge cells across runs and classify convergence.
 
     Only fully aligned (state, event) pairs contribute to the cell
@@ -249,7 +262,7 @@ def _merge_cells(
     questions: list[dict] = []
     q_counter = 1
 
-    stats = {
+    stats: ConvergenceStats = {
         "total_aligned_cells": 0,
         "convergent": 0,
         "disposition_divergent": 0,
@@ -367,7 +380,7 @@ def _merge_cells(
 # ---------------------------------------------------------------------------
 
 def _render_report(
-    stats: dict,
+    stats: ConvergenceStats,
     aligned_states: dict[str, list[Optional[str]]],
     aligned_events: list[str],
     runs_metadata: list[dict],
@@ -523,11 +536,11 @@ def main() -> int:
     all_event_objs: list[dict] = []
     seen_ids: set[str] = set()
     for events in all_event_lists:
-        for e in events:
-            if e["id"] in seen_ids:
+        for event in events:
+            if event["id"] in seen_ids:
                 continue
-            seen_ids.add(e["id"])
-            all_event_objs.append(dict(e))
+            seen_ids.add(event["id"])
+            all_event_objs.append(dict(event))
     merged["events"] = sorted(all_event_objs, key=lambda e: e["id"])
     merged["cells"] = merged_cells
     existing_questions = merged.get("questions", [])

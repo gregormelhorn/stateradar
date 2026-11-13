@@ -134,6 +134,7 @@ def main() -> int:
         sys.path.insert(0, str(ROOT / "tools"))
         import gen_analysis_sidecar as gas
         idx = {"channel.go": "channel.go"}
+        frag_failures: list[str] = []
         for raw_cell, want in (
                 ('reject (observed-in-code, channel.go:50 ("return nil, errors.New("pool is closed")"))',
                  'return nil, errors.New("pool is closed")'),
@@ -158,8 +159,37 @@ def main() -> int:
                  'f("a") + g()')):
             got = gas._parse_cell(raw_cell, None, ["S"], idx).get("citation", {}).get("fragment")
             if got != want:
-                failures.append(f"fragment not captured from {raw_cell!r}: {got!r}")
-        print("  ok  quoted, typographic and backticked fragments are captured")
+                frag_failures.append(f"fragment not captured from {raw_cell!r}: {got!r}")
+        failures.extend(frag_failures)
+        if not frag_failures:
+            print("  ok  quoted, typographic and backticked fragments are captured")
+        # A file:line quoted inside a fragment is neither the citation nor a
+        # dropped one, even when it resolves and the real citation does not.
+        mini_idx = {"mini.py": "src/mini.py"}
+        cite_failures: list[str] = []
+        for raw_cell, want_line, want_unresolved in (
+                ('handle `other_test.py:3` ("log(\\"mini.py:19 failed\\")")', None, {"other_test.py"}),
+                ('handle other_test.py:3 ("log("mini.py:19 failed")")', None, {"other_test.py"}),
+                ('handle mini.py:3 ("g(\\"x\\") + a.json:1")', 3, set()),
+                ('handle mini.py:3 (\u201csee app.json:4\u201d)', 3, set()),
+                ('handle other_test.py:3 ("say "mini.py:19" now")', None, {"other_test.py"}),
+                ('handle mini.py:3 ("say "other.go:9" now")', 3, set()),
+                ('handle mini.py:3 ("f("a") util.go:3")', 3, set()),
+                ('handle other_test.py:3 ("log "mini.py:19 failed" here")', None, {"other_test.py"}),
+                ('handle mini.py:3 ("log "a.json:1" x")', 3, set()),
+                ('reject (observed-in-code, other_test.py:3 ("errors.New("mini.py:19")"))', None,
+                 {"other_test.py"}),
+                ('handle (mini.py:3 ("x") then retries, second_test.py:5 ("y"))', 3, {"second_test.py"})):
+            cell_unresolved: set[str] = set()
+            got_line = gas._parse_cell(raw_cell, None, ["S"], mini_idx, cell_unresolved).get(
+                "citation", {}).get("line")
+            if (got_line, cell_unresolved) != (want_line, want_unresolved):
+                cite_failures.append(f"citation from {raw_cell!r}: line {got_line!r}, unresolved "
+                                     f"{sorted(cell_unresolved)}; want {want_line!r}, "
+                                     f"{sorted(want_unresolved)}")
+        failures.extend(cite_failures)
+        if not cite_failures:
+            print("  ok  a file:line inside a fragment is never the citation")
         qtext = tmp / "q.md"
         qtext.write_text("Q-01. Title\n## Q-and-A\nQ-02\u2014Title\n**Q-03**\n#### Q-ordering\nQ-04) x\n")
         got_q = [q["id"] for q in gas._parse_questions(qtext)]
@@ -198,6 +228,230 @@ def main() -> int:
         expect("generated sidecar with a wrong fragment", True,
                *dsc(bad / "domain-analysis" / "gate", "--repo", str(bad), "--model", "as-is.machine.mmd"),
                needle="fragment")
+
+        print("sidecar schema on generator output (fragment required on code citations)")
+        # The generator's raw output is validated against the pack schema
+        # directly, not only through dsc_check: a fixture that dsc_check
+        # skipped or a backfill that patched over a gap must not hide a
+        # sidecar the schema rejects.
+        validator = jsonschema.Draft202012Validator(
+            json.loads((ROOT / "formats" / "analysis.schema.json").read_text(encoding="utf-8")))
+
+        def schema_errors(doc: object) -> list[str]:
+            return sorted(f"{'/'.join(map(str, e.absolute_path))}: {e.message}"
+                          for e in validator.iter_errors(doc))
+
+        golden = ROOT / "tests" / "golden-mini"
+        for label, src_root, comp_name in (("compound", COMPOUND, "gate"),
+                                           ("golden-mini", golden, "mini")):
+            fresh = sidecar(tmp, src_root)
+            gen_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                      "--root", str(fresh)], capture_output=True, text=True)
+            out_path = fresh / "domain-analysis" / comp_name / "analysis.json"
+            if gen_run.returncode != 0 or not out_path.is_file():
+                failures.append(f"generator on {label} for the schema check:\n"
+                                f"{gen_run.stdout}{gen_run.stderr}")
+                continue
+            errs = schema_errors(json.loads(out_path.read_text(encoding="utf-8")))
+            expect(f"generator output on {label} is schema-valid", False, 1 if errs else 0,
+                   "\n".join(errs))
+
+        # Red: a code citation whose ("fragment") was left out. Before the
+        # schema required it, this sidecar passed and the fragment check
+        # silently skipped the cell.
+        nofrag = sidecar(tmp, COMPOUND)
+        nofrag_matrix = nofrag / "domain-analysis" / "gate" / "disposition-matrix.md"
+        nofrag_matrix.write_text(nofrag_matrix.read_text().replace(
+            'gate.ts:28 ("throw new ClosedError")', "gate.ts:28"))
+        subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                        "--root", str(nofrag)], capture_output=True, text=True)
+        nofrag_sc = json.loads((nofrag / "domain-analysis" / "gate" / "analysis.json").read_text())
+        errs = schema_errors(nofrag_sc)
+        expect("generated code citation without a fragment", True, 1 if errs else 0,
+               "\n".join(errs) or "no schema errors",
+               needle="'fragment' is a required property")
+        expect("dsc_check on a code citation without a fragment", True,
+               *dsc(nofrag / "domain-analysis" / "gate", "--repo", str(nofrag)),
+               needle="'fragment' is a required property")
+
+        # A citation the generator cannot resolve (here a test file outside
+        # the source roots) is dropped with its fragment check: it must say so.
+        unres = sidecar(tmp, golden)
+        unres_matrix = unres / "domain-analysis" / "mini" / "disposition-matrix.md"
+        unres_text = unres_matrix.read_text()
+        unres_matrix.write_text(unres_text.replace(
+            '`mini.py:19` ("self.state = \\"Open\\"")', '`test_cell_suite.py:3` ("import")', 1).replace(
+            '`mini.py:22` ("return \\"ignored\\"")', '`requirements.md:3` ("closed")', 1).replace(
+            '`mini.py:23` ("raise RejectedError")', '(dials db.example.com:5432)', 1).replace(
+            '`mini.py:26` ("self.state = \\"Closed\\"")', '`config.yaml:3` ("retries: 3")', 1).replace(
+            '`mini.py:47` ("self.dup_count += 1")', '`Mini.PY:47` ("self.dup_count += 1")', 1).replace(
+            '`mini.py:49` ("return \\"ignored\\"")',
+            '`mini.py:49` ("return \\"ignored\\"") and `second_test.py:5`', 1).replace(
+            '`mini.py:45` ("raise RejectedError")', '`mini.py:45` ("load(\'quoted_cfg.json:12\')")', 1))
+        # A second component citing the same files: one line per component.
+        # mini2 swaps mini's test-file citation for one of its own: a set of
+        # names that leaked between components (either order) would warn
+        # about a file under the component that does not cite it.
+        mini2_matrix = shutil.copytree(unres_matrix.parent, unres_matrix.parent.with_name("mini2")) \
+            / "disposition-matrix.md"
+        mini2_matrix.write_text(mini2_matrix.read_text().replace(
+            '`test_cell_suite.py:3` ("import")', '`only_mini2_test.py:3` ("import")', 1))
+        unres_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                    "--root", str(unres)], capture_output=True, text=True)
+        warn_lines = [ln for ln in unres_run.stderr.splitlines() if ln.startswith("warning:")]
+        if not any(ln.startswith("warning: mini2: citations of only_mini2_test.py") for ln in warn_lines):
+            failures.append("generator warns per component: no mini2 line\n" + (unres_run.stderr or "no stderr"))
+        else:
+            print("  ok  generator warns per component")
+        if (any("only_mini2_test.py" in ln and not ln.startswith("warning: mini2:") for ln in warn_lines)
+                or any("test_cell_suite.py" in ln and not ln.startswith("warning: mini:")
+                       for ln in warn_lines)):
+            failures.append(f"generator warnings leak across components: {warn_lines}")
+        else:
+            print("  ok  generator warnings stay with their component")
+        for label, needle_text, want_warning in (
+                ("generator warns about an unresolved test-file citation",
+                 "warning: mini: citations of test_cell_suite.py dropped: the file is not under "
+                 "the source roots", True),
+                ("generator points a prose citation to the overlay",
+                 "warning: mini: citations of requirements.md dropped: matrix citations resolve "
+                 "to source files only", True),
+                ("generator warns about a cited config file",
+                 "warning: mini: citations of config.yaml dropped: its extension is not a source "
+                 "extension", True),
+                ("generator names the case of a source extension",
+                 "warning: mini: citations of Mini.PY dropped: its extension is not a source "
+                 "extension (sidecar-overlay.yaml: src_exts, matched case-sensitively)", True),
+                ("generator warns about a second citation next to a resolved one",
+                 "warning: mini: citations of second_test.py dropped", True),
+                ("generator stays quiet on a file:line inside a fragment", "quoted_cfg.json", False),
+                ("generator stays quiet on host:port text", "db.example.com", False)):
+            seen = any(needle_text in ln for ln in warn_lines)
+            if seen != want_warning:
+                failures.append(f"{label}: warning {'missing' if want_warning else 'printed'}\n"
+                                + (unres_run.stderr or "no stderr"))
+            else:
+                print(f"  ok  {label}")
+        if len(warn_lines) != 10:
+            failures.append(f"generator warnings: expected one line per component and file (10), "
+                            f"got {warn_lines}")
+
+        # A host:port earlier in the cell must not hide the citation after it.
+        hostfirst = sidecar(tmp, golden)
+        hostfirst_matrix = hostfirst / "domain-analysis" / "mini" / "disposition-matrix.md"
+        hostfirst_matrix.write_text(hostfirst_matrix.read_text().replace(
+            '`mini.py:19` ("self.state = \\"Open\\"")',
+            'via db.example.com:5432 `mini.py:19` ("self.state = \\"Open\\"")', 1))
+        (hostfirst_matrix.parent / "analysis.json").unlink()  # no stale pass on a crash
+        hostfirst_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                        "--root", str(hostfirst)], capture_output=True, text=True)
+        hostfirst_out = hostfirst_matrix.parent / "analysis.json"
+        hostfirst_cits = ([c.get("citation", {}).get("line")
+                           for c in json.loads(hostfirst_out.read_text())["cells"]]
+                          if hostfirst_run.returncode == 0 and hostfirst_out.is_file() else None)
+        if hostfirst_cits is None:
+            failures.append("generator on the host-first matrix failed:\n" + hostfirst_run.stderr)
+        elif 19 not in hostfirst_cits:
+            failures.append("generator keeps a citation after host:port text: mini.py:19 dropped")
+        else:
+            print("  ok  generator keeps a citation after host:port text")
+
+        # The rule covers code and test citations only: a requirements
+        # document is cited without a fragment, and an empty fragment is
+        # no fragment.
+        base_doc = json.loads((FLAT / "analysis.json").read_text(encoding="utf-8"))
+        cell = next(c for c in base_doc["cells"] if c.get("citation"))
+        for label, citation, want_fail in (
+                ("requirements citation without a fragment",
+                 {"file": "docs/requirements.md", "line": 3}, False),
+                ("upper-case prose extension without a fragment",
+                 {"file": "docs/NOTES.TXT", "line": 3}, False),
+                ("code citation without a fragment",
+                 {"file": "src/mini.py", "line": 3}, True),
+                ("code file whose name contains .md, without a fragment",
+                 {"file": "src/notes.md.py", "line": 3}, True),
+                ("code citation with an empty fragment",
+                 {"file": "src/mini.py", "line": 3, "fragment": ""}, True)):
+            cell["citation"] = citation
+            errs = schema_errors(base_doc)
+            expect(label, want_fail, 1 if errs else 0, "\n".join(errs) or "no schema errors")
+
+        print("sidecar types match the schema (tools/sidecar_types.py)")
+        sys.path.insert(0, str(ROOT / "tools"))
+        import copy
+        import typing
+        import sidecar_types
+
+        def type_drift(schema: dict[str, typing.Any]) -> list[str]:
+            """Keys, required keys and enum values that differ between the
+            TypedDicts and the schema the run-time checker enforces."""
+            problems: list[str] = []
+            props = schema["properties"]
+
+            def items(key: str) -> dict[str, typing.Any]:
+                return dict(props[key]["items"])
+
+            for name, td, part in (
+                    ("Sidecar", sidecar_types.Sidecar, schema),
+                    ("Event", sidecar_types.Event, items("events")),
+                    ("Cell", sidecar_types.Cell, items("cells")),
+                    ("Citation", sidecar_types.Citation, items("cells")["properties"]["citation"]),
+                    ("Pair", sidecar_types.Pair, items("pairs")),
+                    ("GuardGroup", sidecar_types.GuardGroup, items("guardGroups")),
+                    ("Question", sidecar_types.Question, items("questions")),
+                    ("DocLine", sidecar_types.DocLine, items("docLines")),
+                    ("Completeness", sidecar_types.Completeness, props["completeness"]),
+                    ("Absence", sidecar_types.Absence, schema["$defs"]["absence"])):
+                keys, want = set(td.__annotations__), set(part.get("properties", {}))
+                if keys != want:
+                    problems.append(f"{name}: type only {sorted(keys - want)}, "
+                                    f"schema only {sorted(want - keys)}")
+                required, want_req = set(td.__required_keys__), set(part.get("required", []))
+                if required != want_req:
+                    problems.append(f"{name}: required in the type {sorted(required)}, "
+                                    f"in the schema {sorted(want_req)}")
+            # CellBody is a Cell before its state and event are known.
+            cell_part = items("cells")
+            body_keys = set(sidecar_types.CellBody.__annotations__)
+            body_want = set(cell_part["properties"]) - {"state", "event"}
+            body_req = set(sidecar_types.CellBody.__required_keys__)
+            body_req_want = set(cell_part["required"]) - {"state", "event"}
+            if body_keys != body_want or body_req != body_req_want:
+                problems.append(f"CellBody: keys {sorted(body_keys)} required {sorted(body_req)}, "
+                                f"schema keys {sorted(body_want)} required {sorted(body_req_want)}")
+            for name, literal, enum in (
+                    ("Disposition", sidecar_types.Disposition,
+                     items("cells")["properties"]["disposition"]["enum"]),
+                    ("GuardOutcome", sidecar_types.GuardOutcome,
+                     items("guardGroups")["properties"]["outcome"]["enum"])):
+                if set(typing.get_args(literal)) != set(enum):
+                    problems.append(f"{name}: type {sorted(typing.get_args(literal))}, "
+                                    f"schema {sorted(enum)}")
+            return problems
+
+        real_schema = json.loads((ROOT / "formats" / "analysis.schema.json").read_text(encoding="utf-8"))
+        drift = type_drift(real_schema)
+        expect("sidecar TypedDicts agree with analysis.schema.json", False,
+               1 if drift else 0, "\n".join(drift))
+        # Red: each kind of drift must be seen.
+        for label, mutate, needle in (
+                ("schema gains a cell property the type lacks",
+                 lambda s: s["properties"]["cells"]["items"]["properties"].update(
+                     {"note": {"type": "string"}}), "Cell: type only [], schema only ['note']"),
+                ("schema gains a cell property CellBody lacks",
+                 lambda s: s["properties"]["cells"]["items"]["properties"].update(
+                     {"note": {"type": "string"}}), "CellBody: keys"),
+                ("schema makes a question key required",
+                 lambda s: s["properties"]["questions"]["items"]["required"].append("trigger"),
+                 "Question: required in the type"),
+                ("schema adds a disposition",
+                 lambda s: s["properties"]["cells"]["items"]["properties"]["disposition"]["enum"]
+                 .append("escalate"), "Disposition: type")):
+            drifted = copy.deepcopy(real_schema)
+            mutate(drifted)
+            found = type_drift(drifted)
+            expect(f"type drift: {label}", True, 1 if found else 0,
+                   "\n".join(found) or "no drift reported", needle=needle)
 
         print("silent omission (v1.20: absence must be asserted)")
         d = sidecar(tmp, FLAT)
@@ -427,10 +681,15 @@ def main() -> int:
             print("  ok  weak suite survives an ignore-to-handle mutant on a UV cell "
                   "(fails as required)")
 
+        # Golden-mini's (Open, M1) cell, citation with its ("fragment").
+        OPEN_M1_CITATION = '`mini.py:22` ("return \\"ignored\\"")'
+        OPEN_M1_CELL = "| **Open** | ignore (documented) " + OPEN_M1_CITATION + " |"
+        if OPEN_M1_CELL not in (gm / "disposition-matrix.md").read_text():
+            failures.append(f"golden-mini fixture changed: {OPEN_M1_CELL!r} not in the matrix")
         hole = sidecar(tmp, gm)
         hole_mx = hole / "disposition-matrix.md"
         hole_mx.write_text(hole_mx.read_text().replace(
-            "| **Open** | ignore (documented) `mini.py:22` |",
+            OPEN_M1_CELL,
             "| **Open** | ignore (accidental) → Q-01 |"))
         (hole / "matrix-mutation.json").write_text(json.dumps({
             "formatVersion": 1,
@@ -483,7 +742,9 @@ def main() -> int:
                                 f"{base}/{category}={event!r}, got {actual!r}")
             else:
                 print(f"  ok  UV coverage binding {base}/{category}={event} (passes)")
-        if "new='handle `mini.py:28`'" not in out_gm:
+        # The kept citation includes its ("fragment"); the regex once stopped at
+        # the backtick and dropped the whole citation from fragment-cited cells.
+        if "new='handle `mini.py:28` (\"return \\\\\"ignored\\\\\"\")'" not in out_gm:
             failures.append("ignore-to-handle must drop the source annotation, "
                             "not carry it into the replacement\n" + out_gm)
         else:
@@ -496,8 +757,8 @@ def main() -> int:
         annotated = sidecar(tmp, gm)
         ann_mx = annotated / "disposition-matrix.md"
         ann_mx.write_text(ann_mx.read_text().replace(
-            "| **Open** | ignore (documented) `mini.py:22` |",
-            "| **Open** | ignore (documented) DR-005; stays shut `mini.py:22` |"))
+            OPEN_M1_CELL,
+            "| **Open** | ignore (documented) DR-005; stays shut " + OPEN_M1_CITATION + " |"))
         (annotated / "matrix-mutation.json").write_text(json.dumps({
             "formatVersion": 1,
             "testCommand": ["python3", "tests/test_cell_suite.py", "{analysis_dir}"],
@@ -505,9 +766,10 @@ def main() -> int:
             "timeoutSeconds": 5,
         }))
         rc_ann, out_ann = mutation(annotated)
-        if "new='handle `mini.py:22`'" not in out_ann:
+        want_ann = "new='handle `mini.py:22` (\"return \\\\\"ignored\\\\\"\")'"
+        if want_ann not in out_ann:
             failures.append("ignore-to-handle must keep only the citation from an "
-                            "annotated cell; expected new='handle `mini.py:22`'\n" + out_ann)
+                            f"annotated cell; expected {want_ann}\n" + out_ann)
         else:
             print("  ok  ignore-to-handle strips a DR annotation, keeps the citation (passes)")
 
@@ -581,7 +843,7 @@ def main() -> int:
             print("  ok  fault mutant kill proof (passes)")
 
         import difflib
-        base = (ROOT / "tests" / "golden-mini" / "src" / "mini.py").read_text().splitlines()
+        base_lines = (ROOT / "tests" / "golden-mini" / "src" / "mini.py").read_text().splitlines()
         for variant_name in [
             "mini.F-01-missing-transition.py",
             "mini.F-02-transfer-fault.py",
@@ -591,7 +853,7 @@ def main() -> int:
             "mini.F-05-corrupt-state-ignore.py",
         ]:
             variant = (ROOT / "tests" / "golden-mini" / "src" / "mutants" / variant_name).read_text().splitlines()
-            regions = [op for op in difflib.SequenceMatcher(None, base, variant).get_opcodes()
+            regions = [op for op in difflib.SequenceMatcher(None, base_lines, variant).get_opcodes()
                        if op[0] != "equal"]
             if len(regions) != 1:
                 failures.append(f"{variant_name}: a fault variant must differ from the base in exactly "
@@ -1099,10 +1361,56 @@ def main() -> int:
     }) == "unknown", "missing model_release is unknown"
     print("  ok  benchmark dating classification correct")
 
+    # ignore-to-handle keeps the cell's citation in every form the sidecar
+    # generator reads (review of the fragment change: unescaped and
+    # typographic quotes, a backticked file name, a provenance parenthesis).
+    import check_matrix_mutation as cmm_cite
+    failures_before = len(failures)
+    for raw_cell, want_citation in (
+            ('ignore (documented) `mini.py:28` ("return \\"ignored\\"")',
+             '`mini.py:28` ("return \\"ignored\\"")'),
+            ('reject (observed-in-code, channel.go:50 ("say "hi" now"))', 'channel.go:50 ("say "hi" now")'),
+            ('reject a.go:3 (\u201cx := 1\u201d)', 'a.go:3 (\u201cx := 1\u201d)'),
+            ('reject `channel.go`:51 ("x := 1")', '`channel.go`:51 ("x := 1")'),
+            ('ignore (documented) `a.py:2` ("see b.py:3 for x")', '`a.py:2` ("see b.py:3 for x")'),
+            ('ignore (documented) `a.py:1` ("x") then `b.py:2` ("y")', '`b.py:2` ("y")'),
+            ('reject `a.py:1`', '`a.py:1`'),
+            ('ignore (documented) `f.py:1` reason', None)):
+        got_citation = cmm_cite.trailing_citation(raw_cell)
+        if got_citation != want_citation:
+            failures.append(f"trailing citation of {raw_cell!r}: {got_citation!r}, want {want_citation!r}")
+    if len(failures) == failures_before:
+        print("  ok  ignore-to-handle keeps fragment citations in every generator form")
+
+    # Timeout path of the mutation runners. On a timeout, subprocess hands
+    # back the partial output as bytes even with text=True, and stderr may
+    # be None: bytes + "" crashed both runners with a TypeError instead of
+    # reporting a timed-out mutant (found by mypy, 2026-11-13).
+    import check_fault_mutants
+    import check_matrix_mutation
+    sleeper = (sys.executable, "-c",
+               "import time; print('partial', flush=True); time.sleep(30)")
+    for runner_name, run in (
+        ("check_fault_mutants", lambda: check_fault_mutants.run_command(
+            check_fault_mutants.Config(sleeper, ROOT, Path("."), 1), ROOT)),
+        ("check_matrix_mutation", lambda: check_matrix_mutation.run_command(
+            check_matrix_mutation.Config(sleeper, ROOT, 1), ROOT)),
+    ):
+        try:
+            result = run()
+        except TypeError as error:
+            failures.append(f"{runner_name}: the timeout path crashed: {error}")
+            continue
+        if not result.timed_out or "partial" not in result.output:
+            failures.append(f"{runner_name}: timeout not reported with its partial output: "
+                            f"timed_out={result.timed_out} output={result.output!r}")
+        else:
+            print(f"  ok  {runner_name} reports a timeout with its partial output")
+
     if failures:
         print("\nSELFTEST: FAIL")
-        for f in failures:
-            print(" -", f)
+        for failure in failures:
+            print(" -", failure)
         return 1
     print("\nSELFTEST: OK")
     return 0

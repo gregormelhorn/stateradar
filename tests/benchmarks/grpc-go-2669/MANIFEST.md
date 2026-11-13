@@ -60,3 +60,11 @@ Harness yield: this pilot exposed two pack defects, fixed same day —
 check_matrix accepted only `.py:` citations (language neutrality
 silently broken), and part_b_pack --check misread finer-grained blind
 tables as duplicates.
+
+## Sidecar kept as recorded
+
+This sidecar (`analysis.json`) predates the schema rule that code citations
+carry a `fragment` (CHANGELOG, "Unreleased — type checking and the fragment
+rule in the schema"). It is kept as recorded, so `dsc_check` now fails it on
+the missing fragments. Regenerate it from a fragment-cited matrix before
+checking it again.
