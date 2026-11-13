@@ -71,7 +71,7 @@ def _read_requirements(spec: str, repo: Path) -> str:
     if not m:
         raise ValueError(f"requirements pattern {pattern!r} not found in {path}")
     start = m.start()
-    level = len(re.match(r"^#*", text[start:]).group(0)) if text[start] == "#" else 0
+    level = len(text[start:]) - len(text[start:].lstrip("#"))
     rest = text[start:]
     if level:
         nxt = re.search(rf"^#{{1,{level}}} ", rest[1:], re.M)

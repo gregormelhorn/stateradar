@@ -115,6 +115,7 @@ if errors:
     print("PACK CONSISTENCY: FAIL")
     for e in errors: print(" -", e)
     sys.exit(1)
+assert rv is not None  # an unparseable README version failed above
 
 # ODC table sync
 odc_check = subprocess.run(

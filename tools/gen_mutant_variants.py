@@ -185,7 +185,7 @@ def main(argv: List[str]) -> int:
         # Basic field validation
         required_fields = [("id", mid), ("variant", variant_rel), ("mode", mode), ("fault", fault), ("binder", binder), ("cell", cell)]
         missing = [name for name, val in required_fields if not isinstance(val, str) or not val]
-        if missing:
+        if missing or not isinstance(mid, str):
             print(f"CONFIG ERROR: binding {mid or '?'}: missing/invalid fields {missing}", file=sys.stderr)
             config_errors += 1
             continue

@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
+from subprocess_text import as_text
+
 PLACEHOLDER = "{analysis_dir}"
 DEFAULT_TIMEOUT_SECONDS = 30
 
@@ -136,9 +138,9 @@ def run_command(config: Config, root_copy: Path) -> CommandResult:
             check=False,
         )
     except subprocess.TimeoutExpired as exc:
-        output = (exc.stdout or "") + (exc.stderr or "")
-        if isinstance(output, bytes):
-            output = output.decode(errors="replace")
+        # The partial output arrives as bytes even with text=True, and either
+        # stream may be None: decode each one before joining them.
+        output = as_text(exc.stdout) + as_text(exc.stderr)
         return CommandResult(None, output, time.monotonic() - started, timed_out=True)
     except OSError as exc:
         return CommandResult(None, str(exc), time.monotonic() - started, launch_error=str(exc))

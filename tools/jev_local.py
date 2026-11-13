@@ -15,6 +15,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 
 # TypeSafe documents 429 (rate limit) and 529 (overloaded) as retryable with
@@ -25,18 +26,19 @@ MAX_RETRIES = 3
 TIMEOUT_SECONDS = 120
 
 
-def _retry_delay(error, attempt):
+def _retry_delay(error: urllib.error.HTTPError, attempt: int) -> float:
     header = error.headers.get("Retry-After") if error.headers else None
     try:
-        seconds = float(header)
-    except (TypeError, ValueError):
+        seconds = float(header) if header is not None else math.nan
+    except ValueError:
         seconds = math.nan  # absent, or an HTTP date: use backoff
     if not math.isfinite(seconds):
         return min(2.0 ** attempt, 30.0)
     return min(max(seconds, 0.0), 60.0)
 
 
-def post_json(url, payload, key):
+def post_json(url: str, payload: dict[str, Any], key: str) -> Any:
+    """POST payload as JSON and return the decoded JSON answer (unvalidated)."""
     data = json.dumps(payload).encode("utf-8")
     for attempt in range(MAX_RETRIES + 1):
         request = urllib.request.Request(
@@ -52,9 +54,10 @@ def post_json(url, payload, key):
             if error.code not in RETRY_STATUSES or attempt == MAX_RETRIES:
                 raise
             time.sleep(_retry_delay(error, attempt))
+    raise AssertionError("unreachable while MAX_RETRIES >= 0: the last attempt returns or raises")
 
 
-def main():
+def main() -> int:
     from local_budget import Budget, BudgetExceeded
     from local_models import jev
 

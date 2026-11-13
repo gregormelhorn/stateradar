@@ -17,6 +17,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
+from subprocess_text import as_text
+
 PLACEHOLDER = "{analysis_dir}"
 DEFAULT_TIMEOUT_SECONDS = 30
 
@@ -189,6 +191,36 @@ def handle_to_ignore(cell: Cell) -> str | None:
     return None
 
 
+# A citation as gen_analysis_sidecar reads it: `file:line` (backticks around
+# the whole token or the file name only, an optional line range), optionally
+# followed by its ("fragment"), whose quotes may be typographic and whose
+# text may itself hold quotes or file:line tokens (02-pilot rule 3).
+_CITATION_START = re.compile(r"`?[\w./-]+\.[A-Za-z]{1,4}`?:\d+")
+_CITATION = re.compile(r'`?[\w./-]+\.[A-Za-z]{1,4}`?:\d+(?:-\d+)?`?'
+                       r'(?:\s*\(\s*["\u201c].*["\u201d]\s*\))?')
+
+
+def trailing_citation(raw: str) -> str | None:
+    """The last citation in a cell when nothing follows it but, at most, the
+    parenthesis that closes a provenance note: 'reject (observed-in-code,
+    a.go:3 ("x"))' keeps 'a.go:3 ("x")'.
+
+    The last, not the first: a mutant keeps the citation that ends the cell,
+    as before the fragment rule. The sidecar generator records the first
+    citation that resolves to a source file instead; the two differ only in
+    a cell that cites twice.
+    """
+    text = raw.rstrip()
+    for end in (len(text), len(text) - 1 if text.endswith(")") else -1):
+        if end < 0:
+            continue
+        body = text[:end].rstrip()
+        for start in reversed([m.start() for m in _CITATION_START.finditer(body)]):
+            if _CITATION.fullmatch(body, start):
+                return body[start:]
+    return None
+
+
 def ignore_or_reject_to_handle(cell: Cell) -> str | None:
     """Reverse family: a decided no-action cell claims it acts.
 
@@ -197,16 +229,16 @@ def ignore_or_reject_to_handle(cell: Cell) -> str | None:
 
     Only the trailing citation survives. Everything else the source cell carried
     is dropped, because an annotation that documented the old disposition is a
-    lie under the new one: 'ignore (documented) DR-005; reason `f:1`' must become
-    'handle `f:1`', never 'handle DR-005; reason `f:1`', which would read as if
+    lie under the new one: 'ignore (documented) DR-005; reason `f:1` ("x")' must
+    become 'handle `f:1` ("x")', never 'handle DR-005; reason `f:1`', which would read as if
     DR-005 authorised handling. This is the wart handle_to_ignore still has.
     """
     for token in ("ignore (documented)", "reject"):
         if cell.raw == token:
             return "handle"
         if cell.raw.startswith(token + " "):
-            citation = re.search(r"`[^`]+`\s*$", cell.raw)
-            return f"handle {citation.group(0).strip()}" if citation else "handle"
+            citation = trailing_citation(cell.raw)
+            return f"handle {citation}" if citation else "handle"
     return None
 
 
@@ -272,9 +304,9 @@ def run_command(config: Config, analysis_dir: Path) -> CommandResult:
             check=False,
         )
     except subprocess.TimeoutExpired as exc:
-        output = (exc.stdout or "") + (exc.stderr or "")
-        if isinstance(output, bytes):
-            output = output.decode(errors="replace")
+        # The partial output arrives as bytes even with text=True, and either
+        # stream may be None: decode each one before joining them.
+        output = as_text(exc.stdout) + as_text(exc.stderr)
         return CommandResult(None, output, time.monotonic() - started, timed_out=True)
     except OSError as exc:
         return CommandResult(None, str(exc), time.monotonic() - started, launch_error=str(exc))

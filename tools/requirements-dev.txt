@@ -6,3 +6,8 @@
 # --allow-no-schema pattern.
 jsonschema>=4.21
 z3-solver>=4.12
+# Type checking (mypy.ini at the repository root; CI step "type check").
+# types-PyYAML covers gen_analysis_sidecar's optional overlay import.
+mypy==2.4.1
+types-jsonschema==4.26.0.20261006
+types-PyYAML==6.0.12.20261111

@@ -2,6 +2,58 @@
 
 > **Note:** v1.36 was never tagged. Tags resume at v1.35, skip to v1.37.
 
+## Unreleased — type checking and the fragment rule in the schema
+
+- **mypy in CI.** The new `type check` step runs mypy over `tools/` and
+  `tools/selftest/` (`mypy.ini`; mypy and stubs pinned in
+  `tools/requirements-dev.txt`). The first run on main found 34 errors in
+  `tools/` and 11 in the selftests. One was a crash: on a timeout, subprocess
+  returns partial output as bytes even with `text=True`, so
+  `check_fault_mutants.py` and `check_matrix_mutation.py` died on bytes + str
+  instead of reporting the timed-out mutant. New selftest case; red before the
+  fix.
+- **Breaking for consumer sidecars: code citations need their fragment.**
+  `formats/analysis.schema.json` requires a non-empty `fragment` on every cell
+  citation except citations of prose documents (`.md`, `.markdown`, `.txt`,
+  `.rst`, `.adoc`), as 02-pilot rule 3 already demanded. Before, a sidecar
+  without fragments passed and dsc_check's fragment check skipped every cell
+  (the routed pilot's generator bug). The selftest validates the generator's
+  raw output against the schema directly, with red cases. golden-mini's matrix
+  now cites with fragments. `check_matrix_mutation`'s ignore-to-handle mutant
+  dropped the whole citation from a fragment-cited cell; it now keeps the
+  citation in every form the generator reads. Committed sidecars that predate
+  the rule and now fail the schema were kept as records, not rewritten:
+  `examples/device-connection/domain-analysis/device-connection/run2`,
+  `domain-analysis/meilisearch-s3-snapshot`, `tests/benchmarks/grpc-go-2669`,
+  `tests/benchmarks/meilisearch-6510` and the routed-pilot evidence in
+  `docs/evidence/`, each with a note saying so; `tests/red-mini` is red by design and still fails with
+  its expected lines. Regenerate a sidecar from a fragment-cited matrix before
+  running dsc_check on it. Overlay `extra_citations` to code files need a `fragment` too.
+  `formatVersion` stays `"1.0"`: no field was added or renamed, and rule 3
+  has required these fragments since 02-pilot v1.9; the schema now enforces
+  what the format already said. The generator still resolves citations only
+  to files under the source roots (`sidecar-overlay.yaml`: `src_roots`,
+  `src_exts`); it now warns once per component and cited file it cannot
+  resolve, because such a citation, a test file outside those roots for
+  example, is dropped together with its fragment check. A cited prose
+  document gets a pointer to overlay `extra_citations`, a cited config file
+  (`.yaml`, `.json`, ...) or a source extension in the wrong case names
+  `src_exts`; text such as `host:5432` without a known file extension stays
+  quiet. A cell's citation is now the first `file:line` token outside its
+  quoted fragments that resolves, so a `host:5432` earlier in the cell no
+  longer hides it and a `file:line` quoted in a fragment is never taken for it; a second cited
+  file in a cell that does not resolve is warned about too, since a cell
+  records one citation. The two mutation
+  runners share one helper (`tools/subprocess_text.py`) for timeout output.
+- **Sidecar types.** `tools/sidecar_types.py` mirrors the schema as
+  TypedDicts; a selftest fails when properties, required keys or enum values
+  drift between the two. It found the question `note` the generator emits and
+  the schema did not list; the schema now lists it.
+- **Strict modules.** `gen_analysis_sidecar`, `sidecar_types`,
+  `local_models`, `local_budget` and `jev_local` pass strict checking, with
+  typed results for the Flash, Jev, jev-batch and draft-verify records. The
+  generator's output is byte-identical on all 12 matrices in the repository.
+
 ## Unreleased — model routing on DeepSeek Flash and Jev
 
 - **Local model routing.** `tools/local_models.py` sends bounded drafts and
