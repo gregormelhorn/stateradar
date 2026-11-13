@@ -276,16 +276,17 @@ Open, in order:
    checks gave 44 supported, 5 unclear and 2 contradicted, all kept after a
    re-read. 19 of 28 aligned base cells agree with the agent-only baseline
    (first pilot 20 under the same counting rule, 21 as published): the same
-   FactoryFail, Close and Released x Close divergences, plus lazy idle expiry
-   marked accidental; the one-cell gap is not a measured regression. Part B:
-   21 convergent rows (13 of the 26 agreeing rows, 10 convergent and 3
-   convergent-hole, depend on as-is prose in the catalogue) and 8 artefacts,
-   mostly remembrance and upstream statements read as documented intent. Fixes
-   from it: line numbers following a citation, `blind` stdout, the blockquote
-   line in the Part-B task, the matrix wrapper template's pack path, and
-   02-pilot v1.18. Still open from it: the sidecar generator's missing pairs,
-   guard and ODC fields (the pilot merged them with a per-run script); as-is
-   prose in the catalogue reaching Part B (the pilot's candidate rule:
+   FactoryFail, Close and Released x Close divergences, plus lazy idle
+   expiry marked accidental; the one-cell gap is not a measured regression.
+   Part B: 21 convergent rows (13 of the 26 agreeing rows, 10 convergent and
+   3 convergent-hole, depend on as-is prose in the catalogue) and 8
+   artefacts, mostly remembrance and upstream statements read as documented
+   intent. Fixes from it: line numbers following a citation, `blind` stdout,
+   the blockquote line in the Part-B task, the matrix wrapper template's
+   pack path, and 02-pilot v1.18; the sidecar generator's missing pairs,
+   guard and ODC fields (the pilot merged them with a per-run script)
+   followed after the agent-only run (02-pilot v1.19). Still open from it:
+   as-is prose in the catalogue reaching Part B (the pilot's candidate rule:
    remembrance and upstream statements carry the provenance "observed in
    code"). Its `timing.md` shows where the 37 minutes went: about 70 s of
    Flash and Jev calls, about 3.5 minutes of `go test` (mostly three waits
@@ -304,8 +305,8 @@ Open, in order:
    was about the same in both runs (84 against 77 messages, 26.1 M against
    23.6 M cache-read tokens). So routing as configured, where Flash and Jev
    add checks on top of the agent's own complete pass, showed no saving in
-   time or cost; one run each, and the runs differ in model size (7 against 9
-   states), so the small differences are not a measured effect.
+   time or cost; one run each, and the runs differ in model size (7 against
+   9 states), so the small differences are not a measured effect.
 2. **Flash writes, the steering agent decides.** Next. Since the steering
    agent's cache reads, writes and output are almost the whole cost, the aim
    is fewer agent rounds and less agent output. In the routed run, output

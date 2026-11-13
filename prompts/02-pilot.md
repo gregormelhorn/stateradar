@@ -1,8 +1,12 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.18.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.19.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.19 — timed agent-only run (silenceper/pool, 2026-11-13): a crash has
+  a written form (`handle crash: … → Q-nn`) instead of an ad-hoc `handle`
+  note; the sidecar generator derives pairs, guard groups and the ODC
+  fields, so no per-run merge script is needed.
 * v1.18 — second routed pilot (silenceper/pool, 2026-11-13, blind to the
   benchmark): a draft question may also end as a reasoned disposition
   (`answered:` settles as-is behaviour only, `outside scope:` never covers the
@@ -238,6 +242,7 @@ Build a Markdown table: rows = leaf states of the as-is model; columns = all cat
 
 * `transition → <target>`: with provenance
 * `handle`: stays in the state, does something; with provenance
+* a crash (a panic, an exception that escapes the component, a process exit) is `handle` whose text starts `crash:` and carries a question: `handle crash: Ping is nil and panics → Q-11`. The code does something, but nobody decided it. Never write it as `transition`; the sidecar generator rejects a crash cell without a question.
 * `ignore (documented)`: intent has evidence; cite it (the requirement-scope rule applies). Citations are cheapest at matrix-writing time — a `file:line ("fragment")` per cell now beats a backfill pass later.
 * `ignore (accidental)`: nothing happens only by omission or fall-through; **counts as a hole**, however harmless it looks. It carries a hole reference like any hole: `ignore (accidental) → Q-03`.
 * `defer (queued)`: the code buffers the event; cite where
@@ -265,7 +270,7 @@ citation to the state's entry condition. This eliminates repetitive cells
 
 Stage 2 (after Step 7, re-run): every hole cell (`UNSPECIFIED` or `ignore (accidental)`) carries a `→ Q-nn` back-reference that exists in `open-questions.md`. Every interaction pair `P-nn` appears in at least one trace in `adversarial-traces.md`. Every guard group has an outcome from `check_guards.py`. Every control-trace verdict that cites a requirement or decision carries the scope line ("cited text contemplates this ordering: yes/no").
 
-Also emit the machine-readable sidecar `analysis.json` (schema: pack `formats/analysis.schema.json`). Contents: states, events, cells with dispositions and links, pairs with traces, guard outcomes, the coverage table, questions, behavioural DRs. Run the pack checker `tools/dsc_check.py <output-dir> --repo . --model as-is.machine.mmd` in addition to the two per-run scripts. Then run the pack's `tools/check_reachability.py <output-dir>`: it follows `transition` cells only, one sidecar `target` per cell, and takes the first declared state as the initial state. It fails on a non-terminal state that is unreachable from the initial state and on a non-terminal state with no outgoing transition; a state declared terminal (`<!-- terminal: S1, S2 -->` in the matrix) is exempt from both. Write a guarded state change as `transition → <target>` and keep the staying branch in the cell text. A cell with two targets carries only one in the sidecar, so a state reached only through the second one is reported unreachable: split the cell by guard where the catalogue allows it, otherwise record the state as a known limit of the check in `summary.md`; never reorder targets to satisfy the checker. Include all outputs in `summary.md`. Deliver checks as executed code, never as claims.
+Also emit the machine-readable sidecar `analysis.json` (schema: pack `formats/analysis.schema.json`). Contents: states, events, cells with dispositions and links, pairs with traces, guard outcomes, the coverage table, questions, behavioural DRs. Generate it with the pack's `tools/gen_analysis_sidecar.py`, never by hand: it reads the matrix, the pair ids in `event-catalogue.md` with their `### P-01a — …` headings in `adversarial-traces.md`, the `group G-nn …: <outcome>` lines of `guard-results.txt` and the `**Fault:**` / `**Trigger:**` lines of each question, so no per-run merge script is needed; `--strict` fails the run on any note it prints. Run the pack checker `tools/dsc_check.py <output-dir> --repo . --model as-is.machine.mmd` in addition to the two per-run scripts. Then run the pack's `tools/check_reachability.py <output-dir>`: it follows `transition` cells only, one sidecar `target` per cell, and takes the first declared state as the initial state. It fails on a non-terminal state that is unreachable from the initial state and on a non-terminal state with no outgoing transition; a state declared terminal (`<!-- terminal: S1, S2 -->` in the matrix) is exempt from both. Write a guarded state change as `transition → <target>` and keep the staying branch in the cell text. A cell with two targets carries only one in the sidecar, so a state reached only through the second one is reported unreachable: split the cell by guard where the catalogue allows it, otherwise record the state as a known limit of the check in `summary.md`; never reorder targets to satisfy the checker. Include all outputs in `summary.md`. Deliver checks as executed code, never as claims.
 
 **Assert every absence.** An empty `pairs`, `guardGroups`, or `coverage` section is a claim, not a silence: it says this component has no interaction pairs, no formalizable guard groups, or no external sources. State it in the `completeness` block with a reason, or the checker fails the sidecar:
 

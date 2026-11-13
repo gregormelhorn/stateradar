@@ -225,6 +225,18 @@
   comma list once its line numbers are gone is kept once ("(channel.go)");
   "a.go and a.go" stays, since `and` may join two clauses. Red-first tests for
   each.
+- **The sidecar generator derives every section; 02-pilot v1.19.**
+  `gen_analysis_sidecar.py` now reads the pair ids in `event-catalogue.md`
+  with their `adversarial-traces.md` headings, the outcome lines of
+  `guard-results.txt` and each question's `**Fault:**` / `**Trigger:**`
+  lines, so the per-run merge scripts of all three silenceper/pool runs are
+  no longer needed (on both recent runs' inputs it reproduces their
+  hand-merged `pairs`, `guardGroups` and ODC fields exactly). A pair without
+  a trace heading gets an empty trace, which dsc_check reports. A section
+  the sources do not declare is still asserted absent with a reason. A
+  crash has a written form: `handle crash: … → Q-nn` (02-pilot step 4 and
+  the methods reference); the generator rejects a crash cell without a
+  question. Red-first selftests for each.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

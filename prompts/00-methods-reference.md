@@ -254,7 +254,7 @@ transition → <target> | handle | ignore (documented) | ignore (accidental)*
 ```
 <!-- /generated:rules -->
 
-Values marked * count as specification holes. Never accept "nothing happens" implicitly: it is either a documented, DR-linked ignore, or a hole. State dispositions at compound-state level; substates inherit them. Mark inherited cells with their source. Only unresolved leaf cells count as holes. In the to-be matrix, every `ignore` / `reject` / `defer` cell carries its DR link, and `ignore (accidental)` may no longer appear.
+A crash (panic, escaping exception, process exit) is written `handle crash: … → Q-nn`: it is behaviour, but undecided, so it always carries a question. Values marked * count as specification holes. Never accept "nothing happens" implicitly: it is either a documented, DR-linked ignore, or a hole. State dispositions at compound-state level; substates inherit them. Mark inherited cells with their source. Only unresolved leaf cells count as holes. In the to-be matrix, every `ignore` / `reject` / `defer` cell carries its DR link, and `ignore (accidental)` may no longer appear.
 
 ## Event catalogue and undesired variants
 
