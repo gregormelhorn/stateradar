@@ -17,7 +17,7 @@ Steering agent: claude-opus-5-5, the same model as in the second routed pilot.
 | `analysis/` | the whole analysis directory as written into the pool clone, including the run's own `check_guards.py`, `check_matrix.py` and `merge_sidecar_sections.py` |
 | `as-is-tests.md` | executed as-is Go tests, commands, exact outcomes (it names the raw outputs `go-outputs/R*.txt` and earlier test versions `go-outputs/asis_test.go.v1`; in this folder they are in `go-test-outputs/` and `go-tests/`, the raw evidence is left unedited) |
 | `go-tests/` | the final as-is test file and its two earlier versions |
-| `go-test-outputs/` | raw `go test` outputs R0 to R5 (R0 and R5 hang on the repository's `TestPool_Get`) |
+| `go-test-outputs/` | raw `go test` outputs R0 to R5 and R0c (R0 and R5 hang on the repository's `TestPool_Get`; `timing.md` and `comparison.md` call the repository-only run `R0-repo-tests-skip-TestPool_Get.txt` "R0b") |
 | `checker-outputs/` | outputs of every checker run, including the red ones |
 | `part-b/` | the dispatch package as sent, the contracts file, the dispatch start time and the blind subagent's table |
 | `authoring-helpers/` | the matrix generator and its header/footer |
@@ -34,7 +34,7 @@ time this folder was added (main @ 9487c42).
 | 2 | `gen_analysis_sidecar.py` reads `\| DOC-` rows of a `###` sub-section into the doctrine map; dsc_check then fails on the schema and on undeclared doc ids. | Open. |
 | 3 | `gen_analysis_sidecar.py` does not emit `pairs`, guard groups or the ODC fields; the run merged them with its own `merge_sidecar_sections.py`. | Open (roadmap entry 11), as after both routed pilots. |
 | 4 | `check_reachability.py` reports a state that only an interleaving reaches (Open_Waiting_IdleStranded, pair P-01b) as unreachable. | Open; by design under single-event semantics. The run left it red and reported it. |
-| 5 | `part_b_pack.py` leaves debris where it removes ids ("guard group , branch discard", "itself a finding .") and repeated file names where it strips citations ("(channel.go, channel.go)"). | Open; still reproducible on main. Cosmetic: no id or line number leaks. |
+| 5 | `part_b_pack.py` leaves debris where it removes ids ("guard group , branch discard", "itself a .") and repeated file names where it strips citations ("(channel.go, channel.go)"). | Open; still reproducible on main. Cosmetic: no id or line number leaks. |
 | 6 | The disposition vocabulary has no value for a crash or panic; the run used `handle` with the panic stated and a Q. | Open. |
 | 7 | The prompt's routing section prescribes `model routing: not configured` when the keys are unset; here routing was off by instruction. | Recorded; both facts are stated in the run's summary. |
 | 8 | In the final checker run the `check_guards` exit code printed empty (`PIPESTATUS` unavailable in that shell). | Measurement glitch of the run; run 1 recorded `exit=1` for the same result. |

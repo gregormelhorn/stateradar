@@ -207,10 +207,10 @@
   same 19 of 28 aligned cells. Exact cost from the session transcripts at
   Opus 5.5 prices: $12.54 against the routed pilot's $12.86, of which the
   steering agent was 99.8 %. Roadmap entry 11 records that routing as
-  configured saves neither time nor money and makes "Flash writes, the
+  configured showed no saving in time or cost and makes "Flash writes, the
   steering agent decides" the next step. `INDEX.md` lists the run's tool
   problems; the sidecar generator's prose-table and doctrine-table parsing
-  and the Part-B id-removal debris are new and open.
+  and the Part-B id-removal debris are newly recorded and open.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

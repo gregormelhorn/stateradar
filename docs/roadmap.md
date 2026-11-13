@@ -303,20 +303,25 @@ Open, in order:
    subagent). The steering agent is 99.8 % of the routed cost, and its usage
    was about the same in both runs (84 against 77 messages, 26.1 M against
    23.6 M cache-read tokens). So routing as configured, where Flash and Jev
-   add checks on top of the agent's own complete pass, saves neither time nor
-   money; one run each, so the small differences are not a measured effect.
+   add checks on top of the agent's own complete pass, showed no saving in
+   time or cost; one run each, and the runs differ in model size (7 against 9
+   states), so the small differences are not a measured effect.
 2. **Flash writes, the steering agent decides.** Next. Since the steering
    agent's cache reads, writes and output are almost the whole cost, the aim
-   is fewer agent rounds and less agent output: a pilot of the same
-   component in which Flash drafts the bulk text (matrix cells, as-is tests)
-   from the steering agent's decisions, and the steering agent only decides,
-   checks citations and runs the gates. Measure wall clock, cost and finding
-   quality against the same benchmark. This arm runs under a named prompt
-   variant that suspends routing rule 3 (the agent's own complete pass) for
-   that arm only. Flash's error rate on such text is unmeasured: in the
-   second pilot Jev judged Flash's 133 drafted claims 124 supported, 9
-   unclear and 0 contradicted, but those were Step-1 claims, not matrix
-   cells or tests, so the judgment step stays with the steering agent.
+   is fewer agent rounds and less agent output. In the routed run, output
+   was about $4.20 of the steering agent's $12.84 (210k tokens), so cutting
+   output caps the saving at about a third; the cache reads and writes
+   (about $8.60) scale with the number of rounds, and reviewing Flash's
+   drafts could add rounds. Plan: a pilot of the same component in which
+   Flash drafts the bulk text (matrix cells, as-is tests) from the steering
+   agent's decisions, and the steering agent only decides, checks citations
+   and runs the gates. Measure wall clock, cost and finding quality against
+   the same benchmark. This arm runs under a named prompt variant that
+   suspends routing rule 3 (the agent's own complete pass) for that arm
+   only. Flash's error rate on such text is unmeasured: in the second pilot
+   Jev judged Flash's 133 drafted claims 124 supported, 9 unclear and 0
+   contradicted, but those were Step-1 claims, not matrix cells or tests, so
+   the judgment step stays with the steering agent.
 3. **Flash as the steering agent.** Only if the item-2 pilot holds the
    finding quality: the same component with Flash steering the whole run,
    and Part B on a different model so that A and B do not share one model's

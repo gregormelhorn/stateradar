@@ -125,6 +125,10 @@ the question table below counts as a label-only divergence (`≠ label`); a
 
 Convergent **19 / 28** (68 %); divergent **9**, of which **2 are
 label-only** (the same hole, recorded as observed behaviour with a question).
+The grid leaves out the two waiter sub-states without a baseline counterpart;
+they carry behaviour the baseline does not describe (a barging Get below the
+cap goes to Open_Creating, Close is `handle` without waking a waiter), which
+the count does not include and Q-03, Q-04 and Q-05 cover.
 The nine divergent cells are the same nine as in the second routed pilot
 (19 / 28). First routed pilot: 21 / 28 as published, 20 / 28 under the rule
 above (it counted Released × Put as agreeing). The baseline's own
@@ -140,7 +144,7 @@ comparison, not part of the repository):
   cap, `ignore (documented)`; below the cap, the error is returned and the
   pool goes back to Open_Empty_BelowCap. All three match the code. One
   nuance: a Get that starts with idle conns can still reach the factory if it
-  discards every idle conn (expired or Ping-failed, channel.go:115-126) and
+  discards every idle conn (expired or Ping-failed, channel.go:115-127) and
   then falls into the create branch; this run models that as passing through
   Open_Empty_BelowCap and Open_Creating, the baseline as `handle` in
   Active_HasIdle. Same behaviour, different state attribution.
