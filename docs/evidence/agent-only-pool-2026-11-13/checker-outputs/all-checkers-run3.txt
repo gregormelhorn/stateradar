@@ -1,0 +1,16 @@
+## check_matrix
+CHECK MATRIX: OK (9 rows x 27 events)
+exit=0
+## gen_analysis_sidecar
+OK channelPool: 9 states x 27 events = 243 cells, 19 questions, DRs []
+exit=0
+## merge_sidecar_sections
+merged: 18 pairs, 9 guard groups, ODC fields on 19 questions
+exit=0
+## dsc_check
+DSC CHECK: OK (9 states x 27 events, 243 cells, 9 guard groups)
+exit=0
+## check_reachability
+REACHABILITY CHECK: FAIL
+  - state 'Open_Waiting_IdleStranded' is unreachable from initial state 'Open_Idle'
+exit=1

@@ -1,0 +1,52 @@
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestPool_Get_Impl
+--- PASS: TestPool_Get_Impl (0.00s)
+=== RUN   TestPool_Put
+--- PASS: TestPool_Put (0.03s)
+=== RUN   TestPool_UsedCapacity
+--- PASS: TestPool_UsedCapacity (0.00s)
+=== RUN   TestPool_Close
+--- PASS: TestPool_Close (0.00s)
+=== RUN   TestPoolConcurrent
+==================
+WARNING: DATA RACE
+Write at 0x00c0000941f0 by goroutine 401:
+  github.com/silenceper/pool.(*channelPool).Release()
+      /tmp/agent-only-9yFc/pool-tests/channel.go:229 +0xb0
+  github.com/silenceper/pool.TestPoolConcurrent.func1()
+      /tmp/agent-only-9yFc/pool-tests/channel_rpc_test.go:171 +0x38
+
+Previous read at 0x00c0000941f0 by goroutine 404:
+  github.com/silenceper/pool.(*channelPool).Get()
+      /tmp/agent-only-9yFc/pool-tests/channel.go:123 +0x128
+  github.com/silenceper/pool.TestPoolConcurrent.func2()
+      /tmp/agent-only-9yFc/pool-tests/channel_rpc_test.go:176 +0x44
+
+Goroutine 401 (running) created at:
+  github.com/silenceper/pool.TestPoolConcurrent()
+      /tmp/agent-only-9yFc/pool-tests/channel_rpc_test.go:170 +0xa0
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+
+Goroutine 404 (finished) created at:
+  github.com/silenceper/pool.TestPoolConcurrent()
+      /tmp/agent-only-9yFc/pool-tests/channel_rpc_test.go:175 +0x178
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+==================
+    testing.go:1867: race detected during execution of test
+--- FAIL: TestPoolConcurrent (0.00s)
+=== RUN   TestPoolWriteRead
+--- PASS: TestPoolWriteRead (0.00s)
+=== RUN   TestPoolConcurrent2
+--- PASS: TestPoolConcurrent2 (0.08s)
+FAIL
+FAIL	github.com/silenceper/pool	0.738s
+?   	github.com/silenceper/pool/example	[no test files]
+FAIL
+exit=1

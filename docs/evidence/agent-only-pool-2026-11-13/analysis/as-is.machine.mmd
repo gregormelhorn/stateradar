@@ -1,0 +1,40 @@
+stateDiagram-v2
+    %% channelPool as-is (silenceper/pool @ 6084537). i = idle count, M = MaxIdle,
+    %% o = openingConns, X = MaxCap, w = waiting Gets. Guard notes: disposition-matrix.md.
+    [*] --> Open_Idle: New (0 < InitialCap < MaxIdle)
+    [*] --> Open_IdleFull: New (InitialCap = MaxIdle >= 1)
+    [*] --> Open_Empty_BelowCap: New (InitialCap = 0 < MaxCap)
+    [*] --> Open_Empty_AtCap: New (InitialCap = 0 = MaxCap, guard G-01 accepts it)
+    [*] --> [*]: New rejected (G-01) or factory error during pre-fill
+
+    state Open {
+        Open_Idle --> Open_IdleFull: PUT fills last idle slot (i+1 = M)
+        Open_Idle --> Open_Empty_BelowCap: GET takes last idle conn (o < X)
+        Open_Idle --> Open_Empty_AtCap: GET takes last idle conn (o >= X)
+        Open_IdleFull --> Open_Idle: GET takes an idle conn
+        Open_Empty_BelowCap --> Open_Creating: GET (idle empty, o < X)
+        Open_Empty_BelowCap --> Open_Idle: PUT (M >= 1)
+        Open_Empty_AtCap --> Open_Waiting: GET (o >= X), blocks without timeout
+        Open_Empty_AtCap --> Open_Idle: PUT (M >= 1)
+        Open_Empty_AtCap --> Open_Empty_BelowCap: CLOSE / discard (o-1)
+        Open_Creating --> Open_Empty_BelowCap: FACTORY_OK (o+1 < X) or FACTORY_ERR
+        Open_Creating --> Open_Empty_AtCap: FACTORY_OK (o+1 >= X)
+        Open_Creating --> Open_Waiting_BelowCap: FACTORY_OK or FACTORY_ERR with stranded waiters
+        Open_Creating --> Open_Idle: FACTORY_OK while a racing PUT left an idle conn
+        Open_Waiting --> Open_Empty_AtCap: PUT hands conn to the last waiter
+        Open_Waiting --> Open_Waiting_BelowCap: CLOSE / discard (o-1), no waiter woken
+        Open_Waiting --> Open_Waiting_IdleStranded: PUT enqueues in the Get select/lock window (race, P-01b)
+        Open_Waiting_BelowCap --> Open_Creating: GET barges past waiters (idle empty, o < X)
+        Open_Waiting_BelowCap --> Open_Empty_BelowCap: PUT hands conn to the last waiter
+        Open_Waiting_IdleStranded --> Open_Waiting: GET takes the stranded idle conn
+        Open_Waiting_IdleStranded --> Open_Idle: PUT hands conn to the last waiter
+    }
+
+    Open_Idle --> Released: RELEASE
+    Open_IdleFull --> Released: RELEASE
+    Open_Empty_BelowCap --> Released: RELEASE
+    Open_Empty_AtCap --> Released: RELEASE
+    Open_Waiting --> Released: RELEASE (waiters stay blocked)
+    Open_Waiting_BelowCap --> Released: RELEASE (waiters stay blocked)
+    Open_Waiting_IdleStranded --> Released: RELEASE (waiters stay blocked)
+    Open_Creating --> Released: RELEASE (deferred until the factory returns)

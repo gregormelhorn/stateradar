@@ -1,0 +1,3139 @@
+{
+ "formatVersion": "1.0",
+ "component": "channelPool",
+ "packVersion": "stateradar a331dae (02-pilot v1.17)",
+ "analyzedSha": "6084537e520652192f41aebfd88d822c00b9447a",
+ "watchPaths": [
+  "channel.go",
+  "pool.go"
+ ],
+ "states": [
+  "Open_Idle",
+  "Open_IdleFull",
+  "Open_Empty_BelowCap",
+  "Open_Empty_AtCap",
+  "Open_Waiting",
+  "Open_Waiting_BelowCap",
+  "Open_Waiting_IdleStranded",
+  "Open_Creating",
+  "Released"
+ ],
+ "events": [
+  {
+   "id": "GET",
+   "undesired": false,
+   "gate": "service-side state (shut down; idle connection available; live count vs MaxCap) plus payload timestamp and Ping result per dequeued idle connection",
+   "upstream_guards": [
+    "none upstream",
+    "construction guarantees InitialCap <= MaxIdle <= MaxCap and InitialCap >= 0 (channel.go:59)",
+    "MaxCap > 0 not required",
+    "no deadline or cancellation parameter"
+   ]
+  },
+  {
+   "id": "PUT",
+   "undesired": false,
+   "gate": "payload nil check, then service-side state (shut down; waiting Get exists; idle storage full)",
+   "upstream_guards": [
+    "Go type system only",
+    "origin not checked",
+    "duplicate not checked",
+    "liveness not checked"
+   ]
+  },
+  {
+   "id": "CLOSE",
+   "undesired": false,
+   "gate": "payload nil check, then service-side state (shut down)",
+   "upstream_guards": [
+    "none",
+    "origin not checked",
+    "duplicate not checked",
+    "idle-membership not checked"
+   ]
+  },
+  {
+   "id": "RELEASE",
+   "undesired": false,
+   "gate": "service-side state (already shut down or not)",
+   "upstream_guards": [
+    "none"
+   ]
+  },
+  {
+   "id": "LEN",
+   "undesired": false,
+   "gate": "none (no branch)",
+   "upstream_guards": [
+    "none"
+   ]
+  },
+  {
+   "id": "PING",
+   "undesired": false,
+   "gate": "payload nil check; no check that a Ping function is configured",
+   "upstream_guards": [
+    "none",
+    "configured Ping not required"
+   ]
+  },
+  {
+   "id": "FACTORY_OK",
+   "undesired": false,
+   "gate": "payload error nil or not; connection nil-ness not examined",
+   "upstream_guards": [
+    "non-nil Factory required at construction (channel.go:62)",
+    "result shape not checked",
+    "run time not bounded",
+    "re-entry not prevented"
+   ]
+  },
+  {
+   "id": "CLOSEFN_OK",
+   "undesired": false,
+   "gate": "payload error nil or not; propagated to Close and Put callers, discarded in Get and Release",
+   "upstream_guards": [
+    "non-nil Close callback required at construction (channel.go:65)",
+    "run time not bounded",
+    "re-entry not prevented"
+   ]
+  },
+  {
+   "id": "IDLE_TIMEOUT",
+   "undesired": false,
+   "gate": "payload timestamp vs IdleTimeout, compared only when a Get dequeues the connection",
+   "upstream_guards": [
+    "none",
+    "IdleTimeout <= 0 disables the comparison",
+    "monotonic clock assumed (NAT-6)"
+   ]
+  },
+  {
+   "id": "UV-01",
+   "undesired": true
+  },
+  {
+   "id": "UV-02",
+   "undesired": true
+  },
+  {
+   "id": "UV-03",
+   "undesired": true
+  },
+  {
+   "id": "UV-04",
+   "undesired": true
+  },
+  {
+   "id": "UV-05",
+   "undesired": true
+  },
+  {
+   "id": "UV-06",
+   "undesired": true
+  },
+  {
+   "id": "UV-07",
+   "undesired": true
+  },
+  {
+   "id": "UV-08",
+   "undesired": true
+  },
+  {
+   "id": "UV-09",
+   "undesired": true
+  },
+  {
+   "id": "UV-10",
+   "undesired": true
+  },
+  {
+   "id": "UV-11",
+   "undesired": true
+  },
+  {
+   "id": "UV-12",
+   "undesired": true
+  },
+  {
+   "id": "UV-13",
+   "undesired": true
+  },
+  {
+   "id": "UV-14",
+   "undesired": true
+  },
+  {
+   "id": "UV-15",
+   "undesired": true
+  },
+  {
+   "id": "UV-16",
+   "undesired": true
+  },
+  {
+   "id": "UV-17",
+   "undesired": true
+  },
+  {
+   "id": "UV-18",
+   "undesired": true
+  }
+ ],
+ "cells": [
+  {
+   "disposition": "transition",
+   "target": "Open_Empty_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 129,
+    "fragment": "return wrapConn.conn, nil"
+   },
+   "state": "Open_Idle",
+   "event": "GET"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_IdleFull",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Idle",
+   "event": "PUT"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Idle",
+   "event": "CLOSE"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 238,
+    "fragment": "close(conns)"
+   },
+   "state": "Open_Idle",
+   "event": "RELEASE"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_Idle",
+   "event": "LEN"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_Idle",
+   "event": "PING"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Idle",
+   "event": "FACTORY_OK"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Idle",
+   "event": "CLOSEFN_OK"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-12",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+   },
+   "state": "Open_Idle",
+   "event": "IDLE_TIMEOUT"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 129,
+    "fragment": "return wrapConn.conn, nil"
+   },
+   "state": "Open_IdleFull",
+   "event": "GET"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 196,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Open_IdleFull",
+   "event": "PUT"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_IdleFull",
+   "event": "CLOSE"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 238,
+    "fragment": "close(conns)"
+   },
+   "state": "Open_IdleFull",
+   "event": "RELEASE"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_IdleFull",
+   "event": "LEN"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_IdleFull",
+   "event": "PING"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_IdleFull",
+   "event": "FACTORY_OK"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_IdleFull",
+   "event": "CLOSEFN_OK"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-12",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+   },
+   "state": "Open_IdleFull",
+   "event": "IDLE_TIMEOUT"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Creating",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "GET"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "PUT"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "CLOSE"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 238,
+    "fragment": "close(conns)"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "RELEASE"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "LEN"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "PING"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "FACTORY_OK"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "CLOSEFN_OK"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 32,
+    "fragment": "IdleTimeout time.Duration"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "IDLE_TIMEOUT"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "GET"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "PUT"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Empty_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "CLOSE"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 238,
+    "fragment": "close(conns)"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "RELEASE"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "LEN"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "PING"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "FACTORY_OK"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "CLOSEFN_OK"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 32,
+    "fragment": "IdleTimeout time.Duration"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "IDLE_TIMEOUT"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Open_Waiting",
+   "event": "GET"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Empty_AtCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting",
+   "event": "PUT"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting",
+   "event": "CLOSE"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 238,
+    "fragment": "close(conns)"
+   },
+   "state": "Open_Waiting",
+   "event": "RELEASE"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_Waiting",
+   "event": "LEN"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_Waiting",
+   "event": "PING"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting",
+   "event": "FACTORY_OK"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting",
+   "event": "CLOSEFN_OK"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 32,
+    "fragment": "IdleTimeout time.Duration"
+   },
+   "state": "Open_Waiting",
+   "event": "IDLE_TIMEOUT"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Creating",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "GET"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Empty_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "PUT"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "CLOSE"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 238,
+    "fragment": "close(conns)"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "RELEASE"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "LEN"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "PING"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "FACTORY_OK"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "CLOSEFN_OK"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 32,
+    "fragment": "IdleTimeout time.Duration"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "IDLE_TIMEOUT"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 129,
+    "fragment": "return wrapConn.conn, nil"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "GET"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "PUT"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "CLOSE"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 238,
+    "fragment": "close(conns)"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "RELEASE"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "LEN"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "PING"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "FACTORY_OK"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "CLOSEFN_OK"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-12",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "IDLE_TIMEOUT"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 96,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "GET"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "PUT"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "CLOSE"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 225,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "RELEASE"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 96,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "LEN"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_Creating",
+   "event": "PING"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Empty_AtCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_Creating",
+   "event": "FACTORY_OK"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "CLOSEFN_OK"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-12",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+   },
+   "state": "Open_Creating",
+   "event": "IDLE_TIMEOUT"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released",
+   "event": "GET"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 176,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Released",
+   "event": "PUT"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 208,
+    "fragment": "if c.close == nil {"
+   },
+   "state": "Released",
+   "event": "CLOSE"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 234,
+    "fragment": "if conns == nil {"
+   },
+   "state": "Released",
+   "event": "RELEASE"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Released",
+   "event": "LEN"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Released",
+   "event": "PING"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Released",
+   "event": "FACTORY_OK"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Released",
+   "event": "CLOSEFN_OK"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Released",
+   "event": "IDLE_TIMEOUT"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-16",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_Idle",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Idle",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Idle",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Idle",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Idle",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Idle",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Idle",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Idle",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 169,
+    "fragment": "connection is nil. rejecting"
+   },
+   "state": "Open_Idle",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-16",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 196,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 196,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 196,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 169,
+    "fragment": "connection is nil. rejecting"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-16",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 169,
+    "fragment": "connection is nil. rejecting"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-16",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Empty_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Empty_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Empty_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 169,
+    "fragment": "connection is nil. rejecting"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-16",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-02",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 169,
+    "fragment": "connection is nil. rejecting"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-16",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-02",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 169,
+    "fragment": "connection is nil. rejecting"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-16",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-02",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 169,
+    "fragment": "connection is nil. rejecting"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-16",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_Creating",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 169,
+    "fragment": "connection is nil. rejecting"
+   },
+   "state": "Open_Creating",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 238,
+    "fragment": "close(conns)"
+   },
+   "state": "Released",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 176,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Released",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 176,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Released",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 208,
+    "fragment": "if c.close == nil {"
+   },
+   "state": "Released",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 208,
+    "fragment": "if c.close == nil {"
+   },
+   "state": "Released",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 176,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Released",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 176,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Released",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 208,
+    "fragment": "if c.close == nil {"
+   },
+   "state": "Released",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 169,
+    "fragment": "connection is nil. rejecting"
+   },
+   "state": "Released",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Idle",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Idle",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Idle",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Idle",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Idle",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Idle",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Idle",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Idle",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Idle",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 196,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_IdleFull",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Empty_BelowCap",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Idle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Empty_AtCap",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Waiting_BelowCap",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 183,
+    "fragment": "req <- connReq{"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Waiting_IdleStranded",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 172,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Empty_BelowCap",
+   "citation": {
+    "file": "channel.go",
+    "line": 157,
+    "fragment": "return nil, err"
+   },
+   "state": "Open_Creating",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-07",
+   "citation": {
+    "file": "channel.go",
+    "line": 157,
+    "fragment": "return nil, err"
+   },
+   "state": "Open_Creating",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-07",
+   "citation": {
+    "file": "channel.go",
+    "line": 159,
+    "fragment": "c.openingConns++"
+   },
+   "state": "Open_Creating",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 131,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 206,
+    "fragment": "c.mu.Lock()"
+   },
+   "state": "Open_Creating",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 176,
+    "fragment": "return c.Close(conn)"
+   },
+   "state": "Released",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Released",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Released",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Released",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Released",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Released",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 232,
+    "fragment": "c.mu.Unlock()"
+   },
+   "state": "Released",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Released",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 232,
+    "fragment": "c.mu.Unlock()"
+   },
+   "state": "Released",
+   "event": "UV-18"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-19"
+   ],
+   "trigger": "step-2 test replay"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-01"
+   ],
+   "trigger": "step-1 extraction"
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-01"
+   ],
+   "trigger": "pairs table + z3 proof"
+  },
+  {
+   "id": "Q-05",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-20"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-06",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-07"
+   ],
+   "trigger": "step-4 matrix walk"
+  },
+  {
+   "id": "Q-07",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-18"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-08",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-11"
+   ],
+   "trigger": "step-3 lock-discipline annotation"
+  },
+  {
+   "id": "Q-09",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-08"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-10",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-05"
+   ],
+   "trigger": "step-2 test replay"
+  },
+  {
+   "id": "Q-11",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "pairs table + z3 proof"
+  },
+  {
+   "id": "Q-12",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "doctrine mapping"
+  },
+  {
+   "id": "Q-13",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-04"
+   ],
+   "trigger": "doctrine mapping"
+  },
+  {
+   "id": "Q-14",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-19"
+   ],
+   "trigger": "doctrine mapping"
+  },
+  {
+   "id": "Q-15",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "doctrine mapping"
+  },
+  {
+   "id": "Q-16",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-12"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-17",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-18",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-10"
+   ],
+   "trigger": "multi-instance probes"
+  },
+  {
+   "id": "Q-19",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "step-3 lock-discipline annotation"
+  },
+  {
+   "id": "Q-20",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-19"
+   ],
+   "trigger": "part-B diff"
+  }
+ ],
+ "behaviouralDrs": [],
+ "docLines": [
+  {
+   "id": "DOC-1",
+   "mapping": "structural",
+   "target": "connections are opaque values: no cell inspects them, the catalogue gate annotations state that identity and content are never examined (enforced by the event definitions in event-catalogue.md)"
+  },
+  {
+   "id": "DOC-2",
+   "mapping": "cell",
+   "target": "Open_Idle x IDLE_TIMEOUT"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "invariant",
+   "target": "SYS-7"
+  },
+  {
+   "id": "DOC-4",
+   "mapping": "cell",
+   "target": "Open_Empty_AtCap x GET"
+  },
+  {
+   "id": "DOC-5",
+   "mapping": "constraint",
+   "target": "NAT-4"
+  },
+  {
+   "id": "DOC-6",
+   "mapping": "invariant",
+   "target": "SYS-5"
+  },
+  {
+   "id": "DOC-7",
+   "mapping": "cell",
+   "target": "Open_Idle x LEN"
+  },
+  {
+   "id": "DOC-8",
+   "mapping": "invariant",
+   "target": "SYS-1"
+  },
+  {
+   "id": "DOC-9",
+   "mapping": "invariant",
+   "target": "SYS-2"
+  },
+  {
+   "id": "DOC-10",
+   "mapping": "invariant",
+   "target": "SYS-9"
+  },
+  {
+   "id": "DOC-11",
+   "mapping": "guard",
+   "target": "G-03"
+  },
+  {
+   "id": "DOC-12",
+   "mapping": "cell",
+   "target": "Open_Waiting x GET"
+  },
+  {
+   "id": "DOC-13",
+   "mapping": "cell",
+   "target": "Released x GET"
+  },
+  {
+   "id": "DOC-14",
+   "mapping": "cell",
+   "target": "Released x CLOSE"
+  },
+  {
+   "id": "DOC-15",
+   "mapping": "cell",
+   "target": "Open_Idle x GET"
+  },
+  {
+   "id": "DOC-16",
+   "mapping": "cell",
+   "target": "Open_Empty_BelowCap x PUT"
+  },
+  {
+   "id": "DOC-17",
+   "mapping": "rejected",
+   "target": "implementation remark about efficiency (channels); prescribes no observable behaviour"
+  },
+  {
+   "id": "DOC-18",
+   "mapping": "rejected",
+   "target": "attribution to fatih/pool; prescribes no behaviour of this component"
+  }
+ ],
+ "coverage": {
+  "GET": {
+   "loss": "n/a: a Get that never arrives changes nothing; a blocked Get cannot be abandoned (no cancellation API)",
+   "delay": "n/a: Get takes no deadline; waiting without bound is the GET disposition in the waiting rows",
+   "duplication": "n/a: every Get is an independent request; repeating Get is legitimate use",
+   "out-of-order": "n/a: a Get after Release is the GET cell of row Released",
+   "contradiction": "n/a as a column: concurrent Get with Put/Close/Release are pairs P-01, P-02, P-04, P-08",
+   "commission": "n/a: Get has no trigger other than the caller",
+   "value": "n/a: Get has no payload"
+  },
+  "PUT": {
+   "loss": "UV-01",
+   "delay": "UV-02",
+   "duplication": "UV-03",
+   "out-of-order": "n/a: a Put after Release is the PUT cell of row Released (the pool cannot reopen)",
+   "contradiction": "UV-06",
+   "commission": "UV-07",
+   "value": "UV-09, UV-10"
+  },
+  "CLOSE": {
+   "loss": "UV-01",
+   "delay": "n/a: a late Close only delays the decrement; the same as UV-02 for the capacity it holds",
+   "duplication": "UV-04",
+   "out-of-order": "UV-05",
+   "contradiction": "UV-06",
+   "commission": "UV-08",
+   "value": "UV-09"
+  },
+  "RELEASE": {
+   "loss": "n/a: a pool that is never released lives until the process ends; that is its normal lifetime",
+   "delay": "n/a: Release has no deadline relation",
+   "duplication": "n/a: a second Release is the RELEASE cell of row Released",
+   "out-of-order": "n/a: there is no event after which Release would be stale",
+   "contradiction": "n/a as a column: concurrent Release calls are pair P-09",
+   "commission": "n/a: only the caller triggers it",
+   "value": "n/a: no payload"
+  },
+  "LEN": {
+   "loss": "n/a: a query that does not arrive changes nothing",
+   "delay": "n/a: no timing relation",
+   "duplication": "n/a: read-only, repeating is harmless by construction",
+   "out-of-order": "n/a: a Len after Release is the LEN cell of row Released",
+   "contradiction": "n/a: read-only",
+   "commission": "n/a: only the caller triggers it",
+   "value": "n/a: no payload"
+  },
+  "PING": {
+   "loss": "n/a: a Ping call that does not arrive changes nothing",
+   "delay": "n/a: runs without the mutex, a slow Ping delays only its caller",
+   "duplication": "n/a: repeating a validation is legitimate",
+   "out-of-order": "n/a: a Ping after Release is the PING cell of row Released",
+   "contradiction": "n/a: read-only with respect to the pool",
+   "commission": "n/a: only the caller triggers it",
+   "value": "UV-09"
+  },
+  "FACTORY_OK": {
+   "loss": "UV-11",
+   "delay": "UV-12",
+   "duplication": "n/a: synchronous call, one result per call",
+   "out-of-order": "n/a: synchronous; no late result after the creating Get returned",
+   "contradiction": "UV-13",
+   "commission": "UV-17",
+   "value": "UV-14"
+  },
+  "CLOSEFN_OK": {
+   "loss": "UV-15",
+   "delay": "UV-16",
+   "duplication": "n/a: synchronous call, one result per call",
+   "out-of-order": "n/a: synchronous; no late result",
+   "contradiction": "n/a: single error value",
+   "commission": "UV-18",
+   "value": "n/a: the only result is an error value, its non-nil case is UV-15"
+  },
+  "IDLE_TIMEOUT": {
+   "loss": "n/a: no timer exists that could fail",
+   "delay": "n/a: the IDLE_TIMEOUT column records the lazy handling itself",
+   "duplication": "n/a: a passage of time cannot repeat",
+   "out-of-order": "n/a: monotonic comparison (NAT-6)",
+   "contradiction": "n/a: one comparison per dequeued connection",
+   "commission": "n/a: no timer can fire spuriously",
+   "value": "n/a: wall-clock jumps do not affect the monotonic comparison (NAT-6)"
+  }
+ },
+ "pairs": [
+  {
+   "id": "P-01a",
+   "trace": "P-01a — Get registers as waiting, then Put"
+  },
+  {
+   "id": "P-01b",
+   "trace": "P-01b — Put lands between Get's empty select and Get's lock"
+  },
+  {
+   "id": "P-02a",
+   "trace": "P-02a — Get completes, then Release"
+  },
+  {
+   "id": "P-02b",
+   "trace": "P-02b — Release starts while a Get is in progress"
+  },
+  {
+   "id": "P-03a",
+   "trace": "P-03a — Put, then Release"
+  },
+  {
+   "id": "P-03b",
+   "trace": "P-03b — Release, then Put"
+  },
+  {
+   "id": "P-04a",
+   "trace": "P-04a — Close, then Get at the former cap"
+  },
+  {
+   "id": "P-04b",
+   "trace": "P-04b — Get waits, then Close frees capacity"
+  },
+  {
+   "id": "P-05a",
+   "trace": "P-05a — Put(c), then Close(c) by another goroutine"
+  },
+  {
+   "id": "P-05b",
+   "trace": "P-05b — Close(c), then Put(c)"
+  },
+  {
+   "id": "P-06a",
+   "trace": "P-06a — Factory returns, then Release"
+  },
+  {
+   "id": "P-06b",
+   "trace": "P-06b — Release called while Factory runs"
+  },
+  {
+   "id": "P-07a",
+   "trace": "P-07a — Idle time passes, then a Get dequeues the conn"
+  },
+  {
+   "id": "P-07b",
+   "trace": "P-07b — Get dequeues the conn just before the idle time passes"
+  },
+  {
+   "id": "P-08a",
+   "trace": "P-08a — Release clears the Ping reference before the Get reads it"
+  },
+  {
+   "id": "P-08b",
+   "trace": "P-08b — Get reads the Ping reference, Release clears it, Get calls Ping"
+  },
+  {
+   "id": "P-09a",
+   "trace": "P-09a — Release by caller 1, then Release by caller 2"
+  },
+  {
+   "id": "P-09b",
+   "trace": "P-09b — Release by caller 2, then Release by caller 1"
+  }
+ ],
+ "guardGroups": [
+  {
+   "id": "G-01",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-02",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-03",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-04",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-05",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-06",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-07",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-08",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-09",
+   "outcome": "violation"
+  }
+ ]
+}

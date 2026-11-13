@@ -287,23 +287,44 @@ Open, in order:
    guard and ODC fields (the pilot merged them with a per-run script); as-is
    prose in the catalogue reaching Part B (the pilot's candidate rule:
    remembrance and upstream statements carry the provenance "observed in
-   code"). Next: a timed agent-only run of the same component in a fresh
-   session, so time and cost compare like for like. Its `timing.md` shows
-   where the 37 minutes went: about 70 s of Flash and Jev calls, about 3.5
-   minutes of `go test` (mostly three waits on the hanging `TestPool_Get`'s
-   60-second timeout) and about 32 minutes of the steering agent's own work,
-   which includes the pack's tool runs (not timed separately).
-2. **Flash writes, the steering agent decides.** After the timed agent-only
-   run: a pilot of the same component in which Flash drafts the bulk text
-   (matrix cells, as-is tests) from the steering agent's decisions, and the
-   steering agent only decides, checks citations and runs the gates. Measure
-   wall clock, cost and finding quality against the same benchmark. This arm
-   runs under a named prompt variant that suspends routing rule 3 (the
-   agent's own complete pass) for that arm only. Flash's error rate on such
-   text is unmeasured: in the second pilot Jev judged Flash's 133 drafted
-   claims 124 supported, 9 unclear and 0 contradicted, but those were Step-1
-   claims, not matrix cells or tests, so the judgment step stays with the
-   steering agent.
+   code"). Its `timing.md` shows where the 37 minutes went: about 70 s of
+   Flash and Jev calls, about 3.5 minutes of `go test` (mostly three waits
+   on the hanging `TestPool_Get`'s 60-second timeout) and about 32 minutes
+   of the steering agent's own work, which includes the pack's tool runs
+   (not timed separately). Timed agent-only run (done 2026-11-13,
+   `docs/evidence/agent-only-pool-2026-11-13/`, same pack, blind, routing
+   off, Part B in a fresh blind subagent): 34:34 minutes, of which 2:25
+   `go test`, about 3 s checkers, 1:36 blind subagent and 30:30 agent work.
+   Primary finding found and executed; the same 19 of 28 cells and the same
+   nine divergences as the second pilot; 18 as-is tests, 17 observe their
+   claim and T11 reports the ping race. Exact cost from the session
+   transcripts at Opus 5.5 prices: routed $12.86 ($12.84 steering agent,
+   $0.02 Flash and Jev), agent-only $12.54 ($12.04 main, $0.50 blind
+   subagent). The steering agent is 99.8 % of the routed cost, and its usage
+   was about the same in both runs (84 against 77 messages, 26.1 M against
+   23.6 M cache-read tokens). So routing as configured, where Flash and Jev
+   add checks on top of the agent's own complete pass, showed no saving in
+   time or cost; one run each, and the runs differ in model size (7 against 9
+   states), so the small differences are not a measured effect.
+2. **Flash writes, the steering agent decides.** Next. Since the steering
+   agent's cache reads, writes and output are almost the whole cost, the aim
+   is fewer agent rounds and less agent output. In the routed run, output
+   was about $4.20 of the steering agent's $12.84 (210k tokens), so cutting
+   output caps the saving at about a third; the cache reads and writes
+   (about $8.63) scale with the number of rounds, and reviewing Flash's
+   drafts could add rounds. Plan: a pilot of the same component in which
+   Flash drafts the bulk text (matrix cells, as-is tests) from the steering
+   agent's decisions, and the steering agent only decides, checks citations
+   and runs the gates. Measure wall clock, cost and finding quality against
+   the same benchmark, and compare cost against an agent-only run whose
+   model has about the same size (states and cells), since model size moves
+   the steering agent's rounds; the two runs so far differ (7 against 9
+   states). This arm runs under a named prompt variant that suspends routing
+   rule 3 (the agent's own complete pass) for that arm only. Flash's error
+   rate on such text is unmeasured: in the second pilot Jev judged Flash's
+   133 drafted claims 124 supported, 9 unclear and 0 contradicted, but those
+   were Step-1 claims, not matrix cells or tests, so the judgment step stays
+   with the steering agent.
 3. **Flash as the steering agent.** Only if the item-2 pilot holds the
    finding quality: the same component with Flash steering the whole run,
    and Part B on a different model so that A and B do not share one model's

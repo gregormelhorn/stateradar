@@ -1,0 +1,52 @@
+=== RUN   TestAsIs_T10_WaiterStrandedWithIdleConn
+    asis_test.go:251: claim not observed in 50 runs (served=50)
+--- FAIL: TestAsIs_T10_WaiterStrandedWithIdleConn (1.19s)
+=== RUN   TestAsIs_T11_PingReadRacesRelease
+==================
+WARNING: DATA RACE
+Write at 0x00c000290ea0 by goroutine 114:
+  github.com/silenceper/pool.(*channelPool).Release()
+      /tmp/agent-only-9yFc/pool-tests/channel.go:229 +0xb0
+  github.com/silenceper/pool.TestAsIs_T11_PingReadRacesRelease()
+      /tmp/agent-only-9yFc/pool-tests/asis_test.go:276 +0x50
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+
+Previous read at 0x00c000290ea0 by goroutine 115:
+  github.com/silenceper/pool.(*channelPool).Get()
+      /tmp/agent-only-9yFc/pool-tests/channel.go:123 +0x128
+  github.com/silenceper/pool.TestAsIs_T11_PingReadRacesRelease.func2()
+      /tmp/agent-only-9yFc/pool-tests/asis_test.go:272 +0x98
+
+Goroutine 114 (running) created at:
+  testing.(*T).Run()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x7bc
+  testing.runTests.func1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2744 +0x74
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.runTests()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2742 +0x7a0
+  testing.(*M).Run()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2602 +0xb38
+  main.main()
+      _testmain.go:98 +0x100
+
+Goroutine 115 (finished) created at:
+  github.com/silenceper/pool.TestAsIs_T11_PingReadRacesRelease()
+      /tmp/agent-only-9yFc/pool-tests/asis_test.go:269 +0x34
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+==================
+    asis_test.go:279: no panic forced; the race detector is the oracle for this test
+    testing.go:1867: race detected during execution of test
+--- FAIL: TestAsIs_T11_PingReadRacesRelease (0.07s)
+FAIL
+FAIL	github.com/silenceper/pool	1.993s
+?   	github.com/silenceper/pool/example	[no test files]
+FAIL
+exit=1

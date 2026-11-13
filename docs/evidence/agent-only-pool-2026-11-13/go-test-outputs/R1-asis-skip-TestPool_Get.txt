@@ -1,0 +1,106 @@
+=== RUN   TestAsIs_T1_ReleaseLeavesWaiterBlocked
+    asis_test.go:82: observed: waiting Get still blocked 600ms after Release and after a Put
+--- PASS: TestAsIs_T1_ReleaseLeavesWaiterBlocked (0.66s)
+=== RUN   TestAsIs_T2_CloseDoesNotWakeWaiter
+    asis_test.go:105: observed: waiter blocked after Close; a new Get created conn id=2 ahead of it (created=2)
+--- PASS: TestAsIs_T2_CloseDoesNotWakeWaiter (0.35s)
+=== RUN   TestAsIs_T3_PutAfterReleaseDoesNotClose
+    asis_test.go:119: observed: Put after Release -> err=nil, conn closed=0, close calls=0
+--- PASS: TestAsIs_T3_PutAfterReleaseDoesNotClose (0.00s)
+=== RUN   TestAsIs_T4_CloseAfterReleaseDoesNotClose
+    asis_test.go:132: observed: Close after Release -> err=nil, close calls=0
+--- PASS: TestAsIs_T4_CloseAfterReleaseDoesNotClose (0.00s)
+=== RUN   TestAsIs_T5_DoubleCloseExceedsMaxCap
+    asis_test.go:148: observed: MaxCap=2, live conns=3, openingConns=2
+--- PASS: TestAsIs_T5_DoubleCloseExceedsMaxCap (0.00s)
+=== RUN   TestAsIs_T6_ForeignCloseExceedsMaxCap
+    asis_test.go:161: observed: MaxCap=1, two pool conns live after a foreign Close
+--- PASS: TestAsIs_T6_ForeignCloseExceedsMaxCap (0.00s)
+=== RUN   TestAsIs_T7_DuplicatePutSameConnToTwoGets
+    asis_test.go:176: observed: both Gets returned conn id=1
+--- PASS: TestAsIs_T7_DuplicatePutSameConnToTwoGets (0.00s)
+=== RUN   TestAsIs_T8_FactoryConnAndErrLeaksConn
+    asis_test.go:193: observed: Get -> (nil, "dial half-failed"); factory's conn never closed
+--- PASS: TestAsIs_T8_FactoryConnAndErrLeaksConn (0.00s)
+=== RUN   TestAsIs_T9_FactoryNilNilLosesSlot
+    asis_test.go:218: observed: Get -> (nil, nil); Put(nil) -> "connection is nil. rejecting"; Close(nil) -> "connection is nil. rejecting"; next Get blocked
+--- PASS: TestAsIs_T9_FactoryNilNilLosesSlot (0.30s)
+=== RUN   TestAsIs_T10_WaiterStrandedWithIdleConn
+    asis_test.go:247: claim not observed in 20 runs
+--- FAIL: TestAsIs_T10_WaiterStrandedWithIdleConn (0.87s)
+=== RUN   TestAsIs_T11_PingReadRacesRelease
+    asis_test.go:272: no panic forced; the race detector is the oracle for this test
+--- PASS: TestAsIs_T11_PingReadRacesRelease (0.00s)
+=== RUN   TestAsIs_T12_PingMethodNilPanics
+    asis_test.go:292: observed panics: no Ping configured: runtime error: invalid memory address or nil pointer dereference; after Release: runtime error: invalid memory address or nil pointer dereference
+--- PASS: TestAsIs_T12_PingMethodNilPanics (0.00s)
+=== RUN   TestAsIs_T13_LazyIdleExpiry
+    asis_test.go:309: observed: 100ms past expiry closes=0, Len=2; first Get closed 2 and created a new conn
+--- PASS: TestAsIs_T13_LazyIdleExpiry (0.15s)
+=== RUN   TestAsIs_T14_ReentrantCallbacksDeadlock
+    asis_test.go:338: observed: Close callback calling Len deadlocks Close; Factory calling Len deadlocks Get
+--- PASS: TestAsIs_T14_ReentrantCallbacksDeadlock (0.60s)
+=== RUN   TestAsIs_T15_SlowFactoryBlocksPut
+    asis_test.go:363: observed: Put blocked 348ms while another Get's Factory ran
+--- PASS: TestAsIs_T15_SlowFactoryBlocksPut (0.40s)
+=== RUN   TestAsIs_T16_BelowInitialCapNotReplenished
+    asis_test.go:382: observed: InitialCap=3, Len=0, openingConns=0, no conn created
+--- PASS: TestAsIs_T16_BelowInitialCapNotReplenished (0.10s)
+=== RUN   TestAsIs_T17_MaxCapZeroAcceptedGetBlocks
+    asis_test.go:392: observed: NewChannelPool accepted MaxCap=0; Get blocked 300ms
+--- PASS: TestAsIs_T17_MaxCapZeroAcceptedGetBlocks (0.30s)
+=== RUN   TestAsIs_T18_HandOffSkipsPing
+    asis_test.go:421: observed: waiter received the dead conn; Ping calls=0
+--- PASS: TestAsIs_T18_HandOffSkipsPing (0.05s)
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestPool_Get_Impl
+--- PASS: TestPool_Get_Impl (0.00s)
+=== RUN   TestPool_Put
+--- PASS: TestPool_Put (0.03s)
+=== RUN   TestPool_UsedCapacity
+--- PASS: TestPool_UsedCapacity (0.00s)
+=== RUN   TestPool_Close
+--- PASS: TestPool_Close (0.00s)
+=== RUN   TestPoolConcurrent
+==================
+WARNING: DATA RACE
+Write at 0x00c00029a0a0 by goroutine 523:
+  github.com/silenceper/pool.(*channelPool).Release()
+      /tmp/agent-only-9yFc/pool-tests/channel.go:229 +0xb0
+  github.com/silenceper/pool.TestPoolConcurrent.func1()
+      /tmp/agent-only-9yFc/pool-tests/channel_rpc_test.go:171 +0x38
+
+Previous read at 0x00c00029a0a0 by goroutine 526:
+  github.com/silenceper/pool.(*channelPool).Get()
+      /tmp/agent-only-9yFc/pool-tests/channel.go:123 +0x128
+  github.com/silenceper/pool.TestPoolConcurrent.func2()
+      /tmp/agent-only-9yFc/pool-tests/channel_rpc_test.go:176 +0x44
+
+Goroutine 523 (running) created at:
+  github.com/silenceper/pool.TestPoolConcurrent()
+      /tmp/agent-only-9yFc/pool-tests/channel_rpc_test.go:170 +0xa0
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+
+Goroutine 526 (running) created at:
+  github.com/silenceper/pool.TestPoolConcurrent()
+      /tmp/agent-only-9yFc/pool-tests/channel_rpc_test.go:175 +0x178
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+==================
+    testing.go:1867: race detected during execution of test
+--- FAIL: TestPoolConcurrent (0.00s)
+=== RUN   TestPoolWriteRead
+--- PASS: TestPoolWriteRead (0.00s)
+=== RUN   TestPoolConcurrent2
+--- PASS: TestPoolConcurrent2 (0.10s)
+FAIL
+FAIL	github.com/silenceper/pool	4.732s
+?   	github.com/silenceper/pool/example	[no test files]
+FAIL
+exit=1
