@@ -147,8 +147,9 @@ def cited_names(text: str, repo: Path | None = None) -> frozenset:
     """File names that count as later citations: those cited with a
     fragment somewhere in text, plus file:N tokens that name a file under
     repo, by path or by base name (catalogues cite by base name)."""
+    text = _DASH_RANGE.sub(r"\1-", text)
     names = {Path(m.group(1)).name for m in re.finditer(
-        "(" + _FILE + r")`?:\d+(?:-\d+)?`?\s*\(\s*[\"\u201c]", text)}
+        r"(?<![\w./-])(" + _FILE + r")`?:\d+(?:-\d+)?`?\s*\(\s*[\"'\u201c\u2018]", text)}
     if repo is not None:
         tokens = {m.group(1).strip("`") for m in re.finditer("(" + _FILE + r")`?:\d", text)}
         base = _repo_basenames(repo) if tokens else set()
@@ -161,7 +162,7 @@ def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
     """The citation pattern. On a table row (table=True) an unescaped "|"
     is a cell bar that the fallback never crosses; elsewhere "|" is code
     (a || b) like any other character."""
-    later = ("(?:[\\w./-]*/)?(?:" + "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True)) + ")"
+    later = ("(?:[\\w.-]+/)*(?:" + "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True)) + ")"
              if names else r"(?!)")
     q_open, q_close = r"[\"\u201c]", r"[\"\u201d]"
     # Where the next citation starts: a later file:N, or a prose file followed
@@ -186,7 +187,7 @@ def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
     last = (r"(" + ch + r"+?)" + q_close + r"\s*\)(?=(?:(?!" + q_close + r"\s*\))" + ch
             + r")*?(?:" + nxt + bar + r"|$))")
     return re.compile(
-        r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
+        r"(?<![\w./-])(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
         r"(`?\s*\(\s*" + q_open + balanced +
         r"|`?\s*\(\s*" + q_open + last + r")?", re.M)
 
@@ -203,9 +204,24 @@ def sub_citations(text: str, names: frozenset, repl) -> str:
                       for line in text.split("\n"))
 
 
-# After stripping, a file name directly followed by ("..." means a fragment
-# the patterns could not end: the command reports it (backstop for R-PART-B).
-_LEFT_FRAGMENT = re.compile("(" + _FILE + r")`?\s*\(\s*[\"\u201c]")
+# An en- or em-dash line range in a citation ("x.go:7–9") is the range
+# "x.go:7-9"; a dash elsewhere (a kept quote's "10:30–11:00") stays.
+_DASH_RANGE = re.compile(r"(?<![\w./-])(" + _FILE + r"`?:\d+)[\u2013\u2014](?=\d)")
+
+
+# Backstop for R-PART-B, run after stripping: a cited file name, then up to
+# 80 characters of the same clause ("line 7", "(line 7; Get loop)", "#L7",
+# "and in `x.go`"; never past a cell bar, a ";" or a ")" that closes an
+# earlier parenthesis), then a quote-paren with straight, single or
+# typographic quotes. Whatever spelling the citation used, its fragment
+# refuses the package. A parenthesised prose quote right after a code file
+# name refuses too (the safe direction): rephrase it.
+# Known gaps, kept so that prose such as "(pool.go:6), described as
+# ("closed")" is not refused: a quote after the citation's own ";" or ")"
+# ("x.go:7; the code reads ("...")"), or more than 80 characters on. Rule 7
+# still has the agent read the package.
+_LEFT_TAIL = r"`?(?:[^|\n();]|\([^|\n()\"'\u201c\u2018]*\)){0,80}?\(\s*[\"'\u201c\u2018]"
+_LEFT_FRAGMENT = re.compile(r"(?<![\w./-])(" + _FILE + r")" + _LEFT_TAIL)
 
 
 _CELL_BAR = re.compile(r"(?<![|\\])\|(?!\|)")
@@ -222,12 +238,21 @@ def changed_table_rows(before: str, after: str) -> list[str]:
 
 def leftover_fragments(text: str, keep_quotes_from: frozenset = frozenset(),
                        cited: frozenset | None = None) -> list[str]:
-    """Report name ("... left after stripping. With cited, only names the
-    original text cited as file:N count, so code such as errors.New("x") in
-    prose is not reported."""
-    return [m.group(0) for m in _LEFT_FRAGMENT.finditer(text)
-            if _norm(m.group(1)) not in keep_quotes_from
-            and (cited is None or Path(m.group(1)).name in cited)]
+    """Report a cited file name followed by a quote-paren (_LEFT_TAIL) after
+    stripping. With cited, only names the original text cited count, so code
+    such as errors.New("x") in prose is not reported."""
+    if cited is None:
+        pattern = _LEFT_FRAGMENT
+    elif not cited:
+        return []
+    else:
+        pattern = re.compile(r"((?<![\w./-])(?:[\w.-]+/)*(?:"
+                             + "|".join(re.escape(n) for n in sorted(cited, key=len, reverse=True))
+                             + r"))(?![\w-])" + _LEFT_TAIL)
+    # The quote belongs to the last file name before it: a kept prose-source
+    # quote ("README.md ("...")") is not a fragment.
+    return [m.group(0) for m in pattern.finditer(text)
+            if _norm(re.findall(_FILE, m.group(0))[-1]) not in keep_quotes_from]
 
 
 # Prose source documents: a quote cited from one of them is the normative
@@ -310,6 +335,7 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     citations of repository files end a fragment; assemble does.
     """
     names = cited_names(text) | frozenset(later_names)
+    text = _DASH_RANGE.sub(r"\1-", text)  # "file:7–9" is the range "file:7-9"
     text = sub_citations(text, names, _citation_stripper(frozenset(keep_quotes_from)))
     text = _ANALYSIS_ID.sub(_MARK, text)
     # Removing an id never joins two lines: no pattern here crosses a newline.
@@ -429,8 +455,12 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
                          "escaping in the input and rebuild; never send): " + "; ".join(shifted[:10]))
     left = leftover_fragments(blind_copy + "\n" + blind_doctrine, keep_quotes, later)
     if left:
-        raise ValueError("code fragments left after a citation (inside a table cell escape every "
-                         "\"|\" of a fragment as \"\\|\" in the input, then rebuild; never send): "
+        raise ValueError("code fragments left after a citation (a fragment is unbalanced, wrapped "
+                         "across lines, cited as other than file:N or file:N-M, or holds an unescaped "
+                         "\"|\" in a table cell; or a parenthesised prose quote follows a code file "
+                         "name in the same clause: put each fragment on one line after file:N, escape "
+                         "table bars as \"\\|\", rephrase such a prose quote, then rebuild; never "
+                         "send): "
                          + "; ".join(left[:10]))
     kept = sorted(set(_LOCAL_ID.findall(blind_copy + "\n" + blind_doctrine)))
     both = catalogue + "\n" + doctrine
