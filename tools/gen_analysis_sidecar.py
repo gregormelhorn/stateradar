@@ -43,7 +43,7 @@ from pathlib import Path
 from typing import Any, TypedDict, cast
 
 from sidecar_types import (Cell, CellBody, Citation, Completeness, Disposition, DocLine, Event,
-                           Question, Sidecar)
+                           GuardGroup, GuardOutcome, Pair, Question, Sidecar)
 
 
 class Overlay(TypedDict):
@@ -271,6 +271,21 @@ def _parse_cell(
     else:
         disposition = "UNSPECIFIED"
 
+    # A crash (panic, escaping exception, process exit) is `handle crash:
+    # ... -> Q-nn` (02-pilot v1.19): the code does something, but nobody
+    # decided it. The question stays on the cell so dsc_check verifies it.
+    # Only a `crash:` label right after the disposition word (and a
+    # transition's target) counts: "does not crash: returns nil" is prose.
+    if re.match(r"(?:handle|reject|defer[ \t]*\(queued\)|ignore[ \t]*\([^)]*\)|UNSPECIFIED"
+                r"|transition[ \t]*→[ \t]*`?[\w-]+`?)[^\w]*crash:", raw, re.I):
+        crash_q = re.search(r"\bQ-\d[\w-]*", raw)
+        if disposition != "handle":
+            raise ValueError(f"a crash cell is written `handle crash: ...`, not {disposition} "
+                             f"(02-pilot step 4): {raw[:80]!r}")
+        if not crash_q:
+            raise ValueError(f"crash cell without a question (02-pilot step 4): {raw[:80]!r}")
+        hole_q = crash_q.group(0)
+
     # Key order (disposition, target or q, dr, citation) is part of the
     # golden sidecars, which are compared byte for byte.
     cell: CellBody = {"disposition": disposition}
@@ -358,6 +373,19 @@ def _parse_questions(path: Path) -> list[Question]:
         if m:
             current = {"id": m.group(1), "status": "OPEN"}
             questions.append(current)
+        # ODC fields (02-pilot R-ODC-FIELDS): '**Fault:** F-13, F-09' and
+        # '**Trigger:** step-4 matrix walk', or as a list item ('- fault:
+        # F-13'). A plain 'Fault: ...' line is prose, and the first field of
+        # each kind in a question wins.
+        odc = re.match(r"^(?:\*\*(fault|trigger):\*\*|\*\*(fault|trigger)\*\*:|[-*][ \t]+(fault|trigger):)"
+                       r"[ \t]*(.*)$", line.strip(), re.I)
+        if odc and current is not None:
+            label = (odc.group(1) or odc.group(2) or odc.group(3)).lower()
+            value = odc.group(4)
+            if label == "fault" and "fault" not in current:
+                current["fault"] = re.findall(r"F-\d{2}\b", value)
+            elif label == "trigger" and "trigger" not in current:
+                current["trigger"] = value.strip().strip("`").strip()
         s = re.search(r"\*\*Status:\*\*\s*(.+)", line)
         if s and current is not None:
             status = s.group(1).strip()
@@ -365,6 +393,50 @@ def _parse_questions(path: Path) -> list[Question]:
                 status = "RESOLVED" + status[len("DECIDED"):]
             current["status"] = status
     return questions
+
+
+def _parse_pairs(catalogue: Path, traces: Path) -> list[Pair]:
+    """Step-3 pair ids (P-01a, P-01b, ...) declared in event-catalogue.md,
+    each with the adversarial-traces.md heading that carries its id. A pair
+    without such a heading gets an empty trace, which dsc_check reports
+    ("no trace"): an untraced pair is a gap, not something to drop."""
+    if not catalogue.is_file():
+        return []
+    ids = sorted(set(re.findall(r"\bP-\d+[a-z]\b", catalogue.read_text(encoding="utf-8"))),
+                 key=lambda pid: (int(re.findall(r"\d+", pid)[0]), pid))
+    text = traces.read_text(encoding="utf-8") if traces.is_file() else ""
+    pairs: list[Pair] = []
+    for pid in ids:
+        m = re.search(r"^#{1,6}[ \t]+" + re.escape(pid) + r"\b[ \t]*(?:[\u2014:.-]+[ \t]*)?(.*)$",
+                      text, re.M)
+        trace = f"{traces.name}#{pid}: {m.group(1).strip()}".rstrip(": ") if m else ""
+        pairs.append({"id": pid, "trace": trace})
+    return pairs
+
+
+def _parse_guard_results(path: Path) -> list[GuardGroup]:
+    """guard-results.txt as tools/guard_proofs.render writes it ('group G-01
+    name: proven', findings indented), plus the run's own
+    'not-formalizable: <category>: <reason>' lines."""
+    if not path.is_file():
+        return []
+    groups: list[GuardGroup] = []
+    for line in path.read_text(encoding="utf-8").split("\n"):
+        if not line.startswith("group"):
+            continue
+        # The outcome is the first outcome word after a colon; the group
+        # name before it may itself contain colons ("Get: dispose").
+        m = re.match(r"^group[ \t]+(G-[\w.-]+)\b.*?:[ \t]*(proven|violation|not-formalizable)\b"
+                     r"(?:[ \t]*:[ \t]*(.*?))?[ \t]*$", line)
+        if not m:
+            _note(f"{path.name}: group line without an outcome (proven, violation, "
+                  f"not-formalizable): {line.strip()[:80]!r}")
+            continue
+        group: GuardGroup = {"id": m.group(1), "outcome": cast(GuardOutcome, m.group(2))}
+        if m.group(3) and m.group(3).strip():
+            group["reason"] = m.group(3).strip()
+        groups.append(group)
+    return groups
 
 
 def _load_overlay(analysis_root: Path) -> Overlay:
@@ -490,7 +562,10 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
     for block_events, row, state, family in row_index:
         parts = row.strip().strip("|").split("|")[1:]
         for event, cell_text in zip(block_events, parts, strict=True):
-            body = _parse_cell(cell_text, family, states, src_index, unresolved)
+            try:
+                body = _parse_cell(cell_text, family, states, src_index, unresolved)
+            except ValueError as exc:
+                raise ValueError(f"{component}: {state} x {event['id']}: {exc}") from exc
             # Key order as before (parsed keys, then state and event): the
             # golden sidecars are compared byte for byte.
             cells.append({**body, "state": state, "event": event["id"]})
@@ -607,20 +682,30 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
     if doc_lines:
         data["docLines"] = doc_lines
 
-    # The matrix does not carry pairs, guard outcomes, or the coverage
-    # table — they live in adversarial-traces.md, guard-results.txt, and
-    # event-catalogue.md.  Omitting them silently would let a generated
-    # sidecar pass those checks by construction, so declare the absence
-    # instead: dsc_check demands a stated reason for every empty section.
-    absent = ("the sidecar generator derives cells from disposition-matrix.md "
-              "only; this section is not in the matrix. Merge it from {src} "
-              "before the component claims L4.")
+    # Pairs, guard outcomes and the coverage table live outside the matrix
+    # (event-catalogue.md + adversarial-traces.md, guard-results.txt,
+    # event-catalogue.md) and are derived from there below. A section the
+    # sources do not declare is asserted absent with a reason instead of
+    # omitted: dsc_check demands a stated reason for every empty section.
+    absent = ("the sidecar generator found no {what} in {src}; declare it "
+              "there (02-pilot) before the component claims L4.")
     completeness: Completeness = {
-        "pairs": {"count": 0, "reason": absent.format(src="adversarial-traces.md")},
-        "guardGroups": {"count": 0, "reason": absent.format(src="guard-results.txt")},
-        "coverage": {"count": 0, "reason": absent.format(src="event-catalogue.md")},
+        "pairs": {"count": 0, "reason": absent.format(
+            what="pair ids (P-01a, ...)", src="event-catalogue.md")},
+        "guardGroups": {"count": 0, "reason": absent.format(
+            what="guard outcome lines", src="guard-results.txt")},
+        "coverage": {"count": 0, "reason": absent.format(
+            what="undesired-coverage table", src="event-catalogue.md")},
     }
     data["completeness"] = completeness
+    pairs = _parse_pairs(adir / "event-catalogue.md", adir / "adversarial-traces.md")
+    if pairs:
+        data["pairs"] = pairs
+        completeness.pop("pairs", None)
+    guard_groups = _parse_guard_results(adir / "guard-results.txt")
+    if guard_groups:
+        data["guardGroups"] = guard_groups
+        completeness.pop("guardGroups", None)
     if catalogue_coverage:
         data["coverage"] = catalogue_coverage
         completeness.pop("coverage", None)
@@ -643,8 +728,8 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         if prior.get("coverage") and not data.get("coverage"):
             data["coverage"] = prior["coverage"]
             completeness.pop("coverage", None)
-        if not completeness:
-            data.pop("completeness")
+    if not completeness:
+        data.pop("completeness", None)
     return data
 
 

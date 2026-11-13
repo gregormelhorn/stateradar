@@ -9,7 +9,7 @@ entries and separates the new model-routing plan from shipped capabilities.
 
 1. **Measure cost-aware model routing.** Flash drafting, Jev batches, the
    `draft-verify` chain, a local ledger, and an offline batch evaluator exist,
-   and `prompts/02-pilot.md` (v1.18) routes Steps 1, 6, 8 and Part B through
+   and `prompts/02-pilot.md` (v1.19) routes Steps 1, 6, 8 and Part B through
    them; two full routed pilots ran on silenceper/pool, the second blind to
    the benchmark and with executed as-is tests (entry 11). Next run a timed
    agent-only pilot of the same component, build independently reviewed
@@ -235,15 +235,15 @@ Open, in order:
    independent evidence either. 133 drafted claims had 0 citation failures.
    None of the 6 Step-6 orderings was backed by Jev (all `unclear`, scope
    0.02-0.05), so the provisional 0.5 veto fired on every `yes`; the agent's
-   statements added detail the fragments do not mention, which seems to drive
-   the score. Jev also judged equivalent claims about the same line
+   statements added detail the fragments do not mention, which seems to
+   drive the score. Jev also judged equivalent claims about the same line
    differently (C59 and K5 `contradicted`, C78 `supported`). Against the
    agent-only baseline (whose two runs agree 28/28), with a state alignment
    and divergence judgments made by the pilot agent: 21 of 28 aligned base
    cells agree; of the 7 divergent cells, 1 differs only in its label, 3
    FactoryFail cells and 2 Close cells rest on baseline claims the code
-   refutes in whole or part, and Released x Close turns on a doc comment. The
-   comparison lists 13 questions new against the baseline plus 4 voided
+   refutes in whole or part, and Released x Close turns on a doc comment.
+   The comparison lists 13 questions new against the baseline plus 4 voided
    control verdicts (Q-20..Q-23; Q-22 and Q-23 the base scope rule raises
    anyway). Tool and prompt fixes from it: draft budget and truncated-draft
    handling, two hollow checks (sidecar fragments, `###` trace headers),
@@ -254,9 +254,10 @@ Open, in order:
    from it: prose in the catalogue that states as-is conclusions (mandatory
    remembrance, gate, upstream-guard and lock-discipline annotations) still
    reaches Part B, so Part-B agreement on those rows is not independent; the
-   sidecar generator does not merge pairs, guard outcomes or ODC fields;
-   `status` has no tokens, timestamps or step labels; the 0/6 orderings and
-   the inconsistent claim judgments belong in the labelled set.
+   sidecar generator did not merge pairs, guard outcomes or ODC fields
+   (fixed after the agent-only run, 02-pilot v1.19); `status` has no tokens,
+   timestamps or step labels; the 0/6 orderings and the inconsistent claim
+   judgments belong in the labelled set.
 
    **Second routed pilot** (2026-11-13, same component, pack a331dae, prompt
    v1.17, `jev-1.14.0`; outputs, as-is tests and comparison in
@@ -276,16 +277,17 @@ Open, in order:
    checks gave 44 supported, 5 unclear and 2 contradicted, all kept after a
    re-read. 19 of 28 aligned base cells agree with the agent-only baseline
    (first pilot 20 under the same counting rule, 21 as published): the same
-   FactoryFail, Close and Released x Close divergences, plus lazy idle expiry
-   marked accidental; the one-cell gap is not a measured regression. Part B:
-   21 convergent rows (13 of the 26 agreeing rows, 10 convergent and 3
-   convergent-hole, depend on as-is prose in the catalogue) and 8 artefacts,
-   mostly remembrance and upstream statements read as documented intent. Fixes
-   from it: line numbers following a citation, `blind` stdout, the blockquote
-   line in the Part-B task, the matrix wrapper template's pack path, and
-   02-pilot v1.18. Still open from it: the sidecar generator's missing pairs,
-   guard and ODC fields (the pilot merged them with a per-run script); as-is
-   prose in the catalogue reaching Part B (the pilot's candidate rule:
+   FactoryFail, Close and Released x Close divergences, plus lazy idle
+   expiry marked accidental; the one-cell gap is not a measured regression.
+   Part B: 21 convergent rows (13 of the 26 agreeing rows, 10 convergent and
+   3 convergent-hole, depend on as-is prose in the catalogue) and 8
+   artefacts, mostly remembrance and upstream statements read as documented
+   intent. Fixes from it: line numbers following a citation, `blind` stdout,
+   the blockquote line in the Part-B task, the matrix wrapper template's
+   pack path, and 02-pilot v1.18; the sidecar generator's missing pairs,
+   guard and ODC fields (the pilot merged them with a per-run script)
+   followed after the agent-only run (02-pilot v1.19). Still open from it:
+   as-is prose in the catalogue reaching Part B (the pilot's candidate rule:
    remembrance and upstream statements carry the provenance "observed in
    code"). Its `timing.md` shows where the 37 minutes went: about 70 s of
    Flash and Jev calls, about 3.5 minutes of `go test` (mostly three waits
@@ -304,8 +306,8 @@ Open, in order:
    was about the same in both runs (84 against 77 messages, 26.1 M against
    23.6 M cache-read tokens). So routing as configured, where Flash and Jev
    add checks on top of the agent's own complete pass, showed no saving in
-   time or cost; one run each, and the runs differ in model size (7 against 9
-   states), so the small differences are not a measured effect.
+   time or cost; one run each, and the runs differ in model size (7 against
+   9 states), so the small differences are not a measured effect.
 2. **Flash writes, the steering agent decides.** Next. Since the steering
    agent's cache reads, writes and output are almost the whole cost, the aim
    is fewer agent rounds and less agent output. In the routed run, output
