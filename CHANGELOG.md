@@ -100,6 +100,9 @@
   and `jev check`, and `check_pack_consistency.py` fails when the pilot
   prompt's trigger list drifts from it. 02-pilot v1.17 (rules 5, 7, 8, 9 and
   a new rule 10 for finding-neutral draft tasks).
+- **Part-B stripping nits.** `See`/`Cf.` before a removed id goes in any
+  case; a `host:port` token followed by a space inside a fragment no longer
+  ends the fragment early (stripper and sidecar generator).
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

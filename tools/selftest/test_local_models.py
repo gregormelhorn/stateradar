@@ -522,6 +522,8 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(strip("The pool behaves as callers see. What the waiter does not see, the owner does."),
                          "The pool behaves as callers see. What the waiter does not see, the owner does.")
         self.assertEqual(strip('client.go:40 ("f("a") dial db.example.com:5432") |'), "client.go |")
+        self.assertEqual(strip('client.go:40 ("f("a") dial db.example.com:5432 now") |'), "client.go |")
+        self.assertEqual(strip("See Q-01 for details."), "for details.")
         # A reference word left at the end of a cell or line goes too.
         self.assertEqual(strip("| a; see T-F05 and L-4 |\nx, cf. Q-1\n"), "| a |\nx\n")
         # Quotes are kept by exact path: vendor/lib/README.md does not ride on README.md.

@@ -128,7 +128,7 @@ def _read_contracts(spec: str, repo: Path) -> str:
 # line (_FRAG_END); else at the first quote-paren.
 _FILE = r"[\w./-]+\.[A-Za-z]{1,4}"
 _FRAG_END = (r"[\"\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)"
-             r"|(?:(?![\"\u201d]\s*\)).)*?[\s,(]" + _FILE + r"`?:\d+(?:-\d+)?(?=`?\s*\(|[\s,;)|]|$))")
+             r"|(?:(?![\"\u201d]\s*\)).)*?[\s,(]" + _FILE + r"`?:\d+(?:-\d+)?(?=`?\s*\(|[,;)|]|$))")
 _CITE = re.compile(
     r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
     r"(`?\s*\(\s*[\"\u201c](.+?)" + _FRAG_END +
@@ -217,7 +217,7 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
                   lambda m: m.group(0) if m.group(0).lstrip(" \t→") in keep_ids else _MARK, text)
     # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12",
     # "see DR-002"; "see" in prose stays.
-    text = re.sub(r"\b(?:see|cf\.)[ \t]*(?=\x00)", "", text)
+    text = re.sub(r"\b(?:[Ss]ee|[Cc]f\.)[ \t]*(?=\x00)", "", text)
     text = re.sub(r"(?:\b(?:recorded as\s+)?lints?\s*|\b[Ff]inding\s*(?::\s*)?)(?=\x00)", "", text)
     # Parentheses that held only removed ids, then the ids with their separators.
     text = re.sub(r"(?m)(^[ \t]*)?\((?:[\s,;]|\x00)*\x00(?:[\s,;]|\x00)*\)(?(1)[ \t]*)",
