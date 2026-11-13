@@ -531,8 +531,17 @@ class ModelTest(unittest.TestCase):
                             "| e | channel.go then channel.go holds the rest |"),
                            ('channel.go:139 ("return nil, errors.New("connection closed")") and channel.go:140 returns',
                             "channel.go and channel.go returns"),
-                           ('channel.go:10 ("f("a") g") pool.go:3 holds the lock', "channel.go pool.go holds the lock")):
-            self.assertEqual(strip(text), want)
+                           ('channel.go:10 ("f("a") g") pool.go:3 holds the lock', "channel.go pool.go holds the lock"),
+                           ('| e | gen_server.erl:50 ("f("a") + g()") then util.lua:52 holds |',
+                            "| e | gen_server.erl then util.lua holds |")):
+            self.assertEqual(strip(text, later_names=frozenset({"pool.go", "util.lua"})), want)
+        # A host whose ending looks like a file extension is not a later citation.
+        self.assertEqual(strip('client.go:40 ("f("a") dial api.example.rs:8443 now") |'), "client.go |")
+        # A removed sentence-initial label keeps the capital after "," or ";", in parentheses and in cells.
+        self.assertEqual(strip("x. See DR-1; then y."), "x. Then y.")
+        self.assertEqual(strip("See Q-01, which covers it."), "Which covers it.")
+        self.assertEqual(strip("The pool waits (See Q-01)."), "The pool waits.")
+        self.assertEqual(strip("| a | See Q-01 |"), "| a | |")
         # A reference word left at the end of a cell or line goes too.
         self.assertEqual(strip("| a; see T-F05 and L-4 |\nx, cf. Q-1\n"), "| a |\nx\n")
         # Quotes are kept by exact path: vendor/lib/README.md does not ride on README.md.
@@ -577,6 +586,15 @@ class ModelTest(unittest.TestCase):
                               ["summary.md", "docs/req.md:Waiting", str(root / "contracts.md")],
                               root, root / "analysis")
             self.assertEqual(got, frozenset({"summary.md", "docs/req.md", "contracts.md", "docs/README.md"}))
+
+    def test_cited_names_come_from_fragments_and_existing_files(self):
+        cited_names = local_models.part_b_pack.cited_names
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "util.lua").write_text("x")
+            text = 'a.go:1 ("x") then util.lua:5 and db.example.com:5432 and b.rs:3 holds'
+            self.assertEqual(cited_names(text), frozenset({"a.go"}))
+            self.assertEqual(cited_names(text, root), frozenset({"a.go", "util.lua"}))
 
     def test_cli_blind_truncation_goes_to_a_partial_file(self):
         with tempfile.TemporaryDirectory() as directory:

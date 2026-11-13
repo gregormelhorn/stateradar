@@ -101,11 +101,13 @@
   prompt's trigger list drifts from it. 02-pilot v1.17 (rules 5, 7, 8, 9 and
   a new rule 10 for finding-neutral draft tasks).
 - **Part-B stripping nits.** `see`/`cf.` before a removed id goes whatever
-  its case, and a sentence it started keeps its capital; a later citation that
-  ends a fragment must name a source or prose file by its extension, so a
-  `host:port` token inside a fragment no longer ends it early while a bare
-  `file.go:N` citation followed by prose still does (stripper and sidecar
-  generator).
+  its case, and a sentence it started keeps its capital (also after `,`/`;`,
+  in parentheses and in table cells). A later citation that ends a fragment
+  must name a file the text cites with a fragment elsewhere or one that
+  exists in the repository (`part_b_pack.cited_names`; the sidecar
+  generator uses its source index), so a `host:port` token inside a
+  fragment never ends it early, whatever its domain ending, while a bare
+  `file:N` citation followed by prose still does.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 
