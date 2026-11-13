@@ -218,10 +218,11 @@ def _parse_cell(
         if path:
             cell["citation"] = {"file": path, "line": int(cit.group(2))}
             # The fragment may hold unescaped or typographic quotes and
-            # "host:5432" tokens: it ends at the first quote-paren followed by
-            # a boundary or by a later citation on the line, else at the first.
+            # "host:5432" tokens: it ends at a quote-paren followed by a
+            # boundary, or at the last one before a later citation on the line.
             head = re.escape(cit.group(1)) + r"`?:" + cit.group(2) + r'(?:-\d+)?`?\s*\(\s*["\u201c]'
-            end = r'["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)|[^\n]*?[\w./-]+\.[A-Za-z]{1,4}`?:\d)'
+            end = (r'["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)'
+                   r'|(?:(?!["\u201d]\s*\)).)*?[\s,(][\w./-]+\.[A-Za-z]{1,4}`?:\d)')
             frag = (re.search(head + r"(.+?)" + end, text, re.M)
                     or re.search(head + r'(.+?)["\u201d]\s*\)', text))
             if frag:

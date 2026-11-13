@@ -491,6 +491,7 @@ class ModelTest(unittest.TestCase):
             self.assertNotIn("L-9", package)
             self.assertIn("kept in the catalogue", err.getvalue())
             self.assertIn("T-1", err.getvalue())
+            self.assertRegex(err.getvalue(), r"removed as analysis references[^\n]*L-9")
 
     def test_blind_catalogue_round3_cases(self):
         strip = local_models.part_b_pack.blind_catalogue
@@ -503,12 +504,47 @@ class ModelTest(unittest.TestCase):
                            ("(channel.go:175-176 and :194-196) x", ":194")):
             self.assertNotIn(leak, strip(text))
         # A quote from a prose document is normative text and stays; the line number goes.
-        doc = strip('1. DOC-1 — README.md:12 ("The connection type in the pool is interface{}")')
+        doc = strip('1. DOC-1 — README.md:12 ("The connection type in the pool is interface{}")',
+                    keep_quotes_from=frozenset({"README.md"}))
         self.assertIn("The connection type in the pool is interface{}", doc)
         self.assertNotIn(":12", doc)
+        self.assertNotIn("interface{}", strip('README.md:12 ("The connection type in the pool is interface{}")'))
+        # Two citations on one line: each code fragment goes whole.
+        for text in ('| e | x | channel.go:50 ("f("a") + g()") then channel.go:52 ("y := 2") |',
+                     'client.go:40 ("net.Dial("tcp", "db.example.com:5432")") and pool.go:3 ("x := 1")'):
+            out = strip(text)
+            for leak in ("g()", "net.Dial", '")', "x := 1", "y := 2"):
+                self.assertNotIn(leak, out)
+        # Debris: no "see ;", no empty leading space, no double space.
+        self.assertEqual(strip("(Q-01) The pool, see DR-002; then waits."), "The pool; then waits.")
+        self.assertEqual(strip("A wake-up (L-4, G-01) is lost"), "A wake-up is lost")
+        # A dangling conjunction goes with the removed id.
+        self.assertEqual(strip("see T-F05 and L-4.", {"T-F05"}), "see T-F05.")
         # Removing ids keeps the separator between two clauses.
         self.assertEqual(strip("level L-3 cache; recorded as lint L-4; G-01 holds", {"L-3"}), "level L-3 cache; holds")
         self.assertEqual(strip("see Q-1, Q-2 and more"), "see and more")
+
+    def test_blind_keeps_source_quotes_but_not_analysis_quotes_or_glosses(self):
+        # Method review round 4: quotes from the analysis's own .md files and
+        # ids in a doctrine row's gloss must not reach Part B.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            catalogue = ("<!-- event-ids: E01 -->\n| E01 | waiter wakes (as-is-validation.md:12 (\"TestPool_Get hangs "
+                         "forever after Release\"), README.md:15 (\"support for connection waiting\"), "
+                         "requirements.md:3 (\"a waiter is woken on Put\")) see T-F05 |\n" + "event details " * 30)
+            doctrine = "### Doctrine lines\n\n" + "".join(
+                f'- DOC-{n} README.md:15 ("support for connection waiting, retry after T-1") (gloss, cf. T-F05)\n'
+                for n in range(1, 5))
+            args = self.make_blind_inputs(root, catalogue=catalogue, extraction=doctrine)
+            (root / "analysis" / "as-is-validation.md").write_text("validation notes\n")
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+            package = (root / "blind.package.md").read_text()
+            self.assertNotIn("hangs forever", package)
+            self.assertIn('README.md ("support for connection waiting")', package)
+            self.assertIn('requirements.md ("a waiter is woken on Put")', package)
+            self.assertNotIn("T-F05", package)
+            self.assertIn("retry after T-1", package)
 
     def test_cli_blind_truncation_goes_to_a_partial_file(self):
         with tempfile.TemporaryDirectory() as directory:

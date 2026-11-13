@@ -172,17 +172,21 @@ directory, `--requirements` and `--contracts` resolve against `--repo` unless
 absolute. The catalogue lives in the analysis directory; the package carries
 it with code fragments, line numbers and analysis ids removed, because pilot
 rule 3 puts code into those fragments; file names stay, and so does a quote
-cited from a prose document (`.md`, `.txt`, `.rst`, `.adoc`). Q-, PA-, SYS-,
-NAT- and DR- ids are always removed. An L-, G-, F- or T- id stays only when
-the requirements, contracts or doctrine lines use it, so a domain term such as
-`T-1` that the requirements use survives; the command names each kept id on
-stderr for the agent to check. Every other id of those families is removed.
-Prose that states an as-is conclusion cannot be removed mechanically, and the
-pilot lists it as a known leak. Doctrine lines from `extraction.md` travel
-too, stripped the same way: bullets, numbered items or table rows under a
-heading that names doctrine. An extraction that names DOC lines none of which
-sits under such a heading is refused, and so is a catalogue whose event ids
-would not survive the stripping. A truncated blind output is saved to `<output
+cited from a Part B source: the `--requirements` and `--contracts` files, or a
+prose file (`.md`, `.txt`, `.rst`, `.adoc`) that a doctrine line cites. A
+quote from a file of the analysis directory is removed. Q-, PA-, SYS-, NAT-
+and DR- ids are always removed. An L-, G-, F- or T- id stays only when the
+requirements, the contracts or the quoted text of a doctrine line use it (a
+doctrine line's gloss is Part A's and does not count), so a domain term such
+as `T-1` that the requirements use survives; every other id of those families
+is removed, including a domain term the sources never use. The command names
+on stderr each id it kept and each it removed, for the agent to check. Prose
+that states an as-is conclusion cannot be removed mechanically, and the pilot
+lists it as a known leak. Doctrine lines from `extraction.md` travel too,
+stripped the same way: bullets, numbered items or table rows under a heading
+that names doctrine. An extraction that names DOC lines none of which sits
+under such a heading is refused, and so is a catalogue whose event ids would
+not survive the stripping. A truncated blind output is saved to `<output
 stem>.partial.md`, never to `--output`, and is not printed. The call receives
 only the assembled package and no tools or conversation history. The command
 checks the returned table with the existing Part-B coverage checker and

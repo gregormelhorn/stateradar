@@ -73,7 +73,7 @@
   microdollars; the primary finding was found, but the run was not blind to
   it (the operator brief and a draft task named it); 21 of 28 aligned base
   cells agree with the agent-only baseline, whose own two runs agree 28/28,
-  under an alignment and divergence judgments by the pilot agent. Fixes,
+  under a state alignment and divergence judgments made by the pilot agent. Fixes,
   each with a red check first: `gen_analysis_sidecar.py` keeps citation
   fragments, including ones with unescaped or typographic quotes, so
   `dsc_check` verifies them on generated sidecars (this exposed wrong
@@ -86,9 +86,11 @@
   heading, stripped like the catalogue, and refuses an extraction whose DOC
   lines it cannot pass on. Its catalogue copy drops code fragments, line
   numbers and analysis ids but keeps prose between citations and quotes
-  cited from prose documents; an L-, G-, F- or T- id stays only when the
-  requirements, contracts or doctrine lines use it, and each kept id is
-  named on stderr. It refuses a catalogue whose event ids the stripping
+  cited from the Part-B source files (never from an analysis file); an L-,
+  G-, F- or T- id stays only when the requirements, the contracts or the
+  quoted text of a doctrine line use it, and each kept or removed id is
+  named on stderr. Fragments end at the last quote-paren before a later
+  citation, so two citations on one line strip cleanly. It refuses a catalogue whose event ids the stripping
   would change. Its CLI reports input errors without a traceback.
   `draft-verify` defaults to 12000 output tokens. A truncated draft is
   saved to `<stem>.draft.txt` and a truncated blind table to

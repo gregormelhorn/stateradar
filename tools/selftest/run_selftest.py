@@ -143,7 +143,10 @@ def main() -> int:
                 ('handle (channel.go:50 ("x := 1") then retries, channel.go:52 ("y"))', "x := 1"),
                 ('handle (channel.go:40 ("net.Dial("tcp", "db.example.com:5432")"))',
                  'net.Dial("tcp", "db.example.com:5432")'),
-                ('handle (channel.go:41 ("// see util.go:3 for x"))', "// see util.go:3 for x")):
+                ('handle (channel.go:41 ("// see util.go:3 for x"))', "// see util.go:3 for x"),
+                ('handle (channel.go:50 ("f("a") + g()") then channel.go:52 ("y := 2"))', 'f("a") + g()'),
+                ('handle (channel.go:40 ("net.Dial("tcp", "db:5432")") and channel.go:3 ("x"))',
+                 'net.Dial("tcp", "db:5432")')):
             got = gas._parse_cell(raw_cell, None, ["S"], idx).get("citation", {}).get("fragment")
             if got != want:
                 failures.append(f"fragment not captured from {raw_cell!r}: {got!r}")
