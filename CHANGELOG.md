@@ -85,9 +85,12 @@
   lines written as bullets, numbered items or a table under a doctrine
   heading, stripped like the catalogue, and refuses an extraction whose DOC
   lines it cannot pass on; its catalogue copy drops code fragments, line
-  numbers and analysis ids, and it refuses a catalogue whose event ids the
-  stripping would change; its CLI reports input errors without a traceback; `draft-verify` defaults to 12000 output tokens, and a
-  truncated draft or blind output is saved to a file instead of printed;
+  numbers and analysis ids (L-, G-, F- and T- only when the run defines
+  them), keeps prose between citations, and it refuses a catalogue whose
+  event ids the stripping would change; its CLI reports input errors
+  without a traceback; `draft-verify` defaults to 12000 output tokens, a
+  truncated draft is saved to `<stem>.draft.txt` and a truncated blind
+  table to `<stem>.partial.md` instead of being printed;
   `formats/rules.toml` gains the ODC triggers `part-B diff`, `reviewer
   cross-check`, `step-8 verification`, `z3 invariant check`, `draft-verify`
   and `jev check`, and `check_pack_consistency.py` fails when the pilot

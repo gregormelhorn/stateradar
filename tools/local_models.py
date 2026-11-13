@@ -445,8 +445,10 @@ def blind(budget, args, key):
     try:
         result = flash(budget, package, key, args.max_tokens)
     except IncompleteResponse as error:
-        args.output.write_text(error.result["text"], encoding="utf-8")
-        error.saved_to = str(args.output)
+        # Never leave a truncated table where a finished one is expected.
+        partial = args.output.with_suffix(".partial.md")
+        partial.write_text(error.result["text"], encoding="utf-8")
+        error.saved_to = str(partial)
         raise
     args.output.write_text(result["text"], encoding="utf-8")
     print(json.dumps({k: v for k, v in result.items() if k != "text"}, indent=2))

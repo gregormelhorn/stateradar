@@ -219,9 +219,11 @@ def _parse_cell(
             cell["citation"] = {"file": path, "line": int(cit.group(2))}
             # The fragment may hold unescaped or typographic quotes: prefer
             # the last quote-paren before a boundary, else the first one.
-            head = re.escape(cit.group(1)) + r"`?:" + cit.group(2) + r'`?\s*\(\s*["\u201c]'
-            frag = (re.search(head + r'(.+?)["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$))', text, re.M)
-                    or re.search(head + r'(.+?)["\u201d]\s*\)', text))
+            head = re.escape(cit.group(1)) + r"`?:" + cit.group(2) + r'(?:-\d+)?`?\s*\(\s*["\u201c]'
+            # Never run into the next file:line citation on the same line.
+            body = r"((?:(?![\w./-]+\.[A-Za-z]{1,4}`?:\d).)+?)"
+            frag = (re.search(head + body + r'["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$))', text, re.M)
+                    or re.search(head + body + r'["\u201d]\s*\)', text))
             if frag:
                 cell["citation"]["fragment"] = frag.group(1).replace('\\"', '"')
     return cell

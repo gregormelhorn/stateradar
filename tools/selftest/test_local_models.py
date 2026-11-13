@@ -442,7 +442,9 @@ class ModelTest(unittest.TestCase):
     def test_blind_catalogue_strips_the_pilots_own_leaks(self):
         source = (Path(__file__).resolve().parents[2] / "docs" / "evidence" / "routed-pilot-2026-11-13"
                   / "partb" / "event-catalogue.pre-strip.md").read_text()
-        stripped = local_models.part_b_pack.blind_catalogue(source)
+        evidence = Path(__file__).resolve().parents[2] / "docs" / "evidence" / "routed-pilot-2026-11-13" / "channelPool"
+        known = local_models.part_b_pack.analysis_ids(evidence, Path(__file__).resolve().parents[2])
+        stripped = local_models.part_b_pack.blind_catalogue(source, known)
         for leak in (r'\("', r"\bQ-\d", r"\bL-\d", r"\bPA-\d", r"\bSYS-\d", r"\bT-[A-Z]*\d",
                      r"\.go:\d", r"\bFinding\b"):
             self.assertIsNone(re.search(leak, stripped), leak)
@@ -454,6 +456,39 @@ class ModelTest(unittest.TestCase):
             self.assertNotIn(leak, quoted)
         self.assertNotIn(", ,", quoted)
         self.assertIn("P-01a", stripped)  # pair ids are catalogue content, not analysis references
+
+    def test_blind_catalogue_keeps_prose_and_domain_terms(self):
+        strip = local_models.part_b_pack.blind_catalogue
+        text = strip('Waits (channel.go:10 ("x := 1") then the caller retries, see channel.go:12 ("y := 2")).\n'
+                     'Call `c.Get("key")` or fail with `errors.New("pool is closed")`; listen on :8080.\n'
+                     'The T-1 threshold, level L-3 cache, an F-16, (channel.go:186, :194-196) lint L-4.\n',
+                     {"L-4"})
+        self.assertIn("then the caller retries", text)
+        self.assertNotIn("x := 1", text)
+        self.assertNotIn("y := 2", text)
+        for kept in ('c.Get("key")', 'errors.New("pool is closed")', ":8080", "T-1 threshold", "L-3 cache", "F-16"):
+            self.assertIn(kept, text)
+        for gone in (":186", ":194", "L-4"):
+            self.assertNotIn(gone, text)
+
+    def test_cli_blind_truncation_goes_to_a_partial_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root)
+            self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
+            argv = ["local_models.py", "--ledger", str(root / "budget.db"), "blind", "analysis", "--repo", str(root),
+                    "--requirements", "requirements.md", "--contracts", "contracts.md",
+                    "--output", str(root / "blind.md")]
+            out = io.StringIO()
+            truncated = {"model": "deepseek-flash", "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+                         "choices": [{"message": {"content": "| E01 | half"}, "finish_reason": "length"}]}
+            with patch.object(sys, "argv", argv), patch.dict("os.environ", {"DEEPSEEK_API_KEY": "k"}), \
+                    patch.object(local_models, "post_json", return_value=truncated), \
+                    contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(local_models.main(), 1)
+            self.assertFalse((root / "blind.md").exists())
+            self.assertEqual((root / "blind.partial.md").read_text(), "| E01 | half")
+            self.assertNotIn("| E01 | half", out.getvalue())
 
     def test_blind_doctrine_lines_are_stripped_and_need_a_heading(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -477,7 +512,7 @@ class ModelTest(unittest.TestCase):
     def test_blind_refuses_a_stripped_catalogue_that_lost_its_ids(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            args = self.make_blind_inputs(root, catalogue="<!-- event-ids: T-1 F-2 -->\n" + "event details " * 30)
+            args = self.make_blind_inputs(root, catalogue="<!-- event-ids: Q-1 E02 -->\n" + "event details " * 30)
             with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
                 with self.assertRaisesRegex(ValueError, "event ids"):
                     local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")

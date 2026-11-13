@@ -151,16 +151,38 @@ def _part_b_instruction(pack_root: Path) -> str:
     return m.group(1)
 
 
-# file:line or file:a-b, optionally followed by ("fragment"); the fragment may
-# hold unescaped or typographic quotes, so it ends at the last quote-paren
-# before a cell, list or sentence boundary.
-_CITE = re.compile(r'([\w./-]+\.[A-Za-z]{1,4})`?:\d+(?:-\d+)?'
-                   r'(?:`?\s*\(\s*["\u201c].*?["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)))?', re.M)
-_ANALYSIS_ID = re.compile(r"(?:\s*→\s*)?\b(?:Q|PA|L|SYS|NAT|G|DR|F|T)-[A-Z]*\d[\w-]*")
+# A citation: file:line or file:a-b, further ", :n" line refs, and an
+# optional ("fragment"). The fragment may hold unescaped or typographic
+# quotes, so the match prefers the last quote-paren before a boundary; it
+# never runs into the next citation on the same line.
+_FILE = r"[\w./-]+\.[A-Za-z]{1,4}"
+_FRAG = r"(?:(?!" + _FILE + r"`?:\d).)*?"
+_CITE = re.compile(
+    r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:,[ \t]*:\d+(?:-\d+)?)*"
+    r"(?:`?\s*\(\s*[\"\u201c]" + _FRAG + r"[\"\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$))"
+    r"|`?\s*\(\s*[\"\u201c]" + _FRAG + r"[\"\u201d]\s*\))?", re.M)
+# Analysis-only id families. Single-letter families (L-, G-, F-, T-) also
+# name domain things ("the T-1 threshold"), so they are removed only when the
+# run defines them (analysis_ids).
+_ANALYSIS_ID = re.compile(r"(?:\s*→\s*)?\b(?:Q|PA|SYS|NAT|DR)-[A-Z]*\d[\w-]*")
+_LOCAL_ID = re.compile(r"\b(?:L|G|F|T)-[A-Z]*\d[\w-]*")
 _MARK = "\x00"
 
 
-def blind_catalogue(text: str) -> str:
+def analysis_ids(adir: Path, pack_root: Path) -> set[str]:
+    """Single-letter-family ids this run defines: lints, guards and traces in
+    the analysis files other than the catalogue, plus the fault catalogue."""
+    ids: set[str] = set()
+    for path in adir.glob("*.md"):
+        if path.name != "event-catalogue.md":
+            ids.update(_LOCAL_ID.findall(path.read_text(encoding="utf-8")))
+    registry = pack_root / "formats" / "rules.toml"
+    if registry.is_file():
+        ids.update(re.findall(r'^id\s*=\s*"(F-\d+)"', registry.read_text(encoding="utf-8"), re.M))
+    return ids
+
+
+def blind_catalogue(text: str, known_ids: set[str] | frozenset = frozenset()) -> str:
     """The catalogue as Part B may see it.
 
     02-pilot rule 3 puts a verbatim code fragment into every observed-in-code
@@ -173,19 +195,46 @@ def blind_catalogue(text: str) -> str:
     package (rule 7).
     """
     text = _CITE.sub(r"\1", text)
-    # A fragment followed by more prose has no boundary after it: take the
-    # shortest quote-paren close instead.
-    text = re.sub(r'([\w./-]+\.[A-Za-z]{1,4})`?\s*\(\s*["\u201c].*?["\u201d]\s*\)', r"\1", text)
-    text = re.sub(r"(?<=[\s(,]):\d+(?:-\d+)?\b", "", text)  # bare ":194-196" line refs
-    text = re.sub(r",(?:[ \t]*,)+", ",", text)  # "channel.go, , " left by removed line refs
-    text = re.sub(r",[ \t]*\)", ")", text)
     text = _ANALYSIS_ID.sub(_MARK, text)
+    text = re.sub(r"(?:\s*→\s*)?" + _LOCAL_ID.pattern,
+                  lambda m: _MARK if m.group(0).lstrip(" \t→") in known_ids else m.group(0), text)
     # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12".
     text = re.sub(r"(?:\b(?:recorded as\s+)?lints?\s*|\b[Ff]inding\s*(?::\s*)?)(?=\x00)", "", text)
     # Parentheses that held only removed ids, then the ids with their separators.
     text = re.sub(r"\((?:[\s,;]|\x00)*\x00(?:[\s,;]|\x00)*\)", "", text)
     text = re.sub(r"[ \t]*[,;]?[ \t]*\x00(?:[ \t]*[,;][ \t]*(?=\x00))?", "", text)
     return text
+
+
+_DOC_ROW = re.compile(r"^(?:[-*]|\d+\.|\|)\s*\**DOC-\d+")
+
+
+def _extract_doctrine(extraction: str) -> str:
+    """The doctrine lines of an extraction: DOC-n bullets, numbered items or
+    table rows under a heading (any level) that names doctrine. Rows outside
+    such a section (status or mapping tables) are never taken."""
+    lines: list[str] = []
+    section_level = 0
+    for line in extraction.split("\n"):
+        s = line.strip()
+        heading = re.match(r"^(#{1,6})\s", s)
+        if heading and "doctrine" in s.lower():
+            section_level = len(heading.group(1))
+            continue
+        if heading and section_level and len(heading.group(1)) <= section_level:
+            section_level = 0
+        if section_level and _DOC_ROW.match(s):
+            lines.append(s)
+    return "\n".join(lines)
+
+
+def _part_b_instruction(pack_root: Path) -> str:
+    """The canonical blind-pass instruction from prompts/02-pilot.md."""
+    pilot = (pack_root / "prompts" / "02-pilot.md").read_text(encoding="utf-8")
+    m = re.search(r"(> Here is the event catalogue.*?)(?=\n\n(?=> |\w)|\Z)", pilot, re.S)
+    if not m:
+        raise ValueError("02-pilot.md: PART B instruction block not found")
+    return m.group(1)
 
 
 def assemble(args: argparse.Namespace, pack_root: Path) -> int:
@@ -198,14 +247,15 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     catalogue = catalogue_path.read_text(encoding="utf-8")
     events, pairs = _catalogue_ids(catalogue)
 
-    blind_copy = blind_catalogue(catalogue)
+    known_ids = analysis_ids(adir, pack_root)
+    blind_copy = blind_catalogue(catalogue, known_ids)
     try:
         same_ids = _catalogue_ids(blind_copy) == (events, pairs)
     except ValueError:
         same_ids = False
     if not same_ids:
         raise ValueError("stripping analysis ids changed the catalogue's event ids; "
-                         "rename event or pair ids that look like analysis ids (Q-, PA-, L-, SYS-, NAT-, G-, DR-, F-, T-)")
+                         "rename event or pair ids that look like analysis ids (Q-, PA-, SYS-, NAT-, DR-, or L-/G-/F-/T- ids the analysis defines)")
     blocks: list[tuple[str, str]] = [
         ("INPUT 1: EVENT CATALOGUE (code fragments and analysis references removed)", blind_copy)]
 
@@ -221,7 +271,7 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
             raise ValueError(f"{extraction_path} names DOC-n lines but none is a bullet, numbered "
                              "item or table row under a heading that names doctrine")
         if doctrine:
-            doctrine = blind_catalogue(doctrine)
+            doctrine = blind_catalogue(doctrine, known_ids)
             blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", doctrine))
     for spec in args.requirements:
         blocks.append((f"INPUT 2: REQUIREMENTS ({spec})", _read_requirements(spec, repo)))

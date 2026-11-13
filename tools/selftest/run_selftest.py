@@ -138,7 +138,9 @@ def main() -> int:
                 ('reject (observed-in-code, channel.go:50 ("return nil, errors.New("pool is closed")"))',
                  'return nil, errors.New("pool is closed")'),
                 ('reject (observed-in-code, `channel.go`:51 ("x := 1"))', "x := 1"),
-                ('handle (observed-in-code, channel.go:52 (\u201cc.mu.Lock()\u201d) + defer)', "c.mu.Lock()")):
+                ('handle (observed-in-code, channel.go:52 (\u201cc.mu.Lock()\u201d) + defer)', "c.mu.Lock()"),
+                ('handle (observed-in-code, channel.go:50-52 ("x := 1"))', "x := 1"),
+                ('handle (channel.go:50 ("x := 1") then retries, channel.go:52 ("y"))', "x := 1")):
             got = gas._parse_cell(raw_cell, None, ["S"], idx).get("citation", {}).get("fragment")
             if got != want:
                 failures.append(f"fragment not captured from {raw_cell!r}: {got!r}")
