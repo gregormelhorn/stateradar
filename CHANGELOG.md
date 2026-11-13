@@ -264,6 +264,22 @@
   since each one carries a gate and an upstream-guard field. `dsc_blind.py`,
   which sends the catalogue verbatim and is not used by 02-pilot, is
   unchanged. Red-first selftest.
+- **`draft-cells` and the routing variant `flash-writes`; 02-pilot v1.21.**
+  Both silenceper/pool cost measurements put 99.8 % of the routed cost on the
+  steering agent, so roadmap entry 11 item 2 tests whether Flash can write the
+  bulk text while the agent decides. New `local_models.py draft-cells`
+  (`tools/draft_cells.py`): the agent gives the states with their conditions
+  and the events, Flash drafts one cited cell per pair, code checks each cell
+  (vocabulary, target, citation, duplicates, missing pairs), one Jev batch
+  judges every clean cell as a claim, and a matrix block in the 02-pilot cell
+  form with a review list is written next to the JSON. Holes carry `→ Q-?` and
+  missing cells `MISSING`, so the checker fails until the agent decides them.
+  02-pilot v1.21 adds the variant, used only when the run brief names it:
+  Step-1 drafts are the extraction (routing rule 3 suspended, agent additions
+  marked), the matrix comes from `draft-cells`, as-is tests are drafted by
+  Flash from the agent's plan, and `summary.md` counts the agent's changes by
+  Jev choice. New selftest `test_draft_cells.py` in CI. No pilot has run with
+  it yet.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

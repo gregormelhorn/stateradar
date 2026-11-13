@@ -103,6 +103,38 @@ and never accepts one. The command needs both API keys. Every command that
 takes `--output` checks before any request that the output is not a directory
 and its directory is writable.
 
+### Draft matrix cells
+
+`draft-cells` drafts disposition-matrix cells (the 02-pilot routing variant
+`flash-writes`, roadmap entry 11 item 2). The task file is JSON written by the
+steering agent: `states` (each a `name` and the `condition` that defines it),
+`events` (each an `id` and a `gist`) and optional `notes`. Flash must answer
+with one cell per state and event (`state`, `event`, `disposition`, `target`
+for a transition, `line`, `fragment`, `note`) plus `questions`. Code checks
+each cell: known state and event, the closed disposition vocabulary of
+`formats/rules.toml`, a transition target among the states, no target on other
+dispositions, the citation rule of `jev-batch`, and one cell per pair; it
+lists the pairs without a cell. Every clean cell goes to one Jev batch as a
+claim that names the state with its condition, the event with its gist and the
+drafted outcome. The default output budget is 16384 tokens, the Flash maximum;
+split the events across task files when a draft is cut off.
+
+The result JSON holds every cell with its problems and Jev judgment, the
+missing pairs, the draft questions and the usage. Next to it (`cells.json`
+gives `cells.md`) the command writes a matrix block in the 02-pilot cell form,
+in sub-tables of eight events, followed by a review list (cells with problems,
+cells Jev did not judge `supported`, missing pairs) and the draft questions. A
+cell with a problem keeps its disposition but not its citation; a hole carries
+`→ Q-?` and a missing cell reads `MISSING`, so `dsc_check.py` fails until the
+agent has decided each. Nothing is accepted: the agent checks every cell
+against the source.
+
+```bash
+python3 tools/local_models.py --ledger "$ledger" draft-cells \
+  pool/channel.go /path/to/cells-task.json --output /path/to/cells.json \
+  --model jev-1.14.0
+```
+
 ### Evaluate a batch against reviewed examples
 
 `tools/jev_eval.py` compares one saved `jev-batch` result (its `--output` file

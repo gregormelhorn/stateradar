@@ -1,8 +1,12 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.20.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.21.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.21 — roadmap entry 11 item 2: the experimental routing variant
+  `flash-writes`, in which Flash drafts the Step-1 extraction, the matrix
+  cells (`draft-cells`, each cell judged by one Jev batch) and the as-is
+  tests, and the agent decides, corrects and counts its changes.
 * v1.20 — second routed pilot and agent-only run (silenceper/pool,
   2026-11-13): the Part-B package labels the catalogue's code-derived
   sections and fields `observed in code`, Part B marks each row that rests
@@ -148,6 +152,20 @@ Rules for every routed step:
 10. **Draft tasks are finding-neutral.** A `draft-verify` task names what to extract (events, states, guards, orderings, contracts) in general terms, never a suspected defect, race, or scenario: you have seen the code, and a named scenario steers Flash (first routed pilot: the task's example race was the benchmark finding, so Flash raising it was not independent). Keep every task file next to its output.
 
 End `summary.md` with the ledger file name (not its full path), the output of `local_models.py --ledger <path> status`, and every failed or skipped model call.
+
+#### Routing variant `flash-writes` (experimental, roadmap entry 11 item 2)
+
+Use it only when the run brief names `routing variant: flash-writes`, and write that line under the routing line in `summary.md`. It measures whether Flash can write the bulk text while you decide, so it changes only these points; every other rule of this prompt holds.
+
+1. **Step 1.** Routing rule 3 is suspended: the `draft-verify` drafts are the extraction. Rule 1 still holds (read each kept claim's cited line). Add an item yourself only where a later step, a checker or a re-read shows a gap, and mark it `added by agent: <why>` so the agent's share can be counted.
+2. **Step 4.** You decide the states (each with the condition that defines it) and the events, and write them to a cells task file (JSON: `states` with `name` and `condition`, `events` with `id` and `gist`, optional `notes`). Run `draft-cells <source> <task> --output <stem>.json` once per source file that holds the handling (split the events across calls if a draft is cut off; rule 9 still applies). It checks each drafted cell (state, event, vocabulary, target, citation, one cell per pair), sends every clean cell to one Jev batch as a claim, and writes `<stem>.md`: a matrix block in the cell form of this step, then a review list. Read the source file once and check every drafted cell against it; correct a wrong cell in place, decide every `→ Q-?` (a question or a fold) and every `MISSING`, and add guards, `→ Q-nn` links and pair notes as this step requires. Jev's answer orders your reading and is never a reason to keep or drop a cell (routing rule 2). Keep the task file, the JSON and the rendered draft.
+3. **As-is tests** (when the run brief asks for them). Write a test plan, one line per test: its name, the claim it observes, and the cited line. Then draft the test code with `flash` from a prompt that holds the plan and the source, and run it. Fix what does not compile or does not observe its claim, and keep the plan, the prompt and the draft next to the tests.
+4. **Measure.** In `summary.md`, record:
+   * the cells drafted and the cells you changed, split by Jev's choice (supported, contradicted, unclear, not judged) and by kind of change (disposition, target, citation, note only);
+   * the tests drafted and the tests you changed;
+   * the Step-1 items you added.
+
+   These numbers are the variant's result next to cost and time, and the first labelled data on Jev for matrix cells.
 
 ### Step 0 — Scope statement
 
