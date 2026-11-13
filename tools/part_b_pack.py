@@ -205,7 +205,15 @@ def sub_citations(text: str, names: frozenset, repl) -> str:
 
 # After stripping, a file name directly followed by ("..." means a fragment
 # the patterns could not end: the command reports it (backstop for R-PART-B).
-_LEFT_FRAGMENT = re.compile("(" + _FILE + r")`?\s*\(\s*[\"\u201c]")
+_DASH_RANGE = re.compile(r"(:\d+)[\u2013\u2014](?=\d)")
+
+
+# A cited file name, then up to 40 characters of the same cell ("line 7",
+# "–9", "and in `x.go`"), then a quote-paren with straight, single or
+# typographic quotes: whatever spelling the citation used, its fragment
+# never reaches Part B (method review round 8).
+_LEFT_TAIL = r"`?[^|\n(]{0,40}?\(\s*[\"'\u201c\u2018]"
+_LEFT_FRAGMENT = re.compile("(" + _FILE + r")" + _LEFT_TAIL)
 
 
 _CELL_BAR = re.compile(r"(?<![|\\])\|(?!\|)")
@@ -225,9 +233,18 @@ def leftover_fragments(text: str, keep_quotes_from: frozenset = frozenset(),
     """Report name ("... left after stripping. With cited, only names the
     original text cited as file:N count, so code such as errors.New("x") in
     prose is not reported."""
-    return [m.group(0) for m in _LEFT_FRAGMENT.finditer(text)
-            if _norm(m.group(1)) not in keep_quotes_from
-            and (cited is None or Path(m.group(1)).name in cited)]
+    if cited is None:
+        pattern = _LEFT_FRAGMENT
+    elif not cited:
+        return []
+    else:
+        pattern = re.compile(r"((?:[\w./-]*/)?(?<![\w.-])(?:"
+                             + "|".join(re.escape(n) for n in sorted(cited, key=len, reverse=True))
+                             + r"))(?![\w-])" + _LEFT_TAIL)
+    # The quote belongs to the last file name before it: a kept prose-source
+    # quote ("README.md ("...")") is not a fragment.
+    return [m.group(0) for m in pattern.finditer(text)
+            if _norm(re.findall(_FILE, m.group(0))[-1]) not in keep_quotes_from]
 
 
 # Prose source documents: a quote cited from one of them is the normative
@@ -310,6 +327,7 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     citations of repository files end a fragment; assemble does.
     """
     names = cited_names(text) | frozenset(later_names)
+    text = _DASH_RANGE.sub(r"\1-", text)  # "file:7–9" is the range "file:7-9"
     text = sub_citations(text, names, _citation_stripper(frozenset(keep_quotes_from)))
     text = _ANALYSIS_ID.sub(_MARK, text)
     # Removing an id never joins two lines: no pattern here crosses a newline.
@@ -429,8 +447,10 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
                          "escaping in the input and rebuild; never send): " + "; ".join(shifted[:10]))
     left = leftover_fragments(blind_copy + "\n" + blind_doctrine, keep_quotes, later)
     if left:
-        raise ValueError("code fragments left after a citation (inside a table cell escape every "
-                         "\"|\" of a fragment as \"\\|\" in the input, then rebuild; never send): "
+        raise ValueError("code fragments left after a citation (a fragment is unbalanced, wrapped "
+                         "across lines, cited as other than file:N or file:N-M, or holds an unescaped "
+                         "\"|\" in a table cell: put each fragment on one line after file:N, escape "
+                         "table bars as \"\\|\", then rebuild; never send): "
                          + "; ".join(left[:10]))
     kept = sorted(set(_LOCAL_ID.findall(blind_copy + "\n" + blind_doctrine)))
     both = catalogue + "\n" + doctrine

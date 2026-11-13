@@ -182,30 +182,32 @@ elsewhere every `|` is code such as `a || b`): it ends where its quotes
 balance before a boundary, otherwise at the last quote-paren before the next
 citation (a file the catalogue cites with a fragment, or one under `--repo` by
 path or base name), a cell bar or the end of the line. Two backstops refuse
-the package, so nothing is sent: a cited file name still followed by a quote
-after stripping (inside a table cell, escape each `|` of a fragment as `\|`
-and rebuild), and a table row (catalogue or doctrine) whose number of cell
-bars or whose line count changed. Q-, PA-, SYS-, NAT- and DR- ids are always
-removed. An L-, G-, F- or T- id stays only when the requirements, the
-contracts or the quoted text of a doctrine line use it (a doctrine line's
-gloss is Part A's and does not count), so a domain term such as `T-1` that the
-requirements use survives; every other id of those families is removed,
-including a domain term the sources never use. The command names on stderr
-each id it kept and each it removed, for the agent to check; a removed domain
-term is recorded in `part-b-diff.md` as a known loss, and the inputs are never
-edited to restore it. Prose that states an as-is conclusion cannot be removed
-mechanically, and the pilot lists it as a known leak. Doctrine lines from
-`extraction.md` travel too, stripped the same way: bullets, numbered items or
-table rows under a heading that names doctrine. An extraction that names DOC
-lines none of which sits under such a heading is refused, and so is a
-catalogue whose event ids would not survive the stripping. A truncated blind
-output is saved to `<output stem>.partial.md`, never to `--output`, and is not
-printed. The call receives only the assembled package and no tools or
-conversation history. The command checks the returned table with the existing
-Part-B coverage checker and returns a failure for missing rows, missing
-checklist ticks, or truncated output. It does not check the disposition
-vocabulary, and it only requires pair rows when the catalogue carries `P-`
-ids.
+the package, so nothing is sent: a cited file name followed, within the same
+cell and 40 characters, by a quote-paren with straight, single or typographic
+quotes after stripping (put each fragment on one line after `file:N` or
+`file:N-M`, where an en-dash range counts as `-`, escape each `|` of a
+fragment in a table cell as `\|`, and rebuild), and a table row (catalogue or
+doctrine) whose number of cell bars or whose line count changed. Q-, PA-,
+SYS-, NAT- and DR- ids are always removed. An L-, G-, F- or T- id stays only
+when the requirements, the contracts or the quoted text of a doctrine line use
+it (a doctrine line's gloss is Part A's and does not count), so a domain term
+such as `T-1` that the requirements use survives; every other id of those
+families is removed, including a domain term the sources never use. The
+command names on stderr each id it kept and each it removed, for the agent to
+check; a removed domain term is recorded in `part-b-diff.md` as a known loss,
+and the inputs are never edited to restore it. Prose that states an as-is
+conclusion cannot be removed mechanically, and the pilot lists it as a known
+leak. Doctrine lines from `extraction.md` travel too, stripped the same way:
+bullets, numbered items or table rows under a heading that names doctrine. An
+extraction that names DOC lines none of which sits under such a heading is
+refused, and so is a catalogue whose event ids would not survive the
+stripping. A truncated blind output is saved to `<output stem>.partial.md`,
+never to `--output`, and is not printed. The call receives only the assembled
+package and no tools or conversation history. The command checks the returned
+table with the existing Part-B coverage checker and returns a failure for
+missing rows, missing checklist ticks, or truncated output. It does not check
+the disposition vocabulary, and it only requires pair rows when the catalogue
+carries `P-` ids.
 
 ```bash
 blind_args=(blind domain-analysis/component --repo /path/to/repo \

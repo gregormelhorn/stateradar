@@ -508,6 +508,19 @@ class ModelTest(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, r"never send"):
                         local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
                 self.assertFalse((root / "blind.package.md").exists())
+        # Other citation spellings (round 8): an en-dash range strips like
+        # "-"; "line 7", single quotes and a second file name are refused.
+        P = local_models.part_b_pack
+        self.assertEqual(P.blind_catalogue('| E01 | channel.go:17\u201319 ("x := 1") | next |'),
+                         "| E01 | channel.go | next |")
+        cited = frozenset({"channel.go", "pool.go"})
+        for row in ('| z2 | channel.go:7\u20139 ("a | b") | next |', '| z4 | channel.go line 7 ("a | b") | next |',
+                    "| z5 | channel.go:7 ( 'a | b' ) | next |",
+                    '| z6 | channel.go:7 ("ok") and in `pool.go` ("v | w") | next |'):
+            self.assertTrue(P.leftover_fragments(P.blind_catalogue(row, later_names=cited), frozenset(), cited), row)
+        # Quoted prose in another cell is not a fragment.
+        self.assertEqual(P.leftover_fragments('| x | channel.go | Get loop retries ("until ok") |',
+                                              frozenset(), cited), [])
         # Escaped as markdown tables need, the same fragment strips whole.
         self.assertEqual(local_models.part_b_pack.blind_catalogue(
             '| E01 | channel.go:7 ("fd := open(p, O_RDWR \\| O_CREATE)") | next |'), "| E01 | channel.go | next |")
