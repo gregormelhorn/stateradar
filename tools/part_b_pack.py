@@ -423,9 +423,11 @@ def mark_observed(text: str) -> str:
 
 # Asked for at the start of the behaviour cell; counted anywhere in the row.
 _AS_IS_ROW = re.compile(r"(?<![\w-])as-is:", re.I)
-# Weaker signal: "as-is" in prose without the colon. In the flash-writes pilot
-# (2026-11-13) Part B marked no row but wrote "as-is" in six rows, the same
-# rows the agent judged not independent by reading.
+# "as-is" in prose without the colon: a pointer for the agent's reading, not
+# a mark. In the flash-writes pilot (2026-11-13) Part B marked no row but wrote
+# "as-is" in nine rows, each time to set observed-in-code text apart from the
+# requirements ("as-is, not requirements", "must not assert as-is"); whether
+# the row still rests on that text is the agent's call.
 _AS_IS_PROSE = re.compile(r"(?<![\w-])as-is(?![\w-])", re.I)
 
 
@@ -630,15 +632,14 @@ def check(args: argparse.Namespace) -> int:
     # Rows the blind pass based on code-derived catalogue text (mark_observed):
     # agreement on them is not independent (rule 7). Information, not a failure.
     # Always printed, so that "Part B marked nothing" is not mistaken for a
-    # clean result: in the first measured run Part B marked 0 rows although
-    # six rested on observed-in-code text.
+    # clean result: in the first measured run Part B marked 0 rows.
     print(f"PART-B INDEPENDENCE: {len(as_is)} rows marked as-is (not independent)"
           + (": " + ", ".join(as_is) if as_is else
              "; the mark can be missing, so the agent's reading stays the check"))
     if as_is_prose:
         rows = "row says" if len(as_is_prose) == 1 else "rows say"
         print(f"PART-B INDEPENDENCE (prose): {len(as_is_prose)} more {rows} \"as-is\" "
-              "without the mark (read them): " + ", ".join(as_is_prose))
+              "without the mark (read them, not counted): " + ", ".join(as_is_prose))
     return 0
 
 

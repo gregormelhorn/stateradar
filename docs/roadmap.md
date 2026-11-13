@@ -294,12 +294,12 @@ Open, in order:
    the provenance "observed in code") became 02-pilot v1.20: the package
    labels those sections, and Part B marks the rows that rest on them.
    Measured in the flash-writes pilot (Part B on Flash): Part B marked 0 rows
-   `as-is:` but wrote "as-is" in prose in the six rows the agent judged not
-   independent, so the check now always prints the count and lists the prose
-   rows as a weaker signal; the agent's reading stays the check. Its
-   `timing.md` shows where the 37 minutes went: about 70 s of Flash and Jev
-   calls, about 3.5 minutes of `go test` (mostly three waits on the hanging
-   `TestPool_Get`'s 60-second timeout) and about 32 minutes of
+   `as-is:` and used "as-is" in the prose of nine rows, each to set observed
+   text apart from the requirements; the check now always prints the count and
+   lists those prose rows for the agent to read, and the agent's reading stays
+   the check. Its `timing.md` shows where the 37 minutes went: about 70 s of
+   Flash and Jev calls, about 3.5 minutes of `go test` (mostly three waits on
+   the hanging `TestPool_Get`'s 60-second timeout) and about 32 minutes of
    the steering agent's own work, which includes the pack's tool runs (not
    timed separately). Timed agent-only run (done 2026-11-13,
    `docs/evidence/agent-only-pool-2026-11-13/`, same pack, blind, routing
