@@ -3,6 +3,14 @@
 import sqlite3
 from contextlib import closing
 from pathlib import Path
+from typing import TypedDict
+
+
+class LedgerCall(TypedDict):
+    id: int
+    provider: str
+    amount_microdollars: int
+    status: str
 
 
 class BudgetExceeded(Exception):
@@ -10,7 +18,7 @@ class BudgetExceeded(Exception):
 
 
 class Budget:
-    def __init__(self, path: Path, limit: int | None = None):
+    def __init__(self, path: Path, limit: int | None = None) -> None:
         if limit is not None and (isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0):
             raise ValueError("budget limit must be a positive integer")
         self.path = path
@@ -30,7 +38,8 @@ class Budget:
     @property
     def limit(self) -> int:
         with closing(sqlite3.connect(self.path)) as db:
-            return db.execute("SELECT limit_amount FROM config").fetchone()[0]
+            limit: int = db.execute("SELECT limit_amount FROM config").fetchone()[0]
+            return limit
 
     def set_limit(self, limit: int) -> None:
         if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
@@ -58,9 +67,10 @@ class Budget:
 
     def total(self) -> int:
         with closing(sqlite3.connect(self.path)) as db:
-            return db.execute("SELECT COALESCE(SUM(amount), 0) FROM calls").fetchone()[0]
+            total: int = db.execute("SELECT COALESCE(SUM(amount), 0) FROM calls").fetchone()[0]
+            return total
 
-    def calls(self):
+    def calls(self) -> list[LedgerCall]:
         with closing(sqlite3.connect(self.path)) as db:
             return [{"id": row[0], "provider": row[1], "amount_microdollars": row[2], "status": row[3]}
                     for row in db.execute("SELECT id, provider, amount, status FROM calls ORDER BY id")]
