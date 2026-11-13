@@ -493,6 +493,25 @@ class ModelTest(unittest.TestCase):
             self.assertIn("T-1", err.getvalue())
             self.assertRegex(err.getvalue(), r"removed as analysis references[^\n]*L-9")
 
+    def test_blind_refuses_a_package_with_a_leftover_fragment(self):
+        # Method review round 7: an unescaped "|" inside a fragment on a table
+        # row is a cell bar, so the fragment cannot be ended; the package is
+        # refused rather than sent with code in it.
+        for row in ('| E01 | channel.go:7 ("a | b") then | x ("y") |',
+                    '| E01 | channel.go:7 ("fd := open(p, O_RDWR | O_CREATE)") | next |',
+                    '| E01 | channel.go:7 (\u201ctypographic | quote\u201d) | next |'):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                args = self.make_blind_inputs(
+                    root, catalogue="<!-- event-ids: E01 -->\n" + row + "\n" + "event details " * 30)
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    with self.assertRaisesRegex(ValueError, r"never send"):
+                        local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+                self.assertFalse((root / "blind.package.md").exists())
+        # Escaped as markdown tables need, the same fragment strips whole.
+        self.assertEqual(local_models.part_b_pack.blind_catalogue(
+            '| E01 | channel.go:7 ("fd := open(p, O_RDWR \\| O_CREATE)") | next |'), "| E01 | channel.go | next |")
+
     def test_blind_catalogue_round3_cases(self):
         strip = local_models.part_b_pack.blind_catalogue
         # One-argument call: prose between citations survives on its own.
@@ -522,6 +541,81 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(strip("The pool behaves as callers see. What the waiter does not see, the owner does."),
                          "The pool behaves as callers see. What the waiter does not see, the owner does.")
         self.assertEqual(strip('client.go:40 ("f("a") dial db.example.com:5432") |'), "client.go |")
+        self.assertEqual(strip('client.go:40 ("f("a") dial db.example.com:5432 now") |'), "client.go |")
+        self.assertEqual(strip("See Q-01 for details."), "For details.")
+        self.assertEqual(strip("x. Cf. DR-002. y"), "x. y")
+        self.assertEqual(strip("SEE Q-01 for details."), "For details.")
+        # A later bare citation followed by prose still ends a fragment with inner quote-parens.
+        for text, want in (('| e | channel.go:50 ("f("a") + g()") then channel.go:52 holds the rest |',
+                            "| e | channel.go then channel.go holds the rest |"),
+                           ('channel.go:139 ("return nil, errors.New("connection closed")") and channel.go:140 returns',
+                            "channel.go and channel.go returns"),
+                           ('channel.go:10 ("f("a") g") pool.go:3 holds the lock', "channel.go pool.go holds the lock"),
+                           ('| e | gen_server.erl:50 ("f("a") + g()") then util.lua:52 holds |',
+                            "| e | gen_server.erl then util.lua holds |")):
+            self.assertEqual(strip(text, later_names=frozenset({"pool.go", "util.lua"})), want)
+        # No boundary and no later citation: the fragment runs to the last quote-paren, no code tail survives.
+        self.assertNotIn("rest", strip('init.lua:3 ("connect("a") ; rest") then srv.rs:5432 now'))
+        # A fragment never crosses a table cell, and a later uncited quote keeps its prose.
+        for text, want in (
+                ('| ping_failed | callback errors | channel.go:124 ("if err != nil {") | Get loop retries ("until ok") |',
+                 '| ping_failed | callback errors | channel.go | Get loop retries ("until ok") |'),
+                ('| e | channel.go:10 ("x := 1") | the README says ("the pool waits") when full |',
+                 '| e | channel.go | the README says ("the pool waits") when full |'),
+                ('| E01 | channel.go:10 ("x := 1") | the caller calls Close("now") |',
+                 '| E01 | channel.go | the caller calls Close("now") |'),
+                ('| E01 | waits (channel.go:10 ("x")), then logs ("done") quickly |',
+                 '| E01 | waits (channel.go), then logs ("done") quickly |'),
+                ('Waits (channel.go:10 ("x := 1")) and the doc calls it ("lazy") here.',
+                 'Waits (channel.go) and the doc calls it ("lazy") here.'),
+                ('channel.go:8 ("a") the doc (see README.md ("wait for it")) says so',
+                 'channel.go the doc (see README.md ("wait for it")) says so')):
+            out = strip(text)
+            self.assertEqual(out, want)
+            self.assertEqual(out.count("|"), text.count("|"))
+        # Outside table rows "|" is code: fragments with || or |x| strip whole; on a table row
+        # an unescaped || inside balanced quotes strips too, and the cell bars stay.
+        for text, want in (('- bullet: channel.go:5 ("if a || b {") and pool.go:3 holds', "- bullet: channel.go and pool.go holds"),
+                           ('- bullet2: channel.go:5 ("x := a | b") then prose', "- bullet2: channel.go then prose"),
+                           ('- gate: idle check (channel.go:115 ("if timeout > 0 || ok {")), then Ping',
+                            "- gate: idle check (channel.go), then Ping"),
+                           ("* closure (lib.rs:10 (\"v.iter().map(|x| x + 1)\")).", "* closure (lib.rs)."),
+                           ('| t | channel.go:115 ("if c.idleTimeout > 0 || ok {") | next |', "| t | channel.go | next |"),
+                           ('| g | channel.go:10 ("x") See Q-12; Cf. T-F05 |', "| g | channel.go |")):
+            self.assertEqual(strip(text, later_names=frozenset({"pool.go"})), want)
+        # Backstop: a fragment the patterns could not end is reported.
+        self.assertEqual(local_models.part_b_pack.leftover_fragments('a channel.go ("if x {") b README.md ("ok")',
+                                                                     frozenset({"README.md"})), ['channel.go ("'])
+        # Code names in prose are not reported when only cited file names count.
+        self.assertEqual(local_models.part_b_pack.leftover_fragments(
+            'Calls `c.Get("key")` then errors.New("closed"); channel.go ("x', frozenset(),
+            frozenset({"channel.go"})), ['channel.go ("'])
+        # A table row never loses or gains a cell (round 6): fragments end inside their cell.
+        P = local_models.part_b_pack
+        for text, want in (('| s2 | channel.go:5 ("x") tail prose | other cell ("quoted prose") | third |',
+                            '| s2 | channel.go tail prose | other cell ("quoted prose") | third |'),
+                           ('| v | channel.go:7 ("a \\| b") then | x ("y") |', '| v | channel.go then | x ("y") |'),
+                           ('| w | channel.go:7 ("if a || f("b") {") | pool.go:2 ("c") |', '| w | channel.go | pool.go |')):
+            got = strip(text, later_names=frozenset({"pool.go"}))
+            self.assertEqual(got, want)
+            self.assertEqual(P.changed_table_rows(text, got), [])
+        self.assertEqual(P.changed_table_rows("| a | b |", "| a b |"), ["| a b |"])
+        # Removing an id never joins lines; a changed line count is reported.
+        for text in ("| a | b |\n→ Q-07 continues the note\n| c | d |", "| a | x (L-4,\nG-01) |"):
+            got = strip(text)
+            self.assertEqual(got.count("\n"), text.count("\n"))
+            self.assertEqual(P.changed_table_rows(text, got), [])
+        self.assertEqual(strip("| a | b |\n→ Q-07 continues the note"), "| a | b |\ncontinues the note")
+        self.assertEqual(P.changed_table_rows("a\nb", "ab"), ["line count changed: 2 -> 1"])
+        # A wrapped code line that starts with "||" is prose, not a table row.
+        self.assertIsNone(P._TABLE_ROW.match("|| len(c.conns) == 0 {\")),"))
+        # A host whose ending looks like a file extension is not a later citation.
+        self.assertEqual(strip('client.go:40 ("f("a") dial api.example.rs:8443 now") |'), "client.go |")
+        # A removed sentence-initial label keeps the capital after "," or ";", in parentheses and in cells.
+        self.assertEqual(strip("x. See DR-1; then y."), "x. Then y.")
+        self.assertEqual(strip("See Q-01, which covers it."), "Which covers it.")
+        self.assertEqual(strip("The pool waits (See Q-01)."), "The pool waits.")
+        self.assertEqual(strip("| a | See Q-01 |"), "| a | |")
         # A reference word left at the end of a cell or line goes too.
         self.assertEqual(strip("| a; see T-F05 and L-4 |\nx, cf. Q-1\n"), "| a |\nx\n")
         # Quotes are kept by exact path: vendor/lib/README.md does not ride on README.md.
@@ -566,6 +660,22 @@ class ModelTest(unittest.TestCase):
                               ["summary.md", "docs/req.md:Waiting", str(root / "contracts.md")],
                               root, root / "analysis")
             self.assertEqual(got, frozenset({"summary.md", "docs/req.md", "contracts.md", "docs/README.md"}))
+
+    def test_cited_names_come_from_fragments_and_existing_files(self):
+        cited_names = local_models.part_b_pack.cited_names
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "util.lua").write_text("x")
+            text = 'a.go:1 ("x") then util.lua:5 and db.example.com:5432 and b.rs:3 holds'
+            self.assertEqual(cited_names(text), frozenset({"a.go"}))
+            self.assertEqual(cited_names(text, root), frozenset({"a.go", "util.lua"}))
+            # A file in a subdirectory cited by its base name counts too.
+            (root / "sub").mkdir()
+            (root / "sub" / "deep.go").write_text("x")
+            row = '| e | channel.go:50 ("f("a") + g()") then deep.go:3 holds the lock |'
+            self.assertIn("deep.go", cited_names(row, root))
+            self.assertEqual(local_models.part_b_pack.blind_catalogue(row, later_names=cited_names(row, root)),
+                             "| e | channel.go then deep.go holds the lock |")
 
     def test_cli_blind_truncation_goes_to_a_partial_file(self):
         with tempfile.TemporaryDirectory() as directory:

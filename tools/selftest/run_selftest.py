@@ -147,7 +147,15 @@ def main() -> int:
                 ('handle (channel.go:50 ("f("a") + g()") then channel.go:52 ("y := 2"))', 'f("a") + g()'),
                 ('handle (channel.go:40 ("net.Dial("tcp", "db:5432")") and channel.go:3 ("x"))',
                  'net.Dial("tcp", "db:5432")'),
-                ('handle (channel.go:40 ("f("a") dial db.example.com:5432"))', 'f("a") dial db.example.com:5432')):
+                ('handle (channel.go:40 ("f("a") dial db.example.com:5432"))', 'f("a") dial db.example.com:5432'),
+                ('handle (channel.go:40 ("f("a") dial db.example.com:5432 now"))',
+                 'f("a") dial db.example.com:5432 now'),
+                ('handle (channel.go:50 ("f("a") + g()") then channel.go:52 holds the rest)', 'f("a") + g()'),
+                ('handle (channel.go:139 ("return nil, errors.New("closed")") and channel.go:140 returns)',
+                 'return nil, errors.New("closed")'),
+                ('handle (channel.go:40 ("f("a") dial api.example.rs:8443 now"))', 'f("a") dial api.example.rs:8443 now'),
+                ('handle (channel.go:50 ("f("a") + g()") then README.md:3 says, README.md:4 ("doc"))',
+                 'f("a") + g()')):
             got = gas._parse_cell(raw_cell, None, ["S"], idx).get("citation", {}).get("fragment")
             if got != want:
                 failures.append(f"fragment not captured from {raw_cell!r}: {got!r}")

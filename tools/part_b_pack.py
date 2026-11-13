@@ -40,6 +40,7 @@ the assembled prompt never drifts from the canonical text.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -122,17 +123,113 @@ def _read_contracts(spec: str, repo: Path) -> str:
 
 # A citation: file:line or file:a-b, further ", :n" or "and :n" line refs,
 # and an optional ("fragment"). The fragment may hold unescaped or
-# typographic quotes and even "host:5432" tokens, so it ends at a
-# quote-paren followed by a boundary, or at the last quote-paren before a
-# later citation (one preceded by a space, comma or parenthesis) on the
-# line (_FRAG_END); else at the first quote-paren.
+# typographic quotes and even "host:5432" tokens. It ends at the first
+# quote-paren before a boundary that leaves its quotes balanced; otherwise
+# at the last quote-paren before a later citation, a table-cell bar or the
+# end of the line, so no code tail survives. It never crosses a cell. A later
+# citation names a file the text cites with a fragment elsewhere, or one
+# that exists in the repository (cited_names), never a host name.
 _FILE = r"[\w./-]+\.[A-Za-z]{1,4}"
-_FRAG_END = (r"[\"\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)"
-             r"|(?:(?![\"\u201d]\s*\)).)*?[\s,(]" + _FILE + r"`?:\d+(?:-\d+)?(?=`?\s*\(|[\s,;)|]|$))")
-_CITE = re.compile(
-    r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
-    r"(`?\s*\(\s*[\"\u201c](.+?)" + _FRAG_END +
-    r"|`?\s*\(\s*[\"\u201c](.+?)[\"\u201d]\s*\))?", re.M)
+
+
+_SKIP_DIRS = {".git", "node_modules", "vendor", "third_party", "target", "build", "dist", "__pycache__"}
+
+
+def _repo_basenames(repo: Path) -> set[str]:
+    names: set[str] = set()
+    for dirpath, dirnames, files in os.walk(repo):
+        dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS and not d.startswith(".")]
+        names.update(files)
+    return names
+
+
+def cited_names(text: str, repo: Path | None = None) -> frozenset:
+    """File names that count as later citations: those cited with a
+    fragment somewhere in text, plus file:N tokens that name a file under
+    repo, by path or by base name (catalogues cite by base name)."""
+    names = {Path(m.group(1)).name for m in re.finditer(
+        "(" + _FILE + r")`?:\d+(?:-\d+)?`?\s*\(\s*[\"\u201c]", text)}
+    if repo is not None:
+        tokens = {m.group(1).strip("`") for m in re.finditer("(" + _FILE + r")`?:\d", text)}
+        base = _repo_basenames(repo) if tokens else set()
+        names.update(Path(tok).name for tok in tokens
+                     if Path(tok).name in base or (repo / tok).is_file())
+    return frozenset(names)
+
+
+def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
+    """The citation pattern. On a table row (table=True) an unescaped "|"
+    is a cell bar that the fallback never crosses; elsewhere "|" is code
+    (a || b) like any other character."""
+    later = ("(?:[\\w./-]*/)?(?:" + "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True)) + ")"
+             if names else r"(?!)")
+    q_open, q_close = r"[\"\u201c]", r"[\"\u201d]"
+    # Where the next citation starts: a later file:N, or a prose file followed
+    # by its own ("quote") (code such as errors.New("x") is not one). Neither
+    # a fragment nor a quote pair crosses it.
+    nxt = (r"[\s,(](?:" + later + r"`?:\d|[\w./-]+\.(?:md|txt|rst|adoc)`?\s*\(\s*" + q_open + r")")
+    # On a table row a lone unescaped "|" is a cell bar; "\|" and "||" are code.
+    if table:
+        plain = r"(?:(?!" + nxt + r")(?:\\\||\|\||[^\"\u201c\u201d|\n]))"
+        ch = r"(?:(?!" + nxt + r")(?:\\\||\|\||[^|\n]))"
+        bar = r"|(?<![|\\])\|(?!\|)"
+    else:
+        plain = r"(?:(?!" + nxt + r")[^\"\u201c\u201d\n])"
+        ch = r"(?:(?!" + nxt + r")[^\n])"
+        bar = ""
+    # 1. Quotes balanced inside, closed by a quote-paren before a boundary;
+    #    on a table row neither the fragment nor a quote pair crosses a cell.
+    balanced = (r"((?:" + plain + r"|" + q_open + plain + r"*" + q_close + r")*?)"
+                + q_close + r"\s*\)(?=\s*(?:[),;|]|\u2014|$))")
+    # 2. Otherwise the last quote-paren before the next citation, a cell bar
+    #    (table rows) or the end of the line, so no code tail survives.
+    last = (r"(" + ch + r"+?)" + q_close + r"\s*\)(?=(?:(?!" + q_close + r"\s*\))" + ch
+            + r")*?(?:" + nxt + bar + r"|$))")
+    return re.compile(
+        r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
+        r"(`?\s*\(\s*" + q_open + balanced +
+        r"|`?\s*\(\s*" + q_open + last + r")?", re.M)
+
+
+# A table row starts with a cell bar; a wrapped code line starting "||" is not one.
+# Catalogue tables must use leading bars (rows without one are read as prose).
+_TABLE_ROW = re.compile(r"\s*\|(?!\|)")
+
+
+def sub_citations(text: str, names: frozenset, repl) -> str:
+    """Apply repl to every citation, choosing the table-row pattern per line."""
+    prose, table = cite_pattern(names), cite_pattern(names, table=True)
+    return "\n".join((table if _TABLE_ROW.match(line) else prose).sub(repl, line)
+                      for line in text.split("\n"))
+
+
+# After stripping, a file name directly followed by ("..." means a fragment
+# the patterns could not end: the command reports it (backstop for R-PART-B).
+_LEFT_FRAGMENT = re.compile("(" + _FILE + r")`?\s*\(\s*[\"\u201c]")
+
+
+_CELL_BAR = re.compile(r"(?<![|\\])\|(?!\|)")
+
+
+def changed_table_rows(before: str, after: str) -> list[str]:
+    """Table rows whose number of cell bars changed (second backstop)."""
+    a, b = before.split("\n"), after.split("\n")
+    if len(a) != len(b):
+        return [f"line count changed: {len(a)} -> {len(b)}"]
+    return [y.strip()[:80] for x, y in zip(a, b)
+            if _TABLE_ROW.match(x) and len(_CELL_BAR.findall(x)) != len(_CELL_BAR.findall(y))]
+
+
+def leftover_fragments(text: str, keep_quotes_from: frozenset = frozenset(),
+                       cited: frozenset | None = None) -> list[str]:
+    """Report name ("... left after stripping. With cited, only names the
+    original text cited as file:N count, so code such as errors.New("x") in
+    prose is not reported."""
+    return [m.group(0) for m in _LEFT_FRAGMENT.finditer(text)
+            if _norm(m.group(1)) not in keep_quotes_from
+            and (cited is None or Path(m.group(1)).name in cited)]
+
+
 # Prose source documents: a quote cited from one of them is the normative
 # text Part B needs (doctrine lines, requirements), not implementation code
 # and not an analysis conclusion. Only files named in quote_files qualify:
@@ -148,7 +245,7 @@ def _norm(path: str) -> str:
 def _citation_stripper(quote_files: frozenset):
     def strip(m: re.Match) -> str:
         if m.group(2) and _norm(m.group(1)) in quote_files:
-            quote = m.group(3) if m.group(3) is not None else m.group(4)
+            quote = m.group(3) if m.group(3) is not None else m.group(4)  # balanced, last
             return f'{m.group(1)} ("{quote}")'
         return m.group(1)
     return strip
@@ -168,7 +265,7 @@ def quote_files(doctrine: str, inputs: list[str], repo: Path, analysis_dir: Path
             except ValueError:
                 continue
         paths.add(_norm(str(path)))
-    paths.update(_norm(m.group(1)) for m in _CITE.finditer(doctrine))
+    paths.update(_norm(m.group(1)) for m in re.finditer("(" + _FILE + r")`?:\d", doctrine))
     adir = analysis_dir.resolve()
     return frozenset(p for p in paths if p.lower().endswith(_PROSE_EXT)
                      and not (repo / p).resolve().is_relative_to(adir))
@@ -178,7 +275,7 @@ def quote_files(doctrine: str, inputs: list[str], repo: Path, analysis_dir: Path
 # name domain things ("the T-1 threshold"), so an id of those families is
 # kept when the Part B sources (requirements, contracts, doctrine lines) use
 # it, and removed otherwise (domain_ids).
-_ANALYSIS_ID = re.compile(r"(?:\s*→\s*)?\b(?:Q|PA|SYS|NAT|DR)-[A-Z]*\d[\w-]*")
+_ANALYSIS_ID = re.compile(r"(?:[ \t]*→[ \t]*)?\b(?:Q|PA|SYS|NAT|DR)-[A-Z]*\d[\w-]*")
 _LOCAL_ID = re.compile(r"\b(?:L|G|F|T)-[A-Z]*\d[\w-]*")
 _MARK = "\x00"
 
@@ -197,7 +294,7 @@ def domain_ids(*sources: str, doctrine: str = "") -> set[str]:
 
 
 def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
-                    keep_quotes_from: frozenset = frozenset()) -> str:
+                    keep_quotes_from: frozenset = frozenset(), later_names: frozenset = frozenset()) -> str:
     """The catalogue as Part B may see it.
 
     02-pilot rule 3 puts a verbatim code fragment into every observed-in-code
@@ -209,18 +306,22 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     analysis ids and the labels that introduced them are removed; L-, G-,
     F- and T- ids survive only when listed in keep_ids. Prose
     conclusions cannot be removed mechanically: the agent still reads the
-    package (rule 7).
+    package (rule 7). Pass later_names=cited_names(text, repo) so that bare
+    citations of repository files end a fragment; assemble does.
     """
-    text = _CITE.sub(_citation_stripper(frozenset(keep_quotes_from)), text)
+    names = cited_names(text) | frozenset(later_names)
+    text = sub_citations(text, names, _citation_stripper(frozenset(keep_quotes_from)))
     text = _ANALYSIS_ID.sub(_MARK, text)
-    text = re.sub(r"(?:\s*→\s*)?" + _LOCAL_ID.pattern,
+    # Removing an id never joins two lines: no pattern here crosses a newline.
+    text = re.sub(r"(?:[ \t]*→[ \t]*)?" + _LOCAL_ID.pattern,
                   lambda m: m.group(0) if m.group(0).lstrip(" \t→") in keep_ids else _MARK, text)
     # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12",
     # "see DR-002"; "see" in prose stays.
-    text = re.sub(r"\b(?:see|cf\.)[ \t]*(?=\x00)", "", text)
-    text = re.sub(r"(?:\b(?:recorded as\s+)?lints?\s*|\b[Ff]inding\s*(?::\s*)?)(?=\x00)", "", text)
+    text = re.sub(r"\b(?=[A-Z])(?i:see|cf\.)[ \t]*(?=\x00)", "\x01", text)  # a sentence start
+    text = re.sub(r"\b(?i:see|cf\.)[ \t]*(?=\x00)", "", text)
+    text = re.sub(r"(?:\b(?:recorded as[ \t]+)?lints?[ \t]*|\b[Ff]inding[ \t]*(?::[ \t]*)?)(?=\x00)", "", text)
     # Parentheses that held only removed ids, then the ids with their separators.
-    text = re.sub(r"(?m)(^[ \t]*)?\((?:[\s,;]|\x00)*\x00(?:[\s,;]|\x00)*\)(?(1)[ \t]*)",
+    text = re.sub(r"(?m)(^[ \t]*)?(?(1)|[ \t]*)\((?:[ \t,;\x01]|\x00)*\x00(?:[ \t,;]|\x00)*\)(?(1)[ \t]*)",
                   lambda m: m.group(1) or "", text)
     # A removed id between two separators takes one of them with it; at the
     # end of a clause it takes the separator before it; before text it
@@ -234,7 +335,13 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     # Debris: a reference word left before a separator, doubled separators
     # and doubled spaces ("see DR-002; then" -> "; then").
     text = re.sub(r"[,;][ \t]*([,;])", r"\1", text)
-    text = re.sub(r"(?<=\S)[ \t]{2,}(?=[^\s|])", " ", text)
+    # A sentence that started with a removed label starts with a capital, and
+    # one left as bare punctuation ("Cf. DR-002.") goes.
+    text = re.sub(r"\x01[ \t]*\.+[ \t]*", "", text)
+    text = re.sub(r"\x01[ \t]*[;,]*[ \t]*([a-z])", lambda m: m.group(1).upper(), text)
+    text = re.sub(r"\x01[ \t]*[;,]*", "", text)
+    text = re.sub(r"\|[ \t]{2,}\|", "| |", text)
+    text = re.sub(r"(?<=\S)[ \t]{2,}(?=\S)", " ", text)
     return re.sub(r"(?<=[^\s|])[ \t]+$", "", text, flags=re.M)
 
 
@@ -298,7 +405,8 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     keep_ids = domain_ids(*(text for _, text in sources), doctrine=doctrine)
     keep_quotes = quote_files(doctrine, list(args.requirements) + list(args.contracts), repo, adir)
 
-    blind_copy = blind_catalogue(catalogue, keep_ids, keep_quotes)
+    later = cited_names(catalogue + "\n" + doctrine, repo)
+    blind_copy = blind_catalogue(catalogue, keep_ids, keep_quotes, later)
     try:
         same_ids = _catalogue_ids(blind_copy) == (events, pairs)
     except ValueError:
@@ -309,12 +417,24 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
                          "ids the requirements do not use)")
     blocks: list[tuple[str, str]] = [
         ("INPUT 1: EVENT CATALOGUE (code fragments and analysis references removed)", blind_copy)]
-    blind_doctrine = blind_catalogue(doctrine, keep_ids, keep_quotes) if doctrine else ""
+    blind_doctrine = blind_catalogue(doctrine, keep_ids, keep_quotes, later) if doctrine else ""
     if blind_doctrine:
         blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", blind_doctrine))
     blocks += sources
+    shifted = changed_table_rows(catalogue, blind_copy) + (
+        changed_table_rows(doctrine, blind_doctrine) if blind_doctrine else [])
+    # Both backstops refuse the package (rule 7): code must never reach Part B.
+    if shifted:
+        raise ValueError("table rows whose cell count changed in stripping (repair the row's "
+                         "escaping in the input and rebuild; never send): " + "; ".join(shifted[:10]))
+    left = leftover_fragments(blind_copy + "\n" + blind_doctrine, keep_quotes, later)
+    if left:
+        raise ValueError("code fragments left after a citation (inside a table cell escape every "
+                         "\"|\" of a fragment as \"\\|\" in the input, then rebuild; never send): "
+                         + "; ".join(left[:10]))
     kept = sorted(set(_LOCAL_ID.findall(blind_copy + "\n" + blind_doctrine)))
-    removed = sorted(set(_LOCAL_ID.findall(_CITE.sub(r"\1", catalogue + "\n" + doctrine))) - set(kept))
+    both = catalogue + "\n" + doctrine
+    removed = sorted(set(_LOCAL_ID.findall(sub_citations(both, later, r"\1"))) - set(kept))
     if removed:
         # A domain term the sources never use goes too: the agent sees which.
         print("PART-B PACK: removed as analysis references (a domain term among them is a "

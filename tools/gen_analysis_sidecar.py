@@ -221,8 +221,15 @@ def _parse_cell(
             # "host:5432" tokens: it ends at a quote-paren followed by a
             # boundary, or at the last one before a later citation on the line.
             head = re.escape(cit.group(1)) + r"`?:" + cit.group(2) + r'(?:-\d+)?`?\s*\(\s*["\u201c]'
+            # A later citation names a source file or a file cited with a
+            # fragment in the same text (mirrors part_b_pack.cited_names),
+            # never a host name.
+            names = set(src_index) | {Path(m.group(1)).name for m in re.finditer(
+                r'([\w./-]+\.[A-Za-z]{1,4})`?:\d+(?:-\d+)?`?\s*\(\s*["\u201c]', text)}
+            later = "(?:[\\w./-]*/)?(?:" + "|".join(
+                re.escape(n) for n in sorted(names, key=len, reverse=True)) + ")"
             end = (r'["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)'
-                   r'|(?:(?!["\u201d]\s*\)).)*?[\s,(][\w./-]+\.[A-Za-z]{1,4}`?:\d+(?:-\d+)?(?=`?\s*\(|[\s,;)|]|$))')
+                   r'|(?:(?!["\u201d]\s*\)).)*?[\s,(]' + later + r'`?:\d)')
             frag = (re.search(head + r"(.+?)" + end, text, re.M)
                     or re.search(head + r'(.+?)["\u201d]\s*\)', text))
             if frag:

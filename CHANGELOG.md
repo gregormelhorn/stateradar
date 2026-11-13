@@ -100,6 +100,24 @@
   and `jev check`, and `check_pack_consistency.py` fails when the pilot
   prompt's trigger list drifts from it. 02-pilot v1.17 (rules 5, 7, 8, 9 and
   a new rule 10 for finding-neutral draft tasks).
+- **Part-B stripping nits.** `see`/`cf.` before a removed id goes whatever
+  its case, and a sentence it started keeps its capital (also after `,`/`;`,
+  in parentheses and in table cells). In the Part-B copy a code fragment
+  ends at the first quote-paren before a boundary that leaves its quotes
+  balanced, otherwise at the last one before the next citation, a table cell
+  bar or the end of the line; on a table row (a line starting with a single
+  `|`) it never crosses a lone unescaped cell bar, while `\|`, `||` and
+  every `|` outside tables are code; no code tail survives and later cells
+  and quoted prose stay. Two backstops refuse the package: a cited file name
+  still followed by `("` after stripping (escape `|` as `\|` inside a table
+  cell), and a catalogue or doctrine table row whose cell count or the line
+  count changed (`part_b_pack.changed_table_rows`). Removing an id never
+  joins two lines. A later citation names a file the text cites with a
+  fragment elsewhere or a file under `--repo`, by path or base name
+  (`part_b_pack.cited_names`; callers of `blind_catalogue` pass its result).
+  The sidecar generator recognises source-index files and files cited with a
+  fragment in the same text. A `host:port` token inside a fragment never
+  ends it early, whatever its domain ending.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 
