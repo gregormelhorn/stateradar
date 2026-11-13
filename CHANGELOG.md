@@ -104,12 +104,14 @@
   its case, and a sentence it started keeps its capital (also after `,`/`;`,
   in parentheses and in table cells). In the Part-B copy a code fragment
   ends at the first quote-paren before a boundary that leaves its quotes
-  balanced, otherwise at the last one before the next citation, a table
-  cell bar or the end of the line; it never crosses a cell, so no code
-  tail survives and later cells and quoted prose stay. A later citation names a file the text cites with a fragment
-  elsewhere or a file under `--repo`, by path or base name
-  (`part_b_pack.cited_names`; callers of `blind_catalogue` pass its
-  result). The sidecar generator recognises source-index files and files
+  balanced, otherwise at the last one before the next citation, a table cell
+  bar or the end of the line; on a table row it never crosses an unescaped
+  cell bar, while elsewhere `|` is code (`a || b`); no code tail survives
+  and later cells and quoted prose stay. A file name still followed by `("`
+  after stripping is reported on stderr. A later citation names a file the
+  text cites with a fragment elsewhere or a file under `--repo`, by path or
+  base name (`part_b_pack.cited_names`; callers of `blind_catalogue` pass
+  its result). The sidecar generator recognises source-index files and files
   cited with a fragment in the same text. A `host:port` token inside a
   fragment never ends it early, whatever its domain ending.
 - Not changed: no automatic acceptance or escalation; the cascade plan's

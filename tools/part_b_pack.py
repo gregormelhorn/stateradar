@@ -157,26 +157,48 @@ def cited_names(text: str, repo: Path | None = None) -> frozenset:
     return frozenset(names)
 
 
-def cite_pattern(names: frozenset) -> re.Pattern:
+def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
+    """The citation pattern. On a table row (table=True) an unescaped "|"
+    is a cell bar that the fallback never crosses; elsewhere "|" is code
+    (a || b) like any other character."""
     later = ("(?:[\\w./-]*/)?(?:" + "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True)) + ")"
              if names else r"(?!)")
     q_open, q_close = r"[\"\u201c]", r"[\"\u201d]"
     # Where the next citation starts: a later file:N, or a prose file followed
-    # by its own ("quote") (code such as errors.New("x") is not one). Neither a fragment nor a quote pair crosses it.
+    # by its own ("quote") (code such as errors.New("x") is not one). Neither
+    # a fragment nor a quote pair crosses it.
     nxt = (r"[\s,(](?:" + later + r"`?:\d|[\w./-]+\.(?:md|txt|rst|adoc)`?\s*\(\s*" + q_open + r")")
-    ch = r"(?:(?!" + nxt + r")(?:\\\||[^|\n]))"  # never crosses a cell bar either
-    plain = r"(?:(?!" + nxt + r")(?:\\\||[^\"\u201c\u201d|\n]))"
-    # 1. Quotes balanced inside, closed by a quote-paren before a boundary.
+    plain = r"(?:(?!" + nxt + r")[^\"\u201c\u201d\n])"
+    ch = r"(?:(?!" + nxt + r")(?:\\\||[^|\n]))" if table else r"(?:(?!" + nxt + r")[^\n])"
+    bar = r"|\|" if table else ""
+    # 1. Quotes balanced inside, closed by a quote-paren before a boundary
+    #    (this may cross an unescaped "|" of code even on a table row).
     balanced = (r"((?:" + plain + r"|" + q_open + plain + r"*" + q_close + r")*?)"
                 + q_close + r"\s*\)(?=\s*(?:[),;|]|\u2014|$))")
     # 2. Otherwise the last quote-paren before the next citation, a cell bar
-    #    or the end of the line, so no code tail survives.
+    #    (table rows) or the end of the line, so no code tail survives.
     last = (r"(" + ch + r"+?)" + q_close + r"\s*\)(?=(?:(?!" + q_close + r"\s*\))" + ch
-            + r")*?(?:" + nxt + r"|\||$))")
+            + r")*?(?:" + nxt + bar + r"|$))")
     return re.compile(
         r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
         r"(`?\s*\(\s*" + q_open + balanced +
         r"|`?\s*\(\s*" + q_open + last + r")?", re.M)
+
+
+def sub_citations(text: str, names: frozenset, repl) -> str:
+    """Apply repl to every citation, choosing the table-row pattern per line."""
+    prose, table = cite_pattern(names), cite_pattern(names, table=True)
+    return "\n".join((table if line.lstrip().startswith("|") else prose).sub(repl, line)
+                      for line in text.split("\n"))
+
+
+# After stripping, a file name directly followed by ("..." means a fragment
+# the patterns could not end: the command reports it (backstop for R-PART-B).
+_LEFT_FRAGMENT = re.compile("(" + _FILE + r")`?\s*\(\s*[\"\u201c]")
+
+
+def leftover_fragments(text: str, keep_quotes_from: frozenset = frozenset()) -> list[str]:
+    return [m.group(0) for m in _LEFT_FRAGMENT.finditer(text) if _norm(m.group(1)) not in keep_quotes_from]
 
 
 # Prose source documents: a quote cited from one of them is the normative
@@ -214,7 +236,7 @@ def quote_files(doctrine: str, inputs: list[str], repo: Path, analysis_dir: Path
             except ValueError:
                 continue
         paths.add(_norm(str(path)))
-    paths.update(_norm(m.group(1)) for m in cite_pattern(cited_names(doctrine)).finditer(doctrine))
+    paths.update(_norm(m.group(1)) for m in re.finditer("(" + _FILE + r")`?:\d", doctrine))
     adir = analysis_dir.resolve()
     return frozenset(p for p in paths if p.lower().endswith(_PROSE_EXT)
                      and not (repo / p).resolve().is_relative_to(adir))
@@ -259,7 +281,7 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     citations of repository files end a fragment; assemble does.
     """
     names = cited_names(text) | frozenset(later_names)
-    text = cite_pattern(names).sub(_citation_stripper(frozenset(keep_quotes_from)), text)
+    text = sub_citations(text, names, _citation_stripper(frozenset(keep_quotes_from)))
     text = _ANALYSIS_ID.sub(_MARK, text)
     text = re.sub(r"(?:\s*→\s*)?" + _LOCAL_ID.pattern,
                   lambda m: m.group(0) if m.group(0).lstrip(" \t→") in keep_ids else _MARK, text)
@@ -283,13 +305,13 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     # Debris: a reference word left before a separator, doubled separators
     # and doubled spaces ("see DR-002; then" -> "; then").
     text = re.sub(r"[,;][ \t]*([,;])", r"\1", text)
-    text = re.sub(r"(?<=\S)[ \t]{2,}(?=\S)", " ", text)
     # A sentence that started with a removed label starts with a capital, and
     # one left as bare punctuation ("Cf. DR-002.") goes.
     text = re.sub(r"\x01[ \t]*\.+[ \t]*", "", text)
     text = re.sub(r"\x01[ \t]*[;,]*[ \t]*([a-z])", lambda m: m.group(1).upper(), text)
     text = re.sub(r"\x01[ \t]*[;,]*", "", text)
     text = re.sub(r"\|[ \t]{2,}\|", "| |", text)
+    text = re.sub(r"(?<=\S)[ \t]{2,}(?=\S)", " ", text)
     return re.sub(r"(?<=[^\s|])[ \t]+$", "", text, flags=re.M)
 
 
@@ -369,9 +391,13 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     if blind_doctrine:
         blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", blind_doctrine))
     blocks += sources
+    left = leftover_fragments(blind_copy + "\n" + blind_doctrine, keep_quotes)
+    if left:
+        print("PART-B PACK: possible code fragments left after a citation (check the package, rule 7): "
+              + "; ".join(left[:10]), file=sys.stderr)
     kept = sorted(set(_LOCAL_ID.findall(blind_copy + "\n" + blind_doctrine)))
     both = catalogue + "\n" + doctrine
-    removed = sorted(set(_LOCAL_ID.findall(cite_pattern(later).sub(r"\1", both))) - set(kept))
+    removed = sorted(set(_LOCAL_ID.findall(sub_citations(both, later, r"\1"))) - set(kept))
     if removed:
         # A domain term the sources never use goes too: the agent sees which.
         print("PART-B PACK: removed as analysis references (a domain term among them is a "

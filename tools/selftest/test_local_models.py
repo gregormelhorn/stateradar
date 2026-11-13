@@ -554,6 +554,19 @@ class ModelTest(unittest.TestCase):
             out = strip(text)
             self.assertEqual(out, want)
             self.assertEqual(out.count("|"), text.count("|"))
+        # Outside table rows "|" is code: fragments with || or |x| strip whole; on a table row
+        # an unescaped || inside balanced quotes strips too, and the cell bars stay.
+        for text, want in (('- bullet: channel.go:5 ("if a || b {") and pool.go:3 holds', "- bullet: channel.go and pool.go holds"),
+                           ('- bullet2: channel.go:5 ("x := a | b") then prose', "- bullet2: channel.go then prose"),
+                           ('- gate: idle check (channel.go:115 ("if timeout > 0 || ok {")), then Ping',
+                            "- gate: idle check (channel.go), then Ping"),
+                           ("* closure (lib.rs:10 (\"v.iter().map(|x| x + 1)\")).", "* closure (lib.rs)."),
+                           ('| t | channel.go:115 ("if c.idleTimeout > 0 || ok {") | next |', "| t | channel.go | next |"),
+                           ('| g | channel.go:10 ("x") See Q-12; Cf. T-F05 |', "| g | channel.go |")):
+            self.assertEqual(strip(text, later_names=frozenset({"pool.go"})), want)
+        # Backstop: a fragment the patterns could not end is reported.
+        self.assertEqual(local_models.part_b_pack.leftover_fragments('a channel.go ("if x {") b README.md ("ok")',
+                                                                     frozenset({"README.md"})), ['channel.go ("'])
         # A host whose ending looks like a file extension is not a later citation.
         self.assertEqual(strip('client.go:40 ("f("a") dial api.example.rs:8443 now") |'), "client.go |")
         # A removed sentence-initial label keeps the capital after "," or ";", in parentheses and in cells.
