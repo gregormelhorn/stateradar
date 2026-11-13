@@ -636,7 +636,8 @@ def check(args: argparse.Namespace) -> int:
           + (": " + ", ".join(as_is) if as_is else
              "; the mark can be missing, so the agent's reading stays the check"))
     if as_is_prose:
-        print(f"PART-B INDEPENDENCE (prose): {len(as_is_prose)} more rows say \"as-is\" "
+        rows = "row says" if len(as_is_prose) == 1 else "rows say"
+        print(f"PART-B INDEPENDENCE (prose): {len(as_is_prose)} more {rows} \"as-is\" "
               "without the mark (read them): " + ", ".join(as_is_prose))
     return 0
 

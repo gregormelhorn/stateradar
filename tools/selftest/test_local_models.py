@@ -552,7 +552,7 @@ class ModelTest(unittest.TestCase):
                                                     "key"), 0)
             self.assertIn("PART-B INDEPENDENCE: 3 rows marked as-is (not independent): E01, E02 (closed), E02 (open)",
                           err.getvalue())
-            self.assertIn('PART-B INDEPENDENCE (prose): 1 more rows say "as-is" without the mark (read them): '
+            self.assertIn('PART-B INDEPENDENCE (prose): 1 more row says "as-is" without the mark (read them): '
                           "E02 (late)", err.getvalue())
             unmarked = "| Event | Expected |\n|---|---|\n| E01 | handle |\n| E02 | reject |\n\n- [x] E01\n- [x] E02\n"
             err = io.StringIO()
