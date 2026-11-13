@@ -200,6 +200,17 @@
   quote (`(see file:136, 151.)`). The routing doc names the remaining known
   leaks (a dash or slash end, a prose-last run), and rule 7 lists the
   characters that end a run.
+- **Timed agent-only run of silenceper/pool** (evidence in
+  `docs/evidence/agent-only-pool-2026-11-13/`, with `comparison.md` and
+  `INDEX.md`). Same pack and component as the second routed pilot, blind,
+  routing off: 34:34 minutes, the primary finding found and executed, the
+  same 19 of 28 aligned cells. Exact cost from the session transcripts at
+  Opus 5.5 prices: $12.54 against the routed pilot's $12.86, of which the
+  steering agent was 99.8 %. Roadmap entry 11 records that routing as
+  configured saves neither time nor money and makes "Flash writes, the
+  steering agent decides" the next step. `INDEX.md` lists the run's tool
+  problems; the sidecar generator's prose-table and doctrine-table parsing
+  and the Part-B id-removal debris are new and open.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 
