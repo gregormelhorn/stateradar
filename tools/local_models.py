@@ -27,18 +27,19 @@ import part_b_pack
 FLASH_URL = "https://api.deepseek.com/chat/completions"
 JEV_URL = "https://api.typesafe.ai/v1/systemone"
 
-# Provider responses are parsed JSON and arrive as Any: each function below
-# validates the fields it reads. The TypedDicts describe what this module
-# returns and writes, which callers and the selftests rely on.
+# Provider responses are parsed JSON and arrive as Any. Each function below
+# validates the fields it computes with (token usage, answers, probabilities);
+# model names and finish reasons are passed through as received and typed
+# object. The TypedDicts describe what this module returns and writes.
 
 CheckKind = Literal["claim", "ordering"]
 Choice = Literal["supported", "contradicted", "unclear"]
 
 
 class FlashResult(TypedDict):
-    model: str
+    model: object  # as the provider sent it
     text: str
-    finish_reason: str
+    finish_reason: object  # "stop" on success; anything else is kept as sent
     input_tokens: int
     output_tokens: int
     cost_microdollars: int
@@ -47,8 +48,8 @@ class FlashResult(TypedDict):
 
 class DraftMeta(TypedDict):
     """A FlashResult without its text, as draft-verify records it."""
-    model: str
-    finish_reason: str
+    model: object
+    finish_reason: object
     input_tokens: int
     output_tokens: int
     cost_microdollars: int
@@ -56,7 +57,7 @@ class DraftMeta(TypedDict):
 
 
 class JevResult(TypedDict):
-    model: str
+    model: object  # as the provider sent it
     probability: float
     input_tokens: int
     cost_microdollars: int
@@ -111,16 +112,30 @@ class ClaimEntry(TypedDict):
     jev: Judgment | None
 
 
-class Verification(TypedDict, total=False):
-    """Jev's part of a draft-verify result: totals on success (error None),
-    the reason and whatever was paid for on failure."""
-    error: str | None
+class VerificationTotals(TypedDict):
+    """Jev answered and its answer was recorded."""
     model: str
     input_tokens: int
     cost_microdollars: int
     reservation_microdollars: int
+    error: None
+
+
+class VerificationFailed(TypedDict):
+    """The batch failed; usage is present when Jev answered and was charged."""
+    error: str
+    input_tokens: NotRequired[int]
+    cost_microdollars: NotRequired[int]
+
+
+class VerificationUnrecorded(TypedDict):
+    """Jev answered and was paid, but the ledger could not record it."""
+    error: str
     unrecorded_response: Any
     question_claims: dict[str, str]
+
+
+Verification = VerificationTotals | VerificationFailed | VerificationUnrecorded
 
 
 class DraftVerifyResult(TypedDict):
@@ -503,10 +518,11 @@ def draft_verify(budget: Budget, source: str, source_ref: str, task: str, flash_
                                                 if prefix == "choice" or check["kind"] == "ordering"}}
         except (ValueError, OSError, BudgetExceeded, sqlite3.Error) as error:
             # The Flash draft is paid for: keep it and its citation checks.
-            verification = {"error": str(error)}
+            failed: VerificationFailed = {"error": str(error)}
             if isinstance(error, JevAnswerError):
-                verification["input_tokens"] = error.input_tokens
-                verification["cost_microdollars"] = error.cost
+                failed["input_tokens"] = error.input_tokens
+                failed["cost_microdollars"] = error.cost
+            verification = failed
         else:
             for ident, judged in batch["checks"].items():
                 judgment: Judgment = {"choice": judged["choice"], "probabilities": judged["probabilities"],

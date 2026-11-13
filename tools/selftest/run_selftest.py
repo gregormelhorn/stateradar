@@ -244,6 +244,10 @@ def main() -> int:
         for label, citation, want_fail in (
                 ("requirements citation without a fragment",
                  {"file": "docs/requirements.md", "line": 3}, False),
+                ("upper-case prose extension without a fragment",
+                 {"file": "docs/NOTES.TXT", "line": 3}, False),
+                ("code citation without a fragment",
+                 {"file": "src/mini.py", "line": 3}, True),
                 ("code citation with an empty fragment",
                  {"file": "src/mini.py", "line": 3, "fragment": ""}, True)):
             cell["citation"] = citation
@@ -284,6 +288,15 @@ def main() -> int:
                 if required != want_req:
                     problems.append(f"{name}: required in the type {sorted(required)}, "
                                     f"in the schema {sorted(want_req)}")
+            # CellBody is a Cell before its state and event are known.
+            cell_part = items("cells")
+            body_keys = set(sidecar_types.CellBody.__annotations__)
+            body_want = set(cell_part["properties"]) - {"state", "event"}
+            body_req = set(sidecar_types.CellBody.__required_keys__)
+            body_req_want = set(cell_part["required"]) - {"state", "event"}
+            if body_keys != body_want or body_req != body_req_want:
+                problems.append(f"CellBody: keys {sorted(body_keys)} required {sorted(body_req)}, "
+                                f"schema keys {sorted(body_want)} required {sorted(body_req_want)}")
             for name, literal, enum in (
                     ("Disposition", sidecar_types.Disposition,
                      items("cells")["properties"]["disposition"]["enum"]),
@@ -303,6 +316,9 @@ def main() -> int:
                 ("schema gains a cell property the type lacks",
                  lambda s: s["properties"]["cells"]["items"]["properties"].update(
                      {"note": {"type": "string"}}), "Cell: type only [], schema only ['note']"),
+                ("schema gains a cell property CellBody lacks",
+                 lambda s: s["properties"]["cells"]["items"]["properties"].update(
+                     {"note": {"type": "string"}}), "CellBody: keys"),
                 ("schema makes a question key required",
                  lambda s: s["properties"]["questions"]["items"]["required"].append("trigger"),
                  "Question: required in the type"),
@@ -1222,6 +1238,27 @@ def main() -> int:
         "model": "claude-sonnet-4-20250514",
     }) == "unknown", "missing model_release is unknown"
     print("  ok  benchmark dating classification correct")
+
+    # ignore-to-handle keeps the cell's citation in every form the sidecar
+    # generator reads (review of the fragment change: unescaped and
+    # typographic quotes, a backticked file name, a provenance parenthesis).
+    import check_matrix_mutation as cmm_cite
+    failures_before = len(failures)
+    for raw_cell, want_citation in (
+            ('ignore (documented) `mini.py:28` ("return \\"ignored\\"")',
+             '`mini.py:28` ("return \\"ignored\\"")'),
+            ('reject (observed-in-code, channel.go:50 ("say "hi" now"))', 'channel.go:50 ("say "hi" now")'),
+            ('reject a.go:3 (\u201cx := 1\u201d)', 'a.go:3 (\u201cx := 1\u201d)'),
+            ('reject `channel.go`:51 ("x := 1")', '`channel.go`:51 ("x := 1")'),
+            ('ignore (documented) `a.py:2` ("see b.py:3 for x")', '`a.py:2` ("see b.py:3 for x")'),
+            ('ignore (documented) `a.py:1` ("x") then `b.py:2` ("y")', '`b.py:2` ("y")'),
+            ('reject `a.py:1`', '`a.py:1`'),
+            ('ignore (documented) `f.py:1` reason', None)):
+        got_citation = cmm_cite.trailing_citation(raw_cell)
+        if got_citation != want_citation:
+            failures.append(f"trailing citation of {raw_cell!r}: {got_citation!r}, want {want_citation!r}")
+    if len(failures) == failures_before:
+        print("  ok  ignore-to-handle keeps fragment citations in every generator form")
 
     # Timeout path of the mutation runners. On a timeout, subprocess hands
     # back the partial output as bytes even with text=True, and stderr may

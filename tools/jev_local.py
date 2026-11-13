@@ -54,7 +54,7 @@ def post_json(url: str, payload: dict[str, Any], key: str) -> Any:
             if error.code not in RETRY_STATUSES or attempt == MAX_RETRIES:
                 raise
             time.sleep(_retry_delay(error, attempt))
-    raise AssertionError("unreachable: the last attempt returns or raises")
+    raise AssertionError("unreachable while MAX_RETRIES >= 0: the last attempt returns or raises")
 
 
 def main() -> int:

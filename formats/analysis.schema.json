@@ -116,11 +116,11 @@
         "minLength": 1
        }
       },
-      "$comment": "02-pilot rule 3: an observed-in-code or observed-in-tests citation carries a verbatim fragment, which dsc_check verifies near the cited line. A citation of a prose document (an explicit-requirement) needs none.",
+      "$comment": "02-pilot rule 3: an observed-in-code or observed-in-tests citation carries a verbatim fragment, which dsc_check verifies near the cited line. A citation of a prose document (an explicit-requirement; extension matched case-insensitively) needs none.",
       "if": {
        "properties": {
         "file": {
-         "pattern": "\\.(md|markdown|txt|rst|adoc)$"
+         "pattern": "\\.([Mm][Dd]|[Mm][Aa][Rr][Kk][Dd][Oo][Ww][Nn]|[Tt][Xx][Tt]|[Rr][Ss][Tt]|[Aa][Dd][Oo][Cc])$"
         }
        }
       },

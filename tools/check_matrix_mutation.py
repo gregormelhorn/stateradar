@@ -189,9 +189,28 @@ def handle_to_ignore(cell: Cell) -> str | None:
     return None
 
 
-# A trailing `file:line`, optionally followed by its ("fragment") - the form
-# 02-pilot rule 3 requires on code citations and the sidecar schema enforces.
-_TRAILING_CITATION = re.compile(r'`[^`]+`(?:\s*\(\s*"(?:[^"\\]|\\.)*"\s*\))?\s*$')
+# A citation as gen_analysis_sidecar reads it: `file:line` (backticks around
+# the whole token or the file name only, an optional line range), optionally
+# followed by its ("fragment"), whose quotes may be typographic and whose
+# text may itself hold quotes or file:line tokens (02-pilot rule 3).
+_CITATION_START = re.compile(r"`?[\w./-]+\.[A-Za-z]{1,4}`?:\d+")
+_CITATION = re.compile(r'`?[\w./-]+\.[A-Za-z]{1,4}`?:\d+(?:-\d+)?`?'
+                       r'(?:\s*\(\s*["\u201c].*["\u201d]\s*\))?')
+
+
+def trailing_citation(raw: str) -> str | None:
+    """The last citation in a cell when nothing follows it but, at most, the
+    parenthesis that closes a provenance note: 'reject (observed-in-code,
+    a.go:3 ("x"))' keeps 'a.go:3 ("x")'."""
+    text = raw.rstrip()
+    for end in (len(text), len(text) - 1 if text.endswith(")") else -1):
+        if end < 0:
+            continue
+        body = text[:end].rstrip()
+        for start in reversed([m.start() for m in _CITATION_START.finditer(body)]):
+            if _CITATION.fullmatch(body, start):
+                return body[start:]
+    return None
 
 
 def ignore_or_reject_to_handle(cell: Cell) -> str | None:
@@ -210,8 +229,8 @@ def ignore_or_reject_to_handle(cell: Cell) -> str | None:
         if cell.raw == token:
             return "handle"
         if cell.raw.startswith(token + " "):
-            citation = _TRAILING_CITATION.search(cell.raw)
-            return f"handle {citation.group(0).strip()}" if citation else "handle"
+            citation = trailing_citation(cell.raw)
+            return f"handle {citation}" if citation else "handle"
     return None
 
 

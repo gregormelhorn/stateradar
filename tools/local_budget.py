@@ -60,10 +60,12 @@ class Budget:
                 db.rollback()
                 raise BudgetExceeded("reservation exceeds remaining budget")
             cursor = db.execute("INSERT INTO calls (provider, amount, status) VALUES (?, ?, 'reserved')", (provider, amount))
-            db.commit()
-            if cursor.lastrowid is None:  # sqlite sets it after every INSERT
+            ticket = cursor.lastrowid
+            if ticket is None:  # sqlite sets it after every INSERT; never store a ticket nobody holds
+                db.rollback()
                 raise sqlite3.Error("the reservation row has no id")
-            return cursor.lastrowid
+            db.commit()
+            return ticket
 
     def total(self) -> int:
         with closing(sqlite3.connect(self.path)) as db:

@@ -20,8 +20,15 @@
   (the routed pilot's generator bug). The selftest validates the generator's
   raw output against the schema directly, with red cases. golden-mini's matrix
   now cites with fragments. `check_matrix_mutation`'s ignore-to-handle mutant
-  dropped the whole citation from a fragment-cited cell; it now keeps
-  `file:line ("fragment")`.
+  dropped the whole citation from a fragment-cited cell; it now keeps the
+  citation in every form the generator reads. Committed sidecars that predate
+  the rule and now fail the schema were kept as records, not rewritten:
+  `examples/device-connection/domain-analysis/device-connection/run2`,
+  `domain-analysis/meilisearch-s3-snapshot`, `tests/benchmarks/grpc-go-2669`,
+  `tests/benchmarks/meilisearch-6510` and the routed-pilot evidence in
+  `docs/evidence/`; `tests/red-mini` is red by design and still fails with
+  its expected lines. Regenerate a sidecar from a fragment-cited matrix before
+  running dsc_check on it.
 - **Sidecar types.** `tools/sidecar_types.py` mirrors the schema as
   TypedDicts; a selftest fails when properties, required keys or enum values
   drift between the two. It found the question `note` the generator emits and
