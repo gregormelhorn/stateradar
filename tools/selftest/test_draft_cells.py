@@ -209,6 +209,25 @@ class DraftCellsTest(unittest.TestCase):
             self.assertEqual((root / "cells.draft.txt").read_text(), "I cannot do that")
             self.assertFalse((root / "cells.json").exists())
 
+    def test_compare_cli_counts_a_pair_from_two_draft_files_once(self):
+        import subprocess
+        draft = self.run_draft(CELLS)
+        draft.pop("prompt")
+        sidecar = {"cells": [{"state": "Open", "event": "E-GET", "disposition": "handle",
+                              "citation": {"file": "pool/pool.go", "line": 3,
+                                           "fragment": "p.waiters = append(p.waiters, req)"}}]}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("a.json", "b.json"):
+                (root / name).write_text(json.dumps(draft))
+            (root / "analysis.json").write_text(json.dumps(sidecar))
+            run = subprocess.run([sys.executable, draft_cells.__file__, "compare", str(root / "a.json"),
+                                  str(root / "b.json"), "--sidecar", str(root / "analysis.json")],
+                                 capture_output=True, text=True)
+        self.assertEqual(run.returncode, 0, run.stderr)
+        result = json.loads(run.stdout)
+        self.assertEqual((result["drafted"], result["second_cells_in_draft"]), (3, 3))
+
     def test_rendered_matrix_reaches_the_sidecar_generator(self):
         # Review round 1: the rendered block must parse as the pilot's matrix.
         import subprocess

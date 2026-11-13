@@ -328,6 +328,13 @@ def main() -> int:
     args = parser.parse_args()
     drafts = [json.loads(path.read_text(encoding="utf-8")) for path in args.draft]
     merged = {"cells": [c for d in drafts for c in d["cells"]], "missing": [m for d in drafts for m in d["missing"]]}
+    seen: set[tuple[str, str]] = set()
+    for cell in merged["cells"]:
+        # A pair drafted in two files counts once, like a second cell in one file.
+        key = (cell["state"], cell["event"])
+        if key in seen and not any("second cell" in p for p in cell["problems"]):
+            cell["problems"] = [*cell["problems"], "second cell for this state and event (another draft file)"]
+        seen.add(key)
     result = compare(merged, json.loads(args.sidecar.read_text(encoding="utf-8")))
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
