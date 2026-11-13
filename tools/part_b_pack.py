@@ -363,6 +363,9 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     text = re.sub(r"\b(?=[A-Z])(?i:see|cf\.)[ \t]*(?=\x00)", "\x01", text)  # a sentence start
     text = re.sub(r"\b(?i:see|cf\.)[ \t]*(?=\x00)", "", text)
     text = re.sub(r"(?:\b(?:recorded as[ \t]+)?lints?[ \t]*|\b[Ff]inding[ \t]*(?::[ \t]*)?)(?=\x00)", "", text)
+    # An article left before a removed id that ends the clause ("itself a
+    # finding L-06." -> "itself.").
+    text = re.sub(r"[ \t]+\b(?:a|an|the)[ \t]+(?=\x00[ \t]*(?:[.;,)\]\n]|$))", " ", text)
     # Parentheses that held only removed ids, then the ids with their separators.
     text = re.sub(r"(?m)(^[ \t]*)?(?(1)|[ \t]*)\((?:[ \t,;\x01]|\x00)*\x00(?:[ \t,;]|\x00)*\)(?(1)[ \t]*)",
                   lambda m: m.group(1) or "", text)
@@ -374,6 +377,7 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
         text = re.sub(r"[ \t]*[,;][ \t]*\x00(?=[ \t]*[,;])", "", text)
         text = re.sub(r"[ \t]*(?:[,;]|\band\b)?[ \t]*\x00(?=[ \t]*(?:[).|\]\n]|\x00|$))", "", text)
         text = re.sub(r"\x00[ \t]*(?![ \t]*(?:[,;).|\]\n]|\x00|$))", "", text)
+        text = re.sub(r"(?<![,;\s])[ \t]*\x00(?=[ \t]*[,;])", "", text)
         text = re.sub(r"(?<![,;])\x00(?=[ \t]*[,;])", "", text)
     # Debris: a reference word left before a separator, doubled separators
     # and doubled spaces ("see DR-002; then" -> "; then").
@@ -383,6 +387,10 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     text = re.sub(r"\x01[ \t]*\.+[ \t]*", "", text)
     text = re.sub(r"\x01[ \t]*[;,]*[ \t]*([a-z])", lambda m: m.group(1).upper(), text)
     text = re.sub(r"\x01[ \t]*[;,]*", "", text)
+    # A file listed twice once its line numbers are gone ("(channel.go:136,
+    # channel.go:151)" -> "(channel.go)"). Only comma lists: "a.go and a.go
+    # returns" may join two clauses.
+    text = re.sub(r"(?<![\w./-])([\w./-]*\w\.[A-Za-z]\w*)(?:[ \t]*,[ \t]*\1(?![\w./-]))+", r"\1", text)
     text = re.sub(r"\|[ \t]{2,}\|", "| |", text)
     text = re.sub(r"(?<=\S)[ \t]{2,}(?=\S)", " ", text)
     return re.sub(r"(?<=[^\s|])[ \t]+$", "", text, flags=re.M)

@@ -821,6 +821,17 @@ class ModelTest(unittest.TestCase):
         self.assertIn("Finding the oldest waiter", text)
         self.assertNotIn("Q-12", text)
 
+    def test_blind_catalogue_leaves_no_debris_after_removed_ids(self):
+        # Agent-only run 2026-11-13: removing ids left "guard group , branch
+        # discard", "itself a ." and "(channel.go, channel.go)" in the package.
+        blind = local_models.part_b_pack.blind_catalogue
+        self.assertIn("(guard group, branch discard)", blind("(guard group G-03, branch discard)\n"))
+        self.assertIn("This is itself.", blind("This is itself a finding L-06.\n"))
+        self.assertIn("(channel.go)", blind("(channel.go:136, channel.go:151)\n"))
+        self.assertIn("channel.go and pool.go", blind("channel.go:136 and pool.go:20\n"))
+        self.assertIn("(pool.go, channel.go)", blind("(pool.go:1, channel.go:2)\n"))
+        self.assertIn("a waiter, then", blind("a waiter, then\n"))
+
     def test_part_b_pack_cli_reports_input_errors_without_a_traceback(self):
         import subprocess
         with tempfile.TemporaryDirectory() as directory:
