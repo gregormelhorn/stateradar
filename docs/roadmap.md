@@ -313,27 +313,33 @@ Open, in order:
    add checks on top of the agent's own complete pass, showed no saving in
    time or cost; one run each, and the runs differ in model size (7 against
    9 states), so the small differences are not a measured effect.
-2. **Flash writes, the steering agent decides.** Built, pilot next
-   (`draft-cells`, 02-pilot v1.21 routing variant `flash-writes`; Jev
-   judges every drafted cell in one batch). Since the steering
-   agent's cache reads, writes and output are almost the whole cost, the aim
-   is fewer agent rounds and less agent output. In the routed run, output
-   was about $4.20 of the steering agent's $12.84 (210k tokens), so cutting
-   output caps the saving at about a third; the cache reads and writes
-   (about $8.63) scale with the number of rounds, and reviewing Flash's
-   drafts could add rounds. Plan: a pilot of the same component in which
-   Flash drafts the bulk text (matrix cells, as-is tests) from the steering
-   agent's decisions, and the steering agent only decides, checks citations
-   and runs the gates. Measure wall clock, cost and finding quality against
-   the same benchmark, and compare cost against an agent-only run whose
-   model has about the same size (states and cells), since model size moves
-   the steering agent's rounds; the two runs so far differ (7 against 9
-   states). This arm runs under a named prompt variant that suspends routing
-   rule 3 (the agent's own complete pass) for that arm only. Flash's error
-   rate on such text is unmeasured: in the second pilot Jev judged Flash's
-   133 drafted claims 124 supported, 9 unclear and 0 contradicted, but those
-   were Step-1 claims, not matrix cells or tests, so the judgment step stays
-   with the steering agent.
+2. **Flash writes, the steering agent decides.** Built, pilot next:
+   `draft-cells` and the 02-pilot v1.21 routing variant `flash-writes`. Since
+   the steering agent's cache reads, writes and output are almost the whole
+   cost, the aim is fewer agent rounds and less agent output. In the routed
+   run, output was about $4.20 of the steering agent's $12.84 (210k tokens),
+   so cutting output caps the saving at about a third; the cache reads and
+   writes (about $8.63) scale with the number of rounds, and reviewing Flash's
+   drafts could add rounds. The pilot runs the same component and pack with
+   Flash drafting the Step-1 extraction, the matrix cells (one Jev batch
+   judges every cell) and the as-is tests from the steering agent's decisions;
+   the agent decides, checks every cell and test against the source and runs
+   the gates. Fixed before the run: the comparator is the second routed pilot
+   ($12.84 steering agent, 7 states, 22 events, same routing otherwise) when
+   the run's model has 6 to 8 states; with another size the cost is also given
+   per matrix cell and the result is marked unmatched. The variant counts as
+   holding when all four hold: steering-agent cost at most $9.60 (a quarter
+   below $12.84, beyond the $0.32 gap between the two runs so far), the
+   primary finding raised and executed, at least 17 of the 28 aligned base
+   cells agreeing with the agent-only baseline (19 in both runs so far), and
+   every gate green. If the saving is smaller than a quarter, a matched
+   agent-only run decides whether there is any. Per-step cost comes from the
+   step start lines and the session transcript, and `draft_cells.py compare`
+   counts the agent's changes per drafted cell by Jev choice. Flash's error
+   rate on such text is unmeasured: in the second pilot Jev judged Flash's 133
+   drafted claims 124 supported, 9 unclear and 0 contradicted, but those were
+   Step-1 claims, not matrix cells or tests, so the judgment step stays with
+   the steering agent.
 3. **Flash as the steering agent.** Only if the item-2 pilot holds the
    finding quality: the same component with Flash steering the whole run,
    and Part B on a different model so that A and B do not share one model's

@@ -108,26 +108,37 @@ and its directory is writable.
 `draft-cells` drafts disposition-matrix cells (the 02-pilot routing variant
 `flash-writes`, roadmap entry 11 item 2). The task file is JSON written by the
 steering agent: `states` (each a `name` and the `condition` that defines it),
-`events` (each an `id` and a `gist`) and optional `notes`. Flash must answer
-with one cell per state and event (`state`, `event`, `disposition`, `target`
-for a transition, `line`, `fragment`, `note`) plus `questions`. Code checks
-each cell: known state and event, the closed disposition vocabulary of
-`formats/rules.toml`, a transition target among the states, no target on other
-dispositions, the citation rule of `jev-batch`, and one cell per pair; it
-lists the pairs without a cell. Every clean cell goes to one Jev batch as a
-claim that names the state with its condition, the event with its gist and the
-drafted outcome. The default output budget is 16384 tokens, the Flash maximum;
-split the events across task files when a draft is cut off.
+`events` (each an `id` and a `gist`) and optional `notes`; names and ids are
+one word, and rule 10 of the routing section (finding-neutral tasks) applies
+to all of it. Flash must answer with one cell per state and event (`state`,
+`event`, `disposition`, `target` for a transition, `line`, `fragment`, `note`)
+plus `questions`. Code checks each cell: known state and event, the closed
+disposition vocabulary of `formats/rules.toml`, a transition target among the
+states, no target on other dispositions, the citation rule of `jev-batch`, and
+one cell per pair; it lists the pairs without a cell. Every matrix tool splits
+table rows on `|`, so a fragment with a `|` is cut to its longest verbatim
+piece without one (refused if that piece is too short) and a note's `|`
+becomes `/`. Every clean cell goes to one Jev batch as a claim that names the
+state with its condition, the event with its gist and the drafted outcome. The
+default output budget is 16384 tokens, the Flash maximum; split the events
+across task files when a draft is cut off.
 
 The result JSON holds every cell with its problems and Jev judgment, the
-missing pairs, the draft questions and the usage. Next to it (`cells.json`
-gives `cells.md`) the command writes a matrix block in the 02-pilot cell form,
-in sub-tables of eight events, followed by a review list (cells with problems,
-cells Jev did not judge `supported`, missing pairs) and the draft questions. A
-cell with a problem keeps its disposition but not its citation; a hole carries
-`→ Q-?` and a missing cell reads `MISSING`, so `dsc_check.py` fails until the
-agent has decided each. Nothing is accepted: the agent checks every cell
-against the source.
+missing pairs, the draft questions and the usage. The command also writes a
+matrix block next to the JSON (`cells.json` gives `cells.md`): the 02-pilot
+cell form in sub-tables of eight events, then a review list (cells with
+problems, cells Jev did not judge `supported`, missing pairs) and the draft
+questions. A hole or a cell with a problem carries `→ Q-?` (a cell with a
+problem also loses its citation), and a missing cell reads `MISSING`, so
+`dsc_check.py` fails until the agent has decided each. Nothing is accepted:
+the agent checks every cell against the source. A draft that is not the
+required JSON, or is cut off, is kept as `cells.draft.txt`. The command needs
+both API keys.
+
+`python3 tools/draft_cells.py compare cells.json … --sidecar analysis.json`
+needs no key: it compares the drafts with the run's final sidecar and counts
+each drafted cell as unchanged, changed (disposition, target or citation) or
+dropped, split by Jev's choice, and lists the final cells no draft held.
 
 ```bash
 python3 tools/local_models.py --ledger "$ledger" draft-cells \
