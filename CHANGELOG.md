@@ -180,17 +180,17 @@
   22,826 microdollars over 20 calls (7 Flash, 13 Jev), about 37 minutes, no
   provider errors. Flash's finding-neutral `channel.go` draft raised the
   benchmark's primary finding as its first question, and the as-is test T1
-  executes it; 19 of 28 aligned base cells agree with the agent-only
-  baseline (first pilot: 20 under the same counting rule). Fixes: a citation's further line numbers are
-  stripped with it (colon items, ranges and `and`/`or` lists such as
-  `file:136, 151 or 160` always, a bare run only at the end of a clause, so
-  prose such as ", 3 callers" stays); `blind` keeps stdout one
-  JSON document and writes the coverage line to stderr; the Part-B task text
-  drops the prompt's empty blockquote line;
-  `tools/templates/check_matrix.py` uses `STATERADAR_PACK` when set, else
-  a sibling named `stateradar` or `pack`; 02-pilot v1.18 (rule 6 reasoned
-  dispositions, the sidecar step runs `check_reachability.py`, rule 7 names the
-  refusal's gaps and asks for line numbers inside citations).
+  executes it; 19 of 28 aligned base cells agree with the agent-only baseline
+  (first pilot: 20 under the same counting rule). Fixes: a citation's further
+  line numbers are stripped with it (colon items, ranges and `and`/`or` lists
+  such as `file:136, 151 or 160` always, a bare run only at the end of a
+  clause, so prose such as ", 3 callers" stays); `blind` keeps stdout one JSON
+  document and writes the coverage line to stderr; the Part-B task text drops
+  the prompt's empty blockquote line; `tools/templates/check_matrix.py` uses
+  `STATERADAR_PACK` when set, else a sibling named `stateradar` or `pack`;
+  02-pilot v1.18 (rule 6 reasoned dispositions, the sidecar step runs
+  `check_reachability.py`, rule 7 names the refusal's gaps and asks for line
+  numbers inside citations).
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

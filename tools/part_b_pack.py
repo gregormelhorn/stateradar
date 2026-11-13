@@ -158,8 +158,8 @@ def cited_names(text: str, repo: Path | None = None) -> frozenset:
     return frozenset(names)
 
 
-_SEP = r"(?:,|[ \t]+(?:and|or))[ \t]*"
-_NUM_END = r"[ \t]*(?:[;)|\]`(]|,(?![ \t]*\d)|[.:](?=\s|$)|$)|" + _SEP + r":\d"
+_SEP = r"(?:,?[ \t]+(?:and|or)|[ \t]*,)[ \t]*"
+_NUM_END = r"[ \t]*(?:[;)|\]`]|\([ \t]*[\"'“‘]|,(?![ \t]*\d)|[.:?!](?=\s|$)|$)|" + _SEP + r":\d"
 
 
 def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
@@ -197,9 +197,12 @@ def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
         # and bare ", 194" where the run ends the clause (a separator, a bracket,
         # a fragment, a sentence end or the line end). A bare number after a
         # comma and before a word (", 3 callers", ", 30% of calls") stays prose;
-        # a prose count joined by and/or ("and 3 callers") goes, the safe side.
-        r"(?:" + _SEP + r":\d+(?:-\d+)?|" + _SEP + r"\d+-\d+(?![\d-]|:\d)"
-        r"|(?:,[ \t]*\d+(?![\d-]|:\d))*[ \t]+(?:and|or)[ \t]*\d+(?:-\d+)?(?![\d-]|:\d)"
+        # a prose count joined by and/or ("and 3 callers") or a prose range
+        # ("or 2-3 retries") goes, the safe side. Known leaks, which rule 7
+        # steers writers away from: a run ending in a dash, and a run whose
+        # last number is prose (", 13, 3 callers" keeps 13).
+        r"(?:" + _SEP + r":\d+(?:-\d+)?|" + _SEP + r"\d+-\d+(?![\d-]|:\d|[ \t]*%)"
+        r"|(?:[ \t]*,[ \t]*\d+(?![\d-]|:\d))*,?[ \t]+(?:and|or)[ \t]*\d+(?:-\d+)?(?![\d-]|:\d)"
         r"|(?:" + _SEP + r"\d+(?![\d-]|:\d))+(?=" + _NUM_END + r"))*"
         r"(`?\s*\(\s*" + q_open + balanced +
         r"|`?\s*\(\s*" + q_open + last + r")?", re.M)

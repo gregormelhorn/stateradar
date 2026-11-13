@@ -16,7 +16,9 @@ This run was blind to the oracle, unlike the first pilot.
   benchmark, the first pilot's evidence nor the roadmap entry describing it was
   readable. The v1.17 prompt the session read names the first routed pilot
   of silenceper/pool in its changelog, so the session knew the component had
-  been piloted before; it did not see that pilot's finding.
+  been piloted before, and its rule 10 says that in the first pilot a draft
+  task's example race was the benchmark finding. It did not describe that
+  race, and the session did not see the first pilot's finding.
 * The `draft-verify` task (`routing/task-code.txt`) is finding-neutral (rule
   10): it asks for states, events, guards, locks, waiting and cancellation
   paths, and names no behaviour.
@@ -43,7 +45,9 @@ P-01a, and **executed**: `as-is-tests.md` T1 logs `AS-IS: waiter still blocked
 
 As in the first pilot, the routed matrix records the observed behaviour with a
 question instead of the label `UNSPECIFIED`; a scorer that requires the literal
-label on those two cells counts them as missed.
+label on those two cells counts them as missed. This table lists every routed
+sub-state that shows the finding, including Open_Waiting_Stranded, which the
+cell grid below leaves out.
 
 ## Cell-level agreement (aligned base grid, 4 states × 7 events = 28 cells)
 
@@ -55,13 +59,15 @@ Open_AtCapacity ∪ Open_AtCapacity_Waiting; Released ↔ Released.
 Open_Waiting_Stranded (a waiter while an idle connection exists or the pool is
 below capacity, reached only through a race or the lost wake-up on Close) has
 no baseline counterpart, since the baseline has no waiter below capacity; it is
-left out of the grid, and its holes are covered by Q-04, Q-05 and Q-13. Events: Get, Put, Close, Release, FactoryFail, IdleTimeout ↔ E-GET,
-E-PUT, E-CLOSE, E-RELEASE, UV-FACTORY-ERR, I-IDLE-EXPIRE. The routed run has no
-separate PingFail event: a failed Ping is a guarded branch of E-GET (G-03,
+left out of the grid, and its holes are covered by Q-04, Q-05 and Q-13. Events:
+Get, Put, Close, Release, FactoryFail, IdleTimeout ↔ E-GET, E-PUT, E-CLOSE,
+E-RELEASE, UV-FACTORY-ERR, I-IDLE-EXPIRE. The routed run has no separate
+PingFail event: a failed Ping is a guarded branch of E-GET (G-03,
 not-formalizable), so the PingFail column is compared against E-GET's Ping
-branch. A cell counts as agreeing when every aligned routed sub-state agrees.
-A baseline hole (`UNSPECIFIED`) against an observed behaviour that carries the
-same question counts as a label-only divergence (`≠ label`).
+branch. A cell counts as agreeing when every aligned routed sub-state agrees. A
+baseline hole (`UNSPECIFIED`) against an observed behaviour whose question is
+`matched` in the question table below counts as a label-only divergence (`≠
+label`); a `partial` match (UnderCap × FactoryFail, Q-05 vs Q-17) does not.
 
 | baseline state | Get | Put | Close | Release | FactoryFail | IdleTimeout | PingFail |
 |---|---|---|---|---|---|---|---|
@@ -73,8 +79,8 @@ same question counts as a label-only divergence (`≠ label`).
 Convergent 19 / 28 (68 %); divergent 9, of which 2 are label-only (the same
 hole, recorded as observed behaviour with a question). First routed pilot:
 21 / 28 as published, which counted Released × Put as agreeing; under the rule
-above it is 20 / 28. The one-cell difference is the IdleTimeout reading below
-and is within what a different state split can move; it is not a measured
+above it is 20 / 28. The one-cell difference is one disposition reading (lazy
+idle expiry judged accidental, below) on a single run; it is not a measured
 regression. The baseline's own `CONVERGENCE.md`
 reports 28 / 28 between its two agent-only runs.
 
@@ -97,15 +103,14 @@ Divergences, assessed against channel.go @ 6084537:
   question (Q-06, Q-01), as described under the primary finding.
 * **Released × Close (1 cell).** Same as the first pilot: `ignore (accidental)`
   because Close after Release returns nil and closes nothing (T2, T12).
-* **IdleTimeout where an idle connection exists (1 cell, new).** The
-  baseline treats lazy expiry as `handle` (Active_HasIdle); this run marks an
-  idle connection that ages past IdleTimeout with no Get as `ignore
-  (accidental) → Q-13` in Open_IdleAvailable and Open_IdleFull (no timer; the connection stays open
-  until a Get receives it). Part B read the same
-  behaviour as documented (`part-b-diff.md`, divergence folded into Q-13). The
-  code has no timer (expiry is checked at channel.go:115-116 and 141-142 only),
-  so both readings describe the same behaviour and differ on whether it is
-  intended.
+* **IdleTimeout where an idle connection exists (1 cell, new).** The baseline
+  treats lazy expiry as `handle` (Active_HasIdle); this run marks an idle
+  connection that ages past IdleTimeout with no Get as `ignore (accidental) →
+  Q-13` in Open_IdleAvailable and Open_IdleFull (no timer; the connection stays
+  open until a Get receives it). Part B read the same behaviour as documented
+  (`part-b-diff.md`, divergence folded into Q-13). The code has no timer
+  (expiry is checked at channel.go:115-116 and 141-142 only), so both readings
+  describe the same behaviour and differ on whether it is intended.
 
 ## Finding / question level
 
@@ -135,14 +140,13 @@ a Ping function (T17); Q-25 age equal to IdleTimeout. Voided control verdicts:
 Q-23, Q-24 (Jev scope 0.30 and 0.31 below the provisional 0.5).
 
 Against the first routed pilot: the same primary finding and the same six
-substantive divergent cells (FactoryFail, Close, Released × Close); the race
-on `c.ping`, the
-re-entrant-callback deadlock and the duplicate-Put handout were already raised
-there and are now executed, and the first pilot's Q-03 (enqueue race) is now
-Q-05 with an observed interleaving (T4). New in this run: Q-25 (age equal to
-IdleTimeout) and the IdleTimeout divergence above. The first pilot's Q-18 (multi-instance) is covered here
-by three multi-instance probes in `adversarial-traces.md` without its own
-question.
+substantive divergent cells (FactoryFail, Close, Released × Close); the race on
+`c.ping`, the re-entrant-callback deadlock and the duplicate-Put handout were
+already raised there and are now executed, and the first pilot's Q-03 (enqueue
+race) is now Q-05 with an observed interleaving (T4). New in this run: Q-25
+(age equal to IdleTimeout) and the IdleTimeout divergence above. The first
+pilot's Q-18 (multi-instance) is covered here by three multi-instance probes in
+`adversarial-traces.md` without its own question.
 
 ## Executed as-is tests
 

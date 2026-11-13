@@ -688,6 +688,11 @@ class ModelTest(unittest.TestCase):
                            ("released at channel.go:136 and 151: next", "released at channel.go: next"),
                            ("see channel.go:136, 151:", "see channel.go:"),
                            ("channel.go:5 and 1:2 ratio", "channel.go and 1:2 ratio"),
+                           ("see channel.go:136, 151, and 160.", "see channel.go."),
+                           ("channel.go:136, 151? next", "channel.go? next"),
+                           ("channel.go:12 , 13.", "channel.go."),
+                           ("channel.go:12, 10-20% of calls", "channel.go, 10-20% of calls"),
+                           ("channel.go:12, 5 (five) callers", "channel.go, 5 (five) callers"),
                            ("channel.go:12, 1.5 s", "channel.go, 1.5 s")):
             self.assertEqual(strip(text), want)
         # A host whose ending looks like a file extension is not a later citation.

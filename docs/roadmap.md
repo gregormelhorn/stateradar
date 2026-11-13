@@ -278,33 +278,37 @@ Open, in order:
    (first pilot 20 under the same counting rule, 21 as published): the same
    FactoryFail, Close and Released x Close divergences, plus lazy idle expiry
    marked accidental; the one-cell gap is not a measured regression. Part B:
-   21 convergent rows (16 of the agreeing rows, 13 convergent and 3
-   convergent-hole, depend on as-is prose in the catalogue) and 8 artefacts, mostly remembrance and upstream statements
-   read as documented intent. Fixes from it: line numbers following a
-   citation, `blind` stdout, the blockquote line in the Part-B task, the
-   matrix wrapper template's pack path, and 02-pilot v1.18. Still open from
-   it: the sidecar generator's missing pairs, guard and ODC fields (the
-   pilot merged them with a per-run script); as-is prose in the catalogue
-   reaching Part B (the pilot's candidate rule: remembrance and upstream
-   statements carry the provenance "observed in code"). Next: a timed
-   agent-only run of the same component in a fresh session, so time and cost
-   compare like for like. Its `timing.md` shows where the 37 minutes went:
-   about 70 s of Flash and Jev calls, about 3 minutes of `go test` (mostly
-   three waits on the hanging `TestPool_Get`'s 60 s timeout) and about 32
-   minutes of the steering agent's own work; the pack's Python tools are not
-   a measurable share, so speeding them up would not shorten a run.
+   21 convergent rows (13 of the 26 agreeing rows, 10 convergent and 3
+   convergent-hole, depend on as-is prose in the catalogue) and 8 artefacts,
+   mostly remembrance and upstream statements read as documented intent. Fixes
+   from it: line numbers following a citation, `blind` stdout, the blockquote
+   line in the Part-B task, the matrix wrapper template's pack path, and
+   02-pilot v1.18. Still open from it: the sidecar generator's missing pairs,
+   guard and ODC fields (the pilot merged them with a per-run script); as-is
+   prose in the catalogue reaching Part B (the pilot's candidate rule:
+   remembrance and upstream statements carry the provenance "observed in
+   code"). Next: a timed agent-only run of the same component in a fresh
+   session, so time and cost compare like for like. Its `timing.md` shows
+   where the 37 minutes went: about 70 s of Flash and Jev calls, about 3.5
+   minutes of `go test` (mostly three waits on the hanging `TestPool_Get`'s
+   60-second timeout) and about 32 minutes of the steering agent's own work,
+   which includes the pack's tool runs (not timed separately).
 2. **Flash writes, the steering agent decides.** After the timed agent-only
    run: a pilot of the same component in which Flash drafts the bulk text
    (matrix cells, as-is tests) from the steering agent's decisions, and the
    steering agent only decides, checks citations and runs the gates. Measure
-   wall clock, cost and finding quality against the same benchmark. The
-   risk to watch: Step 8 of the second pilot found 2 contradicted and 5
-   unclear among 51 checked Flash claims, so the judgment step stays with the
-   steering agent in this pilot.
-3. **Flash as the steering agent.** Only if pilot 2 holds the finding
-   quality: the same component with Flash steering the whole run. Jev stays a
-   verifier, since it checks claims and orderings and does not plan, read
-   code or write files.
+   wall clock, cost and finding quality against the same benchmark. This arm
+   runs under a named prompt variant that suspends routing rule 3 (the
+   agent's own complete pass) for that arm only. Flash's error rate on such
+   text is unmeasured: in the second pilot Jev judged Flash's 133 drafted
+   claims 124 supported, 9 unclear and 0 contradicted, but those were Step-1
+   claims, not matrix cells or tests, so the judgment step stays with the
+   steering agent.
+3. **Flash as the steering agent.** Only if the item-2 pilot holds the
+   finding quality: the same component with Flash steering the whole run,
+   and Part B on a different model so that A and B do not share one model's
+   blind spots. Jev stays a verifier, since it checks claims and orderings
+   and does not plan, read code or write files.
 4. **Labelled evaluation set.** Collect attributed, independently reviewed
    labels for claim and requirement-scope checks across components (stage 1
    of the cascade plan), including races outside a requirement's scope and
