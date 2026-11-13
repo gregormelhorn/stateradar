@@ -286,11 +286,11 @@ def main() -> int:
     if total != len(names):
         print(f"ERROR: {len(names)} cases scheduled, {total} reported — a case was swallowed")
         return 1
-    passed = sum(1 for _, p in results if p)
-    failed = total - passed
+    n_passed = sum(1 for _, p in results if p)
+    failed = total - n_passed
     skip_str = f" ({total_skips} checks skipped)" if total_skips else ""
     print(f"{'='*40}")
-    print(f"Results: {passed} passed, {failed} failed{skip_str}, {total} total")
+    print(f"Results: {n_passed} passed, {failed} failed{skip_str}, {total} total")
     return 0 if failed == 0 else 1
 
 

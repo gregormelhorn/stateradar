@@ -38,6 +38,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 
 SRC_ROOTS = ["src", "lib", "app", "pkg", "internal"]
@@ -276,7 +277,7 @@ def _parse_questions(path: Path) -> list[dict]:
 
 def _load_overlay(analysis_root: Path) -> dict:
     """sidecar-overlay.yaml — skip list, question aliases, citations."""
-    empty = {"skip": {}, "question_aliases": {}, "extra_citations": [],
+    empty: dict[str, Any] = {"skip": {}, "question_aliases": {}, "extra_citations": [],
              "src_roots": [], "src_exts": []}
     path = analysis_root / "sidecar-overlay.yaml"
     if not path.is_file():

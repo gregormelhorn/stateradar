@@ -573,7 +573,7 @@ def main() -> int:
             print("  ok  fault mutant kill proof (passes)")
 
         import difflib
-        base = (ROOT / "tests" / "golden-mini" / "src" / "mini.py").read_text().splitlines()
+        base_lines = (ROOT / "tests" / "golden-mini" / "src" / "mini.py").read_text().splitlines()
         for variant_name in [
             "mini.F-01-missing-transition.py",
             "mini.F-02-transfer-fault.py",
@@ -583,7 +583,7 @@ def main() -> int:
             "mini.F-05-corrupt-state-ignore.py",
         ]:
             variant = (ROOT / "tests" / "golden-mini" / "src" / "mutants" / variant_name).read_text().splitlines()
-            regions = [op for op in difflib.SequenceMatcher(None, base, variant).get_opcodes()
+            regions = [op for op in difflib.SequenceMatcher(None, base_lines, variant).get_opcodes()
                        if op[0] != "equal"]
             if len(regions) != 1:
                 failures.append(f"{variant_name}: a fault variant must differ from the base in exactly "
@@ -1091,10 +1091,35 @@ def main() -> int:
     }) == "unknown", "missing model_release is unknown"
     print("  ok  benchmark dating classification correct")
 
+    # Timeout path of the mutation runners. On a timeout, subprocess hands
+    # back the partial output as bytes even with text=True, and stderr may
+    # be None: bytes + "" crashed both runners with a TypeError instead of
+    # reporting a timed-out mutant (found by mypy, 2026-11-13).
+    import check_fault_mutants
+    import check_matrix_mutation
+    sleeper = (sys.executable, "-c",
+               "import time; print('partial', flush=True); time.sleep(30)")
+    for runner_name, run in (
+        ("check_fault_mutants", lambda: check_fault_mutants.run_command(
+            check_fault_mutants.Config(sleeper, ROOT, Path("."), 1), ROOT)),
+        ("check_matrix_mutation", lambda: check_matrix_mutation.run_command(
+            check_matrix_mutation.Config(sleeper, ROOT, 1), ROOT)),
+    ):
+        try:
+            result = run()
+        except TypeError as error:
+            failures.append(f"{runner_name}: the timeout path crashed: {error}")
+            continue
+        if not result.timed_out or "partial" not in result.output:
+            failures.append(f"{runner_name}: timeout not reported with its partial output: "
+                            f"timed_out={result.timed_out} output={result.output!r}")
+        else:
+            print(f"  ok  {runner_name} reports a timeout with its partial output")
+
     if failures:
         print("\nSELFTEST: FAIL")
-        for f in failures:
-            print(" -", f)
+        for failure in failures:
+            print(" -", failure)
         return 1
     print("\nSELFTEST: OK")
     return 0

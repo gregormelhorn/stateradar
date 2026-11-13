@@ -52,6 +52,8 @@ class Budget:
                 raise BudgetExceeded("reservation exceeds remaining budget")
             cursor = db.execute("INSERT INTO calls (provider, amount, status) VALUES (?, ?, 'reserved')", (provider, amount))
             db.commit()
+            if cursor.lastrowid is None:  # sqlite sets it after every INSERT
+                raise sqlite3.Error("the reservation row has no id")
             return cursor.lastrowid
 
     def total(self) -> int:
