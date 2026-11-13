@@ -253,14 +253,15 @@ def _parse_cell(
     # that does not resolve goes to `unresolved`, also next to a resolved
     # one (a cell records one citation, so a second one is dropped); the
     # caller drops the candidates that are not file names.
-    found = list(re.finditer(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw))
+    # Candidates come from the cell without its quoted fragments: a fragment
+    # may quote "mini.py:19" or "app.json:12" (a log line, a stack trace),
+    # which is neither the citation nor a dropped one. Escaped quotes inside
+    # a straight-quoted fragment do not end it.
+    outside = re.sub(r'\(\s*(?:"(?:\\.|[^"\\])*"|\u201c[^\u201d]*\u201d)\s*\)', " ", raw)
+    found = list(re.finditer(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", outside))
     if unresolved is not None:
-        # Not the quoted fragments: a fragment may quote "app.json:12" itself.
-        outside = re.sub(r'\(\s*["\u201c].*?["\u201d]\s*\)', " ", raw)
-        unresolved.update(m.group(1) for m in re.finditer(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", outside)
-                          if not src_index.get(Path(m.group(1)).name))
-    cit = next((m for m in found if src_index.get(Path(m.group(1)).name)),
-               found[0] if found else None)
+        unresolved.update(m.group(1) for m in found if not src_index.get(Path(m.group(1)).name))
+    cit = next((m for m in found if src_index.get(Path(m.group(1)).name)), None)
     if cit:
         path = src_index.get(Path(cit.group(1)).name)
         if path:

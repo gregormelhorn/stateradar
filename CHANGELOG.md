@@ -39,8 +39,9 @@
   document gets a pointer to overlay `extra_citations`, a cited config file
   (`.yaml`, `.json`, ...) or a source extension in the wrong case names
   `src_exts`; text such as `host:5432` without a known file extension stays
-  quiet. A cell's citation is now the first `file:line` token that resolves,
-  so a `host:5432` earlier in the cell no longer hides it; a second cited
+  quiet. A cell's citation is now the first `file:line` token outside its
+  quoted fragments that resolves, so a `host:5432` earlier in the cell no
+  longer hides it and a `file:line` quoted in a fragment is never taken for it; a second cited
   file in a cell that does not resolve is warned about too, since a cell
   records one citation. The two mutation
   runners share one helper (`tools/subprocess_text.py`) for timeout output.
