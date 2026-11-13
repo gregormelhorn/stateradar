@@ -640,21 +640,21 @@ def main() -> int:
         # "stateradar" or "pack", or via STATERADAR_PACK (second routed pilot:
         # a checkout named "pack" needed a hand edit).
         for sibling in ("stateradar", "pack", None):
-            base = tmp / f"tpl-{sibling}"
-            adir = base / "repo" / "domain-analysis" / "mini"
-            shutil.copytree(gm, adir)
-            shutil.copy(ROOT / "tools" / "templates" / "check_matrix.py", adir / "check_matrix.py")
+            tpl_base = tmp / f"tpl-{sibling}"
+            tpl_dir = tpl_base / "repo" / "domain-analysis" / "mini"
+            shutil.copytree(gm, tpl_dir)
+            shutil.copy(ROOT / "tools" / "templates" / "check_matrix.py", tpl_dir / "check_matrix.py")
             env = dict(os.environ)
             env.pop("STATERADAR_PACK", None)
             if sibling:
-                (base / sibling).symlink_to(ROOT, target_is_directory=True)
-            r = subprocess.run([sys.executable, str(adir / "check_matrix.py")], capture_output=True, text=True,
+                (tpl_base / sibling).symlink_to(ROOT, target_is_directory=True)
+            r = subprocess.run([sys.executable, str(tpl_dir / "check_matrix.py")], capture_output=True, text=True,
                                env=env)
             expect(f"wrapper template, pack sibling {sibling or 'absent'}", sibling is None, r.returncode,
                    (r.stdout + r.stderr).strip(), "CHECK MATRIX: OK" if sibling else "set STATERADAR_PACK")
             if sibling is None:
                 env["STATERADAR_PACK"] = str(ROOT)
-                r = subprocess.run([sys.executable, str(adir / "check_matrix.py")], capture_output=True,
+                r = subprocess.run([sys.executable, str(tpl_dir / "check_matrix.py")], capture_output=True,
                                    text=True, env=env)
                 expect("wrapper template, STATERADAR_PACK", False, r.returncode, (r.stdout + r.stderr).strip(),
                        "CHECK MATRIX: OK")
