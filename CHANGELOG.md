@@ -191,6 +191,12 @@
   02-pilot v1.18 (rule 6 reasoned dispositions, the sidecar step runs
   `check_reachability.py`, rule 7 names the refusal's gaps and asks for line
   numbers inside citations).
+- **Part-B stripping follow-up.** A line number before a parenthesised gloss
+  (`channel.go:136, 151 (Factory under mu)`) reached the package again after
+  the second pilot's fixes; `(` ends a clause once more, at the cost of a prose
+  count before a parenthesis (the safe direction), and stacked sentence
+  punctuation (`?!`) ends one too. The routing doc names the remaining known
+  leaks, and rule 7 says to join a run's last number with `and`/`or`.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 
