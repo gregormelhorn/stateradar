@@ -4,6 +4,13 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Selective pilot output.** The signed-in Codex runner defaults to one
+  analysis with full short reports, relevant Go failure stacks and paged
+  reads of long documents. Read retained source and table evidence by name,
+  key or line range. Use `--output-mode compare` for the standard and
+  compact pair. The English pilot also checks a second acquisition by the
+  same caller while the first is pending or its resource is still held.
+
 - **Jev ordering scope.** Check every material part of the asserted sequence
   against the quoted fragment. At the existing 0.5 threshold the revised
   question corrected all three repetitions of the known Pool CT-A error.
