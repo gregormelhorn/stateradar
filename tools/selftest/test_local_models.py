@@ -493,6 +493,25 @@ class ModelTest(unittest.TestCase):
             self.assertIn("T-1", err.getvalue())
             self.assertRegex(err.getvalue(), r"removed as analysis references[^\n]*L-9")
 
+    def test_blind_refuses_a_package_with_a_leftover_fragment(self):
+        # Method review round 7: an unescaped "|" inside a fragment on a table
+        # row is a cell bar, so the fragment cannot be ended; the package is
+        # refused rather than sent with code in it.
+        for row in ('| E01 | channel.go:7 ("a | b") then | x ("y") |',
+                    '| E01 | channel.go:7 ("fd := open(p, O_RDWR | O_CREATE)") | next |',
+                    '| E01 | channel.go:7 (\u201ctypographic | quote\u201d) | next |'):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                args = self.make_blind_inputs(
+                    root, catalogue="<!-- event-ids: E01 -->\n" + row + "\n" + "event details " * 30)
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    with self.assertRaisesRegex(ValueError, r"never send"):
+                        local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+                self.assertFalse((root / "blind.package.md").exists())
+        # Escaped as markdown tables need, the same fragment strips whole.
+        self.assertEqual(local_models.part_b_pack.blind_catalogue(
+            '| E01 | channel.go:7 ("fd := open(p, O_RDWR \\| O_CREATE)") | next |'), "| E01 | channel.go | next |")
+
     def test_blind_catalogue_round3_cases(self):
         strip = local_models.part_b_pack.blind_catalogue
         # One-argument call: prose between citations survives on its own.
@@ -581,6 +600,13 @@ class ModelTest(unittest.TestCase):
             self.assertEqual(got, want)
             self.assertEqual(P.changed_table_rows(text, got), [])
         self.assertEqual(P.changed_table_rows("| a | b |", "| a b |"), ["| a b |"])
+        # Removing an id never joins lines; a changed line count is reported.
+        for text in ("| a | b |\n→ Q-07 continues the note\n| c | d |", "| a | x (L-4,\nG-01) |"):
+            got = strip(text)
+            self.assertEqual(got.count("\n"), text.count("\n"))
+            self.assertEqual(P.changed_table_rows(text, got), [])
+        self.assertEqual(strip("| a | b |\n→ Q-07 continues the note"), "| a | b |\ncontinues the note")
+        self.assertEqual(P.changed_table_rows("a\nb", "ab"), ["line count changed: 2 -> 1"])
         # A wrapped code line that starts with "||" is prose, not a table row.
         self.assertIsNone(P._TABLE_ROW.match("|| len(c.conns) == 0 {\")),"))
         # A host whose ending looks like a file extension is not a later citation.

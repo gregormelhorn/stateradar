@@ -215,7 +215,7 @@ def changed_table_rows(before: str, after: str) -> list[str]:
     """Table rows whose number of cell bars changed (second backstop)."""
     a, b = before.split("\n"), after.split("\n")
     if len(a) != len(b):
-        return []
+        return [f"line count changed: {len(a)} -> {len(b)}"]
     return [y.strip()[:80] for x, y in zip(a, b)
             if _TABLE_ROW.match(x) and len(_CELL_BAR.findall(x)) != len(_CELL_BAR.findall(y))]
 
@@ -275,7 +275,7 @@ def quote_files(doctrine: str, inputs: list[str], repo: Path, analysis_dir: Path
 # name domain things ("the T-1 threshold"), so an id of those families is
 # kept when the Part B sources (requirements, contracts, doctrine lines) use
 # it, and removed otherwise (domain_ids).
-_ANALYSIS_ID = re.compile(r"(?:\s*→\s*)?\b(?:Q|PA|SYS|NAT|DR)-[A-Z]*\d[\w-]*")
+_ANALYSIS_ID = re.compile(r"(?:[ \t]*→[ \t]*)?\b(?:Q|PA|SYS|NAT|DR)-[A-Z]*\d[\w-]*")
 _LOCAL_ID = re.compile(r"\b(?:L|G|F|T)-[A-Z]*\d[\w-]*")
 _MARK = "\x00"
 
@@ -312,15 +312,16 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     names = cited_names(text) | frozenset(later_names)
     text = sub_citations(text, names, _citation_stripper(frozenset(keep_quotes_from)))
     text = _ANALYSIS_ID.sub(_MARK, text)
-    text = re.sub(r"(?:\s*→\s*)?" + _LOCAL_ID.pattern,
+    # Removing an id never joins two lines: no pattern here crosses a newline.
+    text = re.sub(r"(?:[ \t]*→[ \t]*)?" + _LOCAL_ID.pattern,
                   lambda m: m.group(0) if m.group(0).lstrip(" \t→") in keep_ids else _MARK, text)
     # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12",
     # "see DR-002"; "see" in prose stays.
     text = re.sub(r"\b(?=[A-Z])(?i:see|cf\.)[ \t]*(?=\x00)", "\x01", text)  # a sentence start
     text = re.sub(r"\b(?i:see|cf\.)[ \t]*(?=\x00)", "", text)
-    text = re.sub(r"(?:\b(?:recorded as\s+)?lints?\s*|\b[Ff]inding\s*(?::\s*)?)(?=\x00)", "", text)
+    text = re.sub(r"(?:\b(?:recorded as[ \t]+)?lints?[ \t]*|\b[Ff]inding[ \t]*(?::[ \t]*)?)(?=\x00)", "", text)
     # Parentheses that held only removed ids, then the ids with their separators.
-    text = re.sub(r"(?m)(^[ \t]*)?(?(1)|[ \t]*)\((?:[\s,;\x01]|\x00)*\x00(?:[\s,;]|\x00)*\)(?(1)[ \t]*)",
+    text = re.sub(r"(?m)(^[ \t]*)?(?(1)|[ \t]*)\((?:[ \t,;\x01]|\x00)*\x00(?:[ \t,;]|\x00)*\)(?(1)[ \t]*)",
                   lambda m: m.group(1) or "", text)
     # A removed id between two separators takes one of them with it; at the
     # end of a clause it takes the separator before it; before text it
@@ -420,14 +421,17 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     if blind_doctrine:
         blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", blind_doctrine))
     blocks += sources
-    shifted = changed_table_rows(catalogue, blind_copy)
+    shifted = changed_table_rows(catalogue, blind_copy) + (
+        changed_table_rows(doctrine, blind_doctrine) if blind_doctrine else [])
+    # Both backstops refuse the package (rule 7): code must never reach Part B.
     if shifted:
-        print("PART-B PACK: table rows whose cell count changed in stripping (check them, rule 7): "
-              + "; ".join(shifted[:10]), file=sys.stderr)
+        raise ValueError("table rows whose cell count changed in stripping (repair the row's "
+                         "escaping in the input and rebuild; never send): " + "; ".join(shifted[:10]))
     left = leftover_fragments(blind_copy + "\n" + blind_doctrine, keep_quotes, later)
     if left:
-        print("PART-B PACK: possible code fragments left after a citation (check the package, rule 7): "
-              + "; ".join(left[:10]), file=sys.stderr)
+        raise ValueError("code fragments left after a citation (inside a table cell escape every "
+                         "\"|\" of a fragment as \"\\|\" in the input, then rebuild; never send): "
+                         + "; ".join(left[:10]))
     kept = sorted(set(_LOCAL_ID.findall(blind_copy + "\n" + blind_doctrine)))
     both = catalogue + "\n" + doctrine
     removed = sorted(set(_LOCAL_ID.findall(sub_citations(both, later, r"\1"))) - set(kept))
