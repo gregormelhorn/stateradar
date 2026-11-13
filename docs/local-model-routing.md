@@ -173,7 +173,12 @@ absolute. The catalogue lives in the analysis directory; the package carries
 it with citation fragments, line numbers and analysis ids (Q-, PA-, L-, SYS-,
 NAT-, G-, DR-, F-, T-) removed, because pilot rule 3 puts code into those
 fragments; file names stay. Prose that states an as-is conclusion cannot be
-removed mechanically, and the pilot lists it as a known leak. The call
+removed mechanically, and the pilot lists it as a known leak. Doctrine lines
+from `extraction.md` travel too, stripped the same way: bullets, numbered
+items or table rows under a heading that names doctrine. An extraction that
+names DOC lines none of which sits under such a heading is refused, and so is
+a catalogue whose event ids would not survive the stripping. A truncated
+blind output is saved to `--output`, not printed. The call
 receives only the assembled package and no tools or conversation history. The
 command checks the returned table with the existing Part-B coverage checker
 and returns a failure for missing rows, missing checklist ticks, or truncated

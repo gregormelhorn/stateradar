@@ -125,8 +125,8 @@ _DOC_ROW = re.compile(r"^(?:[-*]|\d+\.|\|)\s*\**DOC-\d+")
 
 def _extract_doctrine(extraction: str) -> str:
     """The doctrine lines of an extraction: DOC-n bullets, numbered items or
-    table rows, from the section whose heading names doctrine (any level),
-    or from anywhere when no such section exists."""
+    table rows under a heading (any level) that names doctrine. Rows outside
+    such a section (status or mapping tables) are never taken."""
     lines: list[str] = []
     section_level = 0
     for line in extraction.split("\n"):
@@ -139,8 +139,6 @@ def _extract_doctrine(extraction: str) -> str:
             section_level = 0
         if section_level and _DOC_ROW.match(s):
             lines.append(s)
-    if not lines:
-        lines = [line.strip() for line in extraction.split("\n") if _DOC_ROW.match(line.strip())]
     return "\n".join(lines)
 
 
@@ -184,7 +182,6 @@ def blind_catalogue(text: str) -> str:
     text = _ANALYSIS_ID.sub(_MARK, text)
     # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12".
     text = re.sub(r"(?:\b(?:recorded as\s+)?lints?\s*|\b[Ff]inding\s*(?::\s*)?)(?=\x00)", "", text)
-    text = re.sub(r"\bFinding\b\s*(?:→|:)?\s*", "", text)
     # Parentheses that held only removed ids, then the ids with their separators.
     text = re.sub(r"\((?:[\s,;]|\x00)*\x00(?:[\s,;]|\x00)*\)", "", text)
     text = re.sub(r"[ \t]*[,;]?[ \t]*\x00(?:[ \t]*[,;][ \t]*(?=\x00))?", "", text)
@@ -201,9 +198,16 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     catalogue = catalogue_path.read_text(encoding="utf-8")
     events, pairs = _catalogue_ids(catalogue)
 
+    blind_copy = blind_catalogue(catalogue)
+    try:
+        same_ids = _catalogue_ids(blind_copy) == (events, pairs)
+    except ValueError:
+        same_ids = False
+    if not same_ids:
+        raise ValueError("stripping analysis ids changed the catalogue's event ids; "
+                         "rename event or pair ids that look like analysis ids (Q-, PA-, L-, SYS-, NAT-, G-, DR-, F-, T-)")
     blocks: list[tuple[str, str]] = [
-        ("INPUT 1: EVENT CATALOGUE (code fragments and analysis references removed)",
-         blind_catalogue(catalogue))]
+        ("INPUT 1: EVENT CATALOGUE (code fragments and analysis references removed)", blind_copy)]
 
     # Doctrine lines travel with the requirements: every artefact in the
     # dobby Part-B runs (G2 storm guard, trigger-lane policy) traced to a
@@ -214,9 +218,10 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
         doctrine = _extract_doctrine(ext)
         if not doctrine and re.search(r"\bDOC-\d+", ext):
             # A silent skip sent Part B no doctrine lines (routed pilot 2026-11-13).
-            raise ValueError(f"{extraction_path} names DOC-n lines but none is a bullet, "
-                             "numbered item or table row that can be passed to Part B")
+            raise ValueError(f"{extraction_path} names DOC-n lines but none is a bullet, numbered "
+                             "item or table row under a heading that names doctrine")
         if doctrine:
+            doctrine = blind_catalogue(doctrine)
             blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", doctrine))
     for spec in args.requirements:
         blocks.append((f"INPUT 2: REQUIREMENTS ({spec})", _read_requirements(spec, repo)))
@@ -335,7 +340,11 @@ def main() -> int:
         print("PART-B PACK: assemble mode needs --requirements and/or --contracts",
               file=sys.stderr)
         return 2
-    return assemble(args, pack_root)
+    try:
+        return assemble(args, pack_root)
+    except ValueError as error:  # missing inputs, undeliverable doctrine, stripped ids
+        print(f"PART-B PACK: {error}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

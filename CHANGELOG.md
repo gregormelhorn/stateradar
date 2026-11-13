@@ -82,9 +82,11 @@
   ids such as `T-P01a`, so the scope-line check no longer passes vacuously;
   the generator parses `## Q-nn`, `**Q-nn**` and punctuated question ids and
   ignores words such as `Q-and-A`; `part_b_pack.py` sends Part B doctrine
-  lines written as a table and refuses an extraction whose DOC lines it
-  cannot pass on, and its catalogue copy drops code fragments, line numbers
-  and analysis ids; `draft-verify` defaults to 12000 output tokens, and a
+  lines written as bullets, numbered items or a table under a doctrine
+  heading, stripped like the catalogue, and refuses an extraction whose DOC
+  lines it cannot pass on; its catalogue copy drops code fragments, line
+  numbers and analysis ids, and it refuses a catalogue whose event ids the
+  stripping would change; its CLI reports input errors without a traceback; `draft-verify` defaults to 12000 output tokens, and a
   truncated draft or blind output is saved to a file instead of printed;
   `formats/rules.toml` gains the ODC triggers `part-B diff`, `reviewer
   cross-check`, `step-8 verification`, `z3 invariant check`, `draft-verify`

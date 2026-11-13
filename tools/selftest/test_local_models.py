@@ -455,6 +455,51 @@ class ModelTest(unittest.TestCase):
         self.assertNotIn(", ,", quoted)
         self.assertIn("P-01a", stripped)  # pair ids are catalogue content, not analysis references
 
+    def test_blind_doctrine_lines_are_stripped_and_need_a_heading(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            table = ("| DOC-1 | README.md:15, channel.go:21 | \"support for connection waiting\" → SYS-7 |\n"
+                     "| DOC-2 | README.md:14 | \"an invalid connection will be discarded after a failed ping\" |\n"
+                     "| DOC-3 | README.md:13 | \"a timed-out connection will be closed and discarded\" |\n")
+            args = self.make_blind_inputs(root, extraction="### Doctrine lines\n\n" + table)
+            self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
+            package = (root / "blind.package.md").read_text()
+            self.assertIn("support for connection waiting", package)
+            for leak in ("channel.go:21", "SYS-7", "README.md:15"):
+                self.assertNotIn(leak, package)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, extraction="## Status\n\n" + table)
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaisesRegex(ValueError, "doctrine"):
+                    local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+
+    def test_blind_refuses_a_stripped_catalogue_that_lost_its_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, catalogue="<!-- event-ids: T-1 F-2 -->\n" + "event details " * 30)
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaisesRegex(ValueError, "event ids"):
+                    local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+
+    def test_blind_catalogue_keeps_the_word_finding_in_prose(self):
+        text = local_models.part_b_pack.blind_catalogue("Finding the oldest waiter is FIFO. Finding → Q-12 stays.\n")
+        self.assertIn("Finding the oldest waiter", text)
+        self.assertNotIn("Q-12", text)
+
+    def test_part_b_pack_cli_reports_input_errors_without_a_traceback(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_blind_inputs(root, extraction="Doctrine DOC-1 in prose only.\n")
+            run = subprocess.run([sys.executable, str(Path(local_models.__file__).parent / "part_b_pack.py"),
+                                  "analysis", "--repo", str(root), "--requirements", "requirements.md",
+                                  "--contracts", "contracts.md", "--out", str(root / "p.md")],
+                                 capture_output=True, text=True)
+        self.assertEqual(run.returncode, 2, run.stderr)
+        self.assertIn("PART-B PACK:", run.stderr)
+        self.assertNotIn("Traceback", run.stderr)
+
     def test_blind_sends_only_the_inspected_package(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
