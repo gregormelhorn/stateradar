@@ -127,8 +127,9 @@ Convergent **19 / 28** (68 %); divergent **9**, of which **2 are
 label-only** (the same hole, recorded as observed behaviour with a question).
 The grid leaves out the two waiter sub-states without a baseline counterpart;
 they carry behaviour the baseline does not describe (a barging Get below the
-cap goes to Open_Creating, Close is `handle` without waking a waiter), which
-the count does not include and Q-03, Q-04 and Q-05 cover.
+cap goes to Open_Creating, Close and its variants are `handle` without
+waking a waiter), which the count does not include and Q-03, Q-04 and Q-05
+cover.
 The nine divergent cells are the same nine as in the second routed pilot
 (19 / 28). First routed pilot: 21 / 28 as published, 20 / 28 under the rule
 above (it counted Released × Put as agreeing). The baseline's own

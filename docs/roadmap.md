@@ -311,17 +311,20 @@ Open, in order:
    is fewer agent rounds and less agent output. In the routed run, output
    was about $4.20 of the steering agent's $12.84 (210k tokens), so cutting
    output caps the saving at about a third; the cache reads and writes
-   (about $8.60) scale with the number of rounds, and reviewing Flash's
+   (about $8.63) scale with the number of rounds, and reviewing Flash's
    drafts could add rounds. Plan: a pilot of the same component in which
    Flash drafts the bulk text (matrix cells, as-is tests) from the steering
    agent's decisions, and the steering agent only decides, checks citations
    and runs the gates. Measure wall clock, cost and finding quality against
-   the same benchmark. This arm runs under a named prompt variant that
-   suspends routing rule 3 (the agent's own complete pass) for that arm
-   only. Flash's error rate on such text is unmeasured: in the second pilot
-   Jev judged Flash's 133 drafted claims 124 supported, 9 unclear and 0
-   contradicted, but those were Step-1 claims, not matrix cells or tests, so
-   the judgment step stays with the steering agent.
+   the same benchmark, and compare cost against an agent-only run whose
+   model has about the same size (states and cells), since model size moves
+   the steering agent's rounds; the two runs so far differ (7 against 9
+   states). This arm runs under a named prompt variant that suspends routing
+   rule 3 (the agent's own complete pass) for that arm only. Flash's error
+   rate on such text is unmeasured: in the second pilot Jev judged Flash's
+   133 drafted claims 124 supported, 9 unclear and 0 contradicted, but those
+   were Step-1 claims, not matrix cells or tests, so the judgment step stays
+   with the steering agent.
 3. **Flash as the steering agent.** Only if the item-2 pilot holds the
    finding quality: the same component with Flash steering the whole run,
    and Part B on a different model so that A and B do not share one model's
