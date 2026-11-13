@@ -344,8 +344,15 @@ class ModelTest(unittest.TestCase):
                 self.assertNotIn("SECRET MATRIX", prompt)
                 self.assertIn("requirement details", prompt)
                 return {"text": "| E01 | handle |\n\n- [x] E01\n", "finish_reason": "stop"}
-            with patch.object(local_models, "flash", side_effect=fake_flash):
+            out, err = io.StringIO(), io.StringIO()
+            with patch.object(local_models, "flash", side_effect=fake_flash), \
+                    contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                 self.assertEqual(local_models.blind(budget, args, "key"), 0)
+            # Second pilot: stdout is one JSON document; the coverage line goes to stderr.
+            json.loads(out.getvalue())
+            self.assertIn("PART-B COVERAGE: OK", err.getvalue())
+            # The prompt's blockquote leaves no stray ">" line in the task text.
+            self.assertNotRegex((root / "blind.package.md").read_text(), r"(?m)^>")
             self.assertTrue(args.output.is_file())
             package = root / "blind.package.md"
             self.assertTrue(package.is_file(), "the dispatched package is kept next to the output")
@@ -654,6 +661,15 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(P.changed_table_rows("a\nb", "ab"), ["line count changed: 2 -> 1"])
         # A wrapped code line that starts with "||" is prose, not a table row.
         self.assertIsNone(P._TABLE_ROW.match("|| len(c.conns) == 0 {\")),"))
+        # More lines of the same file after a citation go with it (second pilot:
+        # "unlock at 136, 151, 156 or 160" and ", 194" reached the package).
+        for text, want in (("| a | unlock channel.go:136, 151, 156 or 160; factory call channel.go:154 |",
+                            "| a | unlock channel.go; factory call channel.go |"),
+                           ("| a | unlock before any Close call, channel.go:175, 194 |",
+                            "| a | unlock before any Close call, channel.go |"),
+                           ("channel.go:12, 3 callers wait", "channel.go, 3 callers wait"),
+                           ("see channel.go:10 and 2 more", "see channel.go and 2 more")):
+            self.assertEqual(strip(text), want)
         # A host whose ending looks like a file extension is not a later citation.
         self.assertEqual(strip('client.go:40 ("f("a") dial api.example.rs:8443 now") |'), "client.go |")
         # A removed sentence-initial label keeps the capital after "," or ";", in parentheses and in cells.

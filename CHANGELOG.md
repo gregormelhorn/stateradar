@@ -122,6 +122,21 @@
   recognises source-index files and files cited with a fragment in the same
   text. A `host:port` token inside a fragment never ends it early, whatever
   its domain ending.
+- **Second routed pilot (silenceper/pool, 2026-11-13), blind to the
+  benchmark,** and its fixes. Outputs, executed as-is Go tests and the
+  benchmark comparison are in `docs/evidence/routed-pilot-2-2026-11-13/`.
+  22,826 microdollars over 20 calls (7 Flash, 13 Jev), about 37 minutes, no
+  provider errors. Flash's finding-neutral `channel.go` draft raised the
+  benchmark's primary finding as its first question, and the as-is test T1
+  executes it; 19 of 28 aligned base cells agree with the agent-only
+  baseline (first pilot: 21). Fixes: a citation's further line numbers
+  (`file:136, 151 or 160`) are stripped with it; `blind` keeps stdout one
+  JSON document and writes the coverage line to stderr; the Part-B task text
+  drops the prompt's empty blockquote line;
+  `tools/templates/check_matrix.py` finds the pack via `STATERADAR_PACK` or
+  a sibling named `stateradar` or `pack`; 02-pilot v1.18 (rule 6 reasoned
+  dispositions, Step 4 runs `check_reachability.py`, rule 7 names the
+  refusal's gaps and asks for line numbers inside citations).
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

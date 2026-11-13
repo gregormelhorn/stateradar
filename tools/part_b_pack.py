@@ -187,7 +187,11 @@ def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
     last = (r"(" + ch + r"+?)" + q_close + r"\s*\)(?=(?:(?!" + q_close + r"\s*\))" + ch
             + r")*?(?:" + nxt + bar + r"|$))")
     return re.compile(
-        r"(?<![\w./-])(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
+        r"(?<![\w./-])(" + _FILE + r")`?:\d+(?:-\d+)?"
+        # More lines of the same file: ", :194", ", 194", " and 156", " or 160"
+        # (a bare number followed by a word, as in ", 3 callers", is prose).
+        r"(?:(?:,|[ \t]+(?:and|or))[ \t]*:?\d+(?:-\d+)?"
+        r"(?![\w.:]|[ \t]+(?!(?:and|or)\b)[A-Za-z]))*"
         r"(`?\s*\(\s*" + q_open + balanced +
         r"|`?\s*\(\s*" + q_open + last + r")?", re.M)
 
@@ -492,7 +496,8 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
         "inputs below are complete and are your ONLY sources. If you catch "
         "yourself wanting to look something up, label it an open point instead.",
         "",
-        "TASK: " + instruction.lstrip("> ").replace("\n> ", "\n"),
+        # Unquote the prompt's blockquote, including its empty ">" lines.
+        "TASK: " + re.sub(r"(?m)^>[ \t]?", "", instruction),
         "",
         "The catalogue's event ids are: " + ids_line + ".",
         "",

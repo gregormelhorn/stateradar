@@ -11,6 +11,7 @@ Usage: python3 tools/selftest/run_selftest.py     (needs jsonschema)
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -381,6 +382,28 @@ def main() -> int:
             return r.returncode, (r.stdout + r.stderr).strip()
 
         gm = ROOT / "tests" / "golden-mini" / "domain-analysis" / "mini"
+        # The per-component wrapper template finds the pack as a sibling named
+        # "stateradar" or "pack", or via STATERADAR_PACK (second routed pilot:
+        # a checkout named "pack" needed a hand edit).
+        for sibling in ("stateradar", "pack", None):
+            base = tmp / f"tpl-{sibling}"
+            adir = base / "repo" / "domain-analysis" / "mini"
+            shutil.copytree(gm, adir)
+            shutil.copy(ROOT / "tools" / "templates" / "check_matrix.py", adir / "check_matrix.py")
+            env = dict(os.environ)
+            env.pop("STATERADAR_PACK", None)
+            if sibling:
+                (base / sibling).symlink_to(ROOT, target_is_directory=True)
+            r = subprocess.run([sys.executable, str(adir / "check_matrix.py")], capture_output=True, text=True,
+                               env=env)
+            expect(f"wrapper template, pack sibling {sibling or 'absent'}", sibling is None, r.returncode,
+                   (r.stdout + r.stderr).strip(), "CHECK MATRIX: OK" if sibling else "set STATERADAR_PACK")
+            if sibling is None:
+                env["STATERADAR_PACK"] = str(ROOT)
+                r = subprocess.run([sys.executable, str(adir / "check_matrix.py")], capture_output=True,
+                                   text=True, env=env)
+                expect("wrapper template, STATERADAR_PACK", False, r.returncode, (r.stdout + r.stderr).strip(),
+                       "CHECK MATRIX: OK")
         d5 = tmp / "cm-green"
         shutil.copytree(gm, d5)
         expect("check_matrix green on golden-mini", False, *cmx(d5))
