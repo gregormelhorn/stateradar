@@ -3,8 +3,9 @@
 The logic lives in the StateRadar pack
 (`tools/check_matrix.py` in the pack checkout); this wrapper keeps the
 per-component artifact contract (02-pilot step 4) stable. The pack is
-found through the STATERADAR_PACK environment variable, else as a sibling
-checkout named `stateradar` or `pack` of the analysed repository; adjust
+found through the STATERADAR_PACK environment variable (only there when it
+is set), else as a sibling checkout named `stateradar` or `pack` of the
+analysed repository; adjust
 _CANDIDATES for a submodule or vendored copy.
 
 Run: python3 domain-analysis/<component>/check_matrix.py
@@ -19,8 +20,10 @@ from pathlib import Path
 
 ADIR = Path(__file__).resolve().parent
 _SIBLINGS = ADIR.parents[2]  # <repo>/domain-analysis/<component> -> parent of <repo>
-_CANDIDATES = ([Path(os.environ["STATERADAR_PACK"])] if os.environ.get("STATERADAR_PACK") else []) + [
-    _SIBLINGS / "stateradar", _SIBLINGS / "pack"]
+# An explicit STATERADAR_PACK is the only place looked at; siblings are the
+# fallback when it is unset.
+_CANDIDATES = ([Path(os.environ["STATERADAR_PACK"])] if os.environ.get("STATERADAR_PACK")
+               else [_SIBLINGS / "stateradar", _SIBLINGS / "pack"])
 PACK = next((c / "tools" / "check_matrix.py" for c in _CANDIDATES if (c / "tools" / "check_matrix.py").is_file()),
             _CANDIDATES[0] / "tools" / "check_matrix.py")
 

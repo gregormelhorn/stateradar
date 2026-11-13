@@ -192,9 +192,12 @@ or typographic quotes after stripping (put each fragment on one line after
 `-`, escape each `|` of a fragment in a table cell as `\|`, rephrase a
 parenthesised prose quote that follows a code file name, and rebuild), and a
 table row (catalogue or doctrine) whose number of cell bars or whose line
-count changed. Further line numbers of the same file go with a citation
-(`channel.go:136, 151 or 160`); a bare number in prose ("unlock at 136") is
-not recognised. Q-, PA-, SYS-, NAT- and DR- ids are always removed. An L-, G-,
+count changed. Further line numbers of the same file go with a citation:
+colon items, ranges and a list ending in `and`/`or` (`channel.go:136, 151 or
+160`) are always stripped, a bare run (`channel.go:10, 20`) only where it ends
+the clause, so ", 3 callers" stays; a prose count joined by `and`/`or`
+(`channel.go:12, 2 and 3 callers`) goes with it, the safe direction. A bare
+number in prose ("unlock at 136") is not recognised. Q-, PA-, SYS-, NAT- and DR- ids are always removed. An L-, G-,
 F- or T- id stays only when the requirements, the contracts or the quoted text
 of a doctrine line use it (a doctrine line's gloss is Part A's and does not
 count), so a domain term such as `T-1` that the requirements use survives;

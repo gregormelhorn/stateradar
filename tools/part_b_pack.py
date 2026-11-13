@@ -158,6 +158,10 @@ def cited_names(text: str, repo: Path | None = None) -> frozenset:
     return frozenset(names)
 
 
+_SEP = r"(?:,|[ \t]+(?:and|or))[ \t]*"
+_NUM_END = r"[ \t]*(?:[;)|\]`(]|,(?![ \t]*\d)|[.:](?=\s|$)|$)|" + _SEP + r":\d"
+
+
 def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
     """The citation pattern. On a table row (table=True) an unescaped "|"
     is a cell bar that the fallback never crosses; elsewhere "|" is code
@@ -188,10 +192,15 @@ def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
             + r")*?(?:" + nxt + bar + r"|$))")
     return re.compile(
         r"(?<![\w./-])(" + _FILE + r")`?:\d+(?:-\d+)?"
-        # More lines of the same file: ", :194", ", 194", " and 156", " or 160"
-        # (a bare number followed by a word, as in ", 3 callers", is prose).
-        r"(?:(?:,|[ \t]+(?:and|or))[ \t]*:?\d+(?:-\d+)?"
-        r"(?![\w.:]|[ \t]+(?!(?:and|or)\b)[A-Za-z]))*"
+        # More lines of the same file go with the citation: ", :194", a range
+        # ", 194-196", a list ending in " and 156" or " or 160" (", 151 or 160"),
+        # and bare ", 194" where the run ends the clause (a separator, a bracket,
+        # a fragment, a sentence end or the line end). A bare number after a
+        # comma and before a word (", 3 callers", ", 30% of calls") stays prose;
+        # a prose count joined by and/or ("and 3 callers") goes, the safe side.
+        r"(?:" + _SEP + r":\d+(?:-\d+)?|" + _SEP + r"\d+-\d+(?![\d-]|:\d)"
+        r"|(?:,[ \t]*\d+(?![\d-]|:\d))*[ \t]+(?:and|or)[ \t]*\d+(?:-\d+)?(?![\d-]|:\d)"
+        r"|(?:" + _SEP + r"\d+(?![\d-]|:\d))+(?=" + _NUM_END + r"))*"
         r"(`?\s*\(\s*" + q_open + balanced +
         r"|`?\s*\(\s*" + q_open + last + r")?", re.M)
 

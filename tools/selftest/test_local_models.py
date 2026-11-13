@@ -669,7 +669,26 @@ class ModelTest(unittest.TestCase):
                            ("| a | unlock before any Close call, channel.go:175, 194 |",
                             "| a | unlock before any Close call, channel.go |"),
                            ("channel.go:12, 3 callers wait", "channel.go, 3 callers wait"),
-                           ("see channel.go:10 and 2 more", "see channel.go and 2 more")):
+                           # A run of bare numbers is stripped only where it ends the clause.
+                           ("see channel.go:12 and 156 or 160.", "see channel.go."),
+                           ("| e | channel.go:5, 10 |", "| e | channel.go |"),
+                           ("channel.go:12, 30% of calls block", "channel.go, 30% of calls block"),
+                           ("channel.go:12, 1,000 calls per second", "channel.go, 1,000 calls per second"),
+                           ("channel.go:12, 3 \u2014 callers wait", "channel.go, 3 \u2014 callers wait"),
+                           # A list ending in and/or goes, also before a word; a prose
+                           # count joined by and/or goes with it (the safe side).
+                           ("unlock channel.go:136, 151 or 160 before the call", "unlock channel.go before the call"),
+                           ("lines channel.go:136 and 151 unlock", "lines channel.go unlock"),
+                           ("channel.go:12, 2 and 3 callers", "channel.go callers"),
+                           ("see channel.go:10, 20.", "see channel.go."),
+                           ("channel.go:7, 9-11 then", "channel.go then"),
+                           ("channel.go:12 or 10:30 pm", "channel.go or 10:30 pm"),
+                           # A run that ends a sentence or a clause before a colon goes too.
+                           ("Put unlocks before Close, channel.go:175, 194.", "Put unlocks before Close, channel.go."),
+                           ("released at channel.go:136 and 151: next", "released at channel.go: next"),
+                           ("see channel.go:136, 151:", "see channel.go:"),
+                           ("channel.go:5 and 1:2 ratio", "channel.go and 1:2 ratio"),
+                           ("channel.go:12, 1.5 s", "channel.go, 1.5 s")):
             self.assertEqual(strip(text), want)
         # A host whose ending looks like a file extension is not a later citation.
         self.assertEqual(strip('client.go:40 ("f("a") dial api.example.rs:8443 now") |'), "client.go |")

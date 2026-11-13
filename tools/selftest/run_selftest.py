@@ -652,6 +652,13 @@ def main() -> int:
                                env=env)
             expect(f"wrapper template, pack sibling {sibling or 'absent'}", sibling is None, r.returncode,
                    (r.stdout + r.stderr).strip(), "CHECK MATRIX: OK" if sibling else "set STATERADAR_PACK")
+            if sibling == "stateradar":
+                # An explicit STATERADAR_PACK that is wrong is never replaced by a sibling.
+                env["STATERADAR_PACK"] = str(tmp / "no-such-pack")
+                r = subprocess.run([sys.executable, str(tpl_dir / "check_matrix.py")], capture_output=True,
+                                   text=True, env=env)
+                expect("wrapper template, wrong STATERADAR_PACK beside a sibling", True, r.returncode,
+                       (r.stdout + r.stderr).strip(), "no-such-pack")
             if sibling is None:
                 env["STATERADAR_PACK"] = str(ROOT)
                 r = subprocess.run([sys.executable, str(tpl_dir / "check_matrix.py")], capture_output=True,
