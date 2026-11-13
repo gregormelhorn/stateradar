@@ -262,10 +262,12 @@ def main() -> int:
             "# Traces\n\n### P-01a \u2014 E1 then E2\nends idle\n\n### P-01b: E2 then E1\nQ-01\n")
         (sec_dir / "guard-results.txt").write_text(
             "group G-01 open dispatch: proven\ngroup G-02 close: violation\n  - overlap at n=0\n"
-            "group G-03 retry: not-formalizable: clock: wall time\n")
+            "group G-03 retry: not-formalizable: clock: wall time\n"
+            "group G-04 Get: dispose conn: proven\ngroup G-05 typo: provn\n")
         sec_q = sec_dir / "open-questions.md"
         sec_q.write_text(sec_q.read_text().replace(
             "**Status:**", "**Fault:** F-13, F-09\n- trigger: step-4 matrix walk\n**Status:**", 1)
+            .replace("**Status:**", "Fault: F-99 in prose is not a field.\n**Fault:** F-01\n**Status:**", 1)
             + "\nA fault: in prose is not a field.\n")
         sec_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
                                   "--root", str(sec)], capture_output=True, text=True)
@@ -274,13 +276,15 @@ def main() -> int:
                       {"id": "P-01b", "trace": "adversarial-traces.md#P-01b: E2 then E1"},
                       {"id": "P-02a", "trace": ""}]
         want_groups = [{"id": "G-01", "outcome": "proven"}, {"id": "G-02", "outcome": "violation"},
-                       {"id": "G-03", "outcome": "not-formalizable", "reason": "clock: wall time"}]
+                       {"id": "G-03", "outcome": "not-formalizable", "reason": "clock: wall time"},
+                       {"id": "G-04", "outcome": "proven"}]
         first_q = sec_sc["questions"][0]
         if (sec_run.returncode != 0 or sec_sc.get("pairs") != want_pairs
                 or sec_sc.get("guardGroups") != want_groups
                 or first_q.get("fault") != ["F-13", "F-09"] or first_q.get("trigger") != "step-4 matrix walk"
                 or any("fault" in q for q in sec_sc["questions"][1:])
-                or {"pairs", "guardGroups"} & set(sec_sc.get("completeness") or {})):
+                or {"pairs", "guardGroups"} & set(sec_sc.get("completeness") or {})
+                or "group line without an outcome" not in sec_run.stderr):
             failures.append("pairs / guard groups / ODC not derived: "
                             + json.dumps({k: sec_sc.get(k) for k in ("pairs", "guardGroups", "questions",
                                                                      "completeness")})
@@ -289,13 +293,18 @@ def main() -> int:
             print("  ok  pairs, guard groups and ODC fields come from their sources")
         # 02-pilot v1.19: a crash is `handle crash: ...` and needs a question.
         crash_ok = gas._parse_cell("handle crash: nil Ping panics \u2192 Q-02", None, [], {}, set())
-        try:
-            gas._parse_cell("handle crash: nil Ping panics", None, [], {}, set())
-            crash_err = ""
-        except ValueError as exc:
-            crash_err = str(exc)
-        if crash_ok.get("disposition") != "handle" or "crash cell without a question" not in crash_err:
-            failures.append(f"crash cell rule: {crash_ok} / {crash_err!r}")
+        crash_errs = []
+        for crash_cell in ("handle crash: nil Ping panics", "handle crash: panics \u2192 Q-nn",
+                           "transition \u2192 Closed; crash: panics \u2192 Q-02"):
+            try:
+                gas._parse_cell(crash_cell, None, ["Closed"], {}, set())
+                crash_errs.append("")
+            except ValueError as exc:
+                crash_errs.append(str(exc))
+        if (crash_ok != {"disposition": "handle", "q": "Q-02"}
+                or "without a question" not in crash_errs[0] or "without a question" not in crash_errs[1]
+                or "not transition" not in crash_errs[2]):
+            failures.append(f"crash cell rule: {crash_ok} / {crash_errs!r}")
         else:
             print("  ok  a crash cell is handle and needs a question")
         # Same run: '| DOC-' rows of a '###' sub-section after the doctrine
@@ -323,6 +332,15 @@ def main() -> int:
                     ev.setdefault("upstream_guards", ["validated upstream"])
         bad_sc["coverage"] = sc["coverage"]
         (bad / "domain-analysis" / "gate" / "analysis.json").write_text(json.dumps(bad_sc, indent=1))
+        # A crash cell keeps its question; dsc_check requires it to exist.
+        cq = sidecar(tmp, COMPOUND)
+        cq_sc = json.loads((gate / "analysis.json").read_text())
+        handled = next(c for c in cq_sc["cells"] if c["disposition"] not in ("UNSPECIFIED", "ignore (accidental)"))
+        handled["q"] = "Q-99"
+        (cq / "domain-analysis" / "gate" / "analysis.json").write_text(json.dumps(cq_sc, indent=1))
+        expect("crash cell naming an undeclared question", True,
+               *dsc(cq / "domain-analysis" / "gate", "--repo", str(cq), "--model", "as-is.machine.mmd"),
+               needle="does not declare")
         expect("generated sidecar with a wrong fragment", True,
                *dsc(bad / "domain-analysis" / "gate", "--repo", str(bad), "--model", "as-is.machine.mmd"),
                needle="fragment")

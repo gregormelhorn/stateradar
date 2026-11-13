@@ -258,11 +258,6 @@ def _parse_cell(
                 target = f"{family} {target}"
             # an unknown target is kept: the checker flags it
     elif raw.startswith("handle"):
-        # A crash (panic, escaping exception, process exit) is `handle
-        # crash: ...` with a question (02-pilot v1.19): the code does
-        # something, but nobody decided it.
-        if re.match(r"handle\W+crash:", raw) and not q:
-            raise ValueError(f"crash cell without a question (02-pilot step 4): {raw[:80]!r}")
         disposition, hole_q = "handle", None
     elif raw.startswith("reject") or raw.startswith("`reject"):
         disposition, hole_q = "reject", None
@@ -275,6 +270,18 @@ def _parse_cell(
             disposition, hole_q = "ignore (documented)", None
     else:
         disposition = "UNSPECIFIED"
+
+    # A crash (panic, escaping exception, process exit) is `handle crash:
+    # ... -> Q-nn` (02-pilot v1.19): the code does something, but nobody
+    # decided it. The question stays on the cell so dsc_check verifies it.
+    if re.search(r"\bcrash:", raw, re.I):
+        crash_q = re.search(r"\bQ-\d[\w-]*", raw)
+        if disposition != "handle":
+            raise ValueError(f"a crash cell is written `handle crash: ...`, not {disposition} "
+                             f"(02-pilot step 4): {raw[:80]!r}")
+        if not crash_q:
+            raise ValueError(f"crash cell without a question (02-pilot step 4): {raw[:80]!r}")
+        hole_q = crash_q.group(0)
 
     # Key order (disposition, target or q, dr, citation) is part of the
     # golden sidecars, which are compared byte for byte.
@@ -364,16 +371,18 @@ def _parse_questions(path: Path) -> list[Question]:
             current = {"id": m.group(1), "status": "OPEN"}
             questions.append(current)
         # ODC fields (02-pilot R-ODC-FIELDS): '**Fault:** F-13, F-09' and
-        # '**Trigger:** step-4 matrix walk', also as list items or in lower
-        # case ('- fault: F-13'). Only a line that starts with the label
-        # counts, so prose that mentions a fault is not read as one.
-        odc = re.match(r"^(?:[-*][ \t]+)?(?:\*\*)?(fault|trigger)(?:\*\*)?[ \t]*:(?:\*\*)?[ \t]*(.*)$",
-                       line.strip(), re.I)
+        # '**Trigger:** step-4 matrix walk', or as a list item ('- fault:
+        # F-13'). A plain 'Fault: ...' line is prose, and the first field of
+        # each kind in a question wins.
+        odc = re.match(r"^(?:\*\*(fault|trigger):\*\*|\*\*(fault|trigger)\*\*:|[-*][ \t]+(fault|trigger):)"
+                       r"[ \t]*(.*)$", line.strip(), re.I)
         if odc and current is not None:
-            if odc.group(1).lower() == "fault":
-                current["fault"] = re.findall(r"F-\d{2}\b", odc.group(2))
-            else:
-                current["trigger"] = odc.group(2).strip().strip("`").strip()
+            label = (odc.group(1) or odc.group(2) or odc.group(3)).lower()
+            value = odc.group(4)
+            if label == "fault" and "fault" not in current:
+                current["fault"] = re.findall(r"F-\d{2}\b", value)
+            elif label == "trigger" and "trigger" not in current:
+                current["trigger"] = value.strip().strip("`").strip()
         s = re.search(r"\*\*Status:\*\*\s*(.+)", line)
         if s and current is not None:
             status = s.group(1).strip()
@@ -410,9 +419,15 @@ def _parse_guard_results(path: Path) -> list[GuardGroup]:
         return []
     groups: list[GuardGroup] = []
     for line in path.read_text(encoding="utf-8").split("\n"):
-        m = re.match(r"^group[ \t]+(G-[\w.-]+)\b[^:]*:[ \t]*(proven|violation|not-formalizable)"
-                     r"(?:[ \t]*:[ \t]*(.*))?[ \t]*$", line)
+        if not line.startswith("group"):
+            continue
+        # The outcome is the first outcome word after a colon; the group
+        # name before it may itself contain colons ("Get: dispose").
+        m = re.match(r"^group[ \t]+(G-[\w.-]+)\b.*?:[ \t]*(proven|violation|not-formalizable)\b"
+                     r"(?:[ \t]*:[ \t]*(.*?))?[ \t]*$", line)
         if not m:
+            _note(f"{path.name}: group line without an outcome (proven, violation, "
+                  f"not-formalizable): {line.strip()[:80]!r}")
             continue
         group: GuardGroup = {"id": m.group(1), "outcome": cast(GuardOutcome, m.group(2))}
         if m.group(3) and m.group(3).strip():
@@ -544,7 +559,10 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
     for block_events, row, state, family in row_index:
         parts = row.strip().strip("|").split("|")[1:]
         for event, cell_text in zip(block_events, parts, strict=True):
-            body = _parse_cell(cell_text, family, states, src_index, unresolved)
+            try:
+                body = _parse_cell(cell_text, family, states, src_index, unresolved)
+            except ValueError as exc:
+                raise ValueError(f"{component}: {state} x {event['id']}: {exc}") from exc
             # Key order as before (parsed keys, then state and event): the
             # golden sidecars are compared byte for byte.
             cells.append({**body, "state": state, "event": event["id"]})

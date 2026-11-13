@@ -9,7 +9,7 @@ entries and separates the new model-routing plan from shipped capabilities.
 
 1. **Measure cost-aware model routing.** Flash drafting, Jev batches, the
    `draft-verify` chain, a local ledger, and an offline batch evaluator exist,
-   and `prompts/02-pilot.md` (v1.18) routes Steps 1, 6, 8 and Part B through
+   and `prompts/02-pilot.md` (v1.19) routes Steps 1, 6, 8 and Part B through
    them; two full routed pilots ran on silenceper/pool, the second blind to
    the benchmark and with executed as-is tests (entry 11). Next run a timed
    agent-only pilot of the same component, build independently reviewed
@@ -235,15 +235,15 @@ Open, in order:
    independent evidence either. 133 drafted claims had 0 citation failures.
    None of the 6 Step-6 orderings was backed by Jev (all `unclear`, scope
    0.02-0.05), so the provisional 0.5 veto fired on every `yes`; the agent's
-   statements added detail the fragments do not mention, which seems to drive
-   the score. Jev also judged equivalent claims about the same line
+   statements added detail the fragments do not mention, which seems to
+   drive the score. Jev also judged equivalent claims about the same line
    differently (C59 and K5 `contradicted`, C78 `supported`). Against the
    agent-only baseline (whose two runs agree 28/28), with a state alignment
    and divergence judgments made by the pilot agent: 21 of 28 aligned base
    cells agree; of the 7 divergent cells, 1 differs only in its label, 3
    FactoryFail cells and 2 Close cells rest on baseline claims the code
-   refutes in whole or part, and Released x Close turns on a doc comment. The
-   comparison lists 13 questions new against the baseline plus 4 voided
+   refutes in whole or part, and Released x Close turns on a doc comment.
+   The comparison lists 13 questions new against the baseline plus 4 voided
    control verdicts (Q-20..Q-23; Q-22 and Q-23 the base scope rule raises
    anyway). Tool and prompt fixes from it: draft budget and truncated-draft
    handling, two hollow checks (sidecar fragments, `###` trace headers),
@@ -254,9 +254,10 @@ Open, in order:
    from it: prose in the catalogue that states as-is conclusions (mandatory
    remembrance, gate, upstream-guard and lock-discipline annotations) still
    reaches Part B, so Part-B agreement on those rows is not independent; the
-   sidecar generator does not merge pairs, guard outcomes or ODC fields;
-   `status` has no tokens, timestamps or step labels; the 0/6 orderings and
-   the inconsistent claim judgments belong in the labelled set.
+   sidecar generator did not merge pairs, guard outcomes or ODC fields
+   (fixed after the agent-only run, 02-pilot v1.19); `status` has no tokens,
+   timestamps or step labels; the 0/6 orderings and the inconsistent claim
+   judgments belong in the labelled set.
 
    **Second routed pilot** (2026-11-13, same component, pack a331dae, prompt
    v1.17, `jev-1.14.0`; outputs, as-is tests and comparison in

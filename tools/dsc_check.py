@@ -91,6 +91,10 @@ def main() -> int:
             E(f"cell {key}: transition target {c.get('target')!r} is not a state")
         if c["disposition"] in HOLES and c.get("q") not in qids:
             E(f"cell {key}: hole without a valid Q reference")
+        elif c.get("q") and c["q"] not in qids:
+            # A crash cell (`handle crash: ... -> Q-nn`, 02-pilot v1.19)
+            # keeps its question; any question a cell names must exist.
+            E(f"cell {key}: names question {c['q']!r}, which open-questions.md does not declare")
         if c["disposition"] in {"ignore (documented)", "reject", "defer (queued)"}:
             if not (c.get("dr") or c.get("citation")):
                 E(f"cell {key}: {c['disposition']} needs a DR or a citation")

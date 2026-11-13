@@ -235,8 +235,11 @@
   a trace heading gets an empty trace, which dsc_check reports. A section
   the sources do not declare is still asserted absent with a reason. A
   crash has a written form: `handle crash: … → Q-nn` (02-pilot step 4 and
-  the methods reference); the generator rejects a crash cell without a
-  question. Red-first selftests for each.
+  the methods reference); the generator rejects a `crash:` cell that is not
+  `handle` or names no question and keeps the question on the cell, and
+  dsc_check requires every question a cell names to exist. A guard line
+  without an outcome is a note; only the bold or list-item form of an ODC
+  field counts, and the first one wins. Red-first selftests for each.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

@@ -21,7 +21,7 @@ Routing: on; `--model jev-1.14.0`; one ledger, limit 1,000,000 µ$.
 
 Added afterwards from `summary.md` ("Prompt and tool problems hit") and the
 session's report; the disposition column says what the follow-up commit
-changed.
+changed, and for item 3 what a later follow-up changed.
 
 | # | Problem | Disposition |
 |---|---|---|
