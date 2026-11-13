@@ -242,6 +242,35 @@
   outcome is a note (`--strict` fails on it); only the bold or list-item form
   of an ODC field counts, and the first one wins. No committed matrix or
   sidecar is affected. Red-first selftests for each.
+- **Part B sees which catalogue text comes from the code; 02-pilot v1.20.** In
+  the second routed pilot and the agent-only run (silenceper/pool,
+  2026-11-13), Part B read the catalogue's gate, remembrance, upstream-guard
+  and lock-discipline annotations as documented intent, so its agreement on
+  those rows was not independent, and the pilot agent had to find each such
+  row by reading. `part_b_pack.py` now labels those headings, plus the event
+  annotations and the undesired-coverage table,
+  `(observed in code, not documented intent)`, and each `gate:` and
+  `upstream_guards:` list field `(observed in code)`, without adding a line.
+  The Part-B task asks for `as-is:` at the start of the behaviour cell of a
+  row that rests only on such text, and the coverage check (`blind`, or
+  `part_b_pack.py --check`) lists each row that holds the mark anywhere
+  (`PART-B INDEPENDENCE`,
+  information, not a failure). On both runs' catalogues it labels six headings
+  each, and 18 fields (agent-only run) and 12 (routed run). The `as-is:` mark
+  is Part B's own report, not a measurement: Part B can rest on labelled text
+  without marking the row, so rule 7's reading stays the check, and prose
+  outside those sections, such as an event-table cell, is still caught only
+  that way. A per-event list derived from the labels would flag every event,
+  since each one carries a gate and an upstream-guard field. Measured in the
+  flash-writes pilot (2026-11-13, Part B on Flash): 0 rows marked, while nine
+  rows used "as-is" in prose, each to set observed text apart from the
+  requirements. So the `PART-B INDEPENDENCE` line is printed also at 0 rows,
+  and a second line (`PART-B INDEPENDENCE (prose)`) lists rows that say
+  "as-is" without the mark, for the agent to read (not counted as dependent);
+  02-pilot also says to keep catalogue headings plain, since
+  `gen_analysis_sidecar.py` reads only the plain `## Event annotations`
+  heading. `dsc_blind.py`, which sends the catalogue verbatim and is not used
+  by 02-pilot, is unchanged. Red-first selftest.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

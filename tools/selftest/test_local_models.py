@@ -502,6 +502,69 @@ class ModelTest(unittest.TestCase):
             self.assertIn("T-1", err.getvalue())
             self.assertRegex(err.getvalue(), r"removed as analysis references[^\n]*L-9")
 
+    def test_blind_labels_code_derived_catalogue_text_and_counts_as_is_rows(self):
+        # Both pilots of 2026-11-13: gate, remembrance, upstream and lock
+        # annotations reached Part B unlabelled and were read as intent.
+        catalogue = ("<!-- event-ids: E01 E02 -->\n# Pool — Event catalogue\n\n## Events\n\n"
+                     "| id | gist |\n|---|---|\n| E01 | get |\n| E02 | put |\n\n"
+                     "## Undesired variants\n\nnone\n\n## Gate-type annotations\n\n* E01 — gate: state\n\n"
+                     "## Remembrance semantics\n\nnothing kept\n\n### Upstream-guard annotation\n\nnone\n\n"
+                     "## Lock-discipline annotation\n\none mutex\n\n## Undesired-coverage\n\nn/a\n\n"
+                     "## Event annotations\n\n### E01\n- gate: service-side state\n"
+                     "- upstream_guards: none\n- coverage:\n  - loss: n/a\n" + "event details " * 30)
+        mark = local_models.part_b_pack.mark_observed
+        marked = mark(catalogue)
+        self.assertEqual(marked.count("\n"), catalogue.count("\n"), "no line is added")
+        self.assertEqual(mark(marked), marked, "labelling twice changes nothing")
+        label = "(observed in code, not documented intent)"
+        for heading in ("## Gate-type annotations", "## Remembrance semantics", "### Upstream-guard annotation",
+                        "## Lock-discipline annotation", "## Undesired-coverage", "## Event annotations"):
+            self.assertIn(f"{heading} {label}\n", marked)
+        for heading in ("# Pool — Event catalogue\n", "## Events\n", "## Undesired variants\n", "### E01\n"):
+            self.assertIn(heading, marked)
+        self.assertIn("- gate (observed in code): service-side state", marked)
+        self.assertIn("- upstream_guards (observed in code): none", marked)
+        self.assertIn("* E01 — gate: state", marked, "only list fields are relabelled")
+        # Field spellings and closing hashes (review round 1).
+        self.assertEqual(mark("## Remembrance ##\n- **Gate:** x\n- **upstream_guards**: y\n"),
+                         f"## Remembrance {label} ##\n- **Gate (observed in code):** x\n"
+                         "- **upstream_guards (observed in code)**: y\n")
+        # A catalogue without code-derived sections is left alone, and a blind
+        # table without marks prints a 0-row independence line.
+        plain = "<!-- event-ids: E01 -->\n## Events\n\n- payload: none\n- gateway: x\n"
+        self.assertEqual(mark(plain), plain)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, catalogue=catalogue)
+            budget = Budget(root / "budget.db", 2_000_000)
+            self.inspect_package(budget, args)
+            package = (root / "blind.package.md").read_text()
+            self.assertIn(f"## Remembrance semantics {label}", package)
+            self.assertIn("start its behaviour cell with `as-is:`", package)
+            reply = ("| Event | Expected |\n|---|---|\n| E01 | *as-is:* handle |\n| E02 | reject |\n"
+                     "| E02 (closed) | AS-IS: ignore (accidental) |\n| E02 (open) | handle, as-is: queued |\n"
+                     "| E02 (full) | handle; not-as-is: x |\n| E02 (late) | handle, as-is behaviour |\n"
+                     "| E02 (wide) | handle (as-is-like) |\n\n- [x] E01\n- [x] E02\n")
+            out, err = io.StringIO(), io.StringIO()
+            with patch.object(local_models, "flash", return_value={"text": reply, "finish_reason": "stop"}), \
+                    contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                self.assertEqual(local_models.blind(budget, Namespace(**{**vars(args), "package_only": False}),
+                                                    "key"), 0)
+            self.assertIn("PART-B INDEPENDENCE: 3 rows marked as-is (not independent): E01, E02 (closed), E02 (open)",
+                          err.getvalue())
+            self.assertIn('PART-B INDEPENDENCE (prose): 1 more row says "as-is" without the mark (read them, not counted): '
+                          "E02 (late)", err.getvalue())
+            unmarked = "| Event | Expected |\n|---|---|\n| E01 | handle |\n| E02 | reject |\n\n- [x] E01\n- [x] E02\n"
+            err = io.StringIO()
+            with patch.object(local_models, "flash", return_value={"text": unmarked, "finish_reason": "stop"}), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+                self.assertEqual(local_models.blind(budget, Namespace(**{**vars(args), "package_only": False}),
+                                                    "key"), 0)
+            self.assertIn("PART-B COVERAGE: OK", err.getvalue())
+            self.assertIn("PART-B INDEPENDENCE: 0 rows marked as-is (not independent); the mark can be missing",
+                          err.getvalue())
+            self.assertNotIn("PART-B INDEPENDENCE (prose)", err.getvalue())
+
     def test_blind_refuses_a_package_with_a_leftover_fragment(self):
         # Method review round 7: an unescaped "|" inside a fragment on a table
         # row is a cell bar, so the fragment cannot be ended; the package is

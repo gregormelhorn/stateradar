@@ -396,6 +396,41 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     return re.sub(r"(?<=[^\s|])[ \t]+$", "", text, flags=re.M)
 
 
+# Catalogue sections and per-event fields that 02-pilot Step 3 fills from the
+# code (gate, remembrance, upstream guard, lock discipline, the event
+# annotations and the coverage table). Part B needs them to read the events,
+# but they state what the implementation does, and the second routed pilot and
+# the agent-only run of 2026-11-13 saw Part B take them as documented intent.
+# The package keeps them and labels their provenance; the instruction asks
+# Part B to mark rows that rest on them.
+# That mark is Part B's own report, not a measurement: rule 7's reading stays
+# the check. A per-event list from the labels would not help, since 02-pilot
+# gives every event a gate and an upstream-guard field.
+OBSERVED = "observed in code, not documented intent"
+_OBSERVED_HEADING = re.compile(
+    r"(?im)^(#{1,6}[ \t]+(?=[^\n]*\b(?:gate[- ]type|remembrance|upstream[- ]guards?|lock[- ]discipline"
+    r"|event[ \t]+annotations?|undesired[- ]coverage)\b)[^\n]*?)([ \t]+#+)?[ \t]*$")
+# "- gate:", "- **gate:**" and "- **gate**:", in any case.
+_OBSERVED_FIELD = re.compile(r"(?im)^([ \t]*[-*][ \t]+\**)(gate|upstream_guards)(?=\**[ \t]*:)")
+
+
+def mark_observed(text: str) -> str:
+    """Label the catalogue's code-derived sections and fields (no line is added)."""
+    text = _OBSERVED_HEADING.sub(lambda m: m.group(0) if OBSERVED in m.group(1)
+                                 else f"{m.group(1)} ({OBSERVED}){m.group(2) or ''}", text)
+    return _OBSERVED_FIELD.sub(r"\1\2 (observed in code)", text)
+
+
+# Asked for at the start of the behaviour cell; counted anywhere in the row.
+_AS_IS_ROW = re.compile(r"(?<![\w-])as-is:", re.I)
+# "as-is" in prose without the colon: a pointer for the agent's reading, not
+# a mark. In the flash-writes pilot (2026-11-13) Part B marked no row but wrote
+# "as-is" in nine rows, each time to set observed-in-code text apart from the
+# requirements ("as-is, not requirements", "must not assert as-is"); whether
+# the row still rests on that text is the agent's call.
+_AS_IS_PROSE = re.compile(r"(?<![\w-])as-is(?![\w-])", re.I)
+
+
 _DOC_ROW = re.compile(r"^(?:[-*]|\d+\.|\|)\s*\**DOC-\d+")
 
 
@@ -457,7 +492,7 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     keep_quotes = quote_files(doctrine, list(args.requirements) + list(args.contracts), repo, adir)
 
     later = cited_names(catalogue + "\n" + doctrine, repo)
-    blind_copy = blind_catalogue(catalogue, keep_ids, keep_quotes, later)
+    blind_copy = mark_observed(blind_catalogue(catalogue, keep_ids, keep_quotes, later))
     try:
         same_ids = _catalogue_ids(blind_copy) == (events, pairs)
     except ValueError:
@@ -566,10 +601,16 @@ def check(args: argparse.Namespace) -> int:
     # once. A missing row must be impossible to miss; granularity is
     # the blind pass's choice.
     key_cells = []
+    as_is = []
+    as_is_prose = []
     for ln in blind.split("\n"):
         s = ln.strip()
         if s.startswith("|"):
             key_cells.append(s.split("|")[1].strip().lstrip("*").strip())
+            if _AS_IS_ROW.search(s):
+                as_is.append(key_cells[-1])
+            elif _AS_IS_PROSE.search(s):
+                as_is_prose.append(key_cells[-1])
     checklist = re.findall(r"^\s*- \[x\] ([\w-]+)\s*$", blind, re.M)
     errors: list[str] = []
     for ident in events + pairs:
@@ -588,6 +629,17 @@ def check(args: argparse.Namespace) -> int:
             print(" -", e)
         return 1
     print(f"PART-B COVERAGE: OK ({len(events)} events, {len(pairs)} pair orderings)")
+    # Rows the blind pass based on code-derived catalogue text (mark_observed):
+    # agreement on them is not independent (rule 7). Information, not a failure.
+    # Always printed, so that "Part B marked nothing" is not mistaken for a
+    # clean result: in the first measured run Part B marked 0 rows.
+    print(f"PART-B INDEPENDENCE: {len(as_is)} rows marked as-is (not independent)"
+          + (": " + ", ".join(as_is) if as_is else
+             "; the mark can be missing, so the agent's reading stays the check"))
+    if as_is_prose:
+        rows = "row says" if len(as_is_prose) == 1 else "rows say"
+        print(f"PART-B INDEPENDENCE (prose): {len(as_is_prose)} more {rows} \"as-is\" "
+              "without the mark (read them, not counted): " + ", ".join(as_is_prose))
     return 0
 
 
