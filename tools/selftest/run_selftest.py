@@ -250,6 +250,71 @@ def main() -> int:
             errs = schema_errors(base_doc)
             expect(label, want_fail, 1 if errs else 0, "\n".join(errs) or "no schema errors")
 
+        print("sidecar types match the schema (tools/sidecar_types.py)")
+        sys.path.insert(0, str(ROOT / "tools"))
+        import copy
+        import typing
+        import sidecar_types
+
+        def type_drift(schema: dict[str, typing.Any]) -> list[str]:
+            """Keys, required keys and enum values that differ between the
+            TypedDicts and the schema the run-time checker enforces."""
+            problems: list[str] = []
+            props = schema["properties"]
+
+            def items(key: str) -> dict[str, typing.Any]:
+                return dict(props[key]["items"])
+
+            for name, td, part in (
+                    ("Sidecar", sidecar_types.Sidecar, schema),
+                    ("Event", sidecar_types.Event, items("events")),
+                    ("Cell", sidecar_types.Cell, items("cells")),
+                    ("Citation", sidecar_types.Citation, items("cells")["properties"]["citation"]),
+                    ("Pair", sidecar_types.Pair, items("pairs")),
+                    ("GuardGroup", sidecar_types.GuardGroup, items("guardGroups")),
+                    ("Question", sidecar_types.Question, items("questions")),
+                    ("DocLine", sidecar_types.DocLine, items("docLines")),
+                    ("Completeness", sidecar_types.Completeness, props["completeness"]),
+                    ("Absence", sidecar_types.Absence, schema["$defs"]["absence"])):
+                keys, want = set(td.__annotations__), set(part.get("properties", {}))
+                if keys != want:
+                    problems.append(f"{name}: type only {sorted(keys - want)}, "
+                                    f"schema only {sorted(want - keys)}")
+                required, want_req = set(td.__required_keys__), set(part.get("required", []))
+                if required != want_req:
+                    problems.append(f"{name}: required in the type {sorted(required)}, "
+                                    f"in the schema {sorted(want_req)}")
+            for name, literal, enum in (
+                    ("Disposition", sidecar_types.Disposition,
+                     items("cells")["properties"]["disposition"]["enum"]),
+                    ("GuardOutcome", sidecar_types.GuardOutcome,
+                     items("guardGroups")["properties"]["outcome"]["enum"])):
+                if set(typing.get_args(literal)) != set(enum):
+                    problems.append(f"{name}: type {sorted(typing.get_args(literal))}, "
+                                    f"schema {sorted(enum)}")
+            return problems
+
+        real_schema = json.loads((ROOT / "formats" / "analysis.schema.json").read_text(encoding="utf-8"))
+        drift = type_drift(real_schema)
+        expect("sidecar TypedDicts agree with analysis.schema.json", False,
+               1 if drift else 0, "\n".join(drift))
+        # Red: each kind of drift must be seen.
+        for label, mutate, needle in (
+                ("schema gains a cell property the type lacks",
+                 lambda s: s["properties"]["cells"]["items"]["properties"].update(
+                     {"note": {"type": "string"}}), "Cell: type only [], schema only ['note']"),
+                ("schema makes a question key required",
+                 lambda s: s["properties"]["questions"]["items"]["required"].append("trigger"),
+                 "Question: required in the type"),
+                ("schema adds a disposition",
+                 lambda s: s["properties"]["cells"]["items"]["properties"]["disposition"]["enum"]
+                 .append("escalate"), "Disposition: type")):
+            drifted = copy.deepcopy(real_schema)
+            mutate(drifted)
+            found = type_drift(drifted)
+            expect(f"type drift: {label}", True, 1 if found else 0,
+                   "\n".join(found) or "no drift reported", needle=needle)
+
         print("silent omission (v1.20: absence must be asserted)")
         d = sidecar(tmp, FLAT)
         raw = json.loads((d / "analysis.json").read_text())
