@@ -301,7 +301,10 @@ def main() -> int:
                 crash_errs.append("")
             except ValueError as exc:
                 crash_errs.append(str(exc))
+        prose_ok = gas._parse_cell("transition \u2192 Closed \u2014 does not crash: returns nil",
+                                   None, ["Closed"], {}, set())
         if (crash_ok != {"disposition": "handle", "q": "Q-02"}
+                or prose_ok != {"disposition": "transition", "target": "Closed"}
                 or "without a question" not in crash_errs[0] or "without a question" not in crash_errs[1]
                 or "not transition" not in crash_errs[2]):
             failures.append(f"crash cell rule: {crash_ok} / {crash_errs!r}")

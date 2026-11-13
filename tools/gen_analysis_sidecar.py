@@ -274,7 +274,10 @@ def _parse_cell(
     # A crash (panic, escaping exception, process exit) is `handle crash:
     # ... -> Q-nn` (02-pilot v1.19): the code does something, but nobody
     # decided it. The question stays on the cell so dsc_check verifies it.
-    if re.search(r"\bcrash:", raw, re.I):
+    # Only a `crash:` label right after the disposition word (and a
+    # transition's target) counts: "does not crash: returns nil" is prose.
+    if re.match(r"(?:handle|reject|defer[ \t]*\(queued\)|ignore[ \t]*\([^)]*\)|UNSPECIFIED"
+                r"|transition[ \t]*→[ \t]*`?[\w-]+`?)[^\w]*crash:", raw, re.I):
         crash_q = re.search(r"\bQ-\d[\w-]*", raw)
         if disposition != "handle":
             raise ValueError(f"a crash cell is written `handle crash: ...`, not {disposition} "
