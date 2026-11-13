@@ -120,19 +120,27 @@ def _read_contracts(spec: str, repo: Path) -> str:
     return "\n\n".join(out)
 
 
+_DOC_ROW = re.compile(r"^(?:[-*]|\d+\.|\|)\s*\**DOC-\d+")
+
+
 def _extract_doctrine(extraction: str) -> str:
-    """The doctrine-line section of an extraction (DOC-n bullets)."""
+    """The doctrine lines of an extraction: DOC-n bullets, numbered items or
+    table rows, from the section whose heading names doctrine (any level),
+    or from anywhere when no such section exists."""
     lines: list[str] = []
-    in_section = False
+    section_level = 0
     for line in extraction.split("\n"):
         s = line.strip()
-        if s.lower().startswith("## doctrine") or s.lower().startswith("## doctrine-line"):
-            in_section = True
+        heading = re.match(r"^(#{1,6})\s", s)
+        if heading and "doctrine" in s.lower():
+            section_level = len(heading.group(1))
             continue
-        if in_section and s.startswith("## "):
-            break
-        if in_section and s.startswith("- DOC-"):
+        if heading and section_level and len(heading.group(1)) <= section_level:
+            section_level = 0
+        if section_level and _DOC_ROW.match(s):
             lines.append(s)
+    if not lines:
+        lines = [line.strip() for line in extraction.split("\n") if _DOC_ROW.match(line.strip())]
     return "\n".join(lines)
 
 
@@ -145,22 +153,42 @@ def _part_b_instruction(pack_root: Path) -> str:
     return m.group(1)
 
 
-_CITE_FRAGMENT = re.compile(r'([\w./-]+\.[A-Za-z]{1,4}:\d+)`?\s*\(\s*"(?:[^"\\]|\\.)*"\s*\)')
-_ANALYSIS_REF = re.compile(r"(?:\s*→\s*)?\b(?:Q|PA)-[\w-]*\d[\w-]*\b")
+# file:line or file:a-b, optionally followed by ("fragment"); the fragment may
+# hold unescaped or typographic quotes, so it ends at the last quote-paren
+# before a cell, list or sentence boundary.
+_CITE = re.compile(r'([\w./-]+\.[A-Za-z]{1,4})`?:\d+(?:-\d+)?'
+                   r'(?:`?\s*\(\s*["\u201c].*?["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)))?', re.M)
+_ANALYSIS_ID = re.compile(r"(?:\s*→\s*)?\b(?:Q|PA|L|SYS|NAT|G|DR|F|T)-[A-Z]*\d[\w-]*")
+_MARK = "\x00"
 
 
 def blind_catalogue(text: str) -> str:
     """The catalogue as Part B may see it.
 
     02-pilot rule 3 puts a verbatim code fragment into every observed-in-code
-    citation, and the catalogue carries the analysis's question and lint
-    references. Part B must see neither (R-PART-B): keep file:line, drop the
-    fragment, drop Q-/PA- references (routed pilot 2026-11-13).
+    citation, and the catalogue carries the analysis's own ids (questions,
+    lints, invariants, guards, decisions, faults, traces). Part B must see
+    neither the code nor Part A's conclusions (R-PART-B; routed pilot
+    2026-11-13). Citations keep the file name only, without line or fragment;
+    analysis ids and the labels that introduced them are removed. Prose
+    conclusions cannot be removed mechanically: the agent still reads the
+    package (rule 7).
     """
-    text = _CITE_FRAGMENT.sub(r"\1", text)
-    text = _ANALYSIS_REF.sub("", text)
-    text = re.sub(r"\(\s*,?\s*\)", "", text)  # parentheses left empty
-    return re.sub(r"(?:,[ \t]*)+(?=[|)\n])", " ", text)  # dangling commas
+    text = _CITE.sub(r"\1", text)
+    # A fragment followed by more prose has no boundary after it: take the
+    # shortest quote-paren close instead.
+    text = re.sub(r'([\w./-]+\.[A-Za-z]{1,4})`?\s*\(\s*["\u201c].*?["\u201d]\s*\)', r"\1", text)
+    text = re.sub(r"(?<=[\s(,]):\d+(?:-\d+)?\b", "", text)  # bare ":194-196" line refs
+    text = re.sub(r",(?:[ \t]*,)+", ",", text)  # "channel.go, , " left by removed line refs
+    text = re.sub(r",[ \t]*\)", ")", text)
+    text = _ANALYSIS_ID.sub(_MARK, text)
+    # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12".
+    text = re.sub(r"(?:\b(?:recorded as\s+)?lints?\s*|\b[Ff]inding\s*(?::\s*)?)(?=\x00)", "", text)
+    text = re.sub(r"\bFinding\b\s*(?:→|:)?\s*", "", text)
+    # Parentheses that held only removed ids, then the ids with their separators.
+    text = re.sub(r"\((?:[\s,;]|\x00)*\x00(?:[\s,;]|\x00)*\)", "", text)
+    text = re.sub(r"[ \t]*[,;]?[ \t]*\x00(?:[ \t]*[,;][ \t]*(?=\x00))?", "", text)
+    return text
 
 
 def assemble(args: argparse.Namespace, pack_root: Path) -> int:
@@ -184,6 +212,10 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     if extraction_path.is_file():
         ext = extraction_path.read_text(encoding="utf-8")
         doctrine = _extract_doctrine(ext)
+        if not doctrine and re.search(r"\bDOC-\d+", ext):
+            # A silent skip sent Part B no doctrine lines (routed pilot 2026-11-13).
+            raise ValueError(f"{extraction_path} names DOC-n lines but none is a bullet, "
+                             "numbered item or table row that can be passed to Part B")
         if doctrine:
             blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", doctrine))
     for spec in args.requirements:

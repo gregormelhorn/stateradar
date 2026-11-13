@@ -217,8 +217,11 @@ def _parse_cell(
         path = src_index.get(Path(cit.group(1)).name)
         if path:
             cell["citation"] = {"file": path, "line": int(cit.group(2))}
-            frag = re.search(re.escape(cit.group(1)) + ":" + cit.group(2)
-                             + r"`?\s*\(\s*\"((?:[^\"\\]|\\.)+)\"\s*\)", text)
+            # The fragment may hold unescaped or typographic quotes: prefer
+            # the last quote-paren before a boundary, else the first one.
+            head = re.escape(cit.group(1)) + r"`?:" + cit.group(2) + r'`?\s*\(\s*["\u201c]'
+            frag = (re.search(head + r'(.+?)["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$))', text, re.M)
+                    or re.search(head + r'(.+?)["\u201d]\s*\)', text))
             if frag:
                 cell["citation"]["fragment"] = frag.group(1).replace('\\"', '"')
     return cell
@@ -255,7 +258,7 @@ def _parse_questions(path: Path) -> list[dict]:
     current: dict | None = None
     for line in path.read_text().split("\n"):
         # 'Q-01', '## Q-01: title' and '**Q-01**' all open a question.
-        m = re.match(r"^(?:#{1,6}\s+|\*\*)?(Q-[\w-]+?)(?=[\s:*]|$)", line.strip())
+        m = re.match(r"^(?:#{1,6}\s+|\*\*)?(Q-(?:[A-Z]+-)*\d[\w-]*?)(?=[\s:*.,)\u2014]|$)", line.strip())
         if m:
             current = {"id": m.group(1), "status": "OPEN"}
             questions.append(current)

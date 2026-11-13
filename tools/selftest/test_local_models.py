@@ -2,6 +2,7 @@ import importlib.util
 import contextlib
 import io
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -403,9 +404,56 @@ class ModelTest(unittest.TestCase):
             self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
             package = (root / "blind.package.md").read_text()
             self.assertIn("waiter wakes", package)
-            self.assertIn("channel.go:139", package)
-            for leaked in ("if !ok", "Q-01", "PA-21"):
+            self.assertIn("observed-in-code, channel.go)", package)
+            for leaked in ("if !ok", "channel.go:139", "Q-01", "PA-21"):
                 self.assertNotIn(leaked, package)
+
+    def make_blind_inputs(self, root, catalogue=None, extraction=None):
+        analysis = root / "analysis"
+        analysis.mkdir()
+        (analysis / "event-catalogue.md").write_text(catalogue or "<!-- event-ids: E01 -->\n" + "event details " * 30)
+        if extraction is not None:
+            (analysis / "extraction.md").write_text(extraction)
+        (root / "requirements.md").write_text("requirement details " * 30)
+        (root / "contracts.md").write_text("contract details " * 30)
+        return Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
+                         contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=True)
+
+    def test_blind_carries_doctrine_lines_from_a_table(self):
+        # Pilot 2026-11-13: '### Doctrine-line sweep' with a table was skipped silently.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, extraction=(
+                "## Step 1\n\n### Doctrine-line sweep\n\n| id | source | text |\n|---|---|---|\n"
+                "| DOC-1 | README.md:15 | \"support for connection waiting\" |\n"
+                "| DOC-2 | README.md:14 | \"an invalid connection will be discarded after a failed ping\" |\n"
+                "| DOC-3 | README.md:13 | \"a timed-out connection will be closed and discarded\" |\n\n## Step 2\n"))
+            self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
+            self.assertIn("support for connection waiting", (root / "blind.package.md").read_text())
+
+    def test_blind_refuses_doctrine_ids_it_cannot_extract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, extraction="Doctrine DOC-1 and DOC-2 are described in prose only.\n")
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(ValueError):
+                    local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+
+    def test_blind_catalogue_strips_the_pilots_own_leaks(self):
+        source = (Path(__file__).resolve().parents[2] / "docs" / "evidence" / "routed-pilot-2026-11-13"
+                  / "partb" / "event-catalogue.pre-strip.md").read_text()
+        stripped = local_models.part_b_pack.blind_catalogue(source)
+        for leak in (r'\("', r"\bQ-\d", r"\bL-\d", r"\bPA-\d", r"\bSYS-\d", r"\bT-[A-Z]*\d",
+                     r"\.go:\d", r"\bFinding\b"):
+            self.assertIsNone(re.search(leak, stripped), leak)
+        self.assertIn("Get()", stripped)
+        quoted = local_models.part_b_pack.blind_catalogue(
+            '| E | a (channel.go:50 ("return nil, errors.New("pool is closed")")) |\n'
+            '| F | b (channel.go:51 (\u201cc.mu.Lock()\u201d), see Q-01, DR-002) |\n')
+        for leak in ("errors.New", "c.mu.Lock", ":50", "Q-01", "DR-002"):
+            self.assertNotIn(leak, quoted)
+        self.assertNotIn(", ,", quoted)
+        self.assertIn("P-01a", stripped)  # pair ids are catalogue content, not analysis references
 
     def test_blind_sends_only_the_inspected_package(self):
         with tempfile.TemporaryDirectory() as directory:

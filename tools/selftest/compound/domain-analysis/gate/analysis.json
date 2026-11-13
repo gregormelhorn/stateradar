@@ -45,7 +45,8 @@
    "target": "Open Busy",
    "citation": {
     "file": "src/gate.ts",
-    "line": 12
+    "line": 16,
+    "fragment": "transition anchor: open idle x E1"
    },
    "state": "Open Idle",
    "event": "E1"
@@ -67,7 +68,8 @@
    "target": "Open Idle",
    "citation": {
     "file": "src/gate.ts",
-    "line": 20
+    "line": 21,
+    "fragment": "transition anchor: open busy x E2"
    },
    "state": "Open Busy",
    "event": "E2"
@@ -76,7 +78,8 @@
    "disposition": "reject",
    "citation": {
     "file": "src/gate.ts",
-    "line": 28
+    "line": 28,
+    "fragment": "throw new ClosedError"
    },
    "state": "Closed",
    "event": "E1"
@@ -98,7 +101,8 @@
    "target": "Closed",
    "citation": {
     "file": "src/gate.ts",
-    "line": 28
+    "line": 28,
+    "fragment": "throw new ClosedError"
    },
    "state": "Open Idle",
    "event": "E3"
@@ -114,7 +118,8 @@
    "target": "Closed",
    "citation": {
     "file": "src/gate.ts",
-    "line": 28
+    "line": 28,
+    "fragment": "throw new ClosedError"
    },
    "state": "Open Busy",
    "event": "E3"

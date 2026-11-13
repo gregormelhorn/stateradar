@@ -446,6 +446,7 @@ def blind(budget, args, key):
         result = flash(budget, package, key, args.max_tokens)
     except IncompleteResponse as error:
         args.output.write_text(error.result["text"], encoding="utf-8")
+        error.saved_to = str(args.output)
         raise
     args.output.write_text(result["text"], encoding="utf-8")
     print(json.dumps({k: v for k, v in result.items() if k != "text"}, indent=2))
@@ -482,7 +483,7 @@ def main():
     draft_parser.add_argument("--output", type=Path, required=True, help="JSON result file")
     draft_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
     draft_parser.add_argument("--max-tokens", type=int, default=12000,
-                              help="Flash output budget (a 250-line source needed about 12000)")
+                              help="Flash output budget (a 248-line source needed about 5,200; 4096 truncated it)")
     blind_parser = commands.add_parser("blind")
     blind_parser.add_argument("analysis")
     blind_parser.add_argument("--repo", default=".")

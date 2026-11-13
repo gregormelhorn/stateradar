@@ -8,9 +8,9 @@ plan](plan-model-cascade.md); broader project work is in the
 [roadmap](roadmap.md).
 
 This optional workflow sends supplied text to DeepSeek and TypeSafe. Set
-`DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` in the environment. Each pilot
-uses a separate SQLite ledger stored outside the repository. The default
-ledger limit is $2, expressed as 2,000,000 microdollars.
+`DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` in the environment. Each pilot uses
+a separate SQLite ledger stored outside the repository. The default ledger
+limit is $2, expressed as 2,000,000 microdollars.
 
 ```bash
 mkdir -p "$HOME/.local/state/stateradar"
@@ -22,20 +22,20 @@ python3 tools/local_models.py --ledger "$ledger" jev /path/to/source.txt \
 ```
 
 A new ledger takes its limit from `--limit-microdollars` on the first call
-(default 2,000,000). The flag only sets the initial limit: passing a
-different value to an existing ledger fails, so change it with `set-limit`.
+(default 2,000,000). The flag only sets the initial limit: passing a different
+value to an existing ledger fails, so change it with `set-limit`.
 
-The Flash input must include the task and the source excerpts needed to do
-it. Each invocation is a fresh text-only call. Flash cannot browse the repo
-or execute tools through this interface. A calling agent prepares inputs,
-checks citations and results, runs the deterministic checkers, and carries
-forward every uncertainty and question. Jev returns a probability; it does
-not establish a domain decision.
+The Flash input must include the task and the source excerpts needed to do it.
+Each invocation is a fresh text-only call. Flash cannot browse the repo or
+execute tools through this interface. A calling agent prepares inputs, checks
+citations and results, runs the deterministic checkers, and carries forward
+every uncertainty and question. Jev returns a probability; it does not
+establish a domain decision.
 
 ### Batch semantic checks
 
-Use `jev-batch` to evaluate independent claims and event orderings against
-the same source file in one request. Supply a JSON array such as:
+Use `jev-batch` to evaluate independent claims and event orderings against the
+same source file in one request. Supply a JSON array such as:
 
 ```json
 [
@@ -69,17 +69,18 @@ specific available version for comparable measurements.
 ### Draft and verify
 
 `draft-verify` chains the two models for one source file. Flash receives the
-task and the numbered source and must answer with JSON: a `claims` list
-(`id`, `kind` = `claim` or `ordering`, `statement`, `line`, `fragment`) and a
-`questions` list. Code rejects a draft that is not this structure, and a
-draft cut off at the output budget (`finish_reason=length`); either way the
-raw text is saved next to the output with the extension replaced
-(`--output review.json` gives `review.draft.txt`) and is not printed. The
-default output budget is 12000 tokens: a 248-line source needed about that
-much, and 4096 truncated it. Each claim's
-citation is then checked against the source with the same rule as
-`jev-batch`. Claims that fail keep their reason in `citation_check` and are
-never sent to Jev. The citable claims go to Jev in one batch.
+task and the numbered source and must answer with JSON: a `claims` list (`id`,
+`kind` = `claim` or `ordering`, `statement`, `line`, `fragment`) and a
+`questions` list. Code rejects a draft that is not this structure, and a draft
+cut off at the output budget (`finish_reason=length`); either way the raw text
+is saved next to the output with the extension replaced (`--output
+review.json` gives `review.draft.txt`) and is not printed. The default output
+budget is 12000 tokens: 4096 truncated a 248-line source, whose complete draft
+then took about 5,200, so 12000 leaves headroom (the ledger reserves 1.2 times
+the budget for output). Each claim's citation is then checked against the
+source with the same rule as `jev-batch`. Claims that fail keep their reason
+in `citation_check` and are never sent to Jev. The citable claims go to Jev in
+one batch.
 
 ```bash
 python3 tools/local_models.py --ledger "$ledger" draft-verify \
@@ -88,30 +89,30 @@ python3 tools/local_models.py --ledger "$ledger" draft-verify \
 ```
 
 The result records the source path and hash, the Flash and Jev usage, every
-claim with its citation check and Jev judgment, and every draft question.
-The command prints a summary (counts, citation failures, Jev choices,
-usage); the full result is only in the output file. If Jev fails after the
-draft was paid for, the result is still written, with the error in
-`verification.error` and no Jev judgments, and the command exits 1.
-Everything is marked for review; nothing is accepted. `prompts/02-pilot.md`
-("Model routing") says which pilot steps use this command and how the
-calling agent consolidates the result, including the rule that an ordering
-counts as source-backed only when Jev's choice is `supported` and its scope
-probability is at least 0.5. That cut-off is provisional and uncalibrated: it
-can only turn an ordering into a question and never accepts one. The command
-needs both API keys. Every command that takes `--output` checks before any
-request that the output is not a directory and its directory is writable.
+claim with its citation check and Jev judgment, and every draft question. The
+command prints a summary (counts, citation failures, Jev choices, usage); the
+full result is only in the output file. If Jev fails after the draft was paid
+for, the result is still written, with the error in `verification.error` and
+no Jev judgments, and the command exits 1. Everything is marked for review;
+nothing is accepted. `prompts/02-pilot.md` ("Model routing") says which pilot
+steps use this command and how the calling agent consolidates the result,
+including the rule that an ordering counts as source-backed only when Jev's
+choice is `supported` and its scope probability is at least 0.5. That cut-off
+is provisional and uncalibrated: it can only turn an ordering into a question
+and never accepts one. The command needs both API keys. Every command that
+takes `--output` checks before any request that the output is not a directory
+and its directory is writable.
 
 ### Evaluate a batch against reviewed examples
 
-`tools/jev_eval.py` compares one saved `jev-batch` result (its `--output`
-file or redirected stdout) with independently reviewed labels. It does not
-read `draft-verify` output, which nests the judgments under `claims`.
-It runs locally and makes no provider calls. The labels use the same source
-hash and check identity as the batch, plus an attributed reviewer and the
-expected verdict. For example, if the saved batch was produced from the exact
-source and check shown below, a label file has this shape (replace the example
-hash with the batch's actual `source_sha256`):
+`tools/jev_eval.py` compares one saved `jev-batch` result (its `--output` file
+or redirected stdout) with independently reviewed labels. It does not read
+`draft-verify` output, which nests the judgments under `claims`. It runs
+locally and makes no provider calls. The labels use the same source hash and
+check identity as the batch, plus an attributed reviewer and the expected
+verdict. For example, if the saved batch was produced from the exact source
+and check shown below, a label file has this shape (replace the example hash
+with the batch's actual `source_sha256`):
 
 ```json
 {
@@ -169,8 +170,10 @@ the package, then run it without the flag. The real run requires that package,
 sends exactly it, and refuses if the inputs have changed since. The analysis
 directory, `--requirements` and `--contracts` resolve against `--repo` unless
 absolute. The catalogue lives in the analysis directory; the package carries
-it with citation fragments (`("...")` after `file:line`) and Q-/PA- references
-removed, because pilot rule 3 puts code into those fragments. The call
+it with citation fragments, line numbers and analysis ids (Q-, PA-, L-, SYS-,
+NAT-, G-, DR-, F-, T-) removed, because pilot rule 3 puts code into those
+fragments; file names stay. Prose that states an as-is conclusion cannot be
+removed mechanically, and the pilot lists it as a known leak. The call
 receives only the assembled package and no tools or conversation history. The
 command checks the returned table with the existing Part-B coverage checker
 and returns a failure for missing rows, missing checklist ticks, or truncated
@@ -186,14 +189,14 @@ python3 tools/local_models.py --ledger "$ledger" "${blind_args[@]}" --package-on
 python3 tools/local_models.py --ledger "$ledger" "${blind_args[@]}"
 ```
 
-The exact package sent to Flash is kept next to the output with the
-extension replaced (`blind-output.md` gives `blind-output.package.md`), as the
-record of what the blind pass saw. If `blind` fails, the Part-A agent never
-writes the table itself; it dispatches a fresh blind session.
-The calling agent must review the catalogue and supplied files for suitable
-blind inputs and follow `prompts/02-pilot.md` for the diff, divergence
-classification, and questions. The coverage checker checks row presence,
-not whether the predictions are correct.
+The exact package sent to Flash is kept next to the output with the extension
+replaced (`blind-output.md` gives `blind-output.package.md`), as the record of
+what the blind pass saw. If `blind` fails, the Part-A agent never writes the
+table itself; it dispatches a fresh blind session. The calling agent must
+review the catalogue and supplied files for suitable blind inputs and follow
+`prompts/02-pilot.md` for the diff, divergence classification, and questions.
+The coverage checker checks row presence, not whether the predictions are
+correct.
 
 ## Provider limits (checked 2026-11-12)
 
@@ -228,31 +231,30 @@ From the TypeSafe and DeepSeek documentation:
 The tool reserves an estimated maximum before each request using byte length,
 the requested output limit, and peak published prices. It records usage after
 a response. Flash input is charged at the peak cache-miss rate in this
-estimate even when the provider reports a cache hit. Jev output is free at
-the current listed price. Rates are $0.30 per million Flash input tokens,
-$1.20 per million Flash output tokens, and $0.042 per million Jev input
-tokens. Update the implementation when provider prices change.
+estimate even when the provider reports a cache hit. Jev output is free at the
+current listed price. Rates are $0.30 per million Flash input tokens, $1.20
+per million Flash output tokens, and $0.042 per million Jev input tokens.
+Update the implementation when provider prices change.
 
 The reservation is an estimate, not a provider-enforced spending cap. If
 actual usage exceeds it, the ledger records the actual amount and blocks
 future calls when the limit is exceeded. Timeouts, invalid usage responses,
-and interrupted calls retain their reservations, since their actual costs
-are unknown. Concurrent calls to one ledger reserve using SQLite transactions.
-The ledger covers only calls through these tools. The main agent or any
-other provider has separate billing, so any budget for strong-model review
-is not enforced here. Failed requests
-and provider billing changes may also make the ledger differ from an invoice.
+and interrupted calls retain their reservations, since their actual costs are
+unknown. Concurrent calls to one ledger reserve using SQLite transactions. The
+ledger covers only calls through these tools. The main agent or any other
+provider has separate billing, so any budget for strong-model review is not
+enforced here. Failed requests and provider billing changes may also make the
+ledger differ from an invoice.
 
 A failed request reports its reservation id, and for an HTTP error the start
 of the provider's error body (for example `max_tokens_exceeded`). If the
 provider answered but the ledger could not record it (a locked database), the
-answer is printed (in `draft-verify`, kept as `verification.unrecorded_response`
-with a `question_claims` map to claim ids) and the error names the exact
-`settle` command. If Jev
-answers but the answer fails validation, `draft-verify` records its settled
-tokens and cost next to the error. Inspect
-reservations with `status`. After checking the provider's usage,
-reconcile an uncertain call with `settle CALL_ID ACTUAL_MICRODOLLARS`.
+answer is printed (in `draft-verify`, kept as
+`verification.unrecorded_response` with a `question_claims` map to claim ids)
+and the error names the exact `settle` command. If Jev answers but the answer
+fails validation, `draft-verify` records its settled tokens and cost next to
+the error. Inspect reservations with `status`. After checking the provider's
+usage, reconcile an uncertain call with `settle CALL_ID ACTUAL_MICRODOLLARS`.
 Change the limit deliberately with `set-limit MICRODOLLARS`.
 
 ```bash
@@ -262,5 +264,5 @@ python3 tools/local_models.py --ledger "$ledger" set-limit 3000000
 ```
 
 The ledger includes no prompt text, but its database is local task data.
-Prices and usage figures are estimates in US dollars. An output ending for
-any reason other than `stop` may be incomplete and must be reviewed.
+Prices and usage figures are estimates in US dollars. An output ending for any
+reason other than `stop` may be incomplete and must be reviewed.

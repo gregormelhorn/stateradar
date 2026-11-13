@@ -178,7 +178,7 @@ def main() -> int:
         for pair in sorted(set(re.findall(r"P-\d+[ab]", cat))):
             if pair not in traces:
                 errors.append(f"pair {pair} missing from adversarial-traces.md")
-        blocks = re.split(r"\n(?=(?:#{1,6}\s+|\*\*)\s*[PTM]-\d)", traces)
+        blocks = re.split(r"\n(?=(?:#{1,6}\s+|\*\*)\s*[PTM]-[A-Z]*\d)", traces)
         for block in blocks:
             header = block.split("\n", 1)[0][:40]
             flat = " ".join(block.split())  # scope lines wrap across lines

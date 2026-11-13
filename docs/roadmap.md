@@ -10,12 +10,13 @@ entries and separates the new model-routing plan from shipped capabilities.
 1. **Measure cost-aware model routing.** Flash drafting, Jev batches, the
    `draft-verify` chain, a local ledger, and an offline batch evaluator exist,
    and `prompts/02-pilot.md` (v1.17) routes Steps 1, 6, 8 and Part B through
-   them; a first full routed pilot ran on silenceper/pool (entry 11). Next build independently reviewed examples, split held-out components
-   or issues, and measure errors, coverage, time, and total cost of the routed
-   pilot against the agent-only pilot. Only then evaluate selective
-   escalation. Automatic acceptance and escalation are not implemented.
-   Details: [model cascade plan](plan-model-cascade.md) and
-   [entry 11](#11-cost-aware-model-routing-deepseek-flash--jev).
+   them; a first full routed pilot ran on silenceper/pool (entry 11). Next
+   build independently reviewed examples, split held-out components or issues,
+   and measure errors, coverage, time, and total cost of the routed pilot
+   against the agent-only pilot. Only then evaluate selective escalation.
+   Automatic acceptance and escalation are not implemented. Details: [model
+   cascade plan](plan-model-cascade.md) and [entry
+   11](#11-cost-aware-model-routing-deepseek-flash--jev).
 2. **Broaden mutation coverage and validate on real components.** Continue
    [fault-class mutants](#8-ach-style-fault-class-mutants-testgen-upgrade):
    add supported classes and component bindings with observed red probes and
@@ -225,24 +226,37 @@ Open, in order:
    **First full routed pilot** (2026-11-13, silenceper/pool `channelPool`,
    pack da655aa, prompt v1.16, `jev-1.14.0`; outputs and comparison in
    `docs/evidence/routed-pilot-2026-11-13/`): 25,038 microdollars over 15
-   calls (6 Flash, 9 Jev), about 25 minutes. It found the benchmark's
-   primary finding (Release never unblocks waiters in `connReqs`); Flash
-   raised it independently in its draft, but the operator's brief had named
-   it, so the run was not blind to the oracle. 133 drafted claims had 0
-   citation failures; none of the 6 Step-6 orderings was backed by Jev (all
-   `unclear`, scope 0.02-0.05), and Jev contradicted itself once on
-   identical content. Against the agent-only baseline: 21 of 28 aligned base
-   cells agree; 4 of the differences are baseline claims the code
-   contradicts; 8 findings are new. Tool and prompt fixes from it: draft
-   budget and truncated-draft handling, two hollow checks (sidecar fragments,
-   `###` trace headers), the Part-B catalogue copy without code fragments,
-   heading-style question ids, and the ODC trigger vocabulary. Still open
-   from it: the sidecar generator does not merge pairs, guard outcomes or
-   ODC fields; `status` has no tokens, timestamps or step labels; the
-   remembrance semantics tell Part B the as-is outcome, so Part-B agreement
-   on that finding is not independent. Next: a second routed run with an
-   operator brief that names no finding, a timed agent-only run of the same
-   component, and executed as-is tests.
+   calls (6 Flash, 9 Jev). It found the benchmark's primary finding (Release
+   never unblocks waiters in `connReqs`), but not blind to it: the operator
+   brief named the finding, and the Part-A agent's draft task for
+   `channel.go` named the race as its example, so Flash raising it is not
+   independent evidence either. 133 drafted claims had 0 citation failures.
+   None of the 6 Step-6 orderings was backed by Jev (all `unclear`, scope
+   0.02-0.05), so the provisional 0.5 veto fired on every `yes`; the agent's
+   statements added detail the fragments do not mention, which seems to drive
+   the score. Jev also judged equivalent claims about the same line
+   differently (C59 and K5 `contradicted`, C78 `supported`). Against the
+   agent-only baseline (whose two runs agree 28/28), with a state alignment
+   and divergence judgments made by the pilot agent: 21 of 28 aligned base
+   cells agree; of the 7 divergent cells, 1 differs only in its label, 3
+   FactoryFail cells and 2 Close cells rest on baseline claims the code
+   refutes in whole or part, and Released x Close turns on a doc comment. The
+   comparison lists 13 questions new against the baseline plus 4 voided
+   control verdicts (Q-20..Q-23; Q-22 and Q-23 the base scope rule raises
+   anyway). Tool and prompt fixes from it: draft budget and truncated-draft
+   handling, two hollow checks (sidecar fragments, `###` trace headers),
+   doctrine lines written as a table never reached Part B, the Part-B
+   catalogue copy without code fragments, line numbers and analysis ids,
+   heading-style question ids, finding-neutral draft tasks, and the ODC
+   trigger vocabulary (including `draft-verify` and `jev check`). Still open
+   from it: prose in the catalogue that states as-is conclusions (mandatory
+   remembrance, gate, upstream-guard and lock-discipline annotations) still
+   reaches Part B, so Part-B agreement on those rows is not independent; the
+   sidecar generator does not merge pairs, guard outcomes or ODC fields;
+   `status` has no tokens, timestamps or step labels; the 0/6 orderings and
+   the inconsistent claim judgments belong in the labelled set. Next: a
+   second routed run with a brief and draft tasks that name no finding, a
+   timed agent-only run of the same component, and executed as-is tests.
 2. **Labelled evaluation set.** Collect attributed, independently reviewed
    labels for claim and requirement-scope checks across components (stage 1
    of the cascade plan), including races outside a requirement's scope and

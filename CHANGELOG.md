@@ -69,19 +69,28 @@
   message names `FILE:PATTERN` for requirements; the docs show the two-step
   `blind` call; a test covers requirement section selection.
 - **First full routed pilot (silenceper/pool, 2026-11-13)** and its fixes.
-  Evidence in `docs/evidence/routed-pilot-2026-11-13/` (25,038 microdollars,
-  primary finding found, 21/28 aligned base cells agree with the baseline).
-  Fixes, each with a red check first: `gen_analysis_sidecar.py` keeps
-  citation fragments, so `dsc_check` verifies them on generated sidecars
-  (the compound selftest fixture had wrong fragments and lines that this
-  exposed); `check_matrix.py` splits trace blocks on `###` headers too, so
-  the scope-line check no longer passes vacuously; the generator parses
-  `## Q-nn` question headings; the Part-B catalogue copy drops code
-  fragments and Q-/PA- references; `draft-verify` defaults to 12000 output
-  tokens and saves a truncated draft as `<stem>.draft.txt`;
+  Evidence in `docs/evidence/routed-pilot-2026-11-13/`: 25,038
+  microdollars; the primary finding was found, but the run was not blind to
+  it (the operator brief and a draft task named it); 21 of 28 aligned base
+  cells agree with the agent-only baseline, whose own two runs agree 28/28,
+  under an alignment and divergence judgments by the pilot agent. Fixes,
+  each with a red check first: `gen_analysis_sidecar.py` keeps citation
+  fragments, including ones with unescaped or typographic quotes, so
+  `dsc_check` verifies them on generated sidecars (this exposed wrong
+  fragments and lines in the compound selftest fixture); `check_matrix.py`
+  splits trace blocks on `###` and bold headers, including letter-prefixed
+  ids such as `T-P01a`, so the scope-line check no longer passes vacuously;
+  the generator parses `## Q-nn`, `**Q-nn**` and punctuated question ids and
+  ignores words such as `Q-and-A`; `part_b_pack.py` sends Part B doctrine
+  lines written as a table and refuses an extraction whose DOC lines it
+  cannot pass on, and its catalogue copy drops code fragments, line numbers
+  and analysis ids; `draft-verify` defaults to 12000 output tokens, and a
+  truncated draft or blind output is saved to a file instead of printed;
   `formats/rules.toml` gains the ODC triggers `part-B diff`, `reviewer
-  cross-check` and `step-8 verification`, and `check_pack_consistency.py`
-  fails when the pilot prompt's trigger list drifts from it. 02-pilot v1.17.
+  cross-check`, `step-8 verification`, `z3 invariant check`, `draft-verify`
+  and `jev check`, and `check_pack_consistency.py` fails when the pilot
+  prompt's trigger list drifts from it. 02-pilot v1.17 (rules 5, 7, 8, 9
+  and a new rule 10 for finding-neutral draft tasks).
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 
