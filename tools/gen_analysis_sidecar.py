@@ -249,16 +249,17 @@ def _parse_cell(
     # the fragment: dsc_check verifies it near the cited line. Read it from
     # the unstripped text, because inline-code stripping can alter it.
     # The first token that resolves is the citation, so a host:port or a
-    # version string earlier in the cell does not hide it. When none
-    # resolves, every candidate goes to `unresolved`; the caller drops the
-    # ones that are not file names.
+    # version string earlier in the cell does not hide it. Every candidate
+    # that does not resolve goes to `unresolved`, also next to a resolved
+    # one (a cell records one citation, so a second one is dropped); the
+    # caller drops the candidates that are not file names.
     found = list(re.finditer(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw))
+    if unresolved is not None:
+        unresolved.update(m.group(1) for m in found if not src_index.get(Path(m.group(1)).name))
     cit = next((m for m in found if src_index.get(Path(m.group(1)).name)),
                found[0] if found else None)
     if cit:
         path = src_index.get(Path(cit.group(1)).name)
-        if not path and unresolved is not None:
-            unresolved.update(m.group(1) for m in found)
         if path:
             citation: Citation = {"file": path, "line": int(cit.group(2))}
             cell["citation"] = citation

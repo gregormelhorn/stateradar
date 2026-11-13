@@ -246,16 +246,30 @@ def main() -> int:
             '`mini.py:22` ("return \\"ignored\\"")', '`requirements.md:3` ("closed")', 1).replace(
             '`mini.py:23` ("raise RejectedError")', '(dials db.example.com:5432)', 1).replace(
             '`mini.py:26` ("self.state = \\"Closed\\"")', '`config.yaml:3` ("retries: 3")', 1).replace(
-            '`mini.py:47` ("self.dup_count += 1")', '`Mini.PY:47` ("self.dup_count += 1")', 1))
+            '`mini.py:47` ("self.dup_count += 1")', '`Mini.PY:47` ("self.dup_count += 1")', 1).replace(
+            '`mini.py:49` ("return \\"ignored\\"")',
+            '`mini.py:49` ("return \\"ignored\\"") and `second_test.py:5`', 1))
         # A second component citing the same files: one line per component.
-        shutil.copytree(unres_matrix.parent, unres_matrix.parent.with_name("mini2"))
+        # mini2 swaps mini's test-file citation for one of its own: a set of
+        # names that leaked between components (either order) would warn
+        # about a file under the component that does not cite it.
+        mini2_matrix = shutil.copytree(unres_matrix.parent, unres_matrix.parent.with_name("mini2")) \
+            / "disposition-matrix.md"
+        mini2_matrix.write_text(mini2_matrix.read_text().replace(
+            '`test_cell_suite.py:3` ("import")', '`only_mini2_test.py:3` ("import")', 1))
         unres_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
                                     "--root", str(unres)], capture_output=True, text=True)
         warn_lines = [ln for ln in unres_run.stderr.splitlines() if ln.startswith("warning:")]
-        if not any(ln.startswith("warning: mini2: citations of test_cell_suite.py") for ln in warn_lines):
+        if not any(ln.startswith("warning: mini2: citations of only_mini2_test.py") for ln in warn_lines):
             failures.append("generator warns per component: no mini2 line\n" + (unres_run.stderr or "no stderr"))
         else:
             print("  ok  generator warns per component")
+        if (any("only_mini2_test.py" in ln and not ln.startswith("warning: mini2:") for ln in warn_lines)
+                or any("test_cell_suite.py" in ln and not ln.startswith("warning: mini:")
+                       for ln in warn_lines)):
+            failures.append(f"generator warnings leak across components: {warn_lines}")
+        else:
+            print("  ok  generator warnings stay with their component")
         for label, needle_text, want_warning in (
                 ("generator warns about an unresolved test-file citation",
                  "warning: mini: citations of test_cell_suite.py dropped: the file is not under "
@@ -269,6 +283,8 @@ def main() -> int:
                 ("generator names the case of a source extension",
                  "warning: mini: citations of Mini.PY dropped: its extension is not a source "
                  "extension (sidecar-overlay.yaml: src_exts, matched case-sensitively)", True),
+                ("generator warns about a second citation next to a resolved one",
+                 "warning: mini: citations of second_test.py dropped", True),
                 ("generator stays quiet on host:port text", "db.example.com", False)):
             seen = any(needle_text in ln for ln in warn_lines)
             if seen != want_warning:
@@ -276,8 +292,8 @@ def main() -> int:
                                 + (unres_run.stderr or "no stderr"))
             else:
                 print(f"  ok  {label}")
-        if len(warn_lines) != 8:
-            failures.append(f"generator warnings: expected one line per component and file (8), "
+        if len(warn_lines) != 10:
+            failures.append(f"generator warnings: expected one line per component and file (10), "
                             f"got {warn_lines}")
 
         # A host:port earlier in the cell must not hide the citation after it.
@@ -286,8 +302,11 @@ def main() -> int:
         hostfirst_matrix.write_text(hostfirst_matrix.read_text().replace(
             '`mini.py:19` ("self.state = \\"Open\\"")',
             'via db.example.com:5432 `mini.py:19` ("self.state = \\"Open\\"")', 1))
-        subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
-                        "--root", str(hostfirst)], capture_output=True, text=True)
+        (hostfirst_matrix.parent / "analysis.json").unlink()  # no stale pass on a crash
+        hostfirst_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                        "--root", str(hostfirst)], capture_output=True, text=True)
+        if hostfirst_run.returncode != 0:
+            failures.append("generator on the host-first matrix failed:\n" + hostfirst_run.stderr)
         hostfirst_cits = [c.get("citation", {}).get("line") for c in json.loads(
             (hostfirst_matrix.parent / "analysis.json").read_text())["cells"]]
         if 19 not in hostfirst_cits:

@@ -40,7 +40,9 @@
   (`.yaml`, `.json`, ...) or a source extension in the wrong case names
   `src_exts`; text such as `host:5432` without a known file extension stays
   quiet. A cell's citation is now the first `file:line` token that resolves,
-  so a `host:5432` earlier in the cell no longer hides it. The two mutation
+  so a `host:5432` earlier in the cell no longer hides it; a second cited
+  file in a cell that does not resolve is warned about too, since a cell
+  records one citation. The two mutation
   runners share one helper (`tools/subprocess_text.py`) for timeout output.
 - **Sidecar types.** `tools/sidecar_types.py` mirrors the schema as
   TypedDicts; a selftest fails when properties, required keys or enum values
