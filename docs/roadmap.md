@@ -328,18 +328,21 @@ Open, in order:
    ($12.84 steering agent, 7 states, 22 events, same routing otherwise) when
    the run's model has 6 to 8 states; with another size the cost is also given
    per matrix cell and the result is marked unmatched. The variant counts as
-   holding when all four hold: steering-agent cost at most $9.60 (a quarter
-   below $12.84, beyond the $0.32 gap between the two runs so far), the
-   primary finding raised and executed, at least 17 of the 28 aligned base
+   holding when all four hold: steering-agent cost at most $9.60 (about a
+   quarter below $12.84; the two runs so far differed by $0.32 in total cost),
+   the primary finding raised and executed, at least 17 of the 28 aligned base
    cells agreeing with the agent-only baseline (19 in both runs so far), and
-   every gate green. If the saving is smaller than a quarter, a matched
-   agent-only run decides whether there is any. Per-step cost comes from the
-   step start lines and the session transcript, and `draft_cells.py compare`
-   counts the agent's changes per drafted cell by Jev choice. Flash's error
-   rate on such text is unmeasured: in the second pilot Jev judged Flash's 133
-   drafted claims 124 supported, 9 unclear and 0 contradicted, but those were
-   Step-1 claims, not matrix cells or tests, so the judgment step stays with
-   the steering agent.
+   every gate green. The comparator ran on an older pack (a331dae, prompt
+   v1.17), so a pass shows the saving of the variant together with the pack
+   changes since then, not of Flash alone; a matched agent-only run on the
+   same pack is needed before the saving is attributed to Flash, and it also
+   decides whether a saving smaller than a quarter exists at all. Per-step
+   cost comes from the step start lines and the session transcript, and
+   `draft_cells.py compare` counts the agent's changes per drafted cell by Jev
+   choice. Flash's error rate on such text is unmeasured: in the second pilot
+   Jev judged Flash's 133 drafted claims 124 supported, 9 unclear and 0
+   contradicted, but those were Step-1 claims, not matrix cells or tests, so
+   the judgment step stays with the steering agent.
 3. **Flash as the steering agent.** Only if the item-2 pilot holds the
    finding quality: the same component with Flash steering the whole run,
    and Part B on a different model so that A and B do not share one model's
