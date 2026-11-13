@@ -345,8 +345,15 @@ class ModelTest(unittest.TestCase):
                 self.assertNotIn("SECRET MATRIX", prompt)
                 self.assertIn("requirement details", prompt)
                 return {"text": "| E01 | handle |\n\n- [x] E01\n", "finish_reason": "stop"}
-            with patch.object(local_models, "flash", side_effect=fake_flash):
+            out, err = io.StringIO(), io.StringIO()
+            with patch.object(local_models, "flash", side_effect=fake_flash), \
+                    contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                 self.assertEqual(local_models.blind(budget, args, "key"), 0)
+            # Second pilot: stdout is one JSON document; the coverage line goes to stderr.
+            json.loads(out.getvalue())
+            self.assertIn("PART-B COVERAGE: OK", err.getvalue())
+            # The prompt's blockquote leaves no stray ">" line in the task text.
+            self.assertNotRegex((root / "blind.package.md").read_text(), r"(?m)^>")
             self.assertTrue(args.output.is_file())
             package = root / "blind.package.md"
             self.assertTrue(package.is_file(), "the dispatched package is kept next to the output")
@@ -655,6 +662,39 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(P.changed_table_rows("a\nb", "ab"), ["line count changed: 2 -> 1"])
         # A wrapped code line that starts with "||" is prose, not a table row.
         self.assertIsNone(P._TABLE_ROW.match("|| len(c.conns) == 0 {\")),"))
+        # More lines of the same file after a citation go with it (second pilot:
+        # "unlock at 136, 151, 156 or 160" and ", 194" reached the package).
+        for text, want in (("| a | unlock channel.go:136, 151, 156 or 160; factory call channel.go:154 |",
+                            "| a | unlock channel.go; factory call channel.go |"),
+                           ("| a | unlock before any Close call, channel.go:175, 194 |",
+                            "| a | unlock before any Close call, channel.go |"),
+                           ("channel.go:12, 3 callers wait", "channel.go, 3 callers wait"),
+                           # A run of bare numbers is stripped only where it ends the clause.
+                           ("see channel.go:12 and 156 or 160.", "see channel.go."),
+                           ("| e | channel.go:5, 10 |", "| e | channel.go |"),
+                           ("channel.go:12, 30% of calls block", "channel.go, 30% of calls block"),
+                           ("channel.go:12, 1,000 calls per second", "channel.go, 1,000 calls per second"),
+                           ("channel.go:12, 3 \u2014 callers wait", "channel.go, 3 \u2014 callers wait"),
+                           # A list ending in and/or goes, also before a word; a prose
+                           # count joined by and/or goes with it (the safe side).
+                           ("unlock channel.go:136, 151 or 160 before the call", "unlock channel.go before the call"),
+                           ("lines channel.go:136 and 151 unlock", "lines channel.go unlock"),
+                           ("channel.go:12, 2 and 3 callers", "channel.go callers"),
+                           ("see channel.go:10, 20.", "see channel.go."),
+                           ("channel.go:7, 9-11 then", "channel.go then"),
+                           ("channel.go:12 or 10:30 pm", "channel.go or 10:30 pm"),
+                           # A run that ends a sentence or a clause before a colon goes too.
+                           ("Put unlocks before Close, channel.go:175, 194.", "Put unlocks before Close, channel.go."),
+                           ("released at channel.go:136 and 151: next", "released at channel.go: next"),
+                           ("see channel.go:136, 151:", "see channel.go:"),
+                           ("channel.go:5 and 1:2 ratio", "channel.go and 1:2 ratio"),
+                           ("see channel.go:136, 151, and 160.", "see channel.go."),
+                           ("channel.go:136, 151? next", "channel.go? next"),
+                           ("channel.go:12 , 13.", "channel.go."),
+                           ("channel.go:12, 10-20% of calls", "channel.go, 10-20% of calls"),
+                           ("channel.go:12, 5 (five) callers", "channel.go, 5 (five) callers"),
+                           ("channel.go:12, 1.5 s", "channel.go, 1.5 s")):
+            self.assertEqual(strip(text), want)
         # A host whose ending looks like a file extension is not a later citation.
         self.assertEqual(strip('client.go:40 ("f("a") dial api.example.rs:8443 now") |'), "client.go |")
         # A removed sentence-initial label keeps the capital after "," or ";", in parentheses and in cells.

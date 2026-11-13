@@ -9,11 +9,13 @@ entries and separates the new model-routing plan from shipped capabilities.
 
 1. **Measure cost-aware model routing.** Flash drafting, Jev batches, the
    `draft-verify` chain, a local ledger, and an offline batch evaluator exist,
-   and `prompts/02-pilot.md` (v1.17) routes Steps 1, 6, 8 and Part B through
-   them; a first full routed pilot ran on silenceper/pool (entry 11). Next
-   build independently reviewed examples, split held-out components or issues,
-   and measure errors, coverage, time, and total cost of the routed pilot
-   against the agent-only pilot. Only then evaluate selective escalation.
+   and `prompts/02-pilot.md` (v1.18) routes Steps 1, 6, 8 and Part B through
+   them; two full routed pilots ran on silenceper/pool, the second blind to
+   the benchmark and with executed as-is tests (entry 11). Next run a timed
+   agent-only pilot of the same component, build independently reviewed
+   examples, split held-out components or issues, and measure errors,
+   coverage, time, and total cost of the routed pilot against the agent-only
+   pilot. Only then evaluate selective escalation.
    Automatic acceptance and escalation are not implemented. Details: [model
    cascade plan](plan-model-cascade.md) and [entry
    11](#11-cost-aware-model-routing-deepseek-flash--jev).
@@ -254,27 +256,77 @@ Open, in order:
    reaches Part B, so Part-B agreement on those rows is not independent; the
    sidecar generator does not merge pairs, guard outcomes or ODC fields;
    `status` has no tokens, timestamps or step labels; the 0/6 orderings and
-   the inconsistent claim judgments belong in the labelled set. Next: a
-   second routed run with a brief and draft tasks that name no finding, a
-   timed agent-only run of the same component, and executed as-is tests.
-2. **Labelled evaluation set.** Collect attributed, independently reviewed
+   the inconsistent claim judgments belong in the labelled set.
+
+   **Second routed pilot** (2026-11-13, same component, pack a331dae, prompt
+   v1.17, `jev-1.14.0`; outputs, as-is tests and comparison in
+   `docs/evidence/routed-pilot-2-2026-11-13/`): blind to the benchmark
+   (neutral brief; the checkout excluded `docs/`, `tests/benchmarks/`,
+   `README.md` and `CHANGELOG.md`; finding-neutral draft tasks). 22,826
+   microdollars over 20 calls (7 Flash, 13 Jev), about 37 minutes wall
+   clock, of which the model calls took about 70 seconds; no provider
+   errors. Flash's `channel.go` draft raised the primary finding as its
+   first question, and the agent's Q-01 matches it; all six expected
+   baseline questions have a counterpart (Q-05 only partly, its
+   counter-drift premise is refuted by the code). Executed as-is Go tests:
+   22 of 23 observe their claim, T5 reports the as-is data race on the ping
+   function, and the repository's own `TestPool_Get` hangs until the
+   timeout. Jev backed 1 of 6 orderings (scope 0.58); two `yes` verdicts
+   were voided at scope 0.30 and 0.31 and became questions; 51 Step-8 claim
+   checks gave 44 supported, 5 unclear and 2 contradicted, all kept after a
+   re-read. 19 of 28 aligned base cells agree with the agent-only baseline
+   (first pilot 20 under the same counting rule, 21 as published): the same
+   FactoryFail, Close and Released x Close divergences, plus lazy idle expiry
+   marked accidental; the one-cell gap is not a measured regression. Part B:
+   21 convergent rows (13 of the 26 agreeing rows, 10 convergent and 3
+   convergent-hole, depend on as-is prose in the catalogue) and 8 artefacts,
+   mostly remembrance and upstream statements read as documented intent. Fixes
+   from it: line numbers following a citation, `blind` stdout, the blockquote
+   line in the Part-B task, the matrix wrapper template's pack path, and
+   02-pilot v1.18. Still open from it: the sidecar generator's missing pairs,
+   guard and ODC fields (the pilot merged them with a per-run script); as-is
+   prose in the catalogue reaching Part B (the pilot's candidate rule:
+   remembrance and upstream statements carry the provenance "observed in
+   code"). Next: a timed agent-only run of the same component in a fresh
+   session, so time and cost compare like for like. Its `timing.md` shows
+   where the 37 minutes went: about 70 s of Flash and Jev calls, about 3.5
+   minutes of `go test` (mostly three waits on the hanging `TestPool_Get`'s
+   60-second timeout) and about 32 minutes of the steering agent's own work,
+   which includes the pack's tool runs (not timed separately).
+2. **Flash writes, the steering agent decides.** After the timed agent-only
+   run: a pilot of the same component in which Flash drafts the bulk text
+   (matrix cells, as-is tests) from the steering agent's decisions, and the
+   steering agent only decides, checks citations and runs the gates. Measure
+   wall clock, cost and finding quality against the same benchmark. This arm
+   runs under a named prompt variant that suspends routing rule 3 (the
+   agent's own complete pass) for that arm only. Flash's error rate on such
+   text is unmeasured: in the second pilot Jev judged Flash's 133 drafted
+   claims 124 supported, 9 unclear and 0 contradicted, but those were Step-1
+   claims, not matrix cells or tests, so the judgment step stays with the
+   steering agent.
+3. **Flash as the steering agent.** Only if the item-2 pilot holds the
+   finding quality: the same component with Flash steering the whole run,
+   and Part B on a different model so that A and B do not share one model's
+   blind spots. Jev stays a verifier, since it checks claims and orderings
+   and does not plan, read code or write files.
+4. **Labelled evaluation set.** Collect attributed, independently reviewed
    labels for claim and requirement-scope checks across components (stage 1
    of the cascade plan), including races outside a requirement's scope and
    seam-contract cases. Keep a held-out group per component or issue.
-3. **Calibrated thresholds, then escalation.** TypeSafe's cookbooks use
+5. **Calibrated thresholds, then escalation.** TypeSafe's cookbooks use
    vendor-calibrated cut-offs (0.7 per-field gate, 0.8 citation auto-accept,
    0.3/0.7 Noul bands). StateRadar adopts none of them until the labelled set
    supports a value. The pilot's provisional 0.5 scope cut-off is
    question-only (it can void a verdict, never accept one) and is the first
    value to calibrate; any escalation policy is compared end to end against
    the prior workflow.
-4. **Known limits to design around.** Jev accepts 64k tokens per request and
+6. **Known limits to design around.** Jev accepts 64k tokens per request and
    32k per question, so long sources need excerpting with provenance; English
    is its primary language, so non-English requirements need a measured
    accuracy check; aliases move with releases, so measurements pin
    `jev-1.14.0`. The ledger counts only calls through the tool, not the
    calling agent.
-5. **Prompt research.** Repetition and nonce-based consistency studies, and
+7. **Prompt research.** Repetition and nonce-based consistency studies, and
    feature discovery only after the labelled set exists (see entry 9).
 
 ## Positioning note (for the README, task-8 sweep)

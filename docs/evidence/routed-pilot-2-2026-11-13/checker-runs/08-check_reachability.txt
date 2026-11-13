@@ -1,0 +1,7 @@
+REACHABILITY CHECK: FAIL
+  - state 'Open_AtCapacity' is unreachable from initial state 'Open_IdleAvailable'
+  - state 'Open_AtCapacity_Waiting' is unreachable from initial state 'Open_IdleAvailable'
+  - state 'Open_Empty' is unreachable from initial state 'Open_IdleAvailable'
+  - state 'Open_IdleFull' is unreachable from initial state 'Open_IdleAvailable'
+  - state 'Open_Waiting_Stranded' is unreachable from initial state 'Open_IdleAvailable'
+  - state 'Released' has no outgoing transitions and is not marked terminal

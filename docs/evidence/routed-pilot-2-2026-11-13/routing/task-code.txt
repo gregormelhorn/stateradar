@@ -1,0 +1,12 @@
+Step 1 (extraction) of a StateRadar analysis of the connection-pool component channelPool.
+From this source file, extract each item as a claim citing its line:
+- states, including implicit states held in struct fields, nil or non-nil references, counters, and channel contents;
+- external events (public functions and methods) and internal events;
+- transitions between states, with the guards and conditions that select each branch;
+- actions and side effects (including calls into user-supplied functions);
+- timeouts and timers, retry or loop behaviour and its limits, waiting and cancellation paths;
+- failure modes and returned errors;
+- lock usage: where each mutex is acquired and released and which calls happen while it is held;
+- apparent invariants.
+Use kind "ordering" for a specific sequence of events whose outcome the code determines.
+Put into questions every behaviour you cannot determine from this file alone.

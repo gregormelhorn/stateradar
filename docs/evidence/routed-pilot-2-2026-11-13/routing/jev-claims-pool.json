@@ -1,0 +1,39 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "335efb032d3bb90ca7aeabdce5d545d28b6285e0bd7390714c3e7cb82bdc89de",
+  "input_tokens": 638,
+  "cost_microdollars": 27,
+  "reservation_microdollars": 109,
+  "checks": {
+    "V-50": {
+      "kind": "claim",
+      "statement": "ErrClosed carries the message pool is closed.",
+      "source": "pool.go",
+      "line": 7,
+      "fragment": "ErrClosed = errors.New(\"pool is closed\")",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "V-51": {
+      "kind": "claim",
+      "statement": "The Pool interface does not include the Ping method.",
+      "source": "pool.go",
+      "line": 11,
+      "fragment": "type Pool interface {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.74,
+        "contradicted": 0.0,
+        "unclear": 0.26
+      },
+      "confidence": 0.61,
+      "review_required": true
+    }
+  }
+}

@@ -1,0 +1,120 @@
+=== RUN   TestAsIs_T1_ReleaseStrandsWaiter
+    asis_test.go:142: AS-IS: waiter still blocked 300ms after Release; connReqs=1
+--- PASS: TestAsIs_T1_ReleaseStrandsWaiter (0.30s)
+=== RUN   TestAsIs_T2_PutAfterReleaseDoesNotClose
+    asis_test.go:156: AS-IS: Put after Release returned <nil>; close callback calls for the connection: 0
+--- PASS: TestAsIs_T2_PutAfterReleaseDoesNotClose (0.00s)
+=== RUN   TestAsIs_T3_CloseDoesNotWakeWaiter
+    asis_test.go:178: AS-IS: after Close openingConns=1, waiter still blocked after 300ms, waiters=1; a new Get blocked=false (created a connection ahead of the waiter)
+--- PASS: TestAsIs_T3_CloseDoesNotWakeWaiter (0.30s)
+=== RUN   TestAsIs_T4_GetPutRaceStrandsWaiter
+    asis_test.go:226: AS-IS (statistical): stranded waiter with an idle connection observed in 25 of 3000 iterations (waiter queued with no idle connection: 0)
+--- PASS: TestAsIs_T4_GetPutRaceStrandsWaiter (2.29s)
+=== RUN   TestAsIs_T5_PingFieldRace
+==================
+WARNING: DATA RACE
+Write at 0x00c00035bd10 by goroutine 6022:
+  github.com/silenceper/pool.(*channelPool).Release()
+      /tmp/routed-pilot2-GsfX/pool-tests/channel.go:229 +0xb0
+  github.com/silenceper/pool.TestAsIs_T5_PingFieldRace.func3()
+      /tmp/routed-pilot2-GsfX/pool-tests/asis_test.go:248 +0x68
+
+Previous read at 0x00c00035bd10 by goroutine 6021:
+  github.com/silenceper/pool.(*channelPool).Get()
+      /tmp/routed-pilot2-GsfX/pool-tests/channel.go:123 +0x128
+  github.com/silenceper/pool.TestAsIs_T5_PingFieldRace.func2()
+      /tmp/routed-pilot2-GsfX/pool-tests/asis_test.go:246 +0xac
+
+Goroutine 6022 (running) created at:
+  github.com/silenceper/pool.TestAsIs_T5_PingFieldRace()
+      /tmp/routed-pilot2-GsfX/pool-tests/asis_test.go:248 +0x50
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+
+Goroutine 6021 (finished) created at:
+  github.com/silenceper/pool.TestAsIs_T5_PingFieldRace()
+      /tmp/routed-pilot2-GsfX/pool-tests/asis_test.go:239 +0x360
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+==================
+    asis_test.go:251: AS-IS: Get with Ping concurrent with Release, 200 iterations; recovered nil-function panics: 0 (the race detector reports the c.ping access if the interleaving occurred)
+    testing.go:1867: race detected during execution of test
+--- FAIL: TestAsIs_T5_PingFieldRace (0.01s)
+=== RUN   TestAsIs_T6_DuplicateCloseExceedsMaxCap
+    asis_test.go:271: AS-IS: openingConns after double Close=-1; two Gets blocked=false,false; live connections=2 with MaxCap=1 (&{2 0 0}, &{3 0 0})
+--- PASS: TestAsIs_T6_DuplicateCloseExceedsMaxCap (0.00s)
+=== RUN   TestAsIs_T7_DuplicatePutDoubleHandout
+    asis_test.go:286: AS-IS: two Gets after a duplicate Put returned the same connection: true (ids 1, 1)
+--- PASS: TestAsIs_T7_DuplicatePutDoubleHandout (0.00s)
+=== RUN   TestAsIs_T8_FactoryReentrancyDeadlock
+    asis_test.go:300: AS-IS: Get with a re-entrant Factory blocked=true after 300ms; an unrelated Len blocked=true
+--- PASS: TestAsIs_T8_FactoryReentrancyDeadlock (0.60s)
+=== RUN   TestAsIs_T9_SlowFactoryBlocksLen
+    asis_test.go:316: AS-IS: Len took 450ms while a Get was inside a 500ms Factory
+--- PASS: TestAsIs_T9_SlowFactoryBlocksLen (0.50s)
+=== RUN   TestAsIs_T10_HandoffSkipsPing
+    asis_test.go:343: AS-IS: waiter received the broken connection: true; Ping calls on the handoff path: 0
+--- PASS: TestAsIs_T10_HandoffSkipsPing (0.00s)
+=== RUN   TestAsIs_T11_MaxCapZero
+    asis_test.go:357: AS-IS: NewChannelPool(MaxCap=0) err=<nil>; Get blocked after 300ms: true
+--- PASS: TestAsIs_T11_MaxCapZero (0.30s)
+=== RUN   TestAsIs_T12_CloseAfterRelease
+    asis_test.go:370: AS-IS: Close after Release returned <nil>; close callback calls: 0
+--- PASS: TestAsIs_T12_CloseAfterRelease (0.00s)
+=== RUN   TestAsIs_T13_GetInsideFactoryDuringRelease
+    asis_test.go:395: AS-IS: Release blocked while Factory ran: true; Get returned conn=true err=<nil> after Release was called; Put afterwards returned <nil>, close calls=0
+--- PASS: TestAsIs_T13_GetInsideFactoryDuringRelease (0.10s)
+=== RUN   TestAsIs_T14_LazyIdleExpiry
+    asis_test.go:412: AS-IS: 150ms past IdleTimeout, close calls before Get=0, after Get=2; Get returned a new connection id=3 err=<nil>
+--- PASS: TestAsIs_T14_LazyIdleExpiry (0.20s)
+=== RUN   TestAsIs_T15_InitialCapNotMaintained
+    asis_test.go:426: AS-IS: after two Gets and two Closes with InitialCap=2: openingConns=0, Len=0, factory calls=2
+--- PASS: TestAsIs_T15_InitialCapNotMaintained (0.00s)
+=== RUN   TestAsIs_T16_FactoryNilConn
+    asis_test.go:441: AS-IS: Get returned (<nil>, <nil>); openingConns=1; Put(nil)=connection is nil. rejecting; Close(nil)=connection is nil. rejecting; next Get blocked=true
+--- PASS: TestAsIs_T16_FactoryNilConn (0.30s)
+=== RUN   TestAsIs_T17_ExportedPingWithoutPing
+    asis_test.go:456: AS-IS: Ping with no Ping function configured panicked: runtime error: invalid memory address or nil pointer dereference
+--- PASS: TestAsIs_T17_ExportedPingWithoutPing (0.00s)
+=== RUN   TestAsIs_T18_PutFullIdleBelowCap
+    asis_test.go:470: AS-IS: second Put with MaxIdle=1 closed the connection: close calls=1; openingConns=1 < MaxCap=3
+--- PASS: TestAsIs_T18_PutFullIdleBelowCap (0.00s)
+=== RUN   TestAsIs_T19_LenCountsIdleOnly
+    asis_test.go:481: AS-IS: with 2 open connections (1 idle, 1 checked out) Len=1, openingConns=2
+--- PASS: TestAsIs_T19_LenCountsIdleOnly (0.00s)
+=== RUN   TestAsIs_T20_LostConnections
+    asis_test.go:494: AS-IS: after 2 lost connections with MaxCap=2, openingConns=2, third Get blocked after 300ms: true
+--- PASS: TestAsIs_T20_LostConnections (0.30s)
+=== RUN   TestAsIs_T21_CloseErrorDroppedOnDiscard
+    asis_test.go:509: AS-IS: Get discarded the expired connection (close calls=1, callback error dropped) and returned id=2 err=<nil>; openingConns=1
+--- PASS: TestAsIs_T21_CloseErrorDroppedOnDiscard (0.08s)
+=== RUN   TestAsIs_T22_FactoryErrorFailFast
+    asis_test.go:525: AS-IS: Get returned the factory error itself=true after 3µs; factory calls=1; openingConns=0
+--- PASS: TestAsIs_T22_FactoryErrorFailFast (0.00s)
+=== RUN   TestAsIs_T23_PingFailureDiscard
+    asis_test.go:543: AS-IS: Get returned id=2 err=<nil>; close calls for id 1=1; openingConns=1
+--- PASS: TestAsIs_T23_PingFailureDiscard (0.00s)
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestPool_Get_Impl
+--- PASS: TestPool_Get_Impl (0.00s)
+=== RUN   TestPool_Put
+--- PASS: TestPool_Put (0.03s)
+=== RUN   TestPool_UsedCapacity
+--- PASS: TestPool_UsedCapacity (0.00s)
+=== RUN   TestPool_Close
+--- PASS: TestPool_Close (0.00s)
+=== RUN   TestPoolConcurrent
+--- PASS: TestPoolConcurrent (0.00s)
+=== RUN   TestPoolWriteRead
+--- PASS: TestPoolWriteRead (0.00s)
+=== RUN   TestPoolConcurrent2
+--- PASS: TestPoolConcurrent2 (0.10s)
+FAIL
+FAIL	github.com/silenceper/pool	6.111s
+?   	github.com/silenceper/pool/example	[no test files]
+FAIL

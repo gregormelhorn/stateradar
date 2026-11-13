@@ -158,6 +158,10 @@ def cited_names(text: str, repo: Path | None = None) -> frozenset:
     return frozenset(names)
 
 
+_SEP = r"(?:,?[ \t]+(?:and|or)|[ \t]*,)[ \t]*"
+_NUM_END = r"[ \t]*(?:[;)|\]`]|\([ \t]*[\"'“‘]|,(?![ \t]*\d)|[.:?!](?=\s|$)|$)|" + _SEP + r":\d"
+
+
 def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
     """The citation pattern. On a table row (table=True) an unescaped "|"
     is a cell bar that the fallback never crosses; elsewhere "|" is code
@@ -187,7 +191,19 @@ def cite_pattern(names: frozenset, table: bool = False) -> re.Pattern:
     last = (r"(" + ch + r"+?)" + q_close + r"\s*\)(?=(?:(?!" + q_close + r"\s*\))" + ch
             + r")*?(?:" + nxt + bar + r"|$))")
     return re.compile(
-        r"(?<![\w./-])(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
+        r"(?<![\w./-])(" + _FILE + r")`?:\d+(?:-\d+)?"
+        # More lines of the same file go with the citation: ", :194", a range
+        # ", 194-196", a list ending in " and 156" or " or 160" (", 151 or 160"),
+        # and bare ", 194" where the run ends the clause (a separator, a bracket,
+        # a fragment, a sentence end or the line end). A bare number after a
+        # comma and before a word (", 3 callers", ", 30% of calls") stays prose;
+        # a prose count joined by and/or ("and 3 callers") or a prose range
+        # ("or 2-3 retries") goes, the safe side. Known leaks, which rule 7
+        # steers writers away from: a run ending in a dash, and a run whose
+        # last number is prose (", 13, 3 callers" keeps 13).
+        r"(?:" + _SEP + r":\d+(?:-\d+)?|" + _SEP + r"\d+-\d+(?![\d-]|:\d|[ \t]*%)"
+        r"|(?:[ \t]*,[ \t]*\d+(?![\d-]|:\d))*,?[ \t]+(?:and|or)[ \t]*\d+(?:-\d+)?(?![\d-]|:\d)"
+        r"|(?:" + _SEP + r"\d+(?![\d-]|:\d))+(?=" + _NUM_END + r"))*"
         r"(`?\s*\(\s*" + q_open + balanced +
         r"|`?\s*\(\s*" + q_open + last + r")?", re.M)
 
@@ -492,7 +508,8 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
         "inputs below are complete and are your ONLY sources. If you catch "
         "yourself wanting to look something up, label it an open point instead.",
         "",
-        "TASK: " + instruction.lstrip("> ").replace("\n> ", "\n"),
+        # Unquote the prompt's blockquote, including its empty ">" lines.
+        "TASK: " + re.sub(r"(?m)^>[ \t]?", "", instruction),
         "",
         "The catalogue's event ids are: " + ids_line + ".",
         "",

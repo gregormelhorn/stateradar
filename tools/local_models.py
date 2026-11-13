@@ -596,7 +596,9 @@ def blind(budget: Budget, args: argparse.Namespace, key: str | None) -> int:
     args.output.write_text(result["text"], encoding="utf-8")
     print(json.dumps({k: v for k, v in result.items() if k != "text"}, indent=2))
     check_args = argparse.Namespace(repo=args.repo, analysis_dir=args.analysis, check=str(args.output))
-    return part_b_pack.check(check_args)
+    # stdout stays one JSON document; the coverage report goes to stderr.
+    with contextlib.redirect_stdout(sys.stderr):
+        return part_b_pack.check(check_args)
 
 
 def main() -> int:

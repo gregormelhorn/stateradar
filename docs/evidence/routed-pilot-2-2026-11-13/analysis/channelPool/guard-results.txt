@@ -1,0 +1,41 @@
+group G-01 construction validation: proven
+group G-02 idle-expiry decision: proven
+group G-04 Get slow path: proven
+group G-05 waiter wake-up: proven
+group G-06 Put routing: proven
+group G-07 Close routing: proven
+group G-08 Release routing: proven
+group G-09 Get entry: proven
+group G-03 ping validity: not-formalizable: external-call: the branch depends on the user Ping callback result (channel.go:123-124)
+G-01 implication valid => MaxIdle>=0 and MaxCap>=InitialCap>=0: proven
+G-01 witness: MaxCap == 0 accepted by validation: yes [InitialCap = 0, MaxIdle = 0, MaxCap = 0]
+G-04 ordering: released (factoryNil) and at capacity selects 'wait', not 'ErrClosed': witness [maxActive = 0, openingConns = 0, factoryNil = True]
+boundary probes:
+  G-01 {'InitialCap': -1, 'MaxIdle': 5, 'MaxCap': 10, 'FactoryNil': False, 'CloseNil': False} -> ['invalid-capacity']
+  G-01 {'InitialCap': 0, 'MaxIdle': 5, 'MaxCap': 10, 'FactoryNil': False, 'CloseNil': False} -> ['valid']
+  G-01 {'InitialCap': 1, 'MaxIdle': 5, 'MaxCap': 10, 'FactoryNil': False, 'CloseNil': False} -> ['valid']
+  G-01 {'InitialCap': 4, 'MaxIdle': 5, 'MaxCap': 10, 'FactoryNil': False, 'CloseNil': False} -> ['valid']
+  G-01 {'InitialCap': 5, 'MaxIdle': 5, 'MaxCap': 10, 'FactoryNil': False, 'CloseNil': False} -> ['valid']
+  G-01 {'InitialCap': 6, 'MaxIdle': 5, 'MaxCap': 10, 'FactoryNil': False, 'CloseNil': False} -> ['invalid-capacity']
+  G-01 {'InitialCap': 0, 'MaxIdle': 5, 'MaxCap': 4, 'FactoryNil': False, 'CloseNil': False} -> ['invalid-capacity']
+  G-01 {'InitialCap': 0, 'MaxIdle': 5, 'MaxCap': 5, 'FactoryNil': False, 'CloseNil': False} -> ['valid']
+  G-01 {'InitialCap': 0, 'MaxIdle': 5, 'MaxCap': 6, 'FactoryNil': False, 'CloseNil': False} -> ['valid']
+  G-02 {'IdleTimeout': 100, 'age': 99} -> ['keep']
+  G-02 {'IdleTimeout': 100, 'age': 100} -> ['keep']
+  G-02 {'IdleTimeout': 100, 'age': 101} -> ['discard']
+  G-02 {'IdleTimeout': -1, 'age': 50} -> ['keep']
+  G-02 {'IdleTimeout': 0, 'age': 50} -> ['keep']
+  G-02 {'IdleTimeout': 1, 'age': 50} -> ['discard']
+  G-04 {'openingConns': 9, 'maxActive': 10, 'factoryNil': False, 'factoryErr': False} -> ['create']
+  G-04 {'openingConns': 10, 'maxActive': 10, 'factoryNil': False, 'factoryErr': False} -> ['wait']
+  G-04 {'openingConns': 11, 'maxActive': 10, 'factoryNil': False, 'factoryErr': False} -> ['wait']
+  G-04 {'openingConns': 10, 'maxActive': 10, 'factoryNil': True, 'factoryErr': False} -> ['wait']
+  G-05 {'reqOpen': True, 'IdleTimeout': 100, 'age': 99} -> ['deliver']
+  G-05 {'reqOpen': True, 'IdleTimeout': 100, 'age': 100} -> ['deliver']
+  G-05 {'reqOpen': True, 'IdleTimeout': 100, 'age': 101} -> ['discard-retry']
+  G-05 {'reqOpen': False, 'IdleTimeout': 100, 'age': 0} -> ['ErrMaxActiveConnReached']
+  G-06 {'connNil': False, 'released': False, 'waiters': 0, 'idle': 9, 'MaxIdle': 10} -> ['enqueue']
+  G-06 {'connNil': False, 'released': False, 'waiters': 0, 'idle': 10, 'MaxIdle': 10} -> ['overflow-close']
+  G-06 {'connNil': False, 'released': False, 'waiters': 0, 'idle': 0, 'MaxIdle': 10} -> ['enqueue']
+  G-06 {'connNil': False, 'released': False, 'waiters': 1, 'idle': 0, 'MaxIdle': 10} -> ['handoff']
+  G-06 {'connNil': False, 'released': False, 'waiters': 0, 'idle': 0, 'MaxIdle': 0} -> ['overflow-close']

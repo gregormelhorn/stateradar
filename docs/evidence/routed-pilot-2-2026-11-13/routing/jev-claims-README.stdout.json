@@ -1,0 +1,99 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "f1ee56748fe3bf0567a05c4c5a284dfe752b952ae9c9cada76e7687d4dcdbfb2",
+  "input_tokens": 1788,
+  "cost_microdollars": 76,
+  "reservation_microdollars": 319,
+  "checks": {
+    "V-44": {
+      "kind": "claim",
+      "statement": "The README promises that Get waits when the pool is full.",
+      "source": "README.md",
+      "line": 15,
+      "fragment": "When the connection pool is full, support for connection waiting",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.93,
+        "contradicted": 0.0,
+        "unclear": 0.07
+      },
+      "confidence": 0.89,
+      "review_required": true
+    },
+    "V-45": {
+      "kind": "claim",
+      "statement": "The README states that connections exceeding the maximum idle time will be closed and discarded.",
+      "source": "README.md",
+      "line": 13,
+      "fragment": "the timeout connection will be closed and discarded",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.84,
+        "contradicted": 0.0,
+        "unclear": 0.16
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "V-46": {
+      "kind": "claim",
+      "statement": "The README states that connections found invalid by the user ping method will be discarded.",
+      "source": "README.md",
+      "line": 14,
+      "fragment": "invalid connection will be discarded",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "V-47": {
+      "kind": "claim",
+      "statement": "The README states that Release releases all connections in the pool.",
+      "source": "README.md",
+      "line": 55,
+      "fragment": "Release all connections in the connection pool",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "V-48": {
+      "kind": "claim",
+      "statement": "The README describes Len as the number of connections in the current pool.",
+      "source": "README.md",
+      "line": 58,
+      "fragment": "View the number of connections in the current connection pool",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "V-49": {
+      "kind": "claim",
+      "statement": "The README describes InitialCap as the initial number of connections.",
+      "source": "README.md",
+      "line": 30,
+      "fragment": "Initialize the number of connections to 5",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.94,
+        "contradicted": 0.0,
+        "unclear": 0.06
+      },
+      "confidence": 0.91,
+      "review_required": true
+    }
+  }
+}
