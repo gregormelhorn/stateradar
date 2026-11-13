@@ -210,12 +210,17 @@ _DASH_RANGE = re.compile(r"(?<![\w./-])(" + _FILE + r"`?:\d+)[\u2013\u2014](?=\d
 
 
 # Backstop for R-PART-B, run after stripping: a cited file name, then up to
-# 60 characters of the same clause ("line 7", "(line 7)", "#L7", "and in
-# `x.go`"; never past a cell bar, ")" or ";"), then a quote-paren with
-# straight, single or typographic quotes. Whatever spelling the citation
-# used, its fragment refuses the package. A parenthesised prose quote right
-# after a code file name refuses too (the safe direction): rephrase it.
-_LEFT_TAIL = r"`?(?:[^|\n();]|\([^|\n();\"'\u201c\u2018]*\)){0,60}?\(\s*[\"'\u201c\u2018]"
+# 80 characters of the same clause ("line 7", "(line 7; Get loop)", "#L7",
+# "and in `x.go`"; never past a cell bar, a ";" or a ")" that closes an
+# earlier parenthesis), then a quote-paren with straight, single or
+# typographic quotes. Whatever spelling the citation used, its fragment
+# refuses the package. A parenthesised prose quote right after a code file
+# name refuses too (the safe direction): rephrase it.
+# Known gaps, kept so that prose such as "(pool.go:6), described as
+# ("closed")" is not refused: a quote after the citation's own ";" or ")"
+# ("x.go:7; the code reads ("...")"), or more than 80 characters on. Rule 7
+# still has the agent read the package.
+_LEFT_TAIL = r"`?(?:[^|\n();]|\([^|\n()\"'\u201c\u2018]*\)){0,80}?\(\s*[\"'\u201c\u2018]"
 _LEFT_FRAGMENT = re.compile(r"(?<![\w./-])(" + _FILE + r")" + _LEFT_TAIL)
 
 
@@ -452,8 +457,10 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     if left:
         raise ValueError("code fragments left after a citation (a fragment is unbalanced, wrapped "
                          "across lines, cited as other than file:N or file:N-M, or holds an unescaped "
-                         "\"|\" in a table cell: put each fragment on one line after file:N, escape "
-                         "table bars as \"\\|\", then rebuild; never send): "
+                         "\"|\" in a table cell; or a parenthesised prose quote follows a code file "
+                         "name in the same clause: put each fragment on one line after file:N, escape "
+                         "table bars as \"\\|\", rephrase such a prose quote, then rebuild; never "
+                         "send): "
                          + "; ".join(left[:10]))
     kept = sorted(set(_LOCAL_ID.findall(blind_copy + "\n" + blind_doctrine)))
     both = catalogue + "\n" + doctrine

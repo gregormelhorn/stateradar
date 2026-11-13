@@ -110,10 +110,11 @@
   every `|` outside tables are code; no code tail survives and later cells
   and quoted prose stay. Two backstops refuse the package: a cited file name
   followed in the same clause by a quote-paren (any quote style, also after
-  `line 7`, `(line 7)`, `#L7` or a second name, never past `)` or `;`;
-  escape `|` as `\|` inside a table cell; an en- or em-dash range `:7–9` in
-  a citation strips like `:7-9`), and a catalogue or doctrine table row
-  whose cell count or the line count changed
+  `line 7`, `(line 7)`, `#L7` or a second name, never past a `;` or a
+  closing `)`, which are documented gaps; the patterns run in linear time on
+  long tokens; escape `|` as `\|` inside a table cell; an en- or em-dash
+  range `:7–9` in a citation strips like `:7-9`), and a catalogue or
+  doctrine table row whose cell count or the line count changed
   (`part_b_pack.changed_table_rows`). Removing an id never joins two lines.
   A later citation names a file the text cites with a fragment elsewhere or
   a file under `--repo`, by path or base name (`part_b_pack.cited_names`;

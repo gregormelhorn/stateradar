@@ -525,6 +525,16 @@ class ModelTest(unittest.TestCase):
             self.assertTrue(P.leftover_fragments(P.blind_catalogue(row, later_names=cited), frozenset(), cited), row)
         self.assertEqual(P.blind_catalogue('| E01 | channel.go:17\u201419 ("x := 1") | next |'),
                          "| E01 | channel.go | next |")
+        for row in ('| zf | channel.go (line 7; Get loop) ("a | b") | next |',
+                    '| zg | channel.go at line 7, inside the Get loop just before the lock is taken by '
+                    'the caller ("a | b") | next |'):
+            self.assertTrue(P.leftover_fragments(P.blind_catalogue(row, later_names=cited), frozenset(), cited), row)
+        # Known gaps (documented at _LEFT_TAIL): a quote after the citation's
+        # own ";" or ")" reads as prose and is not refused.
+        for row in ('| zh | channel.go:7; the code reads ("a | b") | next |',
+                    '| zi | channel.go:7) and then ("a | b") | next |'):
+            self.assertEqual(P.leftover_fragments(P.blind_catalogue(row, later_names=cited), frozenset(), cited),
+                             [], row)
         # A dash outside a citation (a kept quote) stays verbatim.
         self.assertEqual(P.blind_catalogue('| E | README.md:4 ("open 10:30\u201311:00 daily") | n |',
                                            keep_quotes_from=frozenset({"README.md"})),
