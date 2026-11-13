@@ -542,13 +542,14 @@ class ModelTest(unittest.TestCase):
             self.assertIn(f"## Remembrance semantics {label}", package)
             self.assertIn("start its behaviour cell with `as-is:`", package)
             reply = ("| Event | Expected |\n|---|---|\n| E01 | *as-is:* handle |\n| E02 | reject |\n"
-                     "| E02 (closed) | AS-IS: ignore (accidental) |\n\n- [x] E01\n- [x] E02\n")
+                     "| E02 (closed) | AS-IS: ignore (accidental) |\n| E02 (open) | handle, as-is: queued |\n"
+                     "| E02 (full) | handle; not-as-is: x |\n\n- [x] E01\n- [x] E02\n")
             out, err = io.StringIO(), io.StringIO()
             with patch.object(local_models, "flash", return_value={"text": reply, "finish_reason": "stop"}), \
                     contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                 self.assertEqual(local_models.blind(budget, Namespace(**{**vars(args), "package_only": False}),
                                                     "key"), 0)
-            self.assertIn("PART-B INDEPENDENCE: 2 rows marked as-is (not independent): E01, E02 (closed)",
+            self.assertIn("PART-B INDEPENDENCE: 3 rows marked as-is (not independent): E01, E02 (closed), E02 (open)",
                           err.getvalue())
             unmarked = "| Event | Expected |\n|---|---|\n| E01 | handle |\n| E02 | reject |\n\n- [x] E01\n- [x] E02\n"
             err = io.StringIO()

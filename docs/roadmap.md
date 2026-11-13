@@ -293,11 +293,12 @@ Open, in order:
    for as-is prose reaching Part B (remembrance and upstream statements carry
    the provenance "observed in code") became 02-pilot v1.20: the package
    labels those sections, and Part B marks the rows that rest on them.
-   Its `timing.md` shows where the 37 minutes went: about 70 s of Flash and
-   Jev calls, about 3.5 minutes of `go test` (mostly three waits
-   on the hanging `TestPool_Get`'s 60-second timeout) and about 32 minutes
-   of the steering agent's own work, which includes the pack's tool runs
-   (not timed separately). Timed agent-only run (done 2026-11-13,
+   Whether Part B actually marks the leaked rows is measured in the next
+   pilot. Its `timing.md` shows where the 37 minutes went: about 70 s of
+   Flash and Jev calls, about 3.5 minutes of `go test` (mostly three waits on
+   the hanging `TestPool_Get`'s 60-second timeout) and about 32 minutes of
+   the steering agent's own work, which includes the pack's tool runs (not
+   timed separately). Timed agent-only run (done 2026-11-13,
    `docs/evidence/agent-only-pool-2026-11-13/`, same pack, blind, routing
    off, Part B in a fresh blind subagent): 34:34 minutes, of which 2:25
    `go test`, about 3 s checkers, 1:36 blind subagent and 30:30 agent work.

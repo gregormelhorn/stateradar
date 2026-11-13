@@ -253,7 +253,8 @@
   `upstream_guards:` list field `(observed in code)`, without adding a line.
   The Part-B task asks for `as-is:` at the start of the behaviour cell of a
   row that rests only on such text, and the coverage check (`blind`, or
-  `part_b_pack.py --check`) lists those rows (`PART-B INDEPENDENCE`,
+  `part_b_pack.py --check`) lists each row that holds the mark anywhere
+  (`PART-B INDEPENDENCE`,
   information, not a failure). On both runs' catalogues it labels six headings
   each, and 18 fields (agent-only run) and 12 (routed run). The `as-is:` mark
   is Part B's own report, not a measurement: Part B can rest on labelled text

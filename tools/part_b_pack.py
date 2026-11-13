@@ -421,7 +421,8 @@ def mark_observed(text: str) -> str:
     return _OBSERVED_FIELD.sub(r"\1\2 (observed in code)", text)
 
 
-_AS_IS_ROW = re.compile(r"\|[ \t*_`]*as-is:", re.I)
+# Asked for at the start of the behaviour cell; counted anywhere in the row.
+_AS_IS_ROW = re.compile(r"(?<![\w-])as-is:", re.I)
 
 
 _DOC_ROW = re.compile(r"^(?:[-*]|\d+\.|\|)\s*\**DOC-\d+")
