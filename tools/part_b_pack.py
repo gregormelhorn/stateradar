@@ -396,6 +396,29 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     return re.sub(r"(?<=[^\s|])[ \t]+$", "", text, flags=re.M)
 
 
+# Catalogue sections and per-event fields that 02-pilot Step 3 fills from the
+# code (gate, remembrance, upstream guard, lock discipline, the event
+# annotations and the coverage table). Part B needs them to read the events,
+# but they state what the implementation does, and both pilots of 2026-11-13
+# saw Part B take them as documented intent. The package keeps them and labels
+# their provenance; the instruction asks Part B to mark rows that rest on them.
+OBSERVED = "observed in code, not documented intent"
+_OBSERVED_HEADING = re.compile(
+    r"(?im)^(#{1,6}[ \t]+(?=[^\n]*\b(?:gate[- ]type|remembrance|upstream[- ]guards?|lock[- ]discipline"
+    r"|event[ \t]+annotations?|undesired[- ]coverage)\b)[^\n]*?)[ \t]*$")
+_OBSERVED_FIELD = re.compile(r"(?m)^([ \t]*[-*][ \t]+)(gate|upstream_guards)[ \t]*:")
+
+
+def mark_observed(text: str) -> str:
+    """Label the catalogue's code-derived sections and fields (no line is added)."""
+    text = _OBSERVED_HEADING.sub(lambda m: m.group(1) if OBSERVED in m.group(1)
+                                 else f"{m.group(1)} ({OBSERVED})", text)
+    return _OBSERVED_FIELD.sub(r"\1\2 (observed in code):", text)
+
+
+_AS_IS_ROW = re.compile(r"\|[ \t*_`]*as-is:", re.I)
+
+
 _DOC_ROW = re.compile(r"^(?:[-*]|\d+\.|\|)\s*\**DOC-\d+")
 
 
@@ -457,7 +480,7 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     keep_quotes = quote_files(doctrine, list(args.requirements) + list(args.contracts), repo, adir)
 
     later = cited_names(catalogue + "\n" + doctrine, repo)
-    blind_copy = blind_catalogue(catalogue, keep_ids, keep_quotes, later)
+    blind_copy = mark_observed(blind_catalogue(catalogue, keep_ids, keep_quotes, later))
     try:
         same_ids = _catalogue_ids(blind_copy) == (events, pairs)
     except ValueError:
@@ -566,10 +589,13 @@ def check(args: argparse.Namespace) -> int:
     # once. A missing row must be impossible to miss; granularity is
     # the blind pass's choice.
     key_cells = []
+    as_is = []
     for ln in blind.split("\n"):
         s = ln.strip()
         if s.startswith("|"):
             key_cells.append(s.split("|")[1].strip().lstrip("*").strip())
+            if _AS_IS_ROW.search(s):
+                as_is.append(key_cells[-1])
     checklist = re.findall(r"^\s*- \[x\] ([\w-]+)\s*$", blind, re.M)
     errors: list[str] = []
     for ident in events + pairs:
@@ -588,6 +614,11 @@ def check(args: argparse.Namespace) -> int:
             print(" -", e)
         return 1
     print(f"PART-B COVERAGE: OK ({len(events)} events, {len(pairs)} pair orderings)")
+    # Rows the blind pass based on code-derived catalogue text (mark_observed):
+    # agreement on them is not independent (rule 7). Information, not a failure.
+    if as_is:
+        print(f"PART-B INDEPENDENCE: {len(as_is)} rows marked as-is (not independent): "
+              + ", ".join(as_is))
     return 0
 
 

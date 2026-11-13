@@ -9,7 +9,7 @@ entries and separates the new model-routing plan from shipped capabilities.
 
 1. **Measure cost-aware model routing.** Flash drafting, Jev batches, the
    `draft-verify` chain, a local ledger, and an offline batch evaluator exist,
-   and `prompts/02-pilot.md` (v1.19) routes Steps 1, 6, 8 and Part B through
+   and `prompts/02-pilot.md` (v1.20) routes Steps 1, 6, 8 and Part B through
    them; two full routed pilots ran on silenceper/pool, the second blind to
    the benchmark and with executed as-is tests (entry 11). Next run a timed
    agent-only pilot of the same component, build independently reviewed
@@ -253,7 +253,10 @@ Open, in order:
    trigger vocabulary (including `draft-verify` and `jev check`). Still open
    from it: prose in the catalogue that states as-is conclusions (mandatory
    remembrance, gate, upstream-guard and lock-discipline annotations) still
-   reaches Part B, so Part-B agreement on those rows is not independent; the
+   reaches Part B, so Part-B agreement on those rows is not independent
+   (since 02-pilot v1.20 the package labels those sections and fields
+   `observed in code` and the coverage check lists the rows Part B marks
+   `as-is:`; prose elsewhere is still caught only by reading); the
    sidecar generator did not merge pairs, guard outcomes or ODC fields
    (fixed after the agent-only run, 02-pilot v1.19); `status` has no tokens,
    timestamps or step labels; the 0/6 orderings and the inconsistent claim
@@ -286,10 +289,10 @@ Open, in order:
    the blockquote line in the Part-B task, the matrix wrapper template's
    pack path, and 02-pilot v1.18; the sidecar generator's missing pairs,
    guard and ODC fields (the pilot merged them with a per-run script)
-   followed after the agent-only run (02-pilot v1.19). Still open from it:
-   as-is prose in the catalogue reaching Part B (the pilot's candidate rule:
-   remembrance and upstream statements carry the provenance "observed in
-   code"). Its `timing.md` shows where the 37 minutes went: about 70 s of
+   followed after the agent-only run (02-pilot v1.19). Its candidate rule
+   for as-is prose reaching Part B (remembrance and upstream statements carry
+   the provenance "observed in code") became 02-pilot v1.20: the package
+   labels those sections, and Part B marks the rows that rest on them. Its `timing.md` shows where the 37 minutes went: about 70 s of
    Flash and Jev calls, about 3.5 minutes of `go test` (mostly three waits
    on the hanging `TestPool_Get`'s 60-second timeout) and about 32 minutes
    of the steering agent's own work, which includes the pack's tool runs
