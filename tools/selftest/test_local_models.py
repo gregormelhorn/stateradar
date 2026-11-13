@@ -2,6 +2,7 @@ import importlib.util
 import contextlib
 import io
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -385,6 +386,250 @@ class ModelTest(unittest.TestCase):
             package = (root / "blind.package.md").read_text()
             self.assertIn("selected requirement", package)
             self.assertNotIn("unrelated text", package)
+
+    def test_blind_catalogue_drops_code_fragments_and_analysis_references(self):
+        # Pilot 2026-11-13: rule 3 puts code fragments into catalogue citations,
+        # and the catalogue went to Part B verbatim.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            analysis = root / "analysis"
+            analysis.mkdir()
+            (analysis / "event-catalogue.md").write_text(
+                "<!-- event-ids: E01 -->\n| E01 | waiter wakes (observed-in-code, channel.go:139 "
+                "(\"if !ok {\")) → Q-01, PA-21 |\n" + "event details " * 30)
+            (root / "requirements.md").write_text("requirement details " * 30)
+            (root / "contracts.md").write_text("contract details " * 30)
+            args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
+                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=True)
+            self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
+            package = (root / "blind.package.md").read_text()
+            self.assertIn("waiter wakes", package)
+            self.assertIn("observed-in-code, channel.go)", package)
+            for leaked in ("if !ok", "channel.go:139", "Q-01", "PA-21"):
+                self.assertNotIn(leaked, package)
+
+    def make_blind_inputs(self, root, catalogue=None, extraction=None):
+        analysis = root / "analysis"
+        analysis.mkdir()
+        (analysis / "event-catalogue.md").write_text(catalogue or "<!-- event-ids: E01 -->\n" + "event details " * 30)
+        if extraction is not None:
+            (analysis / "extraction.md").write_text(extraction)
+        (root / "requirements.md").write_text("requirement details " * 30)
+        (root / "contracts.md").write_text("contract details " * 30)
+        return Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
+                         contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=True)
+
+    def test_blind_carries_doctrine_lines_from_a_table(self):
+        # Pilot 2026-11-13: '### Doctrine-line sweep' with a table was skipped silently.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, extraction=(
+                "## Step 1\n\n### Doctrine-line sweep\n\n| id | source | text |\n|---|---|---|\n"
+                "| DOC-1 | README.md:15 | \"support for connection waiting\" |\n"
+                "| DOC-2 | README.md:14 | \"an invalid connection will be discarded after a failed ping\" |\n"
+                "| DOC-3 | README.md:13 | \"a timed-out connection will be closed and discarded\" |\n\n## Step 2\n"))
+            self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
+            self.assertIn("support for connection waiting", (root / "blind.package.md").read_text())
+
+    def test_blind_refuses_doctrine_ids_it_cannot_extract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, extraction="Doctrine DOC-1 and DOC-2 are described in prose only.\n")
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(ValueError):
+                    local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+
+    def test_blind_catalogue_strips_the_pilots_own_leaks(self):
+        source = (Path(__file__).resolve().parents[2] / "docs" / "evidence" / "routed-pilot-2026-11-13"
+                  / "partb" / "event-catalogue.pre-strip.md").read_text()
+        partb = Path(__file__).resolve().parents[2] / "docs" / "evidence" / "routed-pilot-2026-11-13" / "partb"
+        keep = local_models.part_b_pack.domain_ids((partb / "requirements.md").read_text(),
+                                                   (partb / "contracts.md").read_text())
+        stripped = local_models.part_b_pack.blind_catalogue(source, keep)
+        for leak in (r'\("', r"\bQ-\d", r"\bL-\d", r"\bPA-\d", r"\bSYS-\d", r"\bT-[A-Z]*\d",
+                     r"\.go:\d", r"\bFinding\b"):
+            self.assertIsNone(re.search(leak, stripped), leak)
+        self.assertIn("Get()", stripped)
+        quoted = local_models.part_b_pack.blind_catalogue(
+            '| E | a (channel.go:50 ("return nil, errors.New("pool is closed")")) |\n'
+            '| F | b (channel.go:51 (\u201cc.mu.Lock()\u201d), see Q-01, DR-002) |\n')
+        for leak in ("errors.New", "c.mu.Lock", ":50", "Q-01", "DR-002"):
+            self.assertNotIn(leak, quoted)
+        self.assertNotIn(", ,", quoted)
+        self.assertIn("P-01a", stripped)  # pair ids are catalogue content, not analysis references
+
+    def test_blind_catalogue_keeps_prose_and_domain_terms(self):
+        strip = local_models.part_b_pack.blind_catalogue
+        text = strip('Waits (channel.go:10 ("x := 1") then the caller retries, see channel.go:12 ("y := 2")).\n'
+                     'Call `c.Get("key")` or fail with `errors.New("pool is closed")`; listen on :8080.\n'
+                     'The T-1 threshold, level L-3 cache, an F-16, (channel.go:186, :194-196) lint L-4, see L-9.\n',
+                     {"T-1", "L-3", "F-16"})
+        self.assertIn("then the caller retries", text)
+        self.assertNotIn("x := 1", text)
+        self.assertNotIn("y := 2", text)
+        for kept in ('c.Get("key")', 'errors.New("pool is closed")', ":8080", "T-1 threshold", "L-3 cache", "F-16"):
+            self.assertIn(kept, text)
+        for gone in (":186", ":194", "L-4", "L-9"):
+            self.assertNotIn(gone, text)
+
+    def test_blind_keeps_ids_the_requirements_use_and_reports_them(self):
+        # Round 3 review: "the T-1 threshold" quoted in a doctrine line was
+        # stripped from the catalogue, and an undefined "see L-9" survived.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(
+                root, catalogue="<!-- event-ids: E01 -->\n| E01 | timer fires after the T-1 threshold, see L-9 |\n"
+                + "event details " * 30,
+                extraction="### Doctrine lines\n\n- DOC-1 \"the T-1 threshold bounds the wait\"\n"
+                + "".join(f"- DOC-{n} \"a waiting caller is woken when a connection is returned\"\n"
+                          for n in range(2, 6)))
+            err = io.StringIO()
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+                local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+            package = (root / "blind.package.md").read_text()
+            self.assertIn("after the T-1 threshold", package)
+            self.assertNotIn("L-9", package)
+            self.assertIn("kept in the catalogue", err.getvalue())
+            self.assertIn("T-1", err.getvalue())
+            self.assertRegex(err.getvalue(), r"removed as analysis references[^\n]*L-9")
+
+    def test_blind_catalogue_round3_cases(self):
+        strip = local_models.part_b_pack.blind_catalogue
+        # One-argument call: prose between citations survives on its own.
+        self.assertIn("then the caller retries",
+                      strip('Waits (channel.go:10 ("x := 1") then the caller retries, see channel.go:12 ("y")).'))
+        # A fragment that itself holds host:port or file:line tokens is removed whole.
+        for text, leak in (('c (client.go:40 ("conn, err := net.Dial("tcp", "db.example.com:5432")")) |', "net.Dial"),
+                           ('d (channel.go:50 ("// see util.go:3 for x")) |', "for x"),
+                           ("(channel.go:175-176 and :194-196) x", ":194")):
+            self.assertNotIn(leak, strip(text))
+        # A quote from a prose document is normative text and stays; the line number goes.
+        doc = strip('1. DOC-1 — README.md:12 ("The connection type in the pool is interface{}")',
+                    keep_quotes_from=frozenset({"README.md"}))
+        self.assertIn("The connection type in the pool is interface{}", doc)
+        self.assertNotIn(":12", doc)
+        self.assertNotIn("interface{}", strip('README.md:12 ("The connection type in the pool is interface{}")'))
+        # Two citations on one line: each code fragment goes whole.
+        for text in ('| e | x | channel.go:50 ("f("a") + g()") then channel.go:52 ("y := 2") |',
+                     'client.go:40 ("net.Dial("tcp", "db.example.com:5432")") and pool.go:3 ("x := 1")'):
+            out = strip(text)
+            for leak in ("g()", "net.Dial", '")', "x := 1", "y := 2"):
+                self.assertNotIn(leak, out)
+        # Debris: no "see ;", no empty leading space, no double space.
+        self.assertEqual(strip("(Q-01) The pool, see DR-002; then waits."), "The pool; then waits.")
+        self.assertEqual(strip("A wake-up (L-4, G-01) is lost"), "A wake-up is lost")
+        # "see" in prose stays; a host token after an inner quote-paren is not a citation.
+        self.assertEqual(strip("The pool behaves as callers see. What the waiter does not see, the owner does."),
+                         "The pool behaves as callers see. What the waiter does not see, the owner does.")
+        self.assertEqual(strip('client.go:40 ("f("a") dial db.example.com:5432") |'), "client.go |")
+        # A reference word left at the end of a cell or line goes too.
+        self.assertEqual(strip("| a; see T-F05 and L-4 |\nx, cf. Q-1\n"), "| a |\nx\n")
+        # Quotes are kept by exact path: vendor/lib/README.md does not ride on README.md.
+        self.assertEqual(strip('vendor/lib/README.md:9 ("lock A then B") and README.md:3 ("waiting")',
+                               keep_quotes_from=frozenset({"README.md"})),
+                         'vendor/lib/README.md and README.md ("waiting")')
+        # A dangling conjunction goes with the removed id.
+        self.assertEqual(strip("see T-F05 and L-4.", {"T-F05"}), "see T-F05.")
+        # Removing ids keeps the separator between two clauses.
+        self.assertEqual(strip("level L-3 cache; recorded as lint L-4; G-01 holds", {"L-3"}), "level L-3 cache; holds")
+        self.assertEqual(strip("waits; see Q-1, Q-2 and more"), "waits; and more")
+
+    def test_blind_keeps_source_quotes_but_not_analysis_quotes_or_glosses(self):
+        # Method review round 4: quotes from the analysis's own .md files and
+        # ids in a doctrine row's gloss must not reach Part B.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            catalogue = ("<!-- event-ids: E01 -->\n| E01 | waiter wakes (as-is-validation.md:12 (\"TestPool_Get hangs "
+                         "forever after Release\"), README.md:15 (\"support for connection waiting\"), "
+                         "requirements.md:3 (\"a waiter is woken on Put\")) see T-F05 |\n" + "event details " * 30)
+            doctrine = "### Doctrine lines\n\n" + "".join(
+                f'- DOC-{n} README.md:15 ("support for connection waiting, retry after T-1") (gloss, cf. T-F05)\n'
+                for n in range(1, 5))
+            args = self.make_blind_inputs(root, catalogue=catalogue, extraction=doctrine)
+            (root / "analysis" / "as-is-validation.md").write_text("validation notes\n")
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+            package = (root / "blind.package.md").read_text()
+            self.assertNotIn("hangs forever", package)
+            self.assertIn('README.md ("support for connection waiting")', package)
+            self.assertIn('requirements.md ("a waiter is woken on Put")', package)
+            self.assertNotIn("T-F05", package)
+            self.assertIn("retry after T-1", package)
+
+    def test_quote_files_match_exact_paths_outside_the_analysis_directory(self):
+        quote_files = local_models.part_b_pack.quote_files
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            (root / "analysis").mkdir()
+            (root / "analysis" / "summary.md").write_text("x")
+            got = quote_files('- DOC-1 docs/README.md:3 ("a")\n- DOC-2 analysis/open-questions.md:4 ("b")\n',
+                              ["summary.md", "docs/req.md:Waiting", str(root / "contracts.md")],
+                              root, root / "analysis")
+            self.assertEqual(got, frozenset({"summary.md", "docs/req.md", "contracts.md", "docs/README.md"}))
+
+    def test_cli_blind_truncation_goes_to_a_partial_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root)
+            self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
+            argv = ["local_models.py", "--ledger", str(root / "budget.db"), "blind", "analysis", "--repo", str(root),
+                    "--requirements", "requirements.md", "--contracts", "contracts.md",
+                    "--output", str(root / "blind.md")]
+            out = io.StringIO()
+            truncated = {"model": "deepseek-flash", "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+                         "choices": [{"message": {"content": "| E01 | half"}, "finish_reason": "length"}]}
+            with patch.object(sys, "argv", argv), patch.dict("os.environ", {"DEEPSEEK_API_KEY": "k"}), \
+                    patch.object(local_models, "post_json", return_value=truncated), \
+                    contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(local_models.main(), 1)
+            self.assertFalse((root / "blind.md").exists())
+            self.assertEqual((root / "blind.partial.md").read_text(), "| E01 | half")
+            self.assertNotIn("| E01 | half", out.getvalue())
+
+    def test_blind_doctrine_lines_are_stripped_and_need_a_heading(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            table = ("| DOC-1 | README.md:15, channel.go:21 | \"support for connection waiting\" → SYS-7 |\n"
+                     "| DOC-2 | README.md:14 | \"an invalid connection will be discarded after a failed ping\" |\n"
+                     "| DOC-3 | README.md:13 | \"a timed-out connection will be closed and discarded\" |\n")
+            args = self.make_blind_inputs(root, extraction="### Doctrine lines\n\n" + table)
+            self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
+            package = (root / "blind.package.md").read_text()
+            self.assertIn("support for connection waiting", package)
+            for leak in ("channel.go:21", "SYS-7", "README.md:15"):
+                self.assertNotIn(leak, package)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, extraction="## Status\n\n" + table)
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaisesRegex(ValueError, "doctrine"):
+                    local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+
+    def test_blind_refuses_a_stripped_catalogue_that_lost_its_ids(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, catalogue="<!-- event-ids: Q-1 E02 -->\n" + "event details " * 30)
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaisesRegex(ValueError, "event ids"):
+                    local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+
+    def test_blind_catalogue_keeps_the_word_finding_in_prose(self):
+        text = local_models.part_b_pack.blind_catalogue("Finding the oldest waiter is FIFO. Finding → Q-12 stays.\n")
+        self.assertIn("Finding the oldest waiter", text)
+        self.assertNotIn("Q-12", text)
+
+    def test_part_b_pack_cli_reports_input_errors_without_a_traceback(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_blind_inputs(root, extraction="Doctrine DOC-1 in prose only.\n")
+            run = subprocess.run([sys.executable, str(Path(local_models.__file__).parent / "part_b_pack.py"),
+                                  "analysis", "--repo", str(root), "--requirements", "requirements.md",
+                                  "--contracts", "contracts.md", "--out", str(root / "p.md")],
+                                 capture_output=True, text=True)
+        self.assertEqual(run.returncode, 2, run.stderr)
+        self.assertIn("PART-B PACK:", run.stderr)
+        self.assertNotIn("Traceback", run.stderr)
 
     def test_blind_sends_only_the_inspected_package(self):
         with tempfile.TemporaryDirectory() as directory:

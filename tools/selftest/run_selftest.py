@@ -122,6 +122,74 @@ def main() -> int:
             failures.append("non-Python citations were dropped by the generator")
         else:
             print("  ok  TypeScript citations survive the generator")
+        # Pilot 2026-11-13: the generator dropped every ("fragment"), so
+        # dsc_check's fragment verification never ran on generated sidecars.
+        if not cited or not all(c["citation"].get("fragment") for c in cited):
+            failures.append("citation fragments were dropped by the generator: "
+                            + json.dumps(cited[:2]))
+        else:
+            print("  ok  citation fragments survive the generator")
+        # Fragments with unescaped or typographic quotes, and backticked file
+        # names, must survive too (review of the pilot fixes).
+        sys.path.insert(0, str(ROOT / "tools"))
+        import gen_analysis_sidecar as gas
+        idx = {"channel.go": "channel.go"}
+        for raw_cell, want in (
+                ('reject (observed-in-code, channel.go:50 ("return nil, errors.New("pool is closed")"))',
+                 'return nil, errors.New("pool is closed")'),
+                ('reject (observed-in-code, `channel.go`:51 ("x := 1"))', "x := 1"),
+                ('handle (observed-in-code, channel.go:52 (\u201cc.mu.Lock()\u201d) + defer)', "c.mu.Lock()"),
+                ('handle (observed-in-code, channel.go:50-52 ("x := 1"))', "x := 1"),
+                ('handle (channel.go:50 ("x := 1") then retries, channel.go:52 ("y"))', "x := 1"),
+                ('handle (channel.go:40 ("net.Dial("tcp", "db.example.com:5432")"))',
+                 'net.Dial("tcp", "db.example.com:5432")'),
+                ('handle (channel.go:41 ("// see util.go:3 for x"))', "// see util.go:3 for x"),
+                ('handle (channel.go:50 ("f("a") + g()") then channel.go:52 ("y := 2"))', 'f("a") + g()'),
+                ('handle (channel.go:40 ("net.Dial("tcp", "db:5432")") and channel.go:3 ("x"))',
+                 'net.Dial("tcp", "db:5432")'),
+                ('handle (channel.go:40 ("f("a") dial db.example.com:5432"))', 'f("a") dial db.example.com:5432')):
+            got = gas._parse_cell(raw_cell, None, ["S"], idx).get("citation", {}).get("fragment")
+            if got != want:
+                failures.append(f"fragment not captured from {raw_cell!r}: {got!r}")
+        print("  ok  quoted, typographic and backticked fragments are captured")
+        qtext = tmp / "q.md"
+        qtext.write_text("Q-01. Title\n## Q-and-A\nQ-02\u2014Title\n**Q-03**\n#### Q-ordering\nQ-04) x\n")
+        got_q = [q["id"] for q in gas._parse_questions(qtext)]
+        if got_q != ["Q-01", "Q-02", "Q-03", "Q-04"]:
+            failures.append(f"question ids parsed as {got_q}")
+        else:
+            print("  ok  punctuated question ids parse; Q-words do not")
+        # Pilot 2026-11-13: '## Q-nn' question headings (the benchmark's
+        # style) were not parsed, so every hole reference looked dangling.
+        qh = sidecar(tmp, COMPOUND)
+        qfile = qh / "domain-analysis" / "gate" / "open-questions.md"
+        qfile.write_text(qfile.read_text().replace("\nQ-0", "\n## Q-0").replace(
+            "**Status:** OPEN — human decision required", "**Status:** DECIDED — reject (DR-001)", 1))
+        subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"), "--root", str(qh)],
+                       capture_output=True, text=True)
+        qids = [(q["id"], q["status"].split()[0]) for q in json.loads(
+            (qh / "domain-analysis" / "gate" / "analysis.json").read_text()).get("questions", [])]
+        if qids != [("Q-01", "RESOLVED"), ("Q-02", "OPEN")]:
+            failures.append(f"'## Q-nn' question headings not parsed: {qids}")
+        else:
+            print("  ok  '## Q-nn' question headings are parsed")
+        bad = sidecar(tmp, COMPOUND)
+        bad_matrix = bad / "domain-analysis" / "gate" / "disposition-matrix.md"
+        bad_matrix.write_text(bad_matrix.read_text().replace(
+            '("transition anchor: open idle x E1")', '("no such text here")'))
+        subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"), "--root", str(bad)],
+                       capture_output=True, text=True)
+        bad_sc = json.loads((bad / "domain-analysis" / "gate" / "analysis.json").read_text())
+        for key in ("events",):
+            for ev in bad_sc.get(key, []):
+                if not ev.get("undesired"):
+                    ev.setdefault("gate", "payload content")
+                    ev.setdefault("upstream_guards", ["validated upstream"])
+        bad_sc["coverage"] = sc["coverage"]
+        (bad / "domain-analysis" / "gate" / "analysis.json").write_text(json.dumps(bad_sc, indent=1))
+        expect("generated sidecar with a wrong fragment", True,
+               *dsc(bad / "domain-analysis" / "gate", "--repo", str(bad), "--model", "as-is.machine.mmd"),
+               needle="fragment")
 
         print("silent omission (v1.20: absence must be asserted)")
         d = sidecar(tmp, FLAT)
@@ -308,6 +376,24 @@ def main() -> int:
         d5 = tmp / "cm-green"
         shutil.copytree(gm, d5)
         expect("check_matrix green on golden-mini", False, *cmx(d5))
+        # Pilot 2026-11-13: blocks were split on bold headers only, so a
+        # traces file with '###' headers was one block and passed vacuously.
+        heads = sidecar(tmp, gm)
+        ok_trace = "control trace citing DR-001; cited text contemplates this ordering: yes\n"
+        bad_trace = "control trace citing DR-001, verdict handle\n"
+        (heads / "adversarial-traces.md").write_text(
+            "# Traces\n\n### T-01 first\n" + ok_trace + "\n### T-02 second\n" + bad_trace)
+        expect("scope line missing under a '###' trace header", True, *cmx(heads), needle="T-02")
+        (heads / "adversarial-traces.md").write_text(
+            "# Traces\n\n**T-01 first**\n" + ok_trace + "\n**T-02 second**\n" + bad_trace)
+        expect("scope line missing under a bold trace header", True, *cmx(heads), needle="T-02")
+        (heads / "adversarial-traces.md").write_text(
+            "# Traces\n\n### T-01 first\n" + ok_trace + "\n### T-02 second\n" + ok_trace)
+        expect("scope lines present under '###' trace headers", False, *cmx(heads))
+        # The pilot's own headers carry letters before the number.
+        (heads / "adversarial-traces.md").write_text(
+            "# Traces\n\n**T-P01a first**\n" + ok_trace + "\n### T-F01 second\n" + bad_trace)
+        expect("scope line missing under a 'T-F01' trace header", True, *cmx(heads), needle="T-F01")
         no_config = sidecar(tmp, gm)
         (no_config / "matrix-mutation.json").unlink()
         expect("mutation checker rejects missing configuration", True,

@@ -97,6 +97,20 @@ for doc_name in CHECK_FILES:
         if not p.is_dir() and any(m.group(1).startswith(r) for r in PACK_ROOTS):
             errors.append(f"{doc_name}: layout path does not exist: {m.group(1)}")
 
+# ODC trigger list in the pilot prompt == the closed vocabulary that
+# dsc_check enforces (pilot 2026-11-13: the prompt named triggers the
+# checker would reject).
+import tomllib as _toml
+_vocab = set(_toml.loads((ROOT / "formats" / "rules.toml").read_text(encoding="utf-8"))["vocab"]["odc_triggers"])
+_odc = re.search(r"`trigger:` — the mechanism that found it \(([^)]*)\)", read("02-pilot.md"))
+if not _odc:
+    errors.append("prompts/02-pilot.md: ODC trigger list not found")
+else:
+    _named = {t.strip() for t in _odc.group(1).split(",")}
+    if _named != _vocab:
+        errors.append("prompts/02-pilot.md ODC triggers differ from formats/rules.toml odc_triggers: "
+                      f"prompt only {sorted(_named - _vocab)}, registry only {sorted(_vocab - _named)}")
+
 if errors:
     print("PACK CONSISTENCY: FAIL")
     for e in errors: print(" -", e)

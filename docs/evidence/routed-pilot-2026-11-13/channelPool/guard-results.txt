@@ -1,0 +1,40 @@
+group G-01 config validation: proven
+group G-02 Get default branch: proven
+group G-03 idle expiry: proven
+group G-04 Put branches: proven
+group G-05 Close counting: proven
+group G-08 Release re-entry: proven
+group G-06 Get receive gate: not-formalizable: external-call: the Ping callback result (channel.go:124) decides one branch; inspection (unproven): branches are checked in sequence nil -> expired -> ping -> accept, so they are disjoint by order; coverage by the final return (channel.go:129)
+group G-07 waiter wake: not-formalizable: dynamic-state: ok depends on whether any goroutine closes the waiter channel; inspection (unproven): no statement in channel.go closes a req channel, so the !ok branch (channel.go:138-139) is unreachable as-is
+
+boundary probes:
+  G-01 {'InitialCap': 5, 'MaxIdle': 5, 'MaxCap': 5} -> ['valid']
+  G-01 {'InitialCap': 6, 'MaxIdle': 5, 'MaxCap': 5} -> ['invalid']
+  G-01 {'InitialCap': 4, 'MaxIdle': 5, 'MaxCap': 5} -> ['valid']
+  G-01 {'InitialCap': 0, 'MaxIdle': 5, 'MaxCap': 4} -> ['invalid']
+  G-01 {'InitialCap': 0, 'MaxIdle': 5, 'MaxCap': 5} -> ['valid']
+  G-01 {'InitialCap': 0, 'MaxIdle': 5, 'MaxCap': 6} -> ['valid']
+  G-01 {'InitialCap': -1, 'MaxIdle': 0, 'MaxCap': 0} -> ['invalid']
+  G-01 {'InitialCap': 0, 'MaxIdle': 0, 'MaxCap': 0} -> ['valid']
+  G-02 {'openingConns': 99, 'maxActive': 100, 'factoryNil': False} -> ['create']
+  G-02 {'openingConns': 100, 'maxActive': 100, 'factoryNil': False} -> ['wait']
+  G-02 {'openingConns': 101, 'maxActive': 100, 'factoryNil': False} -> ['wait']
+  G-02 {'openingConns': 0, 'maxActive': 0, 'factoryNil': False} -> ['wait']
+  G-02 {'openingConns': 99, 'maxActive': 100, 'factoryNil': True} -> ['closed']
+  G-03 {'ageMs': 14999, 'idleTimeoutMs': 15000} -> ['keep']
+  G-03 {'ageMs': 15000, 'idleTimeoutMs': 15000} -> ['keep']
+  G-03 {'ageMs': 15001, 'idleTimeoutMs': 15000} -> ['expired']
+  G-03 {'ageMs': 1000000000, 'idleTimeoutMs': 0} -> ['keep']
+  G-04 {'connsNil': False, 'waiters': 0, 'idle': 9, 'maxIdle': 10} -> ['enqueue']
+  G-04 {'connsNil': False, 'waiters': 0, 'idle': 10, 'maxIdle': 10} -> ['overflow']
+  G-04 {'connsNil': False, 'waiters': 1, 'idle': 0, 'maxIdle': 10} -> ['handoff']
+  G-04 {'connsNil': True, 'waiters': 3, 'idle': 0, 'maxIdle': 10} -> ['closed']
+  G-04 {'connsNil': False, 'waiters': 0, 'idle': 0, 'maxIdle': 0} -> ['overflow']
+
+facts:
+  G-01 MaxCap == 0 accepted by validation: True  (finding -> Q-14)
+  G-01 valid => InitialCap <= MaxCap: True
+
+SYS invariant checks (z3, assumptions: waiters>=0, idle>=0, maxActive>=0):
+  SYS-3 preserved by Close: violation (witness: idle=0, maxActive=0, openingConns=0, waiters=1)
+  SYS-4 established by Release: violation (Release leaves connReqs unchanged; any pre-state with waiters > 0 keeps them)

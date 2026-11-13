@@ -209,11 +209,24 @@ def _parse_cell(
 
     if dr:
         cell["dr"] = dr.group(0)
+    # file:line, optionally followed by ("fragment") (02-pilot rule 3). Keep
+    # the fragment: dsc_check verifies it near the cited line. Read it from
+    # the unstripped text, because inline-code stripping can alter it.
     cit = re.search(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw)
     if cit:
         path = src_index.get(Path(cit.group(1)).name)
         if path:
             cell["citation"] = {"file": path, "line": int(cit.group(2))}
+            # The fragment may hold unescaped or typographic quotes and
+            # "host:5432" tokens: it ends at a quote-paren followed by a
+            # boundary, or at the last one before a later citation on the line.
+            head = re.escape(cit.group(1)) + r"`?:" + cit.group(2) + r'(?:-\d+)?`?\s*\(\s*["\u201c]'
+            end = (r'["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)'
+                   r'|(?:(?!["\u201d]\s*\)).)*?[\s,(][\w./-]+\.[A-Za-z]{1,4}`?:\d+(?:-\d+)?(?=`?\s*\(|[\s,;)|]|$))')
+            frag = (re.search(head + r"(.+?)" + end, text, re.M)
+                    or re.search(head + r'(.+?)["\u201d]\s*\)', text))
+            if frag:
+                cell["citation"]["fragment"] = frag.group(1).replace('\\"', '"')
     return cell
 
 
@@ -247,7 +260,8 @@ def _parse_questions(path: Path) -> list[dict]:
     questions = []
     current: dict | None = None
     for line in path.read_text().split("\n"):
-        m = re.match(r"^(Q-[\w-]+)", line.strip())
+        # 'Q-01', '## Q-01: title' and '**Q-01**' all open a question.
+        m = re.match(r"^(?:#{1,6}\s+|\*\*)?(Q-(?:[A-Z]+-)*\d[\w-]*?)(?=[\s:*.,)\u2014]|$)", line.strip())
         if m:
             current = {"id": m.group(1), "status": "OPEN"}
             questions.append(current)
