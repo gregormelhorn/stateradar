@@ -242,7 +242,7 @@ Build a Markdown table: rows = leaf states of the as-is model; columns = all cat
 
 * `transition → <target>`: with provenance
 * `handle`: stays in the state, does something; with provenance
-* a crash (a panic, an exception that escapes the component, a process exit) is `handle` whose text starts `crash:` and carries a question: `handle crash: Ping is nil and panics → Q-11`. The code does something, but nobody decided it. Never write it as `transition` or `ignore`: the sidecar generator reads a `crash:` label written right after the disposition word, and rejects such a cell if it is not `handle` or names no question (`Q-nn` is a placeholder, not a question), and keeps the question on the cell for `dsc_check.py`.
+* a crash (a panic, an exception that escapes the component, a process exit) is `handle` whose text starts `crash:` and carries a question: `handle crash: Ping is nil and panics → Q-11`. The code does something, but nobody decided it. Never write it as `transition` or `ignore`: the sidecar generator reads a `crash:` label written right after the disposition word and rejects such a cell if it is not `handle` or names no question (`Q-nn` is a placeholder, not a question). It keeps the question on the cell for `dsc_check.py`.
 * `ignore (documented)`: intent has evidence; cite it (the requirement-scope rule applies). Citations are cheapest at matrix-writing time — a `file:line ("fragment")` per cell now beats a backfill pass later.
 * `ignore (accidental)`: nothing happens only by omission or fall-through; **counts as a hole**, however harmless it looks. It carries a hole reference like any hole: `ignore (accidental) → Q-03`.
 * `defer (queued)`: the code buffers the event; cite where
