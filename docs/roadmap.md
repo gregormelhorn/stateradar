@@ -9,8 +9,8 @@ entries and separates the new model-routing plan from shipped capabilities.
 
 1. **Measure cost-aware model routing.** Flash drafting, Jev batches, the
    `draft-verify` chain, a local ledger, and an offline batch evaluator exist,
-   and `prompts/02-pilot.md` (v1.16) routes Steps 1, 6, 8 and Part B through
-   them. Next build independently reviewed examples, split held-out components
+   and `prompts/02-pilot.md` (v1.17) routes Steps 1, 6, 8 and Part B through
+   them; a first full routed pilot ran on silenceper/pool (entry 11). Next build independently reviewed examples, split held-out components
    or issues, and measure errors, coverage, time, and total cost of the routed
    pilot against the agent-only pilot. Only then evaluate selective
    escalation. Automatic acceptance and escalation are not implemented.
@@ -220,9 +220,29 @@ Open, in order:
    pair orderings because the example catalogue carries no `P-` ids, so it
    cannot fail on missing pairs; and Flash's blind table used disposition
    wording outside the closed vocabulary, which the coverage check does not
-   test. Next run a whole pilot on the routed path, record failures, rejected
-   drafts and the ledger total in `summary.md`, and compare with an agent-only
-   run of the same component.
+   test.
+
+   **First full routed pilot** (2026-11-13, silenceper/pool `channelPool`,
+   pack da655aa, prompt v1.16, `jev-1.14.0`; outputs and comparison in
+   `docs/evidence/routed-pilot-2026-11-13/`): 25,038 microdollars over 15
+   calls (6 Flash, 9 Jev), about 25 minutes. It found the benchmark's
+   primary finding (Release never unblocks waiters in `connReqs`); Flash
+   raised it independently in its draft, but the operator's brief had named
+   it, so the run was not blind to the oracle. 133 drafted claims had 0
+   citation failures; none of the 6 Step-6 orderings was backed by Jev (all
+   `unclear`, scope 0.02-0.05), and Jev contradicted itself once on
+   identical content. Against the agent-only baseline: 21 of 28 aligned base
+   cells agree; 4 of the differences are baseline claims the code
+   contradicts; 8 findings are new. Tool and prompt fixes from it: draft
+   budget and truncated-draft handling, two hollow checks (sidecar fragments,
+   `###` trace headers), the Part-B catalogue copy without code fragments,
+   heading-style question ids, and the ODC trigger vocabulary. Still open
+   from it: the sidecar generator does not merge pairs, guard outcomes or
+   ODC fields; `status` has no tokens, timestamps or step labels; the
+   remembrance semantics tell Part B the as-is outcome, so Part-B agreement
+   on that finding is not independent. Next: a second routed run with an
+   operator brief that names no finding, a timed agent-only run of the same
+   component, and executed as-is tests.
 2. **Labelled evaluation set.** Collect attributed, independently reviewed
    labels for claim and requirement-scope checks across components (stage 1
    of the cascade plan), including races outside a requirement's scope and

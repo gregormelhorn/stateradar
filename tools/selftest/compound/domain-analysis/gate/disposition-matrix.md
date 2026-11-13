@@ -13,8 +13,8 @@ dispositions unless the cell overrides them.
 
 | state | E1 `arrive` | E2 `finish` |
 | --- | --- | --- |
-| **Open** Idle | transition → `Busy` (observed-in-code, gate.ts:12 ("this.phase = 'busy'")) | ignore (documented) — nothing in flight (DR-001) |
-| **Open** Busy | defer (queued) — one at a time (DR-001) | transition → `Idle` (observed-in-code, gate.ts:20 ("this.phase = 'idle'")) |
+| **Open** Idle | transition → `Busy` (observed-in-code, gate.ts:16 ("transition anchor: open idle x E1")) | ignore (documented) — nothing in flight (DR-001) |
+| **Open** Busy | defer (queued) — one at a time (DR-001) | transition → `Idle` (observed-in-code, gate.ts:21 ("transition anchor: open busy x E2")) |
 | **Closed** | reject (observed-in-code, gate.ts:28 ("throw new ClosedError")) | ignore (accidental) → Q-01 |
 
 | state | UV-E1 `duplicate` | E3 `shutdown` |

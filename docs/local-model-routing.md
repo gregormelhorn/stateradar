@@ -71,9 +71,12 @@ specific available version for comparable measurements.
 `draft-verify` chains the two models for one source file. Flash receives the
 task and the numbered source and must answer with JSON: a `claims` list
 (`id`, `kind` = `claim` or `ordering`, `statement`, `line`, `fragment`) and a
-`questions` list. Code rejects a draft that is not this structure; the raw
-text is saved next to the output with the extension replaced
-(`--output review.json` gives `review.draft.txt`). Each claim's
+`questions` list. Code rejects a draft that is not this structure, and a
+draft cut off at the output budget (`finish_reason=length`); either way the
+raw text is saved next to the output with the extension replaced
+(`--output review.json` gives `review.draft.txt`) and is not printed. The
+default output budget is 12000 tokens: a 248-line source needed about that
+much, and 4096 truncated it. Each claim's
 citation is then checked against the source with the same rule as
 `jev-batch`. Claims that fail keep their reason in `citation_check` and are
 never sent to Jev. The citable claims go to Jev in one batch.
@@ -162,14 +165,17 @@ with `FILE.md:PATTERN`, contracts are whole files of verbatim docstrings or
 schema descriptions. It refuses source files and `FILE:Class` specs, so the
 blind pass never receives implementation code. Run it once with
 `--package-only` to write `<output stem>.package.md` without any call, read
-the package, then run it without the flag. The real run requires that
-package, sends exactly it, and refuses if the inputs have changed since. The
-catalogue lives in the analysis directory. The call receives only the
-assembled package and no tools or conversation history. The command checks
-the returned table with the existing Part-B coverage checker and returns a
-failure for missing rows, missing checklist ticks, or truncated output. It does not check the
-disposition vocabulary, and it only requires pair rows when the catalogue
-carries `P-` ids.
+the package, then run it without the flag. The real run requires that package,
+sends exactly it, and refuses if the inputs have changed since. The analysis
+directory, `--requirements` and `--contracts` resolve against `--repo` unless
+absolute. The catalogue lives in the analysis directory; the package carries
+it with citation fragments (`("...")` after `file:line`) and Q-/PA- references
+removed, because pilot rule 3 puts code into those fragments. The call
+receives only the assembled package and no tools or conversation history. The
+command checks the returned table with the existing Part-B coverage checker
+and returns a failure for missing rows, missing checklist ticks, or truncated
+output. It does not check the disposition vocabulary, and it only requires
+pair rows when the catalogue carries `P-` ids.
 
 ```bash
 blind_args=(blind domain-analysis/component --repo /path/to/repo \

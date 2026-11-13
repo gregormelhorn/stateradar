@@ -68,6 +68,20 @@
   so stdout carries only its JSON with the kept package path; the refusal
   message names `FILE:PATTERN` for requirements; the docs show the two-step
   `blind` call; a test covers requirement section selection.
+- **First full routed pilot (silenceper/pool, 2026-11-13)** and its fixes.
+  Evidence in `docs/evidence/routed-pilot-2026-11-13/` (25,038 microdollars,
+  primary finding found, 21/28 aligned base cells agree with the baseline).
+  Fixes, each with a red check first: `gen_analysis_sidecar.py` keeps
+  citation fragments, so `dsc_check` verifies them on generated sidecars
+  (the compound selftest fixture had wrong fragments and lines that this
+  exposed); `check_matrix.py` splits trace blocks on `###` headers too, so
+  the scope-line check no longer passes vacuously; the generator parses
+  `## Q-nn` question headings; the Part-B catalogue copy drops code
+  fragments and Q-/PA- references; `draft-verify` defaults to 12000 output
+  tokens and saves a truncated draft as `<stem>.draft.txt`;
+  `formats/rules.toml` gains the ODC triggers `part-B diff`, `reviewer
+  cross-check` and `step-8 verification`, and `check_pack_consistency.py`
+  fails when the pilot prompt's trigger list drifts from it. 02-pilot v1.17.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

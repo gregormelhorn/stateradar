@@ -386,6 +386,27 @@ class ModelTest(unittest.TestCase):
             self.assertIn("selected requirement", package)
             self.assertNotIn("unrelated text", package)
 
+    def test_blind_catalogue_drops_code_fragments_and_analysis_references(self):
+        # Pilot 2026-11-13: rule 3 puts code fragments into catalogue citations,
+        # and the catalogue went to Part B verbatim.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            analysis = root / "analysis"
+            analysis.mkdir()
+            (analysis / "event-catalogue.md").write_text(
+                "<!-- event-ids: E01 -->\n| E01 | waiter wakes (observed-in-code, channel.go:139 "
+                "(\"if !ok {\")) → Q-01, PA-21 |\n" + "event details " * 30)
+            (root / "requirements.md").write_text("requirement details " * 30)
+            (root / "contracts.md").write_text("contract details " * 30)
+            args = Namespace(repo=str(root), analysis="analysis", requirements=["requirements.md"],
+                             contracts=["contracts.md"], output=root / "blind.md", max_tokens=1000, package_only=True)
+            self.inspect_package(Budget(root / "budget.db", 2_000_000), args)
+            package = (root / "blind.package.md").read_text()
+            self.assertIn("waiter wakes", package)
+            self.assertIn("channel.go:139", package)
+            for leaked in ("if !ok", "Q-01", "PA-21"):
+                self.assertNotIn(leaked, package)
+
     def test_blind_sends_only_the_inspected_package(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

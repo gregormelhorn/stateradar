@@ -169,14 +169,16 @@ def main() -> int:
     # Stage 2: every pair id appears in the traces; control-trace
     # verdicts that cite a requirement or decision carry the scope
     # line (requirement-scope rule): "cited text contemplates this
-    # ordering: yes/no". Blocks are split on bold trace headers.
+    # ordering: yes/no". Blocks are split on trace headers, bold or
+    # markdown headings ('**T-01', '### T-01'); a file with no recognised
+    # header would be one block and pass vacuously.
     traces_path = adir / "adversarial-traces.md"
     if traces_path.is_file():
         traces = traces_path.read_text(encoding="utf-8")
         for pair in sorted(set(re.findall(r"P-\d+[ab]", cat))):
             if pair not in traces:
                 errors.append(f"pair {pair} missing from adversarial-traces.md")
-        blocks = re.split(r"\n(?=\*\*[PTM]-)", traces)
+        blocks = re.split(r"\n(?=(?:#{1,6}\s+|\*\*)\s*[PTM]-\d)", traces)
         for block in blocks:
             header = block.split("\n", 1)[0][:40]
             flat = " ".join(block.split())  # scope lines wrap across lines

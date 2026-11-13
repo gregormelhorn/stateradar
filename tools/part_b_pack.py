@@ -145,6 +145,24 @@ def _part_b_instruction(pack_root: Path) -> str:
     return m.group(1)
 
 
+_CITE_FRAGMENT = re.compile(r'([\w./-]+\.[A-Za-z]{1,4}:\d+)`?\s*\(\s*"(?:[^"\\]|\\.)*"\s*\)')
+_ANALYSIS_REF = re.compile(r"(?:\s*→\s*)?\b(?:Q|PA)-[\w-]*\d[\w-]*\b")
+
+
+def blind_catalogue(text: str) -> str:
+    """The catalogue as Part B may see it.
+
+    02-pilot rule 3 puts a verbatim code fragment into every observed-in-code
+    citation, and the catalogue carries the analysis's question and lint
+    references. Part B must see neither (R-PART-B): keep file:line, drop the
+    fragment, drop Q-/PA- references (routed pilot 2026-11-13).
+    """
+    text = _CITE_FRAGMENT.sub(r"\1", text)
+    text = _ANALYSIS_REF.sub("", text)
+    text = re.sub(r"\(\s*,?\s*\)", "", text)  # parentheses left empty
+    return re.sub(r"(?:,[ \t]*)+(?=[|)\n])", " ", text)  # dangling commas
+
+
 def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     repo = Path(args.repo).resolve()
     adir = repo / args.analysis_dir
@@ -155,7 +173,9 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     catalogue = catalogue_path.read_text(encoding="utf-8")
     events, pairs = _catalogue_ids(catalogue)
 
-    blocks: list[tuple[str, str]] = [("INPUT 1: EVENT CATALOGUE (verbatim)", catalogue)]
+    blocks: list[tuple[str, str]] = [
+        ("INPUT 1: EVENT CATALOGUE (code fragments and analysis references removed)",
+         blind_catalogue(catalogue))]
 
     # Doctrine lines travel with the requirements: every artefact in the
     # dobby Part-B runs (G2 storm guard, trigger-lane policy) traced to a

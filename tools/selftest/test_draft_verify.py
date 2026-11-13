@@ -220,6 +220,30 @@ class DraftVerifyTest(unittest.TestCase):
             result, _ = self.run_cascade("Draft:\n" + json.dumps(nested), Budget(Path(directory) / "usage.db", 1_000_000))
         self.assertEqual(result["claims"]["C1"]["citation_check"], "ok")
 
+    def test_cli_saves_a_truncated_draft_and_uses_a_large_default_budget(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "req.md").write_text(SOURCE, encoding="utf-8")
+            (root / "task.md").write_text("task", encoding="utf-8")
+            argv = ["local_models.py", "--ledger", str(root / "b.db"), "draft-verify", str(root / "req.md"),
+                    str(root / "task.md"), "--output", str(root / "review.json")]
+            payloads = []
+
+            def fake_post(url, payload, key):
+                payloads.append(payload)
+                return flash_response('{"claims": [{"id": "C1", "kind"', finish="length")
+
+            out = io.StringIO()
+            with patch.object(sys, "argv", argv), \
+                    patch.dict("os.environ", {"DEEPSEEK_API_KEY": "fk", "TYPESAFE_API_KEY": "jk"}), \
+                    patch.object(local_models, "post_json", side_effect=fake_post), \
+                    contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(local_models.main(), 1)
+            self.assertEqual(payloads[0]["max_tokens"], 12000)
+            self.assertEqual((root / "review.draft.txt").read_text(), '{"claims": [{"id": "C1", "kind"')
+            self.assertNotIn('"kind"', out.getvalue())
+            self.assertIn("review.draft.txt", out.getvalue())
+
     def test_cli_rejects_output_that_is_a_directory(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

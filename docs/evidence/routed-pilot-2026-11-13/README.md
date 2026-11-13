@@ -50,12 +50,23 @@ Part B was `blind --package-only` twice, then `blind` once.
 
 ## Tool/prompt problems reported by the pilot session
 
-The verbatim list of 12 problems was not available when this folder was assembled
-(it lives in the pilot session's report, not in the output files). The failed and
-rejected model calls are recorded in `channelPool/summary.md` under
-"Every failed or not-run model call", and the raw failures are in
-`routing/dv-.stderr` and `routing/step8-.stdout` (a mis-quoted wrapper invocation and
-a mis-split path argument).
+Added afterwards from the pilot session's final report; the disposition
+column says what the follow-up commit changed.
+
+| # | Problem | Disposition |
+|---|---|---|
+| 1 | `draft-verify` on `channel.go` (248 lines) was cut off at the default 4096 output tokens; the truncated text went to stdout and no `.draft.txt` was kept. Rule 8 did not say whether a larger budget counts as loosening. | Fixed: default 12000, truncated drafts saved as `<stem>.draft.txt` and not printed; rule 8 allows one re-run with a larger budget. |
+| 2 | Hollow check: `gen_analysis_sidecar.py` dropped every `("fragment")`, so `dsc_check`'s fragment verification never ran on a generated sidecar. | Fixed with a red selftest; the selftest's own compound fixture turned out to cite wrong fragments and lines, also fixed. |
+| 3 | Hollow check: `check_matrix.py` split trace blocks only on bold headers, so a traces file with `###` headers passed the scope-line check vacuously. | Fixed with red selftests for both header styles. |
+| 4 | Rule conflict: rule 3 puts code fragments into catalogue citations, and the catalogue went into the Part-B package verbatim (16 code fragments plus Q-/lint references). Remembrance semantics also tell the blind pass the as-is outcome. | Fragments and Q-/PA- references are now removed from the Part-B catalogue copy (red test). The remembrance leak is a method limit, recorded in roadmap entry 11. |
+| 5 | `blind` resolves the analysis directory and `--requirements`/`--contracts` against `--repo`, not the working directory. | Documented in rule 7 and the routing doc. |
+| 6 | Step 7 named ODC triggers (`part-B diff`, `step-8 verification`, `z3 proof`) that `formats/rules.toml` did not contain, so `dsc_check` would reject them. | Fixed: the registry gained the three missing triggers, the prompt lists the vocabulary exactly, and `check_pack_consistency.py` now fails on drift (red first). |
+| 7 | `gen_analysis_sidecar.py` does not merge pairs, guard outcomes or ODC fields, and ignored `## Q-nn` question headings. | Headings fixed (red selftest). Merging pairs, guards and ODC fields stays open (roadmap entry 11). |
+| 8 | `check_reachability.py` follows transition cells only and takes the first state as initial; the first run was red until guarded changes were written as transitions and terminal states declared. | Not changed in this round; recorded. |
+| 9 | Jev contradicted itself on identical content (C59, K5 contradicted; C78 supported). | Recorded as evaluation input (roadmap entry 11). |
+| 10 | `status` reports provider, amount and status only: no tokens, timestamps or step labels. | Open (roadmap entry 11). |
+| 11 | `go test` was not permitted on the pilot machine, so as-is validation was a static walk (predicted `TestPool_Get` hang unverified). | Open. |
+| 12 | Shell word splitting in the operator's own loops (`zsh`). | Operator error, no tool change. |
 
 ## Excluded
 

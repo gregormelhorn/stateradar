@@ -348,7 +348,7 @@ def _parse_draft(text):
     return draft["claims"], questions
 
 
-def draft_verify(budget, source, source_ref, task, flash_key, jev_key, model="jev-latest", max_tokens=4096):
+def draft_verify(budget, source, source_ref, task, flash_key, jev_key, model="jev-latest", max_tokens=12000):
     """Flash drafts cited claims, code checks the citations, Jev judges the citable ones.
 
     Nothing is accepted automatically. Claims with failed citations are kept with the
@@ -481,7 +481,8 @@ def main():
     draft_parser.add_argument("task", type=Path, help="UTF-8 file with the bounded drafting task")
     draft_parser.add_argument("--output", type=Path, required=True, help="JSON result file")
     draft_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
-    draft_parser.add_argument("--max-tokens", type=int, default=4096)
+    draft_parser.add_argument("--max-tokens", type=int, default=12000,
+                              help="Flash output budget (a 250-line source needed about 12000)")
     blind_parser = commands.add_parser("blind")
     blind_parser.add_argument("analysis")
     blind_parser.add_argument("--repo", default=".")
@@ -525,6 +526,12 @@ def main():
             except InvalidDraft as error:
                 args.output.with_suffix(".draft.txt").write_text(error.text, encoding="utf-8")
                 raise
+            except IncompleteResponse as error:
+                # A truncated draft is paid for: keep it on disk, not on stdout.
+                saved = args.output.with_suffix(".draft.txt")
+                saved.write_text(error.result["text"], encoding="utf-8")
+                error.saved_to = str(saved)
+                raise
             args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             failed = result["verification"] is not None and result["verification"]["error"]
             claims = result["claims"].values()
@@ -555,7 +562,12 @@ def main():
         print(f"LOCAL MODELS: {error}", file=sys.stderr)
         return 1
     except IncompleteResponse as error:
-        print(json.dumps(error.result, ensure_ascii=False, indent=2))
+        if getattr(error, "saved_to", None):
+            shown = {key: value for key, value in error.result.items() if key != "text"}
+            shown["text_saved_to"] = error.saved_to
+        else:
+            shown = error.result
+        print(json.dumps(shown, ensure_ascii=False, indent=2))
         print(f"LOCAL MODELS: {error}", file=sys.stderr)
         return 1
     except (OSError, ValueError, BudgetExceeded, urllib.error.URLError, sqlite3.Error) as error:
