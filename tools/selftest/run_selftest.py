@@ -236,6 +236,20 @@ def main() -> int:
                *dsc(nofrag / "domain-analysis" / "gate", "--repo", str(nofrag)),
                needle="'fragment' is a required property")
 
+        # A citation the generator cannot resolve (here a test file outside
+        # the source roots) is dropped with its fragment check: it must say so.
+        unres = sidecar(tmp, golden)
+        unres_matrix = unres / "domain-analysis" / "mini" / "disposition-matrix.md"
+        unres_text = unres_matrix.read_text()
+        unres_matrix.write_text(unres_text.replace(
+            '`mini.py:19` ("self.state = \\"Open\\"")', '`test_cell_suite.py:3` ("import")', 1))
+        unres_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                    "--root", str(unres)], capture_output=True, text=True)
+        expect("generator warns about an unresolved citation", True,
+               1 if "test_cell_suite.py is not under the source roots" in unres_run.stderr else 0,
+               unres_run.stdout + unres_run.stderr or "no output",
+               needle="not under the source roots")
+
         # The rule covers code and test citations only: a requirements
         # document is cited without a fragment, and an empty fragment is
         # no fragment.
@@ -248,6 +262,8 @@ def main() -> int:
                  {"file": "docs/NOTES.TXT", "line": 3}, False),
                 ("code citation without a fragment",
                  {"file": "src/mini.py", "line": 3}, True),
+                ("code file whose name contains .md, without a fragment",
+                 {"file": "src/notes.md.py", "line": 3}, True),
                 ("code citation with an empty fragment",
                  {"file": "src/mini.py", "line": 3, "fragment": ""}, True)):
             cell["citation"] = citation

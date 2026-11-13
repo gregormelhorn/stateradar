@@ -28,7 +28,14 @@
   `tests/benchmarks/meilisearch-6510` and the routed-pilot evidence in
   `docs/evidence/`; `tests/red-mini` is red by design and still fails with
   its expected lines. Regenerate a sidecar from a fragment-cited matrix before
-  running dsc_check on it.
+  running dsc_check on it. Overlay `extra_citations` to code files need a `fragment` too.
+  `formatVersion` stays `"1.0"`: no field was added or renamed, and rule 3
+  has required these fragments since 02-pilot v1.9; the schema now enforces
+  what the format already said. The generator still resolves citations only
+  to files under the source roots (`sidecar-overlay.yaml`: `src_roots`,
+  `src_exts`); it now warns once per cited file it cannot resolve, because
+  such a citation, a test file outside those roots for example, is dropped
+  together with its fragment check.
 - **Sidecar types.** `tools/sidecar_types.py` mirrors the schema as
   TypedDicts; a selftest fails when properties, required keys or enum values
   drift between the two. It found the question `note` the generator emits and

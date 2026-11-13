@@ -182,6 +182,10 @@ def _parse_events(header: str) -> list[Event]:
     return events
 
 
+# Cited file names already reported as unresolved (one warning per file).
+_UNRESOLVED: set[str] = set()
+
+
 def _parse_cell(
     text: str,
     family: str | None,
@@ -236,6 +240,13 @@ def _parse_cell(
     cit = re.search(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw)
     if cit:
         path = src_index.get(Path(cit.group(1)).name)
+        if not path and cit.group(1) not in _UNRESOLVED:
+            # Loud, not silent: a dropped citation also drops its fragment
+            # check (a test file outside the source roots, say). Once per file.
+            _UNRESOLVED.add(cit.group(1))
+            print(f"warning: cited file {cit.group(1)} is not under the source roots "
+                  "(sidecar-overlay.yaml: src_roots, src_exts); cells citing it keep no citation",
+                  file=sys.stderr)
         if path:
             citation: Citation = {"file": path, "line": int(cit.group(2))}
             cell["citation"] = citation
