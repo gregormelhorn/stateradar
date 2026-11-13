@@ -261,7 +261,14 @@
   without marking the row, so rule 7's reading stays the check, and prose
   outside those sections, such as an event-table cell, is still caught only
   that way. A per-event list derived from the labels would flag every event,
-  since each one carries a gate and an upstream-guard field. `dsc_blind.py`,
+  since each one carries a gate and an upstream-guard field. Measured in the
+  flash-writes pilot (2026-11-13, Part B on Flash): 0 rows marked, while six
+  rows said "as-is" in prose, the same six the agent judged not independent.
+  So the `PART-B INDEPENDENCE` line is printed also at 0 rows, and a second
+  line (`PART-B INDEPENDENCE (prose)`) lists rows that say "as-is" without
+  the mark; 02-pilot also says to keep catalogue headings plain, since
+  `gen_analysis_sidecar.py` reads only the plain `## Event annotations`
+  heading. `dsc_blind.py`,
   which sends the catalogue verbatim and is not used by 02-pilot, is
   unchanged. Red-first selftest.
 - Not changed: no automatic acceptance or escalation; the cascade plan's

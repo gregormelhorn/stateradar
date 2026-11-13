@@ -293,8 +293,10 @@ Open, in order:
    for as-is prose reaching Part B (remembrance and upstream statements carry
    the provenance "observed in code") became 02-pilot v1.20: the package
    labels those sections, and Part B marks the rows that rest on them.
-   Whether Part B actually marks the leaked rows is measured in the next
-   pilot. Its `timing.md` shows where the 37 minutes went: about 70 s of
+   Measured in the flash-writes pilot (Part B on Flash): Part B marked 0
+   rows `as-is:` but wrote "as-is" in prose in the six rows the agent judged
+   not independent, so the check now always prints the count and lists the
+   prose rows as a weaker signal; the agent's reading stays the check. Its `timing.md` shows where the 37 minutes went: about 70 s of
    Flash and Jev calls, about 3.5 minutes of `go test` (mostly three waits on
    the hanging `TestPool_Get`'s 60-second timeout) and about 32 minutes of
    the steering agent's own work, which includes the pack's tool runs (not

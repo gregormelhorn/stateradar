@@ -530,7 +530,7 @@ class ModelTest(unittest.TestCase):
                          f"## Remembrance {label} ##\n- **Gate (observed in code):** x\n"
                          "- **upstream_guards (observed in code)**: y\n")
         # A catalogue without code-derived sections is left alone, and a blind
-        # table without marks prints no independence line.
+        # table without marks prints a 0-row independence line.
         plain = "<!-- event-ids: E01 -->\n## Events\n\n- payload: none\n- gateway: x\n"
         self.assertEqual(mark(plain), plain)
         with tempfile.TemporaryDirectory() as directory:
@@ -543,7 +543,8 @@ class ModelTest(unittest.TestCase):
             self.assertIn("start its behaviour cell with `as-is:`", package)
             reply = ("| Event | Expected |\n|---|---|\n| E01 | *as-is:* handle |\n| E02 | reject |\n"
                      "| E02 (closed) | AS-IS: ignore (accidental) |\n| E02 (open) | handle, as-is: queued |\n"
-                     "| E02 (full) | handle; not-as-is: x |\n\n- [x] E01\n- [x] E02\n")
+                     "| E02 (full) | handle; not-as-is: x |\n| E02 (late) | handle, as-is behaviour |\n"
+                     "| E02 (wide) | handle (as-is-like) |\n\n- [x] E01\n- [x] E02\n")
             out, err = io.StringIO(), io.StringIO()
             with patch.object(local_models, "flash", return_value={"text": reply, "finish_reason": "stop"}), \
                     contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
@@ -551,6 +552,8 @@ class ModelTest(unittest.TestCase):
                                                     "key"), 0)
             self.assertIn("PART-B INDEPENDENCE: 3 rows marked as-is (not independent): E01, E02 (closed), E02 (open)",
                           err.getvalue())
+            self.assertIn('PART-B INDEPENDENCE (prose): 1 more rows say "as-is" without the mark (read them): '
+                          "E02 (late)", err.getvalue())
             unmarked = "| Event | Expected |\n|---|---|\n| E01 | handle |\n| E02 | reject |\n\n- [x] E01\n- [x] E02\n"
             err = io.StringIO()
             with patch.object(local_models, "flash", return_value={"text": unmarked, "finish_reason": "stop"}), \
@@ -558,7 +561,9 @@ class ModelTest(unittest.TestCase):
                 self.assertEqual(local_models.blind(budget, Namespace(**{**vars(args), "package_only": False}),
                                                     "key"), 0)
             self.assertIn("PART-B COVERAGE: OK", err.getvalue())
-            self.assertNotIn("PART-B INDEPENDENCE", err.getvalue())
+            self.assertIn("PART-B INDEPENDENCE: 0 rows marked as-is (not independent); the mark can be missing",
+                          err.getvalue())
+            self.assertNotIn("PART-B INDEPENDENCE (prose)", err.getvalue())
 
     def test_blind_refuses_a_package_with_a_leftover_fragment(self):
         # Method review round 7: an unescaped "|" inside a fragment on a table
