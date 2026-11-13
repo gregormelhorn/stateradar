@@ -1,0 +1,63 @@
+{
+ "states": [
+  {
+   "name": "Open_IdleAvailable",
+   "condition": "conns is non-nil and holds at least one idle connection but fewer than MaxIdle; connReqs is empty"
+  },
+  {
+   "name": "Open_IdleFull",
+   "condition": "conns is non-nil and holds exactly MaxIdle idle connections (the channel is full); connReqs is empty"
+  },
+  {
+   "name": "Open_NoIdle_BelowCap",
+   "condition": "conns is non-nil and holds no idle connection; connReqs is empty; openingConns < maxActive"
+  },
+  {
+   "name": "Open_NoIdle_AtCap",
+   "condition": "conns is non-nil and holds no idle connection; connReqs is empty; openingConns >= maxActive"
+  },
+  {
+   "name": "Open_Waiting_AtCap",
+   "condition": "conns is non-nil and holds no idle connection; connReqs is non-empty; openingConns >= maxActive"
+  },
+  {
+   "name": "Open_Waiting_BelowCap",
+   "condition": "conns is non-nil and holds no idle connection; connReqs is non-empty; openingConns < maxActive"
+  },
+  {
+   "name": "Open_Waiting_IdleAvailable",
+   "condition": "conns is non-nil and holds at least one idle connection; connReqs is non-empty"
+  },
+  {
+   "name": "Closed",
+   "condition": "conns is nil (Release has completed): factory, ping and close are nil"
+  }
+ ],
+ "events": [
+  {
+   "id": "Get",
+   "gist": "a caller calls Get() on the pool"
+  },
+  {
+   "id": "Put",
+   "gist": "a caller calls Put(conn) with a non-nil connection that it earlier obtained from Get"
+  },
+  {
+   "id": "Close",
+   "gist": "a caller calls Close(conn) with a non-nil connection that it earlier obtained from Get"
+  },
+  {
+   "id": "Ping",
+   "gist": "a caller calls Ping(conn) with a non-nil connection"
+  },
+  {
+   "id": "Release",
+   "gist": "a caller calls Release() on the pool"
+  },
+  {
+   "id": "Len",
+   "gist": "a caller calls Len() on the pool"
+  }
+ ],
+ "notes": "Each cell describes one call run to completion in the given state. Unless a cell says otherwise, Ping is configured (non-nil), IdleTimeout > 0, MaxIdle >= 1 and the idle connections are not expired. Where the outcome depends on a guard (for example whether the last idle connection is taken, or a callback returns an error), write the main branch as the disposition and the other branches in the note. A transition target is the state after the call returns. Connections are values of type interface{} handed in by the caller."
+}

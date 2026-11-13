@@ -1,0 +1,29 @@
+group G-01 get-idle-timeout: proven
+group G-02 get-default-branch: proven
+group G-03 put-branches: proven
+group G-04 new-capacity-validation: proven
+group G-05 close-branches: proven
+group G-06 get-ping-verdict (channel.go:124): not-formalizable: external-call: the Ping callback's error result decides
+group G-07 get-factory-result (channel.go:154-158): not-formalizable: external-call: the Factory callback's (conn, err) result decides
+group G-08 get-waiter-receive (channel.go:137-140): not-formalizable: dynamic-state: whether the req channel is closed or delivered depends on runtime scheduling
+
+probe G-01 below: {'timeout': 10, 't': 0, 'now': 9} -> ['fresh-timed']
+probe G-01 at: {'timeout': 10, 't': 0, 'now': 10} -> ['fresh-timed']
+probe G-01 above: {'timeout': 10, 't': 0, 'now': 11} -> ['expired']
+probe G-01 timeout=0: {'timeout': 0, 't': 0, 'now': 99} -> ['fresh-untimed']
+probe G-02 below: {'openingConns': 4, 'maxActive': 5, 'factoryNil': False} -> ['create']
+probe G-02 at: {'openingConns': 5, 'maxActive': 5, 'factoryNil': False} -> ['wait']
+probe G-02 above: {'openingConns': 6, 'maxActive': 5, 'factoryNil': False} -> ['wait']
+probe G-02 zero-cap: {'openingConns': 0, 'maxActive': 0, 'factoryNil': False} -> ['wait']
+probe G-03 below: {'connIsNil': False, 'connsNil': False, 'waiters': 0, 'idle': 2, 'MaxIdle': 3} -> ['store-idle']
+probe G-03 at: {'connIsNil': False, 'connsNil': False, 'waiters': 0, 'idle': 3, 'MaxIdle': 3} -> ['channel-full']
+probe G-03 waiter+full: {'connIsNil': False, 'connsNil': False, 'waiters': 1, 'idle': 3, 'MaxIdle': 3} -> ['hand-to-waiter']
+probe G-03 MaxIdle=0: {'connIsNil': False, 'connsNil': False, 'waiters': 0, 'idle': 0, 'MaxIdle': 0} -> ['channel-full']
+probe G-04 at: {'InitialCap': 1, 'MaxIdle': 1, 'MaxCap': 1} -> ['accepted']
+probe G-04 init>idle: {'InitialCap': 2, 'MaxIdle': 1, 'MaxCap': 1} -> ['rejected']
+probe G-04 cap<idle: {'InitialCap': 0, 'MaxIdle': 2, 'MaxCap': 1} -> ['rejected']
+probe G-04 init<0: {'InitialCap': -1, 'MaxIdle': 0, 'MaxCap': 0} -> ['rejected']
+probe G-04 all-zero: {'InitialCap': 0, 'MaxIdle': 0, 'MaxCap': 0} -> ['accepted']
+z3 invariant check: validation accepts MaxCap = 0: sat (witness [InitialCap = 0, MaxIdle = 0, MaxCap = 0]) -> Q-17
+z3 invariant check: validation accepts MaxIdle = 0: sat -> Q-17
+z3 invariant check: SYS-01 (0 <= openingConns) after one Close at openingConns = 0 is violated without NAT-02 -> Q-12, Q-14

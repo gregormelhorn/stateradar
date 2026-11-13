@@ -1,0 +1,54 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "f6073a935a778fa28c765eb0c351aa4e56294b3c7b4df618621838ffabce19eb",
+  "input_tokens": 2547,
+  "cost_microdollars": 107,
+  "reservation_microdollars": 366,
+  "checks": {
+    "T94": {
+      "kind": "claim",
+      "statement": "TestPool_Get expects ErrMaxActiveConnReached from the Get after the maximum number of connections is borrowed.",
+      "source": "channel_rpc_test.go",
+      "line": 94,
+      "fragment": "if err != ErrMaxActiveConnReached {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "T121": {
+      "kind": "claim",
+      "statement": "TestPool_Put expects Len to equal MaxIdleCap after returning all connections.",
+      "source": "channel_rpc_test.go",
+      "line": 121,
+      "fragment": "if p.Len() != MaxIdleCap {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "T213": {
+      "kind": "claim",
+      "statement": "TestPoolConcurrent2 calls wg.Add inside a goroutine for the first group of ten.",
+      "source": "channel_rpc_test.go",
+      "line": 213,
+      "fragment": "wg.Add(1)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.77,
+        "contradicted": 0.01,
+        "unclear": 0.22
+      },
+      "confidence": 0.66,
+      "review_required": true
+    }
+  }
+}
