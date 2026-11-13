@@ -1,0 +1,442 @@
+package pool
+
+// As-is tests for the channelPool StateRadar pilot (agent-only run).
+// Each test asserts the CURRENT behaviour that a finding or open question
+// claims. PASS = the claimed as-is behaviour was observed. Exception: T11
+// is expected to FAIL under -race (the race report is the evidence).
+// Tests use fake connections and callbacks; no network.
+
+import (
+	"errors"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+type fconn struct {
+	id     int64
+	closed int32
+	bad    int32
+}
+
+type harness struct {
+	created int64
+	closes  int64
+	pings   int64
+}
+
+func (h *harness) factory() (interface{}, error) {
+	return &fconn{id: atomic.AddInt64(&h.created, 1)}, nil
+}
+
+func (h *harness) closeFn(v interface{}) error {
+	atomic.AddInt64(&h.closes, 1)
+	atomic.AddInt32(&v.(*fconn).closed, 1)
+	return nil
+}
+
+func mk(t *testing.T, h *harness, initial, maxIdle, maxCap int, idle time.Duration) *channelPool {
+	t.Helper()
+	p, err := NewChannelPool(&Config{InitialCap: initial, MaxIdle: maxIdle, MaxCap: maxCap,
+		Factory: h.factory, Close: h.closeFn, IdleTimeout: idle})
+	if err != nil {
+		t.Fatalf("NewChannelPool: %v", err)
+	}
+	return p.(*channelPool)
+}
+
+// finishes reports whether f returns within d (f keeps running otherwise).
+func finishes(d time.Duration, f func()) bool {
+	done := make(chan struct{})
+	go func() { f(); close(done) }()
+	select {
+	case <-done:
+		return true
+	case <-time.After(d):
+		return false
+	}
+}
+
+const blockWait = 300 * time.Millisecond
+
+// T1 (Q-05): Release leaves a waiting Get blocked; a later Put serves no one.
+func TestAsIs_T1_ReleaseLeavesWaiterBlocked(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 0, 1, 1, 0)
+	c, _ := p.Get()
+	done := make(chan struct{})
+	go func() { p.Get(); close(done) }()
+	time.Sleep(50 * time.Millisecond)
+	p.Release()
+	select {
+	case <-done:
+		t.Fatalf("waiter returned after Release; claim not observed")
+	case <-time.After(blockWait):
+	}
+	p.Put(c)
+	select {
+	case <-done:
+		t.Fatalf("waiter returned after Put on released pool; claim not observed")
+	case <-time.After(blockWait):
+	}
+	t.Logf("observed: waiting Get still blocked %v after Release and after a Put", 2*blockWait)
+}
+
+// T2 (Q-03): Close frees capacity but does not wake the waiter; a new Get barges.
+func TestAsIs_T2_CloseDoesNotWakeWaiter(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 0, 1, 1, 0)
+	c, _ := p.Get()
+	done := make(chan struct{})
+	go func() { p.Get(); close(done) }()
+	time.Sleep(50 * time.Millisecond)
+	if err := p.Close(c); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+	select {
+	case <-done:
+		t.Fatalf("waiter was served after Close; claim not observed")
+	case <-time.After(blockWait):
+	}
+	var got interface{}
+	if !finishes(blockWait, func() { got, _ = p.Get() }) || got == nil {
+		t.Fatalf("new Get did not get a conn")
+	}
+	t.Logf("observed: waiter blocked after Close; a new Get created conn id=%d ahead of it (created=%d)",
+		got.(*fconn).id, atomic.LoadInt64(&h.created))
+}
+
+// T3 (Q-06): Put after Release returns nil and does not close the conn.
+func TestAsIs_T3_PutAfterReleaseDoesNotClose(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 0, 2, 2, 0)
+	c, _ := p.Get()
+	p.Release()
+	err := p.Put(c)
+	if err != nil || atomic.LoadInt32(&c.(*fconn).closed) != 0 {
+		t.Fatalf("claim not observed: err=%v closed=%d", err, c.(*fconn).closed)
+	}
+	t.Logf("observed: Put after Release -> err=nil, conn closed=0, close calls=%d", atomic.LoadInt64(&h.closes))
+}
+
+// T4 (Q-06): Close after Release returns nil and calls no close function.
+func TestAsIs_T4_CloseAfterReleaseDoesNotClose(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 0, 2, 2, 0)
+	c, _ := p.Get()
+	p.Release()
+	err := p.Close(c)
+	if err != nil || atomic.LoadInt64(&h.closes) != 0 {
+		t.Fatalf("claim not observed: err=%v closes=%d", err, h.closes)
+	}
+	t.Logf("observed: Close after Release -> err=nil, close calls=0")
+}
+
+// T5 (Q-09): double Close lets the pool exceed MaxCap.
+func TestAsIs_T5_DoubleCloseExceedsMaxCap(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 0, 2, 2, 0)
+	c1, _ := p.Get()
+	_, _ = p.Get()
+	p.Close(c1)
+	p.Close(c1)
+	ok := finishes(blockWait, func() { p.Get(); p.Get() })
+	live := atomic.LoadInt64(&h.created) - 1 // only c1 is really closed
+	if !ok || live <= 2 {
+		t.Fatalf("claim not observed: both Gets finished=%v live=%d", ok, live)
+	}
+	t.Logf("observed: MaxCap=2, live conns=%d, openingConns=%d", live, p.openingConns)
+}
+
+// T6 (Q-09): Close of a foreign conn lets the pool exceed MaxCap.
+func TestAsIs_T6_ForeignCloseExceedsMaxCap(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 0, 1, 1, 0)
+	_, _ = p.Get()
+	p.Close(&fconn{id: -1})
+	ok := finishes(blockWait, func() { p.Get() })
+	if !ok || atomic.LoadInt64(&h.created) != 2 {
+		t.Fatalf("claim not observed: finished=%v created=%d", ok, h.created)
+	}
+	t.Logf("observed: MaxCap=1, two pool conns live after a foreign Close")
+}
+
+// T7 (Q-09): a duplicate Put hands one conn to two Gets.
+func TestAsIs_T7_DuplicatePutSameConnToTwoGets(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 0, 2, 2, 0)
+	c, _ := p.Get()
+	p.Put(c)
+	p.Put(c)
+	a, _ := p.Get()
+	b, _ := p.Get()
+	if a != c || b != c {
+		t.Fatalf("claim not observed: a=%v b=%v", a, b)
+	}
+	t.Logf("observed: both Gets returned conn id=%d", c.(*fconn).id)
+}
+
+// T8 (Q-07): Factory (conn, err) -> conn dropped without the Close callback.
+func TestAsIs_T8_FactoryConnAndErrLeaksConn(t *testing.T) {
+	h := &harness{}
+	var made *fconn
+	p, err := NewChannelPool(&Config{InitialCap: 0, MaxIdle: 1, MaxCap: 1,
+		Factory: func() (interface{}, error) { made = &fconn{id: 1}; return made, errors.New("dial half-failed") },
+		Close:   h.closeFn})
+	if err != nil {
+		t.Fatal(err)
+	}
+	v, gerr := p.Get()
+	if v != nil || gerr == nil || made == nil || atomic.LoadInt32(&made.closed) != 0 || atomic.LoadInt64(&h.closes) != 0 {
+		t.Fatalf("claim not observed: v=%v err=%v closes=%d", v, gerr, h.closes)
+	}
+	t.Logf("observed: Get -> (nil, %q); factory's conn never closed", gerr)
+}
+
+// T9 (Q-07): Factory (nil, nil) -> slot counted and lost; later Gets wait forever.
+func TestAsIs_T9_FactoryNilNilLosesSlot(t *testing.T) {
+	h := &harness{}
+	first := int32(1)
+	p, err := NewChannelPool(&Config{InitialCap: 0, MaxIdle: 1, MaxCap: 1,
+		Factory: func() (interface{}, error) {
+			if atomic.CompareAndSwapInt32(&first, 1, 0) {
+				return nil, nil
+			}
+			return h.factory()
+		},
+		Close: h.closeFn})
+	if err != nil {
+		t.Fatal(err)
+	}
+	v, gerr := p.Get()
+	perr := p.Put(v)
+	cerr := p.Close(v)
+	blocked := !finishes(blockWait, func() { p.Get() })
+	if v != nil || gerr != nil || perr == nil || cerr == nil || !blocked {
+		t.Fatalf("claim not observed: v=%v gerr=%v perr=%v cerr=%v blocked=%v", v, gerr, perr, cerr, blocked)
+	}
+	t.Logf("observed: Get -> (nil, nil); Put(nil) -> %q; Close(nil) -> %q; next Get blocked", perr, cerr)
+}
+
+// T10 (Q-04): a Put that lands between Get's empty select and its Lock strands
+// the Get as a waiter while an idle conn exists. Stress loop of real,
+// concurrent Get and Put calls released by one barrier; after the Put returns,
+// the test waits until the Get either returned or registered as waiter, then
+// reads the pool under its mutex. Stranded = waiter registered and idle conn
+// present. (v1/v2 of this test tried to force the order by holding the mutex;
+// that cannot reach the window and observed 0 strands — see as-is-tests.md.)
+func TestAsIs_T10_WaiterStrandedWithIdleConn(t *testing.T) {
+	deadline := time.Now().Add(15 * time.Second)
+	runs, stranded, served := 0, 0, 0
+	for time.Now().Before(deadline) && runs < 200000 && stranded < 3 {
+		runs++
+		h := &harness{}
+		p := mk(t, h, 0, 1, 1, 0)
+		c, _ := p.Get() // o = 1 = MaxCap, idle empty
+		start := make(chan struct{})
+		got := make(chan struct{})
+		putDone := make(chan struct{})
+		go func() { <-start; p.Get(); close(got) }()
+		go func() { <-start; p.Put(c); close(putDone) }()
+		close(start)
+		<-putDone
+		for {
+			select {
+			case <-got:
+				served++
+				goto next
+			default:
+			}
+			p.mu.Lock()
+			w, i := len(p.connReqs), len(p.conns)
+			p.mu.Unlock()
+			if w > 0 {
+				if i == 1 {
+					stranded++
+				}
+				goto next
+			}
+			time.Sleep(10 * time.Microsecond)
+		}
+	next:
+	}
+	if stranded == 0 {
+		t.Fatalf("claim not observed in %d runs (served=%d)", runs, served)
+	}
+	t.Logf("observed: %d stranded waiter(s) with an idle conn present in %d runs (served=%d)", stranded, runs, served)
+}
+
+// T11 (Q-10): unsynchronized read of c.ping in Get vs write in Release.
+// The Get goroutine passes getConns before Release locks; the main goroutine
+// does not synchronize with it before calling Release.
+// Expected outcome under -race: FAIL with a DATA RACE report.
+func TestAsIs_T11_PingReadRacesRelease(t *testing.T) {
+	for r := 0; r < 50; r++ {
+		h := &harness{}
+		p, err := NewChannelPool(&Config{InitialCap: 4, MaxIdle: 4, MaxCap: 4,
+			Factory: h.factory, Close: h.closeFn, Ping: func(interface{}) error { return nil }})
+		if err != nil {
+			t.Fatal(err)
+		}
+		done := make(chan struct{})
+		go func() {
+			defer func() { recover(); close(done) }()
+			for i := 0; i < 4; i++ {
+				p.Get()
+			}
+		}()
+		time.Sleep(time.Millisecond)
+		p.Release()
+		<-done
+	}
+	t.Logf("no panic forced; the race detector is the oracle for this test")
+}
+
+// T12 (Q-11): Ping without a configured Ping function, and after Release, panics.
+func TestAsIs_T12_PingMethodNilPanics(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 0, 1, 1, 0)
+	panicked := func(pp *channelPool) (r interface{}) {
+		defer func() { r = recover() }()
+		pp.Ping(&fconn{})
+		return nil
+	}
+	r1 := panicked(p)
+	p2, _ := NewChannelPool(&Config{InitialCap: 0, MaxIdle: 1, MaxCap: 1, Factory: h.factory, Close: h.closeFn,
+		Ping: func(interface{}) error { return nil }})
+	p2.Release()
+	r2 := panicked(p2.(*channelPool))
+	if r1 == nil || r2 == nil {
+		t.Fatalf("claim not observed: r1=%v r2=%v", r1, r2)
+	}
+	t.Logf("observed panics: no Ping configured: %v; after Release: %v", r1, r2)
+}
+
+// T13 (Q-12): expired idle conns are not closed until a Get dequeues them.
+func TestAsIs_T13_LazyIdleExpiry(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 2, 2, 2, 50*time.Millisecond)
+	time.Sleep(150 * time.Millisecond)
+	before := atomic.LoadInt64(&h.closes)
+	lenBefore := p.Len()
+	if _, err := p.Get(); err != nil {
+		t.Fatal(err)
+	}
+	after := atomic.LoadInt64(&h.closes)
+	if before != 0 || lenBefore != 2 || after != 2 || atomic.LoadInt64(&h.created) != 3 {
+		t.Fatalf("claim not observed: closes before=%d len=%d after=%d created=%d", before, lenBefore, after, h.created)
+	}
+	t.Logf("observed: 100ms past expiry closes=0, Len=2; first Get closed 2 and created a new conn")
+}
+
+// T14 (Q-08): a Close callback or Factory that re-enters the pool deadlocks.
+func TestAsIs_T14_ReentrantCallbacksDeadlock(t *testing.T) {
+	h := &harness{}
+	var p *channelPool
+	pp, err := NewChannelPool(&Config{InitialCap: 0, MaxIdle: 1, MaxCap: 2,
+		Factory: h.factory,
+		Close:   func(v interface{}) error { p.Len(); return nil }})
+	if err != nil {
+		t.Fatal(err)
+	}
+	p = pp.(*channelPool)
+	c, _ := p.Get()
+	closeDeadlocked := !finishes(blockWait, func() { p.Close(c) })
+
+	var q *channelPool
+	qq, err := NewChannelPool(&Config{InitialCap: 0, MaxIdle: 1, MaxCap: 1,
+		Factory: func() (interface{}, error) { q.Len(); return h.factory() },
+		Close:   h.closeFn})
+	if err != nil {
+		t.Fatal(err)
+	}
+	q = qq.(*channelPool)
+	factoryDeadlocked := !finishes(blockWait, func() { q.Get() })
+	if !closeDeadlocked || !factoryDeadlocked {
+		t.Fatalf("claim not observed: close=%v factory=%v", closeDeadlocked, factoryDeadlocked)
+	}
+	t.Logf("observed: Close callback calling Len deadlocks Close; Factory calling Len deadlocks Get")
+}
+
+// T15 (Q-19): a slow Factory holds the mutex; Put waits for it.
+func TestAsIs_T15_SlowFactoryBlocksPut(t *testing.T) {
+	h := &harness{}
+	slow := int32(0)
+	p, _ := NewChannelPool(&Config{InitialCap: 0, MaxIdle: 2, MaxCap: 2,
+		Factory: func() (interface{}, error) {
+			if atomic.LoadInt32(&slow) == 1 {
+				time.Sleep(400 * time.Millisecond)
+			}
+			return h.factory()
+		},
+		Close: h.closeFn})
+	c0, _ := p.Get()
+	atomic.StoreInt32(&slow, 1)
+	go p.Get()
+	time.Sleep(50 * time.Millisecond)
+	start := time.Now()
+	p.Put(c0)
+	d := time.Since(start)
+	if d < 250*time.Millisecond {
+		t.Fatalf("claim not observed: Put took %v", d)
+	}
+	t.Logf("observed: Put blocked %v while another Get's Factory ran", d.Round(time.Millisecond))
+}
+
+// T16 (Q-14): the pool drops below InitialCap and does not replenish.
+func TestAsIs_T16_BelowInitialCapNotReplenished(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 3, 3, 5, 0)
+	var cs []interface{}
+	for i := 0; i < 3; i++ {
+		c, _ := p.Get()
+		cs = append(cs, c)
+	}
+	for _, c := range cs {
+		p.Close(c)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if p.Len() != 0 || atomic.LoadInt64(&h.created) != 3 {
+		t.Fatalf("claim not observed: len=%d created=%d", p.Len(), h.created)
+	}
+	t.Logf("observed: InitialCap=3, Len=0, openingConns=%d, no conn created", p.openingConns)
+}
+
+// T17 (Q-01): MaxCap = 0 passes validation and every Get waits forever.
+func TestAsIs_T17_MaxCapZeroAcceptedGetBlocks(t *testing.T) {
+	h := &harness{}
+	p := mk(t, h, 0, 0, 0, 0)
+	if finishes(blockWait, func() { p.Get() }) {
+		t.Fatalf("claim not observed: Get returned")
+	}
+	t.Logf("observed: NewChannelPool accepted MaxCap=0; Get blocked %v", blockWait)
+}
+
+// T18 (Q-13): with Ping configured, a conn handed to a waiter skips Ping.
+func TestAsIs_T18_HandOffSkipsPing(t *testing.T) {
+	h := &harness{}
+	p, _ := NewChannelPool(&Config{InitialCap: 0, MaxIdle: 1, MaxCap: 1,
+		Factory: h.factory, Close: h.closeFn,
+		Ping: func(v interface{}) error {
+			atomic.AddInt64(&h.pings, 1)
+			if atomic.LoadInt32(&v.(*fconn).bad) == 1 {
+				return errors.New("dead")
+			}
+			return nil
+		}})
+	c, _ := p.Get()
+	got := make(chan interface{}, 1)
+	go func() { v, _ := p.Get(); got <- v }()
+	time.Sleep(50 * time.Millisecond)
+	atomic.StoreInt32(&c.(*fconn).bad, 1)
+	p.Put(c)
+	select {
+	case v := <-got:
+		if v != c || atomic.LoadInt64(&h.pings) != 0 {
+			t.Fatalf("claim not observed: v=%v pings=%d", v, h.pings)
+		}
+	case <-time.After(blockWait):
+		t.Fatalf("waiter not served")
+	}
+	t.Logf("observed: waiter received the dead conn; Ping calls=0")
+}

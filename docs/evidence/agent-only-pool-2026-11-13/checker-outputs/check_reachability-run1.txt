@@ -1,0 +1,10 @@
+REACHABILITY CHECK: FAIL
+  - state 'Open_Creating' is unreachable from initial state 'Open_Idle'
+  - state 'Open_Empty_AtCap' is unreachable from initial state 'Open_Idle'
+  - state 'Open_Empty_BelowCap' is unreachable from initial state 'Open_Idle'
+  - state 'Open_IdleFull' is unreachable from initial state 'Open_Idle'
+  - state 'Open_Waiting' is unreachable from initial state 'Open_Idle'
+  - state 'Open_Waiting_BelowCap' is unreachable from initial state 'Open_Idle'
+  - state 'Open_Waiting_IdleStranded' is unreachable from initial state 'Open_Idle'
+  - state 'Released' has no outgoing transitions and is not marked terminal
+exit=1

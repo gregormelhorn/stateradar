@@ -1,0 +1,43 @@
+group G-01 NewChannelPool validation: proven
+group G-02 GET dispatch: proven
+group G-03 GET idle-conn acceptance: proven
+group G-04 PUT dispatch: proven
+group G-05 CLOSE: proven
+group G-06 Factory result: proven
+group G-07 woken waiter: proven
+group G-08 RELEASE: proven
+group G-09 PING method: violation
+  - PA-2 gap: no guard fires (witness: connIsNil=False, pingConfigured=False) — hole, or add an explicit else and pass has_else=True with a citation
+
+Boundary probes (assignment -> guards that fire):
+G-01 {'InitialCap': 0, 'MaxIdle': 0, 'MaxCap': 0} -> ['accept']
+G-01 {'InitialCap': -1, 'MaxIdle': 0, 'MaxCap': 0} -> ['reject']
+G-01 {'InitialCap': 1, 'MaxIdle': 0, 'MaxCap': 0} -> ['reject']
+G-01 {'InitialCap': 2, 'MaxIdle': 2, 'MaxCap': 2} -> ['accept']
+G-01 {'InitialCap': 2, 'MaxIdle': 3, 'MaxCap': 2} -> ['reject']
+G-01 {'InitialCap': 2, 'MaxIdle': 2, 'MaxCap': 3} -> ['accept']
+G-02 {'idle': 1, 'openingConns': 5, 'maxCap': 5, 'released': False} -> ['idle-path']
+G-02 {'idle': 1, 'openingConns': 5, 'maxCap': 5, 'released': True} -> ['idle-path']
+G-02 {'idle': 0, 'openingConns': 4, 'maxCap': 5, 'released': False} -> ['create']
+G-02 {'idle': 0, 'openingConns': 5, 'maxCap': 5, 'released': False} -> ['wait']
+G-02 {'idle': 0, 'openingConns': 6, 'maxCap': 5, 'released': False} -> ['wait']
+G-02 {'idle': 0, 'openingConns': 4, 'maxCap': 5, 'released': True} -> ['reject-closed']
+G-02 {'idle': 0, 'openingConns': 5, 'maxCap': 5, 'released': True} -> ['wait']
+G-02 {'idle': 0, 'openingConns': 0, 'maxCap': 0, 'released': False} -> ['wait']
+G-03 {'idleTimeout': 100, 'idleAge': 99, 'pingConfigured': False, 'pingError': False} -> ['return']
+G-03 {'idleTimeout': 100, 'idleAge': 100, 'pingConfigured': False, 'pingError': False} -> ['return']
+G-03 {'idleTimeout': 100, 'idleAge': 101, 'pingConfigured': False, 'pingError': False} -> ['discard-expired']
+G-03 {'idleTimeout': 0, 'idleAge': 1000000000000, 'pingConfigured': False, 'pingError': False} -> ['return']
+G-03 {'idleTimeout': -1, 'idleAge': 1000000000000, 'pingConfigured': False, 'pingError': False} -> ['return']
+G-03 {'idleTimeout': 100, 'idleAge': 50, 'pingConfigured': True, 'pingError': True} -> ['discard-ping']
+G-03 {'idleTimeout': 100, 'idleAge': 50, 'pingConfigured': False, 'pingError': True} -> ['return']
+G-04 {'connIsNil': False, 'released': False, 'waiters': 0, 'idle': 9, 'maxIdle': 10} -> ['enqueue']
+G-04 {'connIsNil': False, 'released': False, 'waiters': 0, 'idle': 10, 'maxIdle': 10} -> ['close-full']
+G-04 {'connIsNil': False, 'released': False, 'waiters': 1, 'idle': 0, 'maxIdle': 10} -> ['hand-off']
+G-04 {'connIsNil': False, 'released': False, 'waiters': 0, 'idle': 0, 'maxIdle': 0} -> ['close-full']
+G-04 {'connIsNil': False, 'released': True, 'waiters': 3, 'idle': 0, 'maxIdle': 10} -> ['released-close']
+G-06 {'factoryErrNil': True, 'factoryConnNil': True} -> ['count-and-return'] (conn value never inspected)
+G-06 {'factoryErrNil': False, 'factoryConnNil': False} -> ['return-error'] (conn value never inspected)
+G-07 reachability: no statement closes a waiter channel (grep 'close(req' in channel.go: none), so 'err-max-active' is dead
+
+Not-formalizable groups: none.

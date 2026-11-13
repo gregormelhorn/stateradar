@@ -1,0 +1,25 @@
+DSC CHECK: FAIL
+ - schema: docLines/20/mapping: 'Open_Empty_AtCap x GET' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/28/mapping: 'Open_Idle x GET, Open_Empty_BelowCap x PUT' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/18/mapping: 'Open_Idle x IDLE_TIMEOUT (and Open_IdleFull, Open_Waiting_IdleStranded, Open_Creating)' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/22/mapping: 'Open_Idle x LEN' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/25/mapping: 'Open_Waiting x GET (the error a full pool would report)' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/27/mapping: 'Released x CLOSE' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/26/mapping: 'Released x GET' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/23/mapping: 'SYS-1' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/21/mapping: 'SYS-5; Released x PUT / CLOSE' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/19/mapping: 'SYS-7' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/24/mapping: 'SYS-9' is not one of ['cell', 'invariant', 'constraint', 'rejected', 'structural', 'guard']
+ - schema: docLines/24/target: '✗' is too short
+ - doctrine: DOC-2 has unknown mapping 'Open_Idle x IDLE_TIMEOUT (and Open_IdleFull, Open_Waiting_IdleStranded, Open_Creating)'
+ - doctrine: DOC-3 has unknown mapping 'SYS-7'
+ - doctrine: DOC-4 has unknown mapping 'Open_Empty_AtCap x GET'
+ - doctrine: DOC-6 has unknown mapping 'SYS-5; Released x PUT / CLOSE'
+ - doctrine: DOC-7 has unknown mapping 'Open_Idle x LEN'
+ - doctrine: DOC-8 has unknown mapping 'SYS-1'
+ - doctrine: DOC-10 has unknown mapping 'SYS-9'
+ - doctrine: DOC-12 has unknown mapping 'Open_Waiting x GET (the error a full pool would report)'
+ - doctrine: DOC-13 has unknown mapping 'Released x GET'
+ - doctrine: DOC-14 has unknown mapping 'Released x CLOSE'
+ - doctrine: DOC-15, DOC-16 mapped but not declared in doc-ids
+exit=1
