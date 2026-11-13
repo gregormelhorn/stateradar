@@ -123,9 +123,10 @@ def _read_contracts(spec: str, repo: Path) -> str:
 
 # A citation: file:line or file:a-b, further ", :n" or "and :n" line refs,
 # and an optional ("fragment"). The fragment may hold unescaped or
-# typographic quotes and even "host:5432" tokens, so it ends at the last
-# quote-paren before a later citation or the end of the line: no code tail
-# survives, and prose after a later uncited quote may go too. A later
+# typographic quotes and even "host:5432" tokens. It ends at the first
+# quote-paren before a boundary that leaves its quotes balanced; otherwise
+# at the last quote-paren before a later citation, a table-cell bar or the
+# end of the line, so no code tail survives. It never crosses a cell. A later
 # citation names a file the text cites with a fragment elsewhere, or one
 # that exists in the repository (cited_names), never a host name.
 _FILE = r"[\w./-]+\.[A-Za-z]{1,4}"
@@ -159,13 +160,23 @@ def cited_names(text: str, repo: Path | None = None) -> frozenset:
 def cite_pattern(names: frozenset) -> re.Pattern:
     later = ("(?:[\\w./-]*/)?(?:" + "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True)) + ")"
              if names else r"(?!)")
-    # A quote-paren ends the fragment when no other quote-paren follows it
-    # before the next later citation or the end of the line.
-    frag_end = r"[\"\u201d]\s*\)(?=(?:(?![\"\u201d]\s*\)).)*?(?:[\s,(]" + later + r"`?:\d|$))"
+    q_open, q_close = r"[\"\u201c]", r"[\"\u201d]"
+    # Where the next citation starts: a later file:N, or a prose file followed
+    # by its own ("quote") (code such as errors.New("x") is not one). Neither a fragment nor a quote pair crosses it.
+    nxt = (r"[\s,(](?:" + later + r"`?:\d|[\w./-]+\.(?:md|txt|rst|adoc)`?\s*\(\s*" + q_open + r")")
+    ch = r"(?:(?!" + nxt + r")(?:\\\||[^|\n]))"  # never crosses a cell bar either
+    plain = r"(?:(?!" + nxt + r")(?:\\\||[^\"\u201c\u201d|\n]))"
+    # 1. Quotes balanced inside, closed by a quote-paren before a boundary.
+    balanced = (r"((?:" + plain + r"|" + q_open + plain + r"*" + q_close + r")*?)"
+                + q_close + r"\s*\)(?=\s*(?:[),;|]|\u2014|$))")
+    # 2. Otherwise the last quote-paren before the next citation, a cell bar
+    #    or the end of the line, so no code tail survives.
+    last = (r"(" + ch + r"+?)" + q_close + r"\s*\)(?=(?:(?!" + q_close + r"\s*\))" + ch
+            + r")*?(?:" + nxt + r"|\||$))")
     return re.compile(
         r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
-        r"(`?\s*\(\s*[\"\u201c](.+?)" + frag_end +
-        r"|`?\s*\(\s*[\"\u201c]([^\n]+)[\"\u201d]\s*\))?", re.M)
+        r"(`?\s*\(\s*" + q_open + balanced +
+        r"|`?\s*\(\s*" + q_open + last + r")?", re.M)
 
 
 # Prose source documents: a quote cited from one of them is the normative
@@ -183,7 +194,7 @@ def _norm(path: str) -> str:
 def _citation_stripper(quote_files: frozenset):
     def strip(m: re.Match) -> str:
         if m.group(2) and _norm(m.group(1)) in quote_files:
-            quote = m.group(3) if m.group(3) is not None else m.group(4)
+            quote = m.group(3) if m.group(3) is not None else m.group(4)  # balanced, last
             return f'{m.group(1)} ("{quote}")'
         return m.group(1)
     return strip
@@ -272,7 +283,7 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     # Debris: a reference word left before a separator, doubled separators
     # and doubled spaces ("see DR-002; then" -> "; then").
     text = re.sub(r"[,;][ \t]*([,;])", r"\1", text)
-    text = re.sub(r"(?<=\S)[ \t]{2,}(?=[^\s|])", " ", text)
+    text = re.sub(r"(?<=\S)[ \t]{2,}(?=\S)", " ", text)
     # A sentence that started with a removed label starts with a capital, and
     # one left as bare punctuation ("Cf. DR-002.") goes.
     text = re.sub(r"\x01[ \t]*\.+[ \t]*", "", text)

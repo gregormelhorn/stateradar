@@ -537,6 +537,23 @@ class ModelTest(unittest.TestCase):
             self.assertEqual(strip(text, later_names=frozenset({"pool.go", "util.lua"})), want)
         # No boundary and no later citation: the fragment runs to the last quote-paren, no code tail survives.
         self.assertNotIn("rest", strip('init.lua:3 ("connect("a") ; rest") then srv.rs:5432 now'))
+        # A fragment never crosses a table cell, and a later uncited quote keeps its prose.
+        for text, want in (
+                ('| ping_failed | callback errors | channel.go:124 ("if err != nil {") | Get loop retries ("until ok") |',
+                 '| ping_failed | callback errors | channel.go | Get loop retries ("until ok") |'),
+                ('| e | channel.go:10 ("x := 1") | the README says ("the pool waits") when full |',
+                 '| e | channel.go | the README says ("the pool waits") when full |'),
+                ('| E01 | channel.go:10 ("x := 1") | the caller calls Close("now") |',
+                 '| E01 | channel.go | the caller calls Close("now") |'),
+                ('| E01 | waits (channel.go:10 ("x")), then logs ("done") quickly |',
+                 '| E01 | waits (channel.go), then logs ("done") quickly |'),
+                ('Waits (channel.go:10 ("x := 1")) and the doc calls it ("lazy") here.',
+                 'Waits (channel.go) and the doc calls it ("lazy") here.'),
+                ('channel.go:8 ("a") the doc (see README.md ("wait for it")) says so',
+                 'channel.go the doc (see README.md ("wait for it")) says so')):
+            out = strip(text)
+            self.assertEqual(out, want)
+            self.assertEqual(out.count("|"), text.count("|"))
         # A host whose ending looks like a file extension is not a later citation.
         self.assertEqual(strip('client.go:40 ("f("a") dial api.example.rs:8443 now") |'), "client.go |")
         # A removed sentence-initial label keeps the capital after "," or ";", in parentheses and in cells.

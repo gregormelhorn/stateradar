@@ -103,9 +103,10 @@
 - **Part-B stripping nits.** `see`/`cf.` before a removed id goes whatever
   its case, and a sentence it started keeps its capital (also after `,`/`;`,
   in parentheses and in table cells). In the Part-B copy a code fragment
-  ends at the last quote-paren before a later citation or the end of the
-  line, so no code tail survives (prose after a later uncited quote may go
-  too). A later citation names a file the text cites with a fragment
+  ends at the first quote-paren before a boundary that leaves its quotes
+  balanced, otherwise at the last one before the next citation, a table
+  cell bar or the end of the line; it never crosses a cell, so no code
+  tail survives and later cells and quoted prose stay. A later citation names a file the text cites with a fragment
   elsewhere or a file under `--repo`, by path or base name
   (`part_b_pack.cited_names`; callers of `blind_catalogue` pass its
   result). The sidecar generator recognises source-index files and files
