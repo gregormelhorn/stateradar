@@ -5,6 +5,7 @@ import json
 import re
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -518,6 +519,27 @@ class ModelTest(unittest.TestCase):
                     "| z5 | channel.go:7 ( 'a | b' ) | next |",
                     '| z6 | channel.go:7 ("ok") and in `pool.go` ("v | w") | next |'):
             self.assertTrue(P.leftover_fragments(P.blind_catalogue(row, later_names=cited), frozenset(), cited), row)
+        for row in ('| za | channel.go (line 7) ("a | b") | next |',
+                    '| zb | channel.go at line 7, inside the Get loop just before the lock ("a | b") | next |',
+                    '| zc | channel.go#L7 ("a | b") | n |'):
+            self.assertTrue(P.leftover_fragments(P.blind_catalogue(row, later_names=cited), frozenset(), cited), row)
+        self.assertEqual(P.blind_catalogue('| E01 | channel.go:17\u201419 ("x := 1") | next |'),
+                         "| E01 | channel.go | next |")
+        # A dash outside a citation (a kept quote) stays verbatim.
+        self.assertEqual(P.blind_catalogue('| E | README.md:4 ("open 10:30\u201311:00 daily") | n |',
+                                           keep_quotes_from=frozenset({"README.md"})),
+                         '| E | README.md ("open 10:30\u201311:00 daily") | n |')
+        # A quoted parenthetical after the citation's own ")" or ";" is prose (code review, PR #5).
+        for line in ('Waits (channel.go:10 ("x := 1")) and the doc calls it ("lazy") here.',
+                     '* Get blocks (channel.go:135); callers call this ("waiting").',
+                     '* Get returns ErrClosed (pool.go:6), described as ("pool is closed") in the README.',
+                     "* the state (channel.go:88) is named ('Idle') by users."):
+            self.assertEqual(P.leftover_fragments(P.blind_catalogue(line, later_names=cited), frozenset(), cited),
+                             [], line)
+        # A long token never makes the stripping quadratic.
+        started = time.monotonic()
+        P.blind_catalogue("a" * 100_000 + " " + "ab/" * 30_000, later_names=cited)
+        self.assertLess(time.monotonic() - started, 5)
         # Quoted prose in another cell is not a fragment.
         self.assertEqual(P.leftover_fragments('| x | channel.go | Get loop retries ("until ok") |',
                                               frozenset(), cited), [])
