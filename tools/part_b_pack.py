@@ -120,89 +120,79 @@ def _read_contracts(spec: str, repo: Path) -> str:
     return "\n\n".join(out)
 
 
-_DOC_ROW = re.compile(r"^(?:[-*]|\d+\.|\|)\s*\**DOC-\d+")
+# A citation: file:line or file:a-b, further ", :n" or "and :n" line refs,
+# and an optional ("fragment"). The fragment may hold unescaped or
+# typographic quotes and even "host:5432" tokens, so it ends at the first
+# quote-paren followed by a boundary or by a later citation on the line
+# (_FRAG_END), else at the first quote-paren.
+_FILE = r"[\w./-]+\.[A-Za-z]{1,4}"
+_FRAG_END = r"[\"\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)|[^\n]*?" + _FILE + r"`?:\d)"
+_CITE = re.compile(
+    r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
+    r"(`?\s*\(\s*[\"\u201c](.+?)" + _FRAG_END +
+    r"|`?\s*\(\s*[\"\u201c](.+?)[\"\u201d]\s*\))?", re.M)
+# Prose documents: a quote cited from them is the normative text Part B
+# needs (doctrine lines, requirements), not implementation code.
+_PROSE_EXT = (".md", ".txt", ".rst", ".adoc")
 
 
-def _extract_doctrine(extraction: str) -> str:
-    """The doctrine lines of an extraction: DOC-n bullets, numbered items or
-    table rows under a heading (any level) that names doctrine. Rows outside
-    such a section (status or mapping tables) are never taken."""
-    lines: list[str] = []
-    section_level = 0
-    for line in extraction.split("\n"):
-        s = line.strip()
-        heading = re.match(r"^(#{1,6})\s", s)
-        if heading and "doctrine" in s.lower():
-            section_level = len(heading.group(1))
-            continue
-        if heading and section_level and len(heading.group(1)) <= section_level:
-            section_level = 0
-        if section_level and _DOC_ROW.match(s):
-            lines.append(s)
-    return "\n".join(lines)
-
-
-def _part_b_instruction(pack_root: Path) -> str:
-    """The canonical blind-pass instruction from prompts/02-pilot.md."""
-    pilot = (pack_root / "prompts" / "02-pilot.md").read_text(encoding="utf-8")
-    m = re.search(r"(> Here is the event catalogue.*?)(?=\n\n(?=> |\w)|\Z)", pilot, re.S)
-    if not m:
-        raise ValueError("02-pilot.md: PART B instruction block not found")
+def _strip_citation(m: re.Match) -> str:
+    if m.group(2) and m.group(1).lower().endswith(_PROSE_EXT):
+        quote = m.group(3) if m.group(3) is not None else m.group(4)
+        return f'{m.group(1)} ("{quote}")'
     return m.group(1)
 
 
-# A citation: file:line or file:a-b, further ", :n" line refs, and an
-# optional ("fragment"). The fragment may hold unescaped or typographic
-# quotes, so the match prefers the last quote-paren before a boundary; it
-# never runs into the next citation on the same line.
-_FILE = r"[\w./-]+\.[A-Za-z]{1,4}"
-_FRAG = r"(?:(?!" + _FILE + r"`?:\d).)*?"
-_CITE = re.compile(
-    r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:,[ \t]*:\d+(?:-\d+)?)*"
-    r"(?:`?\s*\(\s*[\"\u201c]" + _FRAG + r"[\"\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$))"
-    r"|`?\s*\(\s*[\"\u201c]" + _FRAG + r"[\"\u201d]\s*\))?", re.M)
 # Analysis-only id families. Single-letter families (L-, G-, F-, T-) also
-# name domain things ("the T-1 threshold"), so they are removed only when the
-# run defines them (analysis_ids).
+# name domain things ("the T-1 threshold"), so an id of those families is
+# kept when the Part B sources (requirements, contracts, doctrine lines) use
+# it, and removed otherwise (domain_ids).
 _ANALYSIS_ID = re.compile(r"(?:\s*→\s*)?\b(?:Q|PA|SYS|NAT|DR)-[A-Z]*\d[\w-]*")
 _LOCAL_ID = re.compile(r"\b(?:L|G|F|T)-[A-Z]*\d[\w-]*")
 _MARK = "\x00"
 
 
-def analysis_ids(adir: Path, pack_root: Path) -> set[str]:
-    """Single-letter-family ids this run defines: lints, guards and traces in
-    the analysis files other than the catalogue, plus the fault catalogue."""
+def domain_ids(*sources: str) -> set[str]:
+    """Single-letter-family ids the Part B sources themselves use. They are
+    domain terms Part B sees anyway; every other L-/G-/F-/T- id in the
+    catalogue is an analysis reference (lint, guard, fault, trace)."""
     ids: set[str] = set()
-    for path in adir.glob("*.md"):
-        if path.name != "event-catalogue.md":
-            ids.update(_LOCAL_ID.findall(path.read_text(encoding="utf-8")))
-    registry = pack_root / "formats" / "rules.toml"
-    if registry.is_file():
-        ids.update(re.findall(r'^id\s*=\s*"(F-\d+)"', registry.read_text(encoding="utf-8"), re.M))
+    for source in sources:
+        ids.update(_LOCAL_ID.findall(source))
     return ids
 
 
-def blind_catalogue(text: str, known_ids: set[str] | frozenset = frozenset()) -> str:
+def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset()) -> str:
     """The catalogue as Part B may see it.
 
     02-pilot rule 3 puts a verbatim code fragment into every observed-in-code
     citation, and the catalogue carries the analysis's own ids (questions,
     lints, invariants, guards, decisions, faults, traces). Part B must see
     neither the code nor Part A's conclusions (R-PART-B; routed pilot
-    2026-11-13). Citations keep the file name only, without line or fragment;
-    analysis ids and the labels that introduced them are removed. Prose
+    2026-11-13). Citations keep the file name only, without line or code
+    fragment (a quote from a prose document stays);
+    analysis ids and the labels that introduced them are removed; L-, G-,
+    F- and T- ids survive only when listed in keep_ids. Prose
     conclusions cannot be removed mechanically: the agent still reads the
     package (rule 7).
     """
-    text = _CITE.sub(r"\1", text)
+    text = _CITE.sub(_strip_citation, text)
     text = _ANALYSIS_ID.sub(_MARK, text)
     text = re.sub(r"(?:\s*→\s*)?" + _LOCAL_ID.pattern,
-                  lambda m: _MARK if m.group(0).lstrip(" \t→") in known_ids else m.group(0), text)
+                  lambda m: m.group(0) if m.group(0).lstrip(" \t→") in keep_ids else _MARK, text)
     # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12".
     text = re.sub(r"(?:\b(?:recorded as\s+)?lints?\s*|\b[Ff]inding\s*(?::\s*)?)(?=\x00)", "", text)
     # Parentheses that held only removed ids, then the ids with their separators.
     text = re.sub(r"\((?:[\s,;]|\x00)*\x00(?:[\s,;]|\x00)*\)", "", text)
-    text = re.sub(r"[ \t]*[,;]?[ \t]*\x00(?:[ \t]*[,;][ \t]*(?=\x00))?", "", text)
+    # A removed id between two separators takes one of them with it; at the
+    # end of a clause it takes the separator before it; before text it
+    # leaves that separator ("cache; lint L-4; G-01 holds" keeps a ";").
+    text = re.sub(r"\x00(?:[ \t]*(?:[,;]|\band\b)[ \t]*\x00)+", _MARK, text)  # id lists
+    while _MARK in text:
+        text = re.sub(r"[ \t]*[,;][ \t]*\x00(?=[ \t]*[,;])", "", text)
+        text = re.sub(r"[ \t]*[,;]?[ \t]*\x00(?=[ \t]*(?:[).|\]\n]|\x00|$))", "", text)
+        text = re.sub(r"\x00[ \t]*(?![ \t]*(?:[,;).|\]\n]|\x00|$))", "", text)
+        text = re.sub(r"(?<![,;])\x00(?=[ \t]*[,;])", "", text)
     return text
 
 
@@ -247,21 +237,10 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     catalogue = catalogue_path.read_text(encoding="utf-8")
     events, pairs = _catalogue_ids(catalogue)
 
-    known_ids = analysis_ids(adir, pack_root)
-    blind_copy = blind_catalogue(catalogue, known_ids)
-    try:
-        same_ids = _catalogue_ids(blind_copy) == (events, pairs)
-    except ValueError:
-        same_ids = False
-    if not same_ids:
-        raise ValueError("stripping analysis ids changed the catalogue's event ids; "
-                         "rename event or pair ids that look like analysis ids (Q-, PA-, SYS-, NAT-, DR-, or L-/G-/F-/T- ids the analysis defines)")
-    blocks: list[tuple[str, str]] = [
-        ("INPUT 1: EVENT CATALOGUE (code fragments and analysis references removed)", blind_copy)]
-
     # Doctrine lines travel with the requirements: every artefact in the
     # dobby Part-B runs (G2 storm guard, trigger-lane policy) traced to a
     # doctrine line missing from the blind input.
+    doctrine = ""
     extraction_path = adir / "extraction.md"
     if extraction_path.is_file():
         ext = extraction_path.read_text(encoding="utf-8")
@@ -270,13 +249,31 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
             # A silent skip sent Part B no doctrine lines (routed pilot 2026-11-13).
             raise ValueError(f"{extraction_path} names DOC-n lines but none is a bullet, numbered "
                              "item or table row under a heading that names doctrine")
-        if doctrine:
-            doctrine = blind_catalogue(doctrine, known_ids)
-            blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", doctrine))
-    for spec in args.requirements:
-        blocks.append((f"INPUT 2: REQUIREMENTS ({spec})", _read_requirements(spec, repo)))
-    for spec in args.contracts:
-        blocks.append((f"INPUT 3: EVENT CONTRACT TEXTS ({spec})", _read_contracts(spec, repo)))
+    sources = [(f"INPUT 2: REQUIREMENTS ({spec})", _read_requirements(spec, repo))
+               for spec in args.requirements]
+    sources += [(f"INPUT 3: EVENT CONTRACT TEXTS ({spec})", _read_contracts(spec, repo))
+                for spec in args.contracts]
+    keep_ids = domain_ids(doctrine, *(text for _, text in sources))
+
+    blind_copy = blind_catalogue(catalogue, keep_ids)
+    try:
+        same_ids = _catalogue_ids(blind_copy) == (events, pairs)
+    except ValueError:
+        same_ids = False
+    if not same_ids:
+        raise ValueError("stripping analysis ids changed the catalogue's event ids; rename event or "
+                         "pair ids that look like analysis ids (Q-, PA-, SYS-, NAT-, DR-, or L-/G-/F-/T- "
+                         "ids the requirements do not use)")
+    blocks: list[tuple[str, str]] = [
+        ("INPUT 1: EVENT CATALOGUE (code fragments and analysis references removed)", blind_copy)]
+    if doctrine:
+        blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", blind_catalogue(doctrine, keep_ids)))
+    blocks += sources
+    kept = sorted(set(_LOCAL_ID.findall(blind_copy)))
+    if kept:
+        # Rule 7: the agent judges these while reading the package.
+        print("PART-B PACK: kept in the catalogue because the requirements, contracts or doctrine "
+              "lines use them: " + ", ".join(kept), file=sys.stderr)
 
     # Length guard: the dropped-payload failure mode (dobby 2026-08-05).
     short = [name for name, text in blocks if len(text) < MIN_INPUT_CHARS]

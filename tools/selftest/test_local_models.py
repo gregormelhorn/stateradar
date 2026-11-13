@@ -442,9 +442,10 @@ class ModelTest(unittest.TestCase):
     def test_blind_catalogue_strips_the_pilots_own_leaks(self):
         source = (Path(__file__).resolve().parents[2] / "docs" / "evidence" / "routed-pilot-2026-11-13"
                   / "partb" / "event-catalogue.pre-strip.md").read_text()
-        evidence = Path(__file__).resolve().parents[2] / "docs" / "evidence" / "routed-pilot-2026-11-13" / "channelPool"
-        known = local_models.part_b_pack.analysis_ids(evidence, Path(__file__).resolve().parents[2])
-        stripped = local_models.part_b_pack.blind_catalogue(source, known)
+        partb = Path(__file__).resolve().parents[2] / "docs" / "evidence" / "routed-pilot-2026-11-13" / "partb"
+        keep = local_models.part_b_pack.domain_ids((partb / "requirements.md").read_text(),
+                                                   (partb / "contracts.md").read_text())
+        stripped = local_models.part_b_pack.blind_catalogue(source, keep)
         for leak in (r'\("', r"\bQ-\d", r"\bL-\d", r"\bPA-\d", r"\bSYS-\d", r"\bT-[A-Z]*\d",
                      r"\.go:\d", r"\bFinding\b"):
             self.assertIsNone(re.search(leak, stripped), leak)
@@ -461,15 +462,53 @@ class ModelTest(unittest.TestCase):
         strip = local_models.part_b_pack.blind_catalogue
         text = strip('Waits (channel.go:10 ("x := 1") then the caller retries, see channel.go:12 ("y := 2")).\n'
                      'Call `c.Get("key")` or fail with `errors.New("pool is closed")`; listen on :8080.\n'
-                     'The T-1 threshold, level L-3 cache, an F-16, (channel.go:186, :194-196) lint L-4.\n',
-                     {"L-4"})
+                     'The T-1 threshold, level L-3 cache, an F-16, (channel.go:186, :194-196) lint L-4, see L-9.\n',
+                     {"T-1", "L-3", "F-16"})
         self.assertIn("then the caller retries", text)
         self.assertNotIn("x := 1", text)
         self.assertNotIn("y := 2", text)
         for kept in ('c.Get("key")', 'errors.New("pool is closed")', ":8080", "T-1 threshold", "L-3 cache", "F-16"):
             self.assertIn(kept, text)
-        for gone in (":186", ":194", "L-4"):
+        for gone in (":186", ":194", "L-4", "L-9"):
             self.assertNotIn(gone, text)
+
+    def test_blind_keeps_ids_the_requirements_use_and_reports_them(self):
+        # Round 3 review: "the T-1 threshold" quoted in a doctrine line was
+        # stripped from the catalogue, and an undefined "see L-9" survived.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(
+                root, catalogue="<!-- event-ids: E01 -->\n| E01 | timer fires after the T-1 threshold, see L-9 |\n"
+                + "event details " * 30,
+                extraction="### Doctrine lines\n\n- DOC-1 \"the T-1 threshold bounds the wait\"\n"
+                + "".join(f"- DOC-{n} \"a waiting caller is woken when a connection is returned\"\n"
+                          for n in range(2, 6)))
+            err = io.StringIO()
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+                local_models.blind(Budget(root / "budget.db", 2_000_000), args, "key")
+            package = (root / "blind.package.md").read_text()
+            self.assertIn("after the T-1 threshold", package)
+            self.assertNotIn("L-9", package)
+            self.assertIn("kept in the catalogue", err.getvalue())
+            self.assertIn("T-1", err.getvalue())
+
+    def test_blind_catalogue_round3_cases(self):
+        strip = local_models.part_b_pack.blind_catalogue
+        # One-argument call: prose between citations survives on its own.
+        self.assertIn("then the caller retries",
+                      strip('Waits (channel.go:10 ("x := 1") then the caller retries, see channel.go:12 ("y")).'))
+        # A fragment that itself holds host:port or file:line tokens is removed whole.
+        for text, leak in (('c (client.go:40 ("conn, err := net.Dial("tcp", "db.example.com:5432")")) |', "net.Dial"),
+                           ('d (channel.go:50 ("// see util.go:3 for x")) |', "for x"),
+                           ("(channel.go:175-176 and :194-196) x", ":194")):
+            self.assertNotIn(leak, strip(text))
+        # A quote from a prose document is normative text and stays; the line number goes.
+        doc = strip('1. DOC-1 — README.md:12 ("The connection type in the pool is interface{}")')
+        self.assertIn("The connection type in the pool is interface{}", doc)
+        self.assertNotIn(":12", doc)
+        # Removing ids keeps the separator between two clauses.
+        self.assertEqual(strip("level L-3 cache; recorded as lint L-4; G-01 holds", {"L-3"}), "level L-3 cache; holds")
+        self.assertEqual(strip("see Q-1, Q-2 and more"), "see and more")
 
     def test_cli_blind_truncation_goes_to_a_partial_file(self):
         with tempfile.TemporaryDirectory() as directory:

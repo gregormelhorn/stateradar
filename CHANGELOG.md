@@ -84,13 +84,15 @@
   ignores words such as `Q-and-A`; `part_b_pack.py` sends Part B doctrine
   lines written as bullets, numbered items or a table under a doctrine
   heading, stripped like the catalogue, and refuses an extraction whose DOC
-  lines it cannot pass on; its catalogue copy drops code fragments, line
-  numbers and analysis ids (L-, G-, F- and T- only when the run defines
-  them), keeps prose between citations, and it refuses a catalogue whose
-  event ids the stripping would change; its CLI reports input errors
-  without a traceback; `draft-verify` defaults to 12000 output tokens, a
-  truncated draft is saved to `<stem>.draft.txt` and a truncated blind
-  table to `<stem>.partial.md` instead of being printed;
+  lines it cannot pass on. Its catalogue copy drops code fragments, line
+  numbers and analysis ids but keeps prose between citations and quotes
+  cited from prose documents; an L-, G-, F- or T- id stays only when the
+  requirements, contracts or doctrine lines use it, and each kept id is
+  named on stderr. It refuses a catalogue whose event ids the stripping
+  would change. Its CLI reports input errors without a traceback.
+  `draft-verify` defaults to 12000 output tokens. A truncated draft is
+  saved to `<stem>.draft.txt` and a truncated blind table to
+  `<stem>.partial.md`; neither is printed. Further:
   `formats/rules.toml` gains the ODC triggers `part-B diff`, `reviewer
   cross-check`, `step-8 verification`, `z3 invariant check`, `draft-verify`
   and `jev check`, and `check_pack_consistency.py` fails when the pilot
