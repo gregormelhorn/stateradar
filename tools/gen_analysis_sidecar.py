@@ -255,7 +255,10 @@ def _parse_cell(
     # caller drops the candidates that are not file names.
     found = list(re.finditer(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw))
     if unresolved is not None:
-        unresolved.update(m.group(1) for m in found if not src_index.get(Path(m.group(1)).name))
+        # Not the quoted fragments: a fragment may quote "app.json:12" itself.
+        outside = re.sub(r'\(\s*["\u201c].*?["\u201d]\s*\)', " ", raw)
+        unresolved.update(m.group(1) for m in re.finditer(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", outside)
+                          if not src_index.get(Path(m.group(1)).name))
     cit = next((m for m in found if src_index.get(Path(m.group(1)).name)),
                found[0] if found else None)
     if cit:

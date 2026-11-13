@@ -248,7 +248,8 @@ def main() -> int:
             '`mini.py:26` ("self.state = \\"Closed\\"")', '`config.yaml:3` ("retries: 3")', 1).replace(
             '`mini.py:47` ("self.dup_count += 1")', '`Mini.PY:47` ("self.dup_count += 1")', 1).replace(
             '`mini.py:49` ("return \\"ignored\\"")',
-            '`mini.py:49` ("return \\"ignored\\"") and `second_test.py:5`', 1))
+            '`mini.py:49` ("return \\"ignored\\"") and `second_test.py:5`', 1).replace(
+            '`mini.py:45` ("raise RejectedError")', '`mini.py:45` ("load(\'quoted_cfg.json:12\')")', 1))
         # A second component citing the same files: one line per component.
         # mini2 swaps mini's test-file citation for one of its own: a set of
         # names that leaked between components (either order) would warn
@@ -285,6 +286,7 @@ def main() -> int:
                  "extension (sidecar-overlay.yaml: src_exts, matched case-sensitively)", True),
                 ("generator warns about a second citation next to a resolved one",
                  "warning: mini: citations of second_test.py dropped", True),
+                ("generator stays quiet on a file:line inside a fragment", "quoted_cfg.json", False),
                 ("generator stays quiet on host:port text", "db.example.com", False)):
             seen = any(needle_text in ln for ln in warn_lines)
             if seen != want_warning:
@@ -305,11 +307,13 @@ def main() -> int:
         (hostfirst_matrix.parent / "analysis.json").unlink()  # no stale pass on a crash
         hostfirst_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
                                         "--root", str(hostfirst)], capture_output=True, text=True)
-        if hostfirst_run.returncode != 0:
+        hostfirst_out = hostfirst_matrix.parent / "analysis.json"
+        hostfirst_cits = ([c.get("citation", {}).get("line")
+                           for c in json.loads(hostfirst_out.read_text())["cells"]]
+                          if hostfirst_run.returncode == 0 and hostfirst_out.is_file() else None)
+        if hostfirst_cits is None:
             failures.append("generator on the host-first matrix failed:\n" + hostfirst_run.stderr)
-        hostfirst_cits = [c.get("citation", {}).get("line") for c in json.loads(
-            (hostfirst_matrix.parent / "analysis.json").read_text())["cells"]]
-        if 19 not in hostfirst_cits:
+        elif 19 not in hostfirst_cits:
             failures.append("generator keeps a citation after host:port text: mini.py:19 dropped")
         else:
             print("  ok  generator keeps a citation after host:port text")
