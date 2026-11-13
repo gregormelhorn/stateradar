@@ -196,29 +196,31 @@ count changed. Further line numbers of the same file go with a citation: colon
 items, ranges and a list ending in `and`/`or` (`channel.go:136, 151 or 160`)
 are always stripped, a bare run (`channel.go:10, 20`) only where it ends the
 clause, so ", 3 callers" stays; a prose count joined by `and`/`or`
-(`channel.go:12, 2 and 3 callers`) goes with it, the safe direction. A bare
-number in prose ("unlock at 136") is not recognised. Q-, PA-, SYS-, NAT- and
-DR- ids are always removed. An L-, G-, F- or T- id stays only when the
-requirements, the contracts or the quoted text of a doctrine line use it (a
-doctrine line's gloss is Part A's and does not count), so a domain term such
-as `T-1` that the requirements use survives;
-every other id of those families is removed, including a domain term the
-sources never use. The command names on stderr each id it kept and each it
-removed, for the agent to check; a removed domain term is recorded in
-`part-b-diff.md` as a known loss, and the inputs are never edited to restore
-it. Prose that states an as-is conclusion cannot be removed mechanically, and
-the pilot lists it as a known leak. Doctrine lines from `extraction.md` travel
-too, stripped the same way: bullets, numbered items or table rows under a
-heading that names doctrine. An extraction that names DOC lines none of which
-sits under such a heading is refused, and so is a catalogue whose event ids
-would not survive the stripping. A truncated blind output is saved to `<output
-stem>.partial.md`, never to `--output`, and is not printed. The call receives
-only the assembled package and no tools or conversation history. The command
-checks the returned table with the existing Part-B coverage checker, whose
-report goes to stderr so that stdout stays one JSON document, and returns a
-failure for missing rows, missing checklist ticks, or truncated output. It
-does not check the disposition vocabulary, and it only requires pair rows when
-the catalogue carries `P-` ids.
+(`channel.go:12, 2 and 3 callers`) goes with it, the safe direction, and so
+does a count before a parenthesis (`channel.go:12, 5 (five) callers`). Known
+leaks: a run that ends in a dash or a slash, and a run whose last number is a
+prose count (`channel.go:12, 13, 3 callers` keeps 13). A bare number in prose
+("unlock at 136") is not recognised. Q-, PA-, SYS-, NAT- and DR- ids are
+always removed. An L-, G-, F- or T- id stays only when the requirements, the
+contracts or the quoted text of a doctrine line use it (a doctrine line's
+gloss is Part A's and does not count), so a domain term such as `T-1` that the
+requirements use survives; every other id of those families is removed,
+including a domain term the sources never use. The command names on stderr
+each id it kept and each it removed, for the agent to check; a removed domain
+term is recorded in `part-b-diff.md` as a known loss, and the inputs are never
+edited to restore it. Prose that states an as-is conclusion cannot be removed
+mechanically, and the pilot lists it as a known leak. Doctrine lines from
+`extraction.md` travel too, stripped the same way: bullets, numbered items or
+table rows under a heading that names doctrine. An extraction that names DOC
+lines none of which sits under such a heading is refused, and so is a
+catalogue whose event ids would not survive the stripping. A truncated blind
+output is saved to `<output stem>.partial.md`, never to `--output`, and is not
+printed. The call receives only the assembled package and no tools or
+conversation history. The command checks the returned table with the existing
+Part-B coverage checker, whose report goes to stderr so that stdout stays one
+JSON document, and returns a failure for missing rows, missing checklist
+ticks, or truncated output. It does not check the disposition vocabulary, and
+it only requires pair rows when the catalogue carries `P-` ids.
 
 ```bash
 blind_args=(blind domain-analysis/component --repo /path/to/repo \
