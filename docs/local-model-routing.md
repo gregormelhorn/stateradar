@@ -59,9 +59,11 @@ separate batch for another source. The response includes the source path and
 content hash, citation, statement, model version, choice probabilities, token
 usage, and cost. Every result is marked for review. Ordering checks also
 receive an independently evaluated `ordering_scope_probability` for whether
-the fragment contemplates the exact sequence. The Choice and Noul answers may
-disagree; preserve both and examine the source. Confidence and repeatability
-do not establish correctness. Follow the requirement-scope rule and raise a
+the fragment establishes every material condition, actor, event, order and
+outcome in the asserted sequence. Paraphrases count when they preserve the
+meaning. Surrounding text cannot supply missing evidence. The Choice and
+Noul answers may disagree; preserve both and examine the source. Confidence
+and repeatability do not establish correctness. Follow the requirement-scope rule and raise a
 question when its conditions require one. An API error after reservation keeps
 the reservation until reconciled. Omit `--model` to use `jev-latest`; pin a
 specific available version for comparable measurements.

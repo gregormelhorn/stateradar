@@ -4,6 +4,13 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Jev ordering scope.** Check every material part of the asserted sequence
+  against the quoted fragment. At the existing 0.5 threshold the revised
+  question corrected all three repetitions of the known Pool CT-A error.
+  Both formulations classified the 15 distinct held-out Go cases correctly
+  in all three repetitions. The pilot now batches individual callee
+  guarantees and independently testable parts of each finding.
+
 - **mypy in CI.** The new `type check` step runs mypy over `tools/` and
   `tools/selftest/` (`mypy.ini`; mypy and stubs pinned in
   `tools/requirements-dev.txt`). The first run on main found 34 errors in

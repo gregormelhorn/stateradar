@@ -1,8 +1,11 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.19.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.22.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.22 — write the full requirement-backed sequence before asking Jev,
+  batch specific guarantees against the callee contract, and check each
+  independently testable part of a finding against its own citation.
 * v1.19 — timed agent-only run (silenceper/pool, 2026-11-13): a crash has
   a written form (`handle crash: … → Q-nn`) instead of an ad-hoc `handle`
   note; the sidecar generator derives pairs, guard groups and the ODC
@@ -125,8 +128,9 @@ Use this routing when `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` are set (see the
 | Step | Route | Your part |
 |---|---|---|
 | 1 Extraction, doctrine-line sweep | `draft-verify <source> <task>` once per requirements, doc, code, or test file, with a task that names the step and the items to extract | The drafts seed Step 1; you still do the complete step (rule 3) |
-| 6 Control traces that cite a requirement or decision | `jev-batch` against the original requirements or DR file, one `ordering` check per cited fragment, quoted as on the scope line | You decide the scope line from the quoted text (rule 5) |
-| 8 Line-number accuracy | `jev-batch` with one `claim` check per cited behavioural claim, batched per file | Re-read every cited line yourself as Step 8 requires; Jev only orders the re-reading |
+| 1 Seam contracts | `jev-batch`, one `claim` per cited callee guarantee, grouped by source file | Read the callee contract and record gaps in `extraction.md` |
+| 6 Control traces that cite a requirement or decision | `jev-batch` against the original requirements or DR file, one `ordering` check per asserted sequence and cited fragment | Write the full sequence and decide the scope line from the quoted text (rule 5) |
+| 8 Finding verification | `jev-batch`, one `claim` per independently testable part, grouped by source file | Re-read each citation and keep each part's provenance and verdict separate |
 | Part B | `blind` (Flash, packaged inputs only) | Check the package and the table, then classify (rule 7) |
 
 Rules for every routed step:
@@ -135,7 +139,7 @@ Rules for every routed step:
 2. **Jev may add a question, never remove one.** A Jev answer is never the reason to drop a claim, a finding, or a question: dropping requires your own re-read, recorded with the line. A `supported` answer never upgrades provenance to `explicit-requirement`, never resolves a hole, and never replaces the requirement-scope rule. If Jev returns `contradicted` or `unclear` for a claim you keep, write why you keep it, or raise a question.
 3. **Drafts seed Step 1; they do not bound it.** Do your own complete pass over each file and record every item the drafts missed. Cross-file contradictions, reachable state combinations, and the seam-contract sweep are yours: a drafted claim about a seam's failure behaviour stays `inferred` until you cite the callee contract. Check the doctrine list against the requirements text sentence by sentence.
 4. **Ordering checks read both answers.** Every `ordering` result carries a `choice` and an independent `ordering_scope_probability`; they often disagree (first live run: `supported` with scope 0.11 for an ordering the text never describes). A Jev result never establishes scope. If the choice is not `supported`, or the scope probability is below 0.5, the ordering is not source-backed and a drafted ordering claim becomes a question. The 0.5 is provisional and uncalibrated (see the cascade plan): it can only add questions, and a result above it backs nothing by itself.
-5. **Scope line.** On a Step-6 control trace you decide *cited text contemplates this ordering: yes/no* from the quoted text, then add `jev: <choice>, scope <probability>`, or `jev: failed (<reason>)`, or `jev: not run (<reason>)`. With routing on, `not run` is allowed only when the ledger is exhausted; every `failed` or `not run` is listed in `summary.md`. If you write `yes` and Jev does not back the ordering under rule 4, the control verdict is void: raise a question that cites both. Record every run that Jev answered; never re-run an answered check with another fragment, another source, or a reworded statement to change its result. A batch rejected before Jev answered (for example a citation error) has no result: correct it and run it again. The source is the original requirements or DR file, never an analysis artifact such as `extraction.md`.
+5. **Scope line.** On a Step-6 control trace you decide *cited text contemplates this ordering: yes/no* from the quoted text, then add `jev: <choice>, scope <probability>`, or `jev: failed (<reason>)`, or `jev: not run (<reason>)`. With routing on, `not run` is allowed only when the ledger is exhausted; every `failed` or `not run` is listed in `summary.md`. If you write `yes` and Jev does not back the ordering under rule 4, the control verdict is void: raise a question that cites both. Record every run that Jev answered; never re-run an answered check with another fragment, another source, or a reworded statement to change its result. A batch rejected before Jev answered (for example a citation error) has no result: correct it and run it again. For a control trace, use the original requirements or DR file. For a callee guarantee or finding, use the original contract, code or test that supplies the citation. Never use an analysis artifact such as `extraction.md` as evidence.
 6. **Carry every draft question forward.** Each entry in a draft's `questions` list ends as a Q in Step 7, as a reasoned fold into an existing Q, or as a reasoned disposition recorded in `extraction.md`: `answered: <file:line>` when the sources settle it, or `outside scope: <why>`. `answered:` settles only what the code does; when the requirements are silent on whether that behaviour is intended, the intent part becomes a Q or folds into one. `outside scope:` never applies to behaviour of the component under analysis. A model judgment never answers one.
 7. **Part B is never done by you.** You have seen the code and the matrix. `blind` takes only prepared text files (`.md`, `.txt`, `.rst`): requirements prose (a whole file, or one section selected with `FILE.md:PATTERN`), and a whole contracts file into which you copied each contract docstring or schema description verbatim, headed by its `file:line`, with no added, summarised, or reworded text; it refuses source files and class specs. First run `blind … --package-only`, read `<output stem>.package.md`, and confirm it holds no implementation code; then run `blind` without the flag and without changing the inputs. The real run sends only that inspected package and refuses if the inputs changed. The analysis directory, `--requirements` and `--contracts` are relative to `--repo` (or absolute). The package carries the catalogue with code fragments, line numbers and analysis ids removed; file names stay, and so do quotes cited from the requirements and contracts files or from the prose files the doctrine lines cite (never from a file of the analysis directory). Q-, PA-, SYS-, NAT- and DR- ids are always removed; L-, G-, F- and T- ids stay only when the requirements, the contracts or the quoted text of a doctrine line use them, and the command names on stderr each id it kept and each it removed: check both lists, list each kept id in `part-b-diff.md` with why it stays, and record any removed domain term as a known loss; never edit the inputs to restore one. The command refuses the package when a cited file name is still followed by a quoted fragment after stripping (put each fragment on one line right after `file:N` or `file:N-M`, escape each `|` of a fragment in a table cell as `\|` in the catalogue, rephrase a parenthesised prose quote that follows a code file name, and rebuild) or when a table row's cell count changed (repair that row's escaping and rebuild); never send such a package and never work around the refusal. Write each line number as part of a citation (`file:N`, `file:N, M or K`, `file:N-M`, ranges without spaces) and end the run with `,` `;` `.` `:` `?` `!`, a bracket, a double quote or `*`, or join its last number with `and`/`or`; never end it with a dash or a slash or put a prose count directly after it; a bare number in prose ("unlock at 136") is not recognised and reaches the package. The refusal does not catch a quote after the citation's own `;` or `)`, or more than 80 characters after the file name: search the package for every `(` followed by a quote (straight, single or typographic, also with a space between) and confirm that each one is a kept prose-source quote. Still read it: prose that states an as-is conclusion (a deadlock, a lost wake-up, a hole) is a known leak; list each in `part-b-diff.md` and treat Part B's agreement on that row as not independent. Never repair such text by restating it as intent or as a hole or question; a repaired line states provenance only ("observed in code"). If code reaches a sent package anyway, discard the blind output, record the contamination in `part-b-diff.md`, and re-dispatch with clean inputs. A passing coverage check proves row presence only: confirm the pair count against the pairs table. A row whose disposition word is outside the closed vocabulary is listed as `vocabulary-drift` in `part-b-diff.md`; classify it only where its described behaviour maps unambiguously to one vocabulary value, and state that mapping. If the behaviour differs from the matrix it is a `divergence` with a Q; if it is ambiguous, raise a Q. If `blind` fails or routing is not configured, dispatch a fresh blind session as the Part B dispatch notes describe, with the same prepared text files and no `FILE:Class` specs; never write, edit, rewrite, or complete a blind table yourself.
 8. **Failures are results.** A rejected draft, an incomplete response, an API error, or an exceeded ledger stops that call only. Record it in `summary.md` and do Steps 1, 6 or 8 yourself (Part B: rule 7; an oversized source: rule 9, which takes precedence). A `citation fragment missing` error from `jev-batch` is a correction: fix the citation or raise a question, then re-run the batch with every check. Never retry by loosening the task, dropping a check, or weakening the citation check. A draft cut off at the output budget (`finish_reason=length`, kept as `<stem>.draft.txt`) is not loosening: re-run it once with a larger `--max-tokens` (at most 16384); if it is cut off again, split the source under rule 9 or do the step yourself.
@@ -163,6 +167,16 @@ checked determines the state.
 
 <!-- rule:R-SEAM-CONTRACT -->
 **Seam-contract sweep.** For every external seam the component invokes (publisher or bus, classifier or model client, scheduler, executor, storage): read the callee's contract. Record its failure semantics (raises what, never raises, timeout behaviour) as NAT candidates with citations into the callee. Missing error handling at a call site is **not** evidence that failures propagate. To declare an invoked-operation failure path a hole without reading the callee's contract is an unproven inference. Label it as such.
+
+**Callee guarantees.** Write one claim per guarantee you rely on. Include
+the operation, triggering condition and outcome. For example, “If the write
+returns an error, no partial write remains.” With model routing on, group
+the claims by callee contract file and pass each cited guarantee to
+`jev-batch` as a `claim`. Record each citation, Jev verdict and your review
+in `extraction.md`. If the contract is silent or unavailable, record the
+evidence gap and raise a question about the guarantee. Keep call-site
+observations and implementation inferences separate from documented
+guarantees.
 
 → `extraction.md`
 
@@ -381,6 +395,15 @@ Produce concrete, numbered event sequences of two kinds:
 
 For each trace give (a) the sequence, (b) what the code appears to do, with provenance, and (c) the domain question it raises. For a control trace, write `none — control trace` instead of a question. A control-trace verdict that rests on a cited requirement or recorded decision must add one line with a short quote. The line: **"cited text contemplates this ordering: yes/no"**. A "no" voids the control verdict and raises a question. This is the requirement-scope rule made mechanical.
 
+Before making the scope judgment, write the assertion as **starting
+condition → actors and ordered events → observable outcome**. Include
+every timing, frequency or exclusion the verdict depends on, such as
+“immediately”, “always” or “instead of returning an error”. With model
+routing on, use that full assertion as the `statement` of the `ordering`
+check and use the same fragment as on the scope line. Record Choice and
+scope separately. If the citation leaves out a material detail, apply the
+scope rule to the full assertion and retain the question.
+
 → `adversarial-traces.md`
 
 <!-- rule:R-ODC-FIELDS -->
@@ -448,7 +471,14 @@ step verifies them carefully before the matrix is finalized.
 3. **Line-number accuracy.** Re-read every cited `file:line`. Does the
    code at that line actually do what the finding claims? Off-by-one
    citations or misread logic must be corrected before the matrix is
-   finalized.
+   finalized. Split a compound finding into independently testable claims
+   while keeping the conditions and event order each claim depends on. For
+   example, “Cancel clears the timer and emits a diagnostic” requires a
+   separate check for each effect. With model routing on, batch one
+   `claim` per part against its cited source file and keep the separate
+   verdicts linked to the original finding. A supported part cannot supply
+   evidence for another part. Review each part and preserve unresolved
+   questions before deciding what the combined finding supports.
 
 4. **Severity recalibration.** For each finding: is this a bug
    (incorrect behavior), a design observation (correct but surprising),
