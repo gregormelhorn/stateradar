@@ -1,0 +1,399 @@
+{
+  "source": "channel_rpc_test.go",
+  "source_sha256": "f6073a935a778fa28c765eb0c351aa4e56294b3c7b4df618621838ffabce19eb",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 2812,
+    "output_tokens": 1815,
+    "cost_microdollars": 3022,
+    "reservation_microdollars": 17035
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 7591,
+    "cost_microdollars": 319,
+    "reservation_microdollars": 1240,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The test configuration uses InitialCap=5, MaxIdleCap=10, MaximumCap=100, network=tcp, address=127.0.0.1:7777.",
+      "line": 14,
+      "fragment": "InitialCap = 5",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.5,
+          "contradicted": 0.0,
+          "unclear": 0.5
+        },
+        "confidence": 0.25
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "The factory dials an RPC HTTP connection via tcp to the configured address.",
+      "line": 21,
+      "fragment": "return rpc.DialHTTP(\"tcp\", address)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "The close factory casts the value to *rpc.Client and closes it.",
+      "line": 24,
+      "fragment": "nc := v.(*rpc.Client)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.91,
+          "contradicted": 0.0,
+          "unclear": 0.09
+        },
+        "confidence": 0.86
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "An init function starts the rpc server goroutine and sleeps 300ms to let the tcp server settle before tests.",
+      "line": 32,
+      "fragment": "time.Sleep(time.Millisecond * 300)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "newChannelPool builds a Config with the fixture values (InitialCap, MaxCap MaximumCap, factory, closeFac, IdleTimeout 20s, MaxIdle MaxIdleCap) and calls NewChannelPool.",
+      "line": 257,
+      "fragment": "pconf := Config{InitialCap: InitialCap, MaxCap: MaximumCap, Factory: factory, Close: closeFac, IdleTimeout: time.Second * 20,",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.78,
+          "contradicted": 0.0,
+          "unclear": 0.22
+        },
+        "confidence": 0.67
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "The rpc server registers Arith, handles HTTP, listens on the configured tcp address, panics on listen error, and serves in a goroutine.",
+      "line": 267,
+      "fragment": "l, e := net.Listen(\"tcp\", address)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.28,
+          "contradicted": 0.0,
+          "unclear": 0.72
+        },
+        "confidence": 0.58
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "Arith.Multiply sets reply to A*B and returns nil.",
+      "line": 281,
+      "fragment": "*reply = args.A * args.B",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.79,
+          "contradicted": 0.0,
+          "unclear": 0.21
+        },
+        "confidence": 0.68
+      }
+    },
+    "C8": {
+      "kind": "ordering",
+      "statement": "TestNew creates a pool via newChannelPool, defers Release, and reports an error if newChannelPool errored.",
+      "line": 38,
+      "fragment": "p, err := newChannelPool()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.46,
+          "contradicted": 0.0,
+          "unclear": 0.54
+        },
+        "confidence": 0.31,
+        "ordering_scope_probability": 0.07
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "TestNew asserts no error from newChannelPool except via t.Errorf.",
+      "line": 41,
+      "fragment": "t.Errorf(\"New error: %s\", err)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.83,
+          "contradicted": 0.02,
+          "unclear": 0.15
+        },
+        "confidence": 0.74
+      }
+    },
+    "C10": {
+      "kind": "ordering",
+      "statement": "TestPool_Get_Impl creates a pool, gets a conn, asserts the conn is a *rpc.Client, then Puts it back.",
+      "line": 52,
+      "fragment": "_, ok := conn.(*rpc.Client)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.57,
+          "contradicted": 0.01,
+          "unclear": 0.42
+        },
+        "confidence": 0.35,
+        "ordering_scope_probability": 0.05
+      }
+    },
+    "C11": {
+      "kind": "ordering",
+      "statement": "TestPool_Get calls p.Get once, then asserts p.Len() equals InitialCap-1.",
+      "line": 69,
+      "fragment": "if p.Len() != (InitialCap - 1) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.0,
+          "unclear": 0.13
+        },
+        "confidence": 0.8,
+        "ordering_scope_probability": 0.09
+      }
+    },
+    "C12": {
+      "kind": "ordering",
+      "statement": "TestPool_Get spawns MaximumCap-1 concurrent goroutines each calling p.Get, waits, then asserts p.Len()==0.",
+      "line": 76,
+      "fragment": "for i := 0; i < (MaximumCap - 1); i++ {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.75,
+          "contradicted": 0.0,
+          "unclear": 0.25
+        },
+        "confidence": 0.62,
+        "ordering_scope_probability": 0.05
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "TestPool_Get asserts a subsequent Get after exhausting capacity returns ErrMaxActiveConnReached.",
+      "line": 94,
+      "fragment": "if err != ErrMaxActiveConnReached {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C14": {
+      "kind": "ordering",
+      "statement": "TestPool_Put constructs its own Config, gets MaximumCap conns, puts them all back, then asserts p.Len()==MaxIdleCap.",
+      "line": 121,
+      "fragment": "if p.Len() != MaxIdleCap {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.53,
+          "contradicted": 0.01,
+          "unclear": 0.46
+        },
+        "confidence": 0.3,
+        "ordering_scope_probability": 0.06
+      }
+    },
+    "C15": {
+      "kind": "ordering",
+      "statement": "TestPool_Put calls p.Release at the end to close the pool.",
+      "line": 126,
+      "fragment": "p.Release()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.88,
+          "contradicted": 0.02,
+          "unclear": 0.1
+        },
+        "confidence": 0.82,
+        "ordering_scope_probability": 0.07
+      }
+    },
+    "C16": {
+      "kind": "ordering",
+      "statement": "TestPool_UsedCapacity creates a pool and asserts p.Len() equals InitialCap.",
+      "line": 134,
+      "fragment": "if p.Len() != InitialCap {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.0,
+          "unclear": 0.04
+        },
+        "confidence": 0.94,
+        "ordering_scope_probability": 0.1
+      }
+    },
+    "C17": {
+      "kind": "ordering",
+      "statement": "TestPool_Close creates a pool, calls Release, casts to *channelPool, then asserts conns is nil, factory is nil, Get returns an error, and Len is 0.",
+      "line": 148,
+      "fragment": "if c.conns != nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.58,
+          "contradicted": 0.01,
+          "unclear": 0.41
+        },
+        "confidence": 0.37,
+        "ordering_scope_probability": 0.04
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "After Release, TestPool_Close asserts Get returns a non-nil error.",
+      "line": 157,
+      "fragment": "if err == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.02,
+          "unclear": 0.02
+        },
+        "confidence": 0.94
+      }
+    },
+    "C19": {
+      "kind": "ordering",
+      "statement": "TestPoolConcurrent creates a pool, starts a goroutine calling Release, then launches MaximumCap concurrent Get/Put pairs through an unbuffered pipe channel.",
+      "line": 168,
+      "fragment": "pipe := make(chan interface{}, 0)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.22,
+          "contradicted": 0.0,
+          "unclear": 0.78
+        },
+        "confidence": 0.67,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C20": {
+      "kind": "ordering",
+      "statement": "TestPoolWriteRead gets a conn, casts to *rpc.Client, calls Arith.Multiply with Args{1,2}, and asserts resp==2 and no error.",
+      "line": 197,
+      "fragment": "err := cli.Call(\"Arith.Multiply\", Args{1, 2}, &resp)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.89,
+          "contradicted": 0.0,
+          "unclear": 0.11
+        },
+        "confidence": 0.83,
+        "ordering_scope_probability": 0.09
+      }
+    },
+    "C21": {
+      "kind": "ordering",
+      "statement": "TestPoolConcurrent2 creates a pool and launches two groups (10 each) of goroutines that Get, sleep random milliseconds, then Close the conn, waiting on a WaitGroup.",
+      "line": 216,
+      "fragment": "conn, _ := p.Get()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.21,
+          "contradicted": 0.0,
+          "unclear": 0.79
+        },
+        "confidence": 0.68,
+        "ordering_scope_probability": 0.04
+      }
+    },
+    "C22": {
+      "kind": "claim",
+      "statement": "A commented-out TestPoolConcurrent3 exists but is disabled.",
+      "line": 238,
+      "fragment": "//func TestPoolConcurrent3(t *testing.T) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    }
+  },
+  "questions": [
+    "What should happen (or be asserted) when TestPool_Get's concurrent Get goroutines return errors? The errors are only reported, not the final pool len expectation interaction.",
+    "In TestPool_Put, the error message reports 'Expecting %d' with value 1 but asserts MaxIdleCap; is the expected value 1 or MaxIdleCap?",
+    "TestPool_Close does not check the error from p.Release; is Release expected to return an error?",
+    "TestPoolConcurrent does not assert any outcome and has no WaitGroup; how is completion and correctness determined?",
+    "TestPoolConcurrent2 does not assert any outcome and does not defer Release; is pool release required or verified?",
+    "What is the expected pool Len after TestPool_Get's maximum-capacity concurrent Gets complete with errors potentially suppressed?",
+    "What happens to connections when the Get/Put pipe goroutines in TestPoolConcurrent receive nil from Get errors? Is that behavior specified?",
+    "Does TestPoolWriteRead need to Put or Close the conn? It does not, so is leaking the conn acceptable?",
+    "What is the behavior of p.Close(conn) versus p.Put(conn)? Only Close is used in TestPoolConcurrent2 and Put in others.",
+    "Does newChannelPool's config ever get varied across tests, or is IdleTimeout 20s and MaxIdle 10 always used?",
+    "What is the expected return value of p.Get after p.Release in TestPoolConcurrent where Release races with Get calls?",
+    "Is the rpc server's Arith.Multiply expected to be called through the HTTP registration only, and does that affect the pool connection type?"
+  ],
+  "review_required": true
+}

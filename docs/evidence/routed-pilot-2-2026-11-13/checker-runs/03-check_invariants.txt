@@ -1,0 +1,39 @@
+SYS-1 under E-CLOSE without NAT-4 (foreign or duplicate Close): violation, witness [waiters = 0,
+ MaxCap = 0,
+ checkedOut' = 0,
+ MaxIdle = 0,
+ openingConns' = -1,
+ idle = 0,
+ openingConns = 0,
+ checkedOut = 0]
+SYS-1 and SYS-2 under E-CLOSE with NAT-4: preserved (unsat)
+SYS-2 under UV-PUT-FOREIGN (enqueue): violation, witness [MaxCap = 1,
+ checkedOut' = 0,
+ MaxIdle = 1,
+ openingConns' = 0,
+ idle' = 1,
+ idle = 0,
+ openingConns = 0,
+ checkedOut = 0,
+ waiters = 0]
+SYS-1 and SYS-2 under E-GET create: preserved (unsat)
+live connections <= MaxCap after foreign Close then Get create: violation, witness [waiters = 0,
+ MaxIdle = 0,
+ liveConns' = 2,
+ o_after_get = 1,
+ idle = 0,
+ liveConns = 1,
+ o_after_close = 0,
+ openingConns = 1,
+ checkedOut = 1,
+ MaxCap = 1]
+SYS-3 under E-CLOSE with waiters (NAT-4 holds): violation, witness [MaxCap = 1,
+ waiters = 1,
+ checkedOut' = 0,
+ MaxIdle = 0,
+ openingConns' = 0,
+ idle = 0,
+ waiters' = 1,
+ openingConns = 1,
+ checkedOut = 1]
+SYS-3 under E-PUT handoff (one waiter leaves): preserved (unsat)

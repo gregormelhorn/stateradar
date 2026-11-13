@@ -1,0 +1,388 @@
+{
+  "source": "README_ZH_CN.md",
+  "source_sha256": "afc024a71cffc5c492e015f199abcd701ab460ef4de0a50964695e05131bbb32",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 1038,
+    "output_tokens": 1420,
+    "cost_microdollars": 2016,
+    "reservation_microdollars": 15812
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 4331,
+    "cost_microdollars": 182,
+    "reservation_microdollars": 718,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The pool is a connection pool implemented in Golang.",
+      "line": 5,
+      "fragment": "Golang 实现的连接池",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "The connection type in the pool is interface{}, making it more general-purpose.",
+      "line": 10,
+      "fragment": "连接池中连接类型为`interface{}`，使得更加通用",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "The pool supports a maximum idle time for connections; connections exceeding it are closed and discarded, avoiding idle connections becoming automatically invalid.",
+      "line": 11,
+      "fragment": "连接的最大空闲时间，超时的连接将关闭丢弃",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "The pool supports a user-set ping method to check connection connectivity; invalid connections are discarded.",
+      "line": 12,
+      "fragment": "支持用户设定 ping 方法，检查连接的连通性，无效的连接将丢弃",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "The pool uses a channel to handle connections in the pool, which is efficient.",
+      "line": 13,
+      "fragment": "使用channel处理池中的连接，高效",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "The factory function creates connections.",
+      "line": 19,
+      "fragment": "//factory 创建连接的方法",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "The close function closes connections.",
+      "line": 22,
+      "fragment": "//close 关闭连接的方法",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.84,
+          "contradicted": 0.0,
+          "unclear": 0.16
+        },
+        "confidence": 0.76
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "The ping function checks connections.",
+      "line": 25,
+      "fragment": "//ping 检测连接的方法",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "InitialCap is the initial number of connections in the resource pool.",
+      "line": 30,
+      "fragment": "InitialCap: 5,//资源池初始连接数",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "MaxIdle is the maximum number of idle connections.",
+      "line": 31,
+      "fragment": "MaxIdle:   20,//最大空闲连接数",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "MaxCap is the maximum number of concurrent connections.",
+      "line": 32,
+      "fragment": "MaxCap:     30,//最大并发连接数",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "Factory is a configuration field set to the connection-creating function.",
+      "line": 33,
+      "fragment": "Factory:    factory,",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.86,
+          "contradicted": 0.0,
+          "unclear": 0.14
+        },
+        "confidence": 0.79
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "Close is a configuration field set to the connection-closing function.",
+      "line": 34,
+      "fragment": "Close:      close,",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "Ping is an optional configuration field for the connection-checking function.",
+      "line": 35,
+      "fragment": "//Ping:       ping,",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.7,
+          "contradicted": 0.0,
+          "unclear": 0.3
+        },
+        "confidence": 0.55
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "IdleTimeout is the maximum idle time for connections; connections exceeding this time are closed, avoiding idle EOF and automatic invalidation.",
+      "line": 36,
+      "fragment": "//连接最大空闲时间，超过该时间的连接 将会关闭",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.0,
+          "unclear": 0.04
+        },
+        "confidence": 0.94
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "IdleTimeout is configured as 15 seconds in the example.",
+      "line": 37,
+      "fragment": "IdleTimeout: 15 * time.Second,",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "NewChannelPool creates a connection pool from the config.",
+      "line": 39,
+      "fragment": "p, err := pool.NewChannelPool(poolConfig)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.91,
+          "contradicted": 0.0,
+          "unclear": 0.09
+        },
+        "confidence": 0.86
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "Get obtains a connection from the pool.",
+      "line": 45,
+      "fragment": "v, err := p.Get()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C19": {
+      "kind": "claim",
+      "statement": "Put returns a connection to the pool.",
+      "line": 51,
+      "fragment": "p.Put(v)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92
+      }
+    },
+    "C20": {
+      "kind": "claim",
+      "statement": "Release releases all connections in the pool.",
+      "line": 54,
+      "fragment": "p.Release()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.0,
+          "unclear": 0.04
+        },
+        "confidence": 0.94
+      }
+    },
+    "C21": {
+      "kind": "claim",
+      "statement": "Len reports the current number of connections in the pool.",
+      "line": 57,
+      "fragment": "current := p.Len()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.91,
+          "contradicted": 0.0,
+          "unclear": 0.09
+        },
+        "confidence": 0.86
+      }
+    },
+    "C22": {
+      "kind": "claim",
+      "statement": "The pool is implemented with reference to fatih/pool, changing and adding some of the original functionality.",
+      "line": 64,
+      "fragment": "该连接池参考 [https://github.com/fatih/pool](https://github.com/fatih/pool) 实现",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.83,
+          "contradicted": 0.0,
+          "unclear": 0.17
+        },
+        "confidence": 0.74
+      }
+    }
+  },
+  "questions": [
+    "What happens when Get is called and no idle connection is available — does it create a new connection via Factory up to MaxCap, or block, or return an error?",
+    "What error does NewChannelPool return when the config is invalid, and which invalid conditions are checked?",
+    "What does Put do if the pool is already at MaxIdle or the connection has exceeded IdleTimeout?",
+    "Is the Ping function invoked on Get, on Put, on both, or on a background schedule?",
+    "When is the IdleTimeout check performed — on Get, on Put, by a background goroutine, or otherwise?",
+    "What does Len count — idle connections only, checked-out connections, or both?",
+    "Does Release close all checked-out connections as well as idle ones, and does the pool remain usable afterward?",
+    "What is the exact relationship between MaxCap (maximum concurrent connections) and MaxIdle (maximum idle connections) — must MaxIdle be <= MaxCap?",
+    "What happens when IdleTimeout is zero or unset — is the idle-timeout feature disabled or is some default applied?",
+    "Is the Ping field optional, and what is the behaviour when it is nil?",
+    "Does the factory function ever get called after initialization, e.g., on Get when the pool is empty?",
+    "Does the close function get called for idle connections discarded due to IdleTimeout?"
+  ],
+  "review_required": true
+}

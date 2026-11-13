@@ -1,0 +1,8 @@
+[
+ {"id": "CT-A", "kind": "ordering", "line": 15, "fragment": "When the connection pool is full, support for connection waiting",
+  "statement": "All connections of the pool are in use (the pool is full); then a caller requests a connection; that caller waits instead of failing."},
+ {"id": "CT-E", "kind": "ordering", "line": 55, "fragment": "Release all connections in the connection pool",
+  "statement": "A caller puts a connection back into the pool; afterwards Release is called; Release closes that returned connection."},
+ {"id": "CT-F", "kind": "ordering", "line": 13, "fragment": "the timeout connection will be closed and discarded",
+  "statement": "An idle connection stays in the pool longer than the maximum idle time; afterwards a caller requests a connection; the pool closes and discards that expired connection instead of handing it out."}
+]

@@ -1,0 +1,31 @@
+stateDiagram-v2
+    %% channelPool as-is (silenceper/pool 6084537). Matrix = authority; this diagram documents.
+    %% Construction (NewChannelPool) is the initial transition; validation or factory failure yields no pool.
+    [*] --> Open_IdleAvailable: NewChannelPool [0 < InitialCap < MaxIdle]
+    [*] --> Open_IdleFull: NewChannelPool [InitialCap == MaxIdle > 0]
+    [*] --> Open_Empty: NewChannelPool [InitialCap == 0 < MaxCap]
+    [*] --> Open_AtCapacity: NewChannelPool [MaxCap == 0]
+
+    state Open {
+        Open_IdleFull --> Open_IdleAvailable: E-GET (takes oldest idle)
+        Open_IdleAvailable --> Open_IdleFull: E-PUT [idle reaches MaxIdle] (guard)
+        Open_IdleAvailable --> Open_Empty: E-GET [last idle taken, openingConns < MaxCap] (guard)
+        Open_IdleAvailable --> Open_AtCapacity: E-GET [last idle taken, openingConns >= MaxCap] (guard)
+        Open_Empty --> Open_IdleAvailable: E-PUT (enqueue)
+        Open_Empty --> Open_AtCapacity: E-GET [factory creates the MaxCap-th connection] (guard)
+        Open_AtCapacity --> Open_IdleAvailable: E-PUT (enqueue)
+        Open_AtCapacity --> Open_Empty: E-CLOSE / UV-CLOSE-DUP / UV-CLOSE-FOREIGN (openingConns--)
+        Open_AtCapacity --> Open_AtCapacity_Waiting: E-GET (enqueue waiter, block)
+        Open_AtCapacity_Waiting --> Open_AtCapacity: E-PUT [last waiter served] (guard)
+        Open_AtCapacity_Waiting --> Open_Waiting_Stranded: E-CLOSE / UV-CLOSE-DUP / UV-CLOSE-FOREIGN (no wake-up)
+        Open_AtCapacity --> Open_Waiting_Stranded: E-GET racing E-PUT (interleaving, guard)
+        Open_Waiting_Stranded --> Open_IdleAvailable: E-PUT [last waiter served, idle > 0] (guard)
+        Open_Waiting_Stranded --> Open_Empty: E-PUT [last waiter served, idle == 0] (guard)
+    }
+
+    Open_IdleAvailable --> Released: E-RELEASE
+    Open_IdleFull --> Released: E-RELEASE
+    Open_Empty --> Released: E-RELEASE
+    Open_AtCapacity --> Released: E-RELEASE
+    Open_AtCapacity_Waiting --> Released: E-RELEASE (waiters stay blocked)
+    Open_Waiting_Stranded --> Released: E-RELEASE (waiters stay blocked)

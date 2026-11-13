@@ -1,0 +1,147 @@
+{
+  "source": "pool.go",
+  "source_sha256": "335efb032d3bb90ca7aeabdce5d545d28b6285e0bd7390714c3e7cb82bdc89de",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 511,
+    "output_tokens": 580,
+    "cost_microdollars": 850,
+    "reservation_microdollars": 15324
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 1355,
+    "cost_microdollars": 57,
+    "reservation_microdollars": 236,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "ErrClosed is a package-level error value with message \"pool is closed\".",
+      "line": 7,
+      "fragment": "ErrClosed = errors.New(\"pool is closed\")",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "Pool is an interface type with methods Get, Put, Close, Release, and Len.",
+      "line": 11,
+      "fragment": "type Pool interface {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.8,
+          "contradicted": 0.0,
+          "unclear": 0.2
+        },
+        "confidence": 0.7
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "Pool.Get returns an interface{} value and an error.",
+      "line": 12,
+      "fragment": "Get() (interface{}, error)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "Pool.Put accepts an interface{} and returns an error.",
+      "line": 14,
+      "fragment": "Put(interface{}) error",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "Pool.Close accepts an interface{} and returns an error.",
+      "line": 16,
+      "fragment": "Close(interface{}) error",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "Pool.Release takes no arguments and returns nothing.",
+      "line": 18,
+      "fragment": "Release()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "Pool.Len returns an int.",
+      "line": 20,
+      "fragment": "Len() int",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    }
+  },
+  "questions": [
+    "The file contains only an interface and an error; there is no implementation of channelPool, so no states, struct fields, counters, channel contents, mutexes, or invariants can be determined.",
+    "What states does a channelPool hold (open, closed, draining, etc.) and how are they represented?",
+    "Which concrete type implements Pool and where is it defined?",
+    "What external events (public functions/methods) trigger transitions in channelPool, and what guards select each branch?",
+    "What actions/side effects occur on Get, Put, Close, Release, and Len, and does any call into user-supplied functions?",
+    "Are there timeouts, timers, retries, or loop limits in Get/Put/Close/Release?",
+    "What waiting and cancellation paths exist when the pool is empty or closed?",
+    "Which errors are returned (including ErrClosed) and under what conditions?",
+    "Where are mutexes acquired and released, and which calls occur while held?",
+    "What apparent invariants hold for the pool (e.g., capacity, channel non-nil, closed flag consistency)?",
+    "Does any specific ordering of events result in a determined outcome that this file specifies?"
+  ],
+  "review_required": true
+}

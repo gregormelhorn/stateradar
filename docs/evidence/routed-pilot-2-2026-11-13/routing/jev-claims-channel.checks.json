@@ -1,0 +1,261 @@
+[
+ {
+  "id": "V-01",
+  "kind": "claim",
+  "line": 106,
+  "fragment": "return nil, ErrClosed",
+  "statement": "Get returns ErrClosed when the pool's idle channel snapshot is nil (after Release)."
+ },
+ {
+  "id": "V-02",
+  "kind": "claim",
+  "line": 110,
+  "fragment": "case wrapConn := <-conns:",
+  "statement": "Get first tries a non-blocking receive of an idle connection from the idle channel."
+ },
+ {
+  "id": "V-03",
+  "kind": "claim",
+  "line": 116,
+  "fragment": "wrapConn.t.Add(timeout).Before(time.Now())",
+  "statement": "An idle connection whose last-return time plus IdleTimeout lies before now is treated as expired."
+ },
+ {
+  "id": "V-04",
+  "kind": "claim",
+  "line": 118,
+  "fragment": "c.Close(wrapConn.conn)",
+  "statement": "Get closes an expired idle connection via Close and ignores Close's return value."
+ },
+ {
+  "id": "V-05",
+  "kind": "claim",
+  "line": 123,
+  "fragment": "if c.ping != nil {",
+  "statement": "Get reads the ping function field without holding the mutex."
+ },
+ {
+  "id": "V-06",
+  "kind": "claim",
+  "line": 124,
+  "fragment": "if err := c.Ping(wrapConn.conn); err != nil {",
+  "statement": "When Ping is configured, Get pings an idle connection and discards it on error."
+ },
+ {
+  "id": "V-07",
+  "kind": "claim",
+  "line": 131,
+  "fragment": "c.mu.Lock()",
+  "statement": "Get acquires the mutex only after the non-blocking receive found no idle connection."
+ },
+ {
+  "id": "V-08",
+  "kind": "claim",
+  "line": 133,
+  "fragment": "if c.openingConns >= c.maxActive {",
+  "statement": "Get tests whether the open-connection count reached MaxCap before it tests whether the pool was released."
+ },
+ {
+  "id": "V-09",
+  "kind": "claim",
+  "line": 135,
+  "fragment": "c.connReqs = append(c.connReqs, req)",
+  "statement": "At capacity, Get appends a new request channel to the waiter queue without any bound on the queue length."
+ },
+ {
+  "id": "V-10",
+  "kind": "claim",
+  "line": 137,
+  "fragment": "ret, ok := <-req",
+  "statement": "A waiting Get blocks on its request channel with no timeout and no cancellation."
+ },
+ {
+  "id": "V-11",
+  "kind": "claim",
+  "line": 139,
+  "fragment": "return nil, ErrMaxActiveConnReached",
+  "statement": "A waiting Get returns ErrMaxActiveConnReached only if its request channel is closed."
+ },
+ {
+  "id": "V-12",
+  "kind": "claim",
+  "line": 141,
+  "fragment": "if timeout := c.idleTimeout; timeout > 0 {",
+  "statement": "A connection handed to a waiter is checked only for expiry, not with Ping."
+ },
+ {
+  "id": "V-13",
+  "kind": "claim",
+  "line": 154,
+  "fragment": "conn, err := c.factory()",
+  "statement": "Get calls the user factory while it still holds the mutex."
+ },
+ {
+  "id": "V-14",
+  "kind": "claim",
+  "line": 157,
+  "fragment": "return nil, err",
+  "statement": "A factory error is returned to the Get caller unwrapped, without retry and without changing the open-connection count."
+ },
+ {
+  "id": "V-15",
+  "kind": "claim",
+  "line": 159,
+  "fragment": "c.openingConns++",
+  "statement": "After a successful factory call Get increments the open-connection count, even if the returned connection is nil."
+ },
+ {
+  "id": "V-16",
+  "kind": "claim",
+  "line": 169,
+  "fragment": "connection is nil. rejecting",
+  "statement": "Put rejects a nil connection with an error."
+ },
+ {
+  "id": "V-17",
+  "kind": "claim",
+  "line": 176,
+  "fragment": "return c.Close(conn)",
+  "statement": "Put on a released pool calls Close on the connection and returns its result."
+ },
+ {
+  "id": "V-18",
+  "kind": "claim",
+  "line": 183,
+  "fragment": "req <- connReq{",
+  "statement": "When a waiter exists, Put hands the connection to the oldest waiter instead of storing it."
+ },
+ {
+  "id": "V-19",
+  "kind": "claim",
+  "line": 184,
+  "fragment": "idleConn: &idleConn{conn: conn, t: time.Now()},",
+  "statement": "A connection handed to a waiter gets a fresh timestamp at the time of the Put."
+ },
+ {
+  "id": "V-20",
+  "kind": "claim",
+  "line": 190,
+  "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:",
+  "statement": "Without waiters, Put stores the connection in the idle channel with a fresh timestamp, without checking whether it came from this pool or is already stored."
+ },
+ {
+  "id": "V-21",
+  "kind": "claim",
+  "line": 196,
+  "fragment": "return c.Close(conn)",
+  "statement": "When the idle channel is full, Put closes the connection via Close."
+ },
+ {
+  "id": "V-22",
+  "kind": "claim",
+  "line": 204,
+  "fragment": "connection is nil. rejecting",
+  "statement": "Close rejects a nil connection with an error."
+ },
+ {
+  "id": "V-23",
+  "kind": "claim",
+  "line": 208,
+  "fragment": "if c.close == nil {",
+  "statement": "Close returns nil without calling any close function when the close function field is nil, which is the case after Release."
+ },
+ {
+  "id": "V-24",
+  "kind": "claim",
+  "line": 211,
+  "fragment": "c.openingConns--",
+  "statement": "Close decrements the open-connection count unconditionally for any non-nil value and signals no waiting Get."
+ },
+ {
+  "id": "V-25",
+  "kind": "claim",
+  "line": 212,
+  "fragment": "return c.close(conn)",
+  "statement": "Close calls the user close function while holding the mutex (the unlock is deferred)."
+ },
+ {
+  "id": "V-26",
+  "kind": "claim",
+  "line": 220,
+  "fragment": "return c.ping(conn)",
+  "statement": "The exported Ping method calls the ping function without checking that it is non-nil."
+ },
+ {
+  "id": "V-27",
+  "kind": "claim",
+  "line": 227,
+  "fragment": "c.conns = nil",
+  "statement": "Release sets the idle channel field to nil under the mutex."
+ },
+ {
+  "id": "V-28",
+  "kind": "claim",
+  "line": 229,
+  "fragment": "c.ping = nil",
+  "statement": "Release sets the ping function field to nil under the mutex."
+ },
+ {
+  "id": "V-29",
+  "kind": "claim",
+  "line": 231,
+  "fragment": "c.close = nil",
+  "statement": "Release sets the close function field to nil, so later Close calls cannot close connections."
+ },
+ {
+  "id": "V-30",
+  "kind": "claim",
+  "line": 232,
+  "fragment": "c.mu.Unlock()",
+  "statement": "Release does not touch the waiter queue or wake waiting Gets before unlocking."
+ },
+ {
+  "id": "V-31",
+  "kind": "claim",
+  "line": 234,
+  "fragment": "if conns == nil {",
+  "statement": "A second Release returns immediately."
+ },
+ {
+  "id": "V-32",
+  "kind": "claim",
+  "line": 241,
+  "fragment": "closeFun(wrapConn.conn)",
+  "statement": "Release closes each idle connection with the saved close function outside the mutex and ignores its errors."
+ },
+ {
+  "id": "V-33",
+  "kind": "claim",
+  "line": 247,
+  "fragment": "return len(c.getConns())",
+  "statement": "Len returns the number of idle connections only, taking the mutex through getConns."
+ },
+ {
+  "id": "V-34",
+  "kind": "claim",
+  "line": 59,
+  "fragment": "poolConfig.InitialCap >= 0",
+  "statement": "NewChannelPool accepts MaxCap equal to 0 as long as InitialCap <= MaxIdle <= MaxCap and InitialCap >= 0."
+ },
+ {
+  "id": "V-35",
+  "kind": "claim",
+  "line": 85,
+  "fragment": "c.Release()",
+  "statement": "If the factory fails while filling InitialCap connections, NewChannelPool releases the pool and returns an error."
+ },
+ {
+  "id": "V-36",
+  "kind": "claim",
+  "line": 46,
+  "fragment": "idleTimeout, waitTimeOut time.Duration",
+  "statement": "The struct declares a waitTimeOut field."
+ },
+ {
+  "id": "V-37",
+  "kind": "claim",
+  "line": 19,
+  "fragment": "连接池中拥有的最小连接数",
+  "statement": "The Config comment describes InitialCap as the minimum number of connections the pool holds."
+ }
+]
