@@ -346,14 +346,19 @@ def jev_batch(budget: Budget, source: str, source_ref: str, checks: object, key:
             questions[f"scope_{index}"] = {
                 "type": "noul",
                 "instructions": {
-                    "question": "Does the cited fragment explicitly describe or contemplate this particular sequence of events?",
+                    "question": "Can a reader establish the entire asserted ordering from the quoted fragment alone?",
                     "fragment": fragment,
                     "sequence": statement,
-                    "scope": "Consider only the fragment. An event missing from the fragment or an unmentioned event ordering is insufficient.",
+                    "scope": (
+                        "Check the starting condition, who acts, each event, their order, and the stated outcome or exclusion. "
+                        "Treat each material detail as required. Accept paraphrases that preserve meaning. "
+                        "Reject a plausible inference if the quote leaves any material detail open. "
+                        "An explicit reversal fails. A different sentence cannot supply missing evidence."
+                    ),
                 },
                 "criteria": {
-                    "true": "The fragment describes the relevant events and the specific order between them.",
-                    "false": "At least one event or its ordering is not described in the fragment.",
+                    "true": "The quote establishes every material condition, event, order and outcome in the assertion.",
+                    "false": "The quote leaves at least one material detail open or conflicts with it.",
                 },
             }
     payload = {"model": model, "state": {"source": source}, "questions": questions}

@@ -196,7 +196,16 @@ class ModelTest(unittest.TestCase):
             self.assertTrue(result["checks"]["O1"]["review_required"])
             self.assertEqual(result["checks"]["O1"]["ordering_scope_probability"], 0.15)
             self.assertEqual(len(post.call_args.args[1]["questions"]), 3)
-            self.assertEqual(post.call_args.args[1]["questions"]["scope_1"]["type"], "noul")
+            scope = post.call_args.args[1]["questions"]["scope_1"]
+            self.assertEqual(scope["type"], "noul")
+            self.assertEqual(scope["instructions"]["question"],
+                             "Can a reader establish the entire asserted ordering from the quoted fragment alone?")
+            self.assertEqual(scope["instructions"]["fragment"], "remains failed")
+            self.assertEqual(scope["instructions"]["sequence"], "Disconnect after failure")
+            self.assertEqual(scope["criteria"], {
+                "true": "The quote establishes every material condition, event, order and outcome in the assertion.",
+                "false": "The quote leaves at least one material detail open or conflicts with it.",
+            })
             self.assertEqual(post.call_args.args[1]["model"], "jev-1.14.0")
             self.assertEqual(budget.total(), 5)
 
