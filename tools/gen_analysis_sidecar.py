@@ -192,6 +192,41 @@ CONFIG_EXTS = (".yaml", ".yml", ".json", ".toml", ".ini", ".cfg", ".conf", ".xml
                ".sh", ".tf", ".hcl")
 
 
+_CIT_TOKEN = r"[\w./-]+\.[A-Za-z]{1,4}:\d+"
+_FRAG_OPEN = re.compile(r'(?:-\d+)?`?\s*\(\s*["\u201c]')
+_FRAG_END_AT_BOUNDARY = re.compile(r'["\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$))')
+_FRAG_END_ANY = re.compile(r'["\u201d]\s*\)')
+_NEXT_FRAGMENT_CITATION = re.compile(_CIT_TOKEN + r'`?\s*\(\s*["\u201c]')
+
+
+def _outside_fragments(raw: str) -> str:
+    """The cell text with each citation's quoted fragment blanked out.
+
+    A fragment opens with ("  or (\u201c right after a file:line and may hold
+    unescaped quotes, so it ends where the fragment extractor in _parse_cell
+    ends it: at the first quote-paren followed by a boundary (")", ",", ";",
+    "|", an em dash or the end), searched only up to the next fragment-cited
+    file:line; failing that, at the first quote-paren before it.
+    """
+    spans: list[tuple[int, int]] = []
+    pos = 0
+    while (tok := re.compile(_CIT_TOKEN).search(raw, pos)) is not None:
+        opener = _FRAG_OPEN.match(raw, tok.end())
+        if opener is None:
+            pos = tok.end()
+            continue
+        nxt = _NEXT_FRAGMENT_CITATION.search(raw, opener.end())
+        limit = nxt.start() if nxt else len(raw)
+        end = (_FRAG_END_AT_BOUNDARY.search(raw, opener.end(), limit)
+               or _FRAG_END_ANY.search(raw, opener.end(), limit))
+        stop = end.end() if end else limit
+        spans.append((opener.start(), stop))
+        pos = stop
+    for start, stop in reversed(spans):
+        raw = raw[:start] + " " + raw[stop:]
+    return raw
+
+
 def _parse_cell(
     text: str,
     family: str | None,
@@ -255,9 +290,8 @@ def _parse_cell(
     # caller drops the candidates that are not file names.
     # Candidates come from the cell without its quoted fragments: a fragment
     # may quote "mini.py:19" or "app.json:12" (a log line, a stack trace),
-    # which is neither the citation nor a dropped one. Escaped quotes inside
-    # a straight-quoted fragment do not end it.
-    outside = re.sub(r'\(\s*(?:"(?:\\.|[^"\\])*"|\u201c[^\u201d]*\u201d)\s*\)', " ", raw)
+    # which is neither the citation nor a dropped one.
+    outside = _outside_fragments(raw)
     found = list(re.finditer(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", outside))
     if unresolved is not None:
         unresolved.update(m.group(1) for m in found if not src_index.get(Path(m.group(1)).name))

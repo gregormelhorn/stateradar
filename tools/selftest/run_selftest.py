@@ -134,6 +134,7 @@ def main() -> int:
         sys.path.insert(0, str(ROOT / "tools"))
         import gen_analysis_sidecar as gas
         idx = {"channel.go": "channel.go"}
+        frag_failures: list[str] = []
         for raw_cell, want in (
                 ('reject (observed-in-code, channel.go:50 ("return nil, errors.New("pool is closed")"))',
                  'return nil, errors.New("pool is closed")'),
@@ -150,23 +151,37 @@ def main() -> int:
                 ('handle (channel.go:40 ("f("a") dial db.example.com:5432"))', 'f("a") dial db.example.com:5432')):
             got = gas._parse_cell(raw_cell, None, ["S"], idx).get("citation", {}).get("fragment")
             if got != want:
-                failures.append(f"fragment not captured from {raw_cell!r}: {got!r}")
-        print("  ok  quoted, typographic and backticked fragments are captured")
+                frag_failures.append(f"fragment not captured from {raw_cell!r}: {got!r}")
+        failures.extend(frag_failures)
+        if not frag_failures:
+            print("  ok  quoted, typographic and backticked fragments are captured")
         # A file:line quoted inside a fragment is neither the citation nor a
         # dropped one, even when it resolves and the real citation does not.
         mini_idx = {"mini.py": "src/mini.py"}
+        cite_failures: list[str] = []
         for raw_cell, want_line, want_unresolved in (
                 ('handle `other_test.py:3` ("log(\\"mini.py:19 failed\\")")', None, {"other_test.py"}),
                 ('handle other_test.py:3 ("log("mini.py:19 failed")")', None, {"other_test.py"}),
                 ('handle mini.py:3 ("g(\\"x\\") + a.json:1")', 3, set()),
-                ('handle mini.py:3 (\u201csee app.json:4\u201d)', 3, set())):
+                ('handle mini.py:3 (\u201csee app.json:4\u201d)', 3, set()),
+                ('handle other_test.py:3 ("say "mini.py:19" now")', None, {"other_test.py"}),
+                ('handle mini.py:3 ("say "other.go:9" now")', 3, set()),
+                ('handle mini.py:3 ("f("a") util.go:3")', 3, set()),
+                ('handle other_test.py:3 ("log "mini.py:19 failed" here")', None, {"other_test.py"}),
+                ('handle mini.py:3 ("log "a.json:1" x")', 3, set()),
+                ('reject (observed-in-code, other_test.py:3 ("errors.New("mini.py:19")"))', None,
+                 {"other_test.py"}),
+                ('handle (mini.py:3 ("x") then retries, second_test.py:5 ("y"))', 3, {"second_test.py"})):
             cell_unresolved: set[str] = set()
             got_line = gas._parse_cell(raw_cell, None, ["S"], mini_idx, cell_unresolved).get(
                 "citation", {}).get("line")
             if (got_line, cell_unresolved) != (want_line, want_unresolved):
-                failures.append(f"citation from {raw_cell!r}: line {got_line!r}, unresolved "
-                                f"{sorted(cell_unresolved)}; want {want_line!r}, {sorted(want_unresolved)}")
-        print("  ok  a file:line inside a fragment is never the citation")
+                cite_failures.append(f"citation from {raw_cell!r}: line {got_line!r}, unresolved "
+                                     f"{sorted(cell_unresolved)}; want {want_line!r}, "
+                                     f"{sorted(want_unresolved)}")
+        failures.extend(cite_failures)
+        if not cite_failures:
+            print("  ok  a file:line inside a fragment is never the citation")
         qtext = tmp / "q.md"
         qtext.write_text("Q-01. Title\n## Q-and-A\nQ-02\u2014Title\n**Q-03**\n#### Q-ordering\nQ-04) x\n")
         got_q = [q["id"] for q in gas._parse_questions(qtext)]
