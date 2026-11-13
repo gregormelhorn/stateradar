@@ -242,13 +242,28 @@ def main() -> int:
         unres_matrix = unres / "domain-analysis" / "mini" / "disposition-matrix.md"
         unres_text = unres_matrix.read_text()
         unres_matrix.write_text(unres_text.replace(
-            '`mini.py:19` ("self.state = \\"Open\\"")', '`test_cell_suite.py:3` ("import")', 1))
+            '`mini.py:19` ("self.state = \\"Open\\"")', '`test_cell_suite.py:3` ("import")', 1).replace(
+            '`mini.py:22` ("return \\"ignored\\"")', '`requirements.md:3` ("closed")', 1).replace(
+            '`mini.py:23` ("raise RejectedError")', 'reject (dials db.example.com:5432)', 1))
         unres_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
                                     "--root", str(unres)], capture_output=True, text=True)
-        expect("generator warns about an unresolved citation", True,
-               1 if "test_cell_suite.py is not under the source roots" in unres_run.stderr else 0,
-               unres_run.stdout + unres_run.stderr or "no output",
-               needle="not under the source roots")
+        warn_lines = [ln for ln in unres_run.stderr.splitlines() if ln.startswith("warning:")]
+        for label, needle_text, want_warning in (
+                ("generator warns about an unresolved test-file citation",
+                 "warning: mini: citations of test_cell_suite.py dropped: the file is not under "
+                 "the source roots", True),
+                ("generator points a prose citation to the overlay",
+                 "warning: mini: citations of requirements.md dropped: matrix citations resolve "
+                 "to source files only", True),
+                ("generator stays quiet on host:port text", "db.example.com", False)):
+            seen = any(needle_text in ln for ln in warn_lines)
+            if seen != want_warning:
+                failures.append(f"{label}: warning {'missing' if want_warning else 'printed'}\n"
+                                + (unres_run.stderr or "no stderr"))
+            else:
+                print(f"  ok  {label}")
+        if len(warn_lines) != 2:
+            failures.append(f"generator warnings: expected one line per file (2), got {warn_lines}")
 
         # The rule covers code and test citations only: a requirements
         # document is cited without a fragment, and an empty fragment is

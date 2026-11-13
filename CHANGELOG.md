@@ -33,9 +33,11 @@
   has required these fragments since 02-pilot v1.9; the schema now enforces
   what the format already said. The generator still resolves citations only
   to files under the source roots (`sidecar-overlay.yaml`: `src_roots`,
-  `src_exts`); it now warns once per cited file it cannot resolve, because
-  such a citation, a test file outside those roots for example, is dropped
-  together with its fragment check.
+  `src_exts`); it now warns once per component and cited file it cannot
+  resolve, because such a citation, a test file outside those roots for
+  example, is dropped together with its fragment check. A cited prose
+  document gets a pointer to overlay `extra_citations`; text such as
+  `host:5432` without a source or prose extension stays quiet.
 - **Sidecar types.** `tools/sidecar_types.py` mirrors the schema as
   TypedDicts; a selftest fails when properties, required keys or enum values
   drift between the two. It found the question `note` the generator emits and

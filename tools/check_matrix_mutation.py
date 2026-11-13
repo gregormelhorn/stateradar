@@ -201,7 +201,12 @@ _CITATION = re.compile(r'`?[\w./-]+\.[A-Za-z]{1,4}`?:\d+(?:-\d+)?`?'
 def trailing_citation(raw: str) -> str | None:
     """The last citation in a cell when nothing follows it but, at most, the
     parenthesis that closes a provenance note: 'reject (observed-in-code,
-    a.go:3 ("x"))' keeps 'a.go:3 ("x")'."""
+    a.go:3 ("x"))' keeps 'a.go:3 ("x")'.
+
+    The last, not the first: a mutant keeps the citation that ends the cell,
+    as before the fragment rule. The sidecar generator records the first
+    citation instead; the two differ only in a cell that cites twice.
+    """
     text = raw.rstrip()
     for end in (len(text), len(text) - 1 if text.endswith(")") else -1):
         if end < 0:

@@ -182,8 +182,7 @@ def _parse_events(header: str) -> list[Event]:
     return events
 
 
-# Cited file names already reported as unresolved (one warning per file).
-_UNRESOLVED: set[str] = set()
+PROSE_EXTS = (".md", ".markdown", ".txt", ".rst", ".adoc")
 
 
 def _parse_cell(
@@ -191,8 +190,13 @@ def _parse_cell(
     family: str | None,
     states: list[str],
     src_index: dict[str, str],
+    unresolved: set[str] | None = None,
 ) -> CellBody:
-    """One matrix cell → sidecar cell, without its state and event."""
+    """One matrix cell → sidecar cell, without its state and event.
+
+    A cited file name that does not resolve through src_index is added to
+    `unresolved` (the caller reports it): the citation is dropped.
+    """
     raw = _strip_markdown(text.strip())
     q = re.search(r"Q-[\w-]+", raw)
     dr = re.search(r"DR-\d+", raw)
@@ -240,13 +244,8 @@ def _parse_cell(
     cit = re.search(r"([\w./-]+\.[A-Za-z]{1,4}):(\d+)", raw)
     if cit:
         path = src_index.get(Path(cit.group(1)).name)
-        if not path and cit.group(1) not in _UNRESOLVED:
-            # Loud, not silent: a dropped citation also drops its fragment
-            # check (a test file outside the source roots, say). Once per file.
-            _UNRESOLVED.add(cit.group(1))
-            print(f"warning: cited file {cit.group(1)} is not under the source roots "
-                  "(sidecar-overlay.yaml: src_roots, src_exts); cells citing it keep no citation",
-                  file=sys.stderr)
+        if not path and unresolved is not None:
+            unresolved.add(cit.group(1))
         if path:
             citation: Citation = {"file": path, "line": int(cit.group(2))}
             cell["citation"] = citation
@@ -383,13 +382,30 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
             row_index.append((block_events, row, state, fam if leaf else None))
 
     cells: list[Cell] = []
+    unresolved: set[str] = set()
     for block_events, row, state, family in row_index:
         parts = row.strip().strip("|").split("|")[1:]
         for event, cell_text in zip(block_events, parts, strict=True):
-            body = _parse_cell(cell_text, family, states, src_index)
+            body = _parse_cell(cell_text, family, states, src_index, unresolved)
             # Key order as before (parsed keys, then state and event): the
             # golden sidecars are compared byte for byte.
             cells.append({**body, "state": state, "event": event["id"]})
+
+    # Loud, not silent: a dropped citation drops its fragment check too (a test
+    # file outside the source roots, say). One line per component and file;
+    # tokens without a source or prose extension (host:port, versions) are
+    # not citations and stay quiet.
+    src_exts = {ext.lower() for ext in (overlay["src_exts"] or SRC_EXTS)}
+    for name in sorted(unresolved):
+        ext = Path(name).suffix.lower()
+        if ext in PROSE_EXTS:
+            reason = ("matrix citations resolve to source files only; cite a prose document "
+                      "through sidecar-overlay.yaml extra_citations")
+        elif ext in src_exts:
+            reason = "the file is not under the source roots (sidecar-overlay.yaml: src_roots)"
+        else:
+            continue
+        print(f"warning: {component}: citations of {name} dropped: {reason}", file=sys.stderr)
 
     # PA-18 terminal states: <!-- terminal: A, B, C --> auto-generates
     # ignore (documented) cells for every event, eliminating repetitive
