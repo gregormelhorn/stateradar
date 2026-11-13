@@ -128,7 +128,7 @@ def _read_contracts(spec: str, repo: Path) -> str:
 # line (_FRAG_END); else at the first quote-paren.
 _FILE = r"[\w./-]+\.[A-Za-z]{1,4}"
 _FRAG_END = (r"[\"\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)"
-             r"|(?:(?![\"\u201d]\s*\)).)*?[\s,(]" + _FILE + r"`?:\d)")
+             r"|(?:(?![\"\u201d]\s*\)).)*?[\s,(]" + _FILE + r"`?:\d+(?:-\d+)?(?=`?\s*\(|[\s,;)|]|$))")
 _CITE = re.compile(
     r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
     r"(`?\s*\(\s*[\"\u201c](.+?)" + _FRAG_END +
@@ -141,21 +141,37 @@ _CITE = re.compile(
 _PROSE_EXT = (".md", ".txt", ".rst", ".adoc")
 
 
+def _norm(path: str) -> str:
+    return str(Path(path.strip("`")).as_posix()).removeprefix("./")
+
+
 def _citation_stripper(quote_files: frozenset):
     def strip(m: re.Match) -> str:
-        if m.group(2) and Path(m.group(1)).name in quote_files:
+        if m.group(2) and _norm(m.group(1)) in quote_files:
             quote = m.group(3) if m.group(3) is not None else m.group(4)
             return f'{m.group(1)} ("{quote}")'
         return m.group(1)
     return strip
 
 
-def quote_files(doctrine: str, inputs: list[str], analysis_dir: Path) -> frozenset:
-    """Prose files whose cited quotes may reach Part B."""
-    names = {Path(spec.split(":", 1)[0]).name for spec in inputs}
-    names.update(Path(m.group(1)).name for m in _CITE.finditer(doctrine))
-    analysis = {p.name for p in analysis_dir.iterdir()} if analysis_dir.is_dir() else set()
-    return frozenset(n for n in names if n.lower().endswith(_PROSE_EXT) and n not in analysis)
+def quote_files(doctrine: str, inputs: list[str], repo: Path, analysis_dir: Path) -> frozenset:
+    """Prose files whose cited quotes may reach Part B, as paths relative to
+    --repo: the Part B inputs and the files the doctrine lines cite. A path
+    inside the analysis directory never qualifies. Matching is by exact path,
+    so vendor/lib/README.md does not ride on README.md."""
+    paths = set()
+    for spec in inputs:
+        path = Path(spec.split(":", 1)[0])
+        if path.is_absolute():
+            try:
+                path = path.resolve().relative_to(repo)
+            except ValueError:
+                continue
+        paths.add(_norm(str(path)))
+    paths.update(_norm(m.group(1)) for m in _CITE.finditer(doctrine))
+    adir = analysis_dir.resolve()
+    return frozenset(p for p in paths if p.lower().endswith(_PROSE_EXT)
+                     and not (repo / p).resolve().is_relative_to(adir))
 
 
 # Analysis-only id families. Single-letter families (L-, G-, F-, T-) also
@@ -199,7 +215,9 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     text = _ANALYSIS_ID.sub(_MARK, text)
     text = re.sub(r"(?:\s*→\s*)?" + _LOCAL_ID.pattern,
                   lambda m: m.group(0) if m.group(0).lstrip(" \t→") in keep_ids else _MARK, text)
-    # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12".
+    # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12",
+    # "see DR-002"; "see" in prose stays.
+    text = re.sub(r"\b(?:see|cf\.)[ \t]*(?=\x00)", "", text)
     text = re.sub(r"(?:\b(?:recorded as\s+)?lints?\s*|\b[Ff]inding\s*(?::\s*)?)(?=\x00)", "", text)
     # Parentheses that held only removed ids, then the ids with their separators.
     text = re.sub(r"(?m)(^[ \t]*)?\((?:[\s,;]|\x00)*\x00(?:[\s,;]|\x00)*\)(?(1)[ \t]*)",
@@ -215,10 +233,9 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
         text = re.sub(r"(?<![,;])\x00(?=[ \t]*[,;])", "", text)
     # Debris: a reference word left before a separator, doubled separators
     # and doubled spaces ("see DR-002; then" -> "; then").
-    text = re.sub(r"[ \t]*\b(?:see|cf\.)[ \t]*(?=[;,.)])", "", text)
     text = re.sub(r"[,;][ \t]*([,;])", r"\1", text)
     text = re.sub(r"(?<=\S)[ \t]{2,}(?=[^\s|])", " ", text)
-    return text
+    return re.sub(r"(?<=[^\s|])[ \t]+$", "", text, flags=re.M)
 
 
 _DOC_ROW = re.compile(r"^(?:[-*]|\d+\.|\|)\s*\**DOC-\d+")
@@ -279,7 +296,7 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     sources += [(f"INPUT 3: EVENT CONTRACT TEXTS ({spec})", _read_contracts(spec, repo))
                 for spec in args.contracts]
     keep_ids = domain_ids(*(text for _, text in sources), doctrine=doctrine)
-    keep_quotes = quote_files(doctrine, list(args.requirements) + list(args.contracts), adir)
+    keep_quotes = quote_files(doctrine, list(args.requirements) + list(args.contracts), repo, adir)
 
     blind_copy = blind_catalogue(catalogue, keep_ids, keep_quotes)
     try:
@@ -300,8 +317,9 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
     removed = sorted(set(_LOCAL_ID.findall(_CITE.sub(r"\1", catalogue + "\n" + doctrine))) - set(kept))
     if removed:
         # A domain term the sources never use goes too: the agent sees which.
-        print("PART-B PACK: removed as analysis references (restore by hand only if a domain "
-              "term, and record it in part-b-diff.md): " + ", ".join(removed), file=sys.stderr)
+        print("PART-B PACK: removed as analysis references (a domain term among them is a "
+              "known loss: record it in part-b-diff.md, never edit the inputs to restore it): "
+              + ", ".join(removed), file=sys.stderr)
     if kept:
         # Rule 7: the agent judges these while reading the package.
         print("PART-B PACK: kept in the catalogue or doctrine lines because the requirements, "

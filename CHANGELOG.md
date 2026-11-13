@@ -69,11 +69,11 @@
   message names `FILE:PATTERN` for requirements; the docs show the two-step
   `blind` call; a test covers requirement section selection.
 - **First full routed pilot (silenceper/pool, 2026-11-13)** and its fixes.
-  Evidence in `docs/evidence/routed-pilot-2026-11-13/`: 25,038
-  microdollars; the primary finding was found, but the run was not blind to
-  it (the operator brief and a draft task named it); 21 of 28 aligned base
-  cells agree with the agent-only baseline, whose own two runs agree 28/28,
-  under a state alignment and divergence judgments made by the pilot agent. Fixes,
+  Evidence in `docs/evidence/routed-pilot-2026-11-13/`: 25,038 microdollars;
+  the primary finding was found, but the run was not blind to it (the
+  operator brief and a draft task named it); 21 of 28 aligned base cells
+  agree with the agent-only baseline, whose own two runs agree 28/28, under
+  a state alignment and divergence judgments made by the pilot agent. Fixes,
   each with a red check first: `gen_analysis_sidecar.py` keeps citation
   fragments, including ones with unescaped or typographic quotes, so
   `dsc_check` verifies them on generated sidecars (this exposed wrong
@@ -86,20 +86,20 @@
   heading, stripped like the catalogue, and refuses an extraction whose DOC
   lines it cannot pass on. Its catalogue copy drops code fragments, line
   numbers and analysis ids but keeps prose between citations and quotes
-  cited from the Part-B source files (never from an analysis file); an L-,
-  G-, F- or T- id stays only when the requirements, the contracts or the
-  quoted text of a doctrine line use it, and each kept or removed id is
-  named on stderr. Fragments end at the last quote-paren before a later
-  citation, so two citations on one line strip cleanly. It refuses a catalogue whose event ids the stripping
-  would change. Its CLI reports input errors without a traceback.
-  `draft-verify` defaults to 12000 output tokens. A truncated draft is
-  saved to `<stem>.draft.txt` and a truncated blind table to
-  `<stem>.partial.md`; neither is printed. Further:
+  cited from the Part-B source files (by exact path, never from an analysis
+  file); an L-, G-, F- or T- id stays only when the requirements, the
+  contracts or the quoted text of a doctrine line use it, and each kept or
+  removed id is named on stderr. Fragments end at the last quote-paren
+  before a later citation, so two citations on one line strip cleanly. It
+  refuses a catalogue whose event ids the stripping would change. Its CLI
+  reports input errors without a traceback. `draft-verify` defaults to 12000
+  output tokens. A truncated draft is saved to `<stem>.draft.txt` and a
+  truncated blind table to `<stem>.partial.md`; neither is printed. Further:
   `formats/rules.toml` gains the ODC triggers `part-B diff`, `reviewer
   cross-check`, `step-8 verification`, `z3 invariant check`, `draft-verify`
   and `jev check`, and `check_pack_consistency.py` fails when the pilot
-  prompt's trigger list drifts from it. 02-pilot v1.17 (rules 5, 7, 8, 9
-  and a new rule 10 for finding-neutral draft tasks).
+  prompt's trigger list drifts from it. 02-pilot v1.17 (rules 5, 7, 8, 9 and
+  a new rule 10 for finding-neutral draft tasks).
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

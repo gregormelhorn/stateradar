@@ -518,11 +518,21 @@ class ModelTest(unittest.TestCase):
         # Debris: no "see ;", no empty leading space, no double space.
         self.assertEqual(strip("(Q-01) The pool, see DR-002; then waits."), "The pool; then waits.")
         self.assertEqual(strip("A wake-up (L-4, G-01) is lost"), "A wake-up is lost")
+        # "see" in prose stays; a host token after an inner quote-paren is not a citation.
+        self.assertEqual(strip("The pool behaves as callers see. What the waiter does not see, the owner does."),
+                         "The pool behaves as callers see. What the waiter does not see, the owner does.")
+        self.assertEqual(strip('client.go:40 ("f("a") dial db.example.com:5432") |'), "client.go |")
+        # A reference word left at the end of a cell or line goes too.
+        self.assertEqual(strip("| a; see T-F05 and L-4 |\nx, cf. Q-1\n"), "| a |\nx\n")
+        # Quotes are kept by exact path: vendor/lib/README.md does not ride on README.md.
+        self.assertEqual(strip('vendor/lib/README.md:9 ("lock A then B") and README.md:3 ("waiting")',
+                               keep_quotes_from=frozenset({"README.md"})),
+                         'vendor/lib/README.md and README.md ("waiting")')
         # A dangling conjunction goes with the removed id.
         self.assertEqual(strip("see T-F05 and L-4.", {"T-F05"}), "see T-F05.")
         # Removing ids keeps the separator between two clauses.
         self.assertEqual(strip("level L-3 cache; recorded as lint L-4; G-01 holds", {"L-3"}), "level L-3 cache; holds")
-        self.assertEqual(strip("see Q-1, Q-2 and more"), "see and more")
+        self.assertEqual(strip("waits; see Q-1, Q-2 and more"), "waits; and more")
 
     def test_blind_keeps_source_quotes_but_not_analysis_quotes_or_glosses(self):
         # Method review round 4: quotes from the analysis's own .md files and
@@ -545,6 +555,17 @@ class ModelTest(unittest.TestCase):
             self.assertIn('requirements.md ("a waiter is woken on Put")', package)
             self.assertNotIn("T-F05", package)
             self.assertIn("retry after T-1", package)
+
+    def test_quote_files_match_exact_paths_outside_the_analysis_directory(self):
+        quote_files = local_models.part_b_pack.quote_files
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            (root / "analysis").mkdir()
+            (root / "analysis" / "summary.md").write_text("x")
+            got = quote_files('- DOC-1 docs/README.md:3 ("a")\n- DOC-2 analysis/open-questions.md:4 ("b")\n',
+                              ["summary.md", "docs/req.md:Waiting", str(root / "contracts.md")],
+                              root, root / "analysis")
+            self.assertEqual(got, frozenset({"summary.md", "docs/req.md", "contracts.md", "docs/README.md"}))
 
     def test_cli_blind_truncation_goes_to_a_partial_file(self):
         with tempfile.TemporaryDirectory() as directory:
