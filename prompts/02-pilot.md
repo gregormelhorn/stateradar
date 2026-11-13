@@ -1,11 +1,26 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.22.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.24.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.24 — trace a second acquisition from the same caller while its
+  first request is pending or its first resource is still held.
+* v1.23 — preserve source-specific fault cases, storage and counter
+  effects after logical completion, and callback outcomes during teardown
+  when grouping events or questions.
 * v1.22 — write the full requirement-backed sequence before asking Jev,
   batch specific guarantees against the callee contract, and check each
   independently testable part of a finding against its own citation.
+* v1.21 — roadmap entry 11 item 2: the experimental routing variant
+  `flash-writes`, in which Flash drafts the Step-1 extraction, the matrix
+  cells (`draft-cells`, each cell judged by one Jev batch) and the as-is
+  tests, the agent decides and corrects, and `draft_cells.py compare`
+  counts the agent's changes from the files.
+* v1.20 — second routed pilot and agent-only run (silenceper/pool,
+  2026-11-13): the Part-B package labels the catalogue's code-derived
+  sections and fields `observed in code`, Part B marks each row that rests
+  on them alone with `as-is:`, and the coverage check lists those rows; the
+  mark is Part B's own report and adds to the agent's reading.
 * v1.19 — timed agent-only run (silenceper/pool, 2026-11-13): a crash has
   a written form (`handle crash: … → Q-nn`) instead of an ad-hoc `handle`
   note; the sidecar generator derives pairs, guard groups and the ODC
@@ -141,12 +156,21 @@ Rules for every routed step:
 4. **Ordering checks read both answers.** Every `ordering` result carries a `choice` and an independent `ordering_scope_probability`; they often disagree (first live run: `supported` with scope 0.11 for an ordering the text never describes). A Jev result never establishes scope. If the choice is not `supported`, or the scope probability is below 0.5, the ordering is not source-backed and a drafted ordering claim becomes a question. The 0.5 is provisional and uncalibrated (see the cascade plan): it can only add questions, and a result above it backs nothing by itself.
 5. **Scope line.** On a Step-6 control trace you decide *cited text contemplates this ordering: yes/no* from the quoted text, then add `jev: <choice>, scope <probability>`, or `jev: failed (<reason>)`, or `jev: not run (<reason>)`. With routing on, `not run` is allowed only when the ledger is exhausted; every `failed` or `not run` is listed in `summary.md`. If you write `yes` and Jev does not back the ordering under rule 4, the control verdict is void: raise a question that cites both. Record every run that Jev answered; never re-run an answered check with another fragment, another source, or a reworded statement to change its result. A batch rejected before Jev answered (for example a citation error) has no result: correct it and run it again. For a control trace, use the original requirements or DR file. For a callee guarantee or finding, use the original contract, code or test that supplies the citation. Never use an analysis artifact such as `extraction.md` as evidence.
 6. **Carry every draft question forward.** Each entry in a draft's `questions` list ends as a Q in Step 7, as a reasoned fold into an existing Q, or as a reasoned disposition recorded in `extraction.md`: `answered: <file:line>` when the sources settle it, or `outside scope: <why>`. `answered:` settles only what the code does; when the requirements are silent on whether that behaviour is intended, the intent part becomes a Q or folds into one. `outside scope:` never applies to behaviour of the component under analysis. A model judgment never answers one.
-7. **Part B is never done by you.** You have seen the code and the matrix. `blind` takes only prepared text files (`.md`, `.txt`, `.rst`): requirements prose (a whole file, or one section selected with `FILE.md:PATTERN`), and a whole contracts file into which you copied each contract docstring or schema description verbatim, headed by its `file:line`, with no added, summarised, or reworded text; it refuses source files and class specs. First run `blind … --package-only`, read `<output stem>.package.md`, and confirm it holds no implementation code; then run `blind` without the flag and without changing the inputs. The real run sends only that inspected package and refuses if the inputs changed. The analysis directory, `--requirements` and `--contracts` are relative to `--repo` (or absolute). The package carries the catalogue with code fragments, line numbers and analysis ids removed; file names stay, and so do quotes cited from the requirements and contracts files or from the prose files the doctrine lines cite (never from a file of the analysis directory). Q-, PA-, SYS-, NAT- and DR- ids are always removed; L-, G-, F- and T- ids stay only when the requirements, the contracts or the quoted text of a doctrine line use them, and the command names on stderr each id it kept and each it removed: check both lists, list each kept id in `part-b-diff.md` with why it stays, and record any removed domain term as a known loss; never edit the inputs to restore one. The command refuses the package when a cited file name is still followed by a quoted fragment after stripping (put each fragment on one line right after `file:N` or `file:N-M`, escape each `|` of a fragment in a table cell as `\|` in the catalogue, rephrase a parenthesised prose quote that follows a code file name, and rebuild) or when a table row's cell count changed (repair that row's escaping and rebuild); never send such a package and never work around the refusal. Write each line number as part of a citation (`file:N`, `file:N, M or K`, `file:N-M`, ranges without spaces) and end the run with `,` `;` `.` `:` `?` `!`, a bracket, a double quote or `*`, or join its last number with `and`/`or`; never end it with a dash or a slash or put a prose count directly after it; a bare number in prose ("unlock at 136") is not recognised and reaches the package. The refusal does not catch a quote after the citation's own `;` or `)`, or more than 80 characters after the file name: search the package for every `(` followed by a quote (straight, single or typographic, also with a space between) and confirm that each one is a kept prose-source quote. Still read it: prose that states an as-is conclusion (a deadlock, a lost wake-up, a hole) is a known leak; list each in `part-b-diff.md` and treat Part B's agreement on that row as not independent. Never repair such text by restating it as intent or as a hole or question; a repaired line states provenance only ("observed in code"). If code reaches a sent package anyway, discard the blind output, record the contamination in `part-b-diff.md`, and re-dispatch with clean inputs. A passing coverage check proves row presence only: confirm the pair count against the pairs table. A row whose disposition word is outside the closed vocabulary is listed as `vocabulary-drift` in `part-b-diff.md`; classify it only where its described behaviour maps unambiguously to one vocabulary value, and state that mapping. If the behaviour differs from the matrix it is a `divergence` with a Q; if it is ambiguous, raise a Q. If `blind` fails or routing is not configured, dispatch a fresh blind session as the Part B dispatch notes describe, with the same prepared text files and no `FILE:Class` specs; never write, edit, rewrite, or complete a blind table yourself.
+7. **Part B is never done by you.** You have seen the code and the matrix. `blind` takes only prepared text files (`.md`, `.txt`, `.rst`): requirements prose (a whole file, or one section selected with `FILE.md:PATTERN`), and a whole contracts file into which you copied each contract docstring or schema description verbatim, headed by its `file:line`, with no added, summarised, or reworded text; it refuses source files and class specs. First run `blind … --package-only`, read `<output stem>.package.md`, and confirm it holds no implementation code; then run `blind` without the flag and without changing the inputs. The real run sends only that inspected package and refuses if the inputs changed. The analysis directory, `--requirements` and `--contracts` are relative to `--repo` (or absolute). The package carries the catalogue with code fragments, line numbers and analysis ids removed; file names stay, and so do quotes cited from the requirements and contracts files or from the prose files the doctrine lines cite (never from a file of the analysis directory). Q-, PA-, SYS-, NAT- and DR- ids are always removed; L-, G-, F- and T- ids stay only when the requirements, the contracts or the quoted text of a doctrine line use them, and the command names on stderr each id it kept and each it removed: check both lists, list each kept id in `part-b-diff.md` with why it stays, and record any removed domain term as a known loss; never edit the inputs to restore one. The command refuses the package when a cited file name is still followed by a quoted fragment after stripping (put each fragment on one line right after `file:N` or `file:N-M`, escape each `|` of a fragment in a table cell as `\|` in the catalogue, rephrase a parenthesised prose quote that follows a code file name, and rebuild) or when a table row's cell count changed (repair that row's escaping and rebuild); never send such a package and never work around the refusal. Write each line number as part of a citation (`file:N`, `file:N, M or K`, `file:N-M`, ranges without spaces) and end the run with `,` `;` `.` `:` `?` `!`, a bracket, a double quote or `*`, or join its last number with `and`/`or`; never end it with a dash or a slash or put a prose count directly after it; a bare number in prose ("unlock at 136") is not recognised and reaches the package. The refusal does not catch a quote after the citation's own `;` or `)`, or more than 80 characters after the file name: search the package for every `(` followed by a quote (straight, single or typographic, also with a space between) and confirm that each one is a kept prose-source quote. The package labels the catalogue's gate-type, remembrance, upstream-guard, lock-discipline, event-annotation and undesired-coverage headings, and each `gate:` and `upstream_guards:` field, `observed in code`; the coverage check (run by `blind`, or `part_b_pack.py --check`) lists the rows Part B marked `as-is:`, and Part B's agreement on each of them is not independent: list them in `part-b-diff.md`. The mark is Part B's own report and can be missing: it adds to your reading, never replaces it. Still read it: prose that states an as-is conclusion (a deadlock, a lost wake-up, a hole) elsewhere, such as an event table cell, is a known leak; list each in `part-b-diff.md` and treat Part B's agreement on that row as not independent. Never repair such text by restating it as intent or as a hole or question; a repaired line states provenance only ("observed in code"). If code reaches a sent package anyway, discard the blind output, record the contamination in `part-b-diff.md`, and re-dispatch with clean inputs. A passing coverage check proves row presence only: confirm the pair count against the pairs table. A row whose disposition word is outside the closed vocabulary is listed as `vocabulary-drift` in `part-b-diff.md`; classify it only where its described behaviour maps unambiguously to one vocabulary value, and state that mapping. If the behaviour differs from the matrix it is a `divergence` with a Q; if it is ambiguous, raise a Q. If `blind` fails or routing is not configured, dispatch a fresh blind session as the Part B dispatch notes describe, with the same prepared text files and no `FILE:Class` specs; never write, edit, rewrite, or complete a blind table yourself.
 8. **Failures are results.** A rejected draft, an incomplete response, an API error, or an exceeded ledger stops that call only. Record it in `summary.md` and do Steps 1, 6 or 8 yourself (Part B: rule 7; an oversized source: rule 9, which takes precedence). A `citation fragment missing` error from `jev-batch` is a correction: fix the citation or raise a question, then re-run the batch with every check. Never retry by loosening the task, dropping a check, or weakening the citation check. A draft cut off at the output budget (`finish_reason=length`, kept as `<stem>.draft.txt`) is not loosening: re-run it once with a larger `--max-tokens` (at most 16384); if it is cut off again, split the source under rule 9 or do the step yourself.
 9. **Excerpts keep their line numbers.** Split a file only when a call fails with HTTP 400 and the error text names `max_tokens_exceeded`, or when a draft is cut off again after the rule-8 re-run. Cut on line boundaries, record each excerpt's start line, and add `start - 1` to every cited line before it enters an artifact.
 10. **Draft tasks are finding-neutral.** A `draft-verify` task names what to extract (events, states, guards, orderings, contracts) in general terms, never a suspected defect, race, or scenario: you have seen the code, and a named scenario steers Flash (first routed pilot: the task's example race was the benchmark finding, so Flash raising it was not independent). Keep every task file next to its output.
 
 End `summary.md` with the ledger file name (not its full path), the output of `local_models.py --ledger <path> status`, and every failed or skipped model call.
+
+#### Routing variant `flash-writes` (experimental, roadmap entry 11 item 2)
+
+Use it only when the run brief names `routing variant: flash-writes`, and write that line under the routing line in `summary.md`. It measures whether Flash can write the bulk text while you decide, so it changes only the points below, all of them in every run of the variant; every other rule of this prompt holds. Write a line `step N start: <UTC time>` into `summary.md` when you start each step, so the cost of each step can be read from the session transcript afterwards.
+
+1. **Step 1.** Routing rule 3 is suspended: the `draft-verify` drafts are the extraction. Rule 1 still holds (read each kept claim's cited line). Add an item yourself only where a later step, a checker or a re-read shows a gap, and mark it `added by agent: <why>` so the agent's share can be counted.
+2. **Step 4.** You decide the states (each with the condition that defines it) and the events, and write them to a cells task file (JSON: `states` with `name` and `condition`, `events` with `id` and `gist`, optional `notes`). Rule 10 applies to the whole task file: conditions, gists and notes describe states and events in general terms and never name a suspected defect, race or scenario. Run `draft-cells <source> <task> --output <stem>.json` once per source file that holds the handling (split the events across calls if a draft is cut off; rule 9 still applies). It checks each drafted cell (state, event, vocabulary, target, citation, one cell per pair), sends every clean cell to one Jev batch as a claim, and writes `<stem>.md`: a matrix block in the cell form of this step, then a review list. Read the source file once and check every drafted cell against it; correct a wrong cell in place, decide every `→ Q-?` (a hole's question or fold, or a cell whose citation failed) and every `MISSING`, and add guards, `→ Q-nn` links and pair notes as this step requires. Jev's answer orders your reading and is never a reason to keep or drop a cell (routing rule 2); on a hole cell Jev can judge what the code does, not whether it is intended, so `unclear` there is expected. Keep the task file, the JSON and the rendered draft.
+3. **As-is tests.** Write a test plan, one line per test: its name, the claim it observes, and the cited line. Then draft the test code with `flash` from a prompt that holds the plan and the source, and run it. Fix what does not compile or does not observe its claim, and keep the plan, the prompt and the draft next to the tests.
+4. **Measure.** After the sidecar is generated, run `python3 <pack>/tools/draft_cells.py compare <stem>.json … --sidecar analysis.json` and put its output in `summary.md`. It counts each drafted cell as unchanged, changed (disposition, target or citation) or dropped, split by Jev's choice, and lists the final cells Flash did not draft; the counts come from the files, not from your report. Also record the tests drafted and the tests you changed, and the Step-1 items you added. These numbers are the variant's result next to cost and time, and the first labelled data on Jev for matrix cells.
 
 ### Step 0 — Scope statement
 
@@ -203,7 +227,7 @@ List every event with name, source, external/internal, payload gist, and where t
 
 **Gate-type annotation.** For each event whose handling branches, state the gate: payload content, or service-side state. A reader of the catalogue alone, including the Part-B pass, must not have to guess.
 
-**Remembrance semantics.** For every event family whose entities can end (episodes, sessions, connections): state what an ended entity leaves behind. What the component remembers, in what bound (size or duration), and what a late reference to it resolves to. Transition behaviour without end-of-life memory semantics is exactly where blind readers and late-arrival dispositions go wrong.
+**Remembrance semantics.** For every event family whose entities can end (episodes, sessions, connections): state what an ended entity leaves behind. What the component remembers, in what bound (size or duration), and what a late reference to it resolves to. Transition behaviour without end-of-life memory semantics is exactly where blind readers and late-arrival dispositions go wrong. For queues and owned resources, inspect logical removal, remaining references in backing storage, and counter writes separately. Trace the counter through success, failed cleanup and shutdown. State what it measures and which paths leave it unchanged. Cite the mutations and bounds. Treat any unmeasured retention cost as a runtime question.
 
 For every external event source, derive undesired variants with this checklist (each category carries its fault-class id from `formats/rules.toml`):
 
@@ -217,7 +241,23 @@ For every external event source, derive undesired variants with this checklist (
 * subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18, sidecar key: `value`)
 <!-- /generated:rules -->
 
+Apply the checklist to each independently acting source before grouping.
+Consider the lifecycle owner, request caller and injected callbacks
+separately where present. Include omitted or delayed teardown, repeated
+requests, operations sent to the wrong instance and valid but unintended
+configuration. Separate wrong receiver from wrong payload. If a scenario
+cannot occur at the boundary, cite the guarantee.
+
+For an acquisition API such as Get, name a second call by the same
+caller as a concrete duplication variant. Check separately when the
+first call is still pending and when it has returned a resource that
+the caller still holds. If a caller cannot issue one of these orders,
+cite the caller or boundary guarantee. A grouped variant may share a
+column, with the second acquisition named explicitly in the catalogue.
+
 Add the variants to the catalogue. They receive matrix columns like any other event.
+A shared column must identify its concrete variants and the guard or trace
+that preserves each distinct outcome.
 
 **Upstream-guard annotation.** For every external event, state which validations happen upstream of this boundary (with citations into the upstream code) and which are absent here. Do this per deployment topology when more than one exists. A guard the catalogue does not mention will be re-invented or falsely assumed by every blind reader.
 
@@ -384,7 +424,7 @@ behaviour.
 
 ### Step 6 — Adversarial traces
 
-Produce concrete, numbered event sequences of two kinds:
+Produce concrete, numbered event sequences of these kinds:
 
 1. **Systematic:** one trace per interaction-pair ordering from the Step-3 pairs table (`P-01a`, `P-01b`, …). Each trace ends in an explicit disposition or a raised question. No pair stays untraced.
 2. **Free probes (at least 10):** unexpected ordering; delayed responses that arrive after cancellation or shutdown; duplicates; cancellation races; restart mid-operation; simultaneous external events; deliberate NAT violations.
@@ -392,6 +432,24 @@ Produce concrete, numbered event sequences of two kinds:
    * **Shared-fate reset.** All N instances reset internal state on the same external signal (for example connection opened). Does this create a synchronization cascade? Trace the aggregate load on the external resource over 3 failure/recovery cycles.
    * **Backoff dispersion.** If backoff windows share the same random seed, the same min/max bounds, and the same reset trigger — do they converge or diverge over time?
    * **Degraded-recovery herd.** The external resource recovers partially. Instance A connects, resets its state, then the resource fails again. Instance B connects, resets, fails. Do they amplify the degradation?
+
+For a second acquisition, state how the caller can issue it and trace
+both calls to their outcomes. Check whether the boundary can associate
+them with the same caller, whether each consumes capacity or gets its
+own wait entry, and what one later handoff completes. Cover each
+reachable order from Step 3 with a cited trace and link its outcome and
+any open decision in the summary coverage table.
+
+For cancellation and teardown, follow the operation past the caller's
+departure. Compare no later input with a later matching input. Track
+where a delivered value goes when its caller has stopped waiting.
+For each callback that can meet a lifecycle boundary, examine success
+and failure on both sides of the boundary. Cite the lock or other
+guarantee for impossible orderings. For reachable orders, follow the
+result through retries, captured references, cleanup and any skipped
+effect. Keep the distinct orders even when one event column groups
+the callback outcomes. An applicable probe can also satisfy the
+systematic or free-probe requirement above.
 
 For each trace give (a) the sequence, (b) what the code appears to do, with provenance, and (c) the domain question it raises. For a control trace, write `none — control trace` instead of a question. A control-trace verdict that rests on a cited requirement or recorded decision must add one line with a short quote. The line: **"cited text contemplates this ordering: yes/no"**. A "no" voids the control verdict and raises a question. This is the requirement-scope rule made mechanical.
 
@@ -410,6 +468,12 @@ scope rule to the full assertion and retain the question.
 ### Step 7 — Open domain questions (primary deliverable)
 
 Consolidate every hole, contradiction, accidental ignore, invariant violation, unmapped-doctrine finding, lint finding, and adversarial question into a numbered list. These are decisions that only a human can make. **Nothing gets dropped in consolidation.** Every hole cell maps to exactly one Q. To group related cells into one Q is fine. To omit one is not.
+
+Before finalizing, add a short coverage table to the summary. For each
+applicable case checked above, link the catalogue variant or trace,
+the cited finding and its Q. Keep distinct consequences visible within
+a shared Q. Record a source-backed reason for an inapplicable case.
+Keep the table and findings out of the Part-B inputs.
 
 Write the mapping back into the matrix (`→ Q-nn` per hole cell), so that the Stage-2 checker can verify it. Format each question as a proposed decision record:
 
@@ -504,6 +568,8 @@ removed with a note in the summary.
 Run this in a **new** agent session with no access to the as-is model, the matrix, the traces, or the code. Provide only these inputs. First: `event-catalogue.md`, with gate-type annotations, upstream-guard annotations, and the pairs table. Second: the prose requirements. Third: the **normative contract text of every event the component emits or consumes**. Contract text means contract docstrings and schema descriptions: requirements-level material, never component code.
 
 > Here is the event catalogue of a component, and its requirements. For every event — including undesired variants and both orderings of every interaction pair — state in which situations the component should handle, ignore, or reject it, and what should happen. Describe situations in requirement terms. Name states per PA-17 (state naming convention): prefer public API names, name sub-states by their condition, use PascalCase with `_` as separator. If you must assume a lifecycle state the requirements do not name, label it `assumed-state:` with the condition that defines it. You have no access to the implementation. Be concrete. Produce a table keyed by the catalogue's event ids. End with a coverage checklist: every catalogue event id, listed once, ticked. A missing row must be impossible to miss.
+>
+> Catalogue headings and fields labelled `observed in code` say what the implementation does, not what it should do. Base each row on the requirements, the contracts and the doctrine lines. When a row's expected behaviour rests only on observed-in-code text, start its behaviour cell with `as-is:`.
 >
 <!-- generated:rules key=partb-vocab -->
 > The disposition vocabulary you must use (from the methods reference): `transition → <target>` | `handle` (stays in the state, does something) | `ignore (documented)` | `ignore (accidental)` | `defer (queued)` | `reject` (a declared refusal signal: error, diagnostic, nack) | `UNSPECIFIED`. Without these definitions a blind pass applies `reject` and `handle` to identical semantics interchangeably (dobby trigger-service, 2026-08-05: four vocabulary-only "divergences").

@@ -620,6 +620,7 @@ def main() -> int:
     flash_parser = commands.add_parser("flash")
     flash_parser.add_argument("input", type=Path)
     flash_parser.add_argument("--max-tokens", type=int, default=4096)
+    flash_parser.add_argument("--output", type=Path, help="save the full JSON and print usage only")
     jev_parser = commands.add_parser("jev")
     jev_parser.add_argument("input", type=Path)
     jev_parser.add_argument("question")
@@ -629,6 +630,8 @@ def main() -> int:
     batch_parser.add_argument("checks", type=Path, help="JSON array of checks")
     batch_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
     batch_parser.add_argument("--output", type=Path, help="also write the result JSON to this file")
+    batch_parser.add_argument("--summary", action="store_true",
+                              help="print counts instead of all checks (requires --output)")
     draft_parser = commands.add_parser("draft-verify", help="Flash drafts cited claims; Jev judges them")
     draft_parser.add_argument("input", type=Path, help="UTF-8 source the claims must cite")
     draft_parser.add_argument("task", type=Path, help="UTF-8 file with the bounded drafting task")
@@ -636,6 +639,14 @@ def main() -> int:
     draft_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
     draft_parser.add_argument("--max-tokens", type=int, default=12000,
                               help="Flash output budget (a 248-line source needed about 5,200; 4096 truncated it)")
+    cells_parser = commands.add_parser("draft-cells",
+                                       help="Flash drafts matrix cells for given states and events; Jev judges each")
+    cells_parser.add_argument("input", type=Path, help="UTF-8 source the cells must cite")
+    cells_parser.add_argument("task", type=Path, help="JSON file: states (name, condition), events (id, gist), notes")
+    cells_parser.add_argument("--output", type=Path, required=True,
+                              help="JSON result file; the matrix block is written next to it as .md")
+    cells_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+    cells_parser.add_argument("--max-tokens", type=int, default=16384, help="Flash output budget")
     blind_parser = commands.add_parser("blind")
     blind_parser.add_argument("analysis")
     blind_parser.add_argument("--repo", default=".")
@@ -646,6 +657,8 @@ def main() -> int:
     blind_parser.add_argument("--package-only", action="store_true",
                               help="write <output stem>.package.md for inspection; make no call")
     args = parser.parse_args()
+    if args.command == "jev-batch" and args.summary and args.output is None:
+        batch_parser.error("--summary requires --output to retain all judgments")
     for path in [getattr(args, "output", None)]:
         # Fail before anything is paid for if the result cannot be written.
         if path is not None and (path.is_dir() or not path.parent.is_dir() or not os.access(path.parent, os.W_OK)):
@@ -665,7 +678,20 @@ def main() -> int:
             budget.settle(args.reservation, args.actual_microdollars)
             result = {"committed_or_reserved_microdollars": budget.total()}
         elif args.command == "flash":
-            result = flash(budget, args.input.read_text(encoding="utf-8"), os.environ.get("DEEPSEEK_API_KEY"), args.max_tokens)
+            try:
+                drafted = flash(budget, args.input.read_text(encoding="utf-8"),
+                                os.environ.get("DEEPSEEK_API_KEY"), args.max_tokens)
+            except IncompleteResponse as error:
+                if args.output:
+                    saved = args.output.with_name(args.output.name + ".partial.json")
+                    saved.write_text(json.dumps(error.result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                    error.saved_to = str(saved)
+                raise
+            result = drafted
+            if args.output:
+                args.output.write_text(json.dumps(drafted, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                result = {key: value for key, value in drafted.items() if key != "text"}
+                result = {**result, "output": str(args.output)}
         elif args.command == "blind":
             return blind(budget, args, os.environ.get("DEEPSEEK_API_KEY"))
         elif args.command == "draft-verify":
@@ -702,11 +728,56 @@ def main() -> int:
                 print(json.dumps(result, ensure_ascii=False, indent=2))
                 print(f"LOCAL MODELS: Jev verification failed; draft kept in {args.output}: {failed}", file=sys.stderr)
                 return 1
+        elif args.command == "draft-cells":
+            import draft_cells  # imports this module; loaded only for this command
+            flash_key, jev_key = os.environ.get("DEEPSEEK_API_KEY"), os.environ.get("TYPESAFE_API_KEY")
+            if not flash_key or not jev_key:
+                raise ValueError("draft-cells needs DEEPSEEK_API_KEY and TYPESAFE_API_KEY")
+            try:
+                cells = draft_cells.draft_cells(budget, args.input.read_text(encoding="utf-8"), str(args.input),
+                                                args.task.read_text(encoding="utf-8"), flash_key, jev_key,
+                                                args.model, args.max_tokens)
+            except (InvalidDraft, draft_cells.local_models.InvalidDraft) as error:
+                args.output.with_suffix(".draft.txt").write_text(error.text, encoding="utf-8")
+                raise
+            except (IncompleteResponse, draft_cells.local_models.IncompleteResponse) as error:
+                saved = args.output.with_suffix(".draft.txt")
+                saved.write_text(error.result["text"], encoding="utf-8")
+                print(f"LOCAL MODELS: {error}; draft kept in {saved}", file=sys.stderr)
+                return 1
+            args.output.write_text(json.dumps(cells, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            args.output.with_suffix(".md").write_text(cells["matrix"], encoding="utf-8")
+            cell_choices: dict[str, int] = {}
+            for cell in cells["cells"]:
+                if "jev" in cell:
+                    cell_choices[cell["jev"]["choice"]] = cell_choices.get(cell["jev"]["choice"], 0) + 1
+            result = {"output": str(args.output), "matrix": str(args.output.with_suffix(".md")),
+                      "cells_total": len(cells["cells"]),
+                      "cells_with_problems": sum(bool(c["problems"]) for c in cells["cells"]),
+                      "missing": len(cells["missing"]), "jev_choices": cell_choices,
+                      "questions": len(cells["questions"]), "draft": cells["draft"],
+                      "verification": cells["verification"]}
+            if cells["verification"] and cells["verification"].get("error"):
+                print(json.dumps(result, ensure_ascii=False, indent=2))
+                print(f"LOCAL MODELS: Jev verification failed; draft kept in {args.output}", file=sys.stderr)
+                return 1
         elif args.command == "jev-batch":
-            result = jev_batch(budget, args.input.read_text(encoding="utf-8"), str(args.input),
-                               json.loads(args.checks.read_text(encoding="utf-8")), os.environ.get("TYPESAFE_API_KEY"), args.model)
+            batch = jev_batch(budget, args.input.read_text(encoding="utf-8"), str(args.input),
+                              json.loads(args.checks.read_text(encoding="utf-8")), os.environ.get("TYPESAFE_API_KEY"), args.model)
+            result = batch
             if args.output:
-                args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                args.output.write_text(json.dumps(batch, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            if args.summary:
+                batch_choices: dict[str, int] = {}
+                for check in batch["checks"].values():
+                    choice = check["choice"]
+                    batch_choices[choice] = batch_choices.get(choice, 0) + 1
+                result = {"output": str(args.output), "model": batch["model"],
+                          "source_sha256": batch["source_sha256"],
+                          "input_tokens": batch["input_tokens"], "cost_microdollars": batch["cost_microdollars"],
+                          "checks_total": len(batch["checks"]), "jev_choices": batch_choices,
+                          "ordering_checks": sum(c["kind"] == "ordering" for c in batch["checks"].values()),
+                          "review_required": True}
         else:
             result = jev(budget, args.input.read_text(encoding="utf-8"), args.question,
                          os.environ.get("TYPESAFE_API_KEY"), args.model)

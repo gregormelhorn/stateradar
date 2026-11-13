@@ -49,6 +49,12 @@ python3 tools/local_models.py --ledger "$ledger" jev-batch \
   /path/to/source.md /path/to/checks.json --model jev-1.14.0 --output /path/to/batch.json
 ```
 
+For shorter tool results, add `--summary` with `--output`. Stdout carries
+the artifact path, usage, and counts by choice. The output file keeps every
+judgment and its citation. For `flash`, use `--output draft.json` to save
+the draft and print usage. If Flash truncates the draft, the command exits
+with an error and keeps it at `draft.json.partial.json`.
+
 Each `line` is a one-based integer line in the source file. Each `fragment` is
 a single line of at least four non-space characters that occurs on a line
 within three lines of it, the pack-wide citation window. The `draft-verify`
@@ -104,6 +110,51 @@ is provisional and uncalibrated: it can only turn an ordering into a question
 and never accepts one. The command needs both API keys. Every command that
 takes `--output` checks before any request that the output is not a directory
 and its directory is writable.
+
+### Draft matrix cells
+
+`draft-cells` drafts disposition-matrix cells (the 02-pilot routing variant
+`flash-writes`, roadmap entry 11 item 2). The task file is JSON written by the
+steering agent: `states` (each a `name` and the `condition` that defines it),
+`events` (each an `id` and a `gist`) and optional `notes`; names and ids are
+one word, and rule 10 of the routing section (finding-neutral tasks) applies
+to all of it. Flash must answer with one cell per state and event (`state`,
+`event`, `disposition`, `target` for a transition, `line`, `fragment`, `note`)
+plus `questions`. Code checks each cell: known state and event, the closed
+disposition vocabulary of `formats/rules.toml`, a transition target among the
+states, no target on other dispositions, the citation rule of `jev-batch`, and
+one cell per pair; it lists the pairs without a cell. Every matrix tool splits
+table rows on `|`, so a fragment with a `|` is cut to its longest verbatim
+piece without one (refused if that piece is too short) and a note's `|`
+becomes `/`. Every clean cell goes to one Jev batch as a claim that names the
+state with its condition, the event with its gist and the drafted outcome. The
+default output budget is 16384 tokens, the Flash maximum; split the events
+across task files when a draft is cut off.
+
+The result JSON holds every cell with its problems and Jev judgment, the
+missing pairs, the draft questions and the usage. The command also writes a
+matrix block next to the JSON (`cells.json` gives `cells.md`): the 02-pilot
+cell form in sub-tables of eight events, then a review list (cells with
+problems, cells Jev did not judge `supported`, missing pairs) and the draft
+questions. A hole or a cell with a problem carries `→ Q-?` (a cell with a
+problem also loses its citation), and a missing cell reads `MISSING`, so
+`dsc_check.py` fails until the agent has decided each. Nothing is accepted:
+the agent checks every cell against the source. A draft that is not the
+required JSON, or is cut off, is kept as `cells.draft.txt`. The command needs
+both API keys.
+
+`python3 tools/draft_cells.py compare cells.json … --sidecar analysis.json`
+needs no key: it compares the drafts with the run's final sidecar and counts
+each drafted cell as unchanged, changed (disposition, target or citation) or
+dropped, split by Jev's choice, and lists the final cells no draft held.
+Add `--output compare.json` to keep all rows in the report file and print
+aggregate counts.
+
+```bash
+python3 tools/local_models.py --ledger "$ledger" draft-cells \
+  pool/channel.go /path/to/cells-task.json --output /path/to/cells.json \
+  --model jev-1.14.0
+```
 
 ### Evaluate a batch against reviewed examples
 
@@ -241,6 +292,36 @@ review the catalogue and supplied files for suitable blind inputs and follow
 `prompts/02-pilot.md` for the diff, divergence classification, and questions.
 The coverage checker checks row presence, not whether the predictions are
 correct.
+
+## Pilot runner output
+
+`tools/run_sol_pilot.py` runs the pilot on macOS through the signed-in Codex
+CLI. It requires the two routing provider keys and a local clone of the
+pinned Pool or gobreaker source. It defaults to one analysis with selective
+output.
+
+```bash
+python3 tools/run_sol_pilot.py --component-repo /path/to/pool \
+  --output /tmp/stateradar-pool-run
+```
+Ordinary output up to 12,000 characters per stream is returned in full.
+For longer documents, follow the supplied
+`read_more.next_stdout` or `read_more.next_stderr` command and then each
+returned `next` to read contiguous pages. Long Go test timeout and race
+reports show the relevant stacks and their positions in the full log.
+Both streams are retained for every command.
+
+For targeted evidence, use the command tool with
+`["read-log", "012", "function", "Put"]`,
+`["read-log", "012", "rows", "GetAgain"]`,
+`["read-log", "012", "lines", "20", "45"]`, or
+`["read-log", "012", "find", "generation"]`.
+Append `.stderr` to the log ID to select stderr.
+
+Use `--output-mode standard` or `--output-mode compact` for one run in
+the corresponding comparison format. Use `--output-mode compare` for
+the standard/compact pair. `--compact-first` can be used alone as
+shorthand for the pair in reverse order.
 
 ## Provider limits (checked 2026-11-12)
 

@@ -32,6 +32,26 @@ class ModelTest(unittest.TestCase):
             self.assertEqual(result["cost_microdollars"], 90)
             self.assertEqual(budget.total(), 90)
 
+    def test_flash_cli_can_keep_the_draft_out_of_stdout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            task = root / "task.md"
+            task.write_text("draft test code")
+            output = root / "draft.json"
+            response = {"model": "deepseek-flash", "usage": {"prompt_tokens": 10, "completion_tokens": 3},
+                        "choices": [{"message": {"content": "draft test code"}, "finish_reason": "stop"}]}
+            argv = ["local_models.py", "--ledger", str(root / "b.db"), "flash", str(task),
+                    "--output", str(output)]
+            with patch.object(sys, "argv", argv), patch.dict("os.environ", {"DEEPSEEK_API_KEY": "key"}), \
+                    patch.object(local_models, "post_json", return_value=response), \
+                    contextlib.redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(local_models.main(), 0)
+            self.assertEqual(json.loads(output.read_text())["text"], "draft test code")
+            summary = json.loads(out.getvalue())
+            self.assertNotIn("text", summary)
+            self.assertEqual(summary["output"], str(output))
+            self.assertEqual(summary["output_tokens"], 3)
+
     def test_failed_request_keeps_reservation(self):
         with tempfile.TemporaryDirectory() as directory:
             budget = Budget(Path(directory) / "usage.db", 1000)
@@ -162,11 +182,22 @@ class ModelTest(unittest.TestCase):
                              "probabilities": {"supported": 1.0, "contradicted": 0.0, "unclear": 0.0}}}}
             argv = ["local_models.py", "--ledger", str(root / "b.db"), "jev-batch", str(root / "source.md"),
                     str(root / "checks.json"), "--output", str(root / "batch.json")]
-            with patch.object(sys, "argv", argv), patch.dict("os.environ", {"TYPESAFE_API_KEY": "key"}), \
-                    patch.object(local_models, "post_json", return_value=response), \
-                    contextlib.redirect_stdout(io.StringIO()):
-                self.assertEqual(local_models.main(), 0)
-            self.assertEqual(json.loads((root / "batch.json").read_text())["checks"]["C1"]["choice"], "supported")
+            for summary in (False, True):
+                with self.subTest(summary=summary):
+                    args = [*argv, "--summary"] if summary else argv
+                    with patch.object(sys, "argv", args), patch.dict("os.environ", {"TYPESAFE_API_KEY": "key"}), \
+                            patch.object(local_models, "post_json", return_value=response), \
+                            contextlib.redirect_stdout(io.StringIO()) as out:
+                        self.assertEqual(local_models.main(), 0)
+                    full = json.loads((root / "batch.json").read_text())
+                    self.assertEqual(full["checks"]["C1"]["choice"], "supported")
+                    displayed = json.loads(out.getvalue())
+                    if summary:
+                        self.assertNotIn("checks", displayed)
+                        self.assertEqual(displayed["output"], str(root / "batch.json"))
+                        self.assertEqual(displayed["jev_choices"], {"supported": 1})
+                    else:
+                        self.assertEqual(displayed, full)
 
     def test_jev_records_reported_usage(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -510,6 +541,64 @@ class ModelTest(unittest.TestCase):
             self.assertIn("kept in the catalogue", err.getvalue())
             self.assertIn("T-1", err.getvalue())
             self.assertRegex(err.getvalue(), r"removed as analysis references[^\n]*L-9")
+
+    def test_blind_labels_code_derived_catalogue_text_and_counts_as_is_rows(self):
+        # Both pilots of 2026-11-13: gate, remembrance, upstream and lock
+        # annotations reached Part B unlabelled and were read as intent.
+        catalogue = ("<!-- event-ids: E01 E02 -->\n# Pool — Event catalogue\n\n## Events\n\n"
+                     "| id | gist |\n|---|---|\n| E01 | get |\n| E02 | put |\n\n"
+                     "## Undesired variants\n\nnone\n\n## Gate-type annotations\n\n* E01 — gate: state\n\n"
+                     "## Remembrance semantics\n\nnothing kept\n\n### Upstream-guard annotation\n\nnone\n\n"
+                     "## Lock-discipline annotation\n\none mutex\n\n## Undesired-coverage\n\nn/a\n\n"
+                     "## Event annotations\n\n### E01\n- gate: service-side state\n"
+                     "- upstream_guards: none\n- coverage:\n  - loss: n/a\n" + "event details " * 30)
+        mark = local_models.part_b_pack.mark_observed
+        marked = mark(catalogue)
+        self.assertEqual(marked.count("\n"), catalogue.count("\n"), "no line is added")
+        self.assertEqual(mark(marked), marked, "labelling twice changes nothing")
+        label = "(observed in code, not documented intent)"
+        for heading in ("## Gate-type annotations", "## Remembrance semantics", "### Upstream-guard annotation",
+                        "## Lock-discipline annotation", "## Undesired-coverage", "## Event annotations"):
+            self.assertIn(f"{heading} {label}\n", marked)
+        for heading in ("# Pool — Event catalogue\n", "## Events\n", "## Undesired variants\n", "### E01\n"):
+            self.assertIn(heading, marked)
+        self.assertIn("- gate (observed in code): service-side state", marked)
+        self.assertIn("- upstream_guards (observed in code): none", marked)
+        self.assertIn("* E01 — gate: state", marked, "only list fields are relabelled")
+        # Field spellings and closing hashes (review round 1).
+        self.assertEqual(mark("## Remembrance ##\n- **Gate:** x\n- **upstream_guards**: y\n"),
+                         f"## Remembrance {label} ##\n- **Gate (observed in code):** x\n"
+                         "- **upstream_guards (observed in code)**: y\n")
+        # A catalogue without code-derived sections is left alone, and a blind
+        # table without marks prints no independence line.
+        plain = "<!-- event-ids: E01 -->\n## Events\n\n- payload: none\n- gateway: x\n"
+        self.assertEqual(mark(plain), plain)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = self.make_blind_inputs(root, catalogue=catalogue)
+            budget = Budget(root / "budget.db", 2_000_000)
+            self.inspect_package(budget, args)
+            package = (root / "blind.package.md").read_text()
+            self.assertIn(f"## Remembrance semantics {label}", package)
+            self.assertIn("start its behaviour cell with `as-is:`", package)
+            reply = ("| Event | Expected |\n|---|---|\n| E01 | *as-is:* handle |\n| E02 | reject |\n"
+                     "| E02 (closed) | AS-IS: ignore (accidental) |\n| E02 (open) | handle, as-is: queued |\n"
+                     "| E02 (full) | handle; not-as-is: x |\n\n- [x] E01\n- [x] E02\n")
+            out, err = io.StringIO(), io.StringIO()
+            with patch.object(local_models, "flash", return_value={"text": reply, "finish_reason": "stop"}), \
+                    contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                self.assertEqual(local_models.blind(budget, Namespace(**{**vars(args), "package_only": False}),
+                                                    "key"), 0)
+            self.assertIn("PART-B INDEPENDENCE: 3 rows marked as-is (not independent): E01, E02 (closed), E02 (open)",
+                          err.getvalue())
+            unmarked = "| Event | Expected |\n|---|---|\n| E01 | handle |\n| E02 | reject |\n\n- [x] E01\n- [x] E02\n"
+            err = io.StringIO()
+            with patch.object(local_models, "flash", return_value={"text": unmarked, "finish_reason": "stop"}), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+                self.assertEqual(local_models.blind(budget, Namespace(**{**vars(args), "package_only": False}),
+                                                    "key"), 0)
+            self.assertIn("PART-B COVERAGE: OK", err.getvalue())
+            self.assertNotIn("PART-B INDEPENDENCE", err.getvalue())
 
     def test_blind_refuses_a_package_with_a_leftover_fragment(self):
         # Method review round 7: an unescaped "|" inside a fragment on a table
