@@ -102,12 +102,15 @@
   a new rule 10 for finding-neutral draft tasks).
 - **Part-B stripping nits.** `see`/`cf.` before a removed id goes whatever
   its case, and a sentence it started keeps its capital (also after `,`/`;`,
-  in parentheses and in table cells). A later citation that ends a fragment
-  must name a file the text cites with a fragment elsewhere or one that
-  exists in the repository (`part_b_pack.cited_names`; the sidecar
-  generator uses its source index), so a `host:port` token inside a
-  fragment never ends it early, whatever its domain ending, while a bare
-  `file:N` citation followed by prose still does.
+  in parentheses and in table cells). In the Part-B copy a code fragment
+  ends at the last quote-paren before a later citation or the end of the
+  line, so no code tail survives (prose after a later uncited quote may go
+  too). A later citation names a file the text cites with a fragment
+  elsewhere or a file under `--repo`, by path or base name
+  (`part_b_pack.cited_names`; callers of `blind_catalogue` pass its
+  result). The sidecar generator recognises source-index files and files
+  cited with a fragment in the same text. A `host:port` token inside a
+  fragment never ends it early, whatever its domain ending.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 

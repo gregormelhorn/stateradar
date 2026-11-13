@@ -535,6 +535,8 @@ class ModelTest(unittest.TestCase):
                            ('| e | gen_server.erl:50 ("f("a") + g()") then util.lua:52 holds |',
                             "| e | gen_server.erl then util.lua holds |")):
             self.assertEqual(strip(text, later_names=frozenset({"pool.go", "util.lua"})), want)
+        # No boundary and no later citation: the fragment runs to the last quote-paren, no code tail survives.
+        self.assertNotIn("rest", strip('init.lua:3 ("connect("a") ; rest") then srv.rs:5432 now'))
         # A host whose ending looks like a file extension is not a later citation.
         self.assertEqual(strip('client.go:40 ("f("a") dial api.example.rs:8443 now") |'), "client.go |")
         # A removed sentence-initial label keeps the capital after "," or ";", in parentheses and in cells.
@@ -595,6 +597,13 @@ class ModelTest(unittest.TestCase):
             text = 'a.go:1 ("x") then util.lua:5 and db.example.com:5432 and b.rs:3 holds'
             self.assertEqual(cited_names(text), frozenset({"a.go"}))
             self.assertEqual(cited_names(text, root), frozenset({"a.go", "util.lua"}))
+            # A file in a subdirectory cited by its base name counts too.
+            (root / "sub").mkdir()
+            (root / "sub" / "deep.go").write_text("x")
+            row = '| e | channel.go:50 ("f("a") + g()") then deep.go:3 holds the lock |'
+            self.assertIn("deep.go", cited_names(row, root))
+            self.assertEqual(local_models.part_b_pack.blind_catalogue(row, later_names=cited_names(row, root)),
+                             "| e | channel.go then deep.go holds the lock |")
 
     def test_cli_blind_truncation_goes_to_a_partial_file(self):
         with tempfile.TemporaryDirectory() as directory:

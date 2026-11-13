@@ -40,6 +40,7 @@ the assembled prompt never drifts from the canonical text.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -122,35 +123,49 @@ def _read_contracts(spec: str, repo: Path) -> str:
 
 # A citation: file:line or file:a-b, further ", :n" or "and :n" line refs,
 # and an optional ("fragment"). The fragment may hold unescaped or
-# typographic quotes and even "host:5432" tokens, so it ends at a
-# quote-paren followed by a boundary, or at the last quote-paren before a
-# later citation on the line; else at the first quote-paren. A later
+# typographic quotes and even "host:5432" tokens, so it ends at the last
+# quote-paren before a later citation or the end of the line: no code tail
+# survives, and prose after a later uncited quote may go too. A later
 # citation names a file the text cites with a fragment elsewhere, or one
 # that exists in the repository (cited_names), never a host name.
 _FILE = r"[\w./-]+\.[A-Za-z]{1,4}"
 
 
+_SKIP_DIRS = {".git", "node_modules", "vendor", "third_party", "target", "build", "dist", "__pycache__"}
+
+
+def _repo_basenames(repo: Path) -> set[str]:
+    names: set[str] = set()
+    for dirpath, dirnames, files in os.walk(repo):
+        dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS and not d.startswith(".")]
+        names.update(files)
+    return names
+
+
 def cited_names(text: str, repo: Path | None = None) -> frozenset:
     """File names that count as later citations: those cited with a
-    fragment somewhere in text, plus file:N tokens that exist under repo."""
+    fragment somewhere in text, plus file:N tokens that name a file under
+    repo, by path or by base name (catalogues cite by base name)."""
     names = {Path(m.group(1)).name for m in re.finditer(
         "(" + _FILE + r")`?:\d+(?:-\d+)?`?\s*\(\s*[\"\u201c]", text)}
     if repo is not None:
-        for m in re.finditer("(" + _FILE + r")`?:\d", text):
-            if (repo / m.group(1).strip("`")).is_file():
-                names.add(Path(m.group(1)).name)
+        tokens = {m.group(1).strip("`") for m in re.finditer("(" + _FILE + r")`?:\d", text)}
+        base = _repo_basenames(repo) if tokens else set()
+        names.update(Path(tok).name for tok in tokens
+                     if Path(tok).name in base or (repo / tok).is_file())
     return frozenset(names)
 
 
 def cite_pattern(names: frozenset) -> re.Pattern:
     later = ("(?:[\\w./-]*/)?(?:" + "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True)) + ")"
              if names else r"(?!)")
-    frag_end = (r"[\"\u201d]\s*\)(?=\s*(?:[),;|]|\u2014|$)"
-                r"|(?:(?![\"\u201d]\s*\)).)*?[\s,(]" + later + r"`?:\d)")
+    # A quote-paren ends the fragment when no other quote-paren follows it
+    # before the next later citation or the end of the line.
+    frag_end = r"[\"\u201d]\s*\)(?=(?:(?![\"\u201d]\s*\)).)*?(?:[\s,(]" + later + r"`?:\d|$))"
     return re.compile(
         r"(" + _FILE + r")`?:\d+(?:-\d+)?(?:(?:,|\s+and)[ \t]*:\d+(?:-\d+)?)*"
         r"(`?\s*\(\s*[\"\u201c](.+?)" + frag_end +
-        r"|`?\s*\(\s*[\"\u201c](.+?)[\"\u201d]\s*\))?", re.M)
+        r"|`?\s*\(\s*[\"\u201c]([^\n]+)[\"\u201d]\s*\))?", re.M)
 
 
 # Prose source documents: a quote cited from one of them is the normative
@@ -229,7 +244,8 @@ def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
     analysis ids and the labels that introduced them are removed; L-, G-,
     F- and T- ids survive only when listed in keep_ids. Prose
     conclusions cannot be removed mechanically: the agent still reads the
-    package (rule 7).
+    package (rule 7). Pass later_names=cited_names(text, repo) so that bare
+    citations of repository files end a fragment; assemble does.
     """
     names = cited_names(text) | frozenset(later_names)
     text = cite_pattern(names).sub(_citation_stripper(frozenset(keep_quotes_from)), text)
