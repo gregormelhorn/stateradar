@@ -204,8 +204,8 @@ An L-, G-, F- or T- id stays only when the requirements, the contracts or the
 quoted text of a doctrine line use it (a doctrine line's gloss is Part A's and
 does not count), so a domain term such as `T-1` that the requirements use
 survives; every other id of those families is removed, including a domain
-term the sources never use. The command names on stderr each id it kept and each it
-removed, for the agent to check; a removed domain term is recorded in
+term the sources never use. The command names on stderr each id it kept and
+each it removed, for the agent to check; a removed domain term is recorded in
 `part-b-diff.md` as a known loss, and the inputs are never edited to restore
 it. Prose that states an as-is conclusion cannot be removed mechanically, and
 the pilot lists it as a known leak. Doctrine lines from `extraction.md` travel
