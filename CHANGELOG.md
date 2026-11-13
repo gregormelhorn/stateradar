@@ -193,10 +193,13 @@
   numbers inside citations).
 - **Part-B stripping follow-up.** A line number before a parenthesised gloss
   (`channel.go:136, 151 (Factory under mu)`) reached the package again after
-  the second pilot's fixes; `(` ends a clause once more, at the cost of a prose
-  count before a parenthesis (the safe direction), and stacked sentence
-  punctuation (`?!`) ends one too. The routing doc names the remaining known
-  leaks, and rule 7 says to join a run's last number with `and`/`or`.
+  the second pilot's fixes; `(` ends a clause once more, at the cost of a
+  prose count before a parenthesis (the safe direction). A run also ends
+  before a bracket, a double quote, `*` or an ellipsis, and at stacked
+  sentence punctuation (`?!`) or punctuation followed by a closing bracket or
+  quote (`(see file:136, 151.)`). The routing doc names the remaining known
+  leaks (a dash or slash end, a prose-last run), and rule 7 lists the
+  characters that end a run.
 - Not changed: no automatic acceptance or escalation; the cascade plan's
   evaluation stages remain open.
 
