@@ -1,0 +1,261 @@
+{
+  "source": "example/main.go",
+  "source_sha256": "2f4214f0283cbeb4fb291efbbc3e53f251d3d0cb8a0b93870c9c61506374121e",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 1050,
+    "output_tokens": 987,
+    "cost_microdollars": 1500,
+    "reservation_microdollars": 15695
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 3187,
+    "cost_microdollars": 134,
+    "reservation_microdollars": 533,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The example configures the pool with an initial capacity of 2.",
+      "line": 38,
+      "fragment": "InitialCap: 2",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "The example configures the pool with a maximum idle connection count of 4.",
+      "line": 39,
+      "fragment": "MaxIdle:    4",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "The example configures the pool with a maximum capacity of 5.",
+      "line": 40,
+      "fragment": "MaxCap:     5",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "The example configures the pool's connection factory to dial TCP at addr.",
+      "line": 31,
+      "fragment": "factory := func() (interface{}, error) { return net.Dial(\"tcp\", addr) }",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "The example configures the pool's close function to close the underlying net.Conn.",
+      "line": 34,
+      "fragment": "close := func(v interface{}) error { return v.(net.Conn).Close() }",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "The example configures an idle timeout of 15 seconds, stating that connections exceeding this idle time will be closed to avoid EOF on idle.",
+      "line": 44,
+      "fragment": "IdleTimeout: 15 * time.Second",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.88,
+          "contradicted": 0.0,
+          "unclear": 0.12
+        },
+        "confidence": 0.82
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "The example creates a channel-based connection pool from the config via pool.NewChannelPool.",
+      "line": 46,
+      "fragment": "p, err := pool.NewChannelPool(poolConfig)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "If pool creation returns an error, the example prints it rather than exiting.",
+      "line": 48,
+      "fragment": "fmt.Println(\"err=\", err)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "The example obtains a connection from the pool by calling Get.",
+      "line": 52,
+      "fragment": "v, err := p.Get()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "The example returns the obtained connection to the pool by calling Put.",
+      "line": 58,
+      "fragment": "p.Put(v)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "The example queries the current connection count in the pool via Len and prints it.",
+      "line": 64,
+      "fragment": "current := p.Len()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "The example comments out a call to Release that would release all connections in the pool.",
+      "line": 61,
+      "fragment": "//p.Release()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "The example comments out a call to Release that would release all connections in the pool.",
+      "line": 61,
+      "fragment": "//p.Release()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C14": {
+      "kind": "ordering",
+      "statement": "The example creates the pool, then calls Get, then Put, then Len in that order.",
+      "line": 46,
+      "fragment": "p, err := pool.NewChannelPool(poolConfig)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.18,
+          "contradicted": 0.0,
+          "unclear": 0.82
+        },
+        "confidence": 0.73,
+        "ordering_scope_probability": 0.03
+      }
+    }
+  },
+  "questions": [
+    "Does the example check or handle the error returned by p.Get()?",
+    "What does p.Len() report as the connection count after Get followed by Put?",
+    "Is the connection count from Len affected by the initial capacity of 2?",
+    "What does the pool do if the initial capacity exceeds MaxCap or MaxIdle?",
+    "Does NewChannelPool return an error in the example, and how does the program behave afterward?",
+    "What happens if Put is not called for a connection obtained via Get?",
+    "What happens to a pooled connection when its idle time exceeds the 15-second IdleTimeout?",
+    "Does the factory's net.Dial error propagate to Get's error?",
+    "Is the expected behaviour of Get when the pool is at MaxCap specified?",
+    "Is the sequence of operations (Get then Put then Len) required by the pool or merely chosen by the example?",
+    "What does Len count exactly—total connections, idle connections, or in-use connections?",
+    "Would p.Release(), if uncommented, close connections using the configured close function?"
+  ],
+  "review_required": true
+}

@@ -1,0 +1,99 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "f6073a935a778fa28c765eb0c351aa4e56294b3c7b4df618621838ffabce19eb",
+  "input_tokens": 3009,
+  "cost_microdollars": 127,
+  "reservation_microdollars": 445,
+  "checks": {
+    "V-38": {
+      "kind": "claim",
+      "statement": "TestPool_Get expects a Get at full capacity to return ErrMaxActiveConnReached.",
+      "source": "channel_rpc_test.go",
+      "line": 94,
+      "fragment": "if err != ErrMaxActiveConnReached {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.91,
+        "contradicted": 0.03,
+        "unclear": 0.06
+      },
+      "confidence": 0.86,
+      "review_required": true
+    },
+    "V-39": {
+      "kind": "claim",
+      "statement": "TestPool_Get asserts that Len equals the idle count InitialCap-1 after one Get.",
+      "source": "channel_rpc_test.go",
+      "line": 69,
+      "fragment": "if p.Len() != (InitialCap - 1) {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "V-40": {
+      "kind": "claim",
+      "statement": "TestPool_Close asserts on the internal conns field rather than on behaviour through the interface.",
+      "source": "channel_rpc_test.go",
+      "line": 148,
+      "fragment": "if c.conns != nil {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "V-41": {
+      "kind": "claim",
+      "statement": "TestPoolWriteRead gets a connection and never returns it to the pool.",
+      "source": "channel_rpc_test.go",
+      "line": 194,
+      "fragment": "conn, _ := p.Get()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.17,
+        "contradicted": 0.01,
+        "unclear": 0.82
+      },
+      "confidence": 0.73,
+      "review_required": true
+    },
+    "V-42": {
+      "kind": "claim",
+      "statement": "TestPoolConcurrent starts Release concurrently with Gets and Puts and asserts nothing.",
+      "source": "channel_rpc_test.go",
+      "line": 170,
+      "fragment": "go func() {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.76,
+        "contradicted": 0.02,
+        "unclear": 0.22
+      },
+      "confidence": 0.64,
+      "review_required": true
+    },
+    "V-43": {
+      "kind": "claim",
+      "statement": "The test fixture configures no Ping function and an IdleTimeout of 20 seconds.",
+      "source": "channel_rpc_test.go",
+      "line": 257,
+      "fragment": "IdleTimeout: time.Second * 20,",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.21,
+        "contradicted": 0.0,
+        "unclear": 0.79
+      },
+      "confidence": 0.68,
+      "review_required": true
+    }
+  }
+}

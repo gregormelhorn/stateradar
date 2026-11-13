@@ -1,0 +1,41 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "fd57c54c8d03d2208f611cf12f49a91571923c27127b87e164b1205fd65949ec",
+  "input_tokens": 2749,
+  "cost_microdollars": 116,
+  "reservation_microdollars": 428,
+  "checks": {
+    "CT-B": {
+      "kind": "ordering",
+      "statement": "The pool's idle store is already full; then a caller returns a connection with Put; the pool closes that connection directly instead of storing it.",
+      "source": "channel.go",
+      "line": 195,
+      "fragment": "连接池已满，直接关闭该连接",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true,
+      "ordering_scope_probability": 0.3
+    },
+    "CT-C": {
+      "kind": "ordering",
+      "statement": "During Get the pool takes an idle connection; the ping check then reports it invalid; the pool discards that connection.",
+      "source": "channel.go",
+      "line": 122,
+      "fragment": "判断是否失效，失效则丢弃",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.82,
+        "contradicted": 0.0,
+        "unclear": 0.18
+      },
+      "confidence": 0.73,
+      "review_required": true,
+      "ordering_scope_probability": 0.31
+    }
+  }
+}

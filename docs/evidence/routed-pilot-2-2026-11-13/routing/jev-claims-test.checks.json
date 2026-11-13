@@ -1,0 +1,44 @@
+[
+ {
+  "id": "V-38",
+  "kind": "claim",
+  "line": 94,
+  "fragment": "if err != ErrMaxActiveConnReached {",
+  "statement": "TestPool_Get expects a Get at full capacity to return ErrMaxActiveConnReached."
+ },
+ {
+  "id": "V-39",
+  "kind": "claim",
+  "line": 69,
+  "fragment": "if p.Len() != (InitialCap - 1) {",
+  "statement": "TestPool_Get asserts that Len equals the idle count InitialCap-1 after one Get."
+ },
+ {
+  "id": "V-40",
+  "kind": "claim",
+  "line": 148,
+  "fragment": "if c.conns != nil {",
+  "statement": "TestPool_Close asserts on the internal conns field rather than on behaviour through the interface."
+ },
+ {
+  "id": "V-41",
+  "kind": "claim",
+  "line": 194,
+  "fragment": "conn, _ := p.Get()",
+  "statement": "TestPoolWriteRead gets a connection and never returns it to the pool."
+ },
+ {
+  "id": "V-42",
+  "kind": "claim",
+  "line": 170,
+  "fragment": "go func() {",
+  "statement": "TestPoolConcurrent starts Release concurrently with Gets and Puts and asserts nothing."
+ },
+ {
+  "id": "V-43",
+  "kind": "claim",
+  "line": 257,
+  "fragment": "IdleTimeout: time.Second * 20,",
+  "statement": "The test fixture configures no Ping function and an IdleTimeout of 20 seconds."
+ }
+]

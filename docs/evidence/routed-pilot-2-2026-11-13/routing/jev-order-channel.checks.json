@@ -1,0 +1,6 @@
+[
+ {"id": "CT-B", "kind": "ordering", "line": 195, "fragment": "连接池已满，直接关闭该连接",
+  "statement": "The pool's idle store is already full; then a caller returns a connection with Put; the pool closes that connection directly instead of storing it."},
+ {"id": "CT-C", "kind": "ordering", "line": 122, "fragment": "判断是否失效，失效则丢弃",
+  "statement": "During Get the pool takes an idle connection; the ping check then reports it invalid; the pool discards that connection."}
+]

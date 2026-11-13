@@ -1,0 +1,57 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "f1ee56748fe3bf0567a05c4c5a284dfe752b952ae9c9cada76e7687d4dcdbfb2",
+  "input_tokens": 1878,
+  "cost_microdollars": 79,
+  "reservation_microdollars": 346,
+  "checks": {
+    "CT-A": {
+      "kind": "ordering",
+      "statement": "All connections of the pool are in use (the pool is full); then a caller requests a connection; that caller waits instead of failing.",
+      "source": "README.md",
+      "line": 15,
+      "fragment": "When the connection pool is full, support for connection waiting",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true,
+      "ordering_scope_probability": 0.58
+    },
+    "CT-E": {
+      "kind": "ordering",
+      "statement": "A caller puts a connection back into the pool; afterwards Release is called; Release closes that returned connection.",
+      "source": "README.md",
+      "line": 55,
+      "fragment": "Release all connections in the connection pool",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.17,
+        "contradicted": 0.0,
+        "unclear": 0.83
+      },
+      "confidence": 0.74,
+      "review_required": true,
+      "ordering_scope_probability": 0.03
+    },
+    "CT-F": {
+      "kind": "ordering",
+      "statement": "An idle connection stays in the pool longer than the maximum idle time; afterwards a caller requests a connection; the pool closes and discards that expired connection instead of handing it out.",
+      "source": "README.md",
+      "line": 13,
+      "fragment": "the timeout connection will be closed and discarded",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.11,
+        "contradicted": 0.01,
+        "unclear": 0.88
+      },
+      "confidence": 0.82,
+      "review_required": true,
+      "ordering_scope_probability": 0.05
+    }
+  }
+}

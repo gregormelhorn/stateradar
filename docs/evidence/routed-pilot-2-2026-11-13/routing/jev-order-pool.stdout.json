@@ -1,0 +1,25 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "335efb032d3bb90ca7aeabdce5d545d28b6285e0bd7390714c3e7cb82bdc89de",
+  "input_tokens": 663,
+  "cost_microdollars": 28,
+  "reservation_microdollars": 115,
+  "checks": {
+    "CT-D": {
+      "kind": "ordering",
+      "statement": "Release is called first; afterwards a caller calls Get; Get returns ErrClosed.",
+      "source": "pool.go",
+      "line": 6,
+      "fragment": "ErrClosed 连接池已经关闭Error",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.0,
+        "unclear": 1.0
+      },
+      "confidence": 1.0,
+      "review_required": true,
+      "ordering_scope_probability": 0.02
+    }
+  }
+}
