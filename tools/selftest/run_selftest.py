@@ -212,6 +212,33 @@ def main() -> int:
             failures.append(f"'## Q-nn' question headings not parsed: {qids}")
         else:
             print("  ok  '## Q-nn' question headings are parsed")
+        # Agent-only run 2026-11-13: a prose table whose first header cell
+        # is "State" opened a matrix block, so its other header cells became
+        # phantom events ("Condition") without any error.
+        pt = sidecar(tmp, COMPOUND)
+        pt_matrix = pt / "domain-analysis" / "gate" / "disposition-matrix.md"
+        pt_matrix.write_text(pt_matrix.read_text() + "\n## Leaf conditions\n\n"
+                             "| State | Condition |\n|---|---|\n| Open Idle | no request |\n")
+        pt_run = subprocess.run([sys.executable, str(ROOT / "tools" / "gen_analysis_sidecar.py"),
+                                 "--root", str(pt)], capture_output=True, text=True)
+        pt_events = [e["id"] for e in json.loads(
+            (pt / "domain-analysis" / "gate" / "analysis.json").read_text()).get("events", [])]
+        if pt_run.returncode != 0 or "Condition" in pt_events:
+            failures.append(f"prose 'State' table parsed as a matrix block: {pt_events}"
+                            f"{pt_run.stdout}{pt_run.stderr}")
+        else:
+            print("  ok  a prose table headed 'State' adds no events")
+        # Same run: '| DOC-' rows of a '###' sub-section after the doctrine
+        # table were read as doctrine mappings.
+        dm = tmp / "doc-map.md"
+        dm.write_text("## Doctrine mapping\n\n| id | mapping | target |\n|---|---|---|\n"
+                      "| DOC-1 | cell | Open Idle x E1 |\n\n### Doc lines per cell\n\n"
+                      "| DOC-15 | Open Idle x E2 | note |\n\n## Next\n| DOC-16 | cell | x |\n")
+        got_doc = [d["id"] for d in gas._parse_doc_map(dm)]
+        if got_doc != ["DOC-1"]:
+            failures.append(f"doctrine map read beyond its table: {got_doc}")
+        else:
+            print("  ok  doctrine map stops at the next heading of any level")
         bad = sidecar(tmp, COMPOUND)
         bad_matrix = bad / "domain-analysis" / "gate" / "disposition-matrix.md"
         bad_matrix.write_text(bad_matrix.read_text().replace(

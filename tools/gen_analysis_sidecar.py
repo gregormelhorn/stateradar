@@ -331,7 +331,9 @@ def _parse_doc_map(path: Path) -> list[DocLine]:
     text = path.read_text(encoding="utf-8")
     if "## Doctrine mapping" not in text:
         return []
-    block = text.split("## Doctrine mapping")[1].split("\n## ")[0]
+    # The table ends at the next heading of any level: a '###' sub-section
+    # may hold other '| DOC-' rows (agent-only run 2026-11-13).
+    block = re.split(r"\n#", text.split("## Doctrine mapping")[1], maxsplit=1)[0]
     rows: list[DocLine] = []
     for line in block.split("\n"):
         s = line.strip()
@@ -412,6 +414,11 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
             blocks.append((_parse_events(s), []))
         elif s.startswith("| **") and blocks:
             blocks[-1][1].append(s)
+
+    # A header without '| **' state rows is a prose table whose first
+    # column happens to be headed "State"; it declares no events
+    # (agent-only run 2026-11-13: phantom event "Condition").
+    blocks = [b for b in blocks if b[1]]
 
     events: list[Event] = []
     seen_events: set[str] = set()
