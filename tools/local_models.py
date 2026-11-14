@@ -647,6 +647,9 @@ def main() -> int:
                               help="JSON result file; the matrix block is written next to it as .md")
     cells_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
     cells_parser.add_argument("--max-tokens", type=int, default=16384, help="Flash output budget")
+    windows = commands.add_parser("flash-windows", help="draft and cite bounded concurrent schedules")
+    windows.add_argument("input", type=Path)
+    windows.add_argument("--output", type=Path, required=True)
     blind_parser = commands.add_parser("blind")
     blind_parser.add_argument("analysis")
     blind_parser.add_argument("--repo", default=".")
@@ -692,6 +695,27 @@ def main() -> int:
                 args.output.write_text(json.dumps(drafted, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
                 result = {key: value for key, value in drafted.items() if key != "text"}
                 result = {**result, "output": str(args.output)}
+        elif args.command == "flash-windows":
+            from hybrid_pilot import WINDOW_PROMPT, review_windows
+
+            source = args.input.read_text(encoding="utf-8")
+            numbered = "\n".join(f"{i}: {line}" for i, line in enumerate(source.splitlines(), 1))
+            prompt = f"{WINDOW_PROMPT}\nSOURCE {args.input.name}\n{numbered}"
+            raw = args.output.with_suffix(".raw.json")
+            try:
+                draft = flash(budget, prompt, os.environ.get("DEEPSEEK_API_KEY"), 8192)
+            except IncompleteResponse as error:
+                raw.write_text(json.dumps(error.result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                error.saved_to = str(raw)
+                raise
+            raw.write_text(json.dumps(draft, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            candidates = review_windows(draft["text"], source)
+            metadata = {key: value for key, value in draft.items() if key != "text"}
+            output = {"source": str(args.input), "source_sha256": hashlib.sha256(source.encode()).hexdigest(),
+                      "draft": metadata, "candidates": candidates, "review_required": True}
+            args.output.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            result = {"output": str(args.output), "draft": metadata, "candidates": len(candidates),
+                      "candidates_with_problems": sum(bool(item["problems"]) for item in candidates)}
         elif args.command == "blind":
             return blind(budget, args, os.environ.get("DEEPSEEK_API_KEY"))
         elif args.command == "draft-verify":

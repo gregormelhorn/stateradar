@@ -270,7 +270,7 @@ def execute(root, argv, _sequence, python):
             return 2, '', 'The pilot tool did not receive its provider credentials.'
         env.update({name: os.environ[name] for name in required})
         # Require the canonical ledger and command before any optional arguments.
-        allowed = {'status', 'flash', 'jev', 'jev-batch', 'draft-verify', 'draft-cells', 'blind'}
+        allowed = {'status', 'flash', 'jev', 'jev-batch', 'draft-verify', 'draft-cells', 'flash-windows', 'blind'}
         if len(argv) < 5 or argv[2:4] != ['--ledger', '../routing.sqlite'] or argv[4] not in allowed:
             return 2, '', 'Use --ledger ../routing.sqlite and a model or status command.'
     else:
@@ -328,7 +328,7 @@ runpy.run_path(script, run_name='__main__')
 
 
 
-def verify_artifacts(root, python, output_name='channelPool'):
+def verify_artifacts(root, python, output_name='channelPool', *, structured=False):
     base = f'domain-analysis/{output_name}'
     commands = {
         'matrix': [f'{base}/check_matrix.py'],
@@ -338,8 +338,14 @@ def verify_artifacts(root, python, output_name='channelPool'):
         'blind-coverage': ['../pack/tools/part_b_pack.py', base, '--repo', '.',
                            '--check', f'{base}/part-b-blind.md'],
     }
+    if structured:
+        commands['matrix-fields'] = ['../pack/tools/hybrid_pilot.py', f'{base}/matrix-fields.json',
+                                     f'{base}/disposition-matrix.md', '--check']
+        commands['sidecar-regeneration'] = ['../pack/tools/gen_analysis_sidecar.py', base, '--strict']
     outcomes = {}
-    for name, arguments in commands.items():
+    for name in (('matrix-fields', 'sidecar-regeneration') if structured else ()) + (
+            'matrix', 'guards', 'sidecar', 'reachability', 'blind-coverage'):
+        arguments = commands[name]
         code, stdout, stderr = execute(root, ['python3', *arguments], 0, python)
         (root / 'logs' / f'acceptance-{name}.stdout').write_text(stdout, encoding='utf-8')
         (root / 'logs' / f'acceptance-{name}.stderr').write_text(stderr, encoding='utf-8')
@@ -364,8 +370,8 @@ def main():
     parser.add_argument('--timeout', type=int, default=2400, help='wall-clock seconds per arm')
     parser.add_argument('--output-mode', choices=('selective', 'standard', 'compact', 'compare'),
                         help='selective (default), full standard, compact, or compare standard and compact')
-    parser.add_argument('--routing-variant', choices=('flash-writes', 'routed'), default='flash-writes',
-                        help='delegate bulk drafting to Flash (default) or use standard model routing')
+    parser.add_argument('--routing-variant', choices=('flash-writes', 'routed', 'hybrid'), default='flash-writes',
+                        help='Flash bulk drafting (default), standard routing or hybrid with structured matrix')
     parser.add_argument('--compact-first', action='store_true', help='compare with compact before standard')
     parser.add_argument('--smoke', action='store_true', help='verify selected output modes with a small live command')
     args = parser.parse_args()
@@ -457,7 +463,8 @@ Report the module name and whether the Jev call succeeded.'''
                 ):
                     raise ValueError(f'{arm} smoke did not demonstrate the pilot tool and live Jev')
             else:
-                gates_passed.append(verify_artifacts(folder, python, output_name))
+                gates_passed.append(verify_artifacts(folder, python, output_name,
+                                                     structured=args.routing_variant == 'hybrid'))
         print(f'{len(arm_order)} Codex session(s) ended. Review usage and artifacts in {root}.')
         return 0 if all(gates_passed) else 1
     except (OSError, KeyError, ValueError, subprocess.SubprocessError) as exc:
