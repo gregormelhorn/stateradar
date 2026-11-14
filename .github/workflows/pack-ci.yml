@@ -31,6 +31,8 @@ jobs:
           python tools/check_fault_mutants.py examples/weighted-semaphore/domain-analysis/weightedSemaphore
       - name: mutation verdict and cell rationale selftests
         run: |
+          python tools/selftest/test_fault_runner.py
+          python docs/evidence/generic-canary/scripts/semaphore_weak_control.py
           python tools/selftest/test_mutation_binding.py
           python tools/selftest/test_cell_rationale.py
           python tools/selftest/test_finding_benchmark.py

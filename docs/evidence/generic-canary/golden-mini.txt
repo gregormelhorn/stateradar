@@ -1,0 +1,9 @@
+BASELINE: OK (cells=24)
+MUT-001 KILLED fault=F-04 cell=Closed x M1 id=F-04-sneak-path-Closed-M1 target=src/mini.py exit=1 duration=0.034s
+MUT-002 KILLED fault=F-01 cell=Open x M2 id=F-01-missing-transition-Open-M2 target=src/mini.py exit=1 duration=0.035s
+MUT-003 KILLED fault=F-02 cell=Open x M2 id=F-02-transfer-fault-Open-M2 target=src/mini.py exit=1 duration=0.034s
+MUT-004 KILLED fault=F-05 cell=Open x UV-M1-dup id=F-05-corrupt-state-Open-UV-M1-dup target=src/mini.py exit=1 duration=0.034s
+CANARY id=F-05-corrupt-state-Open-UV-M1-dup: KILLED
+MUT-005 KILLED fault=F-14 cell=Idle x UV-M1-dup id=F-14-duplication-Idle-UV-M1-dup target=src/mini.py exit=1 duration=0.034s
+MUT-006 KILLED fault=F-05 cell=Idle x UV-M2-stale id=F-05-corrupt-state-Idle-UV-M2-stale target=src/mini.py exit=1 duration=0.033s
+FAULT MUTANTS: OK (killed=6 survived=0 errors=0 blocked=0)

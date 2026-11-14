@@ -1,0 +1,6 @@
+BASELINE: OK (cells=1)
+MUT-001 SURVIVED fault=F-05 cell=Acquire_NoWaiters x Release id=zero-charges target=semaphore/semaphore.go exit=0 duration=1.869s
+CANARY id=zero-charges: SURVIVED
+MUT-002 BLOCKED id=omit-cancel-unlink fault=F-09 cell=Acquire_WaitersPending x ContextDone canary=zero-charges verdict=SURVIVED; not executed
+FAULT MUTANTS: FAIL (killed=0 survived=1 errors=0 blocked=1)
+EXPECTED GENERIC CONTROL: unobservable capacity blocks F-09 without execution

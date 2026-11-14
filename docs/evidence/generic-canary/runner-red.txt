@@ -1,0 +1,205 @@
+FFFFFFFFFFFFFFFFFFFFF
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=1, output='CELL FAIL Other x Call\nCELL SUITE: 2 cells checked, 1 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 72, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertNotEqual(code,0); self.assertNotIn('dependent',calls)
+                                 ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: 'dependent' unexpectedly found in ['baseline', 'dependent', 'canary', 'independent']
+
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=0, output='CELL SUITE: 0 cells checked, 0 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 72, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertNotEqual(code,0); self.assertNotIn('dependent',calls)
+                                 ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: 'dependent' unexpectedly found in ['baseline', 'dependent', 'canary', 'independent']
+
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=1, output='CELL FAIL Idle x Call\nCELL SUITE: 1 cells checked, 1 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 72, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertNotEqual(code,0); self.assertNotIn('dependent',calls)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=0, output='CELL FAIL Idle x Call\nCELL SUITE: 2 cells checked, 1 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 72, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertNotEqual(code,0); self.assertNotIn('dependent',calls)
+                                 ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: 'dependent' unexpectedly found in ['baseline', 'dependent', 'canary', 'independent']
+
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=2, output='CELL FAIL Idle x Call\nCELL SUITE: 2 cells checked, 1 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 72, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertNotEqual(code,0); self.assertNotIn('dependent',calls)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=1, output='compile error', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 72, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertNotEqual(code,0); self.assertNotIn('dependent',calls)
+                                 ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: 'dependent' unexpectedly found in ['baseline', 'dependent', 'canary', 'independent']
+
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=1, output='CELL FAIL Idle x Call\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 72, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertNotEqual(code,0); self.assertNotIn('dependent',calls)
+                                 ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: 'dependent' unexpectedly found in ['baseline', 'dependent', 'canary', 'independent']
+
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=None, output='', duration_seconds=0, timed_out=True, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 72, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertNotEqual(code,0); self.assertNotIn('dependent',calls)
+                                 ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: 'dependent' unexpectedly found in ['baseline', 'dependent', 'canary', 'independent']
+
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=1, output='CELL FAIL Idle x Call\nCELL FAIL Idle x Call\nCELL SUITE: 2 cells checked, 2 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 72, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertNotEqual(code,0); self.assertNotIn('dependent',calls)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_incomplete_success_is_blocked_not_survived (__main__.FaultRunner.test_incomplete_success_is_blocked_not_survived)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 86, in test_incomplete_success_is_blocked_not_survived
+    self.assertNotEqual(code,0); self.assertIn('killed=2 survived=0 errors=0 blocked=1',out)
+                                 ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'killed=2 survived=0 errors=0 blocked=1' not found in 'BASELINE: OK\nMUT-001 KILLED fault=F-09 cell=Idle x Call target=source.py exit=1 duration=0.000s\nMUT-002 KILLED fault=F-09 cell=Idle x Call target=source.py exit=1 duration=0.000s\nMUT-003 SURVIVED fault=F-09 cell=Idle x Call target=source.py exit=0 duration=0.000s\nFAULT MUTANTS: FAIL (killed=2 survived=1 errors=0 blocked=0)\n'
+
+======================================================================
+FAIL: test_invalid_baseline_runs_no_mutants (__main__.FaultRunner.test_invalid_baseline_runs_no_mutants) (baseline=CommandResult(returncode=0, output='CELL SUITE: 0 cells checked, 0 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 81, in test_invalid_baseline_runs_no_mutants
+    self.assertNotEqual(code,0); self.assertEqual(calls,['baseline'])
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_invalid_baseline_runs_no_mutants (__main__.FaultRunner.test_invalid_baseline_runs_no_mutants) (baseline=CommandResult(returncode=0, output='CELL SUITE: 1 cells checked, 0 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 81, in test_invalid_baseline_runs_no_mutants
+    self.assertNotEqual(code,0); self.assertEqual(calls,['baseline'])
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_invalid_baseline_runs_no_mutants (__main__.FaultRunner.test_invalid_baseline_runs_no_mutants) (baseline=CommandResult(returncode=0, output='', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 81, in test_invalid_baseline_runs_no_mutants
+    self.assertNotEqual(code,0); self.assertEqual(calls,['baseline'])
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_invalid_baseline_runs_no_mutants (__main__.FaultRunner.test_invalid_baseline_runs_no_mutants) (baseline=CommandResult(returncode=0, output='CELL FAIL Idle x Call\nCELL SUITE: 2 cells checked, 1 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 81, in test_invalid_baseline_runs_no_mutants
+    self.assertNotEqual(code,0); self.assertEqual(calls,['baseline'])
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_projection_contract_errors_stop_before_execution (__main__.FaultRunner.test_projection_contract_errors_stop_before_execution) (case='missing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 100, in test_projection_contract_errors_stop_before_execution
+    with self.subTest(case=case), self.assertRaises(f.ConfigError):
+                                  ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ConfigError not raised
+
+======================================================================
+FAIL: test_projection_contract_errors_stop_before_execution (__main__.FaultRunner.test_projection_contract_errors_stop_before_execution) (case='unknown')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 100, in test_projection_contract_errors_stop_before_execution
+    with self.subTest(case=case), self.assertRaises(f.ConfigError):
+                                  ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ConfigError not raised
+
+======================================================================
+FAIL: test_projection_contract_errors_stop_before_execution (__main__.FaultRunner.test_projection_contract_errors_stop_before_execution) (case='unproven')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 100, in test_projection_contract_errors_stop_before_execution
+    with self.subTest(case=case), self.assertRaises(f.ConfigError):
+                                  ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ConfigError not raised
+
+======================================================================
+FAIL: test_projection_contract_errors_stop_before_execution (__main__.FaultRunner.test_projection_contract_errors_stop_before_execution) (case='cycle')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 100, in test_projection_contract_errors_stop_before_execution
+    with self.subTest(case=case), self.assertRaises(f.ConfigError):
+                                  ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ConfigError not raised
+
+======================================================================
+FAIL: test_projection_contract_errors_stop_before_execution (__main__.FaultRunner.test_projection_contract_errors_stop_before_execution) (case='duplicate')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 100, in test_projection_contract_errors_stop_before_execution
+    with self.subTest(case=case), self.assertRaises(f.ConfigError):
+                                  ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ConfigError not raised
+
+======================================================================
+FAIL: test_success_executes_canary_once_before_dependent (__main__.FaultRunner.test_success_executes_canary_once_before_dependent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 59, in test_success_executes_canary_once_before_dependent
+    self.assertEqual(calls,['baseline','canary','dependent','independent'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['baseline', 'dependent', 'canary', 'independent'] != ['baseline', 'canary', 'dependent', 'independent']
+
+First differing element 1:
+'dependent'
+'canary'
+
+- ['baseline', 'dependent', 'canary', 'independent']
+?                          ----------
+
++ ['baseline', 'canary', 'dependent', 'independent']
+?              ++++++++++
+
+
+======================================================================
+FAIL: test_surviving_canary_blocks_without_running_dependent (__main__.FaultRunner.test_surviving_canary_blocks_without_running_dependent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 52, in test_surviving_canary_blocks_without_running_dependent
+    self.assertNotIn('dependent',calls)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: 'dependent' unexpectedly found in ['baseline', 'dependent', 'canary', 'independent']
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.191s
+
+FAILED (failures=21)

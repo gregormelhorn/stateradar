@@ -1,0 +1,26 @@
+{
+  "sha": "a02b0774206b209466313a0b525d2c738fe407eb",
+  "go": "go version go1.27.3 darwin/arm64",
+  "runs": [
+    {
+      "name": "baseline",
+      "exit": 0,
+      "complete": true,
+      "passing": true,
+      "passes": {
+        "Test/BackoffCancel": 10,
+        "Test": 10
+      }
+    },
+    {
+      "name": "omit-addrconn-cancel",
+      "exit": 0,
+      "complete": true,
+      "passing": true,
+      "passes": {
+        "Test/BackoffCancel": 10,
+        "Test": 10
+      }
+    }
+  ]
+}

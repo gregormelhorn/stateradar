@@ -98,13 +98,20 @@ The checker's verdict order, so the reason a mutant is rejected is predictable:
 
 | observation | verdict |
 |---|---|
-| exit 0 | `SURVIVED` |
-| exit ≠ 0, no completion line | `BLOCKED: suite did not run to completion` |
-| exit ≠ 0, completed, no `CELL FAIL` | `BLOCKED: suite reported no cell failure` |
-| exit ≠ 0, completed, declared cell among the reported ones | `KILLED` |
-| exit ≠ 0, completed, declared cell absent | `KILLED (wrong cell)` — a finding |
+| timeout, launch error, missing/malformed/duplicate completion or failure markers | `BLOCKED` |
+| zero cells, wrong declared cell count, inconsistent failure count | `BLOCKED` |
+| exit 0, completed expected cells, no failures | `SURVIVED` |
+| exit 1, completed expected cells, declared cell among reported failures | `KILLED` |
+| exit 1, declared cell absent, or any inconsistent exit/result | `BLOCKED` (wrong cell is never counted as killed) |
 
-Note the last two rows: the declared cell must be **among** the reported cells,
+`fault-mutants.json` must declare a positive `expectedCells`. Both baseline and
+mutant runs must report exactly that many completed representative cells. Keep
+excluded cells explicit in the coverage map; do not lower the count to accept
+partial execution. The component suite owns actual test discovery; the generic
+runner validates its reporting contract. An invalid baseline blocks the whole
+invocation before any mutant runs.
+
+For a valid kill: the declared cell must be **among** the reported cells,
 not the only one. A fault in one branch legitimately breaks several cells — in
 golden-mini, three of four fault mutants report more cells than they declare,
 because about eight implementation branches serve 21 matrix cells. Requiring an
@@ -172,6 +179,7 @@ Write `fault-mutants.json` beside `disposition-matrix.md`:
   "testCommand": ["python3", "tests/test_cell_suite.py", "{analysis_dir}"],
   "workingDirectory": "../..",
   "timeoutSeconds": 5,
+  "expectedCells": 24,
   "mutants": [
     {
       "fault": "F-04",
@@ -215,10 +223,22 @@ and reports `DRIFT`. Write mode regenerates the variant files. A binding
 that needs a projection the config does not declare reports `BLOCKED`.
 Mutants with no binding stay hand-authored and report `UNBOUND`.
 
-Golden-mini derives its `F-01`, `F-02`, and `F-05` variants this way. That
-is a fixture bridge against hand-authored drift. It does not change layer
-ownership: `F-01` and `F-02` stay matrix-level families, `F-05` stays
-implementation-level, and `F-04` stays hand-authored.
+The general fault runner reads `bindings[].requiresProjection` and
+`projections.<name>.provenBy` from this same file. It executes each named canary
+once in a pristine copy before its dependents. Only a completed correct-cell
+kill unlocks them. A surviving or blocked canary makes its dependents `BLOCKED`
+without executing them; unrelated mutants still run. A canary may name itself
+as proof of its own projection: it is the bootstrap probe, not a cached proof.
+Other dependency cycles and missing/unknown canaries are configuration errors.
+
+Every mutant has exactly one verdict: `KILLED`, `SURVIVED`, or `BLOCKED`. The
+summary's `errors` is a diagnostic subset of blocked execution timeouts/launch
+errors, not a fourth category to add to the denominator. Canaries count once.
+See `docs/fault-mutants.md` for migration and reporting details.
+
+Golden-mini derives all six current variants this way. This does not change
+layer ownership: F-01/F-02 stay matrix-level families; F-05 stays
+implementation-level.
 
 ### Step 5 — Run and report
 

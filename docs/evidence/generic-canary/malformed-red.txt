@@ -1,0 +1,14 @@
+F........
+======================================================================
+FAIL: test_bad_canary_evidence_never_unlocks_or_counts_as_kill (__main__.FaultRunner.test_bad_canary_evidence_never_unlocks_or_counts_as_kill) (result=CommandResult(returncode=0, output='CELL FAIL malformed\nCELL SUITE: 2 cells checked, 0 failed\n', duration_seconds=0, timed_out=False, launch_error=None))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_fault_runner.py", line 74, in test_bad_canary_evidence_never_unlocks_or_counts_as_kill
+    self.assertIn('killed=1 survived=0',out)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'killed=1 survived=0' not found in 'BASELINE: OK (cells=2)\nMUT-002 SURVIVED fault=F-09 cell=Idle x Call id=canary target=source.py exit=0 duration=0.000s\nCANARY id=canary: SURVIVED\nMUT-001 BLOCKED id=dependent fault=F-09 cell=Idle x Call canary=canary verdict=SURVIVED; not executed\nMUT-003 KILLED fault=F-09 cell=Idle x Call id=independent target=source.py exit=1 duration=0.000s\nFAULT MUTANTS: FAIL (killed=1 survived=1 errors=0 blocked=1)\n'
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.352s
+
+FAILED (failures=1)

@@ -15,6 +15,9 @@ def cell_verdict(output: str, expected: int | None = None) -> CellVerdict:
         raise ValueError('suite did not run to completion (one CELL SUITE line required)')
     checked, count = map(int,summaries[0])
     cells = re.findall(r'^CELL FAIL (.+? x .+?)\s*$',output,re.M)
+    failure_lines = [line for line in output.splitlines() if line.lstrip().startswith('CELL FAIL')]
+    if len(failure_lines) != len(cells):
+        raise ValueError('malformed cell-failure marker')
     if checked<=0 or (expected is not None and checked!=expected):
         raise ValueError('empty or incomplete cell discovery')
     if count and not cells:

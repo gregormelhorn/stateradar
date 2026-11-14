@@ -4,6 +4,17 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Executed generic canaries and strict fault verdicts.** The general runner
+  reads projection dependencies from `mutant-generation.json`, runs each canary
+  once, and blocks dependents unless its declared cell fails in a complete run.
+  `fault-mutants.json` now requires positive `expectedCells`; existing semaphore
+  and golden-mini configurations declare 34 and 24. Missing/partial results,
+  wrong-cell failures and inconsistent exit/failure counts are BLOCKED, never
+  kills or survivors. Red probes and real subprocess controls cover failures;
+  semaphore remains 5/5 and golden-mini 6/6. The historical addrConn test passes
+  an omitted-cancel overlay; this readiness probe is not a second F-09 binding.
+  See `docs/evidence/generic-canary/README.md`.
+
 - **Finding preservation during final review.** An additive review must retain
   every original finding, ordered step and open question. Corrections and
   supplementary probe bindings are separate and explicit. Observed red cases

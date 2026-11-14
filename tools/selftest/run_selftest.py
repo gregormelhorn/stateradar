@@ -1016,8 +1016,20 @@ def main() -> int:
         cfg = json.loads((mirror / "domain-analysis" / "mini" / "fault-mutants.json").read_text())
         cfg["testCommand"] = ["python3", "-c", "import sys; sys.exit(0)", "{analysis_dir}"]
         (mirror / "domain-analysis" / "mini" / "fault-mutants.json").write_text(json.dumps(cfg))
-        expect("mirroring suite survives F-04 mutant (F-21 blind spot)", True,
-               *fault_check(mirror / "domain-analysis" / "mini"), needle="SURVIVED")
+        expect("empty suite is blocked even with exit zero", True,
+               *fault_check(mirror / "domain-analysis" / "mini"), needle="BLOCKED: baseline")
+        # A real mirroring loop visits every matrix cell but never calls Mini.
+        # Keep this negative control distinct from the now-rejected empty suite.
+        cfg["testCommand"] = ["python3", "-c",
+            "import sys; from pathlib import Path; sys.path.insert(0,'tests'); "
+            "from test_cell_suite import parse_matrix; "
+            "cells=parse_matrix(Path(sys.argv[1])/'disposition-matrix.md'); "
+            "checked=sum(1 for _ in cells.items()); "
+            "print(f'CELL SUITE: {checked} cells checked, 0 failed')", "{analysis_dir}"]
+        (mirror / "domain-analysis" / "mini" / "fault-mutants.json").write_text(json.dumps(cfg))
+        expect("mirroring suite survives F-04 and blocks projection dependents", True,
+               *fault_check(mirror / "domain-analysis" / "mini"),
+               needle="killed=0 survived=4 errors=0 blocked=2")
 
         no_fm = component(tmp, "fault-no-config")
         (no_fm / "domain-analysis" / "mini" / "fault-mutants.json").unlink()
@@ -1071,7 +1083,7 @@ def main() -> int:
         cfg = json.loads((wrong_cell / "domain-analysis" / "mini" / "fault-mutants.json").read_text())
         cfg["mutants"][0]["cell"] = "Idle x M2"
         (wrong_cell / "domain-analysis" / "mini" / "fault-mutants.json").write_text(json.dumps(cfg))
-        expect("fault mutant reports a kill from an undeclared cell", True,
+        expect("fault mutant blocks an undeclared-cell failure", True,
                *fault_check(wrong_cell / "domain-analysis" / "mini"),
                needle="WRONG CELL: declared 'Idle x M2'")
 

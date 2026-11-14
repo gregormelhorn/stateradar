@@ -201,9 +201,13 @@ own hardcoded expectations, not the spec. Vacuous green has nowhere to hide.
 **Fault mutants** (`tools/check_fault_mutants.py`) mutate the *code*, one
 named fault class at a time, and ask whether the suite notices. The classes
 come from Binder's state-machine fault taxonomy plus empirical additions,
-registered as F-01…F-22 in `formats/rules.toml`. Wired today: F-01 missing
-transition, F-02 transfer fault, F-04 sneak path, F-05 corrupt state.
-Results report `KILLED / SURVIVED / ERROR / BLOCKED` — never a bare rate.
+registered as F-01…F-22 in `formats/rules.toml`. Fixture coverage includes
+F-01 missing transition, F-02 transfer fault, F-04 sneak path, F-05 corrupt
+state and F-14 duplication. The semaphore adds a real F-09 cancellation-leak binding.
+Results report `KILLED / SURVIVED / BLOCKED` — never a bare rate. Declared
+projection canaries execute before dependent mutants; incomplete or wrong-cell
+results cannot count as kills. The required `expectedCells` pins the suite's
+nonempty size. [Execution contract and migration](docs/fault-mutants.md).
 
 This is mutation-guided test assessment in the spirit of Meta's ACH work,
 with one structural difference: because each mutant *is* an instance of a
@@ -211,8 +215,9 @@ named class by construction, "is this mutant relevant?" is a label rather
 than a judgment call — and equivalence is decided against the matrix instead
 of by an LLM judge.
 
-Honest status: the implementation mutants are hand-authored per class today.
-Generating them from the fault classes is the next step, not a shipped one.
+Component-local bindings generate the six golden-mini and five semaphore
+variants. F-09 has one real-component slice; the second-component proof remains
+open. [Generic canary evidence and addrConn readiness](docs/evidence/generic-canary/README.md).
 
 ---
 

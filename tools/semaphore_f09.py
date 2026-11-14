@@ -10,8 +10,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-from check_fault_mutants import CommandResult, copy_component, load_config, run_command
-from mutation_verdict import cell_verdict
+from check_fault_mutants import CommandResult, copy_component, load_config, run_command, classify_result
 
 ROOT = Path(__file__).resolve().parents[1]
 ANALYSIS = ROOT / 'examples/weighted-semaphore/domain-analysis/weightedSemaphore'
@@ -20,17 +19,7 @@ CANARY_CELL = 'Acquire_NoWaiters x Release'
 
 
 def classify(result: CommandResult, cell: str, count: int) -> str:
-    if result.timed_out or result.launch_error:
-        return 'BLOCKED'
-    try:
-        verdict = cell_verdict(result.output, count)
-    except ValueError:
-        return 'BLOCKED'
-    if result.returncode == 0 and not verdict.failed:
-        return 'SURVIVED'
-    if result.returncode == 1 and cell in verdict.failed:
-        return 'KILLED'
-    return 'BLOCKED'
+    return classify_result(result, cell, count)[0]
 
 
 def require_canary(verdict: str) -> None:

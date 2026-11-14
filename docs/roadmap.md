@@ -84,6 +84,12 @@ entries and separates the new model-routing plan from shipped capabilities.
    capacity canary gates this comparison; weak-canary survival blocks the
    dependent evaluation. This is one real-component binding, not class-wide
    completion or a second-component proof.
+   Follow-up: [generic canary execution](evidence/generic-canary/README.md)
+   now gates dependencies in the general runner and validates declared suite
+   cardinality plus consistent, completed correct-cell outcomes. Canary results
+   are counted once; wrong-cell failures are only BLOCKED. The pinned addrConn
+   readiness probe passes even with omitted cancellation: a dedicated scoped
+   seam and updated evaluation artifacts are still needed for a second F-09 proof.
    Crashes and unrelated failures cannot count as kills. Four contract limits
    and two queued cells without a supported operator remain explicit exclusions.
 3. **Make disposition rationale machine-readable.** Implemented as an optional
@@ -232,8 +238,8 @@ Kill proofs are now cause-checked rather than exit-code-correlated. A cell
 suite must print `CELL FAIL <state> x <event>` per failing cell and
 `CELL SUITE: <n> cells checked, <m> failed` on completion; without both,
 `check_fault_mutants.py` reports `BLOCKED` instead of `KILLED`, and a kill whose
-declared cell is absent from the reported ones is reported as
-`KILLED (wrong cell)`. This closed a real hollow proof: F-04 once reported its
+declared cell is absent from the reported ones is now reported only as
+`BLOCKED` (the historical `KILLED (wrong cell)` counter was corrected). This closed a real hollow proof: F-04 once reported its
 cell correctly and then crashed on a later one, so a pseudo-mutant carrying no
 fault at all also scored `KILLED`. The contract is documented for future
 components in `prompts/04-testgen.md`. `check_matrix_mutation.py` was left

@@ -1,0 +1,8 @@
+BASELINE: OK (cells=34)
+MUT-004 KILLED fault=F-05 cell=Acquire_NoWaiters x Release id=zero-charges target=semaphore/semaphore.go exit=1 duration=0.811s
+CANARY id=zero-charges: KILLED
+MUT-001 KILLED fault=F-05 cell=Acquire_WaitersPending x UV-ContextOrder id=omit-grant-rollback target=semaphore/semaphore.go exit=1 duration=0.752s
+MUT-002 KILLED fault=F-05 cell=Acquire_WaitersPending x UV-ContextOrder id=omit-selected-rollback target=semaphore/semaphore.go exit=1 duration=0.784s
+MUT-003 KILLED fault=F-04 cell=Acquire_WaitersPending x TryAcquire id=try-bypass target=semaphore/semaphore.go exit=1 duration=0.776s
+MUT-005 KILLED fault=F-09 cell=Acquire_WaitersPending x ContextDone id=omit-cancel-unlink target=semaphore/semaphore.go exit=1 duration=12.781s
+FAULT MUTANTS: OK (killed=5 survived=0 errors=0 blocked=0)

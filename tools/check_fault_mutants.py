@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run declared cell suites against hand-authored fault-class implementation mutants.
+"""Run complete cell suites against fault mutants, gated by executed projection canaries.
 
 Usage: python3 tools/check_fault_mutants.py <analysis-dir>
 """
@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Sequence
 
 from subprocess_text import as_text
+from mutation_verdict import cell_verdict
 
 PLACEHOLDER = "{analysis_dir}"
 DEFAULT_TIMEOUT_SECONDS = 30
@@ -32,6 +33,8 @@ class Config:
     component_root: Path
     rel_analysis: Path
     timeout_seconds: int
+    expected_cells: int | None = None
+    dependencies: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -85,6 +88,10 @@ def load_config(adir: Path) -> tuple[Config, list[Mutant]]:
     if not isinstance(timeout, int) or isinstance(timeout, bool) or timeout <= 0:
         raise ConfigError("timeoutSeconds must be a positive integer")
 
+    expected = raw.get("expectedCells")
+    if not isinstance(expected, int) or isinstance(expected, bool) or expected <= 0:
+        raise ConfigError("expectedCells must be a positive integer")
+
     rel_analysis = config_path.parent.relative_to(component_root)
 
     mutants_raw = raw.get("mutants")
@@ -112,7 +119,64 @@ def load_config(adir: Path) -> tuple[Config, list[Mutant]]:
             cell=entry["cell"],
         ))
 
-    return Config(tuple(command), component_root, rel_analysis, timeout), mutants
+    ids = [m.identifier for m in mutants]
+    if len(ids) != len(set(ids)):
+        raise ConfigError("duplicate mutant id")
+    if any(i in ("baseline", ".", "..") or "/" in i or "\\" in i for i in ids):
+        raise ConfigError("mutant id must be a unique directory name other than baseline")
+    dependencies = projection_dependencies(adir, set(ids))
+    return Config(tuple(command), component_root, rel_analysis, timeout, expected, dependencies), mutants
+
+
+def projection_dependencies(adir: Path, ids: set[str]) -> tuple[tuple[str, str], ...]:
+    """Read the existing generator's projection contract, without duplicating it.
+
+    A canary may require the very projection it proves: that self edge is the
+    bootstrap execution, never a cached assertion. All other cycles are invalid.
+    """
+    path = adir / "mutant-generation.json"
+    if not path.exists():
+        return ()
+    try:
+        raw = json.loads(path.read_text())
+    except (ValueError, OSError) as exc:
+        raise ConfigError(f"invalid mutant-generation.json: {exc}") from exc
+    if not isinstance(raw, dict):
+        raise ConfigError("mutant-generation.json must be an object")
+    projections, bindings = raw.get("projections", {}), raw.get("bindings", [])
+    if not isinstance(projections, dict) or not isinstance(bindings, list):
+        raise ConfigError("projections must be an object and bindings an array")
+    for name, projection in projections.items():
+        if (not isinstance(projection, dict) or
+                not isinstance(projection.get("provenBy"), str) or
+                projection["provenBy"] not in ids):
+            raise ConfigError(f"projection {name}: provenBy must name a declared mutant")
+    dependencies = {}
+    seen = set()
+    for binding in bindings:
+        if not isinstance(binding, dict) or not isinstance(binding.get("id"), str):
+            raise ConfigError("binding must have a string id")
+        identifier = binding["id"]
+        if identifier not in ids or identifier in seen:
+            raise ConfigError(f"unknown or duplicate binding id: {identifier}")
+        seen.add(identifier)
+        if "requiresProjection" not in binding:
+            continue
+        projection = binding["requiresProjection"]
+        if not isinstance(projection, str) or projection not in projections:
+            raise ConfigError(f"binding {identifier}: required projection undeclared")
+        canary = projections[projection]["provenBy"]
+        if canary != identifier:
+            dependencies[identifier] = canary
+    for identifier in dependencies:
+        chain = set()
+        current = identifier
+        while current in dependencies:
+            if current in chain:
+                raise ConfigError(f"cyclic canary dependencies at {current}")
+            chain.add(current)
+            current = dependencies[current]
+    return tuple(dependencies.items())
 
 
 def copy_component(component_root: Path, tmp: Path, name: str) -> Path:
@@ -152,114 +216,93 @@ def _print_verdict(
 ) -> None:
     exit_status = "timeout" if result.timed_out else str(result.returncode)
     print(
-        f"MUT-{number:03d} {verdict} fault={mutant.fault} cell={mutant.cell} "
+        f"MUT-{number:03d} {verdict} fault={mutant.fault} cell={mutant.cell} id={mutant.identifier} "
         f"target={mutant.target} exit={exit_status} duration={result.duration_seconds:.3f}s"
     )
 
 
-COMPLETION_MARKER = " cells checked, "
-
-
-def reported_cells(output: str) -> list[str]:
-    """Cells the suite reported as failing, per the cell-failure contract."""
-    cells = []
-    for line in output.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("CELL FAIL "):
-            cells.append(stripped[len("CELL FAIL "):].strip())
-    return cells
-
-
-def suite_completed(output: str) -> bool:
-    """Whether the suite ran to the end of its cell loop.
-
-    Per-cell 'CELL FAIL' lines are not sufficient evidence on their own. A suite
-    can report one failing cell and then crash on a later one - that is exactly
-    how a hollow kill proof arose in this fixture, and the declared cell was
-    present in the output, so checking the cells alone would not have caught it.
-    The completion line 'CELL SUITE: <n> cells checked, <m> failed' is only
-    reached if the loop finished, which is what separates a clean failure from a
-    crash. The exit code cannot: Python returns 1 for an unhandled exception,
-    and pytest returns non-zero for internal errors too.
-    """
-    return any(
-        line.strip().startswith("CELL SUITE: ") and COMPLETION_MARKER in line
-        for line in output.splitlines()
-    )
+def classify_result(result: CommandResult, cell: str, expected: int) -> tuple[str, str]:
+    """One mutually exclusive verdict; nonzero exits alone never prove a kill."""
+    if result.timed_out or result.launch_error:
+        return "BLOCKED", "execution timeout or launch error"
+    try:
+        verdict = cell_verdict(result.output, expected)
+    except ValueError as exc:
+        return "BLOCKED", str(exc)
+    if result.returncode == 0 and not verdict.failed:
+        return "SURVIVED", "completed suite passed"
+    if result.returncode != 1:
+        return "BLOCKED", "exit code inconsistent with completed behavior verdict"
+    if not verdict.failed:
+        return "BLOCKED", "nonzero exit without failing cells"
+    if cell not in verdict.failed:
+        return "BLOCKED", f"WRONG CELL: declared {cell!r}, suite reported {sorted(verdict.failed)}"
+    return "KILLED", "declared cell failed in completed suite"
 
 
 def run(adir: Path) -> int:
     config, mutants = load_config(adir)
-    killed = survived = errors = blocked = 0
+    assert config.expected_cells is not None  # validated by load_config
+    expected = config.expected_cells
+    dependencies = dict(config.dependencies)
+    by_id = {m.identifier: m for m in mutants}
+    numbers = {m.identifier: n for n, m in enumerate(mutants, 1)}
+    outcomes: dict[str, str] = {}
+    errors = 0  # diagnostic subset of BLOCKED, never an additional mutant verdict
 
     with tempfile.TemporaryDirectory(prefix="fault-mutants-") as raw_tmp:
         tmp = Path(raw_tmp)
         baseline_copy = copy_component(config.component_root, tmp, "baseline")
         baseline = run_command(config, baseline_copy)
-        if baseline.timed_out:
-            print(f"BLOCKED: baseline timeout={config.timeout_seconds}s")
+        if baseline.timed_out or baseline.launch_error or baseline.returncode != 0:
+            print(f"BLOCKED: baseline exit={baseline.returncode} timeout={baseline.timed_out} "
+                  f"launch_error={baseline.launch_error}")
             return 1
-        if baseline.launch_error:
-            print(f"BLOCKED: baseline launch error={baseline.launch_error}")
+        try:
+            baseline_verdict = cell_verdict(baseline.output, expected)
+            if baseline_verdict.failed:
+                raise ValueError("exit 0 with failing cells")
+        except ValueError as exc:
+            print(f"BLOCKED: baseline {exc}")
             return 1
-        if baseline.returncode != 0:
-            print(f"BLOCKED: baseline exit={baseline.returncode}")
-            return 1
-        print("BASELINE: OK")
+        print(f"BASELINE: OK (cells={expected})")
 
-        for number, mutant in enumerate(mutants, start=1):
-            mutant_copy = copy_component(config.component_root, tmp, mutant.identifier)
+        def evaluate(identifier: str) -> str:
+            nonlocal errors
+            if identifier in outcomes:
+                return outcomes[identifier]
+            mutant = by_id[identifier]
+            canary = dependencies.get(identifier)
+            if canary is not None and evaluate(canary) != "KILLED":
+                outcomes[identifier] = "BLOCKED"
+                print(f"MUT-{numbers[identifier]:03d} BLOCKED id={identifier} fault={mutant.fault} "
+                      f"cell={mutant.cell} canary={canary} verdict={outcomes[canary]}; not executed")
+                return "BLOCKED"
+            mutant_copy = copy_component(config.component_root, tmp, identifier)
             target_path = mutant_copy / mutant.target
             variant_path = mutant_copy / mutant.variant
             target_path.write_text(variant_path.read_text(encoding="utf-8"), encoding="utf-8")
             result = run_command(config, mutant_copy)
-            if result.timed_out or result.launch_error:
-                errors += 1
-                _print_verdict(number, mutant, "ERROR", result)
-            elif result.returncode == 0:
-                survived += 1
-                _print_verdict(number, mutant, "SURVIVED", result)
-            else:
-                cells = reported_cells(result.output)
-                if not suite_completed(result.output):
-                    # The suite did not reach the end of its cell loop, so it
-                    # crashed or does not implement the contract. Either way the
-                    # non-zero exit is not evidence that the suite catches the
-                    # fault, and must not count as a kill.
-                    blocked += 1
-                    _print_verdict(number, mutant, "BLOCKED", result)
-                    print("  BLOCKED: suite did not run to completion "
-                          "(no 'CELL SUITE: <n> cells checked, <m> failed' line)")
-                elif not cells:
-                    # Ran to completion but named no failing cell, while exiting
-                    # non-zero. The verdict cannot be attributed to any cell.
-                    blocked += 1
-                    _print_verdict(number, mutant, "BLOCKED", result)
-                    print(f"  BLOCKED: suite reported no cell failure "
-                          f"(expected a 'CELL FAIL {mutant.cell}' line)")
-                elif mutant.cell not in cells:
-                    # The declared cell must be AMONG the reported cells, not
-                    # the only one: a fault in one branch legitimately breaks
-                    # several cells. But it must be there.
-                    killed += 1
-                    blocked += 1
-                    _print_verdict(number, mutant, "KILLED (wrong cell)", result)
-                    print(f"  WRONG CELL: declared {mutant.cell!r}, "
-                          f"suite reported {cells}")
-                else:
-                    killed += 1
-                    _print_verdict(number, mutant, "KILLED", result)
+            verdict, reason = classify_result(result, mutant.cell, expected)
+            outcomes[identifier] = verdict
+            errors += int(result.timed_out or result.launch_error is not None)
+            _print_verdict(numbers[identifier], mutant, verdict, result)
+            if verdict == "BLOCKED":
+                print("  BLOCKED: " + reason)
+            if identifier in dependencies.values():
+                print(f"CANARY id={identifier}: {verdict}")
+            return verdict
 
-    if survived or errors or blocked:
-        print(
-            f"FAULT MUTANTS: FAIL (killed={killed} survived={survived} "
-            f"errors={errors} blocked={blocked})"
-        )
-        return 1
-    print(
-        f"FAULT MUTANTS: OK (killed={killed} survived=0 errors=0 blocked=0)"
-    )
-    return 0
+        for mutant in mutants:
+            evaluate(mutant.identifier)
+
+    killed = sum(v == "KILLED" for v in outcomes.values())
+    survived = sum(v == "SURVIVED" for v in outcomes.values())
+    blocked = sum(v == "BLOCKED" for v in outcomes.values())
+    ok = killed == len(mutants)
+    print(f"FAULT MUTANTS: {'OK' if ok else 'FAIL'} (killed={killed} survived={survived} "
+          f"errors={errors} blocked={blocked})")
+    return 0 if ok else 1
 
 
 def main(argv: Sequence[str] | None = None) -> int:
