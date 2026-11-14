@@ -1,0 +1,64 @@
+EFEE
+======================================================================
+ERROR: test_abort_still_runs_gates_and_records_separate_outcomes (__main__.AccountingTest.test_abort_still_runs_gates_and_records_separate_outcomes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_accounting.py", line 77, in test_abort_still_runs_gates_and_records_separate_outcomes
+    runner.run_checked_arm(root, 'selective', 'task', 'codex', Path(sys.executable), 5,
+    ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'run_sol_pilot' has no attribute 'run_checked_arm'
+
+======================================================================
+ERROR: test_service_failure_retains_usage_without_claiming_final_bill (__main__.AccountingTest.test_service_failure_retains_usage_without_claiming_final_bill)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_accounting.py", line 48, in test_service_failure_retains_usage_without_claiming_final_bill
+    self.run_fake("print(json.dumps({'type':'turn.failed','error':{'message':'service unavailable'}}), flush=True)\nsys.exit(1)")
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_accounting.py", line 41, in run_fake
+    checkpoint = json.loads((root / 'usage-checkpoint.json').read_text())
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.18/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py", line 546, in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.18/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py", line 632, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.18/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpqdwv9ao3/usage-checkpoint.json'
+
+======================================================================
+ERROR: test_timeout_retains_usage (__main__.AccountingTest.test_timeout_retains_usage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_accounting.py", line 51, in test_timeout_retains_usage
+    result = self.run_fake('time.sleep(10)', timeout=1)
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_accounting.py", line 41, in run_fake
+    checkpoint = json.loads((root / 'usage-checkpoint.json').read_text())
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.18/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py", line 546, in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.18/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py", line 632, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.18/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpclrp4mju/usage-checkpoint.json'
+
+======================================================================
+FAIL: test_checkpoint_exists_before_controller_finishes (__main__.AccountingTest.test_checkpoint_exists_before_controller_finishes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_accounting.py", line 69, in test_checkpoint_exists_before_controller_finishes
+    self.assertTrue((root / 'observed-live').exists(), 'usage must be saved while controller is running')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : usage must be saved while controller is running
+
+----------------------------------------------------------------------
+Ran 4 tests in 6.546s
+
+FAILED (failures=1, errors=3)

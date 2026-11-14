@@ -457,3 +457,38 @@ on both components. Sol's Pool artifacts passed local checks after a service
 cutoff, but its final controller cost is missing. Treat the reported dollar
 figures as cost equivalents under the stated credit conversion, and include
 failed attempts and fallback work before claiming savings.
+
+### Usage checkpoints and interrupted pilots
+
+The runner now keeps its fresh Codex session on disk rather than using
+`--ephemeral`. Authentication still uses the existing ChatGPT login and
+`--ignore-user-config`. Prompts and tool transcripts therefore also remain in
+Codex's local session storage. The supervisor reads only the rollout whose ID
+was emitted by its own child; it does not inspect unrelated chat contents.
+
+`usage-history.jsonl` records changed cumulative counters from local
+`event_msg/token_count` records. `usage-checkpoint.json` is atomically replaced
+while the controller runs. This local format was verified with Codex
+0.167.0-alpha.4.1 and is version dependent. Missing, malformed or unavailable
+records yield an explicit unknown/partial result, never a fabricated zero.
+The documented app-server also exposes `thread/tokenUsage/updated`, but this
+implementation retains the existing CLI configuration and tool isolation.
+
+A successful final `turn.completed` supplies `usage.json`; failed runs keep
+only partial checkpoints. An in-flight failed request may have unreported
+cost even when a checkpoint exists. `cost-estimate.json` combines reported
+Codex usage with the settled Flash/Jev ledger, using the dated standard-speed
+rates and an explicit $0.04/credit assumption. Its total stays null when the
+controller usage is incomplete or provider reservations remain outstanding.
+These are rate-based estimates, not account debits. Supervising-chat work and
+human review remain outside the measurement.
+
+The runner now executes artifact gates even after controller failure and
+writes `phase-status.json`. A failed controller with passing artifacts is
+still not a completed run. Recovery starts from the retained evidence and
+failed gates, with human decisions left open. It does not automatically retry
+a service refusal, resume a paid run, or approve domain semantics.
+
+A third pinned fixture is available as `--component semaphore` using the
+`golang.org/x/sync` v0.17.0 checkout. The boundary is one weighted semaphore;
+public API comments supplement the repository README as contract evidence.

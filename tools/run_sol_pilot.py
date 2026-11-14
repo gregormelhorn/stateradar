@@ -14,6 +14,7 @@ import sys
 import time
 
 from local_budget import Budget
+from pilot_accounting import UsageCheckpoint, atomic_json, cost_report
 from pilot_output import compact_output, document_page, selective_output, select_lines
 
 MODEL = 'gpt-6.1-sol'
@@ -22,6 +23,9 @@ GOBREAKER_SHA = '27b8e2cfc65aacd09abb3968455e4b01df4a83fa'
 COMPONENTS = {
     'pool': (POOL_SHA, 'github.com/silenceper/pool', 'channelPool',
              'channelPool, public Pool interface, channel.go and pool.go', 'channel_rpc_test.go'),
+    'semaphore': ('04914c200cb38d4ea960ee6a4c314a028c632991', 'golang.org/x/sync', 'weightedSemaphore',
+                  'one semaphore.Weighted instance; semaphore/semaphore.go including public API contract comments',
+                  'semaphore/semaphore_test.go and semaphore/semaphore_example_test.go'),
     'gobreaker': (GOBREAKER_SHA, 'github.com/sony/gobreaker', 'circuitBreaker',
                   'one CircuitBreaker instance, including the TwoStepCircuitBreaker public wrapper, gobreaker.go',
                   'gobreaker_test.go'),
@@ -35,7 +39,7 @@ TOOL = {
 
 
 def save(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    atomic_json(path, value)
 
 
 def brief(pack, component='pool', routing_variant='routed'):
@@ -202,13 +206,52 @@ def read_usage(events):
     return usage
 
 
+def stop_controller(proc):
+    """Stop descendants before auditing, including command tool process groups."""
+    try:
+        if proc.poll() is None:
+            # Freeze the controller before taking the descendant snapshot.
+            try:
+                os.kill(proc.pid, signal.SIGSTOP)
+                rows = subprocess.run(['ps', '-axo', 'pid=,ppid='], check=True,
+                                      capture_output=True, text=True, timeout=5).stdout.splitlines()
+                children = {}
+                for row in rows:
+                    pid, parent = map(int, row.split())
+                    children.setdefault(parent, []).append(pid)
+                descendants = []
+                pending = [proc.pid]
+                while pending:
+                    parent = pending.pop()
+                    for pid in children.get(parent, []):
+                        try:
+                            os.kill(pid, signal.SIGSTOP)
+                        except ProcessLookupError:
+                            continue
+                        descendants.append(pid)
+                        pending.append(pid)
+                for pid in reversed(descendants):
+                    try:
+                        os.kill(pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+            except ProcessLookupError:
+                pass
+    finally:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        proc.wait()
+
+
 def run_arm(root, arm, prompt, codex, python, timeout, *, replay_server=None, model=MODEL):
     logs = root / 'logs'
     logs.mkdir(exist_ok=True)
     events = root / 'events.jsonl'
     server = replay_server or Path(__file__).resolve()
     args = [
-        codex, '-a', 'never', 'exec', '--ignore-user-config', '--ephemeral',
+        codex, '-a', 'never', 'exec', '--ignore-user-config',
         '--disable', 'shell_tool', '--disable', 'unified_exec',
         '-c', 'forced_login_method="chatgpt"', '-c', 'model_reasoning_effort="medium"',
         '-c', 'web_search="disabled"',
@@ -222,10 +265,23 @@ def run_arm(root, arm, prompt, codex, python, timeout, *, replay_server=None, mo
         '-C', str(root / 'pool'), '-o', str(root / 'final.txt'), '-',
     ]
     start = time.monotonic()
+    checkpoint = UsageCheckpoint(root)
+    usage = None
     try:
         with events.open('w', encoding='utf-8') as stdout, (root / 'codex.stderr').open('w', encoding='utf-8') as stderr:
-            proc = subprocess.run(args, input=prompt, text=True, env=codex_environment(),
-                                  stdout=stdout, stderr=stderr, timeout=timeout)
+            with subprocess.Popen(args, stdin=subprocess.PIPE, text=True, env=codex_environment(),
+                                  stdout=stdout, stderr=stderr, start_new_session=True) as proc:
+                try:
+                    assert proc.stdin is not None
+                    proc.stdin.write(prompt)
+                    proc.stdin.close()
+                    while proc.poll() is None:
+                        checkpoint.poll()
+                        if time.monotonic() - start >= timeout:
+                            raise subprocess.TimeoutExpired(args, timeout)
+                        time.sleep(.2)
+                finally:
+                    stop_controller(proc)
         if proc.returncode:
             raise ValueError(f'Codex exited {proc.returncode}; see {events}')
         usage = read_usage(events)
@@ -235,6 +291,37 @@ def run_arm(root, arm, prompt, codex, python, timeout, *, replay_server=None, mo
     except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
         save(root / 'failure.json', {'error': str(exc), 'elapsed_seconds': round(time.monotonic() - start, 3)})
         raise
+    finally:
+        checkpoint.finish(usage)
+
+
+def run_checked_arm(root, arm, prompt, codex, python, timeout, *, output_name, model=MODEL,
+                    structured=False, smoke=False):
+    controller = 'failed'
+    gates = False
+    save(root / 'phase-status.json', {'controller': 'running', 'artifact_gates': 'pending', 'complete': False})
+    try:
+        run_arm(root, arm, prompt, codex, python, timeout, model=model)
+        controller = 'completed'
+    finally:
+        calls = Budget(root / 'routing.sqlite').calls()
+        save(root / 'routing-cost.json', {'calls': calls, 'charged_microdollars': sum(
+            c['amount_microdollars'] for c in calls if c['status'] == 'settled'),
+            'reserved_microdollars': sum(c['amount_microdollars'] for c in calls if c['status'] == 'reserved')})
+        checkpoint_path = root / 'usage-checkpoint.json'
+        checkpoint = json.loads(checkpoint_path.read_text()) if checkpoint_path.exists() else {}
+        save(root / 'cost-estimate.json', cost_report(checkpoint, json.loads((root / 'routing-cost.json').read_text()), model))
+        try:
+            if not smoke:
+                (root / 'logs').mkdir(exist_ok=True)
+                gates = verify_artifacts(root, python, output_name, structured=structured, catalogue=True)
+        finally:
+            save(root / 'phase-status.json', {
+                'controller': controller, 'artifact_gates': 'not-run' if smoke else ('passed' if gates else 'failed'),
+                'complete': controller == 'completed' and gates,
+                'recovery': 'Review retained artifacts and failed gates; no automatic retry or domain decisions.',
+            })
+    return gates
 
 
 def git(*args, cwd):
@@ -428,7 +515,7 @@ def main():
                            else {'component': args.component, 'component_sha': source_sha})
         save(root / 'experiment.json', {'pack_sha': sha, **source_identity,
                                          'model': args.model, 'effort': 'medium', 'auth': 'chatgpt',
-                                         'sandbox': 'workspace-write',
+                                         'sandbox': 'workspace-write', 'usage_capture': 'persisted-rollout-v1',
                                          'timeout_seconds': args.timeout, 'smoke': args.smoke,
                                          'arm_order': arm_order,
                                          'routing_variant': args.routing_variant,
@@ -461,14 +548,10 @@ def main():
 "go.mod","Does the source name a Go module?","--model","jev-1.14.0"].
 Report the module name and whether the Jev call succeeded.'''
                       if args.smoke else brief(folder / 'pack', args.component, args.routing_variant))
-            try:
-                run_arm(folder, arm, prompt, codex, python, args.timeout, model=args.model)
-            finally:
-                calls = Budget(folder / 'routing.sqlite').calls()
-                save(folder / 'routing-cost.json', {'calls': calls, 'charged_microdollars': sum(
-                    call['amount_microdollars'] for call in calls if call['status'] == 'settled'),
-                    'reserved_microdollars': sum(call['amount_microdollars'] for call in calls
-                                                  if call['status'] == 'reserved')})
+            gates = run_checked_arm(folder, arm, prompt, codex, python, args.timeout,
+                                    output_name=output_name, model=args.model,
+                                    structured=args.routing_variant in ('matrix', 'hybrid'), smoke=args.smoke)
+            calls = Budget(folder / 'routing.sqlite').calls()
             if args.smoke:
                 text = (folder / 'final.txt').read_text(encoding='utf-8')
                 if module not in text or not any(
@@ -476,9 +559,7 @@ Report the module name and whether the Jev call succeeded.'''
                 ):
                     raise ValueError(f'{arm} smoke did not demonstrate the pilot tool and live Jev')
             else:
-                gates_passed.append(verify_artifacts(folder, python, output_name,
-                                                     structured=args.routing_variant in ('matrix', 'hybrid'),
-                                                     catalogue=True))
+                gates_passed.append(gates)
         print(f'{len(arm_order)} Codex session(s) ended. Review usage and artifacts in {root}.')
         return 0 if all(gates_passed) else 1
     except (OSError, KeyError, ValueError, subprocess.SubprocessError) as exc:

@@ -91,13 +91,20 @@ class PilotArtifactsTest(unittest.TestCase):
     def test_model_selection_reaches_codex_command(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            with patch('run_sol_pilot.subprocess.run') as run, patch('run_sol_pilot.read_usage', return_value={}):
-                run.return_value.returncode = 0
+            usage = {'input_tokens': 1000, 'cached_input_tokens': 800, 'output_tokens': 80}
+            with (patch('run_sol_pilot.subprocess.Popen') as run,
+                  patch('run_sol_pilot.os.killpg'),
+                  patch('run_sol_pilot.read_usage', return_value=usage)):
+                proc = run.return_value.__enter__.return_value
+                proc.poll.return_value = 0
+                proc.returncode = 0
                 run_sol_pilot.run_arm(root, 'selective', 'task', 'codex', Path(sys.executable), 10,
                                       model='gpt-6.1-terra')
                 argv = run.call_args.args[0]
                 self.assertEqual(argv[argv.index('--model') + 1], 'gpt-6.1-terra')
                 self.assertEqual(argv[argv.index('--sandbox') + 1], 'workspace-write')
+                self.assertIn('--ignore-user-config', argv)
+                self.assertNotIn('--ephemeral', argv)
 
     def test_catalogue_gate_cannot_skip_missing_fields(self):
         with tempfile.TemporaryDirectory() as directory:

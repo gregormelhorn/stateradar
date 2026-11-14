@@ -1,0 +1,14 @@
+F
+======================================================================
+FAIL: test_timeout_stops_a_command_in_its_own_process_group (__main__.AccountingTest.test_timeout_stops_a_command_in_its_own_process_group)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_accounting.py", line 67, in test_timeout_stops_a_command_in_its_own_process_group
+    self.assertTrue(not state or state.startswith('Z'), 'detached command must not keep writing after audit starts')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : detached command must not keep writing after audit starts
+
+----------------------------------------------------------------------
+Ran 1 test in 1.078s
+
+FAILED (failures=1)
