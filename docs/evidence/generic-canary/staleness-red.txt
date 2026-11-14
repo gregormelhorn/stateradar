@@ -1,0 +1,6 @@
+DSC CHECK: FAIL
+ - stale: watched paths changed since analyzedSha:
+  examples/weighted-semaphore/domain-analysis/weightedSemaphore/fault-mutants.json
+  tools/check_fault_mutants.py
+  tools/mutation_verdict.py
+  tools/semaphore_f09.py

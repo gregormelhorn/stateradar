@@ -79,3 +79,31 @@ REACHABILITY CHECK: OK (2/2 states reachable from 'Acquire_NoWaiters', 0 termina
 ```
 
 **The component is in steady state; the standing instruction governs further changes; a stale manifest calls this prompt again.**
+
+
+## Generic canary reconciliation — 2026-11-15
+
+Refreshed manifest and sidecar to tested source/test commit **1438728f4a656ca5cc4127be0ef2d337adabcd30**.
+The general fault runner is now watched along with the shared verdict parser
+and the semaphore comparison. `expectedCells=34` excludes only the existing
+four contract limits. Canaries execute once before dependent mutants; the
+real weak-suite control blocks F-09 after its capacity canary survives.
+
+No semaphore behavior, owner decision, matrix, test assertion or source digest
+changed. This is an evidence refresh, with no promotion or superseded artifact
+to archive. Citation locations are unchanged (zero refresh edits); the current
+checker revalidates them. All 13 decisions and 52 historical artifacts remain
+intact. Five source mutants and 41 matrix mutants are still killed; the
+contract limits and unsupported queued matrix cells remain explicit.
+
+Observed staleness and full acceptance are retained in
+`docs/evidence/generic-canary/`. The separate historical grpc-go readiness
+check does not change this component or resolve its own historical questions.
+No OPEN semaphore question or implementation deviation was added or resolved.
+
+```text
+DSC CHECK: OK (2 states x 19 events, 38 cells, 11 guard groups)
+REACHABILITY CHECK: OK (2/2 states reachable from 'Acquire_NoWaiters', 0 terminal)
+```
+
+**The component is in steady state; the standing instruction governs further changes; a stale manifest calls this prompt again.**

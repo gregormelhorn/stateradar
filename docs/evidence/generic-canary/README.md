@@ -53,3 +53,11 @@ parent cancellation can mask the omission. A narrow backoff-worker seam with
 the parent kept alive is a proposed next scope. There is no second-component
 F-09 kill claim, no decision on the 16 historical questions, and no new model
 API cost experiment.
+
+The artifact-only reconciliation pins semaphore manifest and sidecar to
+`1438728` (the tested implementation commit) and watches the generic runner.
+`staleness-red.txt` records the expected stale anchor before refresh;
+`reconciled-gates.txt` records the complete final rerun (exit 0). The source
+implementation, all semaphore decisions and both historical benchmark archives
+remain unchanged. The archived addrConn checker failure is a readiness finding,
+not a suppressed active-pack gate.
