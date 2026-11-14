@@ -1,0 +1,26 @@
+id: DR-006
+date: 2026-11-14
+source_question: Q-06
+question: Is each repeated acquisition by the same logical caller independent?
+options: [independent-invocations, caller-deduplication, constrain-repeat-calls]
+decision: independent-invocations
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Gut, übernehmen wir Q-06 so."
+scope: >-
+  Evaluation copy only. Every acquisition invocation is a separate request,
+  including when the same logical caller already has a pending request or
+  holds capacity. A second invocation does not replace, merge with or inherit
+  success from the first. Each successful acquisition adds its own release
+  obligation under DR-005. Repeated acquisitions may self-block if the caller
+  waits for additional capacity before releasing its existing holding.
+  Cancellation does not couple otherwise independent requests, but a shared
+  Context can cancel multiple requests. No caller identity, deduplication or
+  reentrant acquisition guarantee is introduced. Release ownership and exact
+  cancellation orderings remain Q-07 and Q-10 respectively.
+links:
+  - "guarded matrix branch: Acquire"
+  - "guarded matrix branch: UV-RepeatAcquire"
+  - "guarded matrix branch: UV-RepeatTry"
+status: accepted
+implementation_status: pending-contract-and-conformance-follow-up

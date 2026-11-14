@@ -1,8 +1,8 @@
 # Remaining scope
 
 Q-01 (DR-001), Q-03 (DR-002), Q-04 (DR-003) and Q-02 (DR-004) are accepted.
-Q-05 (DR-005) is now accepted; its contract/conformance follow-up is pending.
-Q-06..Q-13 remain OPEN in open-questions.md. The numeric and cleanup decisions
+Q-05 (DR-005) and Q-06 (DR-006) are accepted; their contract/conformance
+follow-up is pending. Q-07..Q-13 remain OPEN in open-questions.md. These decisions
 do not approve the earlier recommendations on caller identity,
 custom Contexts, cancellation races, timing, general FIFO policy or Release(0).
 

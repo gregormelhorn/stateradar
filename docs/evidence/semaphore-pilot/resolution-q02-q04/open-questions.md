@@ -1,4 +1,4 @@
-# Domain question register after Q-01 through Q-05
+# Domain question register after Q-01 through Q-06
 
 Behavior descriptions and citations below refer to the frozen upstream baseline
 `04914c200cb38d4ea960ee6a4c314a028c632991`. DR-001 through DR-004 subsequently change the
@@ -117,7 +117,17 @@ Options: document independence and self-blocking | design caller-level deduplica
 
 Proposed: Document independence and self-blocking — each invocation is a separate request even for the same logical caller.
 
-Status: OPEN — human decision required
+Decision: Each acquisition invocation is independent, whether earlier calls
+from the same logical caller are pending or already hold capacity. No merging,
+replacement, deduplication or reentrant success. Each success adds its own
+release obligation; repeated acquisitions can self-block. A shared Context can
+cancel multiple requests without making them a single acquisition.
+Rationale: proposal rationale adopted (owner-confirmed).
+Owner response: "Gut, übernehmen wir Q-06 so."
+Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
+Status: RESOLVED — DR-006
+Follow-up: contract documentation and focused conformance acceptance pending;
+this interview answer does not claim implementation/test completion.
 
 ## Q-07 — What constitutes a matching Release across callers, and should duplicate or unowned Release be detected while aggregate weight covers it?
 
