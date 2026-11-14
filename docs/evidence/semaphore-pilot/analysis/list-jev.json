@@ -1,0 +1,54 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "88d1eadd6ac199fe42872bf52ff71264235fa51b0c5034be3d099fcfddcf640e",
+  "input_tokens": 2621,
+  "cost_microdollars": 111,
+  "reservation_microdollars": 412,
+  "checks": {
+    "list-68-0": {
+      "kind": "claim",
+      "statement": "Front returns nil when the list is empty.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/container/list/list.go",
+      "line": 68,
+      "fragment": "// Front returns the first element of list l or nil if the list is empty.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "list-131-1": {
+      "kind": "claim",
+      "statement": "Remove unlinks an element belonging to the list.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/container/list/list.go",
+      "line": 131,
+      "fragment": "// Remove removes e from l if e is an element of list l.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "list-149-2": {
+      "kind": "claim",
+      "statement": "PushBack inserts an element at the back and returns it.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/container/list/list.go",
+      "line": 149,
+      "fragment": "// PushBack inserts a new element e with value v at the back of list l and returns e.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    }
+  }
+}

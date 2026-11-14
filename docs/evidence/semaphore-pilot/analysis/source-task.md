@@ -1,0 +1,1 @@
+Step 1 extraction and doctrine sweep. Extract normative sentences, states, external and internal events, transitions, guards, actions, side effects, timeouts, retries, cancellation, failures, invariants, and seam contracts where present. Identify implicit state combinations and unresolved questions using source evidence.

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "O01",
+    "kind": "ordering",
+    "statement": "Fresh capacity two, one unit held and no queue \u2192 a TryAcquire(2) sees insufficient capacity before the holder releases one \u2192 that try returns false without changing the semaphore.",
+    "line": 110,
+    "fragment": "// On success, returns true. On failure, returns false and leaves the semaphore unchanged."
+  },
+  {
+    "id": "O02",
+    "kind": "ordering",
+    "statement": "Fresh capacity one and a standard context whose Done already closed \u2192 caller invokes Acquire(1) before any other interaction \u2192 call returns ctx.Err without taking capacity despite being able to fit.",
+    "line": 36,
+    "fragment": "// are available or ctx is done. On success, returns nil. On failure, returns"
+  },
+  {
+    "id": "O03",
+    "kind": "ordering",
+    "statement": "A request has already returned nil holding a unit \u2192 its context closes before any Release \u2192 the prior successful acquisition still consumes its unit.",
+    "line": 37,
+    "fragment": "// ctx.Err() and leaves the semaphore unchanged."
+  }
+]

@@ -1,0 +1,54 @@
+NAT-01: nonnegative capacity, outstanding charge in [0,size], nonnegative input and queue length, 0 <= head <= size. Integer arithmetic within representable range.
+group G-01 locked entry Done: proven
+group G-02 fast / oversized / enqueue: proven
+group G-03 try: proven
+group G-04 release: proven
+group G-05 notify: proven
+group G-06 cancellation cleanup: proven
+group G-07 canceled head rescan: proven
+group G-08 granted receiver Done: proven
+G-01 locked entry Done boundary probes (NAT-01; free=-1 intentionally outside NAT):
+  {'done': False} => ['continue']
+  {'done': True} => ['reject']
+G-02 fast / oversized / enqueue boundary probes (NAT-01; free=-1 intentionally outside NAT):
+  {'size': 3, 'cur': 1, 'n': 1, 'length': 0} => ['fast']
+  {'size': 3, 'cur': 1, 'n': 1, 'length': 1} => ['enqueue']
+  {'size': 3, 'cur': 1, 'n': 2, 'length': 0} => ['fast']
+  {'size': 3, 'cur': 1, 'n': 2, 'length': 1} => ['enqueue']
+  {'size': 3, 'cur': 1, 'n': 3, 'length': 0} => ['enqueue']
+  {'size': 3, 'cur': 1, 'n': 3, 'length': 1} => ['enqueue']
+  {'size': 3, 'cur': 1, 'n': 4, 'length': 0} => ['oversized']
+  {'size': 3, 'cur': 1, 'n': 4, 'length': 1} => ['oversized']
+G-03 try boundary probes (NAT-01; free=-1 intentionally outside NAT):
+  {'size': 3, 'cur': 1, 'n': 1, 'length': 0} => ['admit']
+  {'size': 3, 'cur': 1, 'n': 1, 'length': 1} => ['false']
+  {'size': 3, 'cur': 1, 'n': 2, 'length': 0} => ['admit']
+  {'size': 3, 'cur': 1, 'n': 2, 'length': 1} => ['false']
+  {'size': 3, 'cur': 1, 'n': 3, 'length': 0} => ['false']
+  {'size': 3, 'cur': 1, 'n': 3, 'length': 1} => ['false']
+G-04 release boundary probes (NAT-01; free=-1 intentionally outside NAT):
+  {'cur': 2, 'n': 1} => ['notify']
+  {'cur': 2, 'n': 2} => ['notify']
+  {'cur': 2, 'n': 3} => ['panic']
+G-05 notify boundary probes (NAT-01; free=-1 intentionally outside NAT):
+  {'size': 3, 'cur': 1, 'head': 1, 'length': 0} => ['empty']
+  {'size': 3, 'cur': 1, 'head': 1, 'length': 1} => ['grant']
+  {'size': 3, 'cur': 1, 'head': 2, 'length': 0} => ['empty']
+  {'size': 3, 'cur': 1, 'head': 2, 'length': 1} => ['grant']
+  {'size': 3, 'cur': 1, 'head': 3, 'length': 0} => ['empty']
+  {'size': 3, 'cur': 1, 'head': 3, 'length': 1} => ['stop']
+G-06 cancellation cleanup boundary probes (NAT-01; free=-1 intentionally outside NAT):
+  {'ready': False} => ['unlink']
+  {'ready': True} => ['rollback']
+G-07 canceled head rescan boundary probes (NAT-01; free=-1 intentionally outside NAT):
+  {'size': 2, 'cur': 3, 'front': False} => ['skip']
+  {'size': 2, 'cur': 3, 'front': True} => ['skip']
+  {'size': 2, 'cur': 2, 'front': False} => ['skip']
+  {'size': 2, 'cur': 2, 'front': True} => ['skip']
+  {'size': 2, 'cur': 1, 'front': False} => ['skip']
+  {'size': 2, 'cur': 1, 'front': True} => ['notify']
+G-08 granted receiver Done boundary probes (NAT-01; free=-1 intentionally outside NAT):
+  {'done': False} => ['success']
+  {'done': True} => ['rollback']
+group G-09 initial queued select: not-formalizable: dynamic-state: Done and ready can both become available before select evaluates; scheduler selects either ready case. G-06 and G-08 prove the sampled subdecisions.
+  Explicit readiness cases: neither waits, Done only cancels, ready only checks Done, both allow either branch. Both cancellation continuations roll back an already granted charge.

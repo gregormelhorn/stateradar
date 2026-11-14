@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "go",
+    "test",
+    "-race",
+    "-timeout=45s",
+    "-overlay",
+    "domain-analysis/weightedSemaphore/_probe/overlay.json",
+    "-run",
+    "^TestPilot",
+    "-count=5",
+    "-v",
+    "./semaphore"
+  ],
+  "exit_code": 0
+}

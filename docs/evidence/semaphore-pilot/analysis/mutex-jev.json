@@ -1,0 +1,39 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "3dec4264678744c4ce15a05ba0cc88e5e8b155f071b71d74eb7ed229ca72c114",
+  "input_tokens": 1084,
+  "cost_microdollars": 46,
+  "reservation_microdollars": 187,
+  "checks": {
+    "mutex-23-0": {
+      "kind": "claim",
+      "statement": "An earlier Mutex.Unlock synchronizes before a later Mutex.Lock.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+      "line": 23,
+      "fragment": "// the n'th call to [Mutex.Unlock] “synchronizes before” the m'th call to [Mutex.Lock]",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "mutex-44-1": {
+      "kind": "claim",
+      "statement": "A call to Lock blocks if the mutex is in use.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+      "line": 44,
+      "fragment": "// blocks until the mutex is available.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    }
+  }
+}

@@ -27,11 +27,21 @@ entries and separates the new model-routing plan from shipped capabilities.
    remains blocked. Capture incremental controller usage across failures
    before broader cost claims; evaluate cheaper controllers in bounded,
    checkable phases including all continuation/fallback work.
+   Follow-up (2026-11-14): [incremental failure accounting](evidence/abort-accounting/README.md)
+   now retains child-specific usage snapshots, marks missing costs explicitly,
+   stops timed-out descendants and audits artifacts after failures. A new
+   completion gate requires a source-pinned manifest and matching sidecar.
 2. **Broaden mutation coverage and validate on real components.** Continue
    [fault-class mutants](#8-ach-style-fault-class-mutants-testgen-upgrade):
    add supported classes and component bindings with observed red probes and
    behavioral kill evidence. Some fault shapes need additional observability;
    fixture results alone do not prove coverage on a consuming component.
+   The [weighted-semaphore pilot](evidence/semaphore-pilot/README.md) now passes
+   seven artifact gates after review, with all five independent controls covered
+   and 13 open questions. Next resolve Q-01 (zero-weight progress), write its DR
+   and to-be expectation, then demonstrate the behavior test red before a fix.
+   No accepted decisions, conformance suite, reconciliation or broader mutation
+   coverage are claimed yet. The observed F-20 case is a candidate for that work.
 3. **Make disposition rationale machine-readable.** Design and validate a
    representation for cell rationale before building checks that depend on it.
    See [machine-readable cell rationale](#10-machine-readable-cell-rationale).

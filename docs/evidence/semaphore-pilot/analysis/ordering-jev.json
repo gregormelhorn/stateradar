@@ -1,0 +1,57 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "c36737088c3a0f8404a813ebd113b472ac819090b241d57f121fe9b40ec2e2af",
+  "input_tokens": 2686,
+  "cost_microdollars": 113,
+  "reservation_microdollars": 479,
+  "checks": {
+    "O01": {
+      "kind": "ordering",
+      "statement": "Fresh capacity two, one unit held and no queue → a TryAcquire(2) sees insufficient capacity before the holder releases one → that try returns false without changing the semaphore.",
+      "source": "semaphore/semaphore.go",
+      "line": 110,
+      "fragment": "// On success, returns true. On failure, returns false and leaves the semaphore unchanged.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.37,
+        "contradicted": 0.01,
+        "unclear": 0.62
+      },
+      "confidence": 0.43,
+      "review_required": true,
+      "ordering_scope_probability": 0.03
+    },
+    "O02": {
+      "kind": "ordering",
+      "statement": "Fresh capacity one and a standard context whose Done already closed → caller invokes Acquire(1) before any other interaction → call returns ctx.Err without taking capacity despite being able to fit.",
+      "source": "semaphore/semaphore.go",
+      "line": 36,
+      "fragment": "// are available or ctx is done. On success, returns nil. On failure, returns",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.24,
+        "contradicted": 0.0,
+        "unclear": 0.76
+      },
+      "confidence": 0.64,
+      "review_required": true,
+      "ordering_scope_probability": 0.03
+    },
+    "O03": {
+      "kind": "ordering",
+      "statement": "A request has already returned nil holding a unit → its context closes before any Release → the prior successful acquisition still consumes its unit.",
+      "source": "semaphore/semaphore.go",
+      "line": 37,
+      "fragment": "// ctx.Err() and leaves the semaphore unchanged.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.03,
+        "contradicted": 0.14,
+        "unclear": 0.83
+      },
+      "confidence": 0.74,
+      "review_required": true,
+      "ordering_scope_probability": 0.02
+    }
+  }
+}

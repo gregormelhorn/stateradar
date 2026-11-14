@@ -1,0 +1,16 @@
+[
+  {
+    "id": "TF01",
+    "kind": "claim",
+    "statement": "The upstream canceled Acquire checks that all two tokens can subsequently be acquired after the holder releases.",
+    "line": 228,
+    "fragment": "if !sem.TryAcquire(2) {"
+  },
+  {
+    "id": "TF02",
+    "kind": "claim",
+    "statement": "Upstream checks for a panic when releasing an unacquired semaphore.",
+    "line": 52,
+    "fragment": "t.Fatal(\"release of an unacquired weighted semaphore did not panic\")"
+  }
+]

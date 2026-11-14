@@ -1,0 +1,1111 @@
+{
+ "formatVersion": "1.0",
+ "component": "weightedSemaphore",
+ "packVersion": "",
+ "analyzedSha": "WORKTREE",
+ "watchPaths": [],
+ "states": [
+  "Acquire_NoWaiters",
+  "Acquire_WaitersPending",
+  "Acquire_EligibleHeadPending"
+ ],
+ "events": [
+  {
+   "id": "NewWeighted",
+   "undesired": false,
+   "gate": "capacity argument",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "Acquire",
+   "undesired": false,
+   "gate": "requested weight, context and semaphore state",
+   "upstream_guards": [
+    "Go Context interface governs stable Done channel and Err after closure. Custom implementations enter directly; no upstream adapter."
+   ]
+  },
+  {
+   "id": "TryAcquire",
+   "undesired": false,
+   "gate": "requested weight and semaphore state",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "Release",
+   "undesired": false,
+   "gate": "released weight and semaphore state",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "ContextDone",
+   "undesired": false,
+   "gate": "request phase, channel state and semaphore state",
+   "upstream_guards": [
+    "Go Context interface governs stable Done channel and Err after closure. Custom implementations enter directly; no upstream adapter."
+   ]
+  },
+  {
+   "id": "Grant",
+   "undesired": false,
+   "gate": "queue front and capacity",
+   "upstream_guards": [
+    "The channel is created and closed within this boundary."
+   ]
+  },
+  {
+   "id": "UV-Abandon",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "UV-Delay",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "UV-Recreate",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "UV-RepeatAcquire",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "UV-RepeatTry",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "UV-RepeatRelease",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "UV-WrongReceiver",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example.",
+    "Only direct public calls can target an unintended instance. A private Ready signal belongs to its own Acquire and cannot route to another receiver. semaphore/semaphore.go:69 (\"ready := make(chan struct{})\"); semaphore/semaphore.go:70 (\"w := waiter{n: n",
+    "ready: ready}\"); semaphore/semaphore.go:158 (\"close(w.ready)\")."
+   ]
+  },
+  {
+   "id": "UV-Weight",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "UV-ForeignContext",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Go Context interface governs stable Done channel and Err after closure. Custom implementations enter directly; no upstream adapter."
+   ]
+  },
+  {
+   "id": "UV-UnownedRelease",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Direct Go method",
+    "no upstream validation required by the boundary. Example caller discipline is local to the example."
+   ]
+  },
+  {
+   "id": "UV-ContextFault",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Go Context interface governs stable Done channel and Err after closure. Custom implementations enter directly; no upstream adapter."
+   ]
+  },
+  {
+   "id": "UV-RepeatedDone",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Go Context interface governs stable Done channel and Err after closure. Custom implementations enter directly; no upstream adapter."
+   ]
+  },
+  {
+   "id": "UV-ContextOrder",
+   "undesired": true,
+   "gate": "same as base operation",
+   "upstream_guards": [
+    "Go Context interface governs stable Done channel and Err after closure. Custom implementations enter directly; no upstream adapter."
+   ]
+  }
+ ],
+ "cells": [
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 22,
+    "fragment": "w := &Weighted{size: n}"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "NewWeighted"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_WaitersPending",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "Acquire"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 113,
+    "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "TryAcquire"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 124,
+    "fragment": "s.cur -= n"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "Release"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 49,
+    "fragment": "return ctx.Err()"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "ContextDone"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 94,
+    "fragment": "case <-ready:"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "Grant"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 39,
+    "fragment": "done := ctx.Done()"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-Abandon"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 22,
+    "fragment": "w := &Weighted{size: n}"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "NewWeighted"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "Acquire"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 113,
+    "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "TryAcquire"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 157,
+    "fragment": "s.waiters.Remove(next)"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "Release"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 85,
+    "fragment": "s.waiters.Remove(elem)"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "ContextDone"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 158,
+    "fragment": "close(w.ready)"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "Grant"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 75,
+    "fragment": "case <-done:"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-Abandon"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 22,
+    "fragment": "w := &Weighted{size: n}"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "NewWeighted"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "Acquire"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 113,
+    "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "TryAcquire"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 129,
+    "fragment": "s.notifyWaiters()"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "Release"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 85,
+    "fragment": "s.waiters.Remove(elem)"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "ContextDone"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 158,
+    "fragment": "close(w.ready)"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "Grant"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 75,
+    "fragment": "case <-done:"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-Abandon"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 65,
+    "fragment": "<-done"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-Delay"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 22,
+    "fragment": "w := &Weighted{size: n}"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-Recreate"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_WaitersPending",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-RepeatAcquire"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 115,
+    "fragment": "s.cur += n"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-RepeatTry"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 124,
+    "fragment": "s.cur -= n"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-RepeatRelease"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 122,
+    "fragment": "func (s *Weighted) Release(n int64) {"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-WrongReceiver"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_WaitersPending",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-Weight"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 75,
+    "fragment": "case <-done:"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-Delay"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 22,
+    "fragment": "w := &Weighted{size: n}"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-Recreate"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-RepeatAcquire"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 113,
+    "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-RepeatTry"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 129,
+    "fragment": "s.notifyWaiters()"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-RepeatRelease"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 122,
+    "fragment": "func (s *Weighted) Release(n int64) {"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-WrongReceiver"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 129,
+    "fragment": "s.notifyWaiters()"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-Weight"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 87,
+    "fragment": "if isFront && s.size > s.cur {"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-Delay"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 22,
+    "fragment": "w := &Weighted{size: n}"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-Recreate"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-RepeatAcquire"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 113,
+    "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-RepeatTry"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 129,
+    "fragment": "s.notifyWaiters()"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-RepeatRelease"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-08",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 122,
+    "fragment": "func (s *Weighted) Release(n int64) {"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-WrongReceiver"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 129,
+    "fragment": "s.notifyWaiters()"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-Weight"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_WaitersPending",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-ForeignContext"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 124,
+    "fragment": "s.cur -= n"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-UnownedRelease"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 39,
+    "fragment": "done := ctx.Done()"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-ContextFault"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 39,
+    "fragment": "done := ctx.Done()"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-RepeatedDone"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 43,
+    "fragment": "case <-done:"
+   },
+   "state": "Acquire_NoWaiters",
+   "event": "UV-ContextOrder"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-ForeignContext"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 129,
+    "fragment": "s.notifyWaiters()"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-UnownedRelease"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 92,
+    "fragment": "return ctx.Err()"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-ContextFault"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 39,
+    "fragment": "done := ctx.Done()"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-RepeatedDone"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 85,
+    "fragment": "s.waiters.Remove(elem)"
+   },
+   "state": "Acquire_WaitersPending",
+   "event": "UV-ContextOrder"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-ForeignContext"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 129,
+    "fragment": "s.notifyWaiters()"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-UnownedRelease"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 92,
+    "fragment": "return ctx.Err()"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-ContextFault"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 39,
+    "fragment": "done := ctx.Done()"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-RepeatedDone"
+  },
+  {
+   "disposition": "transition",
+   "target": "Acquire_NoWaiters",
+   "citation": {
+    "file": "semaphore/semaphore.go",
+    "line": 85,
+    "fragment": "s.waiters.Remove(elem)"
+   },
+   "state": "Acquire_EligibleHeadPending",
+   "event": "UV-ContextOrder"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN",
+   "fault": [
+    "F-20"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN",
+   "fault": [
+    "F-05"
+   ],
+   "trigger": "step-1 extraction"
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN",
+   "fault": [
+    "F-05"
+   ],
+   "trigger": "step-8 verification"
+  },
+  {
+   "id": "Q-05",
+   "status": "OPEN",
+   "fault": [
+    "F-07"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-06",
+   "status": "OPEN",
+   "fault": [
+    "F-14"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-07",
+   "status": "OPEN",
+   "fault": [
+    "F-08"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-08",
+   "status": "OPEN",
+   "fault": [
+    "F-18"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-09",
+   "status": "OPEN",
+   "fault": [
+    "F-11"
+   ],
+   "trigger": "seam-contract sweep"
+  },
+  {
+   "id": "Q-10",
+   "status": "OPEN",
+   "fault": [
+    "F-16"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-11",
+   "status": "OPEN",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-12",
+   "status": "OPEN",
+   "fault": [
+    "F-20"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-13",
+   "status": "OPEN",
+   "fault": [
+    "F-15"
+   ],
+   "trigger": "part-B diff"
+  }
+ ],
+ "behaviouralDrs": [],
+ "docLines": [
+  {
+   "id": "DOC-1",
+   "mapping": "rejected",
+   "target": "Repository issue triage instruction. It applies to reporters using the tracker."
+  },
+  {
+   "id": "DOC-2",
+   "mapping": "invariant",
+   "target": "SYS-01"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "invariant",
+   "target": "SYS-01"
+  },
+  {
+   "id": "DOC-4",
+   "mapping": "structural",
+   "target": "The checked Acquire and TryAcquire columns each model a signed weight argument."
+  },
+  {
+   "id": "DOC-5",
+   "mapping": "invariant",
+   "target": "SYS-02"
+  },
+  {
+   "id": "DOC-6",
+   "mapping": "invariant",
+   "target": "SYS-03"
+  },
+  {
+   "id": "DOC-7",
+   "mapping": "invariant",
+   "target": "SYS-04"
+  },
+  {
+   "id": "DOC-8",
+   "mapping": "invariant",
+   "target": "SYS-05"
+  },
+  {
+   "id": "DOC-9",
+   "mapping": "invariant",
+   "target": "SYS-05"
+  },
+  {
+   "id": "DOC-10",
+   "mapping": "cell",
+   "target": "Acquire_WaitersPending x TryAcquire"
+  },
+  {
+   "id": "DOC-11",
+   "mapping": "invariant",
+   "target": "SYS-06"
+  }
+ ],
+ "pairs": [
+  {
+   "id": "P-01a",
+   "trace": "adversarial-traces.md#P-01a: Acquire then holder Release"
+  },
+  {
+   "id": "P-01b",
+   "trace": "adversarial-traces.md#P-01b: Holder Release then Acquire"
+  },
+  {
+   "id": "P-02a",
+   "trace": "adversarial-traces.md#P-02a: TryAcquire observes before Release"
+  },
+  {
+   "id": "P-02b",
+   "trace": "adversarial-traces.md#P-02b: Release commits before TryAcquire"
+  },
+  {
+   "id": "P-03a",
+   "trace": "adversarial-traces.md#P-03a: Acquire then context closes"
+  },
+  {
+   "id": "P-03b",
+   "trace": "adversarial-traces.md#P-03b: Context closure then Acquire"
+  },
+  {
+   "id": "P-04a",
+   "trace": "adversarial-traces.md#P-04a: Cancel before releasing at handoff"
+  },
+  {
+   "id": "P-04b",
+   "trace": "adversarial-traces.md#P-04b: Release before cancel at handoff"
+  },
+  {
+   "id": "P-05a",
+   "trace": "adversarial-traces.md#P-05a: Second acquisition pending before handoff"
+  },
+  {
+   "id": "P-05b",
+   "trace": "adversarial-traces.md#P-05b: Holder releases before second acquisition"
+  },
+  {
+   "id": "P-06a",
+   "trace": "adversarial-traces.md#P-06a: Second acquisition then cancel first"
+  },
+  {
+   "id": "P-06b",
+   "trace": "adversarial-traces.md#P-06b: Cancel first then second acquisition"
+  },
+  {
+   "id": "P-07a",
+   "trace": "adversarial-traces.md#P-07a: Cancellation removes blocking head at full capacity before release",
+   "reachability": {
+    "source": "Acquire_WaitersPending",
+    "target": "Acquire_EligibleHeadPending",
+    "file": "domain-analysis/weightedSemaphore/_probe/weighted_pilot_test.go",
+    "line": 60,
+    "fragment": "TryAcquire(0) bypassed the queued zero request"
+   }
+  },
+  {
+   "id": "P-07b",
+   "trace": "adversarial-traces.md#P-07b: Release before late cancellation at handoff"
+  },
+  {
+   "id": "P-08a",
+   "trace": "adversarial-traces.md#P-08a: Unowned release before acquisition"
+  },
+  {
+   "id": "P-08b",
+   "trace": "adversarial-traces.md#P-08b: Acquire before unowned release"
+  }
+ ],
+ "guardGroups": [
+  {
+   "id": "G-01",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-02",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-03",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-04",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-05",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-06",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-07",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-08",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-09",
+   "outcome": "not-formalizable",
+   "reason": "dynamic-state: Done and ready can both become available before select evaluates; scheduler selects either ready case. G-06 and G-08 prove the sampled subdecisions."
+  }
+ ],
+ "coverage": {
+  "NewWeighted": {
+   "loss": "UV-Abandon",
+   "delay": "UV-Abandon",
+   "duplication": "UV-Recreate",
+   "out-of-order": "UV-Recreate",
+   "contradiction": "UV-Recreate",
+   "commission": "UV-Recreate",
+   "value": "UV-Weight"
+  },
+  "Acquire": {
+   "loss": "UV-Abandon",
+   "delay": "UV-Delay",
+   "duplication": "UV-RepeatAcquire",
+   "out-of-order": "UV-RepeatAcquire",
+   "contradiction": "UV-RepeatAcquire",
+   "commission": "UV-WrongReceiver",
+   "value": "UV-Weight, UV-ForeignContext"
+  },
+  "TryAcquire": {
+   "loss": "UV-Abandon",
+   "delay": "UV-Delay",
+   "duplication": "UV-RepeatTry",
+   "out-of-order": "UV-RepeatTry",
+   "contradiction": "UV-RepeatTry",
+   "commission": "UV-WrongReceiver",
+   "value": "UV-Weight"
+  },
+  "Release": {
+   "loss": "UV-Abandon",
+   "delay": "UV-Delay",
+   "duplication": "UV-RepeatRelease",
+   "out-of-order": "UV-RepeatRelease",
+   "contradiction": "UV-RepeatRelease",
+   "commission": "UV-UnownedRelease",
+   "value": "UV-WrongReceiver, UV-Weight"
+  },
+  "ContextDone": {
+   "loss": "UV-ContextFault",
+   "delay": "UV-Delay",
+   "duplication": "UV-RepeatedDone",
+   "out-of-order": "UV-ContextOrder",
+   "contradiction": "UV-ContextOrder",
+   "commission": "UV-ContextFault",
+   "value": "UV-ForeignContext, UV-ContextFault"
+  },
+  "Grant": {
+   "loss": "n/a: grant is an inline close; semaphore/semaphore.go:158 (\"close(w.ready)\").",
+   "delay": "n/a: close is inline; receiver scheduling is separate; semaphore/semaphore.go:158 (\"close(w.ready)\").",
+   "duplication": "n/a: head is first unlinked under the lock; semaphore/semaphore.go:157 (\"s.waiters.Remove(next)\").",
+   "out-of-order": "n/a: the notifier reads the current head; semaphore/semaphore.go:141 (\"if s.size-s.cur < w.n {\").",
+   "contradiction": "n/a: notification is called with the mutex held; semaphore/semaphore.go:129 (\"s.notifyWaiters()\").",
+   "commission": "n/a: ready is private; semaphore/semaphore.go:69 (\"ready := make(chan struct{})\").",
+   "value": "n/a: entry and channel are paired; semaphore/semaphore.go:70 (\"w := waiter{n: n, ready: ready}\")."
+  }
+ }
+}

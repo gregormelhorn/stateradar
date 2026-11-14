@@ -1,0 +1,279 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "c36737088c3a0f8404a813ebd113b472ac819090b241d57f121fe9b40ec2e2af",
+  "input_tokens": 4199,
+  "cost_microdollars": 177,
+  "reservation_microdollars": 726,
+  "checks": {
+    "F01": {
+      "kind": "claim",
+      "statement": "Removing a canceled head triggers a rescan only when size exceeds cur, so at full weight there is no rescan.",
+      "source": "semaphore/semaphore.go",
+      "line": 87,
+      "fragment": "if isFront && s.size > s.cur {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.02,
+        "unclear": 0.03
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "F02": {
+      "kind": "claim",
+      "statement": "A zero head fits when free weight equals zero.",
+      "source": "semaphore/semaphore.go",
+      "line": 141,
+      "fragment": "if s.size-s.cur < w.n {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.2,
+        "contradicted": 0.11,
+        "unclear": 0.69
+      },
+      "confidence": 0.53,
+      "review_required": true
+    },
+    "F03": {
+      "kind": "claim",
+      "statement": "For a live Acquire whose fast path failed and weight exceeds size, the call waits only on context cancellation outside the queue.",
+      "source": "semaphore/semaphore.go",
+      "line": 65,
+      "fragment": "<-done",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.8,
+        "contradicted": 0.02,
+        "unclear": 0.18
+      },
+      "confidence": 0.7,
+      "review_required": true
+    },
+    "F04": {
+      "kind": "claim",
+      "statement": "A negative weight admitted through the fast path decreases the aggregate charged weight.",
+      "source": "semaphore/semaphore.go",
+      "line": 57,
+      "fragment": "s.cur += n",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.62,
+        "contradicted": 0.04,
+        "unclear": 0.34
+      },
+      "confidence": 0.43,
+      "review_required": true
+    },
+    "F05": {
+      "kind": "claim",
+      "statement": "Release writes the subtracted value before testing for negative charged weight.",
+      "source": "semaphore/semaphore.go",
+      "line": 124,
+      "fragment": "s.cur -= n",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.02,
+        "unclear": 0.03
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "F06": {
+      "kind": "claim",
+      "statement": "Release unlocks before panicking on negative charged weight, with no restoration.",
+      "source": "semaphore/semaphore.go",
+      "line": 126,
+      "fragment": "s.mu.Unlock()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.74,
+        "contradicted": 0.1,
+        "unclear": 0.16
+      },
+      "confidence": 0.61,
+      "review_required": true
+    },
+    "F07": {
+      "kind": "claim",
+      "statement": "Feasible overlapping Acquire calls allocate separate queue entries without a caller identifier.",
+      "source": "semaphore/semaphore.go",
+      "line": 71,
+      "fragment": "elem := s.waiters.PushBack(w)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.33,
+        "contradicted": 0.02,
+        "unclear": 0.65
+      },
+      "confidence": 0.48,
+      "review_required": true
+    },
+    "F08": {
+      "kind": "claim",
+      "statement": "The context callback Done runs before the semaphore mutex is acquired.",
+      "source": "semaphore/semaphore.go",
+      "line": 39,
+      "fragment": "done := ctx.Done()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.22,
+        "contradicted": 0.02,
+        "unclear": 0.76
+      },
+      "confidence": 0.64,
+      "review_required": true
+    },
+    "F09": {
+      "kind": "claim",
+      "statement": "Queued cancellation calls Context.Err after releasing the mutex.",
+      "source": "semaphore/semaphore.go",
+      "line": 92,
+      "fragment": "return ctx.Err()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.39,
+        "contradicted": 0.09,
+        "unclear": 0.52
+      },
+      "confidence": 0.28,
+      "review_required": true
+    },
+    "F10": {
+      "kind": "claim",
+      "statement": "When cancellation wins the queued select after a ready grant, the weight is subtracted again from the held total and notification runs.",
+      "source": "semaphore/semaphore.go",
+      "line": 81,
+      "fragment": "s.cur -= n",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.59,
+        "contradicted": 0.2,
+        "unclear": 0.21
+      },
+      "confidence": 0.38,
+      "review_required": true
+    },
+    "F11": {
+      "kind": "claim",
+      "statement": "After receiving ready, Acquire checks Done and calls Release if it is closed before returning Err.",
+      "source": "semaphore/semaphore.go",
+      "line": 101,
+      "fragment": "s.Release(n)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F12": {
+      "kind": "claim",
+      "statement": "TryAcquire checks capacity and queue length under a potentially blocking mutex.",
+      "source": "semaphore/semaphore.go",
+      "line": 112,
+      "fragment": "s.mu.Lock()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.62,
+        "contradicted": 0.05,
+        "unclear": 0.33
+      },
+      "confidence": 0.43,
+      "review_required": true
+    },
+    "F13": {
+      "kind": "claim",
+      "statement": "The notifier leaves remaining waiters blocked when the first queued request cannot fit.",
+      "source": "semaphore/semaphore.go",
+      "line": 141,
+      "fragment": "if s.size-s.cur < w.n {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "F14": {
+      "kind": "claim",
+      "statement": "A successful fast-path acquisition need not recheck Done after charging weight.",
+      "source": "semaphore/semaphore.go",
+      "line": 57,
+      "fragment": "s.cur += n",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.81,
+        "contradicted": 0.01,
+        "unclear": 0.18
+      },
+      "confidence": 0.72,
+      "review_required": true
+    },
+    "F15": {
+      "kind": "claim",
+      "statement": "A Release of zero can invoke notification while leaving the aggregate charge unchanged.",
+      "source": "semaphore/semaphore.go",
+      "line": 129,
+      "fragment": "s.notifyWaiters()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.66,
+        "contradicted": 0.01,
+        "unclear": 0.33
+      },
+      "confidence": 0.49,
+      "review_required": true
+    },
+    "F16": {
+      "kind": "claim",
+      "statement": "Release has no caller identity argument and subtracts from the aggregate charge regardless of holder identity.",
+      "source": "semaphore/semaphore.go",
+      "line": 122,
+      "fragment": "func (s *Weighted) Release(n int64) {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.8,
+        "contradicted": 0.0,
+        "unclear": 0.2
+      },
+      "confidence": 0.7,
+      "review_required": true
+    },
+    "F17": {
+      "kind": "claim",
+      "statement": "A notified waiter is removed from the queue before its Ready channel is closed.",
+      "source": "semaphore/semaphore.go",
+      "line": 157,
+      "fragment": "s.waiters.Remove(next)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "F18": {
+      "kind": "claim",
+      "statement": "Acquire samples the supplied Context's Done channel and has no request-identity check.",
+      "source": "semaphore/semaphore.go",
+      "line": 39,
+      "fragment": "done := ctx.Done()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.38,
+        "contradicted": 0.01,
+        "unclear": 0.61
+      },
+      "confidence": 0.42,
+      "review_required": true
+    }
+  }
+}

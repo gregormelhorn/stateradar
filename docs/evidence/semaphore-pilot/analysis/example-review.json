@@ -1,0 +1,455 @@
+{
+  "source": "semaphore/semaphore_example_test.go",
+  "source_sha256": "7e00fd84cb54ed114dbefa225d37a41a5cc228df82eff8a5397644a225660885",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 1112,
+    "output_tokens": 1795,
+    "cost_microdollars": 2488,
+    "reservation_microdollars": 15759
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 5620,
+    "cost_microdollars": 237,
+    "reservation_microdollars": 955,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The example demonstrates limiting the number of goroutines working on parallel tasks using a semaphore.",
+      "line": 16,
+      "fragment": "demonstrates how to use a semaphore to limit the number of",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "The semaphore use mimics a typical worker pool pattern without the need to explicitly shut down idle workers when the work is done.",
+      "line": 19,
+      "fragment": "without",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.68,
+          "contradicted": 0.01,
+          "unclear": 0.31
+        },
+        "confidence": 0.52
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "The context used is context.TODO().",
+      "line": 22,
+      "fragment": "ctx := context.TODO()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "maxWorkers is set to runtime.GOMAXPROCS(0).",
+      "line": 25,
+      "fragment": "maxWorkers = runtime.GOMAXPROCS(0)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "A weighted semaphore is created with capacity int64(maxWorkers).",
+      "line": 26,
+      "fragment": "sem        = semaphore.NewWeighted(int64(maxWorkers))",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "An output slice of 32 ints is allocated.",
+      "line": 27,
+      "fragment": "out        = make([]int, 32)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "The output is computed using up to maxWorkers goroutines at a time.",
+      "line": 30,
+      "fragment": "Compute the output using up to maxWorkers goroutines at a time.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "When maxWorkers goroutines are in flight, Acquire blocks until one of the workers finishes.",
+      "line": 32,
+      "fragment": "When maxWorkers goroutines are in flight, Acquire blocks until one of the",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "Acquire is called with the context and a weight of 1 for each iteration over out.",
+      "line": 34,
+      "fragment": "if err := sem.Acquire(ctx, 1); err != nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.0,
+          "unclear": 0.04
+        },
+        "confidence": 0.94
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "If Acquire returns an error, the code logs a failure message and breaks out of the loop.",
+      "line": 35,
+      "fragment": "log.Printf(\"Failed to acquire semaphore: %v\", err)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.6,
+          "contradicted": 0.01,
+          "unclear": 0.39
+        },
+        "confidence": 0.4
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "If Acquire returns an error, the loop is exited via break.",
+      "line": 36,
+      "fragment": "break",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.8,
+          "contradicted": 0.0,
+          "unclear": 0.2
+        },
+        "confidence": 0.7
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "The worker goroutine defers sem.Release(1).",
+      "line": 40,
+      "fragment": "defer sem.Release(1)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "The worker goroutine writes collatzSteps(i + 1) to out[i].",
+      "line": 41,
+      "fragment": "out[i] = collatzSteps(i + 1)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "A final Acquire of int64(maxWorkers) is used to wait for any remaining workers to finish.",
+      "line": 45,
+      "fragment": "Acquire all of the tokens to wait for any remaining workers to finish.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.92,
+          "contradicted": 0.0,
+          "unclear": 0.08
+        },
+        "confidence": 0.88
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "The final Acquire call can be omitted if the workers are waited for by some other means such as an errgroup.Group.",
+      "line": 47,
+      "fragment": "If you are already waiting for the workers by some other means (such as an",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "If the final Acquire returns an error, the code logs a failure message.",
+      "line": 50,
+      "fragment": "log.Printf(\"Failed to acquire semaphore: %v\", err)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "The output slice is printed after the final Acquire.",
+      "line": 53,
+      "fragment": "fmt.Println(out)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.58,
+          "contradicted": 0.01,
+          "unclear": 0.41
+        },
+        "confidence": 0.37
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "collatzSteps panics on nonpositive input.",
+      "line": 63,
+      "fragment": "panic(\"nonpositive input\")",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C19": {
+      "kind": "claim",
+      "statement": "collatzSteps loops while n > 1, incrementing steps each iteration.",
+      "line": 66,
+      "fragment": "for ; n > 1; steps++ {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C20": {
+      "kind": "claim",
+      "statement": "collatzSteps panics if steps is negative.",
+      "line": 68,
+      "fragment": "panic(\"too many steps\")",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.83,
+          "contradicted": 0.01,
+          "unclear": 0.16
+        },
+        "confidence": 0.74
+      }
+    },
+    "C21": {
+      "kind": "claim",
+      "statement": "If n is even, it is divided by 2 and the loop continues.",
+      "line": 72,
+      "fragment": "n /= 2",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.86,
+          "contradicted": 0.0,
+          "unclear": 0.14
+        },
+        "confidence": 0.79
+      }
+    },
+    "C22": {
+      "kind": "claim",
+      "statement": "collatzSteps panics on overflow when n > (maxInt-1)/3.",
+      "line": 78,
+      "fragment": "panic(\"overflow\")",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.71,
+          "contradicted": 0.01,
+          "unclear": 0.28
+        },
+        "confidence": 0.56
+      }
+    },
+    "C23": {
+      "kind": "claim",
+      "statement": "For odd n, collatzSteps sets n = 3*n + 1.",
+      "line": 80,
+      "fragment": "n = 3*n + 1",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.67,
+          "contradicted": 0.01,
+          "unclear": 0.32
+        },
+        "confidence": 0.5
+      }
+    },
+    "C24": {
+      "kind": "ordering",
+      "statement": "For each index in out, Acquire(ctx, 1) is called before starting the worker goroutine.",
+      "line": 34,
+      "fragment": "if err := sem.Acquire(ctx, 1); err != nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.57,
+          "contradicted": 0.0,
+          "unclear": 0.43
+        },
+        "confidence": 0.35,
+        "ordering_scope_probability": 0.05
+      }
+    },
+    "C25": {
+      "kind": "ordering",
+      "statement": "The worker goroutine defers Release(1), which runs after collatzSteps and the out[i] assignment complete.",
+      "line": 40,
+      "fragment": "defer sem.Release(1)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.73,
+          "contradicted": 0.01,
+          "unclear": 0.26
+        },
+        "confidence": 0.6,
+        "ordering_scope_probability": 0.06
+      }
+    },
+    "C26": {
+      "kind": "ordering",
+      "statement": "The final Acquire(int64(maxWorkers)) is called after the loop over out, before printing out.",
+      "line": 49,
+      "fragment": "if err := sem.Acquire(ctx, int64(maxWorkers)); err != nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.76,
+          "contradicted": 0.0,
+          "unclear": 0.24
+        },
+        "confidence": 0.64,
+        "ordering_scope_probability": 0.05
+      }
+    }
+  },
+  "questions": [
+    "What happens to goroutines already started if Acquire returns an error and the loop breaks? Is there a guarantee they complete before the final Acquire?",
+    "Does the final Acquire(int64(maxWorkers)) succeed only after all previously acquired weights have been released?",
+    "Is the ordering between the worker goroutine writing out[i] and the final fmt.Println(out) guaranteed by the final Acquire, or does it depend on Release being called after the write?",
+    "What is the behavior of sem.Acquire when the context is canceled or has a deadline?",
+    "Is Release(1) guaranteed to be called even if collatzSteps panics inside the goroutine?",
+    "Is it specified whether the final Acquire can deadlock if a previously started worker never releases?",
+    "Is the assignment out[i] = collatzSteps(i + 1) ordered before the deferred Release(1) runs?",
+    "Does the example specify any ordering guarantee between workers writing distinct out[i] entries?",
+    "If Acquire in the loop returns an error, is the final Acquire still guaranteed to wait for remaining workers?",
+    "What error causes Acquire to return, and is that behavior part of this source's contract or only observable through the semaphore package?",
+    "Does the comment on line 32 imply Acquire blocks exactly when maxWorkers tokens are held, or is the exact blocking condition unspecified here?",
+    "Is the defer sem.Release(1) guaranteed to run before the next loop iteration checks the semaphore state, or is that ordering unspecified?"
+  ],
+  "review_required": true
+}

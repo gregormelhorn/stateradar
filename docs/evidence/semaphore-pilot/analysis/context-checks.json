@@ -1,0 +1,51 @@
+[
+  {
+    "id": "context-78-0",
+    "kind": "claim",
+    "statement": "Done reports cancellation with a closed channel.",
+    "line": 78,
+    "fragment": "// Done returns a channel that's closed when work done on behalf of this"
+  },
+  {
+    "id": "context-80-1",
+    "kind": "claim",
+    "statement": "Repeated Done calls return the same value.",
+    "line": 80,
+    "fragment": "// never be canceled. Successive calls to Done return the same value."
+  },
+  {
+    "id": "context-80-2",
+    "kind": "claim",
+    "statement": "Done may be nil when a context cannot be canceled.",
+    "line": 80,
+    "fragment": "// never be canceled. Successive calls to Done return the same value."
+  },
+  {
+    "id": "context-81-3",
+    "kind": "claim",
+    "statement": "The general interface permits Done to close after the cancel function returns.",
+    "line": 81,
+    "fragment": "// The close of the Done channel may happen asynchronously,"
+  },
+  {
+    "id": "context-112-4",
+    "kind": "claim",
+    "statement": "If Done is closed Err gives a non-nil error.",
+    "line": 112,
+    "fragment": "// If Done is closed, Err returns a non-nil error explaining why:"
+  },
+  {
+    "id": "context-115-5",
+    "kind": "claim",
+    "statement": "Successive Err calls return the same non-nil error.",
+    "line": 115,
+    "fragment": "// After Err returns a non-nil error, successive calls to Err return the same error."
+  },
+  {
+    "id": "context-228-6",
+    "kind": "claim",
+    "statement": "Calling a standard CancelFunc more than once has no further effect.",
+    "line": 228,
+    "fragment": "// A CancelFunc tells an operation to abandon its work."
+  }
+]

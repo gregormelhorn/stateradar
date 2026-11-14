@@ -1,0 +1,74 @@
+package semaphore_test
+
+import (
+	"context"
+	"golang.org/x/sync/semaphore"
+	"testing"
+	"time"
+)
+
+// Independent as-is observations; these do not decide the intended contract.
+func TestControlCanceledDoesNotConsume(t *testing.T) {
+	s := semaphore.NewWeighted(2)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := s.Acquire(ctx, 1); err != context.Canceled {
+		t.Fatalf("canceled acquire = %v", err)
+	}
+	if !s.TryAcquire(2) {
+		t.Fatal("canceled call consumed capacity")
+	}
+	s.Release(2)
+}
+func TestControlSecondHeldAcquisitionConsumesAgain(t *testing.T) {
+	s := semaphore.NewWeighted(2)
+	if !s.TryAcquire(1) || !s.TryAcquire(1) {
+		t.Fatal("two acquisitions should independently succeed")
+	}
+	if s.TryAcquire(1) {
+		t.Fatal("third acquisition exceeded capacity")
+	}
+	s.Release(2)
+}
+func TestControlOversizedWaitCanCancelWithoutBlockingOthers(t *testing.T) {
+	s := semaphore.NewWeighted(2)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { done <- s.Acquire(ctx, 3) }()
+	if !s.TryAcquire(2) {
+		t.Fatal("oversized request blocked available capacity")
+	}
+	s.Release(2)
+	cancel()
+	select {
+	case err := <-done:
+		if err != context.Canceled {
+			t.Fatalf("err=%v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("oversized request did not cancel")
+	}
+}
+func TestControlNegativeAcquireChangesCapacity(t *testing.T) {
+	s := semaphore.NewWeighted(1)
+	if !s.TryAcquire(-1) {
+		t.Fatal("observed negative request was not accepted")
+	}
+	if !s.TryAcquire(2) {
+		t.Fatal("observed extra capacity after negative acquisition missing")
+	}
+	s.Release(1)
+}
+func TestControlRecoveredOverReleaseChangesCapacity(t *testing.T) {
+	s := semaphore.NewWeighted(1)
+	panicked := false
+	func() { defer func() { panicked = recover() != nil }(); s.Release(1) }()
+	if !panicked {
+		t.Fatal("expected observed over-release panic")
+	}
+	if !s.TryAcquire(2) {
+		t.Fatal("expected observed extra capacity after recovered panic")
+	}
+	s.Release(1)
+}

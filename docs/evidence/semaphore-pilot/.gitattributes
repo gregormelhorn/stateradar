@@ -1,0 +1,12 @@
+# Preserve literal renderer output and Markdown hard breaks in retained artifacts.
+# Semantic/catalogue checks still require exact content; no global whitespace exception.
+analysis/event-catalogue.md whitespace=-blank-at-eof
+analysis/adversarial-traces.md whitespace=-blank-at-eof
+analysis/summary.md whitespace=-blank-at-eol
+analysis/as-is-validation.md whitespace=-blank-at-eol
+analysis/archive/original-pilot/summary.md whitespace=-blank-at-eol
+# Verbatim public Go contract example includes a leading space before tabs.
+analysis/contracts.md whitespace=-space-before-tab
+analysis/contracts-complete.md whitespace=-space-before-tab
+analysis/part-b-blind.package.md whitespace=-space-before-tab
+analysis/part-b-complete-contracts.package.md whitespace=-space-before-tab

@@ -1,0 +1,39 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "640c2521e2e4393f4ca127e080199aa52ce7b8792d375a8bc5cd0758f8cfd6fc",
+  "input_tokens": 2427,
+  "cost_microdollars": 102,
+  "reservation_microdollars": 363,
+  "checks": {
+    "TF01": {
+      "kind": "claim",
+      "statement": "The upstream canceled Acquire checks that all two tokens can subsequently be acquired after the holder releases.",
+      "source": "semaphore/semaphore_test.go",
+      "line": 228,
+      "fragment": "if !sem.TryAcquire(2) {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.91,
+        "contradicted": 0.01,
+        "unclear": 0.08
+      },
+      "confidence": 0.86,
+      "review_required": true
+    },
+    "TF02": {
+      "kind": "claim",
+      "statement": "Upstream checks for a panic when releasing an unacquired semaphore.",
+      "source": "semaphore/semaphore_test.go",
+      "line": 52,
+      "fragment": "t.Fatal(\"release of an unacquired weighted semaphore did not panic\")",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    }
+  }
+}

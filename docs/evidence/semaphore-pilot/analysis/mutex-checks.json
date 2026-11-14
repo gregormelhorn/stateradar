@@ -1,0 +1,16 @@
+[
+  {
+    "id": "mutex-23-0",
+    "kind": "claim",
+    "statement": "An earlier Mutex.Unlock synchronizes before a later Mutex.Lock.",
+    "line": 23,
+    "fragment": "// the n'th call to [Mutex.Unlock] \u201csynchronizes before\u201d the m'th call to [Mutex.Lock]"
+  },
+  {
+    "id": "mutex-44-1",
+    "kind": "claim",
+    "statement": "A call to Lock blocks if the mutex is in use.",
+    "line": 44,
+    "fragment": "// blocks until the mutex is available."
+  }
+]

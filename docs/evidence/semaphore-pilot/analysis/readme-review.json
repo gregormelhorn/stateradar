@@ -1,0 +1,118 @@
+{
+  "source": "README.md",
+  "source_sha256": "6687bc62f617eb83cd15bab40cf0e40ff0cfa49c2028f983ef7338413c0e7f79",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 452,
+    "output_tokens": 556,
+    "cost_microdollars": 803,
+    "reservation_microdollars": 15249
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 1208,
+    "cost_microdollars": 51,
+    "reservation_microdollars": 212,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The repository provides Go concurrency primitives in addition to those provided by the language and the \"sync\" and \"sync/atomic\" packages.",
+      "line": 5,
+      "fragment": "This repository provides Go concurrency primitives in addition to the",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.79,
+          "contradicted": 0.0,
+          "unclear": 0.21
+        },
+        "confidence": 0.68
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "The repository uses Gerrit for code changes.",
+      "line": 10,
+      "fragment": "This repository uses Gerrit for code changes.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "To learn how to submit changes to this repository, see https://go.dev/doc/contribute.",
+      "line": 11,
+      "fragment": "To learn how to submit changes to this",
+      "citation_check": "citation fragment missing near line 11",
+      "jev": null
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "The git repository is https://go.googlesource.com/sync.",
+      "line": 13,
+      "fragment": "The git repository is https://go.googlesource.com/sync.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "The main issue tracker for the sync repository is located at https://go.dev/issues.",
+      "line": 15,
+      "fragment": "The main issue tracker for the sync repository is located at",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.55,
+          "contradicted": 0.0,
+          "unclear": 0.45
+        },
+        "confidence": 0.33
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "Issues should be prefixed with \"x/sync:\" in the subject line.",
+      "line": 16,
+      "fragment": "Prefix your issue with \"x/sync:\" in the",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    }
+  },
+  "questions": [
+    "What specific concurrency primitives does the repository provide, and what are their behaviours, transitions, guards, timeouts, retries, cancellation, failures, and invariants?",
+    "Lines 5-6 state the repository provides primitives in addition to language and standard packages, but do not enumerate them; what set of primitives is in scope?",
+    "The source specifies Gerrit for code changes and gives a contribution link, but does not state any ordering between reporting an issue and sending a patch; is there a required sequence?",
+    "Line 16 specifies a subject-line prefix for issues but does not state whether it is mandatory or optional, nor what happens if it is omitted.",
+    "Line 15 calls https://go.dev/issues the \"main\" issue tracker but does not define other trackers or when alternative ones apply.",
+    "No seam contracts, internal events, side effects, timeouts, or failure handling for the primitives are described in the source; are these documented elsewhere?"
+  ],
+  "review_required": true
+}

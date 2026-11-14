@@ -1,0 +1,128 @@
+[
+  {
+    "id": "F01",
+    "kind": "claim",
+    "statement": "Removing a canceled head triggers a rescan only when size exceeds cur, so at full weight there is no rescan.",
+    "line": 87,
+    "fragment": "if isFront && s.size > s.cur {"
+  },
+  {
+    "id": "F02",
+    "kind": "claim",
+    "statement": "A zero head fits when free weight equals zero.",
+    "line": 141,
+    "fragment": "if s.size-s.cur < w.n {"
+  },
+  {
+    "id": "F03",
+    "kind": "claim",
+    "statement": "For a live Acquire whose fast path failed and weight exceeds size, the call waits only on context cancellation outside the queue.",
+    "line": 65,
+    "fragment": "<-done"
+  },
+  {
+    "id": "F04",
+    "kind": "claim",
+    "statement": "A negative weight admitted through the fast path decreases the aggregate charged weight.",
+    "line": 57,
+    "fragment": "s.cur += n"
+  },
+  {
+    "id": "F05",
+    "kind": "claim",
+    "statement": "Release writes the subtracted value before testing for negative charged weight.",
+    "line": 124,
+    "fragment": "s.cur -= n"
+  },
+  {
+    "id": "F06",
+    "kind": "claim",
+    "statement": "Release unlocks before panicking on negative charged weight, with no restoration.",
+    "line": 126,
+    "fragment": "s.mu.Unlock()"
+  },
+  {
+    "id": "F07",
+    "kind": "claim",
+    "statement": "Feasible overlapping Acquire calls allocate separate queue entries without a caller identifier.",
+    "line": 71,
+    "fragment": "elem := s.waiters.PushBack(w)"
+  },
+  {
+    "id": "F08",
+    "kind": "claim",
+    "statement": "The context callback Done runs before the semaphore mutex is acquired.",
+    "line": 39,
+    "fragment": "done := ctx.Done()"
+  },
+  {
+    "id": "F09",
+    "kind": "claim",
+    "statement": "Queued cancellation calls Context.Err after releasing the mutex.",
+    "line": 92,
+    "fragment": "return ctx.Err()"
+  },
+  {
+    "id": "F10",
+    "kind": "claim",
+    "statement": "When cancellation wins the queued select after a ready grant, the weight is subtracted again from the held total and notification runs.",
+    "line": 81,
+    "fragment": "s.cur -= n"
+  },
+  {
+    "id": "F11",
+    "kind": "claim",
+    "statement": "After receiving ready, Acquire checks Done and calls Release if it is closed before returning Err.",
+    "line": 101,
+    "fragment": "s.Release(n)"
+  },
+  {
+    "id": "F12",
+    "kind": "claim",
+    "statement": "TryAcquire checks capacity and queue length under a potentially blocking mutex.",
+    "line": 112,
+    "fragment": "s.mu.Lock()"
+  },
+  {
+    "id": "F13",
+    "kind": "claim",
+    "statement": "The notifier leaves remaining waiters blocked when the first queued request cannot fit.",
+    "line": 141,
+    "fragment": "if s.size-s.cur < w.n {"
+  },
+  {
+    "id": "F14",
+    "kind": "claim",
+    "statement": "A successful fast-path acquisition need not recheck Done after charging weight.",
+    "line": 57,
+    "fragment": "s.cur += n"
+  },
+  {
+    "id": "F15",
+    "kind": "claim",
+    "statement": "A Release of zero can invoke notification while leaving the aggregate charge unchanged.",
+    "line": 129,
+    "fragment": "s.notifyWaiters()"
+  },
+  {
+    "id": "F16",
+    "kind": "claim",
+    "statement": "Release has no caller identity argument and subtracts from the aggregate charge regardless of holder identity.",
+    "line": 122,
+    "fragment": "func (s *Weighted) Release(n int64) {"
+  },
+  {
+    "id": "F17",
+    "kind": "claim",
+    "statement": "A notified waiter is removed from the queue before its Ready channel is closed.",
+    "line": 157,
+    "fragment": "s.waiters.Remove(next)"
+  },
+  {
+    "id": "F18",
+    "kind": "claim",
+    "statement": "Acquire samples the supplied Context's Done channel and has no request-identity check.",
+    "line": 39,
+    "fragment": "done := ctx.Done()"
+  }
+]

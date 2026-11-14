@@ -1,0 +1,338 @@
+{
+  "source": "semaphore/semaphore_test.go",
+  "source_sha256": "640c2521e2e4393f4ca127e080199aa52ce7b8792d375a8bc5cd0758f8cfd6fc",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 2731,
+    "output_tokens": 1511,
+    "cost_microdollars": 2633,
+    "reservation_microdollars": 17076
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 5125,
+    "cost_microdollars": 216,
+    "reservation_microdollars": 834,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "Acquire with a context takes a weighted number of tokens from the semaphore.",
+      "line": 23,
+      "fragment": "sem.Acquire(context.Background(), n)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.9,
+          "contradicted": 0.0,
+          "unclear": 0.1
+        },
+        "confidence": 0.85
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "Release returns a weighted number of tokens to the semaphore after acquisition.",
+      "line": 25,
+      "fragment": "sem.Release(n)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.67,
+          "contradicted": 0.0,
+          "unclear": 0.33
+        },
+        "confidence": 0.5
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "Releasing an unacquired weighted semaphore causes a panic.",
+      "line": 52,
+      "fragment": "release of an unacquired weighted semaphore did not panic",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.88,
+          "contradicted": 0.06,
+          "unclear": 0.06
+        },
+        "confidence": 0.82
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "TryAcquire returns a bool indicating whether acquisition succeeded.",
+      "line": 66,
+      "fragment": "sem.TryAcquire(1)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.72,
+          "contradicted": 0.0,
+          "unclear": 0.28
+        },
+        "confidence": 0.58
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "A weighted semaphore created with capacity 2 permits two successful TryAcquire(1) calls to be observed as one true and one false while one token is held.",
+      "line": 75,
+      "fragment": "want := []bool{true, false, true, false}",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.83,
+          "contradicted": 0.04,
+          "unclear": 0.13
+        },
+        "confidence": 0.74
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "TryAcquire(1) succeeds after Release(2) when the semaphore had capacity 2.",
+      "line": 71,
+      "fragment": "tries = append(tries, sem.TryAcquire(1))",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.54,
+          "contradicted": 0.01,
+          "unclear": 0.45
+        },
+        "confidence": 0.31
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "Acquire returns nil on success and a non-nil error on failure, as tested via comparison to nil.",
+      "line": 91,
+      "fragment": "return sem.Acquire(ctx, n) == nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "An Acquire that cannot be satisfied within a 10ms timeout returns a non-nil error, observed as false in the tryAcquire helper.",
+      "line": 89,
+      "fragment": "context.WithTimeout(ctx, 10*time.Millisecond)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.41,
+          "contradicted": 0.01,
+          "unclear": 0.58
+        },
+        "confidence": 0.37
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "An Acquire for more tokens than the semaphore's capacity does not block other Acquire(1) calls from succeeding.",
+      "line": 121,
+      "fragment": "go sem.Acquire(ctx, n+1)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.01,
+          "unclear": 0.12
+        },
+        "confidence": 0.8
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "Acquire(_, n+1) is expected to remain pending while Acquire(_, 1) calls complete successfully.",
+      "line": 136,
+      "fragment": "failed to AcquireCtx(_, 1) with AcquireCtx(_, %v) pending",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.02,
+          "unclear": 0.03
+        },
+        "confidence": 0.92
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "A large Acquire should not starve indefinitely; the test times out if it starves.",
+      "line": 140,
+      "fragment": "TestLargeAcquireDoesntStarve times out if a large call to Acquire starves.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.89,
+          "contradicted": 0.08,
+          "unclear": 0.03
+        },
+        "confidence": 0.83
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "Concurrent Release(1) and Acquire(ctx, 1) operations may be executed repeatedly by goroutines holding one token.",
+      "line": 161,
+      "fragment": "sem.Release(1)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.6,
+          "contradicted": 0.0,
+          "unclear": 0.4
+        },
+        "confidence": 0.4
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "An Acquire(_, 10) blocked by held tokens is expected to eventually succeed after being unblocked along with an Acquire(_, 1), in either order.",
+      "line": 194,
+      "fragment": "Both Acquire calls should unblock and return, in either order.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "An Acquire whose context is canceled before enough tokens become available must fail.",
+      "line": 221,
+      "fragment": "this Acquire must fail",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "An Acquire with a canceled context returns the error context.Canceled.",
+      "line": 222,
+      "fragment": "err != context.Canceled",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.91,
+          "contradicted": 0.01,
+          "unclear": 0.08
+        },
+        "confidence": 0.86
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "After a canceled Acquire(_, 2) and the other goroutine's release, the semaphore must contain two available tokens.",
+      "line": 225,
+      "fragment": "There must always be two tokens in the semaphore",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "TryAcquire(2) succeeds after a canceled Acquire has returned.",
+      "line": 228,
+      "fragment": "if !sem.TryAcquire(2) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.85,
+          "contradicted": 0.02,
+          "unclear": 0.13
+        },
+        "confidence": 0.77
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "Acquire with an already-done context returns context.Canceled even when it would not need to block.",
+      "line": 234,
+      "fragment": "if err := sem.Acquire(ctx, 1); err != context.Canceled {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C19": {
+      "kind": "claim",
+      "statement": "A canceled Acquire does not consume tokens from the semaphore.",
+      "line": 228,
+      "fragment": "if !sem.TryAcquire(2) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.13,
+          "contradicted": 0.01,
+          "unclear": 0.86
+        },
+        "confidence": 0.79
+      }
+    }
+  },
+  "questions": [
+    "What is the exact boolean capacity semantics of TryAcquire when multiple tokens are requested and insufficient tokens remain (source only shows TryAcquire(1) and TryAcquire(2) at specific points)?",
+    "Does Release block, panic, or behave otherwise if the released weight exceeds the semaphore's capacity, or if the semaphore is over-released with multiple calls?",
+    "What is the precise ordering between a canceled Acquire returning and a concurrent Release unblocking other waiters; the source says 'in either order' but does not define the ordering for the canceled case.",
+    "How does the semaphore decide which blocked Acquire proceeds when multiple waiters with different weights are pending?",
+    "What error is returned by Acquire when the context deadline is exceeded rather than canceled (the helper only checks non-nil, not which error)?",
+    "Does Acquire with an already-done context always return context.Canceled, and is that guaranteed even before any state check, per lines 231-236?",
+    "What happens to tokens held by a goroutine whose Acquire succeeded but whose context is subsequently canceled; the source does not address post-acquisition cancellation.",
+    "Is TryAcquire guaranteed not to block, or is that only implied by test usage?",
+    "What is the ordering guarantee of Acquire(n+1) versus Acquire(1) calls when n+1 exceeds capacity — line 121 shows goroutine launch but no explicit ordering of pending vs. completing calls.",
+    "Does Release(2) after holding 1 token return the semaphore to full capacity in all cases, or is that only asserted for the specific test scenario?"
+  ],
+  "review_required": true
+}
