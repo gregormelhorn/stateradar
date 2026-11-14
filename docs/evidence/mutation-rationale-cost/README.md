@@ -51,5 +51,8 @@ python tools/check_fault_mutants.py examples/weighted-semaphore/domain-analysis/
 The shell commands are retained in `pack-gates-command.txt`. Outputs are in
 `pack-gates.txt`, `accounting-tests.txt`, `decision-gates.txt`, `model-gates.txt`
 and the named mutation/rationale logs. CI runs the same suites directly.
-Source/test commit and reconciliation evidence will be recorded after freezing.
+Source/test commit: `9b3723e`. Its staleness signal is retained in
+`source-commit-stale.txt`. The artifact-only refresh pins that commit and reruns
+full model, decision and pack acceptance in `reconciled-*.txt`, all exit 0.
+The current model checker verifies 232 structured citation occurrences.
 The live comparison follows the predeclared [protocol](protocol.md).

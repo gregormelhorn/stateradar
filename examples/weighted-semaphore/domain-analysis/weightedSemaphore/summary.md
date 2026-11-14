@@ -22,3 +22,30 @@ REACHABILITY CHECK: OK (2/2 states reachable from 'Acquire_NoWaiters', 0 termina
 Questions remaining OPEN: **none**. Open implementation deviations: **zero**. The four contract limits are documented coverage exclusions, not passed behavioral tests or newly resolved questions. The matrix is a guarded abstraction; finite tests do not establish every scheduler interleaving or a fixed latency guarantee.
 
 **The component is in steady state; the standing instruction governs further changes; a stale manifest calls this prompt again.**
+
+
+## Mutation and rationale reconciliation — 2026-11-14
+
+Refreshed the manifest and sidecar to source/test commit **9b3723e4c7f8778bc8c2eb25bc9bed0b0dfe2dda**.
+This is an evidence refresh of the existing as-is model: no new behavior,
+decision or diagram promotion. No artifact became superseded, so the prior
+archive remains unchanged. All 13 decisions and 52 historical artifacts remain
+intact. Test-fragment citations affected by the two added representative
+scenarios were re-resolved by exact content; no blanket offset was used.
+The current checker verifies 232 structured citation occurrences, including
+38 cell reasons with accepted decision evidence and the standard CancelFunc
+callee guarantee. The earlier count of 193 describes the prior reconciliation.
+
+The committed-source staleness signal was observed before refreshing. Full
+current-model, decision, pack, mutation and accounting acceptance is retained
+in `docs/evidence/mutation-rationale-cost/`. Generic matrix mutation now kills
+41 supported changes; source mutation kills four named faults. Four contract
+limits and two queued cells without supported matrix operators remain outside
+that mutation denominator. No OPEN question or implementation deviation remains.
+
+```text
+DSC CHECK: OK (2 states x 19 events, 38 cells, 11 guard groups)
+REACHABILITY CHECK: OK (2/2 states reachable from 'Acquire_NoWaiters', 0 terminal)
+```
+
+**The component is in steady state; the standing instruction governs further changes; a stale manifest calls this prompt again.**
