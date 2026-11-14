@@ -316,14 +316,22 @@ For targeted evidence, use the command tool with
 `["read-log", "012", "rows", "GetAgain"]`,
 `["read-log", "012", "lines", "20", "45"]`, or
 `["read-log", "012", "find", "generation"]`.
-Append `.stderr` to the log ID to select stderr.
+Append `.stderr` to the log ID to select stderr. Every command result carries
+`line_counts` for the retained streams. A line range may end beyond EOF and
+returns the available lines; its start must exist and its requested width
+must not exceed 100 lines. The response includes the actual total line count.
 
 Use `--output-mode standard` or `--output-mode compact` for one run in
 the corresponding comparison format. Use `--output-mode compare` for
 the standard/compact pair. `--compact-first` can be used alone as
 shorthand for the pair in reverse order.
 
-## Hybrid pilot
+## Structured matrix and hybrid pilots
+
+Use `--routing-variant routed` for standard routing. The `matrix` variant
+keeps that routing and adds the structured matrix workflow and its two
+postflight gates. The `hybrid` variant additionally asks Flash for concurrent
+schedules. All three use the same selective output by default.
 
 Use `--routing-variant hybrid` with the Codex runner. Flash proposes
 bounded concurrent schedules against one implementation file per call.
@@ -337,7 +345,7 @@ python3 tools/local_models.py --ledger /tmp/pilot.sqlite flash-windows \
 ```
 
 The full run retains the raw provider answer and the candidate review.
-Codex writes the matrix fields and uses `tools/hybrid_pilot.py` to render
+In both `matrix` and `hybrid`, Codex writes the matrix fields and uses `tools/hybrid_pilot.py` to render
 them. The renderer checks totality, vocabulary, question IDs, source
 fragments and round trips through the sidecar parser. The runner checks
 matrix identity and regenerates the sidecar before running the five pack

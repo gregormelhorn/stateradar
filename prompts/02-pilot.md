@@ -1,8 +1,10 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.27.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.28.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.28 — separate the matrix renderer from the optional Flash schedule sweep
+  so each can be evaluated with the same routing and validation workflow.
 * v1.27 — add the optional hybrid variant with cited Flash schedule
   proposals and deterministic rendering of the reviewed matrix.
 * v1.26 — inspect interleavings inside operations, and validate each
@@ -201,8 +203,16 @@ later invocation or input does. Analyze below-capacity and at-capacity
 separately whenever the code branches on capacity. Where relevant, verify
 claims against Jev in the existing Step 8 batches.
 
-For Step 4 in this variant, write `matrix-fields.json` rather than writing
-a Markdown grid. The object has strings `abstraction`, state names
+Then use the structured matrix workflow below.
+
+#### Structured matrix workflow for `matrix` and `hybrid`
+
+Use this workflow only when the run brief names `routing variant: matrix`
+or `routing variant: hybrid`. The `matrix` variant follows normal routed
+Step 1, Jev verification, blind Part B and all pilot steps. The `hybrid`
+variant also performs the Flash schedule sweep above.
+
+For Step 4, write `matrix-fields.json`. The object has strings `abstraction`, state names
 `states` (initial first), event IDs `events`, optional `terminal` state
 names and optional single-line `guard_notes`. Arrays of IDs use a single
 token per name. Its `cells` array has one object for every state/event
@@ -221,8 +231,8 @@ example, a cell can be written as:
 
 Generate the matrix with `python3 ../pack/tools/hybrid_pilot.py <output-dir>/matrix-fields.json <output-dir>/disposition-matrix.md`.
 Run the usual gates. Correct the fields and regenerate the matrix and
-sidecar when a gate fails. Keep structured fields, checked proposals,
-their raw outputs, and all gate and probe results in the run.
+sidecar when a gate fails. Keep structured fields and all gate and probe
+results in the run. In hybrid, also retain checked proposals and their raw outputs.
 
 ### Step 0 — Scope statement
 

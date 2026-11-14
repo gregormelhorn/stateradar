@@ -62,6 +62,13 @@ Run brief for the benchmark:
   until it is null. For a specific piece of evidence, use the read_more argv
   prefix with function NAME, rows KEY [KEY ...], find LITERAL, or lines START END
   (up to 100 lines). Append .stderr to the log ID to read stderr.
+- Command results include line_counts for both full streams. A lines request
+  ending beyond EOF returns the available lines. Use those counts for exact ranges.
+- Routing JSON uses objects keyed by ID for draft-verify claims and jev-batch
+  checks. Iterate their values when reading the returned judgments.
+- Keep Go probe sources under an underscore-prefixed directory such as _probe
+  and use a Go overlay to inject them into the original package. This keeps
+  recursive upstream test discovery from compiling the probes as a separate package.
 - Stop with a summary of findings and executed checks. Domain questions stay open.
 '''
 
@@ -89,6 +96,7 @@ def command_result(root, arm, argv, sequence, python):
 
 def format_result(name, log, stdout, stderr, code, arm):
     result = {'exit_code': code, 'stdout': stdout, 'stderr': stderr, 'log': log}
+    result['line_counts'] = {'stdout': len(stdout.splitlines()), 'stderr': len(stderr.splitlines())}
     continuations = {}
     for stream, output in (('stdout', stdout), ('stderr', stderr)):
         if arm == 'compact':
@@ -370,8 +378,8 @@ def main():
     parser.add_argument('--timeout', type=int, default=2400, help='wall-clock seconds per arm')
     parser.add_argument('--output-mode', choices=('selective', 'standard', 'compact', 'compare'),
                         help='selective (default), full standard, compact, or compare standard and compact')
-    parser.add_argument('--routing-variant', choices=('flash-writes', 'routed', 'hybrid'), default='flash-writes',
-                        help='Flash bulk drafting (default), standard routing or hybrid with structured matrix')
+    parser.add_argument('--routing-variant', choices=('flash-writes', 'routed', 'matrix', 'hybrid'), default='flash-writes',
+                        help='Flash bulk drafting (default), routed, routed with matrix generator, or hybrid')
     parser.add_argument('--compact-first', action='store_true', help='compare with compact before standard')
     parser.add_argument('--smoke', action='store_true', help='verify selected output modes with a small live command')
     args = parser.parse_args()
@@ -464,7 +472,7 @@ Report the module name and whether the Jev call succeeded.'''
                     raise ValueError(f'{arm} smoke did not demonstrate the pilot tool and live Jev')
             else:
                 gates_passed.append(verify_artifacts(folder, python, output_name,
-                                                     structured=args.routing_variant == 'hybrid'))
+                                                     structured=args.routing_variant in ('matrix', 'hybrid')))
         print(f'{len(arm_order)} Codex session(s) ended. Review usage and artifacts in {root}.')
         return 0 if all(gates_passed) else 1
     except (OSError, KeyError, ValueError, subprocess.SubprocessError) as exc:

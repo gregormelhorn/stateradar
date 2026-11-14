@@ -124,9 +124,9 @@ def select_lines(output, mode, args):
     lines = output.splitlines()
     if mode == 'lines' and len(args) == 2:
         start, end = map(int, args)
-        if not 1 <= start <= end <= len(lines) or end - start >= 100:
-            raise ValueError('line range must contain up to 100 valid lines')
-        indices = list(range(start - 1, end))
+        if not 1 <= start <= end or start > len(lines) or end - start >= 100:
+            raise ValueError(f'line range must start within 1..{len(lines)} and request at most 100 lines')
+        indices = list(range(start - 1, min(end, len(lines))))
     elif mode == 'find' and len(args) == 1 and args[0]:
         indices = [i for i, line in enumerate(lines) if args[0].casefold() in line.casefold()]
     elif mode == 'rows' and args:

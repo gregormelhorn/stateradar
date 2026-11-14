@@ -8,10 +8,37 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from run_sol_pilot import brief, command_result, codex_environment, read_log, read_usage, serve_tools
+from run_sol_pilot import brief, command_result, codex_environment, read_log, read_usage, serve_tools, verify_artifacts
 
 
 class SolPilotTest(unittest.TestCase):
+    def test_short_log_range_returns_available_lines_and_reports_bounds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            full = ''.join(f'line {i}\n' for i in range(1, 53))
+            with patch('run_sol_pilot.execute', return_value=(1, full, '')):
+                result = command_result(root, 'selective', ['go', 'test'], 1, Path(sys.executable))
+            self.assertEqual(result['line_counts'], {'stdout': 52, 'stderr': 0})
+            selected = read_log(root, ['read-log', '001', 'lines', '1', '90'])
+            self.assertEqual(selected['lines'][-1], (52, 'line 52'))
+            self.assertEqual(selected['total_lines'], 52)
+            self.assertFalse(selected['truncated'])
+            with self.assertRaisesRegex(ValueError, '52'):
+                read_log(root, ['read-log', '001', 'lines', '60', '90'])
+            with self.assertRaises(ValueError):
+                read_log(root, ['read-log', '001', 'lines', '1', '101'])
+
+    def test_matrix_variant_uses_generator_gates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'logs').mkdir()
+            with patch('run_sol_pilot.execute', return_value=(0, 'OK', '')) as execute:
+                self.assertTrue(verify_artifacts(root, Path(sys.executable), structured=True))
+            self.assertEqual(execute.call_count, 7)
+            args = [call.args[1] for call in execute.call_args_list]
+            self.assertIn('../pack/tools/hybrid_pilot.py', args[0])
+            self.assertIn('--strict', args[1])
+
     def test_preserves_raw_log_and_uses_compact_tool_result(self):
         full = '=== RUN   TestPool_Get\n' + 'trace\n' * 8000
         full += 'panic: test timed out after 1m\n'
