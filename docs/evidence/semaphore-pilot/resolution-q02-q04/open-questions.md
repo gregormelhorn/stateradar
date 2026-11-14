@@ -1,4 +1,4 @@
-# Domain question register after Q-01 through Q-10
+# Domain question register after Q-01 through Q-11
 
 Behavior descriptions and citations below refer to the frozen upstream baseline
 `04914c200cb38d4ea960ee6a4c314a028c632991`. DR-001 through DR-004 subsequently change the
@@ -242,7 +242,17 @@ Options: document no waiter-queue blocking | require immediate acquisition attem
 
 Proposed: Document no waiter-queue blocking — TryAcquire may wait for its internal mutex; no real-time cancellation bound is promised.
 
-Status: OPEN — human decision required
+Decision: TryAcquire does not enter the capacity waiter queue or wait for future
+releases, but may wait for the internal mutex before its single admission check.
+Cancellation does not interrupt mutex acquisition; DR-010 checkpoints apply.
+No fixed return or cancellation-latency bound is promised, including at a
+Context deadline. Correct cancellation processing and accounting remain required.
+Rationale: proposal rationale adopted (owner-confirmed).
+Owner response: "Gut, übernehmen wir Q-11 so."
+Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
+Status: RESOLVED — DR-011
+Follow-up: contract documentation and focused conformance acceptance pending;
+this interview answer does not claim implementation/test completion.
 
 ## Q-12 — What FIFO ordering, head-of-line blocking, grant versus return order and backlog limit should be public guarantees?
 

@@ -24,6 +24,9 @@ DR-001 / Q-01 remains in ../.. / resolution-q01/decisions.
 - DR-010: Q-10 — Defined cancellation checkpoints and rollback of own holdings; transient reservations permitted.
   Accepted during the continuing interview; contract/conformance follow-up pending.
 
-Q-11 through Q-13 remain OPEN. This implements the explicitly selected next
+- DR-011: Q-11 — No capacity-queue wait for TryAcquire; mutex waits allowed, no fixed latency bound.
+  Accepted during the continuing interview; contract/conformance follow-up pending.
+
+Q-12 and Q-13 remain OPEN. This implements the explicitly selected next
 numeric-contract changes; prior recommendations for the other questions are
 not silently promoted to decisions. Q-13 still needs post-fix investigation.

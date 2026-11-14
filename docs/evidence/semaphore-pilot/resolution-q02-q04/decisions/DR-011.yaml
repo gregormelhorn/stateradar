@@ -1,0 +1,26 @@
+id: DR-011
+date: 2026-11-14
+source_question: Q-11
+question: Does nonblocking acquisition promise bounded mutex or cancellation latency?
+options: [no-capacity-queue-wait, immediate-lock-attempt, bounded-cancellation-latency]
+decision: no-capacity-queue-wait
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Gut, übernehmen wir Q-11 so."
+scope: >-
+  Evaluation copy only. TryAcquire obtains the synchronized state, checks once
+  whether a grant is permitted, and returns false if not; it never joins the
+  capacity waiter queue or waits there for a future release. Waiting for the
+  internal mutex is permitted. Context cancellation does not interrupt mutex
+  acquisition; it is processed at the applicable DR-010 checkpoint. A deadline
+  initiates cancellation but does not guarantee the API has returned by that
+  instant. No fixed return or cancellation-latency bound is promised. DR-010
+  cancellation processing and accounting remain mandatory; no lost-cancellation
+  or corrupted-accounting behavior is authorized. No TryLock policy is added.
+links:
+  - "guarded matrix branch: TryAcquire"
+  - "guarded matrix branch: Acquire"
+  - "guarded matrix branch: ContextDone"
+  - "guarded matrix branch: UV-Delay"
+status: accepted
+implementation_status: pending-contract-and-conformance-follow-up
