@@ -17,7 +17,7 @@ ordinary and deterministically scheduled tests, and four faulty-overlay probes.
 Combined acceptance passes 32 ordinary plus 6 scheduled groups x 50 with the
 race detector and upstream regressions. No original question remains OPEN in
 the [register](resolution-q02-q04/open-questions.md). The historical analysis
-below remains the original baseline; whole-model reconciliation is separate.
+below remains the original baseline. The [current evaluation analysis](../../../examples/weighted-semaphore/domain-analysis/weightedSemaphore/summary.md) now records the reconciled model separately.
 
 ## Frozen inputs and scope
 
@@ -132,11 +132,11 @@ preserve canonical renderer output, existing Markdown hard breaks, and the
 verbatim indentation of the public Go contract example unchanged;
 the semantic and catalogue checks remain enabled.
 
-All original questions have accepted decisions and focused contract/conformance
-acceptance; see the [current report](contracts-q05-q13/README.md). The executed
-[reconcile preflight](reconcile-preflight/README.md) is BLOCKED: a full approved
-matrix with cell-level acceptance and current candidate sidecar is still missing.
-Complete these Stage-03/04 prerequisites before Stage-06 promotion and stamping.
-Existing runtime/contract suites and all historical gates pass. The historical
-baseline, original observations, Part-B evidence and manifest remain unchanged;
-no whole-model promotion or generic mutation coverage is claimed.
+All original questions have accepted decisions and conformance acceptance.
+The earlier [reconcile preflight](reconcile-preflight/README.md) recorded missing
+Stage-03/04 artifacts. Those prerequisites are now complete and the
+[current evaluation model](../../../examples/weighted-semaphore/domain-analysis/weightedSemaphore/summary.md)
+is reconciled: 38 cells, 34 executable guarded scenarios, four explicit contract
+limits and 16 pair orderings, with a verified sidecar and pinned manifest.
+The historical baseline, observations, Part-B evidence and original manifest
+remain unchanged; they must not be checked against the modified evaluation source.

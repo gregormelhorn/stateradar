@@ -9,3 +9,5 @@ All commands used the repository Python environment and local Go 1.27.3. No mode
 - `historical-reproduction.txt`: unchanged upstream pilot, seven gates plus upstream race tests and ten probes repeated five times.
 
 The original full historical analysis and its manifest are not rewritten. The candidate current manifest deliberately uses WORKTREE until the source/tests are committed. The subsequent reconciliation records its pinned source commit and reruns preconditions at that commit.
+
+`head-*.txt` repeats all preconditions on candidate commit 0b7502b4915de4996e71fbd56baa55b4377dbcfe before promotion. `post-*.txt` repeats current-model, full decision, pack and accounting acceptance after promotion. All exit 0; expected red probes are required and checked by their runners. `citation-refresh.txt` records the generic helper's zero Go matches; `markdown-citations.txt` records 154 verified active prose anchors, separately from the 193 structured occurrences.

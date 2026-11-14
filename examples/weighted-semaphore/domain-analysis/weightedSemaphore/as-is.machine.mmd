@@ -1,24 +1,6 @@
 stateDiagram-v2
     [*] --> Acquire_NoWaiters
-    Acquire_NoWaiters --> Acquire_WaitersPending: feasible but cannot admit
-    Acquire_WaitersPending --> Acquire_NoWaiters: final waiter canceled or granted
-    Acquire_WaitersPending --> Acquire_EligibleHeadPending: cancel head at full capacity with zero next
-    Acquire_EligibleHeadPending --> Acquire_WaitersPending: notification reaches blocked tail or removal exposes it
-    Acquire_EligibleHeadPending --> Acquire_NoWaiters: later release grants last or last canceled
-    state "One Acquire call (orthogonal to instance)" as Invocation {
-      [*] --> Acquire_Entering
-      Acquire_Entering --> Acquire_Failed: Done detected under mutex
-      Acquire_Entering --> Acquire_Succeeded: immediate charge
-      Acquire_Entering --> Acquire_OversizedWaiting: too large and unlock
-      Acquire_OversizedWaiting --> Acquire_Failed: context closes
-      Acquire_Entering --> Acquire_Queued: create private ready and enqueue
-      Acquire_Queued --> Acquire_Failed: canceled and unlinked
-      Acquire_Queued --> Acquire_Granted: reserve unlink and close ready
-      Acquire_Granted --> Acquire_Succeeded: observes Ready and no Done
-      Acquire_Granted --> Acquire_Failed: observes Done and returns weight
-    }
-    state "Aggregate weight classification" as Counter {
-      [*] --> WeightWithinCapacity
-      WeightWithinCapacity --> WeightOutsideCapacity: unchecked signed weight or recovered over-release
-      WeightOutsideCapacity --> WeightWithinCapacity: later arithmetic
-    }
+    Acquire_NoWaiters --> Acquire_WaitersPending: DR-006/012 feasible live acquisition queues
+    Acquire_WaitersPending --> Acquire_NoWaiters: DR-001/010/012 last cancellation or FIFO grant
+    Acquire_NoWaiters --> Acquire_NoWaiters: DR-003/005/008/013 held/independent/no-op operations
+    Acquire_WaitersPending --> Acquire_WaitersPending: DR-006/012 blocked head or remaining tail

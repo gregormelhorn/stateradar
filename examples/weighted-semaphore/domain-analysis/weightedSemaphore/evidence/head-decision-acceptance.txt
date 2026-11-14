@@ -1,0 +1,35 @@
+group G-Q01 cancellation rescan: proven
+{'size': 2, 'cur': 3, 'front': False} ['skip'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 3, 'front': True} ['notify'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 2, 'front': False} ['skip']
+{'size': 2, 'cur': 2, 'front': True} ['notify']
+{'size': 2, 'cur': 1, 'front': False} ['skip']
+{'size': 2, 'cur': 1, 'front': True} ['notify']
+DR-001 eligible-zero progress: unsat (unsat required)
+DR-001 positive-head fit at full capacity: unsat (unsat required)
+Source form: DR-001
+COVERAGE: 57 historical cells accounted for; numeric refinements have tests and accepted DRs
+group numeric sign: proven
+group release bound: proven
+group acquire bound: proven
+ARITHMETIC grant: unsat (unsat required)
+ARITHMETIC release/rollback: unsat (unsat required)
+ARITHMETIC rejected operation: unsat (unsat required)
+ARITHMETIC free capacity: unsat (unsat required)
+NUMERIC CHECK: PASS; no whole-model or scheduler proof claimed
+CONTRACT CHECK: 9 decisions, 27 normative clauses, 17 ordinary + 6 scheduled tests; all 13 questions decided
+?   	golang.org/x/sync/errgroup	[no test files]
+ok  	golang.org/x/sync/semaphore	4.658s
+baseline: exit=0; started={'TestScheduleDR010FastLateCancel': 50, 'TestScheduleDR010GrantedRollback': 50, 'TestScheduleDR010CancelSelectedRollback': 50, 'TestScheduleDR010QueuedLateCancel': 50, 'TestScheduleDR011CancelBeforeMutex': 50, 'TestScheduleDR012ReturnOrder': 50}; passed={'TestScheduleDR010FastLateCancel': 50, 'TestScheduleDR010GrantedRollback': 50, 'TestScheduleDR010CancelSelectedRollback': 50, 'TestScheduleDR010QueuedLateCancel': 50, 'TestScheduleDR011CancelBeforeMutex': 50, 'TestScheduleDR012ReturnOrder': 50}; failed={}
+SCHEDULE PASS
+omit-grant-rollback: exit=1; started={'TestScheduleDR010GrantedRollback': 1}; passed={}; failed={'TestScheduleDR010GrantedRollback': 1}
+EXPECTED BEHAVIOR RED OBSERVED
+omit-selected-rollback: exit=1; started={'TestScheduleDR010CancelSelectedRollback': 1}; passed={}; failed={'TestScheduleDR010CancelSelectedRollback': 1}
+EXPECTED BEHAVIOR RED OBSERVED
+try-bypass: exit=1; started={'TestDR012HeadOfLineFIFO': 1}; passed={}; failed={'TestDR012HeadOfLineFIFO': 1}
+EXPECTED BEHAVIOR RED OBSERVED
+zero-charges: exit=1; started={'TestDR013ZeroRelease': 1}; passed={}; failed={'TestDR013ZeroRelease': 1}
+EXPECTED BEHAVIOR RED OBSERVED
+RED-PROBE: empty discovery rejected
+DR-001..013: 32 test groups x 50 = 1600 group passes; all 66 test/subtest names verified; no empty discovery
+All 13 decision contracts, ordinary/scheduled race suites, upstream regressions and four fault probes passed.

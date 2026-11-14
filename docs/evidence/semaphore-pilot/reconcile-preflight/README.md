@@ -63,3 +63,11 @@ says: “If a precondition fails: stop and report. Do not promote.” It also st
 that there is no reconcile-lite. Accordingly, no archive move, citation rewrite,
 manifest stamp or as-is promotion has been performed. Updating only the SHA
 would turn a known incomplete analysis into a misleading freshness signal.
+
+## Subsequent resolution
+
+The block above describes the preflight at fd7395c and remains historical evidence.
+The [current evaluation analysis](../../../../examples/weighted-semaphore/domain-analysis/weightedSemaphore/summary.md)
+now supplies the missing matrix, cell acceptance and sidecar. All preconditions
+were rerun on committed candidate 0b7502b4915de4996e71fbd56baa55b4377dbcfe before
+Stage-06 promotion. No historical pilot artifact or blind prediction was rewritten.
