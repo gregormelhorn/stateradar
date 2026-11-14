@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/docs/evidence/semaphore-pilot/contracts-q05-q13/check_contracts.py", line 58, in <module>
+    check(json.loads(args.manifest.read_text()),args.document)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/docs/evidence/semaphore-pilot/contracts-q05-q13/check_contracts.py", line 32, in check
+    assert document.read_text()==render(data), 'normative contract text missing or drifted'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: normative contract text missing or drifted

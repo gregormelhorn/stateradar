@@ -1,4 +1,4 @@
-# Domain question register after Q-01 through Q-12
+# Domain question register after Q-01 through Q-13
 
 Behavior descriptions and citations below refer to the frozen upstream baseline
 `04914c200cb38d4ea960ee6a4c314a028c632991`. DR-001 through DR-004 subsequently change the
@@ -101,8 +101,8 @@ Rationale: proposal rationale adopted (owner-confirmed).
 Owner response: "Gut, übernehmen wir Q-05 so."
 Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
 Status: RESOLVED — DR-005
-Follow-up: contract documentation and focused conformance acceptance pending;
-this interview answer does not claim implementation/test completion.
+Implementation: contract and focused conformance tests completed; see
+[acceptance evidence](../contracts-q05-q13/README.md).
 
 ## Q-06 — Should a second acquisition by the same logical caller be independent while the first is pending and while it is held?
 
@@ -126,8 +126,8 @@ Rationale: proposal rationale adopted (owner-confirmed).
 Owner response: "Gut, übernehmen wir Q-06 so."
 Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
 Status: RESOLVED — DR-006
-Follow-up: contract documentation and focused conformance acceptance pending;
-this interview answer does not claim implementation/test completion.
+Implementation: contract and focused conformance tests completed; see
+[acceptance evidence](../contracts-q05-q13/README.md).
 
 ## Q-07 — What constitutes a matching Release across callers, and should duplicate or unowned Release be detected while aggregate weight covers it?
 
@@ -151,8 +151,8 @@ Rationale: proposal rationale adopted (owner-confirmed).
 Owner response: "Gut, übernehmen wir Q-07 so."
 Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
 Status: RESOLVED — DR-007
-Follow-up: contract documentation and focused conformance acceptance pending;
-this interview answer does not claim implementation/test completion.
+Implementation: contract and focused conformance tests completed; see
+[acceptance evidence](../contracts-q05-q13/README.md).
 
 ## Q-08 — Should wrong instance or foreign but well-formed Context remain caller errors, and how are these detected?
 
@@ -175,8 +175,8 @@ Rationale: proposal rationale adopted (owner-confirmed).
 Owner response: "Gut, übernehmen wir Q-08 so."
 Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
 Status: RESOLVED — DR-008
-Follow-up: contract documentation and focused conformance acceptance pending;
-this interview answer does not claim implementation/test completion.
+Implementation: contract and focused conformance tests completed; see
+[acceptance evidence](../contracts-q05-q13/README.md).
 
 ## Q-09 — What does Weighted guarantee for nil, blocking, panicking, reentrant or inconsistent custom Context methods?
 
@@ -199,8 +199,8 @@ Rationale: proposal rationale adopted (owner-confirmed).
 Owner response: "Gut, übernehmen wir Q-09 so."
 Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
 Status: RESOLVED — DR-009
-Follow-up: contract documentation and focused conformance acceptance pending;
-this interview answer does not claim implementation/test completion.
+Implementation: contract and focused conformance tests completed; see
+[acceptance evidence](../contracts-q05-q13/README.md).
 
 ## Q-10 — Which cancellation orderings promise failure, rollback or success, and what does unchanged mean with concurrent observers?
 
@@ -226,8 +226,8 @@ Rationale: proposal rationale adopted (owner-confirmed).
 Owner response: "Gut, übernehmen wir Q-10 so."
 Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
 Status: RESOLVED — DR-010
-Follow-up: contract documentation and focused conformance acceptance pending;
-this interview answer does not claim implementation/test completion.
+Implementation: contract and focused conformance tests completed; see
+[acceptance evidence](../contracts-q05-q13/README.md).
 
 ## Q-11 — Does TryAcquire's without-blocking contract exclude ordinary mutex contention, and do canceled callers have a prompt-return guarantee while waiting for the mutex?
 
@@ -251,8 +251,8 @@ Rationale: proposal rationale adopted (owner-confirmed).
 Owner response: "Gut, übernehmen wir Q-11 so."
 Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
 Status: RESOLVED — DR-011
-Follow-up: contract documentation and focused conformance acceptance pending;
-this interview answer does not claim implementation/test completion.
+Implementation: contract and focused conformance tests completed; see
+[acceptance evidence](../contracts-q05-q13/README.md).
 
 ## Q-12 — What FIFO ordering, head-of-line blocking, grant versus return order and backlog limit should be public guarantees?
 
@@ -276,8 +276,8 @@ Rationale: proposal rationale adopted (owner-confirmed).
 Owner response: "Gut, übernehmen wir Q-12 so."
 Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
 Status: RESOLVED — DR-012
-Follow-up: contract documentation and focused conformance acceptance pending;
-this interview answer does not claim implementation/test completion.
+Implementation: contract and focused conformance tests completed; see
+[acceptance evidence](../contracts-q05-q13/README.md).
 
 ## Q-13 — Should a public API describe that Release(0) can change queue state and wake eligible waiters?
 
@@ -298,6 +298,11 @@ synchronization semantics. The DR-001 fix removes the known stranded eligible
 head. Source reasoning and a bounded aggregate/queue exploration support this
 proposal; neither is a full Go implementation proof. See
 [q13-investigation/README.md](q13-investigation/README.md).
-No owner decision on this revised proposal has been recorded.
+Decision: Accept the revised logical-no-op contract under valid reachable states.
+Rationale: proposal rationale adopted (owner-confirmed).
+Owner response: "Gut, übernehmen wir Q-13 so."
+Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
 
-Status: OPEN — human decision required
+Status: RESOLVED — DR-013
+Implementation: contract and focused conformance tests completed; see
+[acceptance evidence](../contracts-q05-q13/README.md).

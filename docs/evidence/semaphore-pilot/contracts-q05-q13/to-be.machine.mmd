@@ -1,0 +1,15 @@
+%% Contract projection only: does not replace the archived as-is sidecar.
+stateDiagram-v2
+    [*] --> NoWaiters
+    NoWaiters --> WaitersPending: DR-006/012 enqueue independent feasible acquisition
+    NoWaiters --> NoWaiters: DR-013 Release(0)
+    WaitersPending --> WaitersPending: DR-012 blocked head prevents bypass
+    WaitersPending --> NoWaiters: DR-001/010/012 grant or cancel last queued entry
+    WaitersPending --> WaitersPending: DR-010/012 rollback or cancel exposes remaining queue
+    WaitersPending --> WaitersPending: DR-013 Release(0)
+    note right of NoWaiters
+      DR-005 successful holdings persist until release
+      DR-007/008 aggregate accounting on the selected instance
+      DR-009 conforming Context precondition
+      DR-011 no fixed latency bound
+    end note

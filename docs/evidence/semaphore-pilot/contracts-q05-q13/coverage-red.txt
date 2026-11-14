@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/docs/evidence/semaphore-pilot/contracts-q05-q13/check_contracts.py", line 58, in <module>
+    check(json.loads(args.manifest.read_text()),args.document)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/docs/evidence/semaphore-pilot/contracts-q05-q13/check_contracts.py", line 37, in check
+    assert item['tests'] and item['clauses'] and item['events'], 'decision missing tests/clauses/events'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: decision missing tests/clauses/events

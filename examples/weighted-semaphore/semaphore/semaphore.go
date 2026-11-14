@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package semaphore provides a weighted semaphore implementation.
+// This evaluation copy follows the accepted decisions in CONTRACT.md.
 package semaphore // import "golang.org/x/sync/semaphore"
 
 import (
@@ -20,6 +21,7 @@ type waiter struct {
 // NewWeighted creates a new weighted semaphore with the given
 // maximum combined weight for concurrent access.
 // A negative capacity panics (evaluation decision DR-002).
+// A new instance does not reset or clean up existing instances (DR-005/008).
 func NewWeighted(n int64) *Weighted {
 	if n < 0 {
 		panic("semaphore: negative capacity")
@@ -39,9 +41,24 @@ type Weighted struct {
 
 // Acquire acquires the semaphore with a weight of n, blocking until resources
 // are available or ctx is done. On success, returns nil. On cancellation,
-// returns ctx.Err(). Errors leave the semaphore unchanged. A negative weight panics
-// (DR-002). An oversized weight returns a size error without waiting for
+// returns ctx.Err(). Errors leave no net holding for this request. A negative
+// weight panics (DR-002). An oversized weight returns a size error without waiting for
 // cancellation; an already canceled context retains priority (DR-004).
+//
+// Each invocation is independent, including repeat calls by one caller;
+// holding capacity while awaiting another acquisition can self-block (DR-006).
+// A successful call requires matching release after work ends. Later Context
+// cancellation does not reclaim that holding (DR-005). Errors leave no own
+// holding or queue entry, but transient reservations can affect concurrent
+// operations. Cancellation after the last check can coexist with success
+// (DR-010); the return value determines the release obligation.
+//
+// ctx must be a non-nil, conforming Context. A nil Done channel is valid;
+// faulty custom methods have no recovery or extra progress guarantee (DR-009).
+// The caller selects the correct instance and Context (DR-008). Mutex waits
+// are permitted and no fixed cancellation-latency bound is promised (DR-011).
+// Queued grants are FIFO by enqueue order without bypass of a blocked head;
+// return order is unspecified. The queue has no internal count cap (DR-012).
 func (s *Weighted) Acquire(ctx context.Context, n int64) error {
 	if n < 0 {
 		panic("semaphore: negative weight")
@@ -115,9 +132,11 @@ func (s *Weighted) Acquire(ctx context.Context, n int64) error {
 	}
 }
 
-// TryAcquire acquires the semaphore with a weight of n without blocking.
+// TryAcquire attempts to acquire weight n without joining the capacity queue
+// or awaiting a future release. It may wait for the internal mutex (DR-011).
 // On success, returns true. On failure, returns false and leaves the semaphore unchanged.
 // A negative weight panics before mutation (DR-002).
+// Existing queued requests cannot be bypassed, including by weight zero (DR-012).
 func (s *Weighted) TryAcquire(n int64) bool {
 	if n < 0 {
 		panic("semaphore: negative weight")
@@ -134,6 +153,11 @@ func (s *Weighted) TryAcquire(n int64) bool {
 // Release releases the semaphore with a weight of n.
 // Negative weights or release above the aggregate held weight panic without
 // changing the instance (evaluation decisions DR-002 and DR-003).
+// Responsibility may transfer between goroutines, but the application must
+// match releases to held, not already released capacity on this instance.
+// Aggregate accounting does not detect every duplicate release (DR-007/008).
+// Release(0) is a logical no-op for capacity, queue and grants in valid reachable
+// states, not a wakeup, repair or extra synchronization operation (DR-013).
 func (s *Weighted) Release(n int64) {
 	if n < 0 {
 		panic("semaphore: negative weight")

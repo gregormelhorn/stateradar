@@ -46,15 +46,13 @@ entries and separates the new model-routing plan from shipped capabilities.
    [numeric-contract fixes](evidence/semaphore-pilot/resolution-q02-q04/deviation-report.md):
    immediate oversized error, negative-input panic before mutation and
    state-preserving over-release panic. Combined acceptance covers 15 test
-   groups x 50 repetitions plus upstream tests. Q-05 through Q-12 are accepted as
-   DR-005 through DR-012 (explicit cleanup, independent repeated acquisitions,
-   transferable release responsibility, caller-selected instance/Context and
-   conforming Context requirements, cancellation checkpoints, timing limits
-   and FIFO grant policy); their
-   contract/conformance follow-up is pending. Only Q-13 remains open.
-   Continue their owner interview and decided
-   conformance slices; full reconciliation and generic F-20 mutation support
-   remain pending. This real progress case is evidence, not broader coverage.
+   groups x 50 repetitions plus upstream tests. Q-05 through Q-13 now have
+   [completed contract/focused conformance acceptance](evidence/semaphore-pilot/contracts-q05-q13/README.md):
+   27 normative clauses, 32 ordinary plus 6 scheduled groups x 50 with race
+   detection, upstream regressions and four faulty-overlay probes. All thirteen
+   questions are decided. Next reconcile the evaluation model/manifest at the
+   current source; full model promotion and generic mutation support remain
+   separate. Historical pilot artifacts stay immutable.
 3. **Make disposition rationale machine-readable.** Design and validate a
    representation for cell rationale before building checks that depend on it.
    See [machine-readable cell rationale](#10-machine-readable-cell-rationale).

@@ -1,0 +1,151 @@
+package semaphore
+
+import (
+	"context"
+	"sync"
+	"sync/atomic"
+	"testing"
+)
+
+type contractBarrier struct {
+	sem              *Weighted
+	point            string
+	weight           int64
+	arrived, proceed chan struct{}
+	arrival, release sync.Once
+}
+
+var contractActive atomic.Pointer[contractBarrier]
+
+// Scheduling only: no component mutation, branch choice or outcome inspection.
+func contractCheckpoint(s *Weighted, point string, weight int64) {
+	b := contractActive.Load()
+	if b != nil && b.sem == s && b.point == point && b.weight == weight {
+		b.arrival.Do(func() { close(b.arrived) })
+		<-b.proceed
+	}
+}
+func contractPause(t *testing.T, s *Weighted, point string, weight int64) *contractBarrier {
+	t.Helper()
+	b := &contractBarrier{sem: s, point: point, weight: weight, arrived: make(chan struct{}), proceed: make(chan struct{})}
+	contractActive.Store(b)
+	t.Cleanup(func() { b.resume(); contractActive.Store(nil) })
+	return b
+}
+func (b *contractBarrier) resume() { b.release.Do(func() { close(b.proceed) }) }
+func (b *contractBarrier) wait(t *testing.T) {
+	t.Helper()
+	select {
+	case <-b.arrived:
+	case <-contractTimeout():
+		t.Fatal("scheduling checkpoint not reached")
+	}
+}
+
+// DR-010; NoWaiters x UV-ContextOrder: late cancellation after initial check may succeed.
+func TestScheduleDR010FastLateCancel(t *testing.T) {
+	s := NewWeighted(1)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	b := contractPause(t, s, "initial-checked", 1)
+	result := make(chan error, 1)
+	go func() { result <- s.Acquire(ctx, 1) }()
+	b.wait(t)
+	cancel()
+	b.resume()
+	q01Result(t, result, nil)
+	if s.TryAcquire(1) {
+		t.Fatal("successful late-cancel acquisition lost its holding")
+	}
+	s.Release(1)
+	numericAvailable(t, s, 1)
+}
+
+// DR-010; WaitersPending x Grant/ContextDone: selected grant rolls back, transient charge visible.
+func TestScheduleDR010GrantedRollback(t *testing.T) {
+	s := NewWeighted(1)
+	s.TryAcquire(1)
+	cancel, result := q01Request(t, s, 1, 1)
+	b := contractPause(t, s, "grant-received", 1)
+	s.Release(1)
+	b.wait(t)
+	if s.TryAcquire(1) {
+		t.Fatal("transient grant did not reserve capacity")
+	}
+	cancel()
+	b.resume()
+	q01Result(t, result, context.Canceled)
+	numericAvailable(t, s, 1)
+}
+
+// DR-010; WaitersPending x ContextDone/Grant: cancellation selected, then grant races with cleanup.
+func TestScheduleDR010CancelSelectedRollback(t *testing.T) {
+	s := NewWeighted(1)
+	s.TryAcquire(1)
+	cancel, result := q01Request(t, s, 1, 1)
+	b := contractPause(t, s, "cancel-selected", 1)
+	cancel()
+	b.wait(t)
+	s.Release(1)
+	if s.TryAcquire(1) {
+		t.Fatal("grant should remain reserved until rollback")
+	}
+	b.resume()
+	q01Result(t, result, context.Canceled)
+	numericAvailable(t, s, 1)
+}
+
+// DR-010; WaitersPending x UV-ContextOrder: cancellation after queued final check permits success.
+func TestScheduleDR010QueuedLateCancel(t *testing.T) {
+	s := NewWeighted(1)
+	s.TryAcquire(1)
+	cancel, result := q01Request(t, s, 1, 1)
+	b := contractPause(t, s, "queued-success", 1)
+	s.Release(1)
+	b.wait(t)
+	cancel()
+	b.resume()
+	q01Result(t, result, nil)
+	if s.TryAcquire(1) {
+		t.Fatal("successful queued acquisition was reclaimed")
+	}
+	s.Release(1)
+	numericAvailable(t, s, 1)
+}
+
+// DR-011/010; NoWaiters x Acquire/ContextDone: cancellation while mutex is held is checked after lock.
+func TestScheduleDR011CancelBeforeMutex(t *testing.T) {
+	s := NewWeighted(1)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	b := contractPause(t, s, "before-mutex", 1)
+	result := make(chan error, 1)
+	go func() { result <- s.Acquire(ctx, 1) }()
+	b.wait(t)
+	s.mu.Lock() // Scheduling barrier only; no counter or queue write.
+	cancel()
+	b.resume()
+	s.mu.Unlock()
+	q01Result(t, result, context.Canceled)
+	numericAvailable(t, s, 1)
+}
+
+// DR-012; WaitersPending x Grant: grant FIFO does not imply return FIFO.
+func TestScheduleDR012ReturnOrder(t *testing.T) {
+	s := NewWeighted(3)
+	s.TryAcquire(3)
+	_, first := q01Request(t, s, 1, 1)
+	_, second := q01Request(t, s, 2, 2)
+	b := contractPause(t, s, "grant-received", 1)
+	s.Release(3)
+	b.wait(t)
+	q01Result(t, second, nil) // Second returns while the first is deliberately paused.
+	q01Pending(t, first)
+	if s.TryAcquire(1) {
+		t.Fatal("grants not accounted")
+	}
+	b.resume()
+	q01Result(t, first, nil)
+	s.Release(3)
+	numericAvailable(t, s, 3)
+}

@@ -1,0 +1,20 @@
+FAULT PROBE omit-grant-rollback (Go exit 1, expected named completed failure)
+    schedule_contract_test.go:78: expected 1 units still available
+--- FAIL: TestScheduleDR010GrantedRollback (0.00s)
+FAIL
+FAIL	golang.org/x/sync/semaphore	0.325s
+FAULT PROBE omit-selected-rollback (Go exit 1, expected named completed failure)
+    schedule_contract_test.go:95: expected 1 units still available
+--- FAIL: TestScheduleDR010CancelSelectedRollback (0.00s)
+FAIL
+FAIL	golang.org/x/sync/semaphore	0.379s
+FAULT PROBE try-bypass (Go exit 1, expected named completed failure)
+    decision_contract_test.go:272: try bypassed queued predecessor
+--- FAIL: TestDR012HeadOfLineFIFO (0.00s)
+FAIL
+FAIL	golang.org/x/sync/semaphore	0.603s
+FAULT PROBE zero-charges (Go exit 1, expected named completed failure)
+    decision_contract_test.go:292: zero release changed zero capacity
+--- FAIL: TestDR013ZeroRelease (0.00s)
+FAIL
+FAIL	golang.org/x/sync/semaphore	0.315s

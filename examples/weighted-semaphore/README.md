@@ -13,12 +13,12 @@ panic (DR-003), and an immediate explanatory error for oversized Acquire
 (DR-004). Pre-canceled Context handling remains unchanged for nonnegative
 weights. These evaluation-specific contracts differ from the pinned upstream.
 
-The [Q-01 evidence](../../docs/evidence/semaphore-pilot/resolution-q01/deviation-report.md)
-and [numeric-contract evidence](../../docs/evidence/semaphore-pilot/resolution-q02-q04/deviation-report.md)
-record the implemented decisions and red/green tests. Q-05 through Q-12 are also accepted as
-DR-005 through DR-012, with contract/conformance follow-up pending. Only Q-13 remains OPEN.
-Tests use a read-only enqueue barrier only for scheduling and assert public
-outcomes; see the [seam](../../docs/evidence/semaphore-pilot/resolution-q02-q04/seam.md).
+The [Q-01 evidence](../../docs/evidence/semaphore-pilot/resolution-q01/deviation-report.md),
+[numeric evidence](../../docs/evidence/semaphore-pilot/resolution-q02-q04/deviation-report.md)
+and [final contract evidence](../../docs/evidence/semaphore-pilot/contracts-q05-q13/README.md)
+record all thirteen accepted decisions and completed focused conformance work.
+[CONTRACT.md](CONTRACT.md) is the normative evaluation contract. No original
+question remains open. Historical as-is reconciliation remains separate.
 
 From the pack root, with Go 1.24+ and the pack Python dependencies:
 
@@ -26,11 +26,11 @@ From the pack root, with Go 1.24+ and the pack Python dependencies:
 .venv/bin/python examples/weighted-semaphore/verify_q01.py
 ```
 
-The original entry-point name is retained; it now checks all four decisions.
-It checks guard/coverage obligations, runs 15 test groups (49 exact test/subtest
-names) 50 times with the race detector, rejects empty/incomplete discovery, and
-runs the upstream plus decision regression suite. CI runs the same command with
-`python`. No model/API calls are made. The guard proof covers its stated integer
+The original entry-point name is retained; it now checks all thirteen decisions.
+It checks guard/coverage obligations, runs 32 ordinary groups (66 exact test/subtest
+names) and 6 scheduled groups 50 times with the race detector, and rejects
+empty/incomplete discovery. It also runs the upstream plus decision regression
+suite and four faulty overlays. CI runs the same command with `python`. No model/API calls are made. The guard proof covers its stated integer
 assumptions; behavior tests verify the actual notification path. Neither proves
 all scheduler interleavings or a production wall-clock latency bound.
 

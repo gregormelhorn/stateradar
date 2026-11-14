@@ -1,0 +1,220 @@
+{
+  "decisions": {
+    "DR-005": {
+      "tests": [
+        "TestDR005CancelPending",
+        "TestDR005CancelHeld",
+        "TestDR005NewInstanceIndependent"
+      ],
+      "events": [
+        "Acquire",
+        "UV-Abandon",
+        "ContextDone",
+        "UV-Recreate"
+      ],
+      "clauses": [
+        "caller_cleanup",
+        "no_auto_reclaim",
+        "instance_lifetime"
+      ]
+    },
+    "DR-006": {
+      "tests": [
+        "TestDR006RepeatedHeld",
+        "TestDR006RepeatedPending",
+        "TestDR006SharedContext",
+        "TestDR005CancelPending"
+      ],
+      "events": [
+        "Acquire",
+        "UV-RepeatAcquire",
+        "UV-RepeatTry",
+        "ContextDone"
+      ],
+      "clauses": [
+        "independent_calls",
+        "self_blocking",
+        "shared_context"
+      ]
+    },
+    "DR-007": {
+      "tests": [
+        "TestDR007TransferredRelease",
+        "TestDR007DuplicateWithinAggregate"
+      ],
+      "events": [
+        "Release",
+        "UV-RepeatRelease",
+        "UV-UnownedRelease"
+      ],
+      "clauses": [
+        "transferable_release",
+        "aggregate_only"
+      ]
+    },
+    "DR-008": {
+      "tests": [
+        "TestDR008WrongReceiver",
+        "TestDR008SelectedContext",
+        "TestDR005NewInstanceIndependent"
+      ],
+      "events": [
+        "UV-WrongReceiver",
+        "UV-ForeignContext",
+        "UV-Recreate"
+      ],
+      "clauses": [
+        "receiver_selection",
+        "context_selection"
+      ]
+    },
+    "DR-009": {
+      "tests": [
+        "TestDR009ConformingContexts"
+      ],
+      "events": [
+        "Acquire",
+        "UV-ContextFault"
+      ],
+      "clauses": [
+        "context_precondition",
+        "nil_done_valid",
+        "no_fault_recovery_contract"
+      ]
+    },
+    "DR-010": {
+      "tests": [
+        "TestDR010PreCanceled",
+        "TestDR010CancelGrantRace",
+        "TestScheduleDR010FastLateCancel",
+        "TestScheduleDR010GrantedRollback",
+        "TestScheduleDR010CancelSelectedRollback",
+        "TestScheduleDR010QueuedLateCancel"
+      ],
+      "events": [
+        "Acquire",
+        "ContextDone",
+        "Grant",
+        "UV-ContextOrder",
+        "UV-RepeatedDone"
+      ],
+      "clauses": [
+        "initial_cancel",
+        "queued_cancel",
+        "grant_rollback",
+        "late_cancel_success",
+        "transient_reservation"
+      ]
+    },
+    "DR-011": {
+      "tests": [
+        "TestDR011TryDoesNotQueue",
+        "TestScheduleDR011CancelBeforeMutex"
+      ],
+      "events": [
+        "TryAcquire",
+        "Acquire",
+        "UV-Delay",
+        "ContextDone"
+      ],
+      "clauses": [
+        "try_no_queue",
+        "mutex_wait_allowed",
+        "no_latency_bound"
+      ]
+    },
+    "DR-012": {
+      "tests": [
+        "TestDR012HeadOfLineFIFO",
+        "TestDR012Backlog",
+        "TestScheduleDR012ReturnOrder"
+      ],
+      "events": [
+        "Acquire",
+        "TryAcquire",
+        "Grant",
+        "UV-Delay"
+      ],
+      "clauses": [
+        "fifo_enqueue",
+        "no_bypass",
+        "return_order",
+        "no_queue_cap"
+      ]
+    },
+    "DR-013": {
+      "tests": [
+        "TestDR013ZeroRelease",
+        "TestDR001FullSingleZero"
+      ],
+      "events": [
+        "Release"
+      ],
+      "clauses": [
+        "zero_release_noop",
+        "no_wakeup_api"
+      ]
+    }
+  },
+  "regularTests": [
+    "TestDR005CancelPending",
+    "TestDR005CancelHeld",
+    "TestDR005NewInstanceIndependent",
+    "TestDR006RepeatedHeld",
+    "TestDR006RepeatedPending",
+    "TestDR006SharedContext",
+    "TestDR007TransferredRelease",
+    "TestDR007DuplicateWithinAggregate",
+    "TestDR008WrongReceiver",
+    "TestDR008SelectedContext",
+    "TestDR009ConformingContexts",
+    "TestDR010PreCanceled",
+    "TestDR010CancelGrantRace",
+    "TestDR011TryDoesNotQueue",
+    "TestDR012HeadOfLineFIFO",
+    "TestDR013ZeroRelease",
+    "TestDR012Backlog"
+  ],
+  "scheduleTests": [
+    "TestScheduleDR010FastLateCancel",
+    "TestScheduleDR010GrantedRollback",
+    "TestScheduleDR010CancelSelectedRollback",
+    "TestScheduleDR010QueuedLateCancel",
+    "TestScheduleDR011CancelBeforeMutex",
+    "TestScheduleDR012ReturnOrder"
+  ],
+  "limitations": {
+    "DR-009": "Behavior outside the Context precondition is not assigned a conformance outcome.",
+    "DR-011": "Finite tests do not establish or refute all real-time bounds; none is promised.",
+    "DR-012": "32 queued requests test finite backlog behavior, not mathematical unboundedness."
+  },
+  "clauses": {
+    "caller_cleanup": "Cancel an abandoned pending request and consume its result. Do not call Release for a failed Acquire; any own reservation is rolled back before error return.",
+    "no_auto_reclaim": "Every successful acquisition requires matching release after protected work ends, even if its Context is canceled later. Cancellation does not automatically reclaim a successful holding.",
+    "instance_lifetime": "Creating a new semaphore does not cancel pending work or release holdings on an old instance.",
+    "independent_calls": "Each invocation is a separate acquisition, including repeat calls from the same logical caller. No deduplication, replacement or reentrant success is provided.",
+    "self_blocking": "A caller holding capacity can block itself by awaiting another acquisition before releasing its existing holding.",
+    "shared_context": "Independent requests can share a Context, in which case cancellation can affect all of them.",
+    "transferable_release": "Release responsibility may transfer to another goroutine. The application must match releases to actually held, not already released capacity.",
+    "aggregate_only": "The semaphore checks aggregate holdings, not caller identity. A duplicate release may remain undetected while other holdings cover it; this is a detection limit, not permission to release twice.",
+    "receiver_selection": "The caller selects the receiver. Release affects only that instance; release responsibility can transfer but capacity cannot transfer across instances.",
+    "context_selection": "The supplied Context governs the request. The semaphore does not infer a different intended Context.",
+    "context_precondition": "Acquire requires a non-nil Context conforming to the Go Context contract. Conforming custom implementations are supported, including concurrent-safe methods, stable Done and consistent cancellation errors.",
+    "nil_done_valid": "A nil Done channel is valid for a Context that cannot be canceled; it is distinct from a nil Context.",
+    "no_fault_recovery_contract": "No automatic substitution, repair, panic recovery or additional progress guarantee is promised for faulty, blocking or reentrant custom Context methods.",
+    "initial_cancel": "For a valid nonnegative weight, closed Done at the initial under-lock check causes a Context error without acquisition. Negative weights retain DR-002 panic priority; oversized errors retain DR-004 rules.",
+    "queued_cancel": "Processing queued cancellation removes the request or reverses a grant that raced with cleanup before returning the Context error.",
+    "grant_rollback": "A queued request receiving a grant checks cancellation again; if cancellation is observed, its grant is returned before error return.",
+    "late_cancel_success": "Cancellation after the last applicable checkpoint may coexist with nil return. That success retains its release obligation. Grant notification alone is not successful API return.",
+    "transient_reservation": "An error return leaves no own holding or queue entry. Temporary reservations may affect other operations; global state and observations need not be unchanged.",
+    "try_no_queue": "TryAcquire obtains the synchronized state, checks once whether admission is permitted, and returns false if not. It does not join the capacity queue or await a future release.",
+    "mutex_wait_allowed": "Internal mutex waiting is permitted. Context cancellation does not interrupt mutex acquisition; cancellation is processed at the defined checkpoints.",
+    "no_latency_bound": "No fixed return or cancellation-latency bound is promised. A Context deadline does not guarantee that Acquire has already returned at that instant.",
+    "fifo_enqueue": "Queued grants follow enqueue order, not wall-clock method-entry order.",
+    "no_bypass": "A blocked head cannot be bypassed by later smaller requests or new Acquire/TryAcquire calls, including zero-weight requests. FIFO can leave capacity idle and does not promise progress without required releases.",
+    "return_order": "Grant order does not guarantee goroutine execution order or API-return order.",
+    "no_queue_cap": "There is no internal waiter-count cap. The application controls incoming work and cancels obsolete requests; the semaphore bounds held capacity, not queue length.",
+    "zero_release_noop": "Release(0) is permitted and is a logical no-op for capacity, queue and grants in valid reachable states. Internal mutex waiting remains permitted.",
+    "no_wakeup_api": "Release(0) is not a promised wakeup, repair, flush or extra synchronization API. Progress must follow the actual enabling event, including DR-001 head removal."
+  }
+}

@@ -7,16 +7,17 @@ the five independent public-boundary controls, and left **13 domain questions OP
 implementation change, accepted DR, to-be promotion or Step-04 conformance
 suite was claimed at that pilot checkpoint.
 
-Follow-up: **Q-01 through Q-04 are now accepted and implemented in the
-[evaluation copy](../../../examples/weighted-semaphore/README.md)**. The
+Follow-up: **all thirteen questions now have owner decisions and implemented
+contract/focused conformance acceptance in the evaluation copy**. The
 [Q-01 resolution](resolution-q01/deviation-report.md) fixes zero-weight FIFO
-progress. The [numeric resolution](resolution-q02-q04/deviation-report.md)
-adds negative-input rejection, state-preserving over-release rejection and an
-immediate oversized-request error. Combined acceptance passes 15 groups x 50
-with the race detector plus upstream tests. **Q-05 through Q-12 are additionally accepted as
-DR-005 through DR-012; their contract/conformance follow-up is pending. Only Q-13 remains OPEN** in
-the [active question register](resolution-q02-q04/open-questions.md). The
-historical analysis below remains the original baseline, not a reconciled model.
+progress; the [numeric resolution](resolution-q02-q04/deviation-report.md)
+adds numeric rejection and an immediate oversized error. The final
+[Q-05..Q-13 contract work](contracts-q05-q13/README.md) adds 27 normative clauses,
+ordinary and deterministically scheduled tests, and four faulty-overlay probes.
+Combined acceptance passes 32 ordinary plus 6 scheduled groups x 50 with the
+race detector and upstream regressions. No original question remains OPEN in
+the [register](resolution-q02-q04/open-questions.md). The historical analysis
+below remains the original baseline; whole-model reconciliation is separate.
 
 ## Frozen inputs and scope
 
@@ -131,9 +132,8 @@ preserve canonical renderer output, existing Markdown hard breaks, and the
 verbatim indentation of the public Go contract example unchanged;
 the semantic and catalogue checks remain enabled.
 
-Q-01 through Q-04 have accepted decisions and tested evaluation implementations;
-see the [current deviation report](resolution-q02-q04/deviation-report.md).
-Continue the remaining owner decisions in the
-[active register](resolution-q02-q04/open-questions.md), one per round. These
-partial implementations do not promote the historical as-is model or establish
-generic mutation coverage. Full conformance and reconciliation remain pending.
+All original questions have accepted decisions and focused contract/conformance
+acceptance; see the [current report](contracts-q05-q13/README.md). Next reconcile
+the evaluation model and manifest at its current source revision. The historical
+baseline, original observations and Part-B evidence remain immutable; these
+tests do not claim whole-model promotion or generic mutation coverage.

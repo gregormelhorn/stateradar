@@ -1,9 +1,9 @@
 # Remaining scope
 
 Q-01 (DR-001), Q-03 (DR-002), Q-04 (DR-003) and Q-02 (DR-004) are accepted.
-Q-05 through Q-12 (DR-005 through DR-012) are accepted; their contract/conformance
-follow-up is pending. Q-13 remains OPEN in open-questions.md. These decisions
-do not approve the earlier recommendations on Release(0).
+Q-05 through Q-13 (DR-005 through DR-013) now have completed contract and focused
+conformance acceptance in ../contracts-q05-q13. No original domain question
+remains OPEN. This does not promote the historical as-is analysis.
 
 This slice gives 13 original cells guarded numeric refinements with explicit
 test/DR links; 44 are outside it. Other branches of those 13 cells remain open.

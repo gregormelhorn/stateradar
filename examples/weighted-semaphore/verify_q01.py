@@ -39,6 +39,12 @@ for test, cases in {
     EXPECTED.update(test + '/' + case for case in cases)
 
 
+CONTRACT_EVIDENCE = EVIDENCE.parent / 'contracts-q05-q13'
+CONTRACT_PLAN = json.loads((CONTRACT_EVIDENCE / 'contracts.json').read_text())
+EXPECTED.update(CONTRACT_PLAN['regularTests'])
+TOP_LEVEL_COUNT = sum('/' not in name for name in EXPECTED)
+
+
 def validate_results(output, count):
     records = [json.loads(line) for line in output.splitlines() if line.strip()]
     failures = [r for r in records if r.get('Action') == 'fail']
@@ -51,7 +57,7 @@ def validate_results(output, count):
             or not any(r.get('Action') == 'pass' and 'Test' not in r for r in records)):
         raise ValueError(f'Decision discovery/results: expected {len(EXPECTED)} named tests x {count}; '
                          f'observed {dict(passed)}, failures={len(failures)}')
-    print(f'DR-001..004: {TOP_LEVEL_COUNT} test groups x {count} = {TOP_LEVEL_COUNT * count} group passes; '
+    print(f'DR-001..013: {TOP_LEVEL_COUNT} test groups x {count} = {TOP_LEVEL_COUNT * count} group passes; '
           f'all {len(EXPECTED)} test/subtest names verified; no empty discovery')
 
 
@@ -59,12 +65,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--results', type=Path, help='validate a retained Go JSON stream only')
     parser.add_argument('--count', type=int, default=50)
+    parser.add_argument('--output-dir', type=Path, help='retain Go JSON streams for this run')
     args = parser.parse_args()
     if args.count < 1:
         parser.error('--count must be positive')
     if args.results:
         validate_results(args.results.read_text(), args.count)
         return
+    if args.output_dir:
+        args.output_dir.mkdir(parents=True, exist_ok=True)
     # Exercise the discovery failure path on every CI run.
     try:
         validate_results('', args.count)
@@ -74,9 +83,12 @@ def main():
         raise RuntimeError('empty discovery unexpectedly accepted')
     subprocess.run([sys.executable, str(EVIDENCE / 'check_guards.py')], check=True, timeout=30)
     subprocess.run([sys.executable, str(NUMERIC_EVIDENCE / 'check_numeric.py')], check=True, timeout=30)
+    subprocess.run([sys.executable, str(CONTRACT_EVIDENCE / 'check_contracts.py')], check=True, timeout=30)
     result = subprocess.run(['go', 'test', '-race', f'-count={args.count}', '-timeout=60s',
-                             '-run', '^TestDR00[1234]', '-json', './semaphore'],
+                             '-run', '^TestDR[0-9]{3}', '-json', './semaphore'],
                             cwd=HERE, text=True, capture_output=True, timeout=120)
+    if args.output_dir:
+        (args.output_dir / 'decisions.jsonl').write_text(result.stdout + result.stderr)
     if result.returncode:
         print(result.stdout)
         print(result.stderr, file=sys.stderr)
@@ -84,7 +96,17 @@ def main():
     validate_results(result.stdout, args.count)
     subprocess.run(['go', 'test', '-race', '-count=1', '-timeout=60s', './...'],
                    cwd=HERE, check=True, timeout=120)
-    print('All accepted decision guard checks, focused race suite and upstream regression suite passed.')
+    schedule = HERE / 'schedule/run.py'
+    command = [sys.executable, str(schedule), '--count', str(args.count)]
+    if args.output_dir:
+        command += ['--output', str(args.output_dir / 'schedule.jsonl')]
+    subprocess.run(command, check=True, timeout=120)
+    for mode in ('omit-grant-rollback', 'omit-selected-rollback', 'try-bypass', 'zero-charges'):
+        command = [sys.executable, str(schedule), '--mode', mode, '--count', '1']
+        if args.output_dir:
+            command += ['--output', str(args.output_dir / (mode + '.jsonl'))]
+        subprocess.run(command, check=True, timeout=120)
+    print('All 13 decision contracts, ordinary/scheduled race suites, upstream regressions and four fault probes passed.')
 
 
 if __name__ == '__main__':
