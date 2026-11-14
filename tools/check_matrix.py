@@ -63,6 +63,7 @@ def main() -> int:
     # A name a blind reader cannot derive — implementation flags,
     # comparisons, lowercase — is a modelling error.
     word_ok = re.compile(r"^[A-Z][A-Za-z0-9]*(?:_[A-Z][A-Za-z0-9]*)*$")
+    names: list[str] = []
     decl = re.search(r"<!-- states: (.+?) -->", matrix)
     if decl:
         raw = decl.group(1)
@@ -96,6 +97,17 @@ def main() -> int:
                 and "Q-" not in c
             ):
                 errors.append(f"uncited {c[:50]!r} in row {label}")
+
+    terminal_match = re.search(r"<!-- terminal: (.+?) -->", matrix)
+    terminal = set(re.split(r"[,\s]+", terminal_match.group(1))) if terminal_match else set()
+    for name in names:
+        if name not in rows and name not in terminal:
+            errors.append(f"missing state row: {name}")
+    for name, count in rows.items():
+        if name not in names:
+            errors.append(f"undeclared state row: {name}")
+        if count != len(events):
+            errors.append(f"grid row {name}: {count} cells, expected {len(events)}")
 
     total = sum(rows.values())
     if total != len(events) * len(rows):

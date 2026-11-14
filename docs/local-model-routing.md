@@ -422,3 +422,25 @@ python3 tools/local_models.py --ledger "$ledger" set-limit 3000000
 The ledger includes no prompt text, but its database is local task data.
 Prices and usage figures are estimates in US dollars. An output ending for any
 reason other than `stop` may be incomplete and must be reviewed.
+
+
+### Predictable pilot artifacts and controller comparison
+
+The pilot runner defaults to `--routing-variant routed` with selective
+output. Matrix rendering and the Flash schedule sweep remain explicit
+variants. `--model gpt-6.1-sol` is the reference; `--model gpt-6.1-terra`
+is an experimental controller using the same ChatGPT login and medium
+reasoning effort. The experiment manifest records the selected model.
+Model choice does not change the provider ledger or pilot instructions.
+
+Prompt v1.29 requires reviewed `catalogue-fields.json`, rendered by
+`tools/pilot_artifacts.py catalogue FIELDS OUTPUT`. The runner verifies
+that the catalogue still matches those fields. Coverage omissions,
+unknown UV references, and inconsistent UV prefixes fail before writing.
+`pilot_artifacts.py citations SOURCE LINE [LINE ...]` copies exact source
+lines as JSON without judging the associated claim.
+
+Blind coverage accepts distinct situations for the same event, with an
+explicit Situation column; duplicate or missing situation labels fail.
+The checklist still ticks each event and pair ordering exactly once.
+A Part-A controller never edits a blind response to make it pass.

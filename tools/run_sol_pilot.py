@@ -38,7 +38,7 @@ def save(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 
-def brief(pack, component='pool', routing_variant='flash-writes'):
+def brief(pack, component='pool', routing_variant='routed'):
     _, _, output_name, scope, tests = COMPONENTS[component]
     return (pack / 'prompts/02-pilot.md').read_text(encoding='utf-8') + f'''
 
@@ -202,7 +202,7 @@ def read_usage(events):
     return usage
 
 
-def run_arm(root, arm, prompt, codex, python, timeout, *, replay_server=None):
+def run_arm(root, arm, prompt, codex, python, timeout, *, replay_server=None, model=MODEL):
     logs = root / 'logs'
     logs.mkdir(exist_ok=True)
     events = root / 'events.jsonl'
@@ -218,7 +218,7 @@ def run_arm(root, arm, prompt, codex, python, timeout, *, replay_server=None):
         '-c', 'mcp_servers.pilot.tools.command.approval_mode="approve"',
         '-c', 'mcp_servers.pilot.tools.command.output_token_limit=60000',
         *([] if replay_server else ['-c', 'mcp_servers.pilot.env_vars=["DEEPSEEK_API_KEY","TYPESAFE_API_KEY"]']),
-        '--model', MODEL, '--json', '--sandbox', 'read-only',
+        '--model', model, '--json', '--sandbox', 'read-only',
         '-C', str(root / 'pool'), '-o', str(root / 'final.txt'), '-',
     ]
     start = time.monotonic()
@@ -336,7 +336,7 @@ runpy.run_path(script, run_name='__main__')
 
 
 
-def verify_artifacts(root, python, output_name='channelPool', *, structured=False):
+def verify_artifacts(root, python, output_name='channelPool', *, structured=False, catalogue=False):
     base = f'domain-analysis/{output_name}'
     commands = {
         'matrix': [f'{base}/check_matrix.py'],
@@ -350,8 +350,11 @@ def verify_artifacts(root, python, output_name='channelPool', *, structured=Fals
         commands['matrix-fields'] = ['../pack/tools/hybrid_pilot.py', f'{base}/matrix-fields.json',
                                      f'{base}/disposition-matrix.md', '--check']
         commands['sidecar-regeneration'] = ['../pack/tools/gen_analysis_sidecar.py', base, '--strict']
+    if catalogue:
+        commands['catalogue-fields'] = ['../pack/tools/pilot_artifacts.py', 'catalogue',
+                                       f'{base}/catalogue-fields.json', f'{base}/event-catalogue.md', '--check']
     outcomes = {}
-    for name in (('matrix-fields', 'sidecar-regeneration') if structured else ()) + (
+    for name in (('catalogue-fields',) if catalogue else ()) + (('matrix-fields', 'sidecar-regeneration') if structured else ()) + (
             'matrix', 'guards', 'sidecar', 'reachability', 'blind-coverage'):
         arguments = commands[name]
         code, stdout, stderr = execute(root, ['python3', *arguments], 0, python)
@@ -375,11 +378,12 @@ def main():
     parser.add_argument('--pack-sha', default='HEAD')
     parser.add_argument('--prepare-only', action='store_true', help='verify clean inputs and sandbox without model calls')
     parser.add_argument('--codex-bin', default=os.environ.get('CODEX_APP_RUNTIME_CLI_PATH') or 'codex')
+    parser.add_argument('--model', choices=('gpt-6.1-sol', 'gpt-6.1-terra'), default=MODEL)
     parser.add_argument('--timeout', type=int, default=2400, help='wall-clock seconds per arm')
     parser.add_argument('--output-mode', choices=('selective', 'standard', 'compact', 'compare'),
                         help='selective (default), full standard, compact, or compare standard and compact')
-    parser.add_argument('--routing-variant', choices=('flash-writes', 'routed', 'matrix', 'hybrid'), default='flash-writes',
-                        help='Flash bulk drafting (default), routed, routed with matrix generator, or hybrid')
+    parser.add_argument('--routing-variant', choices=('flash-writes', 'routed', 'matrix', 'hybrid'), default='routed',
+                        help='routed (default), Flash bulk drafting, routed with matrix generator, or hybrid')
     parser.add_argument('--compact-first', action='store_true', help='compare with compact before standard')
     parser.add_argument('--smoke', action='store_true', help='verify selected output modes with a small live command')
     args = parser.parse_args()
@@ -423,7 +427,7 @@ def main():
         source_identity = ({'pool_sha': source_sha} if args.component == 'pool'
                            else {'component': args.component, 'component_sha': source_sha})
         save(root / 'experiment.json', {'pack_sha': sha, **source_identity,
-                                         'model': MODEL, 'effort': 'medium', 'auth': 'chatgpt',
+                                         'model': args.model, 'effort': 'medium', 'auth': 'chatgpt',
                                          'timeout_seconds': args.timeout, 'smoke': args.smoke,
                                          'arm_order': arm_order,
                                          'routing_variant': args.routing_variant,
@@ -457,7 +461,7 @@ def main():
 Report the module name and whether the Jev call succeeded.'''
                       if args.smoke else brief(folder / 'pack', args.component, args.routing_variant))
             try:
-                run_arm(folder, arm, prompt, codex, python, args.timeout)
+                run_arm(folder, arm, prompt, codex, python, args.timeout, model=args.model)
             finally:
                 calls = Budget(folder / 'routing.sqlite').calls()
                 save(folder / 'routing-cost.json', {'calls': calls, 'charged_microdollars': sum(
@@ -472,7 +476,8 @@ Report the module name and whether the Jev call succeeded.'''
                     raise ValueError(f'{arm} smoke did not demonstrate the pilot tool and live Jev')
             else:
                 gates_passed.append(verify_artifacts(folder, python, output_name,
-                                                     structured=args.routing_variant in ('matrix', 'hybrid')))
+                                                     structured=args.routing_variant in ('matrix', 'hybrid'),
+                                                     catalogue=True))
         print(f'{len(arm_order)} Codex session(s) ended. Review usage and artifacts in {root}.')
         return 0 if all(gates_passed) else 1
     except (OSError, KeyError, ValueError, subprocess.SubprocessError) as exc:
