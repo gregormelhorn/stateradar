@@ -1,0 +1,25 @@
+id: DR-007
+date: 2026-11-14
+source_question: Q-07
+question: May release responsibility transfer between callers without ownership tracking?
+options: [transferable-anonymous-weight, require-matching-ownership, aggregate-diagnostics-only]
+decision: transferable-anonymous-weight
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Gut, übernehmen wir Q-07 so."
+scope: >-
+  Evaluation copy only. Acquisition and matching release may occur in different
+  goroutines when the application transfers responsibility. Each release must
+  correspond to actually held, not already released capacity. The application
+  coordinates that correspondence; the semaphore tracks aggregate weight and
+  validates numeric bounds, not per-caller ownership or acquisition identity.
+  A duplicate release may be undetectable when other outstanding acquisitions
+  cover its weight. DR-003 still rejects aggregate over-release without changing
+  state. No ownership token, acquisition handle or duplicate-release detector is
+  introduced. Wrong-instance and wrong-Context responsibility remains Q-08.
+links:
+  - "guarded matrix branch: Release"
+  - "guarded matrix branch: UV-RepeatRelease"
+  - "guarded matrix branch: UV-UnownedRelease"
+status: accepted
+implementation_status: pending-contract-and-conformance-follow-up

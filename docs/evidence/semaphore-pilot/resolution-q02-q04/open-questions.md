@@ -1,4 +1,4 @@
-# Domain question register after Q-01 through Q-06
+# Domain question register after Q-01 through Q-07
 
 Behavior descriptions and citations below refer to the frozen upstream baseline
 `04914c200cb38d4ea960ee6a4c314a028c632991`. DR-001 through DR-004 subsequently change the
@@ -142,7 +142,17 @@ Options: allow transferable anonymous weight by contract | require matching owne
 
 Proposed: Allow transferable anonymous weight by contract — callers coordinate matching aggregate release; the component does not promise per-caller ownership checks.
 
-Status: OPEN — human decision required
+Decision: Release responsibility may transfer between goroutines. The application
+ensures each release matches held, not already released capacity. The semaphore
+checks numeric bounds and aggregate holdings, not caller ownership or request
+identity. Duplicate releases can remain undetected while other holdings cover
+them. Aggregate over-release retains the state-preserving panic from DR-003.
+Rationale: proposal rationale adopted (owner-confirmed).
+Owner response: "Gut, übernehmen wir Q-07 so."
+Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
+Status: RESOLVED — DR-007
+Follow-up: contract documentation and focused conformance acceptance pending;
+this interview answer does not claim implementation/test completion.
 
 ## Q-08 — Should wrong instance or foreign but well-formed Context remain caller errors, and how are these detected?
 

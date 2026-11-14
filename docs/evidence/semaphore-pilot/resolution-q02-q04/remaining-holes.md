@@ -1,9 +1,9 @@
 # Remaining scope
 
 Q-01 (DR-001), Q-03 (DR-002), Q-04 (DR-003) and Q-02 (DR-004) are accepted.
-Q-05 (DR-005) and Q-06 (DR-006) are accepted; their contract/conformance
-follow-up is pending. Q-07..Q-13 remain OPEN in open-questions.md. These decisions
-do not approve the earlier recommendations on caller identity,
+Q-05 through Q-07 (DR-005 through DR-007) are accepted; their contract/conformance
+follow-up is pending. Q-08..Q-13 remain OPEN in open-questions.md. These decisions
+do not approve the earlier recommendations on wrong-instance/Context selection,
 custom Contexts, cancellation races, timing, general FIFO policy or Release(0).
 
 This slice gives 13 original cells guarded numeric refinements with explicit
