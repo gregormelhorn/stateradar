@@ -13,7 +13,7 @@ import sys
 import time
 
 from local_budget import Budget, BudgetExceeded
-from local_models import FLASH_URL, _post, _tokens, _usage
+from local_models import FLASH_URL, ProviderError, _post, _tokens, _usage
 from run_sol_pilot import (
     MODEL as BLIND_MODEL, POOL_SHA, TOOL, brief, codex_environment, command_result,
     git, prepare, read_log, read_usage, save, verify_artifacts,
@@ -77,6 +77,7 @@ def blind_dispatch(root, argv, sequence, python, codex):
     events = scratch / f'{sequence:03}.jsonl'
     argv_codex = [
         codex, '-a', 'never', 'exec', '--ignore-user-config', '--ephemeral',
+        '--skip-git-repo-check',
         '--disable', 'shell_tool', '--disable', 'unified_exec',
         '-c', 'forced_login_method="chatgpt"', '-c', 'model_reasoning_effort="medium"',
         '-c', 'web_search="disabled"', '--model', BLIND_MODEL, '--json', '--sandbox', 'read-only',
@@ -107,19 +108,30 @@ def execute_call(root, function, sequence, python, codex):
     return command_result(root, 'selective', argv, sequence, python)
 
 
-def run(root, prompt, timeout, codex, python, key):
+def run(root, prompt, timeout, codex, python, key, *, continuation=False):
     ledger = Budget(root / 'routing.sqlite')
-    (root / 'logs').mkdir()
+    (root / 'logs').mkdir(exist_ok=True)
     messages = [{'role': 'user', 'content': prompt}]
     start = time.monotonic()
-    requests = sequence = 0
-    with (root / 'provider-usage.jsonl').open('w', encoding='utf-8', buffering=1) as log:
+    usage_file = root / 'provider-usage.jsonl'
+    requests = len(usage_file.read_text().splitlines()) if continuation else 0
+    sequence = max((int(file.name.split('.')[0]) for file in (root / 'logs').glob('[0-9]*.json')),
+                   default=0)
+    with usage_file.open('a' if continuation else 'w', encoding='utf-8', buffering=1) as log:
         while time.monotonic() - start < timeout:
             payload = {'model': MODEL, 'thinking': {'type': 'disabled'},
                        'tools': [TOOL_SPEC], 'messages': messages, 'max_tokens': MAX_OUTPUT}
             estimated = len(json.dumps(payload, ensure_ascii=False).encode('utf-8'))
             ticket = ledger.reserve('deepseek-flash-steering', (estimated * 3 + 9) // 10 + 2 * MAX_OUTPUT)
-            response = _post(ticket, FLASH_URL, payload, key)
+            try:
+                response = _post(ticket, FLASH_URL, payload, key)
+            except ProviderError as error:
+                # Keep uncertain requests reserved and retry once when the
+                # connection lost the response before any tool was invoked.
+                if not any(reason in str(error).lower() for reason in ('timed out', 'connection reset')):
+                    raise
+                ticket = ledger.reserve('deepseek-flash-steering', (estimated * 3 + 9) // 10 + 2 * MAX_OUTPUT)
+                response = _post(ticket, FLASH_URL, payload, key)
             created = datetime.fromtimestamp(response['created'], timezone.utc)
             usage = _usage(response)
             charged = cost(usage, created)
@@ -158,6 +170,8 @@ def main():
     parser.add_argument('--pack-sha', default='HEAD')
     parser.add_argument('--timeout', type=int, default=2400)
     parser.add_argument('--smoke', action='store_true')
+    parser.add_argument('--resume', action='store_true', help='fresh context for an interrupted pilot')
+    parser.add_argument('--addendum', type=Path, help='additional English execution instructions')
     args = parser.parse_args()
     root = args.output.resolve()
     if sys.platform != 'darwin' or not root.is_relative_to('/private/tmp') or root == Path('/private/tmp'):
@@ -170,11 +184,21 @@ def main():
     pack = Path(__file__).resolve().parents[1]
     python = Path(sys.executable).absolute()
     sha = git('rev-parse', '--verify', f'{args.pack_sha}^{{commit}}', cwd=pack).decode().strip()
-    prepare(root, pack, sha, args.pool_repo.resolve(), POOL_SHA)
-    save(root / 'experiment.json', {'pack_sha': sha, 'pool_sha': POOL_SHA, 'steering_model': MODEL,
-                                    'thinking': 'disabled', 'blind_model': BLIND_MODEL, 'blind_effort': 'medium',
-                                    'output_mode': 'selective', 'timeout_seconds': args.timeout,
-                                    'smoke': args.smoke})
+    metadata = {'pack_sha': sha, 'pool_sha': POOL_SHA, 'steering_model': MODEL,
+                'thinking': 'disabled', 'blind_model': BLIND_MODEL, 'blind_effort': 'medium',
+                'output_mode': 'selective', 'timeout_seconds': args.timeout, 'smoke': args.smoke}
+    if args.resume:
+        original = json.loads((root / 'experiment.json').read_text())
+        if any(original.get(field) != metadata[field] for field in ('pack_sha', 'pool_sha', 'thinking')):
+            parser.error('resume requires the same pack, source and thinking mode')
+        if not (root / 'failure.json').is_file():
+            parser.error('only a recorded interrupted pilot can be resumed')
+        previous = sorted(root.glob('failure-*.json'))
+        (root / 'failure.json').rename(root / f'failure-{len(previous) + 1:02}.json')
+        save(root / f'resume-{len(previous) + 1:02}.json', metadata)
+    else:
+        prepare(root, pack, sha, args.pool_repo.resolve(), POOL_SHA)
+        save(root / 'experiment.json', metadata)
     prompt = ('Use the command tool to read go.mod and report its module name.'
               if args.smoke else brief(root / 'pack', routing_variant='routed') + '''
 - The command tool dispatches Part B through a fresh Codex session. Use the
@@ -189,19 +213,29 @@ def main():
   format checks as each artifact becomes available.
 - Finish by running all five pack gates and returning a short evidence summary.
 ''')
+    if args.resume:
+        prompt += ('\nThis is a fresh Flash context continuing your interrupted run. Inspect the files '
+                   'you already wrote, preserve the evidence and finish the missing work.\n')
+    if args.addendum:
+        addendum = args.addendum.read_text(encoding='utf-8')
+        (root / ('resume-addendum.txt' if args.resume else 'addendum.txt')).write_text(addendum)
+        prompt += '\n' + addendum
+    started = time.monotonic()
     try:
-        run(root, prompt, args.timeout, codex, python, key)
+        run(root, prompt, args.timeout, codex, python, key, continuation=args.resume)
         if args.smoke:
             if 'github.com/silenceper/pool' not in (root / 'final.txt').read_text():
                 raise ValueError('smoke did not report the tool result')
             return 0
         return 0 if verify_artifacts(root, python) else 1
     except (OSError, ValueError, BudgetExceeded, subprocess.SubprocessError) as error:
-        save(root / 'failure.json', {'error': str(error)})
+        save(root / 'failure.json', {'error': str(error), 'elapsed_seconds': time.monotonic() - started})
         print(f'FLASH PILOT: {error}', file=sys.stderr)
         return 1
     finally:
         save(root / 'routing-cost.json', Budget(root / 'routing.sqlite').calls())
+        if not args.smoke and not (root / 'acceptance.json').exists():
+            verify_artifacts(root, python)
 
 
 if __name__ == '__main__':
