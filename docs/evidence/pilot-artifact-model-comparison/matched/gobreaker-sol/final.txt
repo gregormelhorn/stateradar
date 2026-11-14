@@ -1,0 +1,7 @@
+Completed the routed CircuitBreaker pilot. The model covers 3 states, 26 events, and 32 interaction orderings. All 17 domain questions remain open. [Summary](/private/tmp/stateradar-controller-matched-czn61wf4/gobreaker-sol/selective/pool/domain-analysis/circuitBreaker/summary.md) · [Open questions](/private/tmp/stateradar-controller-matched-czn61wf4/gobreaker-sol/selective/pool/domain-analysis/circuitBreaker/open-questions.md)
+
+- One `Allow` continuation can report success twice and close a half-open breaker. An omitted report can leave it rejecting new requests indefinitely once its admission budget is spent.
+- A stale completion can advance an expired open breaker to half-open before its outcome is discarded. Overwriting a wrapper can redirect an outstanding report to another breaker with a matching generation.
+- `OnStateChange` runs under the mutex, so reentrant `Counts` blocks. A panic in `ReadyToTrip` during normal `Execute` accounting can count one failed request twice.
+
+The upstream Go tests and all 10 overlay probes passed, including under the race detector. Catalogue, matrix, sidecar, reachability, and blind coverage checks passed. Nine guard groups were proved and two were inspected without proof. All 41 blind-pass divergences link to open questions. The first Flash draft hit its output limit and the prescribed retry completed. Only analysis artifacts were added.

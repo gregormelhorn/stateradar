@@ -1,0 +1,70 @@
+group G-01 New bounds: proven
+  assumptions: All integer bounds, before any allocation
+  {'initial': -1, 'idle': 2, 'cap': 3}: ['invalid bounds']
+  {'initial': 0, 'idle': 2, 'cap': 3}: ['accept bounds']
+  {'initial': 1, 'idle': 2, 'cap': 3}: ['accept bounds']
+  {'initial': 2, 'idle': 2, 'cap': 3}: ['accept bounds']
+  {'initial': 3, 'idle': 2, 'cap': 3}: ['invalid bounds']
+  {'initial': 0, 'idle': 2, 'cap': 3}: ['accept bounds']
+  {'initial': 0, 'idle': 3, 'cap': 3}: ['accept bounds']
+  {'initial': 0, 'idle': 4, 'cap': 3}: ['invalid bounds']
+group G-02 New callback presence: proven
+  assumptions: After capacity validation for nonnil config
+  {'config': False, 'factory': True, 'closer': True}: ['nil config']
+  {'config': True, 'factory': False, 'closer': True}: ['missing factory']
+  {'config': True, 'factory': True, 'closer': False}: ['missing closer']
+  {'config': True, 'factory': True, 'closer': True}: ['continue']
+group G-03 Get admission after miss: proven
+  assumptions: Mutex-held count, valid configured cap. No assumed lower bound on count
+  {'count': 0, 'cap': 1, 'factory': True}: ['create']
+  {'count': 0, 'cap': 1, 'factory': False}: ['closed']
+  {'count': 1, 'cap': 1, 'factory': True}: ['queue']
+  {'count': 1, 'cap': 1, 'factory': False}: ['queue']
+  {'count': 2, 'cap': 1, 'factory': True}: ['queue']
+  {'count': 2, 'cap': 1, 'factory': False}: ['queue']
+  {'count': -1, 'cap': 0, 'factory': True}: ['create']
+  {'count': 0, 'cap': 0, 'factory': True}: ['queue']
+  {'count': 1, 'cap': 0, 'factory': True}: ['queue']
+group G-04 Age decision at sampled time: proven
+  assumptions: Integer duration and ordering of sampled time relative to computed deadline. Runtime sampling is separate
+  {'duration': -1, 'age_delta': -1}: ['disabled']
+  {'duration': -1, 'age_delta': 0}: ['disabled']
+  {'duration': -1, 'age_delta': 1}: ['disabled']
+  {'duration': 0, 'age_delta': -1}: ['disabled']
+  {'duration': 0, 'age_delta': 0}: ['disabled']
+  {'duration': 0, 'age_delta': 1}: ['disabled']
+  {'duration': 1, 'age_delta': -1}: ['eligible']
+  {'duration': 1, 'age_delta': 0}: ['eligible']
+  {'duration': 1, 'age_delta': 1}: ['expired']
+group G-05 Put waiter priority: proven
+  assumptions: Length of mutex-protected slice. Negative length structurally unavailable
+  {'pending': 0}: ['try idle send']
+  {'pending': 1}: ['handoff']
+  {'pending': 2}: ['handoff']
+group G-09 Constructor iteration: proven
+  assumptions: Valid config, no early factory error, nonnegative index
+  {'i': 0, 'initial': 1}: ['create next']
+  {'i': 1, 'initial': 1}: ['finished']
+  {'i': 2, 'initial': 1}: ['finished']
+group G-10 Put nil and pool availability: proven
+  assumptions: Interface nilness is a Boolean, distinct from typed nil
+  {'payload': False, 'available': False}: ['reject']
+  {'payload': True, 'available': False}: ['closed']
+  {'payload': True, 'available': True}: ['live']
+group G-11 Close and callback availability: proven
+  assumptions: Callback presence sampled under mutex
+  {'payload': False, 'closer': False}: ['reject']
+  {'payload': True, 'closer': False}: ['nil closer']
+  {'payload': True, 'closer': True}: ['invoke']
+group G-12 Ping dispatch gate: proven
+  assumptions: One observed callback presence flag. Later dispatch reads it independently
+  {'ping': True}: ['validate']
+  {'ping': False}: ['skip']
+group G-13 Release snapshot: proven
+  assumptions: Captured channel presence under mutex
+  {'available': True}: ['drain']
+  {'available': False}: ['return']
+group G-06 channel select readiness: not-formalizable: dynamic-state: channel service can change between select and the following lock. P-01a
+group G-07 callback physical result: not-formalizable: external-call: callback contracts give no resource-effect predicate. Q-21
+group G-08 requester completion: not-formalizable: dynamic-state: pending receive only progresses after send or close. Q-02
+group G-14 sampled clock ordering: not-formalizable: clock: scheduler and actual sampled time unavailable. Q-14

@@ -1,0 +1,84 @@
+package pool
+
+import (
+	"testing"
+	"time"
+)
+
+// Called only by the scheduling overlay after the select chooses default.
+var pilotBeforeAdmission = func() {}
+
+func TestPilotAdmissionWindow(t *testing.T) {
+	for _, atCap := range []bool{false, true} {
+		capacity := 2
+		if atCap {
+			capacity = 1
+		}
+		p := probePool(t, 1, 1, capacity, nil, nil, nil)
+		original, _ := p.Get()
+		entered, resume := make(chan struct{}), make(chan struct{})
+		pilotBeforeAdmission = func() { close(entered); <-resume }
+		waiting := acquire(p)
+		select {
+		case <-entered:
+		case <-time.After(time.Second):
+			t.Fatal("no failed receive")
+		}
+		if err := p.Put(original); err != nil {
+			t.Fatal(err)
+		}
+		close(resume)
+		if atCap {
+			requests(t, p, 1)
+			if p.Len() != 1 {
+				t.Fatal("waiter failed to coexist with idle storage")
+			}
+			pending(t, waiting)
+			newer := received(t, acquire(p))
+			if newer.value != original {
+				t.Fatal("later caller did not get buffered resource")
+			}
+			if err := p.Put(newer.value); err != nil {
+				t.Fatal(err)
+			}
+			if got := received(t, waiting); got.value != original {
+				t.Fatalf("queued caller got %+v", got)
+			}
+		} else {
+			newer := received(t, waiting)
+			if newer.value == nil || newer.value == original || p.Len() != 1 {
+				t.Fatal("failed observation was rechecked instead of opening a new resource")
+			}
+		}
+		p.Release()
+	}
+	pilotBeforeAdmission = func() {}
+}
+
+func TestPilotReleaseAdmissionWindow(t *testing.T) {
+	for _, atCap := range []bool{false, true} {
+		capacity := 2
+		if atCap {
+			capacity = 1
+		}
+		p := probePool(t, 1, 1, capacity, nil, nil, nil)
+		_, _ = p.Get()
+		entered, resume := make(chan struct{}), make(chan struct{})
+		pilotBeforeAdmission = func() { close(entered); <-resume }
+		waiting := acquire(p)
+		select {
+		case <-entered:
+		case <-time.After(time.Second):
+			t.Fatal("no failed receive")
+		}
+		p.Release()
+		close(resume)
+		if atCap {
+			requests(t, p, 1)
+			pending(t, waiting)
+		} else if got := received(t, waiting); got.err != ErrClosed {
+			t.Fatalf("below cap got %+v", got)
+		}
+	}
+	pilotBeforeAdmission = func() {}
+}

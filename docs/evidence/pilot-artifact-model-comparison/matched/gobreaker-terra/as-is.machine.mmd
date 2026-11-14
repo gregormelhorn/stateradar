@@ -1,0 +1,6 @@
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Open: failure and ReadyToTrip
+    Open --> HalfOpen: expiry observed
+    HalfOpen --> Open: failure
+    HalfOpen --> Closed: enough consecutive successes

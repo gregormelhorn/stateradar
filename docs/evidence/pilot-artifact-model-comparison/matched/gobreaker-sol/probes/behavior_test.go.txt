@@ -1,0 +1,204 @@
+package gobreaker
+
+import (
+	"errors"
+	"testing"
+	"time"
+)
+
+func tripPilot(b *TwoStepCircuitBreaker) {
+	for i := 0; i < 6; i++ {
+		done, err := b.Allow()
+		if err != nil {
+			panic(err)
+		}
+		done(false)
+	}
+}
+
+func agePilot(b *CircuitBreaker) {
+	b.mutex.Lock()
+	b.expiry = time.Now().Add(-time.Second)
+	b.mutex.Unlock()
+}
+
+func TestPilotDuplicateCompletion(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{MaxRequests: 2})
+	tripPilot(b)
+	agePilot(b.cb)
+	done, err := b.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	done(true)
+	if got := b.Counts(); got != (Counts{Requests: 1, TotalSuccesses: 1, ConsecutiveSuccesses: 1}) {
+		t.Fatal(got)
+	}
+	done(true)
+	if b.State() != StateClosed {
+		t.Fatal("duplicate did not close")
+	}
+}
+
+func TestPilotOmittedCompletionAndSecondAllow(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{})
+	tripPilot(b)
+	agePilot(b.cb)
+	done, err := b.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 2; i++ {
+		if other, err := b.Allow(); other != nil || err != ErrTooManyRequests {
+			t.Fatal(err)
+		}
+	}
+	if b.State() != StateHalfOpen || b.Counts().Requests != 1 {
+		t.Fatal("reservation changed without a report")
+	}
+	done(true)
+	if b.State() != StateClosed {
+		t.Fatal("late matching report did not close")
+	}
+	if other, err := b.Allow(); other == nil || err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPilotStaleCompletionAdvancesOpen(t *testing.T) {
+	calls := 0
+	b := NewTwoStepCircuitBreaker(Settings{OnStateChange: func(string, State, State) { calls++ }})
+	old, _ := b.Allow()
+	tripPilot(b)
+	agePilot(b.cb)
+	old(false)
+	if calls != 2 || b.Counts() != (Counts{}) {
+		t.Fatal("stale report did not publish transition with cleared counts")
+	}
+	if b.State() != StateHalfOpen {
+		t.Fatal("expected half-open")
+	}
+}
+
+func TestPilotCountsDoesNotRefresh(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{Interval: time.Hour})
+	done, _ := b.Allow()
+	done(true)
+	agePilot(b.cb)
+	if b.Counts().Requests != 1 {
+		t.Fatal("Counts refreshed before a state-aware operation")
+	}
+	if b.State() != StateClosed || b.Counts().Requests != 0 {
+		t.Fatal("State failed to refresh")
+	}
+}
+
+func TestPilotExecuteOverlap(t *testing.T) {
+	b := NewCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return false }})
+	started, release, firstReturned := make(chan struct{}), make(chan struct{}), make(chan error, 1)
+	go func() {
+		_, err := b.Execute(func() (interface{}, error) { close(started); <-release; return nil, nil })
+		firstReturned <- err
+	}()
+	<-started
+	marker := errors.New("second")
+	if _, err := b.Execute(func() (interface{}, error) { return nil, marker }); err != marker {
+		t.Fatal(err)
+	}
+	if c := b.Counts(); c.Requests != 2 || c.TotalFailures != 1 || c.TotalSuccesses != 0 {
+		t.Fatal(c)
+	}
+	close(release)
+	if err := <-firstReturned; err != nil {
+		t.Fatal(err)
+	}
+	if c := b.Counts(); c.Requests != 2 || c.TotalSuccesses != 1 || c.ConsecutiveFailures != 0 {
+		t.Fatal(c)
+	}
+}
+
+func TestPilotStateChangePanicKeepsTransition(t *testing.T) {
+	b := NewCircuitBreaker(Settings{
+		ReadyToTrip:   func(Counts) bool { return true },
+		OnStateChange: func(string, State, State) { panic("hook") },
+	})
+	func() {
+		defer func() {
+			if got := recover(); got != "hook" {
+				t.Fatalf("panic = %v", got)
+			}
+		}()
+		b.Execute(func() (interface{}, error) { return nil, errors.New("request") })
+	}()
+	if b.State() != StateOpen || b.Counts() != (Counts{}) {
+		t.Fatal("transition was not committed before callback")
+	}
+}
+
+func TestPilotIsSuccessfulAfterExpiry(t *testing.T) {
+	var b *CircuitBreaker
+	calls := 0
+	b = NewCircuitBreaker(Settings{Interval: time.Hour, IsSuccessful: func(error) bool { calls++; return true }})
+	result, err := b.Execute(func() (interface{}, error) { agePilot(b); return "completed", nil })
+	if calls != 1 || result != "completed" || err != nil || b.Counts() != (Counts{}) {
+		t.Fatal(calls, result, err, b.Counts())
+	}
+}
+
+func TestPilotNotificationReentry(t *testing.T) {
+	entered, returned := make(chan struct{}), make(chan struct{})
+	var b *CircuitBreaker
+	b = NewCircuitBreaker(Settings{
+		ReadyToTrip: func(Counts) bool { return true },
+		OnStateChange: func(string, State, State) {
+			close(entered)
+			b.Counts()
+			close(returned)
+		},
+	})
+	go b.Execute(func() (interface{}, error) { return nil, errors.New("request") })
+	<-entered
+	select {
+	case <-returned:
+		t.Fatal("reentrant Counts returned")
+	case <-time.After(40 * time.Millisecond):
+	}
+}
+
+func TestPilotWrapperReassignmentRedirectsReport(t *testing.T) {
+	a := NewTwoStepCircuitBreaker(Settings{Name: "first"})
+	b := NewTwoStepCircuitBreaker(Settings{Name: "second"})
+	done, err := a.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	*a = *b
+	done(true)
+	if got := b.Counts(); got.Requests != 0 || got.TotalSuccesses != 1 {
+		t.Fatalf("reassigned wrapper reported to counts %+v", got)
+	}
+}
+
+func TestPilotTripPolicyPanicRepeatsFailure(t *testing.T) {
+	calls := 0
+	b := NewCircuitBreaker(Settings{
+		ReadyToTrip: func(Counts) bool {
+			calls++
+			if calls == 1 {
+				panic("policy")
+			}
+			return false
+		},
+	})
+	func() {
+		defer func() {
+			if got := recover(); got != "policy" {
+				t.Fatalf("panic = %v", got)
+			}
+		}()
+		b.Execute(func() (interface{}, error) { return nil, errors.New("request") })
+	}()
+	if c := b.Counts(); c.Requests != 1 || c.TotalFailures != 2 || calls != 2 {
+		t.Fatal(c, calls)
+	}
+}

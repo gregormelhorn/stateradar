@@ -1,0 +1,54 @@
+group G-01 admission: proven
+  - NAT domain: limit >= 1, limit <= 4294967295, requests >= 0, requests <= 4294967295, state >= 0, state <= 2
+  - boundary {'state': 0, 'requests': 1, 'limit': 2}: admit
+  - boundary {'state': 0, 'requests': 2, 'limit': 2}: admit
+  - boundary {'state': 0, 'requests': 3, 'limit': 2}: admit
+  - boundary {'state': 1, 'requests': 1, 'limit': 2}: open
+  - boundary {'state': 1, 'requests': 2, 'limit': 2}: open
+  - boundary {'state': 1, 'requests': 3, 'limit': 2}: open
+  - boundary {'state': 2, 'requests': 1, 'limit': 2}: admit
+  - boundary {'state': 2, 'requests': 2, 'limit': 2}: budget
+  - boundary {'state': 2, 'requests': 3, 'limit': 2}: budget
+group G-02 generation: proven
+  - NAT domain: generation >= 0, generation <= 18446744073709551615, captured >= 0, captured <= 18446744073709551615
+  - boundary {'generation': 1, 'captured': 2}: skip
+  - boundary {'generation': 2, 'captured': 2}: apply
+  - boundary {'generation': 3, 'captured': 2}: skip
+group G-03 success threshold: proven
+  - NAT domain: limit >= 1, limit <= 4294967295, streak >= 0, streak <= 4294967295
+  - boundary {'streak': 1, 'limit': 2}: stay
+  - boundary {'streak': 2, 'limit': 2}: close
+  - boundary {'streak': 3, 'limit': 2}: close
+group G-04 default trip: proven
+  - NAT domain: streak >= 0, streak <= 4294967295
+  - boundary {'streak': 4}: stay
+  - boundary {'streak': 5}: stay
+  - boundary {'streak': 6}: open
+group G-05 duration: proven
+  - NAT domain: duration >= -9223372036854775808, duration <= 9223372036854775807
+  - boundary {'duration': -1}: default
+  - boundary {'duration': 0}: default
+  - boundary {'duration': 1}: configured
+group G-06 maximum: proven
+  - NAT domain: maximum >= 0, maximum <= 4294967295
+  - boundary {'maximum': 0}: default
+  - boundary {'maximum': 1}: configured
+group G-09 outcome: proven
+  - NAT domain: Boolean sort
+  - boundary {'success': False}: failure
+  - boundary {'success': True}: success
+group G-10 callback dispatch: proven
+  - NAT domain: Boolean sort
+  - boundary {'changed': False, 'callback': False}: same
+  - boundary {'changed': False, 'callback': True}: same
+  - boundary {'changed': True, 'callback': False}: skip
+  - boundary {'changed': True, 'callback': True}: notify
+group G-11 nil test: proven
+  - NAT domain: Boolean sort
+  - boundary {'nil_value': False}: non-nil
+  - boundary {'nil_value': True}: nil
+  - G-06 below zero is outside the uint32 domain.
+group G-07 expiry: not-formalizable: clock: time.Time.Before depends on sampled monotonic or wall time and zero sentinel.
+  - Inspection: below and equality stay. Above refreshes only for armed Closed or Open. HalfOpen does not sample an expiry. gobreaker.go:337 and 341.
+group G-08 custom trip: not-formalizable: external-call: ReadyToTrip can return either Boolean, hang, panic or terminate its goroutine.
+  - Inspection following normal return: true opens; false stays. gobreaker.go:326 and 327.

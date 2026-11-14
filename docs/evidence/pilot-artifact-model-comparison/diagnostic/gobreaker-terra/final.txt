@@ -1,0 +1,10 @@
+The pilot is **incomplete**. The session’s filesystem permission is read-only, so I could not create the required analysis artifacts, routing task files, probes, or checker inputs. The pilot tool reported that it created the output directory, but I did not write analysis files into it. Completing the run requires a workspace with write access.
+
+The existing Go tests passed with a finite timeout: `go test -timeout 30s ./...`. The routing ledger status command succeeded and reported zero calls; no provider call was made, so provider availability remains unverified. The matrix, guard proofs, gates, finding verification, and blind Part B were not run.
+
+The initial source reading identified two questions for the full analysis:
+
+- `OnStateChange` runs during a state change while the breaker mutex is held; calling `State` or `Counts` from that callback would try to acquire the same mutex. The callback’s reentrancy contract needs examination. See [gobreaker.go](/private/tmp/stateradar-controller-4us5gpyo/gobreaker-terra/selective/pool/gobreaker.go:358).
+- A `TwoStepCircuitBreaker.Allow` callback can be invoked repeatedly, and each invocation calls `afterRequest`; whether callers must invoke it exactly once needs a contract decision. See [gobreaker.go](/private/tmp/stateradar-controller-4us5gpyo/gobreaker-terra/selective/pool/gobreaker.go:271).
+
+These are preliminary observations, not the completed, verified findings requested by the pilot.

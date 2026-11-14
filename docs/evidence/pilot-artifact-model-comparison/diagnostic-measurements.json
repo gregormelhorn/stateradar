@@ -1,0 +1,974 @@
+{
+  "pool": {
+    "sol": {
+      "settings": {
+        "pack_sha": "8b8e8543114685963db597526e0ac13f57d2ef54",
+        "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "routed",
+        "output_mode": "selective"
+      },
+      "exit": 0,
+      "codex": {
+        "completed_turns": 1,
+        "counters": {
+          "input_tokens": 6782044,
+          "cached_input_tokens": 6616320,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 40610,
+          "reasoning_output_tokens": 3180
+        },
+        "input_excluding_cache_hits": 165724,
+        "input_plus_output": 6822654
+      },
+      "result": {
+        "elapsed_seconds": 1178.962,
+        "tool_calls": 164
+      },
+      "failure": null,
+      "mcp_completed": 164,
+      "retained_log_reads": 10,
+      "acceptance_exit_codes": {
+        "catalogue-fields": 0,
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "model_calls_by_command_status": {
+        "--help/exit-0": 1,
+        "blind/exit-0": 3,
+        "blind/exit-1": 2,
+        "draft-verify/exit-0": 5,
+        "jev-batch/exit-0": 10,
+        "jev-batch/exit-1": 1,
+        "status/exit-0": 3
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {
+          "deepseek-flash/settled": 15811,
+          "jev/settled": 3406
+        },
+        "settled": 19217,
+        "reserved": 0
+      },
+      "sidecar_counts": {
+        "states": 6,
+        "events": 35,
+        "cells": 210,
+        "pairs": 32,
+        "questions": 22,
+        "guardGroups": 23
+      },
+      "pair_reachability_edges": [
+        {
+          "id": "P-01a",
+          "trace": "adversarial-traces.md#P-01a: Get \u2192 Put",
+          "reachability": {
+            "source": "Open",
+            "target": "Open_WaitingWithIdle",
+            "file": "domain-analysis/channelPool/_probe/window_test.go",
+            "line": 34,
+            "fragment": "waiter failed to coexist with idle storage"
+          }
+        },
+        {
+          "id": "P-03a",
+          "trace": "adversarial-traces.md#P-03a: Get \u2192 Release",
+          "reachability": {
+            "source": "Open_Waiting",
+            "target": "Released_Waiting",
+            "file": "domain-analysis/channelPool/_probe/observe_test.go",
+            "line": 79,
+            "fragment": "pending(t, waiting)"
+          }
+        }
+      ],
+      "gates": {
+        "blind-coverage": [
+          "PART-B COVERAGE: OK (35 events, 32 pair orderings)"
+        ],
+        "catalogue-fields": [
+          "PILOT CATALOGUE: OK"
+        ],
+        "guards": [
+          "group G-01 capacities: proven",
+          "group G-02 factory presence: proven"
+        ],
+        "matrix": [
+          "CHECK MATRIX: OK (6 rows x 35 events)"
+        ],
+        "reachability": [
+          "REACHABILITY CHECK: OK (6/6 states reachable from 'Initializing', 1 terminal)"
+        ],
+        "sidecar": [
+          "DSC CHECK: OK (6 states x 35 events, 210 cells, 23 guard groups)"
+        ]
+      },
+      "artifact_sha256": {
+        "catalogue-fields.json": "597f7f2585049c539ef750f4308ff245d722c54b38bb04a1f20f21cd82a8931f",
+        "disposition-matrix.md": "bd2fc9cb84fa80d1325ac3c1351f992fe4421c65eec053a8306dfa3971e4dea4",
+        "analysis.json": "5da8b7951ba58b9e121c59701a91d4782ff34fdf3297b09b9a850e2656edb516",
+        "part-b-blind.md": "c0938d4804981d84469ed09eb234dcb944cf4c975a06b400a1a0ce8cfbab3629"
+      },
+      "schedule_outputs": [],
+      "cost": {
+        "codex_standard_credits": 34.9795,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": 1.39918,
+        "provider_conservative_usd": 0.019217,
+        "combined_conservative_usd_equivalent": 1.418397
+      },
+      "failed_tool_requests": [],
+      "retained_log_request_details": [
+        {
+          "item": "item_33",
+          "argv": [
+            "read-log",
+            "028.stdout",
+            "page",
+            "221",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_39",
+          "argv": [
+            "read-log",
+            "028.stdout",
+            "page",
+            "423",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_42",
+          "argv": [
+            "read-log",
+            "040.stdout",
+            "page",
+            "115",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json, sys\nfrom pathlib import Path\nfor path in sorted(Path(sys.argv[1]).glob(\"*.draft.json\")):\n d=json.loads(path.read_text())\n print(path.name)\n for i,q in enumerate(d['questions'],1): print(i,q)\n for k,c in d['claims'].items():\n  print(k,c['line'], c['citation_check'], (c.get('jev') or {}).get('choice'), c['statement'])",
+            "domain-analysis/channelPool"
+          ]
+        },
+        {
+          "item": "item_48",
+          "argv": [
+            "read-log",
+            "046.stdout",
+            "page",
+            "1",
+            "12001"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "from pathlib import Path\nimport json\nprint(json.dumps({f:Path(f).read_text().splitlines() for f in [\"channel.go\",\"pool.go\",\"README.md\",\"channel_rpc_test.go\",\"example/main.go\"]},ensure_ascii=False))"
+          ]
+        },
+        {
+          "item": "item_49",
+          "argv": [
+            "read-log",
+            "046.stdout",
+            "page",
+            "1",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "from pathlib import Path\nimport json\nprint(json.dumps({f:Path(f).read_text().splitlines() for f in [\"channel.go\",\"pool.go\",\"README.md\",\"channel_rpc_test.go\",\"example/main.go\"]},ensure_ascii=False))"
+          ]
+        },
+        {
+          "item": "item_58",
+          "argv": [
+            "read-log",
+            "056.stdout",
+            "page",
+            "71",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_59",
+          "argv": [
+            "read-log",
+            "056.stdout",
+            "page",
+            "277",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_68",
+          "argv": [
+            "read-log",
+            "064.stdout",
+            "page",
+            "99",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_105",
+          "argv": [
+            "read-log",
+            "101",
+            "lines",
+            "1",
+            "45"
+          ],
+          "failed": false,
+          "original_argv": [
+            "go",
+            "test",
+            "-race",
+            "-timeout=15s",
+            "-overlay",
+            "domain-analysis/channelPool/_probe/overlay.json",
+            "-run",
+            "^TestPilotPingRace$",
+            "."
+          ]
+        },
+        {
+          "item": "item_123",
+          "argv": [
+            "read-log",
+            "009",
+            "lines",
+            "1",
+            "39"
+          ],
+          "failed": false,
+          "original_argv": [
+            "go",
+            "test",
+            "-timeout=20s",
+            "./..."
+          ]
+        }
+      ],
+      "nonzero_commands": [
+        {
+          "log": "009",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-timeout=20s",
+            "./..."
+          ]
+        },
+        {
+          "log": "039",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "-c",
+            "import json, sys\nfrom pathlib import Path\nfor path in sorted(Path(sys.argv[1]).glob(\"*.draft.json\")):\n d=json.loads(path.read_text())\n print(path.name)\n for i,q in enumerate(d['questions'],1): print(i,q)\n for k,c in d['claims'].items():\n  print(k,c['",
+            "domain-analysis/channelPool"
+          ]
+        },
+        {
+          "log": "052",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "blind",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--requirements",
+            "README.md:^## Feature",
+            "--contracts",
+            "domain-analysis/channelPool/event-contracts.txt",
+            "--output",
+            "domain-analysis/channelPool/part-b-blind.md",
+            "--max-tokens",
+            "16384",
+            "--package-only"
+          ]
+        },
+        {
+          "log": "053",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "blind",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--requirements",
+            "README.md:## Feature",
+            "--contracts",
+            "domain-analysis/channelPool/event-contracts.txt",
+            "--output",
+            "domain-analysis/channelPool/part-b-blind.md",
+            "--max-tokens",
+            "16384",
+            "--package-only"
+          ]
+        },
+        {
+          "log": "075",
+          "exit_code": 1,
+          "argv": [
+            "rg",
+            "-n",
+            "part-B|divergence",
+            "../pack/tools/dsc_check.py"
+          ]
+        },
+        {
+          "log": "092",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/dsc_check.py",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--model",
+            "as-is.machine.mmd"
+          ]
+        },
+        {
+          "log": "101",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-race",
+            "-timeout=15s",
+            "-overlay",
+            "domain-analysis/channelPool/_probe/overlay.json",
+            "-run",
+            "^TestPilotPingRace$",
+            "."
+          ]
+        },
+        {
+          "log": "128",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "/opt/homebrew/Cellar/go/1.27.3/libexec/src/net/rpc/client.go",
+            "domain-analysis/channelPool/stdlib-rpc.checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--output",
+            "domain-analysis/channelPool/stdlib-rpc.judgments.json",
+            "--summary"
+          ]
+        }
+      ]
+    },
+    "terra": {
+      "settings": {
+        "pack_sha": "8b8e8543114685963db597526e0ac13f57d2ef54",
+        "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+        "model": "gpt-6.1-terra",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "sandbox": "workspace-write",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "routed",
+        "output_mode": "selective"
+      },
+      "exit": 1,
+      "codex": {
+        "completed_turns": 1,
+        "counters": {
+          "input_tokens": 581923,
+          "cached_input_tokens": 536960,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4474,
+          "reasoning_output_tokens": 148
+        },
+        "input_excluding_cache_hits": 44963,
+        "input_plus_output": 586397
+      },
+      "result": {
+        "elapsed_seconds": 163.938,
+        "tool_calls": 27
+      },
+      "failure": null,
+      "mcp_completed": 27,
+      "retained_log_reads": 0,
+      "acceptance_exit_codes": {
+        "catalogue-fields": 1,
+        "matrix": 2,
+        "guards": 2,
+        "sidecar": 2,
+        "reachability": 1,
+        "blind-coverage": 1
+      },
+      "model_calls_by_command_status": {
+        "--help/exit-0": 1,
+        "blind/exit-0": 1,
+        "draft-verify/exit-0": 5,
+        "jev-batch/exit-0": 1,
+        "status/exit-0": 2
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {
+          "deepseek-flash/settled": 8449,
+          "jev/settled": 711
+        },
+        "settled": 9160,
+        "reserved": 0
+      },
+      "gates": {
+        "blind-coverage": [],
+        "catalogue-fields": [],
+        "guards": [],
+        "matrix": [],
+        "reachability": [
+          "REACHABILITY CHECK: FAIL",
+          "  - no analysis.json at /private/tmp/stateradar-controller-4us5gpyo/pool-terra/selective/pool/domain-analysis/channelPool"
+        ],
+        "sidecar": [
+          "DSC CHECK: no analysis.json in domain-analysis/channelPool",
+          "  Emit the sidecar (02-pilot step 4 / 06-reconcile step 4) \u2014"
+        ]
+      },
+      "artifact_sha256": {},
+      "schedule_outputs": [],
+      "cost": {
+        "codex_standard_credits": 2.354525,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": 0.094181,
+        "provider_conservative_usd": 0.00916,
+        "combined_conservative_usd_equivalent": 0.103341
+      },
+      "failed_tool_requests": [],
+      "retained_log_request_details": [],
+      "nonzero_commands": [
+        {
+          "log": "007",
+          "exit_code": 2,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--help"
+          ]
+        },
+        {
+          "log": "008",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-timeout",
+            "20s",
+            "./..."
+          ]
+        },
+        {
+          "log": "023",
+          "exit_code": 2,
+          "argv": [
+            "python3",
+            "../pack/tools/dsc_check.py",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--model",
+            "as-is.machine.mmd"
+          ]
+        },
+        {
+          "log": "025",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/check_reachability.py",
+            "domain-analysis/channelPool"
+          ]
+        }
+      ]
+    }
+  },
+  "gobreaker": {
+    "sol": {
+      "settings": {
+        "pack_sha": "8b8e8543114685963db597526e0ac13f57d2ef54",
+        "component": "gobreaker",
+        "component_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "routed",
+        "output_mode": "selective"
+      },
+      "exit": 0,
+      "codex": {
+        "completed_turns": 1,
+        "counters": {
+          "input_tokens": 6510062,
+          "cached_input_tokens": 6365696,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 36779,
+          "reasoning_output_tokens": 3548
+        },
+        "input_excluding_cache_hits": 144366,
+        "input_plus_output": 6546841
+      },
+      "result": {
+        "elapsed_seconds": 1072.697,
+        "tool_calls": 142
+      },
+      "failure": null,
+      "mcp_completed": 142,
+      "retained_log_reads": 10,
+      "acceptance_exit_codes": {
+        "catalogue-fields": 0,
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "model_calls_by_command_status": {
+        "--help/exit-0": 1,
+        "blind/exit-0": 3,
+        "blind/exit-1": 1,
+        "draft-verify/exit-0": 4,
+        "jev-batch/exit-0": 11,
+        "status/exit-0": 1
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {
+          "deepseek-flash/settled": 32121,
+          "jev/settled": 4588
+        },
+        "settled": 36709,
+        "reserved": 0
+      },
+      "sidecar_counts": {
+        "states": 3,
+        "events": 35,
+        "cells": 105,
+        "pairs": 36,
+        "questions": 23,
+        "guardGroups": 15
+      },
+      "pair_reachability_edges": [
+        {
+          "id": "P-05b",
+          "trace": "adversarial-traces.md#P-05b: Report \u2192 StateRead",
+          "reachability": {
+            "source": "Open",
+            "target": "HalfOpen",
+            "file": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+            "line": 82,
+            "fragment": "stale report failed to refresh"
+          }
+        }
+      ],
+      "gates": {
+        "blind-coverage": [
+          "PART-B COVERAGE: OK (35 events, 36 pair orderings)",
+          "PART-B INDEPENDENCE: 1 rows marked as-is (not independent): Result"
+        ],
+        "catalogue-fields": [
+          "PILOT CATALOGUE: OK"
+        ],
+        "guards": [
+          "group G-01 admission default: proven",
+          "  - Evidence and domain: uint32 Settings.MaxRequests; gobreaker.go:108,147. Assumptions: [limit >= 0, limit <= 4294967295]"
+        ],
+        "matrix": [
+          "CHECK MATRIX: OK (3 rows x 35 events)"
+        ],
+        "reachability": [
+          "REACHABILITY CHECK: OK (3/3 states reachable from 'Closed', 0 terminal)"
+        ],
+        "sidecar": [
+          "DSC CHECK: OK (3 states x 35 events, 105 cells, 15 guard groups)"
+        ]
+      },
+      "artifact_sha256": {
+        "catalogue-fields.json": "e721f3750f5a476d39af921f8a5336cfe357f9fb27a040b37de8ace6160d63c8",
+        "disposition-matrix.md": "4a7d1c2dfbcb4cbddae636a87601bb2c4fbb434af96a7bea6a359588c8663bed",
+        "analysis.json": "102274468e878048c3f047e3f94f3e52abe2d40b0be9da0a69b1fffa5b6ee143",
+        "part-b-blind.md": "c68a546a47ce9664c1f0c532de4e4b350ef41ede6a556837d98ded7cdeba9b90"
+      },
+      "schedule_outputs": [],
+      "cost": {
+        "codex_standard_credits": 32.32729,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": 1.2930916,
+        "provider_conservative_usd": 0.036709,
+        "combined_conservative_usd_equivalent": 1.3298006
+      },
+      "failed_tool_requests": [],
+      "retained_log_request_details": [
+        {
+          "item": "item_7",
+          "argv": [
+            "read-log",
+            "004.stdout",
+            "page",
+            "369",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker.go"
+          ]
+        },
+        {
+          "item": "item_8",
+          "argv": [
+            "read-log",
+            "005.stdout",
+            "page",
+            "317",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker_test.go"
+          ]
+        },
+        {
+          "item": "item_17",
+          "argv": [
+            "read-log",
+            "011.stdout",
+            "page",
+            "162",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/AGENTS.md"
+          ]
+        },
+        {
+          "item": "item_26",
+          "argv": [
+            "read-log",
+            "015.stdout",
+            "page",
+            "221",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_37",
+          "argv": [
+            "read-log",
+            "015.stdout",
+            "page",
+            "423",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_47",
+          "argv": [
+            "read-log",
+            "046.stdout",
+            "page",
+            "98",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json,sys\np=json.load(open(sys.argv[1]))\nfor k,x in p['claims'].items():\n j=x.get('jev') or x.get('judgment') or {}; print(k,x.get('line'),x.get('statement'),j.get('choice'),x.get('citation_check'))\nfor i,x in enumerate(p['questions'],1): print('DRAFT-Q',i,x)\nprint('SHAPE',next(iter(p['claims'].values())).keys())",
+            "domain-analysis/circuitBreaker/draft-gobreaker_test.go.json"
+          ]
+        },
+        {
+          "item": "item_61",
+          "argv": [
+            "read-log",
+            "059.stdout",
+            "page",
+            "91",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_62",
+          "argv": [
+            "read-log",
+            "059.stdout",
+            "page",
+            "343",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_86",
+          "argv": [
+            "read-log",
+            "081.stdout",
+            "page",
+            "93",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_128",
+          "argv": [
+            "read-log",
+            "116",
+            "lines",
+            "1",
+            "52"
+          ],
+          "failed": false,
+          "original_argv": [
+            "go",
+            "test",
+            "-race",
+            "-timeout",
+            "30s",
+            "./..."
+          ]
+        }
+      ],
+      "nonzero_commands": [
+        {
+          "log": "035",
+          "exit_code": 2,
+          "argv": [
+            "python3",
+            "../pack/tools/dsc_check.py",
+            "--help"
+          ]
+        },
+        {
+          "log": "063",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "blind",
+            "domain-analysis/circuitBreaker",
+            "--repo",
+            ".",
+            "--requirements",
+            "domain-analysis/circuitBreaker/requirements-prose.md",
+            "--contracts",
+            "domain-analysis/circuitBreaker/event-contracts.md",
+            "--output",
+            "domain-analysis/circuitBreaker/part-b-blind.md",
+            "--max-tokens",
+            "16384"
+          ]
+        },
+        {
+          "log": "116",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-race",
+            "-timeout",
+            "30s",
+            "./..."
+          ]
+        }
+      ]
+    },
+    "terra": {
+      "settings": {
+        "pack_sha": "8b8e8543114685963db597526e0ac13f57d2ef54",
+        "component": "gobreaker",
+        "component_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+        "model": "gpt-6.1-terra",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "routed",
+        "output_mode": "selective"
+      },
+      "exit": 1,
+      "codex": {
+        "completed_turns": 1,
+        "counters": {
+          "input_tokens": 175185,
+          "cached_input_tokens": 135808,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 832,
+          "reasoning_output_tokens": 165
+        },
+        "input_excluding_cache_hits": 39377,
+        "input_plus_output": 176017
+      },
+      "result": {
+        "elapsed_seconds": 36.661,
+        "tool_calls": 8
+      },
+      "failure": null,
+      "mcp_completed": 8,
+      "retained_log_reads": 1,
+      "acceptance_exit_codes": {
+        "catalogue-fields": 1,
+        "matrix": 2,
+        "guards": 2,
+        "sidecar": 2,
+        "reachability": 1,
+        "blind-coverage": 1
+      },
+      "model_calls_by_command_status": {
+        "draft-verify/exit-0": 1,
+        "status/exit-0": 1
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {},
+        "settled": 0,
+        "reserved": 0
+      },
+      "gates": {
+        "blind-coverage": [],
+        "catalogue-fields": [],
+        "guards": [],
+        "matrix": [],
+        "reachability": [
+          "REACHABILITY CHECK: FAIL",
+          "  - no analysis.json at /private/tmp/stateradar-controller-4us5gpyo/gobreaker-terra/selective/pool/domain-analysis/circuitBreaker"
+        ],
+        "sidecar": [
+          "DSC CHECK: no analysis.json in domain-analysis/circuitBreaker",
+          "  Emit the sidecar (02-pilot step 4 / 06-reconcile step 4) \u2014"
+        ]
+      },
+      "artifact_sha256": {},
+      "schedule_outputs": [],
+      "cost": {
+        "codex_standard_credits": 1.258185,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": 0.0503274,
+        "provider_conservative_usd": 0.0,
+        "combined_conservative_usd_equivalent": 0.0503274
+      },
+      "failed_tool_requests": [],
+      "retained_log_request_details": [
+        {
+          "item": "item_7",
+          "argv": [
+            "read-log",
+            "002.stdout",
+            "page",
+            "436",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "README.md",
+            "gobreaker.go"
+          ]
+        }
+      ],
+      "nonzero_commands": []
+    }
+  }
+}

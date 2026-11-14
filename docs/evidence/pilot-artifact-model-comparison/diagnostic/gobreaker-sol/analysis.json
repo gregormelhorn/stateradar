@@ -1,0 +1,2069 @@
+{
+ "formatVersion": "1.0",
+ "component": "circuitBreaker",
+ "packVersion": "",
+ "analyzedSha": "WORKTREE",
+ "watchPaths": [],
+ "states": [
+  "Closed",
+  "Open",
+  "HalfOpen"
+ ],
+ "events": [
+  {
+   "id": "Admission",
+   "undesired": false,
+   "gate": "service-side state, current time and admitted request count",
+   "upstream_guards": [
+    "No production caller validation supplied. Allow delegates to the same admission path gobreaker.go:266 (\"generation",
+    "err := tscb.cb.beforeRequest()\")"
+   ]
+  },
+  {
+   "id": "StateRead",
+   "undesired": false,
+   "gate": "service-side state and time",
+   "upstream_guards": [
+    "No caller validation supplied gobreaker.go:206 (\"func (cb *CircuitBreaker) State() State {\")"
+   ]
+  },
+  {
+   "id": "CountsRead",
+   "undesired": false,
+   "gate": "service-side snapshot",
+   "upstream_guards": [
+    "No caller validation supplied gobreaker.go:216 (\"func (cb *CircuitBreaker) Counts() Counts {\")"
+   ]
+  },
+  {
+   "id": "NameRead",
+   "undesired": false,
+   "gate": "service-side immutable setting",
+   "upstream_guards": [
+    "No caller validation supplied gobreaker.go:201 (\"func (cb *CircuitBreaker) Name() string {\")"
+   ]
+  },
+  {
+   "id": "Report",
+   "undesired": false,
+   "gate": "payload Boolean and service-side generation, state and recovery counts",
+   "upstream_guards": [
+    "Only successful Allow returns a callback. No once or truth guarantee gobreaker.go:273 (\"}",
+    "nil\")"
+   ]
+  },
+  {
+   "id": "Result",
+   "undesired": false,
+   "gate": "payload outcome and service-side admission generation",
+   "upstream_guards": [
+    "Execute invokes request only after admission. No guarantee on user code returning gobreaker.go:231 (\"return nil",
+    "err\")"
+   ]
+  },
+  {
+   "id": "Classify",
+   "undesired": false,
+   "gate": "payload error and callback outcome",
+   "upstream_guards": [
+    "Constructor supplies default when nil. User termination and serialization guarantees absent gobreaker.go:171 (\"if st.IsSuccessful == nil {\")"
+   ]
+  },
+  {
+   "id": "TripDecision",
+   "undesired": false,
+   "gate": "payload Counts and policy Boolean",
+   "upstream_guards": [
+    "Constructor supplies default when nil. User termination guarantee absent gobreaker.go:165 (\"if st.ReadyToTrip == nil {\")"
+   ]
+  },
+  {
+   "id": "Notify",
+   "undesired": false,
+   "gate": "service-side state change and callback presence",
+   "upstream_guards": [
+    "Constructor copies hook. User termination and reentry guarantees absent gobreaker.go:145 (\"cb.onStateChange = st.OnStateChange\")"
+   ]
+  },
+  {
+   "id": "Setup",
+   "undesired": false,
+   "gate": "payload configuration",
+   "upstream_guards": [
+    "Zero and negative duration handling in constructor. No caller validation supplied gobreaker.go:153 (\"if st.Interval <= 0 {\")"
+   ]
+  },
+  {
+   "id": "Expiry",
+   "undesired": false,
+   "gate": "service-side deadline and sampled time",
+   "upstream_guards": [
+    "Clock sampled from time.Now under mutex for State",
+    "admission",
+    "and completion gobreaker.go:297 (\"now := time.Now()\")"
+   ]
+  },
+  {
+   "id": "Complete",
+   "undesired": false,
+   "gate": "payload success and service-side generation and state",
+   "upstream_guards": [
+    "Private dispatch from Execute or Allow only gobreaker.go:243 (\"cb.afterRequest(generation",
+    "cb.isSuccessful(err))\")"
+   ]
+  },
+  {
+   "id": "UV-01",
+   "undesired": true,
+   "gate": "service-side state, current time and admitted request count",
+   "upstream_guards": [
+    "No production caller validation supplied. Allow delegates to the same admission path gobreaker.go:266 (\"generation",
+    "err := tscb.cb.beforeRequest()\")"
+   ]
+  },
+  {
+   "id": "UV-02",
+   "undesired": true,
+   "gate": "service-side state, current time and admitted request count",
+   "upstream_guards": [
+    "No production caller validation supplied. Allow delegates to the same admission path gobreaker.go:266 (\"generation",
+    "err := tscb.cb.beforeRequest()\")"
+   ]
+  },
+  {
+   "id": "UV-03",
+   "undesired": true,
+   "gate": "service-side state, current time and admitted request count",
+   "upstream_guards": [
+    "No production caller validation supplied. Allow delegates to the same admission path gobreaker.go:266 (\"generation",
+    "err := tscb.cb.beforeRequest()\")"
+   ]
+  },
+  {
+   "id": "UV-04",
+   "undesired": true,
+   "gate": "service-side state, current time and admitted request count",
+   "upstream_guards": [
+    "No production caller validation supplied. Allow delegates to the same admission path gobreaker.go:266 (\"generation",
+    "err := tscb.cb.beforeRequest()\")"
+   ]
+  },
+  {
+   "id": "UV-05",
+   "undesired": true,
+   "gate": "service-side state and time",
+   "upstream_guards": [
+    "No caller validation supplied gobreaker.go:206 (\"func (cb *CircuitBreaker) State() State {\")"
+   ]
+  },
+  {
+   "id": "UV-06",
+   "undesired": true,
+   "gate": "service-side state and time",
+   "upstream_guards": [
+    "No caller validation supplied gobreaker.go:206 (\"func (cb *CircuitBreaker) State() State {\")"
+   ]
+  },
+  {
+   "id": "UV-07",
+   "undesired": true,
+   "gate": "payload Boolean and service-side generation, state and recovery counts",
+   "upstream_guards": [
+    "Only successful Allow returns a callback. No once or truth guarantee gobreaker.go:273 (\"}",
+    "nil\")"
+   ]
+  },
+  {
+   "id": "UV-08",
+   "undesired": true,
+   "gate": "payload Boolean and service-side generation, state and recovery counts",
+   "upstream_guards": [
+    "Only successful Allow returns a callback. No once or truth guarantee gobreaker.go:273 (\"}",
+    "nil\")"
+   ]
+  },
+  {
+   "id": "UV-09",
+   "undesired": true,
+   "gate": "payload Boolean and service-side generation, state and recovery counts",
+   "upstream_guards": [
+    "Only successful Allow returns a callback. No once or truth guarantee gobreaker.go:273 (\"}",
+    "nil\")"
+   ]
+  },
+  {
+   "id": "UV-10",
+   "undesired": true,
+   "gate": "payload Boolean and service-side generation, state and recovery counts",
+   "upstream_guards": [
+    "Only successful Allow returns a callback. No once or truth guarantee gobreaker.go:273 (\"}",
+    "nil\")"
+   ]
+  },
+  {
+   "id": "UV-11",
+   "undesired": true,
+   "gate": "payload Boolean and service-side generation, state and recovery counts",
+   "upstream_guards": [
+    "Only successful Allow returns a callback. No once or truth guarantee gobreaker.go:273 (\"}",
+    "nil\")"
+   ]
+  },
+  {
+   "id": "UV-12",
+   "undesired": true,
+   "gate": "payload Boolean and service-side generation, state and recovery counts",
+   "upstream_guards": [
+    "Only successful Allow returns a callback. No once or truth guarantee gobreaker.go:273 (\"}",
+    "nil\")"
+   ]
+  },
+  {
+   "id": "UV-13",
+   "undesired": true,
+   "gate": "payload outcome and service-side admission generation",
+   "upstream_guards": [
+    "Execute invokes request only after admission. No guarantee on user code returning gobreaker.go:231 (\"return nil",
+    "err\")"
+   ]
+  },
+  {
+   "id": "UV-14",
+   "undesired": true,
+   "gate": "payload outcome and service-side admission generation",
+   "upstream_guards": [
+    "Execute invokes request only after admission. No guarantee on user code returning gobreaker.go:231 (\"return nil",
+    "err\")"
+   ]
+  },
+  {
+   "id": "UV-15",
+   "undesired": true,
+   "gate": "payload error and callback outcome",
+   "upstream_guards": [
+    "Constructor supplies default when nil. User termination and serialization guarantees absent gobreaker.go:171 (\"if st.IsSuccessful == nil {\")"
+   ]
+  },
+  {
+   "id": "UV-16",
+   "undesired": true,
+   "gate": "payload error and callback outcome",
+   "upstream_guards": [
+    "Constructor supplies default when nil. User termination and serialization guarantees absent gobreaker.go:171 (\"if st.IsSuccessful == nil {\")"
+   ]
+  },
+  {
+   "id": "UV-17",
+   "undesired": true,
+   "gate": "payload Counts and policy Boolean",
+   "upstream_guards": [
+    "Constructor supplies default when nil. User termination guarantee absent gobreaker.go:165 (\"if st.ReadyToTrip == nil {\")"
+   ]
+  },
+  {
+   "id": "UV-18",
+   "undesired": true,
+   "gate": "service-side state change and callback presence",
+   "upstream_guards": [
+    "Constructor copies hook. User termination and reentry guarantees absent gobreaker.go:145 (\"cb.onStateChange = st.OnStateChange\")"
+   ]
+  },
+  {
+   "id": "UV-19",
+   "undesired": true,
+   "gate": "service-side state change and callback presence",
+   "upstream_guards": [
+    "Constructor copies hook. User termination and reentry guarantees absent gobreaker.go:145 (\"cb.onStateChange = st.OnStateChange\")"
+   ]
+  },
+  {
+   "id": "UV-20",
+   "undesired": true,
+   "gate": "service-side state change and callback presence",
+   "upstream_guards": [
+    "Constructor copies hook. User termination and reentry guarantees absent gobreaker.go:145 (\"cb.onStateChange = st.OnStateChange\")"
+   ]
+  },
+  {
+   "id": "UV-21",
+   "undesired": true,
+   "gate": "payload configuration",
+   "upstream_guards": [
+    "Zero and negative duration handling in constructor. No caller validation supplied gobreaker.go:153 (\"if st.Interval <= 0 {\")"
+   ]
+  },
+  {
+   "id": "UV-22",
+   "undesired": true,
+   "gate": "payload configuration",
+   "upstream_guards": [
+    "Zero and negative duration handling in constructor. No caller validation supplied gobreaker.go:153 (\"if st.Interval <= 0 {\")"
+   ]
+  },
+  {
+   "id": "UV-23",
+   "undesired": true,
+   "gate": "service-side deadline and sampled time",
+   "upstream_guards": [
+    "Clock sampled from time.Now under mutex for State",
+    "admission",
+    "and completion gobreaker.go:297 (\"now := time.Now()\")"
+   ]
+  }
+ ],
+ "cells": [
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+   },
+   "state": "Closed",
+   "event": "Admission"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 211,
+    "fragment": "state, _ := cb.currentState(now)"
+   },
+   "state": "Closed",
+   "event": "StateRead"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 220,
+    "fragment": "return cb.counts"
+   },
+   "state": "Closed",
+   "event": "CountsRead"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 202,
+    "fragment": "return cb.name"
+   },
+   "state": "Closed",
+   "event": "NameRead"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 327,
+    "fragment": "cb.setState(StateOpen, now)"
+   },
+   "state": "Closed",
+   "event": "Report"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 327,
+    "fragment": "cb.setState(StateOpen, now)"
+   },
+   "state": "Closed",
+   "event": "Result"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+   },
+   "state": "Closed",
+   "event": "Classify"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "Admission"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "StateRead"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 220,
+    "fragment": "return cb.counts"
+   },
+   "state": "Open",
+   "event": "CountsRead"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 202,
+    "fragment": "return cb.name"
+   },
+   "state": "Open",
+   "event": "NameRead"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "Report"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "Result"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+   },
+   "state": "Open",
+   "event": "Classify"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 286,
+    "fragment": "return generation, ErrTooManyRequests"
+   },
+   "state": "HalfOpen",
+   "event": "Admission"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 212,
+    "fragment": "return state"
+   },
+   "state": "HalfOpen",
+   "event": "StateRead"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 220,
+    "fragment": "return cb.counts"
+   },
+   "state": "HalfOpen",
+   "event": "CountsRead"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 202,
+    "fragment": "return cb.name"
+   },
+   "state": "HalfOpen",
+   "event": "NameRead"
+  },
+  {
+   "disposition": "transition",
+   "target": "Closed",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 317,
+    "fragment": "cb.setState(StateClosed, now)"
+   },
+   "state": "HalfOpen",
+   "event": "Report"
+  },
+  {
+   "disposition": "transition",
+   "target": "Closed",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 317,
+    "fragment": "cb.setState(StateClosed, now)"
+   },
+   "state": "HalfOpen",
+   "event": "Result"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+   },
+   "state": "HalfOpen",
+   "event": "Classify"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 327,
+    "fragment": "cb.setState(StateOpen, now)"
+   },
+   "state": "Closed",
+   "event": "TripDecision"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+   },
+   "state": "Closed",
+   "event": "Notify"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 142,
+    "fragment": "cb := new(CircuitBreaker)"
+   },
+   "state": "Closed",
+   "event": "Setup"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 338,
+    "fragment": "cb.toNewGeneration(now)"
+   },
+   "state": "Closed",
+   "event": "Expiry"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 327,
+    "fragment": "cb.setState(StateOpen, now)"
+   },
+   "state": "Closed",
+   "event": "Complete"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-16",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 229,
+    "fragment": "generation, err := cb.beforeRequest()"
+   },
+   "state": "Closed",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+   },
+   "state": "Closed",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 323,
+    "fragment": "switch state {"
+   },
+   "state": "Open",
+   "event": "TripDecision"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+   },
+   "state": "Open",
+   "event": "Notify"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 142,
+    "fragment": "cb := new(CircuitBreaker)"
+   },
+   "state": "Open",
+   "event": "Setup"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "Expiry"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "Complete"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-16",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 229,
+    "fragment": "generation, err := cb.beforeRequest()"
+   },
+   "state": "Open",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 329,
+    "fragment": "case StateHalfOpen:"
+   },
+   "state": "HalfOpen",
+   "event": "TripDecision"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+   },
+   "state": "HalfOpen",
+   "event": "Notify"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 142,
+    "fragment": "cb := new(CircuitBreaker)"
+   },
+   "state": "HalfOpen",
+   "event": "Setup"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 344,
+    "fragment": "}"
+   },
+   "state": "HalfOpen",
+   "event": "Expiry"
+  },
+  {
+   "disposition": "transition",
+   "target": "Closed",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 317,
+    "fragment": "cb.setState(StateClosed, now)"
+   },
+   "state": "HalfOpen",
+   "event": "Complete"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-16",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 229,
+    "fragment": "generation, err := cb.beforeRequest()"
+   },
+   "state": "HalfOpen",
+   "event": "UV-01"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 286,
+    "fragment": "return generation, ErrTooManyRequests"
+   },
+   "state": "HalfOpen",
+   "event": "UV-02"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+   },
+   "state": "Closed",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 242,
+    "fragment": "result, err := req()"
+   },
+   "state": "Closed",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-05",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 210,
+    "fragment": "now := time.Now()"
+   },
+   "state": "Closed",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 211,
+    "fragment": "state, _ := cb.currentState(now)"
+   },
+   "state": "Closed",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 271,
+    "fragment": "return func(success bool) {"
+   },
+   "state": "Closed",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 327,
+    "fragment": "cb.setState(StateOpen, now)"
+   },
+   "state": "Closed",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 327,
+    "fragment": "cb.setState(StateOpen, now)"
+   },
+   "state": "Closed",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 284,
+    "fragment": "return generation, ErrOpenState"
+   },
+   "state": "Open",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-05",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 210,
+    "fragment": "now := time.Now()"
+   },
+   "state": "Open",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 271,
+    "fragment": "return func(success bool) {"
+   },
+   "state": "Open",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 286,
+    "fragment": "return generation, ErrTooManyRequests"
+   },
+   "state": "HalfOpen",
+   "event": "UV-03"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 242,
+    "fragment": "result, err := req()"
+   },
+   "state": "HalfOpen",
+   "event": "UV-04"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-05",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 210,
+    "fragment": "now := time.Now()"
+   },
+   "state": "HalfOpen",
+   "event": "UV-05"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 220,
+    "fragment": "return cb.counts"
+   },
+   "state": "HalfOpen",
+   "event": "UV-06"
+  },
+  {
+   "disposition": "UNSPECIFIED",
+   "q": "Q-03",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 271,
+    "fragment": "return func(success bool) {"
+   },
+   "state": "HalfOpen",
+   "event": "UV-07"
+  },
+  {
+   "disposition": "transition",
+   "target": "Closed",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 317,
+    "fragment": "cb.setState(StateClosed, now)"
+   },
+   "state": "HalfOpen",
+   "event": "UV-08"
+  },
+  {
+   "disposition": "transition",
+   "target": "Closed",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 317,
+    "fragment": "cb.setState(StateClosed, now)"
+   },
+   "state": "HalfOpen",
+   "event": "UV-09"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 327,
+    "fragment": "cb.setState(StateOpen, now)"
+   },
+   "state": "Closed",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 268,
+    "fragment": "return nil, err"
+   },
+   "state": "Closed",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 327,
+    "fragment": "cb.setState(StateOpen, now)"
+   },
+   "state": "Closed",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-11",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 238,
+    "fragment": "panic(e)"
+   },
+   "state": "Closed",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 244,
+    "fragment": "return result, err"
+   },
+   "state": "Closed",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-10",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+   },
+   "state": "Closed",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+   },
+   "state": "Closed",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 268,
+    "fragment": "return nil, err"
+   },
+   "state": "Open",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-11",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 238,
+    "fragment": "panic(e)"
+   },
+   "state": "Open",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 244,
+    "fragment": "return result, err"
+   },
+   "state": "Open",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-10",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+   },
+   "state": "Open",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+   },
+   "state": "Open",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "transition",
+   "target": "Closed",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 317,
+    "fragment": "cb.setState(StateClosed, now)"
+   },
+   "state": "HalfOpen",
+   "event": "UV-10"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 268,
+    "fragment": "return nil, err"
+   },
+   "state": "HalfOpen",
+   "event": "UV-11"
+  },
+  {
+   "disposition": "transition",
+   "target": "Closed",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 317,
+    "fragment": "cb.setState(StateClosed, now)"
+   },
+   "state": "HalfOpen",
+   "event": "UV-12"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-11",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 238,
+    "fragment": "panic(e)"
+   },
+   "state": "HalfOpen",
+   "event": "UV-13"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 244,
+    "fragment": "return result, err"
+   },
+   "state": "HalfOpen",
+   "event": "UV-14"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-10",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+   },
+   "state": "HalfOpen",
+   "event": "UV-15"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+   },
+   "state": "HalfOpen",
+   "event": "UV-16"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-08",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 326,
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+   },
+   "state": "Closed",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+   },
+   "state": "Closed",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+   },
+   "state": "Closed",
+   "event": "UV-19"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 326,
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+   },
+   "state": "Closed",
+   "event": "UV-20"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 142,
+    "fragment": "cb := new(CircuitBreaker)"
+   },
+   "state": "Closed",
+   "event": "UV-21"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 153,
+    "fragment": "if st.Interval <= 0 {"
+   },
+   "state": "Closed",
+   "event": "UV-22"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 337,
+    "fragment": "if !cb.expiry.IsZero() && cb.expiry.Before(now) {"
+   },
+   "state": "Closed",
+   "event": "UV-23"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 323,
+    "fragment": "switch state {"
+   },
+   "state": "Open",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+   },
+   "state": "Open",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+   },
+   "state": "Open",
+   "event": "UV-19"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 326,
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+   },
+   "state": "Open",
+   "event": "UV-20"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 142,
+    "fragment": "cb := new(CircuitBreaker)"
+   },
+   "state": "Open",
+   "event": "UV-21"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 153,
+    "fragment": "if st.Interval <= 0 {"
+   },
+   "state": "Open",
+   "event": "UV-22"
+  },
+  {
+   "disposition": "transition",
+   "target": "HalfOpen",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+   },
+   "state": "Open",
+   "event": "UV-23"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 329,
+    "fragment": "case StateHalfOpen:"
+   },
+   "state": "HalfOpen",
+   "event": "UV-17"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+   },
+   "state": "HalfOpen",
+   "event": "UV-18"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+   },
+   "state": "HalfOpen",
+   "event": "UV-19"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 326,
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+   },
+   "state": "HalfOpen",
+   "event": "UV-20"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 142,
+    "fragment": "cb := new(CircuitBreaker)"
+   },
+   "state": "HalfOpen",
+   "event": "UV-21"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 153,
+    "fragment": "if st.Interval <= 0 {"
+   },
+   "state": "HalfOpen",
+   "event": "UV-22"
+  },
+  {
+   "disposition": "ignore (documented)",
+   "citation": {
+    "file": "gobreaker.go",
+    "line": 378,
+    "fragment": "cb.expiry = zero"
+   },
+   "state": "HalfOpen",
+   "event": "UV-23"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-11"
+   ],
+   "trigger": "step-3 lock-discipline annotation"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-11"
+   ],
+   "trigger": "step-3 lock-discipline annotation"
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-07"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-14"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-05",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "doctrine mapping"
+  },
+  {
+   "id": "Q-06",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-15"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-07",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-08",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "seam-contract sweep"
+  },
+  {
+   "id": "Q-09",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "seam-contract sweep"
+  },
+  {
+   "id": "Q-10",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "seam-contract sweep"
+  },
+  {
+   "id": "Q-11",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-09"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-12",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-18"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-13",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-17"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-14",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-10"
+   ],
+   "trigger": "multi-instance probes"
+  },
+  {
+   "id": "Q-15",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-05"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-16",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-07"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-17",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-01"
+   ],
+   "trigger": "step-1 extraction"
+  },
+  {
+   "id": "Q-18",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-15"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-19",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "step-8 verification"
+  },
+  {
+   "id": "Q-20",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-18"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-21",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "step-4 matrix walk"
+  },
+  {
+   "id": "Q-22",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-01"
+   ],
+   "trigger": "part-B diff"
+  },
+  {
+   "id": "Q-23",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "part-B diff"
+  }
+ ],
+ "behaviouralDrs": [],
+ "docLines": [
+  {
+   "id": "DOC-1",
+   "mapping": "invariant",
+   "target": "SYS-1"
+  },
+  {
+   "id": "DOC-2",
+   "mapping": "structural",
+   "target": "Initial Closed edge and Setup cells record allocation"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "structural",
+   "target": "Setup cells and G-01 to G-03 capture configuration"
+  },
+  {
+   "id": "DOC-4",
+   "mapping": "cell",
+   "target": "Closed x NameRead"
+  },
+  {
+   "id": "DOC-5",
+   "mapping": "guard",
+   "target": "G-04"
+  },
+  {
+   "id": "DOC-6",
+   "mapping": "guard",
+   "target": "G-01"
+  },
+  {
+   "id": "DOC-7",
+   "mapping": "cell",
+   "target": "Closed x Expiry"
+  },
+  {
+   "id": "DOC-8",
+   "mapping": "guard",
+   "target": "G-15"
+  },
+  {
+   "id": "DOC-9",
+   "mapping": "cell",
+   "target": "Open x Expiry"
+  },
+  {
+   "id": "DOC-10",
+   "mapping": "guard",
+   "target": "G-03"
+  },
+  {
+   "id": "DOC-11",
+   "mapping": "cell",
+   "target": "Closed x TripDecision"
+  },
+  {
+   "id": "DOC-12",
+   "mapping": "cell",
+   "target": "Closed x TripDecision"
+  },
+  {
+   "id": "DOC-13",
+   "mapping": "guard",
+   "target": "G-11"
+  },
+  {
+   "id": "DOC-14",
+   "mapping": "guard",
+   "target": "G-08"
+  },
+  {
+   "id": "DOC-15",
+   "mapping": "invariant",
+   "target": "SYS-2"
+  },
+  {
+   "id": "DOC-16",
+   "mapping": "cell",
+   "target": "Closed x Classify"
+  },
+  {
+   "id": "DOC-17",
+   "mapping": "invariant",
+   "target": "SYS-3"
+  },
+  {
+   "id": "DOC-18",
+   "mapping": "invariant",
+   "target": "SYS-3"
+  },
+  {
+   "id": "DOC-19",
+   "mapping": "guard",
+   "target": "G-09"
+  },
+  {
+   "id": "DOC-20",
+   "mapping": "invariant",
+   "target": "SYS-4"
+  },
+  {
+   "id": "DOC-21",
+   "mapping": "invariant",
+   "target": "SYS-2"
+  },
+  {
+   "id": "DOC-22",
+   "mapping": "invariant",
+   "target": "SYS-5"
+  },
+  {
+   "id": "DOC-23",
+   "mapping": "constraint",
+   "target": "NAT-3"
+  },
+  {
+   "id": "DOC-24",
+   "mapping": "invariant",
+   "target": "SYS-1"
+  },
+  {
+   "id": "DOC-25",
+   "mapping": "cell",
+   "target": "Open x Admission"
+  },
+  {
+   "id": "DOC-26",
+   "mapping": "invariant",
+   "target": "SYS-6"
+  },
+  {
+   "id": "DOC-27",
+   "mapping": "invariant",
+   "target": "SYS-6"
+  }
+ ],
+ "pairs": [
+  {
+   "id": "P-01a",
+   "trace": "adversarial-traces.md#P-01a: Admission → StateRead"
+  },
+  {
+   "id": "P-01b",
+   "trace": "adversarial-traces.md#P-01b: StateRead → Admission"
+  },
+  {
+   "id": "P-02a",
+   "trace": "adversarial-traces.md#P-02a: Admission → CountsRead"
+  },
+  {
+   "id": "P-02b",
+   "trace": "adversarial-traces.md#P-02b: CountsRead → Admission"
+  },
+  {
+   "id": "P-03a",
+   "trace": "adversarial-traces.md#P-03a: Admission → Report"
+  },
+  {
+   "id": "P-03b",
+   "trace": "adversarial-traces.md#P-03b: Report → Admission"
+  },
+  {
+   "id": "P-04a",
+   "trace": "adversarial-traces.md#P-04a: Admission → Result"
+  },
+  {
+   "id": "P-04b",
+   "trace": "adversarial-traces.md#P-04b: Result → Admission"
+  },
+  {
+   "id": "P-05a",
+   "trace": "adversarial-traces.md#P-05a: StateRead → Report"
+  },
+  {
+   "id": "P-05b",
+   "trace": "adversarial-traces.md#P-05b: Report → StateRead",
+   "reachability": {
+    "source": "Open",
+    "target": "HalfOpen",
+    "file": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+    "line": 82,
+    "fragment": "stale report failed to refresh"
+   }
+  },
+  {
+   "id": "P-06a",
+   "trace": "adversarial-traces.md#P-06a: StateRead → Result"
+  },
+  {
+   "id": "P-06b",
+   "trace": "adversarial-traces.md#P-06b: Result → StateRead"
+  },
+  {
+   "id": "P-07a",
+   "trace": "adversarial-traces.md#P-07a: CountsRead → Report"
+  },
+  {
+   "id": "P-07b",
+   "trace": "adversarial-traces.md#P-07b: Report → CountsRead"
+  },
+  {
+   "id": "P-08a",
+   "trace": "adversarial-traces.md#P-08a: CountsRead → Result"
+  },
+  {
+   "id": "P-08b",
+   "trace": "adversarial-traces.md#P-08b: Result → CountsRead"
+  },
+  {
+   "id": "P-09a",
+   "trace": "adversarial-traces.md#P-09a: StateRead → CountsRead"
+  },
+  {
+   "id": "P-09b",
+   "trace": "adversarial-traces.md#P-09b: CountsRead → StateRead"
+  },
+  {
+   "id": "P-10a",
+   "trace": "adversarial-traces.md#P-10a: Admission → Classify"
+  },
+  {
+   "id": "P-10b",
+   "trace": "adversarial-traces.md#P-10b: Classify → Admission"
+  },
+  {
+   "id": "P-11a",
+   "trace": "adversarial-traces.md#P-11a: StateRead → Classify"
+  },
+  {
+   "id": "P-11b",
+   "trace": "adversarial-traces.md#P-11b: Classify → StateRead"
+  },
+  {
+   "id": "P-12a",
+   "trace": "adversarial-traces.md#P-12a: CountsRead → Classify"
+  },
+  {
+   "id": "P-12b",
+   "trace": "adversarial-traces.md#P-12b: Classify → CountsRead"
+  },
+  {
+   "id": "P-13a",
+   "trace": "adversarial-traces.md#P-13a: Admission → TripDecision"
+  },
+  {
+   "id": "P-13b",
+   "trace": "adversarial-traces.md#P-13b: TripDecision → Admission"
+  },
+  {
+   "id": "P-14a",
+   "trace": "adversarial-traces.md#P-14a: StateRead → TripDecision"
+  },
+  {
+   "id": "P-14b",
+   "trace": "adversarial-traces.md#P-14b: TripDecision → StateRead"
+  },
+  {
+   "id": "P-15a",
+   "trace": "adversarial-traces.md#P-15a: CountsRead → TripDecision"
+  },
+  {
+   "id": "P-15b",
+   "trace": "adversarial-traces.md#P-15b: TripDecision → CountsRead"
+  },
+  {
+   "id": "P-16a",
+   "trace": "adversarial-traces.md#P-16a: Admission → Notify"
+  },
+  {
+   "id": "P-16b",
+   "trace": "adversarial-traces.md#P-16b: Notify → Admission"
+  },
+  {
+   "id": "P-17a",
+   "trace": "adversarial-traces.md#P-17a: StateRead → Notify"
+  },
+  {
+   "id": "P-17b",
+   "trace": "adversarial-traces.md#P-17b: Notify → StateRead"
+  },
+  {
+   "id": "P-18a",
+   "trace": "adversarial-traces.md#P-18a: CountsRead → Notify"
+  },
+  {
+   "id": "P-18b",
+   "trace": "adversarial-traces.md#P-18b: Notify → CountsRead"
+  }
+ ],
+ "guardGroups": [
+  {
+   "id": "G-01",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-02",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-03",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-04",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-05",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-06",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-07",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-08",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-09",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-10",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-11",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-12",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-14",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-15",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-13",
+   "outcome": "not-formalizable",
+   "reason": "external-call: caller-supplied policy may return true, false or fail to return; branch projection does not prove callback behavior (gobreaker.go:326)"
+  }
+ ],
+ "coverage": {
+  "Admission": {
+   "loss": "UV-01",
+   "delay": "UV-02",
+   "duplication": "UV-03",
+   "out-of-order": "UV-02",
+   "contradiction": "UV-03",
+   "commission": "UV-04",
+   "value": "UV-04"
+  },
+  "StateRead": {
+   "loss": "UV-05",
+   "delay": "UV-05",
+   "duplication": "UV-06",
+   "out-of-order": "UV-06",
+   "contradiction": "UV-06",
+   "commission": "UV-06",
+   "value": "UV-04"
+  },
+  "CountsRead": {
+   "loss": "UV-05",
+   "delay": "UV-05",
+   "duplication": "UV-06",
+   "out-of-order": "UV-06",
+   "contradiction": "UV-06",
+   "commission": "UV-06",
+   "value": "UV-04"
+  },
+  "NameRead": {
+   "loss": "UV-05",
+   "delay": "UV-05",
+   "duplication": "UV-06",
+   "out-of-order": "UV-06",
+   "contradiction": "UV-06",
+   "commission": "UV-06",
+   "value": "UV-04"
+  },
+  "Report": {
+   "loss": "UV-07",
+   "delay": "UV-08",
+   "duplication": "UV-09",
+   "out-of-order": "UV-08",
+   "contradiction": "UV-10",
+   "commission": "UV-11",
+   "value": "UV-12"
+  },
+  "Result": {
+   "loss": "UV-13",
+   "delay": "UV-13",
+   "duplication": "n/a: one Go invocation has one ordinary return. gobreaker.go:242 (\"result, err := req()\")",
+   "out-of-order": "UV-08",
+   "contradiction": "n/a: one invocation has one ordinary return or panic. gobreaker.go:242 (\"result, err := req()\")",
+   "commission": "n/a: execution follows successful admission. gobreaker.go:229 (\"generation, err := cb.beforeRequest()\")",
+   "value": "UV-14"
+  },
+  "Classify": {
+   "loss": "UV-15",
+   "delay": "UV-15",
+   "duplication": "n/a: one call per normal return. gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\")",
+   "out-of-order": "UV-08",
+   "contradiction": "UV-16",
+   "commission": "n/a: invocation follows normal request return. gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\")",
+   "value": "UV-16"
+  },
+  "TripDecision": {
+   "loss": "UV-17",
+   "delay": "UV-17",
+   "duplication": "n/a: one call per current closed failure. gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\")",
+   "out-of-order": "UV-19",
+   "contradiction": "UV-17",
+   "commission": "n/a: invocation follows current closed failure. gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\")",
+   "value": "UV-20"
+  },
+  "Notify": {
+   "loss": "UV-18",
+   "delay": "UV-18",
+   "duplication": "n/a: one synchronous call per setState change. gobreaker.go:358 (\"if cb.onStateChange != nil {\")",
+   "out-of-order": "UV-19",
+   "contradiction": "UV-18",
+   "commission": "n/a: same-state update returns before hook. gobreaker.go:349 (\"if cb.state == state {\")",
+   "value": "UV-20"
+  },
+  "Setup": {
+   "loss": "UV-21",
+   "delay": "UV-21",
+   "duplication": "UV-21",
+   "out-of-order": "UV-21",
+   "contradiction": "UV-21",
+   "commission": "UV-21",
+   "value": "UV-22"
+  },
+  "Expiry": {
+   "loss": "UV-05",
+   "delay": "UV-23",
+   "duplication": "n/a: one check per operation; clearing replaces the deadline. gobreaker.go:338 (\"cb.toNewGeneration(now)\")",
+   "out-of-order": "UV-23",
+   "contradiction": "n/a: one stored state selects deadline kind. gobreaker.go:335 (\"switch cb.state {\")",
+   "commission": "n/a: evaluation is inline on an eligible operation. gobreaker.go:334 (\"func (cb *CircuitBreaker) currentState(now time.Time) (State, uint64) {\")",
+   "value": "UV-23"
+  },
+  "Complete": {
+   "loss": "UV-07",
+   "delay": "UV-08",
+   "duplication": "UV-09",
+   "out-of-order": "UV-08",
+   "contradiction": "UV-10",
+   "commission": "n/a: private method with causal callers. gobreaker.go:293 (\"func (cb *CircuitBreaker) afterRequest(before uint64, success bool) {\")",
+   "value": "UV-12"
+  }
+ }
+}

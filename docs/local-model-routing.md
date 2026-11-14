@@ -450,3 +450,10 @@ component checkout, matching its artifact-writing task. The pilot command
 server still applies its macOS sandbox and restricts credentials to routing
 commands. A read-only controller setting conflicts with authorized artifact
 creation even when the external command server can perform writes.
+
+The [matched Sol/Terra screen](evidence/pilot-artifact-model-comparison/README.md)
+did not support changing the default controller: Terra stopped incomplete
+on both components. Sol's Pool artifacts passed local checks after a service
+cutoff, but its final controller cost is missing. Treat the reported dollar
+figures as cost equivalents under the stated credit conversion, and include
+failed attempts and fallback work before claiming savings.

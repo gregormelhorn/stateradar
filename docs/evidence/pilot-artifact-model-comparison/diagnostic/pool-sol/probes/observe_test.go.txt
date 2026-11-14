@@ -1,0 +1,268 @@
+package pool
+
+import (
+	"errors"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+type observation struct {
+	value interface{}
+	err   error
+}
+
+func acquire(p Pool) <-chan observation {
+	result := make(chan observation, 1)
+	go func() { v, err := p.Get(); result <- observation{v, err} }()
+	return result
+}
+func received(t *testing.T, result <-chan observation) observation {
+	t.Helper()
+	select {
+	case got := <-result:
+		return got
+	case <-time.After(time.Second):
+		t.Fatal("acquisition did not return")
+		return observation{}
+	}
+}
+func pending(t *testing.T, result <-chan observation) {
+	t.Helper()
+	select {
+	case got := <-result:
+		t.Fatalf("unexpected acquisition result: %+v", got)
+	case <-time.After(20 * time.Millisecond):
+	}
+}
+func requests(t *testing.T, p *channelPool, want int) {
+	t.Helper()
+	for deadline := time.Now().Add(time.Second); time.Now().Before(deadline); {
+		p.mu.Lock()
+		n := len(p.connReqs)
+		p.mu.Unlock()
+		if n == want {
+			return
+		}
+		time.Sleep(time.Millisecond)
+	}
+	t.Fatalf("request count never reached %d", want)
+}
+func probePool(t *testing.T, initial, idle, active int, factory func() (interface{}, error), closeFn func(interface{}) error, ping func(interface{}) error) *channelPool {
+	t.Helper()
+	if factory == nil {
+		factory = func() (interface{}, error) { return new(int), nil }
+	}
+	if closeFn == nil {
+		closeFn = func(interface{}) error { return nil }
+	}
+	p, err := NewChannelPool(&Config{InitialCap: initial, MaxIdle: idle, MaxCap: active, Factory: factory, Close: closeFn, Ping: ping})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p.(*channelPool)
+}
+
+func TestPilotPendingRelease(t *testing.T) {
+	var closes atomic.Int32
+	p := probePool(t, 1, 1, 1, nil, func(interface{}) error { closes.Add(1); return nil }, nil)
+	held, _ := p.Get()
+	waiting := acquire(p)
+	requests(t, p, 1)
+	p.Release()
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	if p.Len() != 0 || closes.Load() != 0 {
+		t.Fatal("late Put performed cleanup")
+	}
+	pending(t, waiting)
+	if got := received(t, acquire(p)); got.err != ErrClosed {
+		t.Fatalf("fresh caller got %+v", got)
+	}
+}
+func TestPilotCloseAdmission(t *testing.T) {
+	failure := errors.New("cleanup failed")
+	p := probePool(t, 1, 1, 1, nil, func(interface{}) error { return failure }, nil)
+	defer p.Release()
+	held, _ := p.Get()
+	waiting := acquire(p)
+	requests(t, p, 1)
+	if err := p.Close(held); err != failure {
+		t.Fatal(err)
+	}
+	pending(t, waiting)
+	newer := received(t, acquire(p))
+	if newer.value == nil || newer.err != nil {
+		t.Fatalf("later Get = %+v", newer)
+	}
+	if err := p.Put(newer.value); err != nil {
+		t.Fatal(err)
+	}
+	if got := received(t, waiting); got.value != newer.value {
+		t.Fatalf("waiter got %+v", got)
+	}
+}
+func TestPilotSameCallerAndAbandonment(t *testing.T) {
+	p := probePool(t, 1, 1, 2, nil, nil, nil)
+	defer p.Release()
+	first := received(t, acquire(p))
+	held := received(t, acquire(p))
+	if first.value == nil || held.value == nil || first.value == held.value {
+		t.Fatal("same caller did not get two distinct resources")
+	}
+	abandoned := acquire(p)
+	requests(t, p, 1)
+	other := acquire(p)
+	requests(t, p, 2)
+	pending(t, abandoned)
+	if err := p.Put(first.value); err != nil {
+		t.Fatal(err)
+	}
+	// The test regains access to the abandoned caller's buffered outer result.
+	if got := received(t, abandoned); got.value != first.value {
+		t.Fatalf("abandoned Get received %+v", got)
+	}
+	pending(t, other)
+	if err := p.Put(held.value); err != nil {
+		t.Fatal(err)
+	}
+	if got := received(t, other); got.value != held.value {
+		t.Fatalf("second request received %+v", got)
+	}
+}
+func TestPilotPingReturnDuringRelease(t *testing.T) {
+	for _, pingErr := range []error{nil, errors.New("invalid")} {
+		entered, resume := make(chan struct{}), make(chan struct{})
+		var closes atomic.Int32
+		p := probePool(t, 1, 1, 1, nil, func(interface{}) error { closes.Add(1); return nil }, func(interface{}) error { close(entered); <-resume; return pingErr })
+		get := acquire(p)
+		select {
+		case <-entered:
+		case <-time.After(time.Second):
+			t.Fatal("ping did not start")
+		}
+		p.Release()
+		close(resume)
+		got := received(t, get)
+		if pingErr == nil && (got.value == nil || got.err != nil) {
+			t.Fatalf("successful ping got %+v", got)
+		}
+		if pingErr != nil && got.err != ErrClosed {
+			t.Fatalf("failed ping got %+v", got)
+		}
+		if closes.Load() != 0 {
+			t.Fatal("detached checkout was closed")
+		}
+	}
+}
+func TestPilotDuplicateOwnership(t *testing.T) {
+	var closes atomic.Int32
+	p := probePool(t, 1, 2, 2, nil, func(interface{}) error { closes.Add(1); return nil }, nil)
+	conn, _ := p.Get()
+	if err := p.Put(conn); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Put(conn); err != nil {
+		t.Fatal(err)
+	}
+	first := received(t, acquire(p))
+	second := received(t, acquire(p))
+	if first.value != conn || second.value != conn {
+		t.Fatal("duplicate reference not delivered twice")
+	}
+	_ = p.Close(first.value)
+	_ = p.Close(second.value)
+	if closes.Load() != 2 {
+		t.Fatal("duplicate closure not delegated twice")
+	}
+	p.Release()
+}
+func TestPilotDirectPingNil(t *testing.T) {
+	p := probePool(t, 0, 1, 1, nil, nil, nil)
+	defer p.Release()
+	defer func() {
+		if recover() == nil {
+			t.Error("nil callback did not panic")
+		}
+	}()
+	_ = p.Ping(new(int))
+}
+func TestPilotDrainFailureAndRepeat(t *testing.T) {
+	entered, resume := make(chan struct{}), make(chan struct{})
+	var calls atomic.Int32
+	p := probePool(t, 2, 2, 2, nil, func(interface{}) error {
+		if calls.Add(1) == 1 {
+			close(entered)
+			<-resume
+			return errors.New("one close failed")
+		}
+		return nil
+	}, nil)
+	done := make(chan struct{})
+	go func() { p.Release(); close(done) }()
+	select {
+	case <-entered:
+	case <-time.After(time.Second):
+		t.Fatal("drain did not start")
+	}
+	p.Release()
+	if got := received(t, acquire(p)); got.err != ErrClosed {
+		t.Fatalf("draining Get = %+v", got)
+	}
+	close(resume)
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("drain did not finish")
+	}
+	if calls.Load() != 2 {
+		t.Fatal("drain stopped on returned error")
+	}
+}
+
+func TestPilotPingRace(t *testing.T) {
+	for i := 0; i < 32; i++ {
+		p := probePool(t, 1, 1, 1, nil, nil, func(interface{}) error { return nil })
+		done := make(chan struct{})
+		go func() {
+			defer close(done)
+			defer func() { recover() }()
+			_ = p.Ping(new(int))
+		}()
+		p.Release()
+		<-done
+	}
+}
+
+func TestPilotLockedReentry(t *testing.T) {
+	for _, factory := range []bool{false, true} {
+		var p *channelPool
+		entered := make(chan struct{})
+		reenter := func() { close(entered); _ = p.Len() }
+		if factory {
+			p = probePool(t, 0, 1, 1, func() (interface{}, error) { reenter(); return new(int), nil }, nil, nil)
+		} else {
+			p = probePool(t, 0, 1, 1, nil, func(interface{}) error { reenter(); return nil }, nil)
+		}
+		done := make(chan struct{})
+		go func() {
+			if factory {
+				p.Get()
+			} else {
+				p.Close(new(int))
+			}
+			close(done)
+		}()
+		select {
+		case <-entered:
+		case <-time.After(time.Second):
+			t.Fatal("callback not entered")
+		}
+		select {
+		case <-done:
+			t.Fatal("reentrant Len returned under the held lock")
+		case <-time.After(20 * time.Millisecond):
+		}
+	}
+}

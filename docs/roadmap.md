@@ -19,6 +19,14 @@ entries and separates the new model-routing plan from shipped capabilities.
    Automatic acceptance and escalation are not implemented. Details: [model
    cascade plan](plan-model-cascade.md) and [entry
    11](#11-cost-aware-model-routing-deepseek-flash--jev).
+   Latest increment (2026-11-14): [artifact workflow and Sol/Terra
+   comparison](evidence/pilot-artifact-model-comparison/README.md). Routed
+   selective execution remains the default. Terra's two matched pilots
+   stopped incomplete; Sol produced checked artifacts, but the Pool service
+   cutoff omitted its final controller usage. A complete Pool cost ranking
+   remains blocked. Capture incremental controller usage across failures
+   before broader cost claims; evaluate cheaper controllers in bounded,
+   checkable phases including all continuation/fallback work.
 2. **Broaden mutation coverage and validate on real components.** Continue
    [fault-class mutants](#8-ach-style-fault-class-mutants-testgen-upgrade):
    add supported classes and component bindings with observed red probes and

@@ -1,0 +1,499 @@
+{
+  "events": [
+    {
+      "id": "Create",
+      "classification": "external",
+      "source": "Lifecycle owner",
+      "undesired": false,
+      "description": "Construct an instance and configure its policies. observed-in-code gobreaker.go:142 (\"cb := new(CircuitBreaker)\")",
+      "gate": "Settings values and optional callbacks",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ],
+      "coverage": {
+        "loss": "UV-14",
+        "delay": "UV-14",
+        "duplication": "UV-14",
+        "out-of-order": "UV-14",
+        "contradiction": "UV-14",
+        "commission": "UV-14",
+        "value": "UV-14"
+      }
+    },
+    {
+      "id": "Admit",
+      "classification": "external",
+      "source": "Request initiator",
+      "undesired": false,
+      "description": "Execute or Allow attempts one new admission. observed-in-code gobreaker.go:281 (\"state, generation := cb.currentState(now)\")",
+      "gate": "Service state, sampled deadline and admission count",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ],
+      "coverage": {
+        "loss": "UV-02",
+        "delay": "UV-02",
+        "duplication": "UV-03",
+        "out-of-order": "UV-03",
+        "contradiction": "UV-03",
+        "commission": "UV-03",
+        "value": "UV-07, UV-12, UV-13, UV-14"
+      }
+    },
+    {
+      "id": "State",
+      "classification": "external",
+      "source": "Observer",
+      "undesired": false,
+      "description": "Read the state of an instance. observed-in-code gobreaker.go:211 (\"state, _ := cb.currentState(now)\")",
+      "gate": "Service state and sampled deadline",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ],
+      "coverage": {
+        "loss": "UV-08",
+        "delay": "UV-08",
+        "duplication": "UV-08",
+        "out-of-order": "UV-08",
+        "contradiction": "UV-08",
+        "commission": "UV-08",
+        "value": "UV-13"
+      }
+    },
+    {
+      "id": "Counts",
+      "classification": "external",
+      "source": "Observer",
+      "undesired": false,
+      "description": "Read a snapshot of five counters. observed-in-code gobreaker.go:220 (\"return cb.counts\")",
+      "gate": "No payload",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ],
+      "coverage": {
+        "loss": "UV-08",
+        "delay": "UV-08",
+        "duplication": "UV-08",
+        "out-of-order": "UV-08",
+        "contradiction": "UV-08",
+        "commission": "UV-08",
+        "value": "UV-13"
+      }
+    },
+    {
+      "id": "Name",
+      "classification": "external",
+      "source": "Observer",
+      "undesired": false,
+      "description": "Read the configured name through either wrapper. observed-in-code gobreaker.go:202 (\"return cb.name\")",
+      "gate": "No payload",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ],
+      "coverage": {
+        "loss": "UV-08",
+        "delay": "UV-08",
+        "duplication": "UV-08",
+        "out-of-order": "UV-08",
+        "contradiction": "UV-08",
+        "commission": "UV-08",
+        "value": "UV-13"
+      }
+    },
+    {
+      "id": "Report",
+      "classification": "external",
+      "source": "Continuation holder",
+      "undesired": false,
+      "description": "Invoke Allow's returned completion callback with a success boolean. observed-in-code gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\")",
+      "gate": "Payload boolean plus service generation and state",
+      "upstream_guards": [
+        "Only a successful Allow returns a callable completion; caller report cardinality, truth and ownership are undocumented. gobreaker.go:268 (\"return nil, err\")"
+      ],
+      "coverage": {
+        "loss": "UV-01",
+        "delay": "UV-05",
+        "duplication": "UV-04",
+        "out-of-order": "UV-05",
+        "contradiction": "UV-04",
+        "commission": "UV-06",
+        "value": "UV-06"
+      }
+    },
+    {
+      "id": "Return",
+      "classification": "external",
+      "source": "Execute request callback",
+      "undesired": false,
+      "description": "Return a result and an error from admitted request work. observed-in-code gobreaker.go:242 (\"result, err := req()\")",
+      "gate": "Payload error plus service generation and state",
+      "upstream_guards": [
+        "Execute invokes request work only following successful admission. The example uses the initialized breaker and propagates HTTP/read errors. The public topology permits arbitrary request functions. gobreaker.go:231 (\"return nil, err\"). example/http_breaker.go:26 (\"func Get(url string) ([]byte, error) {\")"
+      ],
+      "coverage": {
+        "loss": "UV-02",
+        "delay": "UV-05",
+        "duplication": "UV-03",
+        "out-of-order": "UV-05",
+        "contradiction": "UV-05",
+        "commission": "UV-03",
+        "value": "UV-07, UV-13"
+      }
+    },
+    {
+      "id": "Panic",
+      "classification": "external",
+      "source": "Execute request callback",
+      "undesired": false,
+      "description": "Panic from admitted work. observed-in-code gobreaker.go:237 (\"cb.afterRequest(generation, false)\")",
+      "gate": "Payload recover value plus service generation and state",
+      "upstream_guards": [
+        "Execute invokes request work only following successful admission. The example uses the initialized breaker and propagates HTTP/read errors. The public topology permits arbitrary request functions. gobreaker.go:231 (\"return nil, err\"). example/http_breaker.go:26 (\"func Get(url string) ([]byte, error) {\")"
+      ],
+      "coverage": {
+        "loss": "UV-02",
+        "delay": "UV-05",
+        "duplication": "UV-03",
+        "out-of-order": "UV-05",
+        "contradiction": "UV-05",
+        "commission": "UV-03",
+        "value": "UV-07, UV-13"
+      }
+    },
+    {
+      "id": "Classify",
+      "classification": "internal",
+      "source": "IsSuccessful policy",
+      "undesired": false,
+      "description": "Classify the error from Execute request work. observed-in-code gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\")",
+      "gate": "Payload error, configured classifier and result",
+      "upstream_guards": [
+        "Dispatch is private; no independent public event injection. gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\")"
+      ],
+      "coverage": {
+        "loss": "UV-09",
+        "delay": "UV-09",
+        "duplication": "UV-09",
+        "out-of-order": "UV-05",
+        "contradiction": "UV-09",
+        "commission": "UV-09",
+        "value": "UV-09"
+      }
+    },
+    {
+      "id": "TripPolicy",
+      "classification": "internal",
+      "source": "ReadyToTrip policy",
+      "undesired": false,
+      "description": "Evaluate a copied counter snapshot after a closed failure. observed-in-code gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\")",
+      "gate": "Service state and callback result",
+      "upstream_guards": [
+        "Dispatch is private; no independent public event injection. gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\")"
+      ],
+      "coverage": {
+        "loss": "UV-10",
+        "delay": "UV-10",
+        "duplication": "UV-10",
+        "out-of-order": "UV-10",
+        "contradiction": "UV-10",
+        "commission": "UV-10",
+        "value": "UV-10"
+      }
+    },
+    {
+      "id": "Notify",
+      "classification": "internal",
+      "source": "State change observer",
+      "undesired": false,
+      "description": "Invoke configured notification with name and old and new modes. observed-in-code gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\")",
+      "gate": "Distinct state change and configured callback",
+      "upstream_guards": [
+        "Dispatch is private; no independent public event injection. gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\")"
+      ],
+      "coverage": {
+        "loss": "UV-11",
+        "delay": "UV-11",
+        "duplication": "UV-11",
+        "out-of-order": "UV-11",
+        "contradiction": "UV-11",
+        "commission": "UV-11",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "Expiry",
+      "classification": "internal",
+      "source": "Clock sampled during State, admission or completion",
+      "undesired": false,
+      "description": "Evaluate deadline on an eligible operation. observed-in-code gobreaker.go:337 (\"if !cb.expiry.IsZero() && cb.expiry.Before(now) {\")",
+      "gate": "Service state and strict expiry-before-now comparison",
+      "upstream_guards": [
+        "Dispatch is private; no independent public event injection. gobreaker.go:337 (\"if !cb.expiry.IsZero() && cb.expiry.Before(now) {\")"
+      ],
+      "coverage": {
+        "loss": "UV-08",
+        "delay": "UV-08",
+        "duplication": "UV-08",
+        "out-of-order": "UV-08",
+        "contradiction": "UV-08",
+        "commission": "UV-08",
+        "value": "UV-08"
+      }
+    },
+    {
+      "id": "UV-01",
+      "classification": "external",
+      "source": "Continuation holder",
+      "undesired": true,
+      "description": "Omit a report, including after the caller abandons admitted work. A later report may or may not arrive. observed-in-code gobreaker.go:271 (\"return func(success bool) {\")",
+      "gate": "Service state and admission budget",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-02",
+      "classification": "external",
+      "source": "Execute request owner",
+      "undesired": true,
+      "description": "Slow, blocked, abandoned or Goexit request work; unissued admission or caller-side cancellation. observed-in-code gobreaker.go:242 (\"result, err := req()\")",
+      "gate": "Service state, actual callback outcome and generation",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-03",
+      "classification": "external",
+      "source": "Request initiator",
+      "undesired": true,
+      "description": "Same caller executes again while original work is pending, or calls Allow again while first continuation is outstanding. Concurrent Allow can also overlap before the first return. observed-in-code gobreaker.go:277 (\"cb.mutex.Lock()\")",
+      "gate": "Service state and admission budget",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-04",
+      "classification": "external",
+      "source": "Continuation holder",
+      "undesired": true,
+      "description": "Repeat the same callback with identical or contradictory payloads, including overlapping calls. observed-in-code gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\")",
+      "gate": "Service generation, state, payload and lock order",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-05",
+      "classification": "external",
+      "source": "Request or continuation holder",
+      "undesired": true,
+      "description": "Old admitted work returns, panics, or reports after a clear, possibly after the next open interval. observed-in-code gobreaker.go:299 (\"if generation != before {\")",
+      "gate": "Service generation after refresh",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-06",
+      "classification": "external",
+      "source": "Continuation holder",
+      "undesired": true,
+      "description": "Wrong boolean or continuation, pooled/reassigned wrapper, or fabricated current report; nil callback after rejected admission. observed-in-code gobreaker.go:271 (\"return func(success bool) {\")",
+      "gate": "Payload and continuation identity",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-07",
+      "classification": "external",
+      "source": "Execute request owner",
+      "undesired": true,
+      "description": "Pass nil request or panic with nil payload. observed-in-code gobreaker.go:235 (\"e := recover()\")",
+      "gate": "Payload and runtime recover behavior",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-08",
+      "classification": "external",
+      "source": "Observer / clock context",
+      "undesired": true,
+      "description": "Omit or delay a refreshing call, read Counts first, or sample exactly at the deadline; also repeated/out-of-order reads. observed-in-code gobreaker.go:337 (\"if !cb.expiry.IsZero() && cb.expiry.Before(now) {\")",
+      "gate": "Operation type and strict deadline",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-09",
+      "classification": "external",
+      "source": "Injected IsSuccessful",
+      "undesired": true,
+      "description": "Block, panic, Goexit, re-enter, or return valid but wrong classification, including work already stale. observed-in-code gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\")",
+      "gate": "Callback control flow, result and generation",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-10",
+      "classification": "external",
+      "source": "Injected ReadyToTrip",
+      "undesired": true,
+      "description": "Block, panic, Goexit, re-enter, or return a valid but unintended decision. observed-in-code gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\")",
+      "gate": "Callback control flow and result",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-11",
+      "classification": "external",
+      "source": "Injected OnStateChange",
+      "undesired": true,
+      "description": "Block, panic, Goexit, re-enter, or misdeliver an observation after a state commit. observed-in-code gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\")",
+      "gate": "Callback control flow",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-12",
+      "classification": "external",
+      "source": "Lifecycle and API owner",
+      "undesired": true,
+      "description": "Use zero-value or nil receiver, copy a live breaker, replace wrapper or try teardown without an API. observed-in-code gobreaker.go:136 (\"type TwoStepCircuitBreaker struct {\")",
+      "gate": "Receiver validity and per-object lifetime",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-13",
+      "classification": "external",
+      "source": "API and request owner",
+      "undesired": true,
+      "description": "Call wrong valid instance or provide a valid callback/payload for the wrong request. observed-in-code gobreaker.go:229 (\"generation, err := cb.beforeRequest()\")",
+      "gate": "Receiver identity or payload supplied by caller",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    },
+    {
+      "id": "UV-14",
+      "classification": "external",
+      "source": "Lifecycle owner",
+      "undesired": true,
+      "description": "Missing, delayed, duplicate or replacement construction, or valid but unintended Settings. observed-in-code gobreaker.go:153 (\"if st.Interval <= 0 {\")",
+      "gate": "Settings values, callback availability and object identity",
+      "upstream_guards": [
+        "No public caller identity or client-side validation is specified. The example uses the initialized instance. example/http_breaker.go:21 (\"\")"
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "id": "P-01",
+      "first": "Admit",
+      "second": "Report",
+      "entity": "New admission and existing report on same breaker; half-open at budget"
+    },
+    {
+      "id": "P-02",
+      "first": "Admit",
+      "second": "Return",
+      "entity": "New admission and previous Execute return on same breaker"
+    },
+    {
+      "id": "P-03",
+      "first": "Admit",
+      "second": "Panic",
+      "entity": "New admission and previous Execute panic on same breaker"
+    },
+    {
+      "id": "P-04",
+      "first": "State",
+      "second": "Report",
+      "entity": "Observer and delayed report on same breaker"
+    },
+    {
+      "id": "P-05",
+      "first": "Counts",
+      "second": "Report",
+      "entity": "Snapshot and report on same breaker"
+    },
+    {
+      "id": "P-06",
+      "first": "State",
+      "second": "Return",
+      "entity": "Observer and returning Execute on same breaker"
+    },
+    {
+      "id": "P-07",
+      "first": "Counts",
+      "second": "Return",
+      "entity": "Snapshot and returning Execute on same breaker"
+    },
+    {
+      "id": "P-08",
+      "first": "State",
+      "second": "Panic",
+      "entity": "Observer and panicking Execute on same breaker"
+    },
+    {
+      "id": "P-09",
+      "first": "Counts",
+      "second": "Panic",
+      "entity": "Snapshot and panic on same breaker"
+    },
+    {
+      "id": "P-10",
+      "first": "State",
+      "second": "Admit",
+      "entity": "Independent observer and initiator at an Open expiry"
+    },
+    {
+      "id": "P-11",
+      "first": "Counts",
+      "second": "Admit",
+      "entity": "Snapshot and initiator in Closed or HalfOpen"
+    },
+    {
+      "id": "P-12",
+      "first": "State",
+      "second": "Counts",
+      "entity": "Independent observers on a breaker with due expiry"
+    },
+    {
+      "id": "P-13",
+      "first": "Name",
+      "second": "Admit",
+      "entity": "Name observer and initiator sharing one breaker"
+    },
+    {
+      "id": "P-14",
+      "first": "Name",
+      "second": "Report",
+      "entity": "Name observer and continuation holder sharing one breaker"
+    },
+    {
+      "id": "P-15",
+      "first": "Name",
+      "second": "Return",
+      "entity": "Name observer and Execute callback sharing one breaker"
+    },
+    {
+      "id": "P-16",
+      "first": "Name",
+      "second": "Panic",
+      "entity": "Name observer and panicking Execute callback sharing one breaker"
+    }
+  ],
+  "remembrance": "observed-in-code gobreaker.go:271 (\"return func(success bool) {\"). A caller-held continuation records a generation and retains its wrapper. No individual completion or queue is stored by the breaker. Lifecycle replacement creates an independent instance. A late callback refreshes then compares generation. gobreaker.go:298 (\"state, generation := cb.currentState(now)\"). gobreaker.go:299 (\"if generation != before {\"). observed-in-code gobreaker.go:56 (\"c.Requests++\"). Requests counts admissions per generation, independent of caller departure. Successful reports update outcome counters until a state change or interval refresh clears all five. A half-open failure goes straight to a state change. Rejection and stale contribution do not increment outcomes. gobreaker.go:285 (\"} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {\"). gobreaker.go:330 (\"cb.setState(StateOpen, now)\"). gobreaker.go:365 (\"cb.counts.clear()\"). No queue backing store. Retained closure footprint or collection timing is a runtime question. observed-in-code gobreaker.go:128 (\"generation uint64\"). Only the current generation is retained, bounded by uint64. Counts use uint32 fields. HalfOpen has no expiry. gobreaker.go:48 (\"Requests             uint32\"). gobreaker.go:378 (\"cb.expiry = zero\").",
+  "lock_discipline": "observed-in-code gobreaker.go:207 (\"cb.mutex.Lock()\"). State holds the mutex across refresh and synchronous notification. Counts takes it only for the snapshot. Name reads the configured name without locking. gobreaker.go:217 (\"cb.mutex.Lock()\"). gobreaker.go:202 (\"return cb.name\"). observed-in-code gobreaker.go:277 (\"cb.mutex.Lock()\"). Admission holds the mutex across refresh, possible OnStateChange and its count decision. Completion holds it across refresh, ReadyToTrip and OnStateChange. gobreaker.go:294 (\"cb.mutex.Lock()\"). gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"). gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"). observed-in-code gobreaker.go:242 (\"result, err := req()\"). Execute invokes request work and classifier after admission unlock and before completion lock. The contracts do not specify same-instance reentry or callback failure and blocking behavior. gobreaker.go:95 (\"// ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.\"). gobreaker.go:100 (\"// OnStateChange is called whenever the state of the CircuitBreaker changes.\"). gobreaker.go:102 (\"// IsSuccessful is called with the error returned from a request.\").",
+  "notes": "The public topologies wrap Execute work directly or issue a continuation through Allow. Read methods exist in both. Reports and Execute results do not share one publicly constructed backing breaker across topologies. A construction targets a new breaker identity. Clock evaluation is internal."
+}
