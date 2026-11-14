@@ -1,0 +1,56 @@
+[
+  {
+    "run": "full-baseline",
+    "mutant": null,
+    "suite": "full",
+    "verdict": "SURVIVED",
+    "expected": "SURVIVED",
+    "exit": 0,
+    "seconds": 2.282
+  },
+  {
+    "run": "weak-baseline",
+    "mutant": null,
+    "suite": "weak",
+    "verdict": "SURVIVED",
+    "expected": "SURVIVED",
+    "exit": 0,
+    "seconds": 1.687
+  },
+  {
+    "run": "capacity-canary",
+    "mutant": "zero-charges",
+    "suite": "full",
+    "verdict": "KILLED",
+    "expected": "KILLED",
+    "exit": 1,
+    "seconds": 0.831
+  },
+  {
+    "run": "weak-canary-control",
+    "mutant": "zero-charges",
+    "suite": "weak",
+    "verdict": "SURVIVED",
+    "expected": "SURVIVED",
+    "exit": 0,
+    "seconds": 1.683
+  },
+  {
+    "run": "weak-f09",
+    "mutant": "omit-cancel-unlink",
+    "suite": "weak",
+    "verdict": "SURVIVED",
+    "expected": "SURVIVED",
+    "exit": 0,
+    "seconds": 1.748
+  },
+  {
+    "run": "full-f09",
+    "mutant": "omit-cancel-unlink",
+    "suite": "full",
+    "verdict": "KILLED",
+    "expected": "KILLED",
+    "exit": 1,
+    "seconds": 12.834
+  }
+]

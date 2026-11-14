@@ -77,7 +77,13 @@ entries and separates the new model-routing plan from shipped capabilities.
    artifacts and blind evidence stay immutable; generic mutation coverage is
    not claimed beyond the executed named fault probes.
    Next increment: [mutation binding and rationale](evidence/mutation-rationale-cost/README.md)
-   exercises 41 generic matrix mutations across 32 cells and four source faults.
+   exercised 41 generic matrix mutations across 32 cells and four source faults.
+   The [F-09 semaphore slice](evidence/semaphore-f09/README.md) adds a fifth
+   source mutant: omitted cancellation unlink. A result-only weak suite lets it
+   survive; the full suite kills it at the cancellation cell. An executed
+   capacity canary gates this comparison; weak-canary survival blocks the
+   dependent evaluation. This is one real-component binding, not class-wide
+   completion or a second-component proof.
    Crashes and unrelated failures cannot count as kills. Four contract limits
    and two queued cells without a supported operator remain explicit exclusions.
 3. **Make disposition rationale machine-readable.** Implemented as an optional

@@ -1,0 +1,36 @@
+F..FF
+======================================================================
+FAIL: test_canary_survival_blocks_dependent_execution (__main__.F09Gate.test_canary_survival_blocks_dependent_execution)
+----------------------------------------------------------------------
+RuntimeError: BLOCKED: full-f09: expected KILLED, got SURVIVED
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_semaphore_f09.py", line 25, in test_canary_survival_blocks_dependent_execution
+    with self.assertRaisesRegex(RuntimeError, 'BLOCKED: capacity canary'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "BLOCKED: capacity canary" does not match "BLOCKED: full-f09: expected KILLED, got SURVIVED"
+
+======================================================================
+FAIL: test_only_executed_correct_cell_kill_authorizes (__main__.F09Gate.test_only_executed_correct_cell_kill_authorizes) (verdict='SURVIVED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_semaphore_f09.py", line 31, in test_only_executed_correct_cell_kill_authorizes
+    with self.subTest(verdict=verdict), self.assertRaises(RuntimeError):
+                                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_only_executed_correct_cell_kill_authorizes (__main__.F09Gate.test_only_executed_correct_cell_kill_authorizes) (verdict='BLOCKED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_semaphore_f09.py", line 31, in test_only_executed_correct_cell_kill_authorizes
+    with self.subTest(verdict=verdict), self.assertRaises(RuntimeError):
+                                        ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+FAILED (failures=3)

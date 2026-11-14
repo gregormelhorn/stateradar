@@ -71,6 +71,21 @@
       ],
       "requiresProjection": "available_capacity",
       "binder": "corrupt-state"
+    },
+    {
+      "id": "omit-cancel-unlink",
+      "fault": "F-09",
+      "cell": "Acquire_WaitersPending x ContextDone",
+      "variant": "mutants/omit-cancel-unlink.go.txt",
+      "mode": "replace-block",
+      "match": [
+        "\t\t\ts.waiters.Remove(elem)"
+      ],
+      "replace": [
+        "\t\t\t// deliberately retain the canceled waiter (F-09)"
+      ],
+      "requiresProjection": "available_capacity",
+      "binder": "cancellation-leak"
     }
   ]
 }

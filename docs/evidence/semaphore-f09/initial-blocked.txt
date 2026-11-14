@@ -1,0 +1,30 @@
+Initial full F-09 execution before the P-06b capacity precondition.
+Exit 1; verdict BLOCKED, not a kill. Selected output:
+CELL FAIL Acquire_NoWaiters x Release
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x NewWeighted
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x TryAcquire
+CELL FAIL Acquire_WaitersPending x Release
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x ContextDone
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x UV-Abandon
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x UV-Recreate
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x UV-RepeatTry
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x UV-WrongReceiver
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x UV-Weight
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x UV-ForeignContext
+state_cells_test.go:318: expected 2 units still available
+CELL FAIL Acquire_WaitersPending x UV-RepeatedDone
+CELL COVERAGE: 34 executable, 4 explicit contract limits
+CELL SUITE: 34 cells checked, 12 failed
+=== RUN   TestStatePairs/P-06b
+panic: test timed out after 1m30s
+TestStatePairs/P-06b (1m20s)
+BLOCKED: incomplete Go behavior verdict

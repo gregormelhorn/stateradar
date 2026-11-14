@@ -20,6 +20,10 @@ jobs:
         run: python examples/weighted-semaphore/verify_q01.py
       - name: weighted semaphore current model and cells
         run: python examples/weighted-semaphore/domain-analysis/weightedSemaphore/verify.py
+      - name: semaphore F-09 observability and weak/full comparison
+        run: |
+          python tools/selftest/test_semaphore_f09.py
+          python tools/semaphore_f09.py
       - name: weighted semaphore mutation binding
         run: |
           python tools/gen_mutant_variants.py examples/weighted-semaphore/domain-analysis/weightedSemaphore --check

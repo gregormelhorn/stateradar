@@ -39,6 +39,13 @@
       "cell": "Acquire_NoWaiters x Release",
       "target": "semaphore/semaphore.go",
       "variant": "mutants/zero-charges.go.txt"
+    },
+    {
+      "id": "omit-cancel-unlink",
+      "fault": "F-09",
+      "cell": "Acquire_WaitersPending x ContextDone",
+      "target": "semaphore/semaphore.go",
+      "variant": "mutants/omit-cancel-unlink.go.txt"
     }
   ]
 }

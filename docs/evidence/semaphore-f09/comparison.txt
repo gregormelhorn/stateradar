@@ -1,0 +1,8 @@
+full-baseline: SURVIVED (expected SURVIVED)
+weak-baseline: SURVIVED (expected SURVIVED)
+capacity-canary: KILLED (expected KILLED)
+weak-canary-control: SURVIVED (expected SURVIVED)
+EXPECTED CONTROL BLOCKED: capacity canary SURVIVED; dependent F-09 not executed
+weak-f09: SURVIVED (expected SURVIVED)
+full-f09: KILLED (expected KILLED)
+F-09 PASS: canary killed; weak mutant survived; full mutant killed at Acquire_WaitersPending x ContextDone

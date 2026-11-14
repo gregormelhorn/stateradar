@@ -1,0 +1,19 @@
+package semaphore
+
+import (
+	"context"
+	"testing"
+)
+
+// Deliberately weak negative control: checks only the canceled API result.
+// q01Request's read-only barrier establishes that the request was queued.
+// No post-cancel queue/capacity assertion; never replaces the contract suite.
+func TestF09WeakCancelResult(t *testing.T) {
+	s := NewWeighted(3)
+	if !s.TryAcquire(1) {
+		t.Fatal("setup: initial capacity unavailable")
+	}
+	cancel, result := q01Request(t, s, 3, 1)
+	cancel()
+	q01Result(t, result, context.Canceled)
+}

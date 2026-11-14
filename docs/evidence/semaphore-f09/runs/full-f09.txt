@@ -1,0 +1,13 @@
+CELL FAIL Acquire_NoWaiters x Release
+CELL FAIL Acquire_WaitersPending x NewWeighted
+CELL FAIL Acquire_WaitersPending x TryAcquire
+CELL FAIL Acquire_WaitersPending x Release
+CELL FAIL Acquire_WaitersPending x ContextDone
+CELL FAIL Acquire_WaitersPending x UV-Abandon
+CELL FAIL Acquire_WaitersPending x UV-Recreate
+CELL FAIL Acquire_WaitersPending x UV-RepeatTry
+CELL FAIL Acquire_WaitersPending x UV-WrongReceiver
+CELL FAIL Acquire_WaitersPending x UV-Weight
+CELL FAIL Acquire_WaitersPending x UV-ForeignContext
+CELL FAIL Acquire_WaitersPending x UV-RepeatedDone
+CELL SUITE: 34 cells checked, 12 failed

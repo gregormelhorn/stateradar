@@ -1,0 +1,244 @@
+{"Time":"2026-11-14T23:56:28.303929+01:00","Action":"start","Package":"golang.org/x/sync/semaphore"}
+{"Time":"2026-11-14T23:56:28.654306+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells"}
+{"Time":"2026-11-14T23:56:28.654426+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"=== RUN   TestStateCells\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:28.667195+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/NewWeighted"}
+{"Time":"2026-11-14T23:56:28.667218+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/NewWeighted","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/NewWeighted\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:28.667388+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/NewWeighted","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/NewWeighted (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:28.667396+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/NewWeighted","Elapsed":0}
+{"Time":"2026-11-14T23:56:28.667424+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Acquire"}
+{"Time":"2026-11-14T23:56:28.667429+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Acquire","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/Acquire\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:28.667621+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Acquire","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/Acquire (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:28.667633+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Acquire","Elapsed":0}
+{"Time":"2026-11-14T23:56:28.667658+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/TryAcquire"}
+{"Time":"2026-11-14T23:56:28.667662+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/TryAcquire","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/TryAcquire\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:28.667736+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/TryAcquire","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/TryAcquire (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:28.667747+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/TryAcquire","Elapsed":0}
+{"Time":"2026-11-14T23:56:28.667759+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Release"}
+{"Time":"2026-11-14T23:56:28.667762+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Release","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/Release\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.669892+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Release","Output":"    decision_contract_test.go:309: DR-001: eligible zero waiter did not complete without another input\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:30.669945+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Release","Output":"--- FAIL: TestStateCells/Acquire_NoWaiters/Release (2.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.66995+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Release","Elapsed":2}
+{"Time":"2026-11-14T23:56:30.669957+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_NoWaiters x Release\n"}
+{"Time":"2026-11-14T23:56:30.670025+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/ContextDone"}
+{"Time":"2026-11-14T23:56:30.670031+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/ContextDone","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/ContextDone\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670119+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/ContextDone","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/ContextDone (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670161+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/ContextDone","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.67018+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Grant"}
+{"Time":"2026-11-14T23:56:30.670183+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Grant","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/Grant\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670287+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Grant","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/Grant (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.6703+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/Grant","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.670321+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Abandon"}
+{"Time":"2026-11-14T23:56:30.670323+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Abandon","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-Abandon\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670368+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Abandon","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-Abandon (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670382+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Abandon","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.670413+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Recreate"}
+{"Time":"2026-11-14T23:56:30.670417+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Recreate","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-Recreate\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670455+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Recreate","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-Recreate (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670463+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Recreate","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.670474+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatAcquire"}
+{"Time":"2026-11-14T23:56:30.670477+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatAcquire","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-RepeatAcquire\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670564+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatAcquire","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-RepeatAcquire (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670573+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatAcquire","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.670594+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatTry"}
+{"Time":"2026-11-14T23:56:30.670596+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatTry","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-RepeatTry\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670644+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatTry","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-RepeatTry (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670651+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatTry","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.670657+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatRelease"}
+{"Time":"2026-11-14T23:56:30.670659+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatRelease","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-RepeatRelease\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670704+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatRelease","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-RepeatRelease (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670709+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatRelease","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.670719+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-WrongReceiver"}
+{"Time":"2026-11-14T23:56:30.670724+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-WrongReceiver","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-WrongReceiver\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670758+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-WrongReceiver","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-WrongReceiver (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670762+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-WrongReceiver","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.670776+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Weight"}
+{"Time":"2026-11-14T23:56:30.67078+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Weight","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-Weight\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670854+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Weight","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-Weight (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670862+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-Weight","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.67088+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-ForeignContext"}
+{"Time":"2026-11-14T23:56:30.670885+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-ForeignContext","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-ForeignContext\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670928+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-ForeignContext","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-ForeignContext (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670932+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-ForeignContext","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.670939+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-UnownedRelease"}
+{"Time":"2026-11-14T23:56:30.670941+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-UnownedRelease","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-UnownedRelease\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670989+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-UnownedRelease","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-UnownedRelease (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.670993+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-UnownedRelease","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.67102+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatedDone"}
+{"Time":"2026-11-14T23:56:30.671038+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatedDone","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-RepeatedDone\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.671062+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatedDone","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-RepeatedDone (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.671067+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-RepeatedDone","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.671082+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-ContextOrder"}
+{"Time":"2026-11-14T23:56:30.671085+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-ContextOrder","Output":"=== RUN   TestStateCells/Acquire_NoWaiters/UV-ContextOrder\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.671148+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-ContextOrder","Output":"--- PASS: TestStateCells/Acquire_NoWaiters/UV-ContextOrder (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.671158+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_NoWaiters/UV-ContextOrder","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.671178+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/NewWeighted"}
+{"Time":"2026-11-14T23:56:30.671182+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/NewWeighted","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/NewWeighted\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.67129+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/NewWeighted","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:30.671317+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/NewWeighted","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/NewWeighted (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.67133+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/NewWeighted","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.671334+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x NewWeighted\n"}
+{"Time":"2026-11-14T23:56:30.671356+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Acquire"}
+{"Time":"2026-11-14T23:56:30.671359+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Acquire","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/Acquire\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.671454+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Acquire","Output":"--- PASS: TestStateCells/Acquire_WaitersPending/Acquire (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.67146+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Acquire","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.671476+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/TryAcquire"}
+{"Time":"2026-11-14T23:56:30.671479+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/TryAcquire","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/TryAcquire\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.671554+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/TryAcquire","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:30.671572+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/TryAcquire","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/TryAcquire (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:30.671576+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/TryAcquire","Elapsed":0}
+{"Time":"2026-11-14T23:56:30.671586+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x TryAcquire\n"}
+{"Time":"2026-11-14T23:56:30.671596+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Release"}
+{"Time":"2026-11-14T23:56:30.671602+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Release","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/Release\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.672563+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Release","Output":"    decision_contract_test.go:309: DR-001: eligible zero waiter did not complete without another input\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:32.672616+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Release","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/Release (2.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.672631+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Release","Elapsed":2}
+{"Time":"2026-11-14T23:56:32.672664+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x Release\n"}
+{"Time":"2026-11-14T23:56:32.672698+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/ContextDone"}
+{"Time":"2026-11-14T23:56:32.672703+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/ContextDone","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/ContextDone\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.672813+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/ContextDone","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:32.672853+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/ContextDone","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/ContextDone (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.67287+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/ContextDone","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.672873+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x ContextDone\n"}
+{"Time":"2026-11-14T23:56:32.672876+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Grant"}
+{"Time":"2026-11-14T23:56:32.672878+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Grant","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/Grant\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.67296+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Grant","Output":"--- PASS: TestStateCells/Acquire_WaitersPending/Grant (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.67297+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/Grant","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.672973+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Abandon"}
+{"Time":"2026-11-14T23:56:32.672974+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Abandon","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-Abandon\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673064+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Abandon","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:32.673085+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Abandon","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/UV-Abandon (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673094+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Abandon","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.673096+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x UV-Abandon\n"}
+{"Time":"2026-11-14T23:56:32.673153+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Recreate"}
+{"Time":"2026-11-14T23:56:32.673181+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Recreate","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-Recreate\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673286+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Recreate","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:32.673311+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Recreate","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/UV-Recreate (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673348+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Recreate","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.673359+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x UV-Recreate\n"}
+{"Time":"2026-11-14T23:56:32.673394+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatAcquire"}
+{"Time":"2026-11-14T23:56:32.673403+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatAcquire","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-RepeatAcquire\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673471+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatAcquire","Output":"--- PASS: TestStateCells/Acquire_WaitersPending/UV-RepeatAcquire (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673477+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatAcquire","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.673499+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatTry"}
+{"Time":"2026-11-14T23:56:32.673506+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatTry","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-RepeatTry\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673572+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatTry","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:32.673586+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatTry","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/UV-RepeatTry (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673626+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatTry","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.673652+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x UV-RepeatTry\n"}
+{"Time":"2026-11-14T23:56:32.673697+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatRelease"}
+{"Time":"2026-11-14T23:56:32.673706+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatRelease","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-RepeatRelease\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673857+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatRelease","Output":"--- PASS: TestStateCells/Acquire_WaitersPending/UV-RepeatRelease (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.673911+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatRelease","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.673978+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-WrongReceiver"}
+{"Time":"2026-11-14T23:56:32.673983+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-WrongReceiver","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-WrongReceiver\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674083+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-WrongReceiver","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:32.674089+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-WrongReceiver","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/UV-WrongReceiver (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674108+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-WrongReceiver","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.674128+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x UV-WrongReceiver\n"}
+{"Time":"2026-11-14T23:56:32.674182+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Weight"}
+{"Time":"2026-11-14T23:56:32.674191+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Weight","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-Weight\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674312+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Weight","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:32.674346+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Weight","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/UV-Weight (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674351+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-Weight","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.674353+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x UV-Weight\n"}
+{"Time":"2026-11-14T23:56:32.674365+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-ForeignContext"}
+{"Time":"2026-11-14T23:56:32.674367+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-ForeignContext","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-ForeignContext\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674455+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-ForeignContext","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:32.674464+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-ForeignContext","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/UV-ForeignContext (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674502+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-ForeignContext","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.67451+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x UV-ForeignContext\n"}
+{"Time":"2026-11-14T23:56:32.674534+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-UnownedRelease"}
+{"Time":"2026-11-14T23:56:32.674537+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-UnownedRelease","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-UnownedRelease\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674624+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-UnownedRelease","Output":"--- PASS: TestStateCells/Acquire_WaitersPending/UV-UnownedRelease (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674634+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-UnownedRelease","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.674638+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatedDone"}
+{"Time":"2026-11-14T23:56:32.67464+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatedDone","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-RepeatedDone\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674729+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatedDone","Output":"    state_cells_test.go:318: expected 2 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:32.674742+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatedDone","Output":"--- FAIL: TestStateCells/Acquire_WaitersPending/UV-RepeatedDone (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.674756+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-RepeatedDone","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.67476+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL FAIL Acquire_WaitersPending x UV-RepeatedDone\n"}
+{"Time":"2026-11-14T23:56:32.674787+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-ContextOrder"}
+{"Time":"2026-11-14T23:56:32.674793+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-ContextOrder","Output":"=== RUN   TestStateCells/Acquire_WaitersPending/UV-ContextOrder\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.675016+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-ContextOrder","Output":"--- PASS: TestStateCells/Acquire_WaitersPending/UV-ContextOrder (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.675024+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells/Acquire_WaitersPending/UV-ContextOrder","Elapsed":0}
+{"Time":"2026-11-14T23:56:32.675031+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL COVERAGE: 34 executable, 4 explicit contract limits\n"}
+{"Time":"2026-11-14T23:56:32.675036+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"CELL SUITE: 34 cells checked, 12 failed\n"}
+{"Time":"2026-11-14T23:56:32.675052+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Output":"--- FAIL: TestStateCells (4.02s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.675131+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStateCells","Elapsed":4.02}
+{"Time":"2026-11-14T23:56:32.675144+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs"}
+{"Time":"2026-11-14T23:56:32.675152+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs","Output":"=== RUN   TestStatePairs\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:32.675211+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-01a"}
+{"Time":"2026-11-14T23:56:32.675217+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-01a","Output":"=== RUN   TestStatePairs/P-01a\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.675785+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-01a","Output":"    decision_contract_test.go:91: DR-001: eligible zero waiter did not complete without another input\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:34.675878+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-01a","Output":"--- FAIL: TestStatePairs/P-01a (2.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.675888+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-01a","Elapsed":2}
+{"Time":"2026-11-14T23:56:34.676194+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-01b"}
+{"Time":"2026-11-14T23:56:34.676209+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-01b","Output":"=== RUN   TestStatePairs/P-01b\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.676215+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-01b","Output":"--- PASS: TestStatePairs/P-01b (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.676219+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-01b","Elapsed":0}
+{"Time":"2026-11-14T23:56:34.676223+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-02a"}
+{"Time":"2026-11-14T23:56:34.676231+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-02a","Output":"=== RUN   TestStatePairs/P-02a\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.676248+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-02a","Output":"--- PASS: TestStatePairs/P-02a (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.67626+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-02a","Elapsed":0}
+{"Time":"2026-11-14T23:56:34.676264+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-02b"}
+{"Time":"2026-11-14T23:56:34.676267+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-02b","Output":"=== RUN   TestStatePairs/P-02b\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.67634+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-02b","Output":"--- PASS: TestStatePairs/P-02b (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.67635+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-02b","Elapsed":0}
+{"Time":"2026-11-14T23:56:34.676361+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-03a"}
+{"Time":"2026-11-14T23:56:34.676397+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-03a","Output":"=== RUN   TestStatePairs/P-03a\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.676844+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-03a","Output":"--- PASS: TestStatePairs/P-03a (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.676853+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-03a","Elapsed":0}
+{"Time":"2026-11-14T23:56:34.676856+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-03b"}
+{"Time":"2026-11-14T23:56:34.676859+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-03b","Output":"=== RUN   TestStatePairs/P-03b\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.676864+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-03b","Output":"--- PASS: TestStatePairs/P-03b (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.676877+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-03b","Elapsed":0}
+{"Time":"2026-11-14T23:56:34.676889+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-04a"}
+{"Time":"2026-11-14T23:56:34.676912+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-04a","Output":"=== RUN   TestStatePairs/P-04a\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.676921+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-04a","Output":"--- PASS: TestStatePairs/P-04a (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.676925+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-04a","Elapsed":0}
+{"Time":"2026-11-14T23:56:34.677037+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-04b"}
+{"Time":"2026-11-14T23:56:34.677047+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-04b","Output":"=== RUN   TestStatePairs/P-04b\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.677305+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-04b","Output":"--- PASS: TestStatePairs/P-04b (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:34.677313+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-04b","Elapsed":0}
+{"Time":"2026-11-14T23:56:34.677366+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-05a"}
+{"Time":"2026-11-14T23:56:34.677374+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-05a","Output":"=== RUN   TestStatePairs/P-05a\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:36.678085+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-05a","Output":"    decision_contract_test.go:91: DR-001: eligible zero waiter did not complete without another input\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:36.678138+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-05a","Output":"--- FAIL: TestStatePairs/P-05a (2.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:36.678153+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-05a","Elapsed":2}
+{"Time":"2026-11-14T23:56:36.678347+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-05b"}
+{"Time":"2026-11-14T23:56:36.678365+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-05b","Output":"=== RUN   TestStatePairs/P-05b\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:36.678371+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-05b","Output":"--- PASS: TestStatePairs/P-05b (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:36.678375+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-05b","Elapsed":0}
+{"Time":"2026-11-14T23:56:36.67838+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06a"}
+{"Time":"2026-11-14T23:56:36.678383+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06a","Output":"=== RUN   TestStatePairs/P-06a\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:38.680798+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06a","Output":"    decision_q01_test.go:115: DR-001: eligible zero waiter did not complete without another input\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:38.680869+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06a","Output":"--- FAIL: TestStatePairs/P-06a (2.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:38.680875+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06a","Elapsed":2}
+{"Time":"2026-11-14T23:56:38.680961+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06b"}
+{"Time":"2026-11-14T23:56:38.68098+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06b","Output":"=== RUN   TestStatePairs/P-06b\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:38.681204+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06b","Output":"    state_cells_test.go:404: expected 1 units still available\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:38.681216+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06b","Output":"--- FAIL: TestStatePairs/P-06b (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:38.681252+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-06b","Elapsed":0}
+{"Time":"2026-11-14T23:56:38.681273+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-07a"}
+{"Time":"2026-11-14T23:56:38.681275+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-07a","Output":"=== RUN   TestStatePairs/P-07a\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.683959+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-07a","Output":"    decision_q01_test.go:90: DR-001: eligible zero waiter did not complete without another input\n","OutputType":"error"}
+{"Time":"2026-11-14T23:56:40.684375+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-07a","Output":"--- FAIL: TestStatePairs/P-07a (2.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.684393+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-07a","Elapsed":2}
+{"Time":"2026-11-14T23:56:40.684404+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-07b"}
+{"Time":"2026-11-14T23:56:40.684442+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-07b","Output":"=== RUN   TestStatePairs/P-07b\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.684669+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-07b","Output":"--- PASS: TestStatePairs/P-07b (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.684681+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-07b","Elapsed":0}
+{"Time":"2026-11-14T23:56:40.684883+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-08a"}
+{"Time":"2026-11-14T23:56:40.684895+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-08a","Output":"=== RUN   TestStatePairs/P-08a\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.685108+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-08a","Output":"--- PASS: TestStatePairs/P-08a (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.685121+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-08a","Elapsed":0}
+{"Time":"2026-11-14T23:56:40.685127+01:00","Action":"run","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-08b"}
+{"Time":"2026-11-14T23:56:40.685176+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-08b","Output":"=== RUN   TestStatePairs/P-08b\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.685187+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-08b","Output":"--- PASS: TestStatePairs/P-08b (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.685237+01:00","Action":"pass","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs/P-08b","Elapsed":0}
+{"Time":"2026-11-14T23:56:40.685244+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs","Output":"PAIR SUITE: 16 orderings completed\n"}
+{"Time":"2026-11-14T23:56:40.685258+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs","Output":"--- FAIL: TestStatePairs (8.01s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.685487+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Test":"TestStatePairs","Elapsed":8.01}
+{"Time":"2026-11-14T23:56:40.685594+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Output":"FAIL\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.688425+01:00","Action":"output","Package":"golang.org/x/sync/semaphore","Output":"FAIL\tgolang.org/x/sync/semaphore\t12.384s\n","OutputType":"frame"}
+{"Time":"2026-11-14T23:56:40.688467+01:00","Action":"fail","Package":"golang.org/x/sync/semaphore","Elapsed":12.384}
