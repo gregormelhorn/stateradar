@@ -1,0 +1,140 @@
+=== RUN   TestDR002NegativeConstructor
+=== RUN   TestDR002NegativeConstructor/MinusOne
+    decision_numeric_test.go:41: approved numeric rejection must panic
+=== RUN   TestDR002NegativeConstructor/MinInt64
+    decision_numeric_test.go:41: approved numeric rejection must panic
+--- FAIL: TestDR002NegativeConstructor (0.00s)
+    --- FAIL: TestDR002NegativeConstructor/MinusOne (0.00s)
+    --- FAIL: TestDR002NegativeConstructor/MinInt64 (0.00s)
+=== RUN   TestDR002NegativeAcquire
+=== RUN   TestDR002NegativeAcquire/MinusOne/Empty
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: rejected call manufactured capacity
+=== RUN   TestDR002NegativeAcquire/MinusOne/Full
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: rejected call manufactured capacity
+=== RUN   TestDR002NegativeAcquire/MinusOne/Queued
+    decision_numeric_test.go:69: approved numeric rejection must panic
+=== RUN   TestDR002NegativeAcquire/MinusOne/PreCanceled
+    decision_numeric_test.go:69: approved numeric rejection must panic
+=== RUN   TestDR002NegativeAcquire/MinInt64/Empty
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: expected 2 units still available
+=== RUN   TestDR002NegativeAcquire/MinInt64/Full
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: expected 0 units still available
+=== RUN   TestDR002NegativeAcquire/MinInt64/Queued
+    decision_numeric_test.go:69: approved numeric rejection must panic
+=== RUN   TestDR002NegativeAcquire/MinInt64/PreCanceled
+    decision_numeric_test.go:69: approved numeric rejection must panic
+--- FAIL: TestDR002NegativeAcquire (0.20s)
+    --- FAIL: TestDR002NegativeAcquire/MinusOne/Empty (0.00s)
+    --- FAIL: TestDR002NegativeAcquire/MinusOne/Full (0.00s)
+    --- FAIL: TestDR002NegativeAcquire/MinusOne/Queued (0.10s)
+    --- FAIL: TestDR002NegativeAcquire/MinusOne/PreCanceled (0.00s)
+    --- FAIL: TestDR002NegativeAcquire/MinInt64/Empty (0.00s)
+    --- FAIL: TestDR002NegativeAcquire/MinInt64/Full (0.00s)
+    --- FAIL: TestDR002NegativeAcquire/MinInt64/Queued (0.10s)
+    --- FAIL: TestDR002NegativeAcquire/MinInt64/PreCanceled (0.00s)
+=== RUN   TestDR002NegativeTryAcquire
+=== RUN   TestDR002NegativeTryAcquire/MinusOne/Empty
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: rejected call manufactured capacity
+=== RUN   TestDR002NegativeTryAcquire/MinusOne/Full
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: rejected call manufactured capacity
+=== RUN   TestDR002NegativeTryAcquire/MinusOne/Queued
+    decision_numeric_test.go:69: approved numeric rejection must panic
+=== RUN   TestDR002NegativeTryAcquire/MinusOne/PreCanceled
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: rejected call manufactured capacity
+=== RUN   TestDR002NegativeTryAcquire/MinInt64/Empty
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: expected 2 units still available
+=== RUN   TestDR002NegativeTryAcquire/MinInt64/Full
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: expected 0 units still available
+=== RUN   TestDR002NegativeTryAcquire/MinInt64/Queued
+    decision_numeric_test.go:69: approved numeric rejection must panic
+=== RUN   TestDR002NegativeTryAcquire/MinInt64/PreCanceled
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: expected 2 units still available
+--- FAIL: TestDR002NegativeTryAcquire (0.00s)
+    --- FAIL: TestDR002NegativeTryAcquire/MinusOne/Empty (0.00s)
+    --- FAIL: TestDR002NegativeTryAcquire/MinusOne/Full (0.00s)
+    --- FAIL: TestDR002NegativeTryAcquire/MinusOne/Queued (0.00s)
+    --- FAIL: TestDR002NegativeTryAcquire/MinusOne/PreCanceled (0.00s)
+    --- FAIL: TestDR002NegativeTryAcquire/MinInt64/Empty (0.00s)
+    --- FAIL: TestDR002NegativeTryAcquire/MinInt64/Full (0.00s)
+    --- FAIL: TestDR002NegativeTryAcquire/MinInt64/Queued (0.00s)
+    --- FAIL: TestDR002NegativeTryAcquire/MinInt64/PreCanceled (0.00s)
+=== RUN   TestDR002NegativeRelease
+=== RUN   TestDR002NegativeRelease/MinusOne/Empty
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: expected 2 units still available
+=== RUN   TestDR002NegativeRelease/MinusOne/Full
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: expected 0 units still available
+=== RUN   TestDR002NegativeRelease/MinusOne/Queued
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: expected 0 units still available
+=== RUN   TestDR002NegativeRelease/MinusOne/PreCanceled
+    decision_numeric_test.go:69: approved numeric rejection must panic
+    decision_numeric_test.go:88: expected 2 units still available
+=== RUN   TestDR002NegativeRelease/MinInt64/Empty
+    decision_numeric_test.go:88: expected 2 units still available
+=== RUN   TestDR002NegativeRelease/MinInt64/Full
+    decision_numeric_test.go:88: expected 0 units still available
+=== RUN   TestDR002NegativeRelease/MinInt64/Queued
+    decision_numeric_test.go:88: expected 0 units still available
+=== RUN   TestDR002NegativeRelease/MinInt64/PreCanceled
+    decision_numeric_test.go:88: expected 2 units still available
+--- FAIL: TestDR002NegativeRelease (0.00s)
+    --- FAIL: TestDR002NegativeRelease/MinusOne/Empty (0.00s)
+    --- FAIL: TestDR002NegativeRelease/MinusOne/Full (0.00s)
+    --- FAIL: TestDR002NegativeRelease/MinusOne/Queued (0.00s)
+    --- FAIL: TestDR002NegativeRelease/MinusOne/PreCanceled (0.00s)
+    --- FAIL: TestDR002NegativeRelease/MinInt64/Empty (0.00s)
+    --- FAIL: TestDR002NegativeRelease/MinInt64/Full (0.00s)
+    --- FAIL: TestDR002NegativeRelease/MinInt64/Queued (0.00s)
+    --- FAIL: TestDR002NegativeRelease/MinInt64/PreCanceled (0.00s)
+=== RUN   TestDR002ZeroAndMaxBoundaries
+=== RUN   TestDR002ZeroAndMaxBoundaries/Zero
+=== RUN   TestDR002ZeroAndMaxBoundaries/MaxInt64
+=== RUN   TestDR002ZeroAndMaxBoundaries/QueuedMaxInt64
+--- PASS: TestDR002ZeroAndMaxBoundaries (0.00s)
+    --- PASS: TestDR002ZeroAndMaxBoundaries/Zero (0.00s)
+    --- PASS: TestDR002ZeroAndMaxBoundaries/MaxInt64 (0.00s)
+    --- PASS: TestDR002ZeroAndMaxBoundaries/QueuedMaxInt64 (0.00s)
+=== RUN   TestDR003OverReleaseEmptyPartialFull
+=== RUN   TestDR003OverReleaseEmptyPartialFull/Empty
+    decision_numeric_test.go:157: rejected call manufactured capacity
+=== RUN   TestDR003OverReleaseEmptyPartialFull/Partial
+    decision_numeric_test.go:157: rejected call manufactured capacity
+=== RUN   TestDR003OverReleaseEmptyPartialFull/Full
+    decision_numeric_test.go:157: rejected call manufactured capacity
+--- FAIL: TestDR003OverReleaseEmptyPartialFull (0.00s)
+    --- FAIL: TestDR003OverReleaseEmptyPartialFull/Empty (0.00s)
+    --- FAIL: TestDR003OverReleaseEmptyPartialFull/Partial (0.00s)
+    --- FAIL: TestDR003OverReleaseEmptyPartialFull/Full (0.00s)
+=== RUN   TestDR003OverReleaseQueued
+--- FAIL: TestDR003OverReleaseQueued (0.00s)
+panic: semaphore: released more than held [recovered, repanicked]
+
+goroutine 15 [running]:
+testing.tRunner.func1.2({0x102abbd08, 0x102a8c570})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2125 +0x2b8
+testing.tRunner.func1()
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2128 +0x438
+panic({0x102abbd08?, 0x102a8c570?})
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go:859 +0x120
+golang.org/x/sync/semaphore.(*Weighted).Release(0xc000038780, 0x1)
+	/Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/semaphore/semaphore.go:127 +0xc0
+golang.org/x/sync/semaphore.TestDR003OverReleaseQueued(0xc0000d7b08)
+	/Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/semaphore/decision_numeric_test.go:173 +0x128
+testing.tRunner(0xc0000d7b08, 0x102adeb28)
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x168
+created by testing.(*T).Run in goroutine 1
+	/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x7c0
+FAIL	golang.org/x/sync/semaphore	0.662s
+FAIL

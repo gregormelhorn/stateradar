@@ -7,13 +7,15 @@ the five independent public-boundary controls, and left **13 domain questions OP
 implementation change, accepted DR, to-be promotion or Step-04 conformance
 suite was claimed at that pilot checkpoint.
 
-Follow-up: the owner has now accepted **Q-01 as DR-001**. The
-[focused resolution](resolution-q01/deviation-report.md) records the expected-red
-tests and the minimal fix in the [evaluation copy](../../../examples/weighted-semaphore/README.md).
-Its five scenarios pass 50 times each with the race detector; upstream tests
-also pass. **Twelve questions remain OPEN** in the
-[active question register](resolution-q01/open-questions.md). The historical
-analysis below remains the original baseline, not a reconciled fixed model.
+Follow-up: **Q-01 through Q-04 are now accepted and implemented in the
+[evaluation copy](../../../examples/weighted-semaphore/README.md)**. The
+[Q-01 resolution](resolution-q01/deviation-report.md) fixes zero-weight FIFO
+progress. The [numeric resolution](resolution-q02-q04/deviation-report.md)
+adds negative-input rejection, state-preserving over-release rejection and an
+immediate oversized-request error. Combined acceptance passes 15 groups x 50
+with the race detector plus upstream tests. **Nine questions remain OPEN** in
+the [active question register](resolution-q02-q04/open-questions.md). The
+historical analysis below remains the original baseline, not a reconciled model.
 
 ## Frozen inputs and scope
 
@@ -128,12 +130,9 @@ preserve canonical renderer output, existing Markdown hard breaks, and the
 verbatim indentation of the public Go contract example unchanged;
 the semantic and catalogue checks remain enabled.
 
-Q-01 was accepted as [DR-001](resolution-q01/decisions/DR-001.yaml): keep zero
-weight and FIFO, and notify an eligible zero prefix after the blocking head
-cancels even at full capacity. The focused to-be refinement, red/green tests and
-evaluation fix are complete. The next domain step is the next unanswered
-question in the [active register](resolution-q01/open-questions.md), one per
-round. Other questions stay OPEN and block only their own branches. Full
-conformance and reconciliation remain pending; this partial DR implementation
-does not promote the historical as-is analysis or establish generic F-20
-mutation coverage.
+Q-01 through Q-04 have accepted decisions and tested evaluation implementations;
+see the [current deviation report](resolution-q02-q04/deviation-report.md).
+Continue the remaining owner decisions in the
+[active register](resolution-q02-q04/open-questions.md), one per round. These
+partial implementations do not promote the historical as-is model or establish
+generic mutation coverage. Full conformance and reconciliation remain pending.

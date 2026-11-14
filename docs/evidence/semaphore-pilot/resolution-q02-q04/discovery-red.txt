@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/verify_q01.py", line 91, in <module>
+    main()
+    ~~~~^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/verify_q01.py", line 66, in main
+    validate_results(args.results.read_text(), args.count)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/verify_q01.py", line 52, in validate_results
+    raise ValueError(f'Decision discovery/results: expected {len(EXPECTED)} named tests x {count}; '
+                     f'observed {dict(passed)}, failures={len(failures)}')
+ValueError: Decision discovery/results: expected 49 named tests x 50; observed {}, failures=0

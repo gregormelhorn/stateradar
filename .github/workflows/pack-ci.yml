@@ -16,7 +16,7 @@ jobs:
         with:
           go-version-file: examples/weighted-semaphore/go.mod
           cache: false
-      - name: weighted semaphore DR-001 acceptance
+      - name: weighted semaphore accepted decisions
         run: python examples/weighted-semaphore/verify_q01.py
       # mypy over tools/ and tools/selftest/ (config: mypy.ini). Its first
       # run on main found 34 errors, one a real crash: both mutation

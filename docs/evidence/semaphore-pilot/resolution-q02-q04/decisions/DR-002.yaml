@@ -1,0 +1,17 @@
+id: DR-002
+date: 2026-11-14
+source_question: Q-03
+question: Reject negative arguments before mutation
+decision: panic-on-negative
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Panic bei negativen Werten in allen vier Methoden (empfohlen)"
+scope: >-
+  Evaluation copy only. NewWeighted, Acquire, TryAcquire and Release reject negative int64 arguments with panic before changing state. Zero remains supported under DR-001. All nonnegative int64 values are representable inputs; capacity accounting must stay within [0,size].
+links:
+  - "guarded matrix branch: NewWeighted"
+  - "guarded matrix branch: Acquire"
+  - "guarded matrix branch: TryAcquire"
+  - "guarded matrix branch: Release"
+  - "guarded matrix branch: UV-Weight"
+status: accepted

@@ -42,7 +42,12 @@ entries and separates the new model-routing plan from shipped capabilities.
    [focused resolution](evidence/semaphore-pilot/resolution-q01/deviation-report.md)
    demonstrates four expected-red cases, a minimal evaluation-copy fix, and
    five scenarios x 50 green race-detector repetitions plus upstream tests.
-   Twelve questions remain open. Continue their owner interview and decided
+   Q-02/Q-03/Q-04 now have separate accepted decisions and
+   [numeric-contract fixes](evidence/semaphore-pilot/resolution-q02-q04/deviation-report.md):
+   immediate oversized error, negative-input panic before mutation and
+   state-preserving over-release panic. Combined acceptance covers 15 test
+   groups x 50 repetitions plus upstream tests. Nine questions remain open.
+   Continue their owner interview and decided
    conformance slices; full reconciliation and generic F-20 mutation support
    remain pending. This real progress case is evidence, not broader coverage.
 3. **Make disposition rationale machine-readable.** Design and validate a

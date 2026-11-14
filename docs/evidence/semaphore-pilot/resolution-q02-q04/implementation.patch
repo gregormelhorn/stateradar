@@ -1,0 +1,47 @@
+--- a/semaphore/semaphore.go
++++ b/semaphore/semaphore.go
+@@ -10,0 +11 @@
++	"fmt"
+@@ -20,0 +22 @@
++// A negative capacity panics (evaluation decision DR-002).
+@@ -21,0 +24,3 @@
++	if n < 0 {
++		panic("semaphore: negative capacity")
++	}
+@@ -36,2 +41,4 @@
+-// are available or ctx is done. On success, returns nil. On failure, returns
+-// ctx.Err() and leaves the semaphore unchanged.
++// are available or ctx is done. On success, returns nil. On cancellation,
++// returns ctx.Err(). Errors leave the semaphore unchanged. A negative weight panics
++// (DR-002). An oversized weight returns a size error without waiting for
++// cancellation; an already canceled context retains priority (DR-004).
+@@ -38,0 +46,3 @@
++	if n < 0 {
++		panic("semaphore: negative weight")
++	}
+@@ -63 +73 @@
+-		// Don't make other Acquire calls block on one that's doomed to fail.
++		// DR-004: this request can never fit; do not enqueue or await Done.
+@@ -65,2 +75 @@
+-		<-done
+-		return ctx.Err()
++		return fmt.Errorf("semaphore: requested weight %d exceeds capacity %d", n, s.size)
+@@ -110,0 +120 @@
++// A negative weight panics before mutation (DR-002).
+@@ -111,0 +122,3 @@
++	if n < 0 {
++		panic("semaphore: negative weight")
++	}
+@@ -121,0 +135,2 @@
++// Negative weights or release above the aggregate held weight panic without
++// changing the instance (evaluation decisions DR-002 and DR-003).
+@@ -122,0 +138,3 @@
++	if n < 0 {
++		panic("semaphore: negative weight")
++	}
+@@ -124,2 +142 @@
+-	s.cur -= n
+-	if s.cur < 0 {
++	if n > s.cur {
+@@ -128,0 +146 @@
++	s.cur -= n

@@ -1,0 +1,31 @@
+group G-Q01 cancellation rescan: proven
+{'size': 2, 'cur': 3, 'front': False} ['skip'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 3, 'front': True} ['notify'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 2, 'front': False} ['skip']
+{'size': 2, 'cur': 2, 'front': True} ['notify']
+{'size': 2, 'cur': 1, 'front': False} ['skip']
+{'size': 2, 'cur': 1, 'front': True} ['notify']
+DR-001 eligible-zero progress: unsat (unsat required)
+DR-001 positive-head fit at full capacity: unsat (unsat required)
+Source form: DR-001
+COVERAGE: 57 historical cells accounted for; numeric refinements have tests and accepted DRs
+group numeric sign: proven
+group release bound: proven
+group acquire bound: proven
+ARITHMETIC grant: unsat (unsat required)
+ARITHMETIC release/rollback: unsat (unsat required)
+ARITHMETIC rejected operation: unsat (unsat required)
+ARITHMETIC free capacity: unsat (unsat required)
+NUMERIC CHECK: PASS; no whole-model or scheduler proof claimed
+RED-PROBE: empty discovery rejected
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/verify_q01.py", line 92, in <module>
+    main()
+    ~~~~^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/verify_q01.py", line 85, in main
+    validate_results(result.stdout, args.count)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/verify_q01.py", line 53, in validate_results
+    raise ValueError(f'Decision discovery/results: expected {len(EXPECTED)} named tests x {count}; '
+                     f'observed {dict(passed)}, failures={len(failures)}')
+ValueError: Decision discovery/results: expected 55 named tests x 50; observed {'TestDR002NegativeConstructor/MinusOne': 50, 'TestDR002NegativeConstructor/MinInt64': 50, 'TestDR002NegativeConstructor': 50, 'TestDR002NegativeAcquire/MinusOne/Empty': 50, 'TestDR002NegativeAcquire/MinusOne/Full': 50, 'TestDR002NegativeAcquire/MinusOne/Queued': 50, 'TestDR002NegativeAcquire/MinusOne/PreCanceled': 50, 'TestDR002NegativeAcquire/MinInt64/Empty': 50, 'TestDR002NegativeAcquire/MinInt64/Full': 50, 'TestDR002NegativeAcquire/MinInt64/Queued': 50, 'TestDR002NegativeAcquire/MinInt64/PreCanceled': 50, 'TestDR002NegativeAcquire': 50, 'TestDR002NegativeTryAcquire/MinusOne/Empty': 50, 'TestDR002NegativeTryAcquire/MinusOne/Full': 50, 'TestDR002NegativeTryAcquire/MinusOne/Queued': 50, 'TestDR002NegativeTryAcquire/MinusOne/PreCanceled': 50, 'TestDR002NegativeTryAcquire/MinInt64/Empty': 50, 'TestDR002NegativeTryAcquire/MinInt64/Full': 50, 'TestDR002NegativeTryAcquire/MinInt64/Queued': 50, 'TestDR002NegativeTryAcquire/MinInt64/PreCanceled': 50, 'TestDR002NegativeTryAcquire': 50, 'TestDR002NegativeRelease/MinusOne/Empty': 50, 'TestDR002NegativeRelease/MinusOne/Full': 50, 'TestDR002NegativeRelease/MinusOne/Queued': 50, 'TestDR002NegativeRelease/MinusOne/PreCanceled': 50, 'TestDR002NegativeRelease/MinInt64/Empty': 50, 'TestDR002NegativeRelease/MinInt64/Full': 50, 'TestDR002NegativeRelease/MinInt64/Queued': 50, 'TestDR002NegativeRelease/MinInt64/PreCanceled': 50, 'TestDR002NegativeRelease': 50, 'TestDR002ZeroAndMaxBoundaries/Zero': 50, 'TestDR002ZeroAndMaxBoundaries/MaxInt64': 50, 'TestDR002ZeroAndMaxBoundaries/QueuedMaxInt64': 50, 'TestDR002ZeroAndMaxBoundaries': 50, 'TestDR003OverReleaseEmptyPartialFull/Empty': 50, 'TestDR003OverReleaseEmptyPartialFull/Partial': 50, 'TestDR003OverReleaseEmptyPartialFull/Full': 50, 'TestDR003OverReleaseEmptyPartialFull': 50, 'TestDR003OverReleaseQueued': 50, 'TestDR003OverReleaseMax': 50, 'TestDR004OversizedImmediateError/Empty': 50, 'TestDR004OversizedImmediateError/Queued': 50, 'TestDR004OversizedImmediateError': 50, 'TestDR004PreCanceledOversized': 50, 'TestDR001FullSingleZero': 50, 'TestDR001FullZeroPrefix': 50, 'TestDR001SpareCapacity': 50, 'TestDR001RetainedHeadPreservesFIFO': 50, 'TestDR001ZeroTryDoesNotBypass': 50}, failures=0

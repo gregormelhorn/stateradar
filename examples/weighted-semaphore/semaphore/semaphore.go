@@ -8,6 +8,7 @@ package semaphore // import "golang.org/x/sync/semaphore"
 import (
 	"container/list"
 	"context"
+	"fmt"
 	"sync"
 )
 
@@ -18,7 +19,11 @@ type waiter struct {
 
 // NewWeighted creates a new weighted semaphore with the given
 // maximum combined weight for concurrent access.
+// A negative capacity panics (evaluation decision DR-002).
 func NewWeighted(n int64) *Weighted {
+	if n < 0 {
+		panic("semaphore: negative capacity")
+	}
 	w := &Weighted{size: n}
 	return w
 }
@@ -33,9 +38,14 @@ type Weighted struct {
 }
 
 // Acquire acquires the semaphore with a weight of n, blocking until resources
-// are available or ctx is done. On success, returns nil. On failure, returns
-// ctx.Err() and leaves the semaphore unchanged.
+// are available or ctx is done. On success, returns nil. On cancellation,
+// returns ctx.Err(). Errors leave the semaphore unchanged. A negative weight panics
+// (DR-002). An oversized weight returns a size error without waiting for
+// cancellation; an already canceled context retains priority (DR-004).
 func (s *Weighted) Acquire(ctx context.Context, n int64) error {
+	if n < 0 {
+		panic("semaphore: negative weight")
+	}
 	done := ctx.Done()
 
 	s.mu.Lock()
@@ -60,10 +70,9 @@ func (s *Weighted) Acquire(ctx context.Context, n int64) error {
 	}
 
 	if n > s.size {
-		// Don't make other Acquire calls block on one that's doomed to fail.
+		// DR-004: this request can never fit; do not enqueue or await Done.
 		s.mu.Unlock()
-		<-done
-		return ctx.Err()
+		return fmt.Errorf("semaphore: requested weight %d exceeds capacity %d", n, s.size)
 	}
 
 	ready := make(chan struct{})
@@ -108,7 +117,11 @@ func (s *Weighted) Acquire(ctx context.Context, n int64) error {
 
 // TryAcquire acquires the semaphore with a weight of n without blocking.
 // On success, returns true. On failure, returns false and leaves the semaphore unchanged.
+// A negative weight panics before mutation (DR-002).
 func (s *Weighted) TryAcquire(n int64) bool {
+	if n < 0 {
+		panic("semaphore: negative weight")
+	}
 	s.mu.Lock()
 	success := s.size-s.cur >= n && s.waiters.Len() == 0
 	if success {
@@ -119,13 +132,18 @@ func (s *Weighted) TryAcquire(n int64) bool {
 }
 
 // Release releases the semaphore with a weight of n.
+// Negative weights or release above the aggregate held weight panic without
+// changing the instance (evaluation decisions DR-002 and DR-003).
 func (s *Weighted) Release(n int64) {
+	if n < 0 {
+		panic("semaphore: negative weight")
+	}
 	s.mu.Lock()
-	s.cur -= n
-	if s.cur < 0 {
+	if n > s.cur {
 		s.mu.Unlock()
 		panic("semaphore: released more than held")
 	}
+	s.cur -= n
 	s.notifyWaiters()
 	s.mu.Unlock()
 }

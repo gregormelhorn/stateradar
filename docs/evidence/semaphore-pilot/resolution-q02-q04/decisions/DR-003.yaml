@@ -1,0 +1,14 @@
+id: DR-003
+date: 2026-11-14
+source_question: Q-04
+question: Keep state unchanged after over-release panic
+decision: validate-before-subtraction
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "gut, ich folge deiner einschätzung"
+scope: >-
+  Evaluation copy only. Release of more than the aggregate held weight panics before subtracting or notifying. Recovery preserves the component counter and queue; this is not a recovery guarantee for the calling application.
+links:
+  - "guarded matrix branch: Release"
+  - "guarded matrix branch: UV-RepeatRelease"
+status: accepted
