@@ -1,8 +1,10 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.25.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.26.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.26 — inspect interleavings inside operations, and validate each
+  generated artifact before building later steps on it.
 * v1.25 — account for a state reached through a cited interaction-pair
   ordering, with the starting and resulting states recorded in its trace.
 * v1.24 — trace a second acquisition from the same caller while its
@@ -313,6 +315,13 @@ For each group establish, under the declared NAT assumptions: (a) **pairwise dis
 
 A guard you cannot formalize gets the mark `not-formalizable: <category>: <reason>` and keeps its inspection reasoning, labelled unproven. The category comes from a closed vocabulary — `external-call` (the guard calls out of the machine), `dynamic-state` (the guard reads mutable runtime content), `clock` (floating-point or wall time), `unstructured-payload` (free-form content) — because the not-formalizable outcome is a judgment call, and the category makes it reviewable (the pack checker enforces the vocabulary). Every guard group must end as `proven`, `violation` (a finding), or `not-formalizable`. To skip a group silently is an error. Write the outcomes to `guard-results.txt` and back into the matrix's guard notes.
 
+Write and validate each artifact as soon as its inputs exist. Build large
+tables in blocks and use the shipped wrapper for stage checks. Write probe
+files with a literal-preserving tool call, format them and run each bounded
+probe before expanding the test set. Record compilation and runtime
+failures. Keep the component sources and existing tests intact, and
+retain a failing observation as evidence when the code produces it.
+
 **Mechanical self-check (mandatory).** Wire the pack's generic checker: copy `tools/templates/check_matrix.py` into the output directory (it calls `tools/check_matrix.py`, which covers grid totality, citations, hole→Q links, pair→trace links, and undesired-coverage totality) and execute it. Write component-specific checks only when the matrix needs something the generic checker does not verify — never duplicate its logic per component (four ~90% copies existed in dobby before the generic one). The catalogue must carry a machine-readable id declaration (`<!-- event-ids: ... -->`) and the matrix a state declaration (`<!-- states: ... -->`). Checkers parse these declarations, never prose.
 
 Stage 1 (after this step): every state row contains exactly one disposition per catalogue event column. No catalogue column is missing. Every `ignore (documented)` and `reject` cell carries a citation. The `undesired-coverage` table is total (no empty cells).
@@ -434,6 +443,16 @@ Produce concrete, numbered event sequences of these kinds:
    * **Shared-fate reset.** All N instances reset internal state on the same external signal (for example connection opened). Does this create a synchronization cascade? Trace the aggregate load on the external resource over 3 failure/recovery cycles.
    * **Backoff dispersion.** If backoff windows share the same random seed, the same min/max bounds, and the same reset trigger — do they converge or diverge over time?
    * **Degraded-recovery herd.** The external resource recovers partially. Instance A connects, resets its state, then the resource fails again. Instance B connects, resets, fails. Do they amplify the degradation?
+
+For overlapping calls, split each operation at the first observation,
+the acquisition or release of synchronization, and the commit or wait.
+Check whether the other actor can change an observed condition in each
+gap. For a reachable overlap, state whether the first operation rechecks
+that condition and trace both actors through their actual results. Include
+any disagreement between admission, stored work and pending work, and
+whether a later request can complete first. Cite the observed decision
+and commit sites. Use a scheduling-only probe when a hook is needed, and
+assert externally visible results. Record a question when intent is open.
 
 When an interaction ordering reaches a modeled state and no single event
 cell represents that sequence, write the starting state, ordered steps and
