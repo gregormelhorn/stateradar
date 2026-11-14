@@ -1,0 +1,25 @@
+79:func TestIdentityWrapperReplacement(t *testing.T) {
+90:		*a = *b
+110:func TestIdentityWrapperCopyAndRebind(t *testing.T) {
+126:func TestIdentityWrapperMismatch(t *testing.T) {
+141:func TestIdentityWrapperLazyBoundary(t *testing.T) {
+199:func TestIdentityWrapperHalfOpenSuccess(t *testing.T) { identityWrapperHalfOpen(t, true) }
+200:func TestIdentityWrapperHalfOpenFailure(t *testing.T) { identityWrapperHalfOpen(t, false) }
+202:func TestIdentityWrapperZero(t *testing.T) {
+213:func TestIdentityExecuteReceiver(t *testing.T) {
+232:					*a = *b
+260:func TestIdentityRepeatedClosed(t *testing.T) {
+272:func TestIdentityRepeatedHalfOpen(t *testing.T) {
+286:func TestIdentityAbandonedHalfOpen(t *testing.T) {
+307:func TestIdentityStaleHalfOpen(t *testing.T) {
+327:func TestIdentityClosedExpiry(t *testing.T) {
+370:func TestIdentityDepartedExecute(t *testing.T) {
+416:func TestIdentityClassifierOrdering(t *testing.T) {
+467:func TestIdentityRequestAndClassifierPanic(t *testing.T) {
+512:func TestIdentityTripHookRetry(t *testing.T) {
+538:func TestIdentityTripHookReplacementPanic(t *testing.T) {
+554:func TestIdentityCompletionHookPanic(t *testing.T) {
+621:func TestIdentityAdmissionHookPanic(t *testing.T) {
+674:func TestIdentityStaleHookPanic(t *testing.T) {
+701:func TestIdentitySettingsCallbacks(t *testing.T) {
+726:func TestIdentityTwoStepBypassesClassifier(t *testing.T) {

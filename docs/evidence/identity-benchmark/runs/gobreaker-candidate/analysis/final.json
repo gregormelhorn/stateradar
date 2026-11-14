@@ -1,0 +1,415 @@
+{
+  "findings": [
+    {
+      "id": "F01",
+      "initial": "TwoStep wrapper W points to new A. B is separately constructed. Both have the same numeric generation.",
+      "steps": [
+        "Admit one A request through W",
+        "Keep a copy of W that still points to A",
+        "Overwrite W with B",
+        "Invoke the original done with true or false"
+      ],
+      "outcome": "observed-in-code: The outcome goes to B, which has zero admissions. A retains the admission with no outcome. A closed failure in B calls B's ReadyToTrip with B's counts. Source: gobreaker.go:266 (\"generation, err := tscb.cb.beforeRequest()\"), gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"), gobreaker.go:177 (\"cb.toNewGeneration(time.Now())\"), gobreaker.go:142 (\"cb := new(CircuitBreaker)\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:60 (\"c.TotalSuccesses++\"), gobreaker.go:66 (\"c.TotalFailures++\"), gobreaker.go:289 (\"cb.counts.onRequest()\"), gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"). observed-in-tests: analysis/_probe/identity_test.go:98 (\"identityCounts(t, b.Counts(), want)\"). Executing a subsequent local B request increments B.Requests independently.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "TestIdentityWrapperReplacement",
+      "question": "Should a callback follow replacement of its wrapper when the replacement accepts the captured generation?"
+    },
+    {
+      "id": "F02",
+      "initial": "New TwoStep wrapper W and a by-value wrapper copy both point to A. B is independent.",
+      "steps": [
+        "Admit through W and through its copy",
+        "Rebind only the variable holding W to B",
+        "Complete both callbacks without overwriting either captured wrapper"
+      ],
+      "outcome": "observed-in-code: Both outcomes go to shared A. B remains untouched. Variable rebinding changes the name used by the caller, while the captured wrapper objects remain where they were. Source: gobreaker.go:137 (\"cb *CircuitBreaker\"), gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"), gobreaker.go:265 (\"func (tscb *TwoStepCircuitBreaker) Allow() (done func(success bool), err error) {\"). observed-in-tests: analysis/_probe/identity_test.go:121 (\"identityCounts(t, a.Counts(), want)\").",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "TestIdentityWrapperCopyAndRebind",
+      "question": "Is sharing A via a shallow wrapper copy a supported public use?"
+    },
+    {
+      "id": "F03",
+      "initial": "A has a pending completion in its initial generation. B has tripped and is still open.",
+      "steps": [
+        "Copy W pointing to A",
+        "Overwrite W with B",
+        "Invoke the pending callback after replacement",
+        "Retry Allow on W"
+      ],
+      "outcome": "observed-in-code: B ignores either result and rejects retry with ErrOpenState while its timeout is unexpired. A retains its pending count. Source: gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:284 (\"return generation, ErrOpenState\"), gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"), gobreaker.go:294 (\"cb.mutex.Lock()\"), gobreaker.go:300 (\"return\"). observed-in-tests: analysis/_probe/identity_test.go:135 (\"identityReject(t, w, gb.ErrOpenState)\"). The public rejection returns a nil callback.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "\tif generation != before {"
+      },
+      "test": "TestIdentityWrapperMismatch",
+      "question": "Should replacement mismatches be silent and should the original admission remain charged? README.md:77-79 covers clearing on one breaker."
+    },
+    {
+      "id": "F04",
+      "initial": "A pending callback was admitted closed. W now points to B, which is open with a short timeout.",
+      "steps": [
+        "Wait past B's timeout without touching B's state",
+        "Invoke the old done using W",
+        "Retry Allow on W"
+      ],
+      "outcome": "observed-in-code: For either result, B enters half-open and invokes B's notification before dropping the mismatching completion. No request is charged by done, and a retry can take the available slot. Source: gobreaker.go:298 (\"state, generation := cb.currentState(now)\"), gobreaker.go:342 (\"cb.setState(StateHalfOpen, now)\"), gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"), gobreaker.go:289 (\"cb.counts.onRequest()\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:364 (\"cb.generation++\"). observed-in-tests: analysis/_probe/identity_test.go:158 (\"if !reflect.DeepEqual(events, []gb.State{gb.StateOpen, gb.StateHalfOpen}) {\"). A remains charged through the saved alias.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 342,
+        "fragment": "\t\t\tcb.setState(StateHalfOpen, now)"
+      },
+      "test": "TestIdentityWrapperLazyBoundary",
+      "question": "Should an unrelated callback be able to advance a replacement's state even when its result is discarded?"
+    },
+    {
+      "id": "F05",
+      "initial": "A and B are separate breakers that previously tripped. A has a pending half-open request, and B's open timeout has passed without a state check.",
+      "steps": [
+        "Admit A's half-open request",
+        "Overwrite W with B",
+        "Report A's success",
+        "Read B and try a new request"
+      ],
+      "outcome": "observed-in-code: B first notifies open to half-open, then half-open to closed without any B admission. B clears counts and admits a new request. A stays half-open with its slot charged. Source: gobreaker.go:316 (\"if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {\"), gobreaker.go:317 (\"cb.setState(StateClosed, now)\"), gobreaker.go:365 (\"cb.counts.clear()\"), gobreaker.go:285 (\"} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {\"), gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"), gobreaker.go:298 (\"state, generation := cb.currentState(now)\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:342 (\"cb.setState(StateHalfOpen, now)\"), gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"). observed-in-tests: analysis/_probe/identity_test.go:185 (\"if !reflect.DeepEqual(events, []gb.State{gb.StateOpen, gb.StateHalfOpen, want}) {\"). A's later Allow returns ErrTooManyRequests.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 317,
+        "fragment": "\t\t\tcb.setState(StateClosed, now)"
+      },
+      "test": "TestIdentityWrapperHalfOpenSuccess",
+      "question": "Should a foreign completion be able to close a replacement when the numeric generation matches after expiry?"
+    },
+    {
+      "id": "F06",
+      "initial": "A and B are separate breakers that previously tripped. A has a pending half-open request, and B's open timeout has passed without a state check.",
+      "steps": [
+        "Admit A's half-open request",
+        "Overwrite W with B",
+        "Report A's failure",
+        "Read B and retry"
+      ],
+      "outcome": "observed-in-code: B notifies open to half-open and half-open to open, with no B admission or failure count carried forward. A stays half-open with its slot charged. Source: gobreaker.go:330 (\"cb.setState(StateOpen, now)\"), gobreaker.go:376 (\"cb.expiry = now.Add(cb.timeout)\"), gobreaker.go:284 (\"return generation, ErrOpenState\"), gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"), gobreaker.go:298 (\"state, generation := cb.currentState(now)\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:342 (\"cb.setState(StateHalfOpen, now)\"), gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"), gobreaker.go:365 (\"cb.counts.clear()\"), gobreaker.go:285 (\"} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {\"). observed-in-tests: analysis/_probe/identity_test.go:195 (\"identityReject(t, b, gb.ErrOpenState)\"). A's later Allow returns ErrTooManyRequests. B's new open deadline is installed by the transition.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "\t\tcb.setState(StateOpen, now)"
+      },
+      "test": "TestIdentityWrapperHalfOpenFailure",
+      "question": "Should a foreign completion be able to reopen a replacement before it has admitted a probe?"
+    },
+    {
+      "id": "F07",
+      "initial": "W points to A and an admitted callback is outstanding.",
+      "steps": [
+        "Save a shallow alias",
+        "Overwrite W with a zero-value TwoStepCircuitBreaker",
+        "Call the old callback with recovery supplied by the caller"
+      ],
+      "outcome": "observed-in-code: The old callback panics on a nil underlying receiver before accounting. A's admission remains via the saved alias. Source: gobreaker.go:137 (\"cb *CircuitBreaker\"), gobreaker.go:294 (\"cb.mutex.Lock()\"), gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"), gobreaker.go:293 (\"func (cb *CircuitBreaker) afterRequest(before uint64, success bool) {\"). observed-in-tests: analysis/_probe/identity_test.go:209 (\"identityCounts(t, alias.Counts(), gb.Counts{Requests: 1})\"). Additional interpretation (inferred where it extends the probe). The public probe checks the panic and A's count. The precise nil access is inferred from the zero-value pointer and afterRequest's mutex access.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "TestIdentityWrapperZero",
+      "question": "What validity contract applies to a captured wrapper overwritten with a zero value?"
+    },
+    {
+      "id": "F08",
+      "initial": "A new direct CircuitBreaker is used by Execute. B is newly constructed.",
+      "steps": [
+        "Inside the admitted request, rebind the caller's pointer variable to B or overwrite the receiver value with a fresh breaker value",
+        "Return either success or failure"
+      ],
+      "outcome": "observed-in-code: Rebinding leaves completion on A. Overwriting the receiver at the same address changes the classifier, current counters and trip callback used by Execute. With equal generations, the replacement counts an outcome with no admission. Source: gobreaker.go:228 (\"func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{}, error) {\"), gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"), gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"), gobreaker.go:220 (\"return cb.counts\"), gobreaker.go:244 (\"return result, err\"), gobreaker.go:242 (\"result, err := req()\"), gobreaker.go:126 (\"mutex      sync.Mutex\"). observed-in-tests: analysis/_probe/identity_test.go:254 (\"identityCounts(t, a.Counts(), want)\"). Additional interpretation (inferred where it extends the probe). B is copied into A's receiver storage in the overwrite case and B itself remains unchanged. The Go sync.Mutex documentation excludes copying a mutex after first use. The source value copied here is a freshly constructed B before its first mutex-using call. No copy of the already-used A mutex was tested. Support for overwriting A's whole value is unresolved.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 243,
+        "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))"
+      },
+      "test": "TestIdentityExecuteReceiver",
+      "question": "What public contract applies when the active receiver storage is overwritten from an unused breaker value during req? Go sync.Mutex documents the separate constraint that a mutex must not be copied after first use."
+    },
+    {
+      "id": "F09",
+      "initial": "A closed TwoStep breaker has one admitted request and ReadyToTrip always returns false.",
+      "steps": [
+        "Copy the returned function value",
+        "Call the original with true",
+        "Call its copy with false",
+        "Call it again with false"
+      ],
+      "outcome": "observed-in-code: All three outcomes are counted against one admission, with two consecutive failures. Source: gobreaker.go:271 (\"return func(success bool) {\"), gobreaker.go:289 (\"cb.counts.onRequest()\"), gobreaker.go:68 (\"c.ConsecutiveSuccesses = 0\"). observed-in-tests: analysis/_probe/identity_test.go:269 (\"identityCounts(t, b.Counts(), want)\").",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "\treturn func(success bool) {"
+      },
+      "test": "TestIdentityRepeatedClosed",
+      "question": "Is done defined as exactly once, repeatable, or expected to signal misuse?"
+    },
+    {
+      "id": "F10",
+      "initial": "A half-open TwoStep breaker allows two requests.",
+      "steps": [
+        "Admit one request",
+        "Report success twice using the same callback",
+        "Call it again after close"
+      ],
+      "outcome": "observed-in-code: The two reports close the breaker without a second admission. Closing clears counts. The subsequent report is stale and is ignored. Source: gobreaker.go:315 (\"cb.counts.onSuccess()\"), gobreaker.go:316 (\"if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {\"), gobreaker.go:356 (\"cb.toNewGeneration(now)\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:365 (\"cb.counts.clear()\"). observed-in-tests: analysis/_probe/identity_test.go:279 (\"identityCounts(t, b.Counts(), identitySuccess(1))\"). The call made after close reports false and leaves the reset counts unchanged.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 316,
+        "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+      },
+      "test": "TestIdentityRepeatedHalfOpen",
+      "question": "Can repeated reports from one admission satisfy the full half-open threshold?"
+    },
+    {
+      "id": "F11",
+      "initial": "A half-open TwoStep breaker has a single allowed slot.",
+      "steps": [
+        "Admit one request and leave its callback uncalled",
+        "Let the caller leave and wait beyond the configured open timeout",
+        "Retry",
+        "Compare reporting success or failure later on separate breakers"
+      ],
+      "outcome": "observed-in-code: Without a report the breaker stays half-open and retry returns ErrTooManyRequests. A later success closes and permits new admissions. A later failure reopens and retry returns ErrOpenState before expiry. Source: gobreaker.go:285 (\"} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {\"), gobreaker.go:378 (\"cb.expiry = zero\"), gobreaker.go:317 (\"cb.setState(StateClosed, now)\"), gobreaker.go:330 (\"cb.setState(StateOpen, now)\"), gobreaker.go:286 (\"return generation, ErrTooManyRequests\"), gobreaker.go:335 (\"switch cb.state {\"), gobreaker.go:367 (\"var zero time.Time\"). observed-in-tests: analysis/_probe/identity_test.go:293 (\"identityReject(t, b, gb.ErrTooManyRequests)\").",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 285,
+        "fragment": "\t} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+      },
+      "test": "TestIdentityAbandonedHalfOpen",
+      "question": "What is the expected recovery when a half-open owner leaves without reporting? README.md:41-43 limits admission but says nothing about abandonment."
+    },
+    {
+      "id": "F12",
+      "initial": "Two requests are admitted in the same half-open generation.",
+      "steps": [
+        "Report failure for the first request",
+        "Report success or failure for the second before the new open timeout",
+        "Inspect state and counts"
+      ],
+      "outcome": "observed-in-code: The first opens and clears counts. Both possible second results are skipped, with no extra notification or accounting. Source: gobreaker.go:330 (\"cb.setState(StateOpen, now)\"), gobreaker.go:365 (\"cb.counts.clear()\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:294 (\"cb.mutex.Lock()\"), gobreaker.go:295 (\"defer cb.mutex.Unlock()\"). observed-in-tests: analysis/_probe/identity_test.go:321 (\"if !reflect.DeepEqual(events, []gb.State{gb.StateOpen, gb.StateHalfOpen, gb.StateOpen}) {\").",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "\tif generation != before {"
+      },
+      "test": "TestIdentityStaleHalfOpen",
+      "question": "explicit-requirement README.md:77-79 covers ignoring results sent before the state-change reset."
+    },
+    {
+      "id": "F13",
+      "initial": "A closed breaker with a finite interval has a pending result.",
+      "steps": [
+        "Compare reporting before expiry, reporting as the first state-aware call after expiry, and reporting after State refreshes expiry",
+        "Try both success and failure"
+      ],
+      "outcome": "observed-in-code: Before expiry the outcome counts and failure invokes ReadyToTrip. After expiry either outcome is discarded and counts are cleared, with no state notification or ReadyToTrip. Counts alone sees the old admission until a state-aware call. Source: gobreaker.go:337 (\"if !cb.expiry.IsZero() && cb.expiry.Before(now) {\"), gobreaker.go:338 (\"cb.toNewGeneration(now)\"), gobreaker.go:220 (\"return cb.counts\"), gobreaker.go:298 (\"state, generation := cb.currentState(now)\"), gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"), gobreaker.go:211 (\"state, _ := cb.currentState(now)\"), gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"), gobreaker.go:365 (\"cb.counts.clear()\"). observed-in-tests: analysis/_probe/identity_test.go:356 (\"identityCounts(t, b.Counts(), want)\"). The stale exclusion is documented for results admitted before clearing. Which operation performs the first refresh is an implementation observation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 338,
+        "fragment": "\t\t\tcb.toNewGeneration(now)"
+      },
+      "test": "TestIdentityClosedExpiry",
+      "question": "explicit-requirement README.md:77-79 covers outcome exclusion after clearing. Should Counts itself advance an expired window, and should completion be allowed to trigger the reset?"
+    },
+    {
+      "id": "F14",
+      "initial": "A worker has entered Execute on A. The caller can abandon waiting on the worker using its own channel. A has no interval.",
+      "steps": [
+        "Leave the worker blocked and inspect counts",
+        "Optionally trip A in a separate request",
+        "Release the worker with success or failure",
+        "Observe the buffered caller-owned result channel and A"
+      ],
+      "outcome": "observed-in-code: Without a later return the admission stays charged. With a later return in the same generation A counts it. After a trip the returned value and error still reach the worker's channel, but A discards the outcome. Breaker code supplies no channel cleanup or retry. Source: gobreaker.go:242 (\"result, err := req()\"), gobreaker.go:289 (\"cb.counts.onRequest()\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:244 (\"return result, err\"), gobreaker.go:229 (\"generation, err := cb.beforeRequest()\"), gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"). observed-in-tests: analysis/_probe/identity_test.go:400 (\"if got.value != \"payload\" || got.err != requestErr {\"). Additional interpretation (inferred where it extends the probe). The harness consumer exits before completion, leaving the buffered send available to a later observer. This buffer is caller-owned. The probe observes the still-blocked phase and subsequently releases the worker in every subcase. Indefinite non-return is inferred from the synchronous req call.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 244,
+        "fragment": "\treturn result, err"
+      },
+      "test": "TestIdentityDepartedExecute",
+      "question": "Should documentation specify that caller departure leaves both worker cancellation and delivery cleanup to the caller, while a later return can still account?"
+    },
+    {
+      "id": "F15",
+      "initial": "Execute has admitted a blocked request or entered a blocked IsSuccessful on A. Another request can trip A.",
+      "steps": [
+        "Trip A before request return or while its classifier is blocked",
+        "Let the old classifier return true or false",
+        "Take the old Execute result"
+      ],
+      "outcome": "observed-in-code: Classification still runs (or finishes) after the transition. Both results are stale. The original payload and error are returned. A classifier can use Counts while running because it runs before the accounting lock. Source: gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"), gobreaker.go:294 (\"cb.mutex.Lock()\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:244 (\"return result, err\"), gobreaker.go:217 (\"cb.mutex.Lock()\"), gobreaker.go:281 (\"state, generation := cb.currentState(now)\"), gobreaker.go:325 (\"cb.counts.onFailure()\"), gobreaker.go:327 (\"cb.setState(StateOpen, now)\"). observed-in-tests: analysis/_probe/identity_test.go:461 (\"identityState(t, <-classifiedAt, want)\"). The classifier can call Counts and State in the tested order. Only the completion's own afterRequest acquisition follows classification. The classifier can explicitly take a breaker lock via public methods.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 243,
+        "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))"
+      },
+      "test": "TestIdentityClassifierOrdering",
+      "question": "Should an obsolete result still run IsSuccessful and its external side effects?"
+    },
+    {
+      "id": "F16",
+      "initial": "An admitted Execute request or its IsSuccessful callback can panic with a non-nil value.",
+      "steps": [
+        "Panic from each origin before a boundary, or after another request trips A",
+        "Recover outside Execute"
+      ],
+      "outcome": "observed-in-code: With an unchanged generation the defer counts a failure and re-panics the value if reporting returns. With a changed generation it still re-panics but skips failure accounting. Request panic bypasses IsSuccessful. Source: gobreaker.go:234 (\"defer func() {\"), gobreaker.go:235 (\"e := recover()\"), gobreaker.go:237 (\"cb.afterRequest(generation, false)\"), gobreaker.go:238 (\"panic(e)\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:236 (\"if e != nil {\"), gobreaker.go:242 (\"result, err := req()\"), gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"). observed-in-tests: analysis/_probe/identity_test.go:507 (\"identityCounts(t, b.Counts(), want)\").",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 237,
+        "fragment": "\t\t\tcb.afterRequest(generation, false)"
+      },
+      "test": "TestIdentityRequestAndClassifierPanic",
+      "question": "explicit-requirement README.md:90-91 covers a request panic. Should classifier panics have the same failure-reporting semantics?"
+    },
+    {
+      "id": "F17",
+      "initial": "A's closed ReadyToTrip can panic. A failure was already counted.",
+      "steps": [
+        "Compare a TwoStep report with Execute returning an error",
+        "Make ReadyToTrip panic on its first call and return false on a second call",
+        "Inspect counts and recover"
+      ],
+      "outcome": "observed-in-code: TwoStep exposes the panic after one counted failure. Execute retries accounting once with false inside the recovery defer, counts a second failure in the same generation, then propagates the original panic. Source: gobreaker.go:325 (\"cb.counts.onFailure()\"), gobreaker.go:295 (\"defer cb.mutex.Unlock()\"), gobreaker.go:237 (\"cb.afterRequest(generation, false)\"), gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"), gobreaker.go:294 (\"cb.mutex.Lock()\"), gobreaker.go:298 (\"state, generation := cb.currentState(now)\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"). observed-in-tests: analysis/_probe/identity_test.go:534 (\"identityCounts(t, b.Counts(), identityFailure(2))\"). Additional interpretation (inferred where it extends the probe). The double count is conditional on a matching generation when retry takes the lock. The first reporting defer unlocks before the outer Execute defer reports again. An intervening expiry or transition can instead cause a skipped retry.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 326,
+        "fragment": "\t\tif cb.readyToTrip(cb.counts) {"
+      },
+      "test": "TestIdentityTripHookRetry",
+      "question": "Should a trip predicate panic trigger a second accounting attempt, and should it count again if the generation is still current?"
+    },
+    {
+      "id": "F18",
+      "initial": "A's ReadyToTrip panics twice with distinct values while A is closed.",
+      "steps": [
+        "Return an error from Execute",
+        "Let failure accounting and the recovery accounting both panic",
+        "Recover from Execute"
+      ],
+      "outcome": "observed-in-code: The second panic reaches the outer recover. The first is not re-raised by the explicit panic statement because retry did not return. Both failures were counted. Source: gobreaker.go:237 (\"cb.afterRequest(generation, false)\"), gobreaker.go:325 (\"cb.counts.onFailure()\"), gobreaker.go:238 (\"panic(e)\"), gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"). observed-in-tests: analysis/_probe/identity_test.go:551 (\"identityCounts(t, b.Counts(), identityFailure(2))\"). The test controls the predicate to panic both times and holds generation constant. No returned request payload is delivered in this case.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 238,
+        "fragment": "\t\t\tpanic(e)"
+      },
+      "test": "TestIdentityTripHookReplacementPanic",
+      "question": "Which panic should escape when retry accounting also panics?"
+    },
+    {
+      "id": "F19",
+      "initial": "A has an OnStateChange callback that panics at a completion-driven transition.",
+      "steps": [
+        "Trigger closed to open by failure or half-open to open/closed by failure/success",
+        "Recover",
+        "Inspect state, counts and notification count"
+      ],
+      "outcome": "observed-in-code: The transition and count reset survive, and the mutex is released. Execute's recovery attempt sees a different generation so it does not apply a duplicate outcome. TwoStep propagates the hook panic directly. Source: gobreaker.go:354 (\"cb.state = state\"), gobreaker.go:356 (\"cb.toNewGeneration(now)\"), gobreaker.go:365 (\"cb.counts.clear()\"), gobreaker.go:295 (\"defer cb.mutex.Unlock()\"), gobreaker.go:237 (\"cb.afterRequest(generation, false)\"), gobreaker.go:299 (\"if generation != before {\"), gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"), gobreaker.go:294 (\"cb.mutex.Lock()\"), gobreaker.go:298 (\"state, generation := cb.currentState(now)\"), gobreaker.go:340 (\"case StateOpen:\"), gobreaker.go:342 (\"cb.setState(StateHalfOpen, now)\"), gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"). observed-in-tests: analysis/_probe/identity_test.go:611 (\"identityCounts(t, counts(), gb.Counts{})\"). Additional interpretation (inferred where it extends the probe). Execute's retry can refresh state before skipping accounting. In the tested schedule no additional expiry is due. After the first unwind the lock can be taken by another operation before retry. A newly due Open expiry could refresh to HalfOpen and invoke its notifier before the stale check. This latter ordering is inferred from the two lock acquisitions and is untested.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "\t\tcb.onStateChange(cb.name, prev, state)"
+      },
+      "test": "TestIdentityCompletionHookPanic",
+      "question": "What commit and propagation contract applies to a failed completion notification, including a later expiry observed during Execute's recovery attempt?"
+    },
+    {
+      "id": "F20",
+      "initial": "A's open timeout passes and an OnStateChange callback panics only on open to half-open.",
+      "steps": [
+        "Compare State, Execute admission, and TwoStep Allow as the first caller after timeout",
+        "Recover",
+        "Inspect state and retry"
+      ],
+      "outcome": "observed-in-code: The breaker remains half-open with zero admissions. Execute did not arm its recover defer or run the request. Allow produced no callback. A later admission takes the free slot without retrying the notification. Source: gobreaker.go:342 (\"cb.setState(StateHalfOpen, now)\"), gobreaker.go:289 (\"cb.counts.onRequest()\"), gobreaker.go:229 (\"generation, err := cb.beforeRequest()\"), gobreaker.go:266 (\"generation, err := tscb.cb.beforeRequest()\"), gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"), gobreaker.go:335 (\"switch cb.state {\"), gobreaker.go:234 (\"defer func() {\"), gobreaker.go:268 (\"return nil, err\"), gobreaker.go:271 (\"return func(success bool) {\"), gobreaker.go:277 (\"cb.mutex.Lock()\"), gobreaker.go:278 (\"defer cb.mutex.Unlock()\"), gobreaker.go:281 (\"state, generation := cb.currentState(now)\"), gobreaker.go:354 (\"cb.state = state\"). observed-in-tests: analysis/_probe/identity_test.go:667 (\"if calls != 1 {\"). Retry did not repeat OnStateChange.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 229,
+        "fragment": "\tgeneration, err := cb.beforeRequest()"
+      },
+      "test": "TestIdentityAdmissionHookPanic",
+      "question": "Should a failed expiry notification abort first admission while preserving the new state?"
+    },
+    {
+      "id": "F21",
+      "initial": "A stale TwoStep callback is pending while its original breaker is open past timeout.",
+      "steps": [
+        "Use the stale callback as the first call after open timeout",
+        "Have OnStateChange panic on open to half-open",
+        "Recover",
+        "Retry Allow"
+      ],
+      "outcome": "observed-in-code: Either bool can expose the hook panic before the mismatch return. Half-open remains committed with no admitted request until retry, and retry does not re-notify the transition. Source: gobreaker.go:298 (\"state, generation := cb.currentState(now)\"), gobreaker.go:342 (\"cb.setState(StateHalfOpen, now)\"), gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"), gobreaker.go:365 (\"cb.counts.clear()\"), gobreaker.go:289 (\"cb.counts.onRequest()\"), gobreaker.go:234 (\"defer func() {\"), gobreaker.go:237 (\"cb.afterRequest(generation, false)\"), gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"), gobreaker.go:294 (\"cb.mutex.Lock()\"), gobreaker.go:295 (\"defer cb.mutex.Unlock()\"), gobreaker.go:299 (\"if generation != before {\"). observed-in-tests: analysis/_probe/identity_test.go:695 (\"if calls != 1 {\"). Additional interpretation (inferred where it extends the probe). A corresponding Execute stale normal return would invoke classification first. If its accounting refresh panics, a retry can see the already committed new generation and skip. This Execute variant is inferred from 234\u2013244 and 293\u2013300. The public probe covers TwoStep.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 298,
+        "fragment": "\tstate, generation := cb.currentState(now)"
+      },
+      "test": "TestIdentityStaleHookPanic",
+      "question": "Should a result headed for discard surface an expiry notification panic, and should Execute and TwoStep behave differently if their panic paths differ?"
+    },
+    {
+      "id": "F22",
+      "initial": "A transition notification or trip predicate is called for a breaker operation that holds the mutex.",
+      "steps": [
+        "Within the hook, compare Name with same-breaker State, Counts or admission",
+        "Consider waiting for another goroutine that needs the same lock"
+      ],
+      "outcome": "observed-in-code: Name reads without the mutex. A same-breaker lock-taking call cannot proceed while that hook holds the lock. Another operation cannot refresh expiry between entry into the locked hook and its return or unwind. Source: gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"), gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"), gobreaker.go:207 (\"cb.mutex.Lock()\"), gobreaker.go:217 (\"cb.mutex.Lock()\"), gobreaker.go:277 (\"cb.mutex.Lock()\"), gobreaker.go:202 (\"return cb.name\"), gobreaker.go:208 (\"defer cb.mutex.Unlock()\"), gobreaker.go:218 (\"defer cb.mutex.Unlock()\"), gobreaker.go:278 (\"defer cb.mutex.Unlock()\"), gobreaker.go:294 (\"cb.mutex.Lock()\"), gobreaker.go:295 (\"defer cb.mutex.Unlock()\"). Additional interpretation (inferred where it extends the probe). Exclusivity is inferred from Go sync.Mutex and the actual lock/defer sites for State, admission and completion. A goroutine independent of the current callback may proceed after the lock is released. Waiting inside the callback for a same-breaker operation requiring the mutex can block indefinitely.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "\t\tcb.onStateChange(cb.name, prev, state)"
+      },
+      "test": "untested",
+      "question": "Which callbacks are allowed to reenter breaker APIs or wait for work using the same breaker?"
+    },
+    {
+      "id": "F23",
+      "initial": "A Settings value has callbacks referring to mutable caller variables and is passed to the constructor.",
+      "steps": [
+        "After construction, replace function fields in the Settings variable",
+        "Change state captured by the originally selected functions",
+        "Exercise failure, transition and classification"
+      ],
+      "outcome": "observed-in-code: The original function values run and see the changed captured state. Reassigning Settings fields does not replace the installed functions. Source: gobreaker.go:141 (\"func NewCircuitBreaker(st Settings) *CircuitBreaker {\"), gobreaker.go:145 (\"cb.onStateChange = st.OnStateChange\"), gobreaker.go:168 (\"cb.readyToTrip = st.ReadyToTrip\"), gobreaker.go:174 (\"cb.isSuccessful = st.IsSuccessful\"), gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"), gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"), gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\"). observed-in-tests: analysis/_probe/identity_test.go:721 (\"if !reflect.DeepEqual(events, []gb.State{gb.StateOpen}) {\"). Additional interpretation (inferred where it extends the probe). The saved closures can still observe state referenced through their own environment. The test modifies that state sequentially.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 174,
+        "fragment": "\t\tcb.isSuccessful = st.IsSuccessful"
+      },
+      "test": "TestIdentitySettingsCallbacks",
+      "question": "explicit-requirement README.md:25-36 frames Settings as constructor configuration. Should capture lifetime and subsequent mutation be documented?"
+    },
+    {
+      "id": "F24",
+      "initial": "A TwoStep breaker is configured with a custom IsSuccessful callback.",
+      "steps": [
+        "Allow an admitted request and report a boolean",
+        "Compare Execute on a direct breaker configured with the same callback"
+      ],
+      "outcome": "observed-in-code: TwoStep accounts the boolean without calling IsSuccessful. Execute calls the classifier and accounts its result. Source: gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"), gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"). observed-in-tests: analysis/_probe/identity_test.go:733 (\"t.Fatalf(\"classifier called by Allow\")\").",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "TestIdentityTwoStepBypassesClassifier",
+      "question": "Should the TwoStep constructor explicitly document that done bypasses the configured IsSuccessful function?"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+// Package gobreaker implements the Circuit Breaker pattern.
+// See https://msdn.microsoft.com/en-us/library/dn589784.aspx.
+package gobreaker
+
+import (
+	"errors"
+	"fmt"
+	"sync"
+	"time"
+)
+
+// State is a type that represents a state of CircuitBreaker.
+type State int
+
+// These constants are states of CircuitBreaker.
+const (
+	StateClosed State = iota
+	StateHalfOpen
+	StateOpen
+)
+
+var (
+	// ErrTooManyRequests is returned when the CB state is half open and the requests count is over the cb maxRequests
+	ErrTooManyRequests = errors.New("too many requests")
+	// ErrOpenState is returned when the CB state is open
+	ErrOpenState = errors.New("circuit breaker is open")
+)
+
+// String implements stringer interface.
+func (s State) String() string {
+	switch s {
+	case StateClosed:
+		return "closed"
+	case StateHalfOpen:
+		return "half-open"
+	case StateOpen:
+		return "open"
+	default:
+		return fmt.Sprintf("unknown state: %d", s)
+	}
+}
+
+// Counts holds the numbers of requests and their successes/failures.
+// CircuitBreaker clears the internal Counts either
+// on the change of the state or at the closed-state intervals.
+// Counts ignores the results of the requests sent before clearing.
+type Counts struct {
+	Requests             uint32
+	TotalSuccesses       uint32
+	TotalFailures        uint32
+	ConsecutiveSuccesses uint32
+	ConsecutiveFailures  uint32
+}
+
+func (c *Counts) onRequest() {
+	c.Requests++
+}
+
+func (c *Counts) onSuccess() {
+	c.TotalSuccesses++
+	c.ConsecutiveSuccesses++
+	c.ConsecutiveFailures = 0
+}
+
+func (c *Counts) onFailure() {
+	c.TotalFailures++
+	c.ConsecutiveFailures++
+	c.ConsecutiveSuccesses = 0
+}
+
+func (c *Counts) clear() {
+	c.Requests = 0
+	c.TotalSuccesses = 0
+	c.TotalFailures = 0
+	c.ConsecutiveSuccesses = 0
+	c.ConsecutiveFailures = 0
+}
+
+// Settings configures CircuitBreaker:
+//
+// Name is the name of the CircuitBreaker.
+//
+// MaxRequests is the maximum number of requests allowed to pass through
+// when the CircuitBreaker is half-open.
+// If MaxRequests is 0, the CircuitBreaker allows only 1 request.
+//
+// Interval is the cyclic period of the closed state
+// for the CircuitBreaker to clear the internal Counts.
+// If Interval is less than or equal to 0, the CircuitBreaker doesn't clear internal Counts during the closed state.
+//
+// Timeout is the period of the open state,
+// after which the state of the CircuitBreaker becomes half-open.
+// If Timeout is less than or equal to 0, the timeout value of the CircuitBreaker is set to 60 seconds.
+//
+// ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.
+// If ReadyToTrip returns true, the CircuitBreaker will be placed into the open state.
+// If ReadyToTrip is nil, default ReadyToTrip is used.
+// Default ReadyToTrip returns true when the number of consecutive failures is more than 5.
+//
+// OnStateChange is called whenever the state of the CircuitBreaker changes.

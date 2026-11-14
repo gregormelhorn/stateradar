@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json; d=json.load(open('analysis/draft-verify.json')); print([(k,type(v).__name__, len(v) if hasattr(v,'__len__') else '') for k,v in d.items()]); print(str(d)[:4200])"
+  ],
+  "exit_code": 0
+}

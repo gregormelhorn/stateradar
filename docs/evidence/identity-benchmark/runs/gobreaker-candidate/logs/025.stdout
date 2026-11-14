@@ -1,0 +1,20 @@
+F02.02 unclear 272 The closure references the Allow receiver, so rebinding the caller's pointer variable does not change its captured receiver.
+F07.01 unclear 137 The zero-value TwoStep wrapper has a nil breaker pointer.
+F07.02 unclear 294 Completion attempts to access the nil underlying receiver's mutex after a wrapper is replaced with the zero value.
+F08.01 unclear 228 Execute has a pointer receiver, so rebinding a caller variable does not retarget the active Execute.
+F08.02 unclear 243 Execute reads the classifier field from its receiver after the request returns.
+F08.03 unclear 326 Closed failure invokes the ReadyToTrip field on the active receiver, including after receiver storage is overwritten.
+F09.01 unclear 271 The returned completion closure has no per-call consumed flag.
+F14.04 unclear 244 Execute still returns the original request result and error after a skipped report.
+F15.02 contradicted 294 The accounting lock is acquired only inside afterRequest.
+F17.02 unclear 295 Panic unwinding from the trip predicate releases the reporting mutex via defer.
+F17.04 unclear 272 TwoStep forwards the result directly with no recovery retry.
+F18.01 unclear 237 If the recovery report itself panics, it does not return to the explicit re-panic statement.
+F18.02 unclear 325 Both matching closed failure attempts increment failure counts before the predicate panics.
+F19.07 unclear 272 TwoStep does not wrap completion with a recover handler.
+F20.02 unclear 289 A panic from expiry notification prevents admission from reaching the request increment.
+F20.06 unclear 335 A later half-open call does not repeat the open-expiry transition.
+F21.02 unclear 342 The expiry path can enter half-open even when triggered by this stale callback.
+F21.03 unclear 359 A notification panic can escape before the generation guard.
+F21.05 unclear 289 A following successful admission charges the previously unused slot.
+F22.03 unclear 207 Same-breaker State acquires the mutex.

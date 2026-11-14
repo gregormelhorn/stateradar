@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nfrom collections import Counter\nimport json\np=Path('analysis/probe-attempt-01.stdout.jsonl')\nrows=[json.loads(line) for line in p.read_text().splitlines()]\nfor action in ('run','pass','fail','skip'):\n tests=Counter(r['Test'] for r in rows if r['Action']==action and 'Test' in r)\n roots={k:v for k,v in tests.items() if '/' not in k}\n print(action,sum(tests.values()),'distinct',len(tests),'roots',roots,'repetition counts',Counter(tests.values()))\nprint('package terminal',[(r['Action'],r.get('Package')) for r in rows if 'Test' not in r and r['Action'] in ('pass','fail','skip')])\nprint('stderr bytes',Path('analysis/probe-attempt-01.stderr.log').stat().st_size)\nassert len([r for r in rows if r['Action']=='run' and r.get('Test','').startswith('TestIdentity')])>0\nruns=Counter(r['Test'] for r in rows if r['Action']=='run' and 'Test' in r)\npasses=Counter(r['Test'] for r in rows if r['Action']=='pass' and 'Test' in r)\nassert runs==passes and set(runs.values())=={3} and any(r['Action']=='pass' and 'Test' not in r for r in rows)"
+  ],
+  "exit_code": 0
+}

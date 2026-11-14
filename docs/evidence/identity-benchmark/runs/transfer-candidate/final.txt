@@ -1,0 +1,5 @@
+Completed the bounded analysis. The [final report](/private/tmp/stateradar-identity-bounded-01/transfer-candidate/pool/analysis/final.json) contains 40 findings about deferred completion and accounting. The [open questions](/private/tmp/stateradar-identity-bounded-01/transfer-candidate/pool/analysis/open-questions.md) preserve undecided lifecycle and accounting policy.
+
+All nine public-API overlay probes passed in each of three race-enabled runs. Both JSON reports passed validation. The probes exercised serialized operations.
+
+Jev returned 25 unclear verdicts across 79 checks. The [review](/private/tmp/stateradar-identity-bounded-01/transfer-candidate/pool/analysis/review.md) records the source and probe evidence for each, including one check that combined two separately asserted effects. The [summary](/private/tmp/stateradar-identity-bounded-01/transfer-candidate/pool/analysis/summary.md) links the raw logs and lists the verification limits.

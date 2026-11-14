@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,re,collections\nfrom pathlib import Path\np=Path('analysis')\nsrc=Path('gobreaker.go').read_text().splitlines()\na=json.loads((p/'initial.json').read_text())['findings']\nb=json.loads((p/'final.json').read_text())['findings']\nassert list(r['id'] for r in a)==list(r['id'] for r in b)\nassert all(r['test']=='untested' for r in a)\nfor r in a+b:\n assert set(r)=={'id','initial','steps','outcome','citation','test','question'}\n c=r['citation']; assert c['fragment']==src[c['line']-1]\nchecks=json.loads((p/'final-claims.json').read_text())\nresults=json.loads((p/'final-jev.json').read_text())['checks']\nfor c in checks:\n assert set(c['citation'])=={'file','line','fragment'} and c['type']=='claim' and c['kind']=='claim'\n assert c['fragment']==src[c['line']-1].strip()\n assert results[c['id']]['statement']==c['statement']\n assert f'**{c[\"id\"]}**' in (p/'review.md').read_text()\nprint(len(a),len(b),len(checks))\nfor f in sorted(p.rglob('*')):\n if f.is_file(): print(f,f.stat().st_size)\n"
+  ],
+  "exit_code": 0
+}

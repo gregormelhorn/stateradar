@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import os,subprocess,sys\nfrom pathlib import Path\nattempt=sys.argv[1]\ncmd=[\"go\",\"test\",\"-race\",\"-count=3\",\"-timeout=30s\",\"-json\",\"-overlay\",\"analysis/overlay-order.json\",\"-run\",\"^TestIdentity\",\".\"]\nenv=os.environ.copy()\nif len(sys.argv)>2:\n    run_dir=Path(sys.argv[2])\n    env.update({key:str(run_dir / part) for key, part in {\"GOCACHE\":\"go-cache\",\"GOTMPDIR\":\"go-tmp\",\"TMPDIR\":\"tmp\"}.items()})\n    for key in (\"GOCACHE\",\"GOTMPDIR\",\"TMPDIR\"): Path(env[key]).mkdir(parents=True,exist_ok=True)\nwith open(f\"analysis/probe-{attempt}.stdout.jsonl\",\"xb\") as out, open(f\"analysis/probe-{attempt}.stderr.log\",\"xb\") as err:\n    result=subprocess.run(cmd,stdout=out,stderr=err,env=env)\nprint(\"argv\",repr(cmd))\nprint(\"exit\",result.returncode)\nsys.exit(result.returncode)",
+    "02"
+  ],
+  "exit_code": 0
+}

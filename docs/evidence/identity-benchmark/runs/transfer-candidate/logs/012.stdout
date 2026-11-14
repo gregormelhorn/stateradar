@@ -1,0 +1,22 @@
+36:Choice = Literal["supported", "contradicted", "unclear"]
+109:    line: object  # as drafted; _citation_error reports a non-integer line
+111:    citation_check: str
+281:def _citation_error(source_lines: list[str], line: object, fragment: object) -> str | None:
+282:    """Return why a line/fragment citation fails against the source, or None.
+288:        return "citation line is not an integer"
+290:        return "citation line is outside source"
+292:        return f"citation fragment must be a single line of at least {MIN_FRAGMENT} non-space characters"
+294:        return f"citation fragment missing near line {line}"
+298:def jev_batch(budget: Budget, source: str, source_ref: str, checks: object, key: str | None,
+323:        error = _citation_error(source_lines, line, fragment)
+326:        assert isinstance(line, int)  # _citation_error rejected anything else
+340:                "supported": "The cited fragment explicitly supports the claim or contemplates the specific ordering.",
+381:            if (answer.get("type") != "choice" or choice not in ("supported", "contradicted", "unclear")
+382:                    or not isinstance(probabilities, dict) or set(probabilities) != {"supported", "contradicted", "unclear"}
+489:def draft_verify(budget: Budget, source: str, source_ref: str, task: str, flash_key: str, jev_key: str,
+491:    """Flash drafts cited claims, code checks the citations, Jev judges the citable ones.
+493:    Nothing is accepted automatically. Claims with failed citations are kept with the
+506:        error = _citation_error(source_lines, claim.get("line"), claim["fragment"])
+509:                                "citation_check": error or "ok", "jev": None}
+525:            # The Flash draft is paid for: keep it and its citation checks.
+749:                      "citation_failures": sum(claim["citation_check"] != "ok" for claim in claims),

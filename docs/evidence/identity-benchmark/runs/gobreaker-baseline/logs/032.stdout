@@ -1,0 +1,77 @@
+					}
+					identityCounts(t, cb, Counts{})
+				}
+				if tripCalls != 1 {
+					t.Fatal(tripCalls)
+				}
+			})
+		}
+	}
+}
+
+func TestIdentityExecuteDepartedWaiter(t *testing.T) {
+	for _, order := range []string{"no result", "success", "failure", "stale success", "stale failure"} {
+		t.Run(order, func(t *testing.T) {
+			closedFailure, lateFailure := errors.New("open"), errors.New("late")
+			cb := NewCircuitBreaker(Settings{Timeout: identityWait, ReadyToTrip: identityTrip})
+			cb.Execute(func() (interface{}, error) { return nil, closedFailure })
+			time.Sleep(identityWait)
+			identityState(t, cb, StateHalfOpen)
+			started := make(chan struct{})
+			type pair struct {
+				value interface{}
+				err   error
+			}
+			producer := make(chan pair, 1)
+			delivered := make(chan pair, 1)
+			waiterGone := make(chan struct{})
+			var worker *CircuitBreaker = cb
+			stale := order == "stale success" || order == "stale failure"
+			if stale {
+				worker = NewCircuitBreaker(Settings{Timeout: time.Hour, ReadyToTrip: identityTrip})
+			}
+			go func() {
+				v, e := worker.Execute(func() (interface{}, error) {
+					close(started)
+					reply, ok := <-producer
+					if !ok {
+						runtime.Goexit()
+					}
+					return reply.value, reply.err
+				})
+				delivered <- pair{v, e}
+			}()
+			<-started
+			go func() { close(waiterGone) }()
+			<-waiterGone
+			if order == "no result" {
+				time.Sleep(2 * identityWait)
+				identityState(t, cb, StateHalfOpen)
+				identityCounts(t, cb, Counts{Requests: 1})
+				_, err := cb.Execute(func() (interface{}, error) { t.Error("rejected body ran"); return nil, nil })
+				if err != ErrTooManyRequests {
+					t.Fatal(err)
+				}
+				close(producer)
+				return
+			}
+			if stale {
+				worker.Execute(func() (interface{}, error) { return nil, closedFailure })
+			}
+			reply := pair{value: "late"}
+			if order == "failure" || order == "stale failure" {
+				reply.err = lateFailure
+			}
+			producer <- reply
+			if got := <-delivered; got != reply {
+				t.Fatal(got, reply)
+			}
+			identityCounts(t, worker, Counts{})
+			if stale {
+				identityState(t, worker, StateOpen)
+			} else if order == "success" {
+				identityState(t, worker, StateClosed)
+			}
+		})
+	}
+}

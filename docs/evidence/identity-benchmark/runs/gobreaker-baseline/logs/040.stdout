@@ -1,0 +1,23 @@
+63:func TestIdentityRepeatedClosedCompletion(t *testing.T) {
+80:func TestIdentityRepeatedHalfOpenSuccess(t *testing.T) {
+93:func TestIdentityAbandonedHalfOpen(t *testing.T) {
+126:func TestIdentityHalfOpenBudget(t *testing.T) {
+137:func TestIdentityStaleOpenCompletion(t *testing.T) {
+185:func TestIdentityClosedIntervalCompletion(t *testing.T) {
+211:func TestIdentityClassifierAcrossTransition(t *testing.T) {
+284:func identityPanicBoundary(t *testing.T, classifier bool) {
+338:func TestIdentityRequestPanicBoundary(t *testing.T)    { identityPanicBoundary(t, false) }
+339:func TestIdentityClassifierPanicBoundary(t *testing.T) { identityPanicBoundary(t, true) }
+341:func TestIdentityTripPanicRetry(t *testing.T) {
+360:func TestIdentityPanicReplacement(t *testing.T) {
+398:func TestIdentityTwoStepTripPanic(t *testing.T) {
+421:func TestIdentityStateHookPanicAfterCommit(t *testing.T) {
+448:func TestIdentityStateHookPanicExpires(t *testing.T) {
+481:func TestIdentityAdmissionHookPanic(t *testing.T) {
+519:func TestIdentityStaleOpenHookPanic(t *testing.T) {
+550:func TestIdentityExecuteGoexit(t *testing.T) {
+589:func TestIdentityReassignedReceiver(t *testing.T) {
+612:func TestIdentityTripHookAcrossExpiry(t *testing.T) {
+640:func TestIdentityTripPanicAfterInterval(t *testing.T) {
+659:func TestIdentityHalfOpenNotificationPanic(t *testing.T) {
+722:func TestIdentityExecuteDepartedWaiter(t *testing.T) {

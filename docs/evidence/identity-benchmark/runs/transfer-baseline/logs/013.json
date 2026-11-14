@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\np=Path('../pack/tools/local_models.py'); lines=p.read_text().splitlines()\nfor i,l in enumerate(lines,1):\n if 'check.get(' in l or 'def cmd_jev_batch' in l or 'def jev_batch' in l or 'check[' in l: print(i,l)"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,15 @@
+usage: local_models.py draft-verify [-h] --output OUTPUT [--model MODEL]
+                                    [--max-tokens MAX_TOKENS]
+                                    input task
+
+positional arguments:
+  input                 UTF-8 source the claims must cite
+  task                  UTF-8 file with the bounded drafting task
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT       JSON result file
+  --model MODEL         TypeSafe model name or alias
+  --max-tokens MAX_TOKENS
+                        Flash output budget (a 248-line source needed about
+                        5,200; 4096 truncated it)

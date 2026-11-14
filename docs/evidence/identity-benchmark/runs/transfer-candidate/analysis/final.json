@@ -1,0 +1,669 @@
+{
+  "findings": [
+    {
+      "id": "F01",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call A on the port. Admission and capture are observed-in-code at component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\").",
+        "Invoke the completion with the target and epoch unchanged."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). A increments a.Successes. observed-in-tests analysis/_probe/identity_test.go:36 (\"counters(t, a, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAEpochAndTarget",
+      "question": "What completion policy should A implement for a still-current account?"
+    },
+    {
+      "id": "F02",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Set b.Epoch to 7.",
+        "Call A on the port. Admission and capture are observed-in-code at component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\").",
+        "Set the same port's Target to b.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). A increments b.Successes. The completion leaves a.Successes at zero. observed-in-tests analysis/_probe/identity_test.go:40 (\"counters(t, a, 1, 0)\"), analysis/_probe/identity_test.go:41 (\"counters(t, b, 0, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAEpochAndTarget",
+      "question": "May success from the original admission be credited to a distinct account on epoch equality?"
+    },
+    {
+      "id": "F03",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Set b.Epoch to 8.",
+        "Call A on the port. Admission and capture are observed-in-code at component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\").",
+        "Set the same port's Target to b.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). A skips the success increment when the replacement's epoch differs. observed-in-tests analysis/_probe/identity_test.go:46 (\"counters(t, a, 1, 0)\"), analysis/_probe/identity_test.go:47 (\"counters(t, b, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAEpochAndTarget",
+      "question": "Should an epoch mismatch on a replacement suppress credit, and should callers receive any indication?"
+    },
+    {
+      "id": "F04",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call A on the port. Admission and capture are observed-in-code at component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\").",
+        "Set a.Epoch to 8.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). A skips the success increment on the original account at its changed epoch. observed-in-tests analysis/_probe/identity_test.go:51 (\"counters(t, a, 1, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAEpochAndTarget",
+      "question": "Should an epoch change invalidate pending completions, and who owns the epoch?"
+    },
+    {
+      "id": "F05",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call A on the port. Admission and capture are observed-in-code at component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\").",
+        "Set a.Epoch to 8 and invoke the completion.",
+        "Restore a.Epoch to 7 and invoke the same completion again."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). The invocation after restoration increments a.Successes. observed-in-tests analysis/_probe/identity_test.go:51 (\"counters(t, a, 1, 0)\"), analysis/_probe/identity_test.go:54 (\"counters(t, a, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAEpochAndTarget",
+      "question": "Can epochs be reused, and may a previously skipped completion credit success on a later invocation?"
+    },
+    {
+      "id": "F06",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call A on the port. Admission and capture are observed-in-code at component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\").",
+        "Clear the same port's Target.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). A panics evaluating the nil target's Epoch. observed-in-tests analysis/_probe/identity_test.go:57 (\"panics(t, done)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAEpochAndTarget",
+      "question": "Is clearing a port while A is pending a valid teardown, and what should the late invocation do?"
+    },
+    {
+      "id": "F07",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Make a value copy of the original port and keep the caller's pointer aimed at the original.",
+        "Call A through the original pointer. Admission and capture are observed-in-code at component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). The pointer receiver is observed-in-code component.go:7 (\"func (p *Port) A() func() {\").",
+        "Reassign the caller's port pointer to the copy and set the copy's Target to b, whose epoch is 7.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). A reads the original port object and increments a.Successes. observed-in-tests analysis/_probe/identity_test.go:76 (\"counters(t, a, 1, 1)\"), analysis/_probe/identity_test.go:77 (\"counters(t, b, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAPortIdentity",
+      "question": "When a caller copies or rebinds a port, which outstanding completions should follow the new object?"
+    },
+    {
+      "id": "F08",
+      "initial": "An original Port object p points at a at epoch 7.",
+      "steps": [
+        "Call A on the original port. Admission and capture are observed-in-code at component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\").",
+        "Copy the admitted Account value to a distinct object b and overwrite p with Port{Target: b}.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). A increments the distinct copied account b.Successes because the copy has epoch 7. The probe observes (Requests, Successes) of (1, 0) for a and (1, 1) for b. b inherited its Requests value from the account copy. observed-in-tests analysis/_probe/identity_test.go:86 (\"counters(t, a, 1, 0)\"), analysis/_probe/identity_test.go:87 (\"counters(t, &copyAccount, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAPortIdentity",
+      "question": "Should an account copy with equal field values be eligible for original work when the original port object is overwritten?"
+    },
+    {
+      "id": "F09",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call B on the port. Admission and capture are observed-in-code at component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\").",
+        "Set its Target to b and change a.Epoch.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:15 (\"return func() { target.Successes++ }\"). B increments a.Successes using the saved account pointer regardless of the epoch change. observed-in-tests analysis/_probe/identity_test.go:110 (\"counters(t, a, 1, 1)\"), analysis/_probe/identity_test.go:111 (\"counters(t, b, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCapturedAccounts",
+      "question": "Should B credit the original account across both a retarget and an epoch change?"
+    },
+    {
+      "id": "F10",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call E on the port. Admission and capture are observed-in-code at component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\").",
+        "Set the caller's Target to b and change a.Epoch.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:28 (\"return func() { p.Target.Successes++ }\"). E increments a.Successes through its receiver copy's Target pointer regardless of the epoch change. observed-in-tests analysis/_probe/identity_test.go:110 (\"counters(t, a, 1, 1)\"), analysis/_probe/identity_test.go:111 (\"counters(t, b, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityCapturedAccounts",
+      "question": "Should E's shallow receiver copy keep pending work tied to the original account across lifecycle changes?"
+    },
+    {
+      "id": "F11",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call F with the port pointer. Admission and capture are observed-in-code at component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\").",
+        "Set its Target to b and change a.Epoch.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:33 (\"return func() { target.Successes++ }\"). F increments a.Successes using the saved account pointer regardless of the epoch change. observed-in-tests analysis/_probe/identity_test.go:110 (\"counters(t, a, 1, 1)\"), analysis/_probe/identity_test.go:111 (\"counters(t, b, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCapturedAccounts",
+      "question": "Should F credit the original account across both a retarget and an epoch change?"
+    },
+    {
+      "id": "F12",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call B on the port. Admission and capture are observed-in-code at component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\").",
+        "Clear the original port's Target.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:15 (\"return func() { target.Successes++ }\"). B still increments the original account's Successes. observed-in-tests analysis/_probe/identity_test.go:119 (\"counters(t, a, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCapturedAccounts",
+      "question": "Should B completions remain effective after the wrapper is cleared?"
+    },
+    {
+      "id": "F13",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call E on the port. Admission and capture are observed-in-code at component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\").",
+        "Clear the original port's Target.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:28 (\"return func() { p.Target.Successes++ }\"). E still increments the original account's Successes. observed-in-tests analysis/_probe/identity_test.go:119 (\"counters(t, a, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityCapturedAccounts",
+      "question": "Should E completions remain effective after the wrapper is cleared?"
+    },
+    {
+      "id": "F14",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call F with the port pointer. Admission and capture are observed-in-code at component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\").",
+        "Clear the original port's Target.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:33 (\"return func() { target.Successes++ }\"). F still increments the original account's Successes. observed-in-tests analysis/_probe/identity_test.go:119 (\"counters(t, a, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCapturedAccounts",
+      "question": "Should F completions remain effective after the wrapper is cleared?"
+    },
+    {
+      "id": "F15",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call C on the port. Admission and capture are observed-in-code at component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\").",
+        "Invoke the completion with the target and epoch unchanged."
+      ],
+      "outcome": "observed-in-code component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"). C increments a.Successes when both guards match. observed-in-tests analysis/_probe/identity_test.go:132 (\"counters(t, a, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityCIdentityAndEpoch",
+      "question": "What completion policy should C implement for a still-current account?"
+    },
+    {
+      "id": "F16",
+      "initial": "An original Port object p points at a at epoch 7.",
+      "steps": [
+        "Call C on the port. Admission and capture are observed-in-code at component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\").",
+        "Copy the admitted account value to b and set the original port's Target to b.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"). C skips the success increment because b is a different account object despite the copied epoch. Both the original and the value copy retain their zero Successes. observed-in-tests analysis/_probe/identity_test.go:141 (\"counters(t, a, 1, 0)\"), analysis/_probe/identity_test.go:142 (\"counters(t, &copyAccount, 1, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityCIdentityAndEpoch",
+      "question": "Should C reject a value-identical account copy under this ordering?"
+    },
+    {
+      "id": "F17",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call C on the port. Admission and capture are observed-in-code at component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\").",
+        "Leave Target pointing at a and change a.Epoch to 8.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"). C skips the success increment on the same account when its epoch differs. observed-in-tests analysis/_probe/identity_test.go:153 (\"counters(t, a, 1, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityCIdentityAndEpoch",
+      "question": "Should C define a generation change as permanent invalidation or as a check of the current epoch value?"
+    },
+    {
+      "id": "F18",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call C on the port. Admission and capture are observed-in-code at component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\").",
+        "Clear the original port's Target.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"). C skips without panicking because the pointer comparison fails before the epoch comparison. observed-in-tests analysis/_probe/identity_test.go:164 (\"counters(t, a, 1, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityCIdentityAndEpoch",
+      "question": "Should a completion after clearing Target be silent or report the skipped credit?"
+    },
+    {
+      "id": "F19",
+      "initial": "An original Port object p points at a at epoch 7.",
+      "steps": [
+        "Call C on the port. Admission and capture are observed-in-code at component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\").",
+        "Copy a by value into a distinct account b, retarget to b, and invoke.",
+        "Restore the original Target a with epoch 7 and invoke the same completion."
+      ],
+      "outcome": "observed-in-code component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"). C increments a.Successes after restoration. observed-in-tests analysis/_probe/identity_test.go:141 (\"counters(t, a, 1, 0)\"), analysis/_probe/identity_test.go:145 (\"counters(t, a, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityCIdentityAndEpoch",
+      "question": "Should a temporary retarget invalidate pending work even after the original target and epoch are restored?"
+    },
+    {
+      "id": "F20",
+      "initial": "A port points to account a at epoch 7. Account b is a distinct object with initially zero counters.",
+      "steps": [
+        "Call C on the port. Admission and capture are observed-in-code at component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\").",
+        "Change a.Epoch to 8 and invoke.",
+        "Restore a.Epoch to 7 and invoke the same completion."
+      ],
+      "outcome": "observed-in-code component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"). C increments a.Successes after epoch restoration. observed-in-tests analysis/_probe/identity_test.go:153 (\"counters(t, a, 1, 0)\"), analysis/_probe/identity_test.go:156 (\"counters(t, a, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityCIdentityAndEpoch",
+      "question": "May C credit old work when the same epoch value returns on the same account?"
+    },
+    {
+      "id": "F21",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Call D(\"k\") on r. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\"). Capture and admission are observed-in-code component.go:22 (\"func (r *Registry) D(key string) func() {\") and component.go:23 (\"r.Entries[key].Requests++\").",
+        "Invoke the completion with the entry unchanged."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). D increments a.Successes. observed-in-tests analysis/_probe/identity_test.go:179 (\"case \"unchanged\":\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "What completion policy should D implement for a still-current entry?"
+    },
+    {
+      "id": "F22",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Call D(\"k\") on r. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\").",
+        "Replace r.Entries[\"k\"] with b at a different epoch.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). D increments b.Successes without an epoch check. observed-in-tests analysis/_probe/identity_test.go:181 (\"case \"entry replacement\":\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "May success for an earlier admission follow a key to a distinct account at a different epoch?"
+    },
+    {
+      "id": "F23",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Call D(\"k\") on r. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\").",
+        "Delete k and invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). D skips success credit for a missing key. observed-in-tests analysis/_probe/identity_test.go:184 (\"case \"delete\":\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "Should late credit for a deleted entry be discarded, retained, or reported?"
+    },
+    {
+      "id": "F24",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Call D(\"k\") on r. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\").",
+        "Assign nil to entry k and invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). D skips success credit for a present key with a nil value. observed-in-tests analysis/_probe/identity_test.go:186 (\"case \"nil entry\":\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "Should an explicitly nil entry behave like a deleted key for outstanding work?"
+    },
+    {
+      "id": "F25",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Call D(\"k\") on r. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\").",
+        "Replace r.Entries with nil and invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). D skips credit for a nil map without panicking. observed-in-tests analysis/_probe/identity_test.go:188 (\"case \"nil map\":\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "Is clearing the entire map a valid teardown while completions are outstanding, and should skips be visible?"
+    },
+    {
+      "id": "F26",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Call D(\"k\") on r. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\").",
+        "Delete k and invoke the completion.",
+        "Reinsert k with b and invoke the same completion."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). The invocation after reinsertion increments b.Successes. observed-in-tests analysis/_probe/identity_test.go:190 (\"case \"reinsert\":\"), analysis/_probe/identity_test.go:193 (\"counters(t, a, 1, 0)\"), analysis/_probe/identity_test.go:194 (\"counters(t, b, 0, 0)\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "May a completion that skipped a missing key later credit a replacement after reinsertion?"
+    },
+    {
+      "id": "F27",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Save the old map and call D(\"k\") on r. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\").",
+        "Replace r.Entries with a new map whose entry k points at b.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). D increments b.Successes in the replacement map. observed-in-tests analysis/_probe/identity_test.go:197 (\"case \"map replacement\":\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "Should replacing the map inside the same registry redirect pending accounting?"
+    },
+    {
+      "id": "F28",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Copy r by value and call D(\"k\") on r. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\").",
+        "Replace the caller's registry pointer with a pointer to the copy and give the copy a new map containing b.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). D reads the original registry object and increments a.Successes. observed-in-tests analysis/_probe/identity_test.go:203 (\"case \"caller rebind\":\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "What relationship should outstanding completions have to a copied registry object?"
+    },
+    {
+      "id": "F29",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Copy r by value while the maps are shared and call D(\"k\") on r. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\").",
+        "Assign b to k through the copy's shared map.",
+        "Invoke the completion."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). D increments b.Successes through the original registry's now-updated map. observed-in-tests analysis/_probe/identity_test.go:207 (\"case \"copy shares map\":\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "Should writes through another registry value sharing the map affect pending accounting?"
+    },
+    {
+      "id": "F30",
+      "initial": "Registry r has a map entry k pointing at account a. Account b is distinct with zero counters.",
+      "steps": [
+        "Put b at a second key j and store k in a caller variable.",
+        "Call D with that variable, assign j to the caller variable, and invoke the completion. Admission and capture are observed-in-code at component.go:23 (\"r.Entries[key].Requests++\") and component.go:22 (\"func (r *Registry) D(key string) func() {\"). The parameter and lookup are observed-in-code component.go:22 (\"func (r *Registry) D(key string) func() {\") and component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\")."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). D uses the call's key value k and increments a.Successes. observed-in-tests analysis/_probe/identity_test.go:210 (\"case \"caller reassigns key\":\"), analysis/_probe/identity_test.go:218 (\"counters(t, a, 1, wantA)\"), analysis/_probe/identity_test.go:219 (\"counters(t, b, 0, wantB)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDRegistryAndKey",
+      "question": "Should caller key reassignment have any role in the outstanding completion contract?"
+    },
+    {
+      "id": "F31",
+      "initial": "Valid accounts and wrappers for A through F, with counters initially zero.",
+      "steps": [
+        "On fresh fixtures for each API, call the admission operation, then stop waiting without invoking the returned completion.",
+        "Inspect counters before any later input."
+      ],
+      "outcome": "observed-in-code. Each admission records one request before returning a completion, and the success writes are in the returned functions. A: observed-in-code component.go:8 (\"p.Target.Requests++\"). component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). B: observed-in-code component.go:14 (\"target.Requests++\"). component.go:15 (\"return func() { target.Successes++ }\"). C: observed-in-code component.go:19 (\"target.Requests++\"). component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"). D: observed-in-code component.go:23 (\"r.Entries[key].Requests++\"). component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). E: observed-in-code component.go:27 (\"p.Target.Requests++\"). component.go:28 (\"return func() { p.Target.Successes++ }\"). F: observed-in-code component.go:32 (\"target.Requests++\"). component.go:33 (\"return func() { target.Successes++ }\"). observed-in-tests analysis/_probe/identity_test.go:245 (\"counters(t, a, 1, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 8,
+        "fragment": " p.Target.Requests++"
+      },
+      "test": "TestIdentityAdmissionAndRepeat",
+      "question": "If a caller stops waiting and no completion comes, should an admission remain reflected in accounting, and should there be cancellation or cleanup?"
+    },
+    {
+      "id": "F32",
+      "initial": "Valid accounts and wrappers for A through F, with counters initially zero.",
+      "steps": [
+        "On separate fresh fixtures, admit work once per API and model the caller as no longer waiting.",
+        "Invoke the returned completion later twice while all guards continue to match."
+      ],
+      "outcome": "observed-in-code. Each matching invocation credits one success, including repeat invocations after the caller stops waiting. A: observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). B: observed-in-code component.go:15 (\"return func() { target.Successes++ }\"). C: observed-in-code component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"). D: observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). E: observed-in-code component.go:28 (\"return func() { p.Target.Successes++ }\"). F: observed-in-code component.go:33 (\"return func() { target.Successes++ }\"). observed-in-tests analysis/_probe/identity_test.go:245 (\"counters(t, a, 1, 0)\"), analysis/_probe/identity_test.go:247 (\"counters(t, a, 1, 1)\"), analysis/_probe/identity_test.go:249 (\"counters(t, a, 1, 2)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAdmissionAndRepeat",
+      "question": "May a late callback credit success after the caller has stopped waiting, and should callback credit be one-shot?"
+    },
+    {
+      "id": "F33",
+      "initial": "A nonnil Port has a nil Target.",
+      "steps": [
+        "Call each of A, B, C, E and F separately with a nil target."
+      ],
+      "outcome": "observed-in-code. Each admission panics before returning a completion when Target is nil. component.go:8 (\"p.Target.Requests++\"); component.go:14 (\"target.Requests++\"); component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"); component.go:27 (\"p.Target.Requests++\"); component.go:32 (\"target.Requests++\"). observed-in-tests analysis/_probe/identity_test.go:257 (\"\"A\":            func() { p.A() },\"), analysis/_probe/identity_test.go:258 (\"\"B\":            func() { p.B() },\"), analysis/_probe/identity_test.go:259 (\"\"C\":            func() { p.C() },\"), analysis/_probe/identity_test.go:260 (\"\"E\":            func() { p.E() },\"), analysis/_probe/identity_test.go:261 (\"\"F\":            func() { fixture.F(p) },\"), analysis/_probe/identity_test.go:268 (\"panics(t, call)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 8,
+        "fragment": " p.Target.Requests++"
+      },
+      "test": "TestIdentityNilAdmission",
+      "question": "Is a nil target outside the supported admission contract, or what failure should be observable?"
+    },
+    {
+      "id": "F34",
+      "initial": "A nonnil registry either has no k entry, has a nil k entry, or has a nil map.",
+      "steps": [
+        "On three separate fixtures, call D(\"k\") with the missing key, nil entry, or nil map."
+      ],
+      "outcome": "observed-in-code component.go:23 (\"r.Entries[key].Requests++\"). D panics at admission because the lookup yields a nil account. observed-in-tests analysis/_probe/identity_test.go:263 (\"\"D absent key\": func() { (&fixture.Registry{Entries: map[string]*fixture.Account{}}).D(\"k\") },\"), analysis/_probe/identity_test.go:264 (\"\"D nil entry\":  func() { (&fixture.Registry{Entries: map[string]*fixture.Account{\"k\": nil}}).D(\"k\") },\"), analysis/_probe/identity_test.go:265 (\"\"D nil map\":    func() { (&fixture.Registry{}).D(\"k\") },\"), analysis/_probe/identity_test.go:268 (\"panics(t, call)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 23,
+        "fragment": " r.Entries[key].Requests++"
+      },
+      "test": "TestIdentityNilAdmission",
+      "question": "What contract should D provide for missing keys, explicitly nil entries, and a nil map at admission?"
+    },
+    {
+      "id": "F35",
+      "initial": "A caller has a nil *Port.",
+      "steps": [
+        "Pass the pointer to F."
+      ],
+      "outcome": "observed-in-code component.go:31 (\"target := p.Target\"). F panics while reading p.Target before returning a completion. observed-in-tests analysis/_probe/identity_test.go:262 (\"\"F nil port\":   func() { fixture.F(nil) },\"), analysis/_probe/identity_test.go:268 (\"panics(t, call)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 31,
+        "fragment": " target := p.Target"
+      },
+      "test": "TestIdentityNilAdmission",
+      "question": "Is a nil port pointer outside the supported admission contract, or what failure should be observable?"
+    },
+    {
+      "id": "F36",
+      "initial": "A port points at a at epoch 7.",
+      "steps": [
+        "Call A on the port.",
+        "Clear Target and recover a panic from invoking the completion.",
+        "Restore a to the original port and invoke the same completion."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). A credits a.Successes on the invocation after recovery and restoration. observed-in-tests analysis/_probe/identity_test.go:57 (\"panics(t, done)\"), analysis/_probe/identity_test.go:61 (\"counters(t, a, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAEpochAndTarget",
+      "question": "If callers recover a callback panic during teardown, should a later invocation on a restored target still be eligible to credit success?"
+    },
+    {
+      "id": "F37",
+      "initial": "Separate valid fixtures for A through F start with one account each and counters zero.",
+      "steps": [
+        "Admit once on each fixture.",
+        "Discard the returned function as a model of caller departure.",
+        "Clear the port target and delete the registry entry on each fixture without invoking a completion."
+      ],
+      "outcome": "observed-in-code component.go:8 (\"p.Target.Requests++\"). In A the account stays at Requests 1 and Successes 0. The same observed counter result holds for the other five fixtures. Observed-in-code admission and deferred bodies for the other APIs: component.go:14 (\"target.Requests++\"), component.go:15 (\"return func() { target.Successes++ }\"), component.go:19 (\"target.Requests++\"), component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"), component.go:23 (\"r.Entries[key].Requests++\"), component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"), component.go:27 (\"p.Target.Requests++\"), component.go:28 (\"return func() { p.Target.Successes++ }\"), component.go:32 (\"target.Requests++\"), component.go:33 (\"return func() { target.Successes++ }\"). observed-in-tests analysis/_probe/order_test.go:31 (\"counters(t, a, 1, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 8,
+        "fragment": " p.Target.Requests++"
+      },
+      "test": "TestIdentityDepartureWithoutDelivery",
+      "question": "What accounting and cleanup, if any, should occur when a caller has departed and teardown is followed by no completion?"
+    },
+    {
+      "id": "F38",
+      "initial": "A port points to a at epoch 7. Distinct account b has epoch 7.",
+      "steps": [
+        "Admit with A and invoke the completion while a is current.",
+        "Retarget the original port to b and invoke the same completion again."
+      ],
+      "outcome": "observed-in-code component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\"). The second invocation increments b.Successes after the first credited a. observed-in-tests analysis/_probe/order_test.go:42 (\"counters(t, a, 1, 1)\"), analysis/_probe/order_test.go:45 (\"counters(t, a, 1, 1)\"), analysis/_probe/order_test.go:46 (\"counters(t, b, 0, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityDeliveryAcrossReplacement",
+      "question": "May a completion already credited to its original account subsequently credit a different account?"
+    },
+    {
+      "id": "F39",
+      "initial": "A port points to a at epoch 7. Distinct account b has epoch 7.",
+      "steps": [
+        "Admit with C and invoke the completion while a is current.",
+        "Retarget the original port to b and invoke the same completion again."
+      ],
+      "outcome": "observed-in-code component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\"). The second invocation credits neither account after the first credited a. observed-in-tests analysis/_probe/order_test.go:53 (\"counters(t, a, 1, 1)\"), analysis/_probe/order_test.go:56 (\"counters(t, a, 1, 1)\"), analysis/_probe/order_test.go:57 (\"counters(t, b, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityDeliveryAcrossReplacement",
+      "question": "Should earlier delivery change the policy for a subsequent invocation after replacement?"
+    },
+    {
+      "id": "F40",
+      "initial": "A registry maps k to a at epoch 7. Distinct account b has epoch 8.",
+      "steps": [
+        "Admit with D(\"k\") and invoke the completion while a holds k.",
+        "Replace k with b and invoke the same completion again."
+      ],
+      "outcome": "observed-in-code component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\"). The second invocation increments b.Successes after the first credited a. observed-in-tests analysis/_probe/order_test.go:64 (\"counters(t, a, 1, 1)\"), analysis/_probe/order_test.go:67 (\"counters(t, a, 1, 1)\"), analysis/_probe/order_test.go:68 (\"counters(t, b, 0, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDeliveryAcrossReplacement",
+      "question": "May a completion already credited to the former entry subsequently credit the current entry?"
+    }
+  ]
+}

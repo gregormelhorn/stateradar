@@ -1,0 +1,187 @@
+{
+  "reviewer": "Codex supervising agent, final reports and generated public-seam probes reviewed 2026-11-14",
+  "scope": "Recipient/effect classes for six untuned synthetic controls, including two redirection positives. Four no-redirection classes have no false redirection claim in the mapped final findings. No universal false-positive rate or independent held-out result is claimed. Canonical F sequence remains unexecuted by either generated suite.",
+  "rows": [
+    {
+      "id": "T-A",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/A",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/final.json",
+          "sha256": "a4bbe8565781c2e142520b0d1432c724da3c96dd2a51076aaa9437d6e400f9df",
+          "line": 113,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The replacement gets one Successes increment. The original has one Requests increment and zero Successes. Replacement Requests stay at zero. component.go:10 (\\\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\\\") and component.go:8 (\\\"p.Target.Requests++\\\") and component.go:9 (\\\"epoch := p.Target.Epoch\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-baseline-final.jsonl",
+          "sha256": "8910d60cd4a592fb4f6dd0e82e91fbde511aae39bf9e373123e0e97c9a4bedf3",
+          "line": 35,
+          "quote": "{\"Time\":\"2026-11-14T22:54:54.172243+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/A\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-B",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/B",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/final.json",
+          "sha256": "a4bbe8565781c2e142520b0d1432c724da3c96dd2a51076aaa9437d6e400f9df",
+          "line": 130,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The original gets one Successes increment. The replacement counters remain zero. Replacement Requests stay at zero. component.go:15 (\\\"return func() { target.Successes++ }\\\") and component.go:14 (\\\"target.Requests++\\\") and component.go:13 (\\\"target := p.Target\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-baseline-final.jsonl",
+          "sha256": "8910d60cd4a592fb4f6dd0e82e91fbde511aae39bf9e373123e0e97c9a4bedf3",
+          "line": 39,
+          "quote": "{\"Time\":\"2026-11-14T22:54:54.172324+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/B\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-C",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/C",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/final.json",
+          "sha256": "a4bbe8565781c2e142520b0d1432c724da3c96dd2a51076aaa9437d6e400f9df",
+          "line": 147,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 Both Successes counters stay zero. The original retains the request. Replacement Requests stay at zero. component.go:20 (\\\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\\\") and component.go:19 (\\\"target.Requests++\\\") and component.go:18 (\\\"target, epoch := p.Target, p.Target.Epoch\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-baseline-final.jsonl",
+          "sha256": "8910d60cd4a592fb4f6dd0e82e91fbde511aae39bf9e373123e0e97c9a4bedf3",
+          "line": 43,
+          "quote": "{\"Time\":\"2026-11-14T22:54:54.17239+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/C\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-D",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/D",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/final.json",
+          "sha256": "a4bbe8565781c2e142520b0d1432c724da3c96dd2a51076aaa9437d6e400f9df",
+          "line": 164,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The replacement gets one Successes increment. The original has one Requests increment and zero Successes. Replacement Requests stay at zero. component.go:24 (\\\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\\\") and component.go:23 (\\\"r.Entries[key].Requests++\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-baseline-final.jsonl",
+          "sha256": "8910d60cd4a592fb4f6dd0e82e91fbde511aae39bf9e373123e0e97c9a4bedf3",
+          "line": 47,
+          "quote": "{\"Time\":\"2026-11-14T22:54:54.172457+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/D\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-E",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/E",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/final.json",
+          "sha256": "a4bbe8565781c2e142520b0d1432c724da3c96dd2a51076aaa9437d6e400f9df",
+          "line": 181,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The original gets one Successes increment. The replacement counters remain zero. Replacement Requests stay at zero. component.go:28 (\\\"return func() { p.Target.Successes++ }\\\") and component.go:27 (\\\"p.Target.Requests++\\\") and component.go:26 (\\\"func (p Port) E() func() {\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-baseline-final.jsonl",
+          "sha256": "8910d60cd4a592fb4f6dd0e82e91fbde511aae39bf9e373123e0e97c9a4bedf3",
+          "line": 51,
+          "quote": "{\"Time\":\"2026-11-14T22:54:54.172498+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/E\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-F",
+      "found": true,
+      "correct": true,
+      "tested": "partial",
+      "test_name": "TestIdentitySameEpochReplacement/F",
+      "rationale": "The report explicitly retains F as a stable captured-target completion, correctly excluding redirection after a stronger mutation of the original Port.Target. The generated probe does not separately execute caller-variable rebinding from the canonical F control. Recipient-class coverage is retained, exact-sequence test coverage is partial. No claim that the generated probe ran that missing schedule.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/final.json",
+          "sha256": "a4bbe8565781c2e142520b0d1432c724da3c96dd2a51076aaa9437d6e400f9df",
+          "line": 198,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The original gets one Successes increment. The replacement counters remain zero. Replacement Requests stay at zero. component.go:33 (\\\"return func() { target.Successes++ }\\\") and component.go:32 (\\\"target.Requests++\\\") and component.go:31 (\\\"target := p.Target\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-baseline/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-baseline-final.jsonl",
+          "sha256": "8910d60cd4a592fb4f6dd0e82e91fbde511aae39bf9e373123e0e97c9a4bedf3",
+          "line": 55,
+          "quote": "{\"Time\":\"2026-11-14T22:54:54.172567+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/F\",\"Elapsed\":0}"
+        }
+      ]
+    }
+  ],
+  "refuted_claims": []
+}

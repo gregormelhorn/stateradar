@@ -1,0 +1,8 @@
+     1	# Deferred accounting fixture
+     2	
+     3	The public operations A through F admit work and return a completion function.
+     4	Account counters expose admission and completed success. Callers supply accounts,
+     5	ports or registries. Analyze serialized public operations; concurrent unsynchronized
+     6	field writes are outside this fixture's scope. Report what the implementation does.
+     7	The intended policy for outstanding completions during lifecycle changes has not
+     8	been decided. A code observation does not settle that policy.

@@ -1,0 +1,13 @@
+usage: local_models.py jev-batch [-h] [--model MODEL] [--output OUTPUT]
+                                 [--summary]
+                                 input checks
+
+positional arguments:
+  input            UTF-8 source shared by the checks
+  checks           JSON array of checks
+
+options:
+  -h, --help       show this help message and exit
+  --model MODEL    TypeSafe model name or alias
+  --output OUTPUT  also write the result JSON to this file
+  --summary        print counts instead of all checks (requires --output)

@@ -1,0 +1,1029 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1",
+  "input_tokens": 11469,
+  "cost_microdollars": 482,
+  "reservation_microdollars": 2032,
+  "checks": {
+    "A_admission": {
+      "kind": "claim",
+      "statement": "A increments Requests on the account currently at p.Target during admission, before the callback is returned.",
+      "source": "component.go",
+      "line": 8,
+      "fragment": "p.Target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.9,
+        "contradicted": 0.0,
+        "unclear": 0.1
+      },
+      "confidence": 0.85,
+      "review_required": true
+    },
+    "A_success": {
+      "kind": "claim",
+      "statement": "A's callback increments Successes on the current account, when its epoch matches.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": "return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "A_only_success_field": {
+      "kind": "claim",
+      "statement": "Invoking A's returned callback does not change Requests.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": "return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.0,
+        "unclear": 0.04
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "A_repeat": {
+      "kind": "claim",
+      "statement": "Each invocation of the same A callback that meets its increment conditions can add one success, including a second eligible invocation.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": "return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.84,
+        "contradicted": 0.02,
+        "unclear": 0.14
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "A_no_dispatch": {
+      "kind": "claim",
+      "statement": "A places the Successes increment inside the returned callback; returning the callback does not run its body.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": "return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.0,
+        "unclear": 0.04
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "A_invalid_admission": {
+      "kind": "claim",
+      "statement": "A panics on the Requests field dereference if p.Target is nil.",
+      "source": "component.go",
+      "line": 8,
+      "fragment": "p.Target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.75,
+        "contradicted": 0.01,
+        "unclear": 0.24
+      },
+      "confidence": 0.62,
+      "review_required": true
+    },
+    "B_admission": {
+      "kind": "claim",
+      "statement": "B increments Requests on the previously captured target during admission, before the callback is returned.",
+      "source": "component.go",
+      "line": 14,
+      "fragment": "target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.76,
+        "contradicted": 0.01,
+        "unclear": 0.23
+      },
+      "confidence": 0.64,
+      "review_required": true
+    },
+    "B_success": {
+      "kind": "claim",
+      "statement": "B's callback increments Successes on the captured target.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "B_only_success_field": {
+      "kind": "claim",
+      "statement": "Invoking B's returned callback does not change Requests.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.9,
+        "contradicted": 0.0,
+        "unclear": 0.1
+      },
+      "confidence": 0.85,
+      "review_required": true
+    },
+    "B_repeat": {
+      "kind": "claim",
+      "statement": "Each invocation of the same B callback that meets its increment conditions can add one success, including a second eligible invocation.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.74,
+        "contradicted": 0.01,
+        "unclear": 0.25
+      },
+      "confidence": 0.61,
+      "review_required": true
+    },
+    "B_no_dispatch": {
+      "kind": "claim",
+      "statement": "B places the Successes increment inside the returned callback; returning the callback does not run its body.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.89,
+        "contradicted": 0.0,
+        "unclear": 0.11
+      },
+      "confidence": 0.83,
+      "review_required": true
+    },
+    "B_invalid_admission": {
+      "kind": "claim",
+      "statement": "B panics at the Requests field dereference if the captured target is nil.",
+      "source": "component.go",
+      "line": 14,
+      "fragment": "target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.56,
+        "contradicted": 0.02,
+        "unclear": 0.42
+      },
+      "confidence": 0.34,
+      "review_required": true
+    },
+    "C_admission": {
+      "kind": "claim",
+      "statement": "C increments Requests on the previously captured target during admission, before the callback is returned.",
+      "source": "component.go",
+      "line": 19,
+      "fragment": "target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.85,
+        "contradicted": 0.01,
+        "unclear": 0.14
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "C_success": {
+      "kind": "claim",
+      "statement": "C's callback increments Successes on the captured target, when both identity and epoch match.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": "return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "C_only_success_field": {
+      "kind": "claim",
+      "statement": "Invoking C's returned callback does not change Requests.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": "return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.01,
+        "unclear": 0.04
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "C_repeat": {
+      "kind": "claim",
+      "statement": "Each invocation of the same C callback that meets its increment conditions can add one success, including a second eligible invocation.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": "return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.79,
+        "contradicted": 0.02,
+        "unclear": 0.19
+      },
+      "confidence": 0.68,
+      "review_required": true
+    },
+    "C_no_dispatch": {
+      "kind": "claim",
+      "statement": "C places the Successes increment inside the returned callback; returning the callback does not run its body.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": "return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.91,
+        "contradicted": 0.0,
+        "unclear": 0.09
+      },
+      "confidence": 0.86,
+      "review_required": true
+    },
+    "C_invalid_admission": {
+      "kind": "claim",
+      "statement": "C panics while reading p.Target.Epoch if p.Target is nil, before the Requests increment.",
+      "source": "component.go",
+      "line": 18,
+      "fragment": "target, epoch := p.Target, p.Target.Epoch",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.79,
+        "contradicted": 0.07,
+        "unclear": 0.14
+      },
+      "confidence": 0.68,
+      "review_required": true
+    },
+    "D_admission": {
+      "kind": "claim",
+      "statement": "D increments Requests on the current occupant of the supplied key during admission, before the callback is returned.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": "r.Entries[key].Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.9,
+        "contradicted": 0.0,
+        "unclear": 0.1
+      },
+      "confidence": 0.85,
+      "review_required": true
+    },
+    "D_success": {
+      "kind": "claim",
+      "statement": "D's callback increments Successes on the current non-nil occupant of the admitted key.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "D_only_success_field": {
+      "kind": "claim",
+      "statement": "Invoking D's returned callback does not change Requests.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.0,
+        "unclear": 0.05
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "D_repeat": {
+      "kind": "claim",
+      "statement": "Each invocation of the same D callback that meets its increment conditions can add one success, including a second eligible invocation.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.79,
+        "contradicted": 0.03,
+        "unclear": 0.18
+      },
+      "confidence": 0.68,
+      "review_required": true
+    },
+    "D_no_dispatch": {
+      "kind": "claim",
+      "statement": "D places the Successes increment inside the returned callback; returning the callback does not run its body.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.93,
+        "contradicted": 0.0,
+        "unclear": 0.07
+      },
+      "confidence": 0.89,
+      "review_required": true
+    },
+    "D_invalid_admission": {
+      "kind": "claim",
+      "statement": "D's admission dereferences the key lookup result for Requests without a nil guard.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": "r.Entries[key].Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "E_admission": {
+      "kind": "claim",
+      "statement": "E increments Requests on the account pointed to by the value receiver's Target during admission, before the callback is returned.",
+      "source": "component.go",
+      "line": 27,
+      "fragment": "p.Target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.87,
+        "contradicted": 0.02,
+        "unclear": 0.11
+      },
+      "confidence": 0.8,
+      "review_required": true
+    },
+    "E_success": {
+      "kind": "claim",
+      "statement": "E's callback increments Successes on the target pointer in the copied Port receiver.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": "return func() { p.Target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.89,
+        "contradicted": 0.08,
+        "unclear": 0.03
+      },
+      "confidence": 0.83,
+      "review_required": true
+    },
+    "E_only_success_field": {
+      "kind": "claim",
+      "statement": "Invoking E's returned callback does not change Requests.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": "return func() { p.Target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.85,
+        "contradicted": 0.01,
+        "unclear": 0.14
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "E_repeat": {
+      "kind": "claim",
+      "statement": "Each invocation of the same E callback that meets its increment conditions can add one success, including a second eligible invocation.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": "return func() { p.Target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.66,
+        "contradicted": 0.01,
+        "unclear": 0.33
+      },
+      "confidence": 0.49,
+      "review_required": true
+    },
+    "E_no_dispatch": {
+      "kind": "claim",
+      "statement": "E places the Successes increment inside the returned callback; returning the callback does not run its body.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": "return func() { p.Target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.88,
+        "contradicted": 0.01,
+        "unclear": 0.11
+      },
+      "confidence": 0.82,
+      "review_required": true
+    },
+    "E_invalid_admission": {
+      "kind": "claim",
+      "statement": "E panics at the admission Requests field dereference if its copied Target is nil.",
+      "source": "component.go",
+      "line": 27,
+      "fragment": "p.Target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.66,
+        "contradicted": 0.02,
+        "unclear": 0.32
+      },
+      "confidence": 0.49,
+      "review_required": true
+    },
+    "F_admission": {
+      "kind": "claim",
+      "statement": "F increments Requests on the previously captured target during admission, before the callback is returned.",
+      "source": "component.go",
+      "line": 32,
+      "fragment": "target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.0,
+        "unclear": 0.08
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "F_success": {
+      "kind": "claim",
+      "statement": "F's callback increments Successes on the captured target.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "F_only_success_field": {
+      "kind": "claim",
+      "statement": "Invoking F's returned callback does not change Requests.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.85,
+        "contradicted": 0.0,
+        "unclear": 0.15
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "F_repeat": {
+      "kind": "claim",
+      "statement": "Each invocation of the same F callback that meets its increment conditions can add one success, including a second eligible invocation.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.72,
+        "contradicted": 0.01,
+        "unclear": 0.27
+      },
+      "confidence": 0.58,
+      "review_required": true
+    },
+    "F_no_dispatch": {
+      "kind": "claim",
+      "statement": "F places the Successes increment inside the returned callback; returning the callback does not run its body.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.88,
+        "contradicted": 0.0,
+        "unclear": 0.12
+      },
+      "confidence": 0.82,
+      "review_required": true
+    },
+    "F_invalid_admission": {
+      "kind": "claim",
+      "statement": "F panics at the Requests field dereference if the captured target is nil.",
+      "source": "component.go",
+      "line": 32,
+      "fragment": "target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.6,
+        "contradicted": 0.02,
+        "unclear": 0.38
+      },
+      "confidence": 0.4,
+      "review_required": true
+    },
+    "A_saved_epoch": {
+      "kind": "claim",
+      "statement": "A saves the admitting account's numeric Epoch value.",
+      "source": "component.go",
+      "line": 9,
+      "fragment": "epoch := p.Target.Epoch",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "A_same_epoch_other_target": {
+      "kind": "claim",
+      "statement": "After rebinding to a distinct account with the saved epoch, A's callback increments that replacement's Successes.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": "return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.67,
+        "contradicted": 0.18,
+        "unclear": 0.15
+      },
+      "confidence": 0.5,
+      "review_required": true
+    },
+    "A_skip_mismatched_epoch": {
+      "kind": "claim",
+      "statement": "When the live target's epoch differs from the saved value, A's callback increments no Successes.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": "return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "A_nil_target_panic": {
+      "kind": "claim",
+      "statement": "When the live target is nil at invocation, A's callback panics while evaluating p.Target.Epoch.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": "return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.48,
+        "contradicted": 0.12,
+        "unclear": 0.4
+      },
+      "confidence": 0.22,
+      "review_required": true
+    },
+    "A_later_eligible": {
+      "kind": "claim",
+      "statement": "After an invocation that skipped for an epoch mismatch, a later invocation of the same A callback with a live target whose epoch now matches increments that target's Successes.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": "return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.25,
+        "contradicted": 0.54,
+        "unclear": 0.21
+      },
+      "confidence": 0.31,
+      "review_required": true
+    },
+    "A_after_panic": {
+      "kind": "claim",
+      "statement": "After a recovered nil-target panic, invoking the same A callback with a reattached matching target increments its Successes.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": "return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.09,
+        "contradicted": 0.06,
+        "unclear": 0.85
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "B_capture": {
+      "kind": "claim",
+      "statement": "B assigns the admission-time account pointer to the local target.",
+      "source": "component.go",
+      "line": 13,
+      "fragment": "target := p.Target",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.0,
+        "unclear": 0.08
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "B_rebinding": {
+      "kind": "claim",
+      "statement": "B's callback increments the admitted account's Successes even after the Port is rebound or detached.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.79,
+        "contradicted": 0.01,
+        "unclear": 0.2
+      },
+      "confidence": 0.68,
+      "review_required": true
+    },
+    "B_epoch": {
+      "kind": "claim",
+      "statement": "An epoch change on the captured account does not prevent B's callback from incrementing it.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.81,
+        "contradicted": 0.01,
+        "unclear": 0.18
+      },
+      "confidence": 0.72,
+      "review_required": true
+    },
+    "B_live_counter": {
+      "kind": "claim",
+      "statement": "B's callback increments the captured account's current Successes field value, including a value assigned after admission.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.63,
+        "contradicted": 0.01,
+        "unclear": 0.36
+      },
+      "confidence": 0.44,
+      "review_required": true
+    },
+    "C_capture": {
+      "kind": "claim",
+      "statement": "C saves the admission-time account pointer and its numeric Epoch.",
+      "source": "component.go",
+      "line": 18,
+      "fragment": "target, epoch := p.Target, p.Target.Epoch",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "C_skip_other_target": {
+      "kind": "claim",
+      "statement": "C's callback adds no success when the current target is a different account even if that account has the saved epoch.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": "return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.02,
+        "unclear": 0.01
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "C_skip_changed_epoch": {
+      "kind": "claim",
+      "statement": "C's callback adds no success when the original account is still the target but no longer has the saved epoch.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": "return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "C_skip_nil_target": {
+      "kind": "claim",
+      "statement": "After a valid C admission, a nil Port.Target makes the identity comparison false and short-circuits the epoch comparison.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": "return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.34,
+        "contradicted": 0.31,
+        "unclear": 0.35
+      },
+      "confidence": 0.02,
+      "review_required": true
+    },
+    "C_later_eligible": {
+      "kind": "claim",
+      "statement": "After an invocation of C's callback with a false guard, a later invocation of the same callback increments Successes once both original identity and saved epoch match.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": "return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.48,
+        "contradicted": 0.12,
+        "unclear": 0.4
+      },
+      "confidence": 0.22,
+      "review_required": true
+    },
+    "D_new_key_occupant": {
+      "kind": "claim",
+      "statement": "When the admitted key is rebound to another account, D's existing callback increments the new occupant's Successes.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.91,
+        "contradicted": 0.05,
+        "unclear": 0.04
+      },
+      "confidence": 0.86,
+      "review_required": true
+    },
+    "D_whole_map": {
+      "kind": "claim",
+      "statement": "D's callback looks up the admitted key in the Registry's current Entries field, including after assigning a new non-nil map.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.67,
+        "contradicted": 0.02,
+        "unclear": 0.31
+      },
+      "confidence": 0.5,
+      "review_required": true
+    },
+    "D_other_key": {
+      "kind": "claim",
+      "statement": "D's callback does not look up a different key in the Registry.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "D_absent": {
+      "kind": "claim",
+      "statement": "D's callback does not increment Successes when the admitted key is absent.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.75,
+        "contradicted": 0.07,
+        "unclear": 0.18
+      },
+      "confidence": 0.62,
+      "review_required": true
+    },
+    "D_nil_entry": {
+      "kind": "claim",
+      "statement": "D's callback does not increment Successes when the admitted key is present with a nil value.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.91,
+        "contradicted": 0.05,
+        "unclear": 0.04
+      },
+      "confidence": 0.86,
+      "review_required": true
+    },
+    "D_nil_map": {
+      "kind": "claim",
+      "statement": "D's callback does not increment Successes when Entries is a nil map and the Registry receiver remains non-nil.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.43,
+        "contradicted": 0.07,
+        "unclear": 0.5
+      },
+      "confidence": 0.25,
+      "review_required": true
+    },
+    "D_later_eligible": {
+      "kind": "claim",
+      "statement": "After a skipped invocation on a missing or nil entry, a later invocation of the same D callback increments a non-nil account subsequently bound to the same key.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.26,
+        "contradicted": 0.04,
+        "unclear": 0.7
+      },
+      "confidence": 0.55,
+      "review_required": true
+    },
+    "D_epoch": {
+      "kind": "claim",
+      "statement": "A different epoch on the account at the key does not prevent the D callback from incrementing it.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": "return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.79,
+        "contradicted": 0.01,
+        "unclear": 0.2
+      },
+      "confidence": 0.68,
+      "review_required": true
+    },
+    "D_admission_missing": {
+      "kind": "claim",
+      "statement": "During D admission, a missing key yields a nil account pointer and the unguarded Requests field dereference panics.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": "r.Entries[key].Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.6,
+        "contradicted": 0.03,
+        "unclear": 0.37
+      },
+      "confidence": 0.4,
+      "review_required": true
+    },
+    "D_admission_nil_entry": {
+      "kind": "claim",
+      "statement": "During D admission, a key whose value is nil results in a panic at the Requests field dereference.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": "r.Entries[key].Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.86,
+        "contradicted": 0.02,
+        "unclear": 0.12
+      },
+      "confidence": 0.79,
+      "review_required": true
+    },
+    "D_admission_nil_map": {
+      "kind": "claim",
+      "statement": "During D admission, a nil Entries map yields a nil account pointer at the key and the Requests field dereference panics.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": "r.Entries[key].Requests++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.21,
+        "contradicted": 0.04,
+        "unclear": 0.75
+      },
+      "confidence": 0.62,
+      "review_required": true
+    },
+    "E_value_receiver": {
+      "kind": "claim",
+      "statement": "E declares a Port value receiver, so the receiver is a Port value copy with a copied Target pointer.",
+      "source": "component.go",
+      "line": 26,
+      "fragment": "func (p Port) E() func() {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.02,
+        "unclear": 0.06
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "E_rebinding": {
+      "kind": "claim",
+      "statement": "E's callback increments the account addressed through the receiver copy after the caller rebinds or detaches its Port.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": "return func() { p.Target.Successes++ }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.36,
+        "contradicted": 0.22,
+        "unclear": 0.42
+      },
+      "confidence": 0.13,
+      "review_required": true
+    },
+    "E_epoch": {
+      "kind": "claim",
+      "statement": "An epoch change on the account addressed through the receiver copy does not prevent E's callback from incrementing it.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": "return func() { p.Target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.62,
+        "contradicted": 0.05,
+        "unclear": 0.33
+      },
+      "confidence": 0.43,
+      "review_required": true
+    },
+    "F_capture": {
+      "kind": "claim",
+      "statement": "F assigns the admission-time account pointer to the local target.",
+      "source": "component.go",
+      "line": 31,
+      "fragment": "target := p.Target",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.94,
+        "contradicted": 0.0,
+        "unclear": 0.06
+      },
+      "confidence": 0.91,
+      "review_required": true
+    },
+    "F_rebinding": {
+      "kind": "claim",
+      "statement": "F's callback increments the admitted account's Successes even after the Port is rebound or detached.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.72,
+        "contradicted": 0.03,
+        "unclear": 0.25
+      },
+      "confidence": 0.58,
+      "review_required": true
+    },
+    "F_epoch": {
+      "kind": "claim",
+      "statement": "An epoch change on the captured account does not prevent F's callback from incrementing it.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": "return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.77,
+        "contradicted": 0.02,
+        "unclear": 0.21
+      },
+      "confidence": 0.66,
+      "review_required": true
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import collections,json\nfrom pathlib import Path\nrows=[json.loads(x) for x in Path('analysis/probe-attempt-01.stdout.jsonl').read_text().splitlines()]\nfor act in ['run','pass','fail','skip']:\n print(act,collections.Counter(x['Test'] for x in rows if x['Action']==act and 'Test' in x and '/' not in x['Test']))\nprint('package:',[(x['Action'],x.get('Elapsed')) for x in rows if x['Action'] in {'pass','fail','skip'} and 'Test' not in x])\nprint('stderr bytes:',Path('analysis/probe-attempt-01.stderr.log').stat().st_size)\n"
+  ],
+  "exit_code": 0
+}

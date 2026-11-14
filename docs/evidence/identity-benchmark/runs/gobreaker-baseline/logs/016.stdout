@@ -1,0 +1,54 @@
+C1 230 supported Execute obtains a generation from beforeRequest; if beforeRequest returns an error, Execute returns nil and the error without running the request. if err != nil {
+C2 237 supported When a panic occurs in a request, Execute recovers it, calls afterRequest with success=false, and re-panics the same value. cb.afterRequest(generation, false)
+C3 243 supported Execute reports the outcome using isSuccessful applied to the request's returned error. cb.afterRequest(generation, cb.isSuccessful(err))
+C4 272 supported TwoStepCircuitBreaker.Allow returns a done callback that calls afterRequest with the supplied success flag and the generation captured at Allow time. tscb.cb.afterRequest(generation, success)
+C5 268 supported If the circuit breaker does not allow requests, Allow returns a nil callback and an error. return nil, err
+C6 283 supported beforeRequest returns ErrOpenState when the current state is Open. if state == StateOpen {
+C7 285 supported beforeRequest returns ErrTooManyRequests when the state is HalfOpen and the request count is at least maxRequests. state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests
+C8 289 supported beforeRequest increments the request count and returns the generation only when the request is allowed. cb.counts.onRequest()
+C9 299 supported afterRequest discards the outcome if the generation captured before the request differs from the current generation. if generation != before {
+C10 298 supported afterRequest resolves the current state and generation before applying the outcome. state, generation := cb.currentState(now)
+C11 62 supported In the closed state, a success increments total and consecutive successes and resets consecutive failures. c.ConsecutiveFailures = 0
+C12 68 supported In the closed state, a failure increments total and consecutive failures and resets consecutive successes. c.ConsecutiveSuccesses = 0
+C13 326 supported In the closed state, a failure triggers readyToTrip on the counts and opens the breaker if it returns true. if cb.readyToTrip(cb.counts) {
+C14 316 supported In the half-open state, a success is counted and, when consecutive successes reach maxRequests, the breaker moves to closed. if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {
+C15 330 supported In the half-open state, any failure moves the breaker to open. cb.setState(StateOpen, now)
+C16 341 supported In the open state, when expiry is before now, currentState transitions the breaker to half-open. if cb.expiry.Before(now) {
+C17 337 supported In the closed state, when a non-zero expiry is before now, currentState starts a new generation. if !cb.expiry.IsZero() && cb.expiry.Before(now) {
+C18 349 supported setState does nothing if the requested state equals the current state. if cb.state == state {
+C19 356 supported setState starts a new generation before invoking onStateChange with the previous and new states. cb.toNewGeneration(now)
+C20 358 supported onStateChange is invoked only when it is non-nil. if cb.onStateChange != nil {
+C21 365 supported toNewGeneration increments the generation and clears counts. cb.counts.clear()
+C22 370 supported On entering the closed state, expiry is set to zero when interval is zero, otherwise to now plus interval. if cb.interval == 0 {
+C23 376 supported On entering the open state, expiry is set to now plus timeout. cb.expiry = now.Add(cb.timeout)
+C24 378 supported On entering the half-open state, expiry is set to zero. cb.expiry = zero
+C25 211 supported State() locks the mutex and returns the state resolved through currentState with the current time, so it may trigger generation or state transitions. state, _ := cb.currentState(now)
+C26 177 supported A new breaker is created and initialized to a new generation at construction time. cb.toNewGeneration(time.Now())
+C27 229 unclear For Execute, the sequence is beforeRequest, then the deferred panic handler, then the request, then afterRequest with the success determination. generation, err := cb.beforeRequest()
+C28 354 supported In setState, the state field is updated before toNewGeneration runs, so toNewGeneration computes expiry for the new state. cb.state = state
+C29 356 supported In setState, toNewGeneration runs before onStateChange. cb.toNewGeneration(now)
+C30 147 supported MaxRequests of 0 is normalized to 1. if st.MaxRequests == 0 {
+C31 153 supported A non-positive Interval is normalized to defaultInterval. if st.Interval <= 0 {
+C32 159 supported A non-positive Timeout is normalized to defaultTimeout. if st.Timeout <= 0 {
+C33 193 supported The default ReadyToTrip returns true when consecutive failures exceed 5. return counts.ConsecutiveFailures > 5
+C34 197 supported The default IsSuccessful returns true only when the error is nil. return err == nil
+Q1 If a deferred TwoStep callback is invoked after the breaker's generation has advanced, the outcome is discarded (line 299). Is deferred completion after generation change intended to be ignored, and does the caller receive any signal that its outcome was dropped?
+Q2 What happens if a TwoStep done callback is invoked more than once? Each invocation calls afterRequest with the same before generation (line 272); is repeated accounting intended, limited, or unspecified?
+Q3 What happens if a TwoStep done callback is never invoked? The request count incremented by Allow is never decremented, so Requests can remain counted (line 289). Is this intended as consumed capacity, and how does it interact with maxRequests in half-open?
+Q4 Inside afterRequest, currentState is resolved (line 298) before the generation check (line 299). If currentState performs a transition (e.g., open to half-open after timeout), that transition occurs before the stale outcome is discarded. Is that ordering intended, and can a stale outcome trigger a state change?
+Q5 setState calls toNewGeneration before onStateChange (lines 356-359). If onStateChange calls back into the breaker, what state and counts does it observe? Is re-entrancy during the callback specified?
+Q6 OnStateChange is invoked after the new generation and counts have been installed (lines 356-359). Is the callback expected to observe post-transition counts, and is it required to be non-blocking or free of re-entry?
+Q7 Execute recovers any panic in the request, records failure, and re-panics (lines 235-239). If afterRequest itself panics (e.g., inside readyToTrip or onStateChange), is the original request panic lost? This interaction is not addressed.
+Q8 A panic in the request is always recorded as a failure (line 237) without consulting isSuccessful. Is a panic semantically a failure regardless of isSuccessful, and how does this interact with a user-supplied isSuccessful?
+Q9 Comparing generations (line 299) is used to drop outcomes from before a generation change. If generation wraps around uint64, stale and current generations could compare equal; is wraparound addressed or considered out of scope?
+Q10 currentState in the closed state starts a new generation when a non-zero expiry is before now (line 337). Does this clearing of counts also occur on reads like State() and Counts()? State() calls currentState (line 211), but Counts() does not (line 220). Is the asymmetric expiry behavior intended?
+Q11 Counts() returns counts without resolving currentState (line 220), so it may return pre-interval counts even when the interval has elapsed. Is Counts() intended to reflect only the stored counts, or should it also trigger interval clearing?
+Q12 In half-open, beforeRequest compares counts.Requests against maxRequests (line 285). Requests cleared on transition into half-open (line 365). If a TwoStep allow is granted but never completes, does it permanently consume a half-open slot for that generation? This is unspecified.
+Q13 In the half-open state, a success that reaches maxRequests consecutive successes closes the breaker (line 316). If failures and successes interleave, consecutive successes reset, but Requests also cap admission (line 285). What is the intended interaction between admission caps and consecutive-success criteria when a callback is deferred or dropped?
+Q14 The open-to-half-open transition happens lazily inside currentState (lines 340-343). Is the transition intended to occur only on the next call (State, Counts-path, beforeRequest, afterRequest), and what is the observable behavior if no calls occur after the timeout?
+Q15 A non-positive Timeout is normalized to defaultTimeout (line 159), and the defaultTimeout constant is 60 seconds (line 190). The doc says non-positive timeout is set to 60 seconds. Is this normalization applied at construction and never re-evaluated, and is that intended for all Settings mutations after construction?
+Q16 A non-positive Interval is normalized to defaultInterval (line 153), and defaultInterval is zero duration (line 189). The doc says the breaker doesn't clear internal counts during the closed state. Is a negative Interval intended to be identical to zero, or an error?
+Q17 The doc says ReadyToTrip is called whenever a request fails in the closed state (line 95), and onFailure is invoked after generation checking in afterRequest (lines 299-307). If a stale failure is discarded by the generation check, ReadyToTrip is not called. Is that consistent with the documented 'whenever a request fails' wording?
+Q18 The doc states Counts ignores results of requests sent before clearing (line 46). The implementation enforces this via generation equality (line 299). Are there paths where a cleared generation's outcome can still be applied (e.g., generation wraparound or transition within afterRequest's currentState call)?
+Q19 The doc says OnStateChange is called whenever the state changes (line 100). setState returns early when the new state equals the current state (line 349), so no callback fires. Is a no-op setState considered a state change for callback purposes?
+Q20 If both a state transition and interval expiry would occur at the same call, currentState evaluates the switch on the stored state (line 335). Is the precedence between open-timeout transition and closed-interval clearing specified for boundary times, and what happens when now equals expiry?

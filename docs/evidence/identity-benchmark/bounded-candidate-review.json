@@ -1,0 +1,239 @@
+{
+  "reviewer": "Codex supervising agent; final reports and probe bodies reviewed 2026-11-14",
+  "scope": "Bounded final reports only. Scores cover eight predeclared cases, not every claim in the component. Independent replay supplies execution evidence, not new findings. No domain intent is decided.",
+  "rows": [
+    {
+      "id": "B01",
+      "found": true,
+      "correct": true,
+      "tested": "partial",
+      "test_name": "TestIdentityWrapperLazyBoundary",
+      "rationale": "The summary explicitly retains expiry/notification before stale discard. F04 executes it with wrapper replacement; F21 uses the original breaker but a panicking notification. Neither is the complete ordinary same-instance reference schedule. This is retained behavior with narrower/different executable coverage, not a missing finding.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/final.json",
+          "sha256": "c2f23be11abc828901f80f6d8ef1db9c2d6039cc18ed39d9ced26a62edb72ad4",
+          "line": 64,
+          "quote": "      \"outcome\": \"observed-in-code: For either result, B enters half-open and invokes B's notification before dropping the mismatching completion. No request is charged by done, and a retry can take the available slot. Source: gobreaker.go:298 (\\\"state, generation := cb.currentState(now)\\\"), gobreaker.go:342 (\\\"cb.setState(StateHalfOpen, now)\\\"), gobreaker.go:359 (\\\"cb.onStateChange(cb.name, prev, state)\\\"), gobreaker.go:289 (\\\"cb.counts.onRequest()\\\"), gobreaker.go:299 (\\\"if generation != before {\\\"), gobreaker.go:364 (\\\"cb.generation++\\\"). observed-in-tests: analysis/_probe/identity_test.go:158 (\\\"if !reflect.DeepEqual(events, []gb.State{gb.StateOpen, gb.StateHalfOpen}) {\\\"). A remains charged through the saved alias.\","
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/final.json",
+          "sha256": "c2f23be11abc828901f80f6d8ef1db9c2d6039cc18ed39d9ced26a62edb72ad4",
+          "line": 356,
+          "quote": "      \"outcome\": \"observed-in-code: Either bool can expose the hook panic before the mismatch return. Half-open remains committed with no admitted request until retry, and retry does not re-notify the transition. Source: gobreaker.go:298 (\\\"state, generation := cb.currentState(now)\\\"), gobreaker.go:342 (\\\"cb.setState(StateHalfOpen, now)\\\"), gobreaker.go:359 (\\\"cb.onStateChange(cb.name, prev, state)\\\"), gobreaker.go:365 (\\\"cb.counts.clear()\\\"), gobreaker.go:289 (\\\"cb.counts.onRequest()\\\"), gobreaker.go:234 (\\\"defer func() {\\\"), gobreaker.go:237 (\\\"cb.afterRequest(generation, false)\\\"), gobreaker.go:243 (\\\"cb.afterRequest(generation, cb.isSuccessful(err))\\\"), gobreaker.go:294 (\\\"cb.mutex.Lock()\\\"), gobreaker.go:295 (\\\"defer cb.mutex.Unlock()\\\"), gobreaker.go:299 (\\\"if generation != before {\\\"). observed-in-tests: analysis/_probe/identity_test.go:695 (\\\"if calls != 1 {\\\"). Additional interpretation (inferred where it extends the probe). A corresponding Execute stale normal return would invoke classification first. If its accounting refresh panics, a retry can see the already committed new generation and skip. This Execute variant is inferred from 234\\u2013244 and 293\\u2013300. The public probe covers TwoStep.\","
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/summary.md",
+          "sha256": "fd9e543387f76eebe9be32cb9546be21a51173a090d1b556b5324651f2477034",
+          "line": 6,
+          "quote": "- **observed-in-code and observed-in-tests**. A stale report can run expiry and notification before its outcome is discarded. A matching late report can still update counts after the caller leaves. Execute returns the request\u2019s value and error to its calling worker after a skipped report. The worker channel and disposal of a queued value are supplied by the caller in the probe. [gobreaker.go:298 (\"state, generation := cb.currentState(now)\")](../gobreaker.go#L298) \u00b7 [gobreaker.go:299 (\"if generation != before {\")](../gobreaker.go#L299) \u00b7 [gobreaker.go:244 (\"return result, err\")](../gobreaker.go#L244) \u00b7 [identity_test.go:400 (\"if got.value != \"payload\" || got.err != requestErr {\")](_probe/identity_test.go#L400)"
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/_probe/identity_test.go",
+          "sha256": "05b1618df82d2c57d6a86bb3d0cc6da525da6402a6a2b3e1a333db0d9c36ec7c",
+          "line": 141,
+          "quote": "func TestIdentityWrapperLazyBoundary(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/gobreaker-candidate-final.jsonl",
+          "sha256": "a38d07a4a7866bb8cc65ca8295c0d302052c1d08734f1dee1fe306f75d2bdb17",
+          "line": 41,
+          "quote": "{\"Time\":\"2026-11-14T22:54:39.397158+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestIdentityWrapperLazyBoundary\",\"Elapsed\":0.32}"
+        }
+      ]
+    },
+    {
+      "id": "B02",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityRepeatedHalfOpen",
+      "rationale": "The final report explicitly preserves the condition, order and observable consequence; linked probe assertions were reviewed.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/final.json",
+          "sha256": "c2f23be11abc828901f80f6d8ef1db9c2d6039cc18ed39d9ced26a62edb72ad4",
+          "line": 168,
+          "quote": "      \"outcome\": \"observed-in-code: The two reports close the breaker without a second admission. Closing clears counts. The subsequent report is stale and is ignored. Source: gobreaker.go:315 (\\\"cb.counts.onSuccess()\\\"), gobreaker.go:316 (\\\"if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {\\\"), gobreaker.go:356 (\\\"cb.toNewGeneration(now)\\\"), gobreaker.go:299 (\\\"if generation != before {\\\"), gobreaker.go:365 (\\\"cb.counts.clear()\\\"). observed-in-tests: analysis/_probe/identity_test.go:279 (\\\"identityCounts(t, b.Counts(), identitySuccess(1))\\\"). The call made after close reports false and leaves the reset counts unchanged.\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/_probe/identity_test.go",
+          "sha256": "05b1618df82d2c57d6a86bb3d0cc6da525da6402a6a2b3e1a333db0d9c36ec7c",
+          "line": 272,
+          "quote": "func TestIdentityRepeatedHalfOpen(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/gobreaker-candidate-final.jsonl",
+          "sha256": "a38d07a4a7866bb8cc65ca8295c0d302052c1d08734f1dee1fe306f75d2bdb17",
+          "line": 81,
+          "quote": "{\"Time\":\"2026-11-14T22:54:39.88274+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestIdentityRepeatedHalfOpen\",\"Elapsed\":0.16}"
+        }
+      ]
+    },
+    {
+      "id": "B03",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityAbandonedHalfOpen",
+      "rationale": "The final report explicitly preserves the condition, order and observable consequence; linked probe assertions were reviewed.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/final.json",
+          "sha256": "c2f23be11abc828901f80f6d8ef1db9c2d6039cc18ed39d9ced26a62edb72ad4",
+          "line": 186,
+          "quote": "      \"outcome\": \"observed-in-code: Without a report the breaker stays half-open and retry returns ErrTooManyRequests. A later success closes and permits new admissions. A later failure reopens and retry returns ErrOpenState before expiry. Source: gobreaker.go:285 (\\\"} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {\\\"), gobreaker.go:378 (\\\"cb.expiry = zero\\\"), gobreaker.go:317 (\\\"cb.setState(StateClosed, now)\\\"), gobreaker.go:330 (\\\"cb.setState(StateOpen, now)\\\"), gobreaker.go:286 (\\\"return generation, ErrTooManyRequests\\\"), gobreaker.go:335 (\\\"switch cb.state {\\\"), gobreaker.go:367 (\\\"var zero time.Time\\\"). observed-in-tests: analysis/_probe/identity_test.go:293 (\\\"identityReject(t, b, gb.ErrTooManyRequests)\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/_probe/identity_test.go",
+          "sha256": "05b1618df82d2c57d6a86bb3d0cc6da525da6402a6a2b3e1a333db0d9c36ec7c",
+          "line": 286,
+          "quote": "func TestIdentityAbandonedHalfOpen(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/gobreaker-candidate-final.jsonl",
+          "sha256": "a38d07a4a7866bb8cc65ca8295c0d302052c1d08734f1dee1fe306f75d2bdb17",
+          "line": 93,
+          "quote": "{\"Time\":\"2026-11-14T22:54:40.527407+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestIdentityAbandonedHalfOpen\",\"Elapsed\":0.64}"
+        }
+      ]
+    },
+    {
+      "id": "B04",
+      "found": true,
+      "correct": true,
+      "tested": "none",
+      "test_name": null,
+      "rationale": "The lock/reentry mechanism is correctly retained as a source-only finding; no reentry probe was executed in this bounded session.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/final.json",
+          "sha256": "c2f23be11abc828901f80f6d8ef1db9c2d6039cc18ed39d9ced26a62edb72ad4",
+          "line": 372,
+          "quote": "      \"outcome\": \"observed-in-code: Name reads without the mutex. A same-breaker lock-taking call cannot proceed while that hook holds the lock. Another operation cannot refresh expiry between entry into the locked hook and its return or unwind. Source: gobreaker.go:326 (\\\"if cb.readyToTrip(cb.counts) {\\\"), gobreaker.go:359 (\\\"cb.onStateChange(cb.name, prev, state)\\\"), gobreaker.go:207 (\\\"cb.mutex.Lock()\\\"), gobreaker.go:217 (\\\"cb.mutex.Lock()\\\"), gobreaker.go:277 (\\\"cb.mutex.Lock()\\\"), gobreaker.go:202 (\\\"return cb.name\\\"), gobreaker.go:208 (\\\"defer cb.mutex.Unlock()\\\"), gobreaker.go:218 (\\\"defer cb.mutex.Unlock()\\\"), gobreaker.go:278 (\\\"defer cb.mutex.Unlock()\\\"), gobreaker.go:294 (\\\"cb.mutex.Lock()\\\"), gobreaker.go:295 (\\\"defer cb.mutex.Unlock()\\\"). Additional interpretation (inferred where it extends the probe). Exclusivity is inferred from Go sync.Mutex and the actual lock/defer sites for State, admission and completion. A goroutine independent of the current callback may proceed after the lock is released. Waiting inside the callback for a same-breaker operation requiring the mutex can block indefinitely.\","
+        }
+      ],
+      "test_evidence": []
+    },
+    {
+      "id": "B05",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityWrapperReplacement",
+      "rationale": "The final report explicitly preserves the condition, order and observable consequence; linked probe assertions were reviewed.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/final.json",
+          "sha256": "c2f23be11abc828901f80f6d8ef1db9c2d6039cc18ed39d9ced26a62edb72ad4",
+          "line": 12,
+          "quote": "      \"outcome\": \"observed-in-code: The outcome goes to B, which has zero admissions. A retains the admission with no outcome. A closed failure in B calls B's ReadyToTrip with B's counts. Source: gobreaker.go:266 (\\\"generation, err := tscb.cb.beforeRequest()\\\"), gobreaker.go:272 (\\\"tscb.cb.afterRequest(generation, success)\\\"), gobreaker.go:177 (\\\"cb.toNewGeneration(time.Now())\\\"), gobreaker.go:142 (\\\"cb := new(CircuitBreaker)\\\"), gobreaker.go:299 (\\\"if generation != before {\\\"), gobreaker.go:60 (\\\"c.TotalSuccesses++\\\"), gobreaker.go:66 (\\\"c.TotalFailures++\\\"), gobreaker.go:289 (\\\"cb.counts.onRequest()\\\"), gobreaker.go:326 (\\\"if cb.readyToTrip(cb.counts) {\\\"). observed-in-tests: analysis/_probe/identity_test.go:98 (\\\"identityCounts(t, b.Counts(), want)\\\"). Executing a subsequent local B request increments B.Requests independently.\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/_probe/identity_test.go",
+          "sha256": "05b1618df82d2c57d6a86bb3d0cc6da525da6402a6a2b3e1a333db0d9c36ec7c",
+          "line": 79,
+          "quote": "func TestIdentityWrapperReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/gobreaker-candidate-final.jsonl",
+          "sha256": "a38d07a4a7866bb8cc65ca8295c0d302052c1d08734f1dee1fe306f75d2bdb17",
+          "line": 13,
+          "quote": "{\"Time\":\"2026-11-14T22:54:39.074233+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestIdentityWrapperReplacement\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B06",
+      "found": false,
+      "correct": false,
+      "tested": "none",
+      "test_name": null,
+      "rationale": "F12 admits two callbacks but reports FAILURE first, opening a new generation. It does not trace first SUCCESS, retained Requests=2, third refusal and second success closing. Generic cumulative-count claims C8/C9 do not supply that concrete sequence. This is a missing benchmark case, not a falsely reported runtime outcome.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/final.json",
+          "sha256": "c2f23be11abc828901f80f6d8ef1db9c2d6039cc18ed39d9ced26a62edb72ad4",
+          "line": 203,
+          "quote": "      \"outcome\": \"observed-in-code: The first opens and clears counts. Both possible second results are skipped, with no extra notification or accounting. Source: gobreaker.go:330 (\\\"cb.setState(StateOpen, now)\\\"), gobreaker.go:365 (\\\"cb.counts.clear()\\\"), gobreaker.go:299 (\\\"if generation != before {\\\"), gobreaker.go:294 (\\\"cb.mutex.Lock()\\\"), gobreaker.go:295 (\\\"defer cb.mutex.Unlock()\\\"). observed-in-tests: analysis/_probe/identity_test.go:321 (\\\"if !reflect.DeepEqual(events, []gb.State{gb.StateOpen, gb.StateHalfOpen, gb.StateOpen}) {\\\").\","
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/review.md",
+          "sha256": "779014150a93e2333f98658eefee54ed2febd2ff2acaa45984a8b1f74c1109ab",
+          "line": 14,
+          "quote": "- **C8** (supported). observed-in-code gobreaker.go:285 (\"} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {\"). Retained. Admission uses cumulative Requests for the half-open generation. F11 traces abandoned and late-report schedules."
+        }
+      ],
+      "test_evidence": []
+    },
+    {
+      "id": "B07",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityRequestAndClassifierPanic",
+      "rationale": "The final report explicitly preserves the condition, order and observable consequence; linked probe assertions were reviewed.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/final.json",
+          "sha256": "c2f23be11abc828901f80f6d8ef1db9c2d6039cc18ed39d9ced26a62edb72ad4",
+          "line": 270,
+          "quote": "      \"outcome\": \"observed-in-code: With an unchanged generation the defer counts a failure and re-panics the value if reporting returns. With a changed generation it still re-panics but skips failure accounting. Request panic bypasses IsSuccessful. Source: gobreaker.go:234 (\\\"defer func() {\\\"), gobreaker.go:235 (\\\"e := recover()\\\"), gobreaker.go:237 (\\\"cb.afterRequest(generation, false)\\\"), gobreaker.go:238 (\\\"panic(e)\\\"), gobreaker.go:299 (\\\"if generation != before {\\\"), gobreaker.go:236 (\\\"if e != nil {\\\"), gobreaker.go:242 (\\\"result, err := req()\\\"), gobreaker.go:243 (\\\"cb.afterRequest(generation, cb.isSuccessful(err))\\\"). observed-in-tests: analysis/_probe/identity_test.go:507 (\\\"identityCounts(t, b.Counts(), want)\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/_probe/identity_test.go",
+          "sha256": "05b1618df82d2c57d6a86bb3d0cc6da525da6402a6a2b3e1a333db0d9c36ec7c",
+          "line": 467,
+          "quote": "func TestIdentityRequestAndClassifierPanic(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/gobreaker-candidate-final.jsonl",
+          "sha256": "a38d07a4a7866bb8cc65ca8295c0d302052c1d08734f1dee1fe306f75d2bdb17",
+          "line": 169,
+          "quote": "{\"Time\":\"2026-11-14T22:54:41.500154+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestIdentityRequestAndClassifierPanic\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B08",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityClassifierOrdering",
+      "rationale": "The final report explicitly preserves the condition, order and observable consequence; linked probe assertions were reviewed.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/final.json",
+          "sha256": "c2f23be11abc828901f80f6d8ef1db9c2d6039cc18ed39d9ced26a62edb72ad4",
+          "line": 254,
+          "quote": "      \"outcome\": \"observed-in-code: Classification still runs (or finishes) after the transition. Both results are stale. The original payload and error are returned. A classifier can use Counts while running because it runs before the accounting lock. Source: gobreaker.go:243 (\\\"cb.afterRequest(generation, cb.isSuccessful(err))\\\"), gobreaker.go:294 (\\\"cb.mutex.Lock()\\\"), gobreaker.go:299 (\\\"if generation != before {\\\"), gobreaker.go:244 (\\\"return result, err\\\"), gobreaker.go:217 (\\\"cb.mutex.Lock()\\\"), gobreaker.go:281 (\\\"state, generation := cb.currentState(now)\\\"), gobreaker.go:325 (\\\"cb.counts.onFailure()\\\"), gobreaker.go:327 (\\\"cb.setState(StateOpen, now)\\\"). observed-in-tests: analysis/_probe/identity_test.go:461 (\\\"identityState(t, <-classifiedAt, want)\\\"). The classifier can call Counts and State in the tested order. Only the completion's own afterRequest acquisition follows classification. The classifier can explicitly take a breaker lock via public methods.\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/gobreaker-candidate/analysis/_probe/identity_test.go",
+          "sha256": "05b1618df82d2c57d6a86bb3d0cc6da525da6402a6a2b3e1a333db0d9c36ec7c",
+          "line": 416,
+          "quote": "func TestIdentityClassifierOrdering(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/gobreaker-candidate-final.jsonl",
+          "sha256": "a38d07a4a7866bb8cc65ca8295c0d302052c1d08734f1dee1fe306f75d2bdb17",
+          "line": 165,
+          "quote": "{\"Time\":\"2026-11-14T22:54:41.49995+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestIdentityClassifierOrdering\",\"Elapsed\":0}"
+        }
+      ]
+    }
+  ],
+  "refuted_claims": []
+}

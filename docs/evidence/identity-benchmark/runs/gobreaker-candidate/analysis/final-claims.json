@@ -1,0 +1,1302 @@
+[
+  {
+    "id": "F01.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Allow obtains the admission generation from the breaker currently in the wrapper.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 266,
+      "fragment": "generation, err := tscb.cb.beforeRequest()"
+    },
+    "line": 266,
+    "fragment": "generation, err := tscb.cb.beforeRequest()"
+  },
+  {
+    "id": "F01.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Allow's completion reads the breaker pointer from the captured wrapper at invocation.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 272,
+      "fragment": "tscb.cb.afterRequest(generation, success)"
+    },
+    "line": 272,
+    "fragment": "tscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "F01.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Construction starts a new generation on each created breaker.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 177,
+      "fragment": "cb.toNewGeneration(time.Now())"
+    },
+    "line": 177,
+    "fragment": "cb.toNewGeneration(time.Now())"
+  },
+  {
+    "id": "F01.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "NewCircuitBreaker allocates a distinct breaker.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 142,
+      "fragment": "cb := new(CircuitBreaker)"
+    },
+    "line": 142,
+    "fragment": "cb := new(CircuitBreaker)"
+  },
+  {
+    "id": "F01.05",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The completion guard compares the numeric generations without testing original breaker identity.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {"
+    },
+    "line": 299,
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "F01.06",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Success accounting increments TotalSuccesses.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 60,
+      "fragment": "c.TotalSuccesses++"
+    },
+    "line": 60,
+    "fragment": "c.TotalSuccesses++"
+  },
+  {
+    "id": "F01.07",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Failure accounting increments TotalFailures.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 66,
+      "fragment": "c.TotalFailures++"
+    },
+    "line": 66,
+    "fragment": "c.TotalFailures++"
+  },
+  {
+    "id": "F01.08",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Admission, rather than deferred completion, increments Requests.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 289,
+      "fragment": "cb.counts.onRequest()"
+    },
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+  },
+  {
+    "id": "F01.09",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Closed failure calls the receiving breaker's ReadyToTrip with its current counts.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 326,
+      "fragment": "if cb.readyToTrip(cb.counts) {"
+    },
+    "line": 326,
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+  },
+  {
+    "id": "F02.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A TwoStep wrapper contains a breaker pointer, so shallow copying a wrapper copies that pointer.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 137,
+      "fragment": "cb *CircuitBreaker"
+    },
+    "line": 137,
+    "fragment": "cb *CircuitBreaker"
+  },
+  {
+    "id": "F02.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The closure references the Allow receiver, so rebinding the caller's pointer variable does not change its captured receiver.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 272,
+      "fragment": "tscb.cb.afterRequest(generation, success)"
+    },
+    "line": 272,
+    "fragment": "tscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "F03.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Completion on a replacement with a differing current generation returns before outcome accounting.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {"
+    },
+    "line": 299,
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "F03.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A request retry while the target remains open returns ErrOpenState.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 284,
+      "fragment": "return generation, ErrOpenState"
+    },
+    "line": 284,
+    "fragment": "return generation, ErrOpenState"
+  },
+  {
+    "id": "F04.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Completion refreshes state before the mismatch check.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 298,
+      "fragment": "state, generation := cb.currentState(now)"
+    },
+    "line": 298,
+    "fragment": "state, generation := cb.currentState(now)"
+  },
+  {
+    "id": "F04.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The open expiry check can transition to half-open during deferred completion.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 342,
+      "fragment": "cb.setState(StateHalfOpen, now)"
+    },
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+  },
+  {
+    "id": "F04.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "That state transition invokes the replacement's notifier if configured.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 359,
+      "fragment": "cb.onStateChange(cb.name, prev, state)"
+    },
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+  },
+  {
+    "id": "F04.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A subsequent admitted retry increments the half-open request count.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 289,
+      "fragment": "cb.counts.onRequest()"
+    },
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+  },
+  {
+    "id": "F05.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Matching half-open success tests the consecutive success threshold.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 316,
+      "fragment": "if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+    },
+    "line": 316,
+    "fragment": "if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+  },
+  {
+    "id": "F05.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Threshold success in half-open closes the receiving breaker.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 317,
+      "fragment": "cb.setState(StateClosed, now)"
+    },
+    "line": 317,
+    "fragment": "cb.setState(StateClosed, now)"
+  },
+  {
+    "id": "F05.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A generation change clears all counters.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 365,
+      "fragment": "cb.counts.clear()"
+    },
+    "line": 365,
+    "fragment": "cb.counts.clear()"
+  },
+  {
+    "id": "F05.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The original half-open breaker rejects further admissions at its charged request limit.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 285,
+      "fragment": "} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+    },
+    "line": 285,
+    "fragment": "} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+  },
+  {
+    "id": "F06.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A matching half-open failure opens the receiving breaker.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 330,
+      "fragment": "cb.setState(StateOpen, now)"
+    },
+    "line": 330,
+    "fragment": "cb.setState(StateOpen, now)"
+  },
+  {
+    "id": "F06.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Reopening installs a new open expiry.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 376,
+      "fragment": "cb.expiry = now.Add(cb.timeout)"
+    },
+    "line": 376,
+    "fragment": "cb.expiry = now.Add(cb.timeout)"
+  },
+  {
+    "id": "F06.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A retry before the new open expiry returns ErrOpenState.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 284,
+      "fragment": "return generation, ErrOpenState"
+    },
+    "line": 284,
+    "fragment": "return generation, ErrOpenState"
+  },
+  {
+    "id": "F07.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The zero-value TwoStep wrapper has a nil breaker pointer.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 137,
+      "fragment": "cb *CircuitBreaker"
+    },
+    "line": 137,
+    "fragment": "cb *CircuitBreaker"
+  },
+  {
+    "id": "F07.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Completion attempts to access the nil underlying receiver's mutex after a wrapper is replaced with the zero value.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 294,
+      "fragment": "cb.mutex.Lock()"
+    },
+    "line": 294,
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "F08.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Execute has a pointer receiver, so rebinding a caller variable does not retarget the active Execute.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 228,
+      "fragment": "func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{}, error) {"
+    },
+    "line": 228,
+    "fragment": "func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{}, error) {"
+  },
+  {
+    "id": "F08.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Execute reads the classifier field from its receiver after the request returns.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 243,
+      "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+    },
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+  },
+  {
+    "id": "F08.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Closed failure invokes the ReadyToTrip field on the active receiver, including after receiver storage is overwritten.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 326,
+      "fragment": "if cb.readyToTrip(cb.counts) {"
+    },
+    "line": 326,
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+  },
+  {
+    "id": "F08.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Counts returns the counters stored in the receiver as a value.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 220,
+      "fragment": "return cb.counts"
+    },
+    "line": 220,
+    "fragment": "return cb.counts"
+  },
+  {
+    "id": "F08.05",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A normal Execute returns the request's result and error unchanged.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 244,
+      "fragment": "return result, err"
+    },
+    "line": 244,
+    "fragment": "return result, err"
+  },
+  {
+    "id": "F09.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The returned completion closure has no per-call consumed flag.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 271,
+      "fragment": "return func(success bool) {"
+    },
+    "line": 271,
+    "fragment": "return func(success bool) {"
+  },
+  {
+    "id": "F09.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Requests increments at admission.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 289,
+      "fragment": "cb.counts.onRequest()"
+    },
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+  },
+  {
+    "id": "F09.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Failure accounting resets consecutive successes.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 68,
+      "fragment": "c.ConsecutiveSuccesses = 0"
+    },
+    "line": 68,
+    "fragment": "c.ConsecutiveSuccesses = 0"
+  },
+  {
+    "id": "F10.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Each matching half-open success increments the success counters.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 315,
+      "fragment": "cb.counts.onSuccess()"
+    },
+    "line": 315,
+    "fragment": "cb.counts.onSuccess()"
+  },
+  {
+    "id": "F10.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The half-open threshold uses consecutive successes with no distinct-admission check.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 316,
+      "fragment": "if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+    },
+    "line": 316,
+    "fragment": "if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+  },
+  {
+    "id": "F10.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A state change enters a new generation.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 356,
+      "fragment": "cb.toNewGeneration(now)"
+    },
+    "line": 356,
+    "fragment": "cb.toNewGeneration(now)"
+  },
+  {
+    "id": "F10.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Following closure of the breaker, another invocation using the earlier generation is stale.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {"
+    },
+    "line": 299,
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "F11.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Half-open admission rejects when the request count reaches its limit.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 285,
+      "fragment": "} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+    },
+    "line": 285,
+    "fragment": "} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+  },
+  {
+    "id": "F11.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Half-open generation installs a zero expiry.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 378,
+      "fragment": "cb.expiry = zero"
+    },
+    "line": 378,
+    "fragment": "cb.expiry = zero"
+  },
+  {
+    "id": "F11.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A matching success closes a default one-slot half-open breaker.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 317,
+      "fragment": "cb.setState(StateClosed, now)"
+    },
+    "line": 317,
+    "fragment": "cb.setState(StateClosed, now)"
+  },
+  {
+    "id": "F11.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A matching half-open failure reopens the breaker.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 330,
+      "fragment": "cb.setState(StateOpen, now)"
+    },
+    "line": 330,
+    "fragment": "cb.setState(StateOpen, now)"
+  },
+  {
+    "id": "F12.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A first matching half-open failure opens the breaker.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 330,
+      "fragment": "cb.setState(StateOpen, now)"
+    },
+    "line": 330,
+    "fragment": "cb.setState(StateOpen, now)"
+  },
+  {
+    "id": "F12.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The transition clears the counts.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 365,
+      "fragment": "cb.counts.clear()"
+    },
+    "line": 365,
+    "fragment": "cb.counts.clear()"
+  },
+  {
+    "id": "F12.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Either old result from the earlier generation exits before accounting.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {"
+    },
+    "line": 299,
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "F13.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Closed expiry is recognized when the saved expiry precedes a state-aware operation's time.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 337,
+      "fragment": "if !cb.expiry.IsZero() && cb.expiry.Before(now) {"
+    },
+    "line": 337,
+    "fragment": "if !cb.expiry.IsZero() && cb.expiry.Before(now) {"
+  },
+  {
+    "id": "F13.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Closed interval refresh starts a new generation without setState.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 338,
+      "fragment": "cb.toNewGeneration(now)"
+    },
+    "line": 338,
+    "fragment": "cb.toNewGeneration(now)"
+  },
+  {
+    "id": "F13.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Counts reads stored counts without refreshing expiry.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 220,
+      "fragment": "return cb.counts"
+    },
+    "line": 220,
+    "fragment": "return cb.counts"
+  },
+  {
+    "id": "F13.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "An afterRequest call can itself perform the refresh before attempting to report its outcome.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 298,
+      "fragment": "state, generation := cb.currentState(now)"
+    },
+    "line": 298,
+    "fragment": "state, generation := cb.currentState(now)"
+  },
+  {
+    "id": "F13.05",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "An accepted closed failure calls the trip predicate after recording the failure.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 326,
+      "fragment": "if cb.readyToTrip(cb.counts) {"
+    },
+    "line": 326,
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+  },
+  {
+    "id": "F14.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Execute waits synchronously for the request function to return.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 242,
+      "fragment": "result, err := req()"
+    },
+    "line": 242,
+    "fragment": "result, err := req()"
+  },
+  {
+    "id": "F14.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The admitted request was incremented before the request ran.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 289,
+      "fragment": "cb.counts.onRequest()"
+    },
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+  },
+  {
+    "id": "F14.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "When the generation changed, either later outcome is skipped.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {"
+    },
+    "line": 299,
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "F14.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Execute still returns the original request result and error after a skipped report.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 244,
+      "fragment": "return result, err"
+    },
+    "line": 244,
+    "fragment": "return result, err"
+  },
+  {
+    "id": "F15.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Execute evaluates IsSuccessful before entering afterRequest and its mutex.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 243,
+      "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+    },
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+  },
+  {
+    "id": "F15.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The accounting lock is acquired only inside afterRequest.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 294,
+      "fragment": "cb.mutex.Lock()"
+    },
+    "line": 294,
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "F15.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "An intervening generation change prevents either classification from being counted.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {"
+    },
+    "line": 299,
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "F15.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Normal Execute still returns the request's value and error.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 244,
+      "fragment": "return result, err"
+    },
+    "line": 244,
+    "fragment": "return result, err"
+  },
+  {
+    "id": "F16.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Execute's defer is installed before invoking req and remains active during classification.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 234,
+      "fragment": "defer func() {"
+    },
+    "line": 234,
+    "fragment": "defer func() {"
+  },
+  {
+    "id": "F16.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The deferred handler uses recover.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 235,
+      "fragment": "e := recover()"
+    },
+    "line": 235,
+    "fragment": "e := recover()"
+  },
+  {
+    "id": "F16.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The handler submits a failure for a recovered non-nil panic.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 237,
+      "fragment": "cb.afterRequest(generation, false)"
+    },
+    "line": 237,
+    "fragment": "cb.afterRequest(generation, false)"
+  },
+  {
+    "id": "F16.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "When failure reporting returns, Execute re-panics the recovered value.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 238,
+      "fragment": "panic(e)"
+    },
+    "line": 238,
+    "fragment": "panic(e)"
+  },
+  {
+    "id": "F16.05",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After a generation change failure recording is skipped.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {"
+    },
+    "line": 299,
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "F17.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Closed failure increments the counts before ReadyToTrip runs.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 325,
+      "fragment": "cb.counts.onFailure()"
+    },
+    "line": 325,
+    "fragment": "cb.counts.onFailure()"
+  },
+  {
+    "id": "F17.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Panic unwinding from the trip predicate releases the reporting mutex via defer.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 295,
+      "fragment": "defer cb.mutex.Unlock()"
+    },
+    "line": 295,
+    "fragment": "defer cb.mutex.Unlock()"
+  },
+  {
+    "id": "F17.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A panic in ordinary Execute accounting causes its recovery handler to make a further failure-report attempt.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 237,
+      "fragment": "cb.afterRequest(generation, false)"
+    },
+    "line": 237,
+    "fragment": "cb.afterRequest(generation, false)"
+  },
+  {
+    "id": "F17.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "TwoStep forwards the result directly with no recovery retry.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 272,
+      "fragment": "tscb.cb.afterRequest(generation, success)"
+    },
+    "line": 272,
+    "fragment": "tscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "F17.05",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A matching recovery report while still closed increments the failure counters again.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 325,
+      "fragment": "cb.counts.onFailure()"
+    },
+    "line": 325,
+    "fragment": "cb.counts.onFailure()"
+  },
+  {
+    "id": "F18.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "If the recovery report itself panics, it does not return to the explicit re-panic statement.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 237,
+      "fragment": "cb.afterRequest(generation, false)"
+    },
+    "line": 237,
+    "fragment": "cb.afterRequest(generation, false)"
+  },
+  {
+    "id": "F18.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Both matching closed failure attempts increment failure counts before the predicate panics.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 325,
+      "fragment": "cb.counts.onFailure()"
+    },
+    "line": 325,
+    "fragment": "cb.counts.onFailure()"
+  },
+  {
+    "id": "F19.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The new state is assigned before notification.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 354,
+      "fragment": "cb.state = state"
+    },
+    "line": 354,
+    "fragment": "cb.state = state"
+  },
+  {
+    "id": "F19.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The state transition updates generation before notification.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 356,
+      "fragment": "cb.toNewGeneration(now)"
+    },
+    "line": 356,
+    "fragment": "cb.toNewGeneration(now)"
+  },
+  {
+    "id": "F19.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Generation update clears the counts.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 365,
+      "fragment": "cb.counts.clear()"
+    },
+    "line": 365,
+    "fragment": "cb.counts.clear()"
+  },
+  {
+    "id": "F19.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The reporting lock is released on notification panic unwind.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 295,
+      "fragment": "defer cb.mutex.Unlock()"
+    },
+    "line": 295,
+    "fragment": "defer cb.mutex.Unlock()"
+  },
+  {
+    "id": "F19.05",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Execute tries a failure report after a completion notification panic.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 237,
+      "fragment": "cb.afterRequest(generation, false)"
+    },
+    "line": 237,
+    "fragment": "cb.afterRequest(generation, false)"
+  },
+  {
+    "id": "F19.06",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The retry skips the original outcome when the original generation has been replaced.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {"
+    },
+    "line": 299,
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "F19.07",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "TwoStep does not wrap completion with a recover handler.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 272,
+      "fragment": "tscb.cb.afterRequest(generation, success)"
+    },
+    "line": 272,
+    "fragment": "tscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "F20.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Open timeout handling selects a half-open transition.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 342,
+      "fragment": "cb.setState(StateHalfOpen, now)"
+    },
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+  },
+  {
+    "id": "F20.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A panic from expiry notification prevents admission from reaching the request increment.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 289,
+      "fragment": "cb.counts.onRequest()"
+    },
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+  },
+  {
+    "id": "F20.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Execute performs admission before installing its recover defer.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 229,
+      "fragment": "generation, err := cb.beforeRequest()"
+    },
+    "line": 229,
+    "fragment": "generation, err := cb.beforeRequest()"
+  },
+  {
+    "id": "F20.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Allow performs admission before creating the returned closure.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 266,
+      "fragment": "generation, err := tscb.cb.beforeRequest()"
+    },
+    "line": 266,
+    "fragment": "generation, err := tscb.cb.beforeRequest()"
+  },
+  {
+    "id": "F20.05",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Notification runs synchronously inside the transition.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 359,
+      "fragment": "cb.onStateChange(cb.name, prev, state)"
+    },
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+  },
+  {
+    "id": "F20.06",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A later half-open call does not repeat the open-expiry transition.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 335,
+      "fragment": "switch cb.state {"
+    },
+    "line": 335,
+    "fragment": "switch cb.state {"
+  },
+  {
+    "id": "F21.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The stale callback invokes currentState before the generation check.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 298,
+      "fragment": "state, generation := cb.currentState(now)"
+    },
+    "line": 298,
+    "fragment": "state, generation := cb.currentState(now)"
+  },
+  {
+    "id": "F21.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The expiry path can enter half-open even when triggered by this stale callback.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 342,
+      "fragment": "cb.setState(StateHalfOpen, now)"
+    },
+    "line": 342,
+    "fragment": "cb.setState(StateHalfOpen, now)"
+  },
+  {
+    "id": "F21.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A notification panic can escape before the generation guard.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 359,
+      "fragment": "cb.onStateChange(cb.name, prev, state)"
+    },
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+  },
+  {
+    "id": "F21.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "On that transition counters clear prior to the notification.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 365,
+      "fragment": "cb.counts.clear()"
+    },
+    "line": 365,
+    "fragment": "cb.counts.clear()"
+  },
+  {
+    "id": "F21.05",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A following successful admission charges the previously unused slot.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 289,
+      "fragment": "cb.counts.onRequest()"
+    },
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+  },
+  {
+    "id": "F22.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The trip predicate is called from closed failure accounting under the afterRequest lock.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 326,
+      "fragment": "if cb.readyToTrip(cb.counts) {"
+    },
+    "line": 326,
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+  },
+  {
+    "id": "F22.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The notification is synchronous under the state-aware caller's lock.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 359,
+      "fragment": "cb.onStateChange(cb.name, prev, state)"
+    },
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+  },
+  {
+    "id": "F22.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Same-breaker State acquires the mutex.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 207,
+      "fragment": "cb.mutex.Lock()"
+    },
+    "line": 207,
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "F22.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Same-breaker Counts acquires the mutex.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 217,
+      "fragment": "cb.mutex.Lock()"
+    },
+    "line": 217,
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "F22.05",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Same-breaker admission acquires the mutex.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 277,
+      "fragment": "cb.mutex.Lock()"
+    },
+    "line": 277,
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "F22.06",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Name returns the name without taking the mutex.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 202,
+      "fragment": "return cb.name"
+    },
+    "line": 202,
+    "fragment": "return cb.name"
+  },
+  {
+    "id": "F23.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The constructor takes Settings by value.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 141,
+      "fragment": "func NewCircuitBreaker(st Settings) *CircuitBreaker {"
+    },
+    "line": 141,
+    "fragment": "func NewCircuitBreaker(st Settings) *CircuitBreaker {"
+  },
+  {
+    "id": "F23.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The constructor stores the OnStateChange function value.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 145,
+      "fragment": "cb.onStateChange = st.OnStateChange"
+    },
+    "line": 145,
+    "fragment": "cb.onStateChange = st.OnStateChange"
+  },
+  {
+    "id": "F23.03",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The constructor stores the supplied trip predicate function value.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 168,
+      "fragment": "cb.readyToTrip = st.ReadyToTrip"
+    },
+    "line": 168,
+    "fragment": "cb.readyToTrip = st.ReadyToTrip"
+  },
+  {
+    "id": "F23.04",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The constructor stores the supplied classification function value.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 174,
+      "fragment": "cb.isSuccessful = st.IsSuccessful"
+    },
+    "line": 174,
+    "fragment": "cb.isSuccessful = st.IsSuccessful"
+  },
+  {
+    "id": "F24.01",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The TwoStep callback passes its caller-supplied boolean directly into accounting.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 272,
+      "fragment": "tscb.cb.afterRequest(generation, success)"
+    },
+    "line": 272,
+    "fragment": "tscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "F24.02",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "Execute calls IsSuccessful to obtain the boolean passed into accounting.",
+    "citation": {
+      "file": "gobreaker.go",
+      "line": 243,
+      "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+    },
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+  }
+]

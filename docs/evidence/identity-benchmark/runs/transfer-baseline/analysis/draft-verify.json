@@ -1,0 +1,292 @@
+{
+  "source": "component.go",
+  "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 620,
+    "output_tokens": 1563,
+    "cost_microdollars": 2062,
+    "reservation_microdollars": 15394
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 3003,
+    "cost_microdollars": 127,
+    "reservation_microdollars": 526,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "A() increments the Target's Requests count at call time, before returning the closure.",
+      "line": 8,
+      "fragment": "p.Target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.89,
+          "contradicted": 0.0,
+          "unclear": 0.11
+        },
+        "confidence": 0.83
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "A() captures the Target's Epoch value at call time into a local variable.",
+      "line": 9,
+      "fragment": "epoch := p.Target.Epoch",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "The closure returned by A() increments Successes only if the Target's current Epoch equals the captured epoch.",
+      "line": 10,
+      "fragment": "if p.Target.Epoch == epoch { p.Target.Successes++ }",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "B() captures the Target pointer into a local variable and increments that target's Requests.",
+      "line": 13,
+      "fragment": "target := p.Target",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.73,
+          "contradicted": 0.01,
+          "unclear": 0.26
+        },
+        "confidence": 0.6
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "B() increments the captured target's Requests at call time.",
+      "line": 14,
+      "fragment": "target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.0,
+          "unclear": 0.07
+        },
+        "confidence": 0.89
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "The closure returned by B() unconditionally increments the captured target's Successes.",
+      "line": 15,
+      "fragment": "target.Successes++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "C() captures both the Target pointer and its Epoch at call time into local variables.",
+      "line": 18,
+      "fragment": "target, epoch := p.Target, p.Target.Epoch",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "C() increments the captured target's Requests at call time.",
+      "line": 19,
+      "fragment": "target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.92,
+          "contradicted": 0.01,
+          "unclear": 0.07
+        },
+        "confidence": 0.88
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "The closure returned by C() increments Successes only if p.Target still equals the captured target and the target's Epoch equals the captured epoch.",
+      "line": 20,
+      "fragment": "if p.Target == target && target.Epoch == epoch { target.Successes++ }",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "D() increments Requests on the entry currently mapped to key at call time.",
+      "line": 23,
+      "fragment": "r.Entries[key].Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.0,
+          "unclear": 0.04
+        },
+        "confidence": 0.94
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "The closure returned by D() looks up the key again at invocation time and increments Successes only if the looked-up entry is not nil.",
+      "line": 24,
+      "fragment": "if target := r.Entries[key]; target != nil { target.Successes++ }",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "E() has a value receiver, so it operates on a copy of the Port; it increments the Target's Requests at call time.",
+      "line": 27,
+      "fragment": "p.Target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.48,
+          "contradicted": 0.03,
+          "unclear": 0.49
+        },
+        "confidence": 0.24
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "The closure returned by E() unconditionally increments the copy's Target's Successes; the copy's Target field is fixed to the value captured in the receiver copy.",
+      "line": 28,
+      "fragment": "p.Target.Successes++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.73,
+          "contradicted": 0.02,
+          "unclear": 0.25
+        },
+        "confidence": 0.6
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "F() captures p.Target into a local variable and increments that target's Requests.",
+      "line": 31,
+      "fragment": "target := p.Target",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.72,
+          "contradicted": 0.02,
+          "unclear": 0.26
+        },
+        "confidence": 0.58
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "F() increments the captured target's Requests at call time.",
+      "line": 32,
+      "fragment": "target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.01,
+          "unclear": 0.12
+        },
+        "confidence": 0.8
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "The closure returned by F() unconditionally increments the captured target's Successes.",
+      "line": 33,
+      "fragment": "target.Successes++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92
+      }
+    }
+  },
+  "questions": [
+    "In A(), is the intended semantic for 'Successes' to count completions only within the same epoch as when the factory was invoked? Line 10 compares p.Target.Epoch but line 9 captures epoch; is there an intended behavior when p.Target itself changes between invocation and completion?",
+    "In C(), line 20 checks both pointer identity (p.Target == target) and epoch equality; line 9/A only checks epoch. Is this asymmetry intentional, and what is the intended behavior for A() when p.Target is reassigned to a different Account?",
+    "In D(), Requests is incremented on r.Entries[key] but if the key is absent or nil at call time, line 23 would be a nil dereference; is nil/absent handling intended and is it specified?",
+    "In D(), the closure re-reads r.Entries[key] at completion, so a map entry replaced between invocation and completion will record Successes on the new entry; is that intended, and how should the correspondence between Requests and Successes be accounted across replacement?",
+    "In E(), the value receiver copies Port, so the closure mutates p.Target.Successes on the captured Target pointer; if the original Port.Target is reassigned meanwhile, the closure still increments the old Target. Is that intended, or should E share the pointer/epoch semantics of A/C?",
+    "In B() and F(), the closures increment Successes unconditionally on the captured target with no epoch or identity check; is it intended that B and F count completions regardless of any later state changes (e.g., Target reassignment or Epoch bump)?",
+    "Lines 8, 14, 19, 23, 27, 32 increment Requests at factory invocation time, while Successes is incremented at completion; is the intended accounting pairing one invocation to one completion, and what should happen if the returned closure is never called (Requests incremented without Successes)?",
+    "Is there any ordering requirement between the increment of Requests (line 8/14/19/23/27/32) and any subsequent mutation of Epoch or Target such that a completion is attributed to invocation-time state? The sources do not state one.",
+    "If the returned closures are invoked concurrently or multiple times, is the intended behavior one Successes increment per call, or one per factory invocation? No source line constrains this.",
+    "Does any behavior ensure p.Target (line 8, 9, 10, 13, 18, 20, 27, 28, 31) is non-nil? No source line checks for nil Target, and the observable behavior under a nil Target is not specified.",
+    "Is the difference in epoch-checking between A (epoch only, line 10) and C (identity and epoch, line 20) a deliberate design distinction or an unintended inconsistency? The source provides no intent statement.",
+    "Are A/B/C/E declared on *Port vs value Port (line 7, 12, 17, 26) intended to have differing semantics, or should all factories share capture-at-invocation behavior? The source does not state intent."
+  ],
+  "review_required": true
+}

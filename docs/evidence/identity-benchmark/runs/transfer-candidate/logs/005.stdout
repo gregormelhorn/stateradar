@@ -1,0 +1,34 @@
+     1	package identityfixture
+     2	
+     3	type Account struct { Requests, Successes, Epoch int }
+     4	type Port struct { Target *Account }
+     5	type Registry struct { Entries map[string]*Account }
+     6	
+     7	func (p *Port) A() func() {
+     8	 p.Target.Requests++
+     9	 epoch := p.Target.Epoch
+    10	 return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }
+    11	}
+    12	func (p *Port) B() func() {
+    13	 target := p.Target
+    14	 target.Requests++
+    15	 return func() { target.Successes++ }
+    16	}
+    17	func (p *Port) C() func() {
+    18	 target, epoch := p.Target, p.Target.Epoch
+    19	 target.Requests++
+    20	 return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }
+    21	}
+    22	func (r *Registry) D(key string) func() {
+    23	 r.Entries[key].Requests++
+    24	 return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }
+    25	}
+    26	func (p Port) E() func() {
+    27	 p.Target.Requests++
+    28	 return func() { p.Target.Successes++ }
+    29	}
+    30	func F(p *Port) func() {
+    31	 target := p.Target
+    32	 target.Requests++
+    33	 return func() { target.Successes++ }
+    34	}

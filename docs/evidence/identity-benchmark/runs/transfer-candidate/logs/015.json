@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nd=json.load(open(\"analysis/draft-verify.json\"))\nprint(d.keys())\nfor i, c in enumerate(d[\"claims\"],1):\n print(i,c)\nfor i,q in enumerate(d[\"questions\"],1): print(i,q)"
+  ],
+  "exit_code": 0
+}

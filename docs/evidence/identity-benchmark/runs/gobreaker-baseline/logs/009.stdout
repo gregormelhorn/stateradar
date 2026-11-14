@@ -1,0 +1,80 @@
+	}
+
+	if success {
+		cb.onSuccess(state, now)
+	} else {
+		cb.onFailure(state, now)
+	}
+}
+
+func (cb *CircuitBreaker) onSuccess(state State, now time.Time) {
+	switch state {
+	case StateClosed:
+		cb.counts.onSuccess()
+	case StateHalfOpen:
+		cb.counts.onSuccess()
+		if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {
+			cb.setState(StateClosed, now)
+		}
+	}
+}
+
+func (cb *CircuitBreaker) onFailure(state State, now time.Time) {
+	switch state {
+	case StateClosed:
+		cb.counts.onFailure()
+		if cb.readyToTrip(cb.counts) {
+			cb.setState(StateOpen, now)
+		}
+	case StateHalfOpen:
+		cb.setState(StateOpen, now)
+	}
+}
+
+func (cb *CircuitBreaker) currentState(now time.Time) (State, uint64) {
+	switch cb.state {
+	case StateClosed:
+		if !cb.expiry.IsZero() && cb.expiry.Before(now) {
+			cb.toNewGeneration(now)
+		}
+	case StateOpen:
+		if cb.expiry.Before(now) {
+			cb.setState(StateHalfOpen, now)
+		}
+	}
+	return cb.state, cb.generation
+}
+
+func (cb *CircuitBreaker) setState(state State, now time.Time) {
+	if cb.state == state {
+		return
+	}
+
+	prev := cb.state
+	cb.state = state
+
+	cb.toNewGeneration(now)
+
+	if cb.onStateChange != nil {
+		cb.onStateChange(cb.name, prev, state)
+	}
+}
+
+func (cb *CircuitBreaker) toNewGeneration(now time.Time) {
+	cb.generation++
+	cb.counts.clear()
+
+	var zero time.Time
+	switch cb.state {
+	case StateClosed:
+		if cb.interval == 0 {
+			cb.expiry = zero
+		} else {
+			cb.expiry = now.Add(cb.interval)
+		}
+	case StateOpen:
+		cb.expiry = now.Add(cb.timeout)
+	default: // StateHalfOpen
+		cb.expiry = zero
+	}
+}

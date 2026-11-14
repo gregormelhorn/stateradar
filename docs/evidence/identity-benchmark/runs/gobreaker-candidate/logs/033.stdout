@@ -1,0 +1,100 @@
+F01.01 supported 266 generation, err := tscb.cb.beforeRequest()
+F01.02 supported 272 tscb.cb.afterRequest(generation, success)
+F01.03 supported 177 cb.toNewGeneration(time.Now())
+F01.04 supported 142 cb := new(CircuitBreaker)
+F01.05 supported 299 if generation != before {
+F01.06 supported 60 c.TotalSuccesses++
+F01.07 supported 66 c.TotalFailures++
+F01.08 supported 289 cb.counts.onRequest()
+F01.09 supported 326 if cb.readyToTrip(cb.counts) {
+F02.01 supported 137 cb *CircuitBreaker
+F02.02 unclear 272 tscb.cb.afterRequest(generation, success)
+F03.01 supported 299 if generation != before {
+F03.02 supported 284 return generation, ErrOpenState
+F04.01 supported 298 state, generation := cb.currentState(now)
+F04.02 supported 342 cb.setState(StateHalfOpen, now)
+F04.03 supported 359 cb.onStateChange(cb.name, prev, state)
+F04.04 supported 289 cb.counts.onRequest()
+F05.01 supported 316 if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {
+F05.02 supported 317 cb.setState(StateClosed, now)
+F05.03 supported 365 cb.counts.clear()
+F05.04 supported 285 } else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {
+F06.01 supported 330 cb.setState(StateOpen, now)
+F06.02 supported 376 cb.expiry = now.Add(cb.timeout)
+F06.03 supported 284 return generation, ErrOpenState
+F07.01 unclear 137 cb *CircuitBreaker
+F07.02 unclear 294 cb.mutex.Lock()
+F08.01 unclear 228 func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{}, error) {
+F08.02 unclear 243 cb.afterRequest(generation, cb.isSuccessful(err))
+F08.03 unclear 326 if cb.readyToTrip(cb.counts) {
+F08.04 supported 220 return cb.counts
+F08.05 supported 244 return result, err
+F09.01 unclear 271 return func(success bool) {
+F09.02 supported 289 cb.counts.onRequest()
+F09.03 supported 68 c.ConsecutiveSuccesses = 0
+F10.01 supported 315 cb.counts.onSuccess()
+F10.02 supported 316 if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {
+F10.03 supported 356 cb.toNewGeneration(now)
+F10.04 supported 299 if generation != before {
+F11.01 supported 285 } else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {
+F11.02 supported 378 cb.expiry = zero
+F11.03 supported 317 cb.setState(StateClosed, now)
+F11.04 supported 330 cb.setState(StateOpen, now)
+F12.01 supported 330 cb.setState(StateOpen, now)
+F12.02 supported 365 cb.counts.clear()
+F12.03 supported 299 if generation != before {
+F13.01 supported 337 if !cb.expiry.IsZero() && cb.expiry.Before(now) {
+F13.02 supported 338 cb.toNewGeneration(now)
+F13.03 supported 220 return cb.counts
+F13.04 supported 298 state, generation := cb.currentState(now)
+F13.05 supported 326 if cb.readyToTrip(cb.counts) {
+F14.01 supported 242 result, err := req()
+F14.02 supported 289 cb.counts.onRequest()
+F14.03 supported 299 if generation != before {
+F14.04 unclear 244 return result, err
+F15.01 supported 243 cb.afterRequest(generation, cb.isSuccessful(err))
+F15.02 contradicted 294 cb.mutex.Lock()
+F15.03 supported 299 if generation != before {
+F15.04 supported 244 return result, err
+F16.01 supported 234 defer func() {
+F16.02 supported 235 e := recover()
+F16.03 supported 237 cb.afterRequest(generation, false)
+F16.04 supported 238 panic(e)
+F16.05 supported 299 if generation != before {
+F17.01 supported 325 cb.counts.onFailure()
+F17.02 unclear 295 defer cb.mutex.Unlock()
+F17.03 supported 237 cb.afterRequest(generation, false)
+F17.04 unclear 272 tscb.cb.afterRequest(generation, success)
+F17.05 supported 325 cb.counts.onFailure()
+F18.01 unclear 237 cb.afterRequest(generation, false)
+F18.02 unclear 325 cb.counts.onFailure()
+F19.01 supported 354 cb.state = state
+F19.02 supported 356 cb.toNewGeneration(now)
+F19.03 supported 365 cb.counts.clear()
+F19.04 supported 295 defer cb.mutex.Unlock()
+F19.05 supported 237 cb.afterRequest(generation, false)
+F19.06 supported 299 if generation != before {
+F19.07 unclear 272 tscb.cb.afterRequest(generation, success)
+F20.01 supported 342 cb.setState(StateHalfOpen, now)
+F20.02 unclear 289 cb.counts.onRequest()
+F20.03 supported 229 generation, err := cb.beforeRequest()
+F20.04 supported 266 generation, err := tscb.cb.beforeRequest()
+F20.05 supported 359 cb.onStateChange(cb.name, prev, state)
+F20.06 unclear 335 switch cb.state {
+F21.01 supported 298 state, generation := cb.currentState(now)
+F21.02 unclear 342 cb.setState(StateHalfOpen, now)
+F21.03 unclear 359 cb.onStateChange(cb.name, prev, state)
+F21.04 supported 365 cb.counts.clear()
+F21.05 unclear 289 cb.counts.onRequest()
+F22.01 supported 326 if cb.readyToTrip(cb.counts) {
+F22.02 supported 359 cb.onStateChange(cb.name, prev, state)
+F22.03 unclear 207 cb.mutex.Lock()
+F22.04 supported 217 cb.mutex.Lock()
+F22.05 supported 277 cb.mutex.Lock()
+F22.06 supported 202 return cb.name
+F23.01 supported 141 func NewCircuitBreaker(st Settings) *CircuitBreaker {
+F23.02 supported 145 cb.onStateChange = st.OnStateChange
+F23.03 supported 168 cb.readyToTrip = st.ReadyToTrip
+F23.04 supported 174 cb.isSuccessful = st.IsSuccessful
+F24.01 supported 272 tscb.cb.afterRequest(generation, success)
+F24.02 supported 243 cb.afterRequest(generation, cb.isSuccessful(err))

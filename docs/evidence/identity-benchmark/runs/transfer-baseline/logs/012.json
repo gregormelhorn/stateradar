@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json; d=json.load(open('analysis/draft-verify.json')); print([(k,type(v).__name__) for k,v in d.items()]); print(json.dumps(d,ensure_ascii=False)[:22000])"
+  ],
+  "exit_code": 0
+}

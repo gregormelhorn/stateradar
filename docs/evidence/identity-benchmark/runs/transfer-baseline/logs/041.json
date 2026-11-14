@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nfrom hashlib import sha256\nimport json\np=Path('analysis')\nfiles=sorted(q for q in p.rglob('*') if q.is_file())\nfor q in files: print(q,q.stat().st_size)\nassert p.joinpath('initial.json').stat().st_mtime_ns < p.joinpath('probe-attempt-01.stdout.jsonl').stat().st_mtime_ns\nsource=sha256(Path('component.go').read_bytes()).hexdigest()\nfor name in ('draft-verify.json','jev-results.json'): assert json.loads(p.joinpath(name).read_text())['source_sha256']==source\nprint('Initial snapshot predated first probe log; both model batches refer to the current source hash.')"
+  ],
+  "exit_code": 0
+}

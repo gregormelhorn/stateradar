@@ -1,0 +1,8 @@
+{
+  "A": {"steps": "a,b distinct, epoch=0; p.Target=a; done=p.A(); p.Target=b; done()", "a": [1,0], "b": [0,1], "redirected": true},
+  "B": {"steps": "a,b distinct; p.Target=a; done=p.B(); p.Target=b; done()", "a": [1,1], "b": [0,0], "redirected": false},
+  "C": {"steps": "a,b distinct, epoch=0; p.Target=a; done=p.C(); p.Target=b; done()", "a": [1,0], "b": [0,0], "redirected": false},
+  "D": {"steps": "r.Entries[k]=a; done=r.D(k); r.Entries[k]=b; done()", "a": [1,0], "b": [0,1], "redirected": true},
+  "E": {"steps": "a,b distinct; p.Target=a; done=p.E(); p.Target=b; done()", "a": [1,1], "b": [0,0], "redirected": false},
+  "F": {"steps": "p.Target=a; done=F(p); p=&Port{b}; done()", "a": [1,1], "b": [0,0], "redirected": false}
+}

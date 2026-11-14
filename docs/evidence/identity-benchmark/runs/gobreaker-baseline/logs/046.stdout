@@ -1,0 +1,27 @@
+test anchors:
+1 73 identityCounts(t, cb, Counts{Requests: 1, TotalSuccesses: 2, TotalFailures: 2, ConsecutiveFailures: 2})
+2 90 identityCounts(t, cb, Counts{})
+3 105 identityCounts(t, cb, Counts{Requests: 1})
+4 112 identityCounts(t, cb, Counts{})
+5 116 identityRejected(t, cb, ErrOpenState)
+6 131 identityRejected(t, cb, ErrTooManyRequests)
+7 176 identityCounts(t, cb, Counts{})
+8 174 }
+9 202 identityCounts(t, cb, Counts{})
+10 260 t.Fatal(result, classified)
+11 329 identityCounts(t, cb, Counts{})
+12 331 if calls != 1 || (classifier && classified != 1) || (!classifier && classified != 0) {
+13 354 identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 2, ConsecutiveFailures: 2})
+14 390 identityCounts(t, cb, Counts{Requests: 1, TotalFailures: want, ConsecutiveFailures: want})
+15 415 identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 2, ConsecutiveFailures: 2})
+16 439 identityCounts(t, cb, Counts{})
+17 472 if len(notifications) != 2 || notifications[0] != StateOpen || notifications[1] != StateHalfOpen {
+18 502 if v != 17 || e != nil || calls != 1 || class != 2 {
+19 540 identityCounts(t, cb, Counts{})
+21 580 identityCounts(t, cb, Counts{Requests: 1})
+22 605 identityCounts(t, target, Counts{})
+23 632 identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1})
+24 655 identityCounts(t, cb, Counts{})
+25 705 if len(transitions) != 3 || transitions[2] != want {
+26 773 identityCounts(t, cb, Counts{Requests: 1})
+27 797 if got := <-delivered; got != reply {

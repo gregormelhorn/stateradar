@@ -1,0 +1,19 @@
+			oldValue := *cb
+			old := identityDone(t, cb)
+			target := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: identityTrip, Timeout: time.Hour})
+			if order == "different" {
+				identityDone(t, target)(false)
+			}
+			*cb = *target
+			old(true)
+			if order == "equal" {
+				identityCounts(t, target, Counts{TotalSuccesses: 1, ConsecutiveSuccesses: 1})
+			} else {
+				identityState(t, target, StateOpen)
+				identityCounts(t, target, Counts{})
+			}
+			identityCounts(t, &oldValue, Counts{Requests: 1})
+		})
+	}
+}
+

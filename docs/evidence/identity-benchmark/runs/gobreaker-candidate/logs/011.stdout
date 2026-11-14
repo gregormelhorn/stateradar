@@ -1,0 +1,42 @@
+('C1', {'kind': 'claim', 'statement': 'CircuitBreaker guards its mutable state with a sync.Mutex.', 'line': 126, 'fragment': 'mutex      sync.Mutex', 'citation_check': 'ok', 'jev': {'choice': 'supported', 'probabilities': {'supported': 0.78, 'contradicted': 0.0, 'unclear': 0.22}, 'confidence': 0.67}})
+Q 1 When a deferred callback (Allow's done or Execute's afterRequest) runs after a generation change, the outcome is silently dropped by afterRequest line 299; is this intended deferred-completion accounting behavior or a gap?
+Q 2 Counts doc says CircuitBreaker clears Counts on state change or at closed intervals, but beforeRequest increments counts.Requests (line 289) even in half-open before generation validity is re-checked; is that intended?
+Q 3 Execute's panic path calls afterRequest(generation, false) before re-panicking (line 237-238); should a panic count as a failure even if the request never returned an error, and is that resolved intent?
+Q 4 TwoStepCircuitBreaker.Allow returns a done callback the caller may invoke later or never; there is no source-specified requirement that done be called exactly once, nor any error returned for a late callback affected by generation mismatch — is that unresolved?
+Q 5 onStateChange is invoked inside setState while the mutex is held (line 359); source does not specify whether the callback may safely call back into the breaker (e.g., State or Counts) — is reentrancy supported or unspecified?
+Q 6 currentState in closed state may call toNewGeneration (line 338) without changing state, clearing counts; does that mean interval expiry silently drops in-flight deferred outcomes via generation mismatch, and is that intended?
+Q 7 In open state, currentState transitions to half-open (line 342) and toNewGeneration clears counts and leaves expiry zero; source does not specify whether there is a cooldown or window limiting half-open attempts beyond maxRequests — is that a gap?
+Q 8 defaultReadyToTrip uses ConsecutiveFailures > 5 (line 193) while docs say 'more than 5' (line 98); consistent, but the ordering between counts.onFailure and readyToTrip invocation when multiple concurrent failures resolve is not specified beyond generation check — unresolved?
+Q 9 beforeRequest returns the captured generation even on ErrOpenState/ErrTooManyRequests (lines 284, 286); since Execute ignores generation on the error path (line 230-231), source does not state whether returned generation on rejection has any meaning — unspecified?
+Q 10 Settings.MaxRequests=0 is normalized to 1 (lines 147-148), and half-open rejection compares counts.Requests >= maxRequests (line 285); after a half-open success closes the breaker then reopens, source does not specify how many half-open probes occur across the open->half-open transition — unresolved?
+C1 CircuitBreaker guards its mutable state with a sync.Mutex. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C2 Execute obtains a generation and error from beforeRequest before running the request. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C3 If beforeRequest returns an error, Execute returns nil and that error immediately without running the request. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C4 Execute defers a recover handler around the request. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C5 On panic Execute calls afterRequest with success false before re-panicking. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C6 After a normal request, Execute records the outcome via afterRequest using isSuccessful(err). None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C7 beforeRequest rejects requests in StateOpen with ErrOpenState. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C8 beforeRequest rejects half-open requests when counts.Requests is at or above maxRequests with ErrTooManyRequests. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C9 Accepted requests increment counts.Requests in beforeRequest. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C10 afterRequest returns without accounting if the generation differs from the one captured before the request. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C11 afterRequest recomputes the current state via currentState before accounting. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C12 In closed state, a success increments totals and resets consecutive failures via counts.onSuccess. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C13 In half-open state, a success closes the breaker when consecutive successes reach maxRequests. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C14 In closed state, a failure calls readyToTrip and opens the breaker if it returns true. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C15 In half-open state, any failure transitions the breaker to open. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C16 In closed state, currentState starts a new generation when expiry is set and has passed. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C17 In open state, currentState transitions to half-open when expiry has passed. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C18 setState is a no-op if the requested state equals the current state. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C19 setState moves to a new generation before invoking onStateChange. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C20 setState invokes onStateChange only if a callback is set, passing name, previous and new state. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C21 toNewGeneration increments the generation and clears counts. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C22 In closed state with interval zero, toNewGeneration leaves expiry at the zero time. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C23 In open state, toNewGeneration sets expiry to now plus timeout. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C24 In half-open state, toNewGeneration leaves expiry at the zero time. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C25 TwoStepCircuitBreaker.Allow returns an error and no callback when beforeRequest fails. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C26 The Allow callback reports the outcome via afterRequest with the captured generation. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C27 Settings docs state ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C28 Execute calls beforeRequest, then on a normal path runs the request and then calls afterRequest. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C29 On panic, Execute calls afterRequest false and then re-panics with the same value. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C30 afterRequest takes the mutex, recomputes state/generation, and returns early when generations differ. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])
+C31 beforeRequest takes the mutex and computes the current state/generation via currentState before checks. None None dict_keys(['kind', 'statement', 'line', 'fragment', 'citation_check', 'jev'])

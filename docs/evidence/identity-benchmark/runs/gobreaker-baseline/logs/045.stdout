@@ -1,0 +1,91 @@
+21:func identityRejected(t *testing.T, cb *TwoStepCircuitBreaker, want error) {
+43:func identityPanic(t *testing.T, fn func(), want interface{}) {
+67:	identityCounts(t, cb, Counts{Requests: 1})
+68:	done(true)
+69:	done(true)
+70:	identityCounts(t, cb, Counts{Requests: 1, TotalSuccesses: 2, ConsecutiveSuccesses: 2})
+71:	done(false)
+72:	done(false)
+73:	identityCounts(t, cb, Counts{Requests: 1, TotalSuccesses: 2, TotalFailures: 2, ConsecutiveFailures: 2})
+83:	done(true)
+85:	identityCounts(t, cb, Counts{Requests: 1, TotalSuccesses: 1, ConsecutiveSuccesses: 1})
+86:	done(true)
+88:	done(true)
+89:	done(false)
+90:	identityCounts(t, cb, Counts{})
+104:			identityRejected(t, cb, ErrTooManyRequests)
+105:			identityCounts(t, cb, Counts{Requests: 1})
+108:				identityRejected(t, cb, ErrTooManyRequests)
+112:				identityCounts(t, cb, Counts{})
+116:				identityRejected(t, cb, ErrOpenState)
+117:				identityCounts(t, cb, Counts{})
+130:	identityCounts(t, cb, Counts{Requests: 2, TotalSuccesses: 1, ConsecutiveSuccesses: 1})
+131:	identityRejected(t, cb, ErrTooManyRequests)
+134:	identityCounts(t, cb, Counts{})
+158:				identityCounts(t, cb, Counts{})
+176:				identityCounts(t, cb, Counts{})
+197:				identityCounts(t, cb, Counts{Requests: 1})
+202:				identityCounts(t, cb, Counts{})
+264:					identityCounts(t, cb, Counts{})
+265:					if calls != 1 {
+269:					identityCounts(t, cb, Counts{Requests: 1, TotalSuccesses: 1, ConsecutiveSuccesses: 1})
+270:					if calls != 0 {
+274:					identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1})
+275:					if calls != 1 {
+317:				identityPanic(t, execute, original)
+318:				identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1})
+329:				identityCounts(t, cb, Counts{})
+331:			if calls != 1 || (classifier && classified != 1) || (!classifier && classified != 0) {
+353:	identityPanic(t, func() { cb.Execute(func() (interface{}, error) { return nil, errors.New("request") }) }, first)
+354:	identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 2, ConsecutiveFailures: 2})
+378:			identityPanic(t, func() {
+390:			identityCounts(t, cb, Counts{Requests: 1, TotalFailures: want, ConsecutiveFailures: want})
+391:			if calls != int(want) {
+409:	identityPanic(t, func() { done(false) }, hook)
+410:	identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1})
+411:	if calls != 1 {
+414:	done(false)
+415:	identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 2, ConsecutiveFailures: 2})
+416:	if calls != 2 {
+429:				identityPanic(t, func() { cb.Execute(func() (interface{}, error) { return nil, errors.New("result") }) }, hook)
+431:				identityCounts(t, cb, Counts{})
+435:				identityPanic(t, func() { done(false) }, hook)
+437:				done(false)
+438:				done(true)
+439:				identityCounts(t, cb, Counts{})
+471:			identityPanic(t, func() { cb.Execute(func() (interface{}, error) { return nil, errors.New("result") }) }, want)
+472:			if len(notifications) != 2 || notifications[0] != StateOpen || notifications[1] != StateHalfOpen {
+476:			identityCounts(t, cb, Counts{})
+496:				identityPanic(t, func() { cb.Execute(req) }, hook)
+497:				identityCounts(t, cb, Counts{})
+498:				if calls != 0 || class != 1 {
+502:				if v != 17 || e != nil || calls != 1 || class != 2 {
+510:				identityPanic(t, func() { cb.Allow() }, hook)
+511:				identityCounts(t, cb, Counts{})
+537:			identityPanic(t, func() { stale(success) }, hook)
+540:			identityCounts(t, cb, Counts{})
+580:			identityCounts(t, cb, Counts{Requests: 1})
+629:				identityCounts(t, cb, Counts{})
+632:				identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1})
+634:				identityCounts(t, cb, Counts{})
+651:	identityPanic(t, func() { cb.Execute(func() (interface{}, error) { return nil, errors.New("request") }) }, hook)
+652:	if calls != 1 {
+655:	identityCounts(t, cb, Counts{})
+686:					identityPanic(t, func() {
+694:					if len(transitions) != 3 || transitions[2] != want {
+697:					identityCounts(t, cb, Counts{})
+704:					identityPanic(t, func() { done(success) }, hook)
+705:					if len(transitions) != 3 || transitions[2] != want {
+709:						done(false)
+710:						done(true)
+712:					identityCounts(t, cb, Counts{})
+739:			workerGone := make(chan struct{})
+746:				defer close(workerGone)
+773:				identityCounts(t, cb, Counts{Requests: 1})
+779:				<-workerGone
+780:				if len(delivered) != 0 {
+793:			<-workerGone
+794:			if len(delivered) != 1 {
+797:			if got := <-delivered; got != reply {
+802:				identityState(t, worker, StateOpen)
+804:				identityState(t, worker, StateClosed)

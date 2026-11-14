@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nd=json.load(open(\"analysis/final-jev.json\"))\nprint(d.keys())\nprint(type(d[\"checks\"]), next(iter(d[\"checks\"].items())) if isinstance(d[\"checks\"],dict) else d[\"checks\"][0])\nfor k,r in d[\"checks\"].items():\n if r[\"choice\"]!=\"supported\": print(k,r)"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,22 @@
+package identityfixture
+import "testing"
+func TestTransferOracle(t *testing.T) {
+ for _,name:=range []string{"A","B","C","D","E","F"} {t.Run(name,func(t *testing.T){
+  a,b:=&Account{},&Account{}
+  p:=&Port{a}
+  var done func()
+  switch name {
+  case "A":done=p.A();p.Target=b
+  case "B":done=p.B();p.Target=b
+  case "C":done=p.C();p.Target=b
+  case "D":r:=&Registry{map[string]*Account{"k":a}};done=r.D("k");r.Entries["k"]=b
+  case "E":done=p.E();p.Target=b
+  case "F":done=F(p);p=&Port{b}
+  }
+  done()
+  wantA,wantB:=1,0
+  if name=="A"||name=="D" {wantA,wantB=0,1}
+  if name=="C" {wantA,wantB=0,0}
+  if a.Requests!=1 || a.Successes!=wantA || b.Requests!=0 || b.Successes!=wantB {t.Fatalf("a=%+v b=%+v",a,b)}
+ })}
+}

@@ -1,0 +1,365 @@
+{
+  "findings": [
+    {
+      "id": "F01",
+      "initial": "One closed admission and a retained completion; ReadyToTrip returns false.",
+      "steps": [
+        "Invoke the same completion with success twice.",
+        "Invoke it with failure twice."
+      ],
+      "outcome": "inferred: Both successes and both failures are counted against one admission; the order updates the consecutive counters.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "untested",
+      "question": "Is each completion conventionally single-use, or is repeated reporting supposed to count?"
+    },
+    {
+      "id": "F02",
+      "initial": "Half-open with MaxRequests=2 and one admission.",
+      "steps": [
+        "Invoke that admission's success callback twice.",
+        "Invoke it a third time after the state change."
+      ],
+      "outcome": "inferred: The second call closes and clears the breaker with only one admitted trial; the third call contributes no result.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 316,
+        "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+      },
+      "test": "untested",
+      "question": "Must closing represent distinct trials, and what is a duplicate report expected to do?"
+    },
+    {
+      "id": "F03",
+      "initial": "Half-open with MaxRequests=1 and one admitted operation whose caller stops waiting.",
+      "steps": [
+        "Leave its completion unused past the configured Timeout.",
+        "Retry admission."
+      ],
+      "outcome": "inferred: The slot remains occupied and retries are rejected while the breaker remains half-open.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 285,
+        "fragment": "\t} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+      },
+      "test": "untested",
+      "question": "Should an abandoned operation have an expiration or a way to report abandonment?"
+    },
+    {
+      "id": "F04",
+      "initial": "The caller left a half-open admission unresolved; its generation is still active.",
+      "steps": [
+        "A later producer invokes the retained callback with true."
+      ],
+      "outcome": "inferred: The late report closes the breaker and admission resumes.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 317,
+        "fragment": "\t\t\tcb.setState(StateClosed, now)"
+      },
+      "test": "untested",
+      "question": "Should a matching result still decide recovery after its original caller has stopped waiting?"
+    },
+    {
+      "id": "F05",
+      "initial": "The caller left a half-open admission unresolved; its generation is still active.",
+      "steps": [
+        "A later producer invokes the retained callback with false."
+      ],
+      "outcome": "inferred: The late report reopens the breaker and starts a new open timeout.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "\t\tcb.setState(StateOpen, now)"
+      },
+      "test": "untested",
+      "question": "Should a late failure reopen the breaker after the caller's departure?"
+    },
+    {
+      "id": "F06",
+      "initial": "Half-open with MaxRequests=2 and two admitted trials.",
+      "steps": [
+        "Report success for one trial while the other remains pending.",
+        "Retry admission."
+      ],
+      "outcome": "inferred: A partial success is counted, but its slot is not returned; the third admission is rejected.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 285,
+        "fragment": "\t} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+      },
+      "test": "untested",
+      "question": "Explicit requirement README.md:41–43 gives an admission cap. Should successful completion ever return capacity within that half-open generation?"
+    },
+    {
+      "id": "F07",
+      "initial": "Two closed admissions; one failure opens the breaker.",
+      "steps": [
+        "Invoke the older completion before open timeout or after another call has advanced to half-open.",
+        "Try success and failure as separate schedules."
+      ],
+      "outcome": "inferred: The old result does not change counts, invoke ReadyToTrip, or decide the new state.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "\tif generation != before {"
+      },
+      "test": "untested",
+      "question": "Explicit requirement README.md:77–79 specifies ignoring pre-clear outcomes in Counts. Is lack of acknowledgement intended, and does ReadyToTrip's failure rule include a stale failure?"
+    },
+    {
+      "id": "F08",
+      "initial": "An old closed completion is retained across opening; the open timeout has elapsed with no state-resolving call.",
+      "steps": [
+        "Read Counts only.",
+        "Invoke the old completion as the first state-resolving call, with either outcome."
+      ],
+      "outcome": "inferred: The stale callback transitions to half-open and delivers OnStateChange before dropping its own result.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 342,
+        "fragment": "\t\t\tcb.setState(StateHalfOpen, now)"
+      },
+      "test": "untested",
+      "question": "Which calls should advance an elapsed open timeout and can stale completion be the trigger?"
+    },
+    {
+      "id": "F09",
+      "initial": "Closed with a positive Interval and a pending admission.",
+      "steps": [
+        "Let the interval elapse.",
+        "Try completion as the first resolving call, or resolve with State first.",
+        "Try each result."
+      ],
+      "outcome": "inferred: Counts can show the admission before the reset; whichever call resolves expiry clears counts, and the old result is ignored without a state-change notification.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 338,
+        "fragment": "\t\t\tcb.toNewGeneration(now)"
+      },
+      "test": "untested",
+      "question": "README.md:77–79 covers the count reset and ignored results. Should Counts reflect a rollover before a resolving call, and should an old failure reach ReadyToTrip?"
+    },
+    {
+      "id": "F10",
+      "initial": "Execute's request or IsSuccessful is paused, and another request changes generation.",
+      "steps": [
+        "Release the old execution and let its classifier return success or failure."
+      ],
+      "outcome": "inferred: Classification still runs, old accounting is skipped, and Execute returns the request's original value and error.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 243,
+        "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))"
+      },
+      "test": "untested",
+      "question": "Should classification run for a stale result, and may the classifier overlap other requests and transitions?"
+    },
+    {
+      "id": "F11",
+      "initial": "Execute's admitted request panics while its generation is current or stale.",
+      "steps": [
+        "Recover outside Execute.",
+        "Compare fresh failure accounting with a completion after another request opened."
+      ],
+      "outcome": "inferred: The panic path bypasses IsSuccessful; fresh failures are accounted and stale failures are discarded. The original panic is rethrown if failure reporting completes normally.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 237,
+        "fragment": "\t\t\tcb.afterRequest(generation, false)"
+      },
+      "test": "untested",
+      "question": "README.md:90–91 covers request panic and rethrow. How does that contract interact with stale failure observers?"
+    },
+    {
+      "id": "F12",
+      "initial": "Execute's request returned normally, but IsSuccessful panics.",
+      "steps": [
+        "The Execute defer recovers and reports failure.",
+        "Compare a current generation and a generation advanced before the retry."
+      ],
+      "outcome": "inferred: Fresh accounting records failure without retrying classification; stale accounting is dropped. If reporting completes, the classifier panic reaches the caller and the request return pair is not delivered.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 237,
+        "fragment": "\t\t\tcb.afterRequest(generation, false)"
+      },
+      "test": "untested",
+      "question": "Should a classifier panic report request failure and replace the normal return pair?"
+    },
+    {
+      "id": "F13",
+      "initial": "A current closed Execute returns a failure; ReadyToTrip panics on the first call.",
+      "steps": [
+        "Execute recovers and attempts failure accounting again.",
+        "The second ReadyToTrip call returns false."
+      ],
+      "outcome": "inferred: Two failures are counted for one request, and Execute rethrows the first hook panic.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 325,
+        "fragment": "\t\tcb.counts.onFailure()"
+      },
+      "test": "untested",
+      "question": "Is a failure charge and callback retry intended when ReadyToTrip panics?"
+    },
+    {
+      "id": "F14",
+      "initial": "ReadyToTrip panics while Execute is handling an existing request or classifier panic, or panics again in the fallback.",
+      "steps": [
+        "The deferred failure report unwinds before the explicit rethrow."
+      ],
+      "outcome": "inferred: The reporting panic reaches the caller in place of the panic Execute was handling; partial failure accounting remains.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 238,
+        "fragment": "\t\t\tpanic(e)"
+      },
+      "test": "untested",
+      "question": "Which panic should reach the caller, and is prior accounting supposed to remain visible?"
+    },
+    {
+      "id": "F15",
+      "initial": "A current closed TwoStep completion reports failure and ReadyToTrip panics.",
+      "steps": [
+        "Recover at the caller of done.",
+        "Read counts and manually retry the same completion."
+      ],
+      "outcome": "inferred: The failure is already counted; there is no automatic callback retry, and a matching manual retry counts again.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "untested",
+      "question": "Should a caller retrying a panicked done invocation repeat accounting, and how should it learn whether the first report committed?"
+    },
+    {
+      "id": "F16",
+      "initial": "A failure opens the breaker and OnStateChange panics after commit.",
+      "steps": [
+        "Catch the panic at the Execute or done caller.",
+        "Inspect the new generation and try the old report again."
+      ],
+      "outcome": "inferred: The opening and count reset survive. Execute's fallback normally sees a stale generation; TwoStep does not automatically retry.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 356,
+        "fragment": "\tcb.toNewGeneration(now)"
+      },
+      "test": "untested",
+      "question": "Should callback failure propagate after state is committed, and should any reporting retry be attempted?"
+    },
+    {
+      "id": "F17",
+      "initial": "Execute commits Open and its OnStateChange runs long enough that the open deadline passes before it panics.",
+      "steps": [
+        "Execute's panic fallback calls afterRequest again."
+      ],
+      "outcome": "inferred: The fallback can advance to half-open and invoke a second notification before dropping the old result; if the second notification panics it can replace the first panic.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 376,
+        "fragment": "\t\tcb.expiry = now.Add(cb.timeout)"
+      },
+      "test": "untested",
+      "question": "Should fallback after a notification panic advance expiry, and which notification panic should reach the caller?"
+    },
+    {
+      "id": "F18",
+      "initial": "An Execute enters after the open timeout and OnStateChange panics in admission.",
+      "steps": [
+        "Admission resolves the timeout before the request is invoked.",
+        "Recover and retry."
+      ],
+      "outcome": "inferred: Half-open is committed, but no trial was admitted, no request or classifier ran, and the retry can use the slot.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 229,
+        "fragment": "\tgeneration, err := cb.beforeRequest()"
+      },
+      "test": "untested",
+      "question": "Should a transition notification panic abort admission after committing the transition?"
+    },
+    {
+      "id": "F19",
+      "initial": "A stale report first observes an expired open state and its half-open OnStateChange panics.",
+      "steps": [
+        "Invoke the old completion with each result.",
+        "Recover and retry it."
+      ],
+      "outcome": "inferred: Half-open remains committed; the first call panics before generation comparison, and a retry drops the old result without counting or notifying again.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "\t\tcb.onStateChange(cb.name, prev, state)"
+      },
+      "test": "untested",
+      "question": "Should an otherwise stale callback propagate a notification panic, and what should retries mean?"
+    },
+    {
+      "id": "F20",
+      "initial": "A ReadyToTrip or OnStateChange callback starts from a locked breaker path.",
+      "steps": [
+        "Consider the callback synchronously calling this breaker's State, Counts, Allow, or Execute."
+      ],
+      "outcome": "inferred: The nested lock cannot be acquired while the callback holds up the outer call; Name only reads the name.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 294,
+        "fragment": "\tcb.mutex.Lock()"
+      },
+      "test": "untested",
+      "question": "Which methods may callbacks call synchronously on the same breaker? Is lock-held callback execution part of the API contract?"
+    },
+    {
+      "id": "F21",
+      "initial": "An admitted request or classifier calls runtime.Goexit in half-open.",
+      "steps": [
+        "Wait for caller goroutine termination.",
+        "Try admission again."
+      ],
+      "outcome": "inferred: The deferred recover sees no panic; no result is returned and the half-open slot remains consumed.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 235,
+        "fragment": "\t\te := recover()"
+      },
+      "test": "untested",
+      "question": "What contract, if any, covers termination without returning or panicking after admission?"
+    },
+    {
+      "id": "F22",
+      "initial": "A TwoStep completion is obtained, then the value at the public receiver pointer is replaced with a second constructed breaker.",
+      "steps": [
+        "Invoke the old callback after replacement with the target at the same or a different generation."
+      ],
+      "outcome": "inferred: The callback looks up the receiver's current breaker. At equal generation it can charge the replacement; at a different generation it drops the result after resolving target expiry.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "untested",
+      "question": "Are reassignment and retained callbacks supported, and should callback lifetime follow the admission or receiver value?"
+    },
+    {
+      "id": "F23",
+      "initial": "Execute has a current closed failure; ReadyToTrip is blocked while an interval expires.",
+      "steps": [
+        "Let ReadyToTrip return false or true after expiry, then read Counts and resolve state."
+      ],
+      "outcome": "inferred: The in-progress failure is accounted before the hook and expiry is not rechecked inside that locked report. A true verdict opens using time sampled before the callback.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 325,
+        "fragment": "\t\tcb.counts.onFailure()"
+      },
+      "test": "untested",
+      "question": "Should a callback verdict after expiry apply to the earlier generation, and what time is the new timeout measured from?"
+    }
+  ]
+}

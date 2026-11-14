@@ -1,0 +1,20 @@
+usage: local_models.py [-h] --ledger LEDGER
+                       [--limit-microdollars LIMIT_MICRODOLLARS]
+                       {status,set-limit,settle,flash,jev,jev-batch,draft-verify,draft-cells,flash-windows,blind} ...
+
+Run a bounded text task through DeepSeek Flash or a Jev judgment. Inputs are
+explicit files. Each request uses an independent session and sends only the
+supplied material. Costs are reserved in a local SQLite ledger.
+
+positional arguments:
+  {status,set-limit,settle,flash,jev,jev-batch,draft-verify,draft-cells,flash-windows,blind}
+    draft-verify        Flash drafts cited claims; Jev judges them
+    draft-cells         Flash drafts matrix cells for given states and events;
+                        Jev judges each
+    flash-windows       draft and cite bounded concurrent schedules
+
+options:
+  -h, --help            show this help message and exit
+  --ledger LEDGER
+  --limit-microdollars LIMIT_MICRODOLLARS
+                        initial limit for a new ledger

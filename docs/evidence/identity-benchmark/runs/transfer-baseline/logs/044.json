@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,re\nfrom pathlib import Path\np=Path('analysis')\nfinal=json.loads((p/'final.json').read_text())['findings']\nchecks=json.loads((p/'jev-results.json').read_text())['checks']\nreview=(p/'review.md').read_text()\nseen={}\nfor match in re.finditer(r'^- (F\\d+) — ((?:`[A-Za-z0-9_]+`(?:, )?)+)\\.$',review,re.M):\n seen[match[1]]=re.findall(r'`([A-Za-z0-9_]+)`',match[2])\nassert set(seen)=={f['id'] for f in final}\nassert set(x for v in seen.values() for x in v)==set(checks)\nfor doc in ('review.md','summary.md','open-questions.md'):\n body=(p/doc).read_text()\n for src,line,fragment in re.findall(r'([\\w/_.]+\\.go):(\\d+) \\(\"((?:[^\"\\n]|\"(?!\\)))*)\"\\)',body):\n  assert fragment in Path(src).read_text().splitlines()[int(line)-1],(doc,src,line,fragment)\n for link in re.findall(r'\\[[^]]+\\]\\(([^)]+)\\)',body):\n  assert (p/link).exists(),(doc,link)\nprint('Final artifacts: all finding-to-batch links, citation fragments, and local Markdown links verified')"
+  ],
+  "exit_code": 0
+}

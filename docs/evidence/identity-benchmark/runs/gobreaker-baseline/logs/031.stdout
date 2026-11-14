@@ -1,0 +1,8 @@
+			if stale {
+				identityState(t, worker, StateOpen)
+			} else if order == "success" {
+				identityState(t, worker, StateClosed)
+			}
+		})
+	}
+}

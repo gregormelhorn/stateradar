@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\np=Path('analysis/_probe/identity_test.go')\ns=p.read_text()\ns=s.replace('waiterGone := make(chan struct{})\\n\\t\\t\\tvar worker','cancelWait := make(chan struct{})\\n\\t\\t\\twaiterGone := make(chan bool, 1)\\n\\t\\t\\tworkerGone := make(chan struct{})\\n\\t\\t\\tvar worker')\ns=s.replace('v, e := worker.Execute(func()', 'defer close(workerGone)\\n\\t\\t\\t\\tv, e := worker.Execute(func()')\ns=s.replace('go func() { close(waiterGone) }()\\n\\t\\t\\t<-waiterGone','go func() {\\n\\t\\t\\t\\tselect {\\n\\t\\t\\t\\tcase <-delivered: waiterGone <- false\\n\\t\\t\\t\\tcase <-cancelWait: waiterGone <- true\\n\\t\\t\\t\\t}\\n\\t\\t\\t}()\\n\\t\\t\\tclose(cancelWait)\\n\\t\\t\\tif !<-waiterGone { t.Fatal(\"waiter consumed result before cancellation\") }')\ns=s.replace('close(producer)\\n\\t\\t\\t\\treturn','close(producer)\\n\\t\\t\\t\\t<-workerGone\\n\\t\\t\\t\\tif len(delivered)!=0 {t.Fatal(\"unexpected result\")}\\n\\t\\t\\t\\treturn')\ns=s.replace('producer <- reply\\n\\t\\t\\tif got := <-delivered; got != reply {','producer <- reply\\n\\t\\t\\t<-workerGone\\n\\t\\t\\tif len(delivered)!=1 {t.Fatal(\"missing buffered result\")}\\n\\t\\t\\tif got := <-delivered; got != reply {')\ns=s.replace('} else if order == \"success\" {\\n\\t\\t\\t\\tidentityState(t, worker, StateClosed)\\n\\t\\t\\t}', '} else if order == \"success\" {\\n\\t\\t\\t\\tidentityState(t, worker, StateClosed)\\n\\t\\t\\t} else {\\n\\t\\t\\t\\t_, err := worker.Execute(func()(interface{},error){t.Error(\"rejected body ran\");return nil,nil})\\n\\t\\t\\t\\tif err!=ErrOpenState {t.Fatal(err)}\\n\\t\\t\\t}')\np.write_text(s)\n"
+  ],
+  "exit_code": 0
+}

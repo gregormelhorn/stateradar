@@ -1,0 +1,93 @@
+F01.01 56 supported Admission increments Requests once per allowed request.
+F01.02 272 supported Each invocation of the returned closure forwards the same captured generation and supplied boolean, with no single-use guard.
+F01.03 60 supported Success increments TotalSuccesses.
+F01.04 66 supported Failure increments TotalFailures.
+F01.05 68 supported A recorded failure resets ConsecutiveSuccesses.
+F02.01 316 supported The half-open closing threshold is consecutive recorded successes rather than a count of distinct admissions.
+F02.02 317 supported Reaching the half-open success threshold closes the breaker.
+F02.03 299 supported A report with a generation superseded by closing cannot contribute accounting.
+F03.01 285 supported Half-open admission is blocked when Requests has reached maxRequests.
+F03.02 378 supported Half-open installs zero expiry, with no half-open timeout transition.
+F03.03 289 supported An accepted admission increments Requests before returning.
+F04.01 317 supported A matching half-open success that reaches the threshold closes the breaker.
+F05.01 330 supported A matching half-open failure opens the breaker directly.
+F05.02 376 supported Opening assigns an expiry of the sampled time plus the open timeout.
+F06.01 315 supported Half-open success increments success counters, with no request-count decrement.
+F06.02 286 supported Half-open admission over the cap returns ErrTooManyRequests.
+F07.01 299 supported A stale completion returns without dispatching either success or failure.
+F07.02 306 supported Failure accounting and its hook can be reached only after the generation guard.
+F08.01 298 supported Reporting resolves current state before testing the captured generation.
+F08.02 342 supported An expired open state changes to half-open during state resolution.
+F08.03 359 supported A state transition invokes a configured state-change notification synchronously.
+F08.04 220 supported Counts returns stored counters without calling time-based state resolution.
+F09.01 338 unclear Closed expiry starts a new generation without a state-change call.
+F09.02 365 supported Starting a new generation clears counters.
+F09.03 211 supported Calling State can itself resolve a closed interval.
+F09.04 300 unclear A completion invalidated by closed rollover returns without counting.
+F10.01 243 supported Execute calls the classifier as an argument to afterRequest, before entering that reporting function and its lock.
+F10.02 244 supported If reporting returns normally, Execute returns the original request result and error unchanged.
+F11.01 237 supported The recovery branch reports false without calling the classifier.
+F11.02 238 supported If the deferred report returns normally, Execute re-panics the recovered value.
+F11.03 299 supported The recovery report also obeys the generation check.
+F12.01 235 unclear Execute's installed deferred recover covers a panic raised by the classifier.
+F12.02 237 unclear A classifier panic causes a false report, without reevaluating the classifier.
+F12.03 244 unclear The request pair is returned only if classification and reporting finish normally.
+F13.01 325 supported Closed failure counters update before ReadyToTrip executes.
+F13.02 237 supported A panic from the normal afterRequest call is caught by Execute's defer and triggers one additional false report.
+F13.03 326 unclear A second matching closed false report calls ReadyToTrip again.
+F14.01 238 supported The explicit rethrow can execute only if the deferred afterRequest call returns normally.
+F14.02 325 unclear On the closed reporting path, failure accounting precedes a panic raised by ReadyToTrip.
+F15.01 272 supported The TwoStep callback forwards directly to afterRequest with no recovery or automatic retry.
+F15.02 325 supported A TwoStep closed failure has updated failure counters before the policy hook runs.
+F16.01 354 supported State is assigned before invoking the notification.
+F16.02 356 supported The new generation and count reset are installed before invoking the notification.
+F16.03 299 supported A fallback report carrying the pre-transition generation skips accounting when it reaches the guard.
+F17.01 376 supported Opening starts expiry from the time passed into the original report, before the notification.
+F17.02 297 unclear Execute's fallback report samples time again.
+F17.03 342 supported An expired open state may advance to half-open during fallback state resolution.
+F17.04 238 unclear A panic during the fallback can prevent rethrow of the initial notification panic.
+F18.01 229 supported Execute calls admission before installing its recovery defer.
+F18.02 281 supported Admission resolves expiry before counting a request.
+F18.03 289 unclear If state resolution panics during admission, control never reaches the admission increment.
+F18.04 242 supported The user request runs only after beforeRequest returns successfully.
+F19.01 298 unclear A notification reached during state resolution runs before the stale-result guard.
+F19.02 354 unclear The transition assigning half-open can remain committed when its notification panics.
+F19.03 299 supported A subsequent report carrying the old generation cannot account after that transition.
+F20.01 294 supported Reporting acquires the breaker mutex before state and result handling.
+F20.02 277 supported Admission acquires the breaker mutex before state resolution.
+F20.03 207 supported State takes the breaker mutex.
+F20.04 217 unclear Counts takes the breaker mutex.
+F20.05 202 supported Name returns the stored name directly.
+F20.06 326 supported ReadyToTrip runs synchronously inside closed failure handling.
+F20.07 359 supported OnStateChange runs synchronously inside the transition path.
+F21.01 236 supported A deferred invocation with recover returning nil skips the failure report.
+F21.02 285 unclear An admitted half-open request remains part of the admission cap if the reporting phase never runs.
+F22.01 272 supported The retained closure dereferences tscb.cb when it is called, using the saved generation.
+F22.02 299 supported The selected breaker's generation comparison checks the saved number without comparing breaker identity.
+F23.01 325 supported Closed failure accounting precedes ReadyToTrip.
+F23.02 327 supported A true ReadyToTrip verdict directly opens using the previously supplied time.
+F23.03 298 supported Current state is resolved before processing a completion, with no post-hook resolution in that path.
+F24.01 337 supported A deferred report may observe and process closed expiry when it resolves state.
+F24.02 365 supported The resulting generation rollover clears the first failure count.
+F24.03 299 supported After rollover the old fallback report exits without a second policy hook.
+F25.01 317 supported A matching threshold half-open success commits a closing transition.
+F25.02 330 supported A matching half-open failure opens directly without ReadyToTrip.
+F25.03 356 supported Either transition starts its generation before OnStateChange is invoked.
+F26.01 242 supported Execute synchronously awaits the supplied request before normal result reporting.
+F26.02 285 supported While a half-open trial remains outstanding, its admission counts toward the half-open cap.
+F27.01 244 supported Execute returns the request pair to its direct caller after normal reporting.
+F27.02 317 supported A matching threshold success closes half-open.
+F27.03 330 supported A matching failure reopens half-open.
+F27.04 299 supported Stale success and stale failure are skipped by the same guard.
+F28.01 295 supported A panic unwinding afterRequest runs the deferred mutex unlock.
+F28.02 294 unclear Any fallback report must reacquire the same mutex.
+F28.03 237 supported The Execute defer initiates its fallback report outside the original afterRequest invocation.
+F29.01 128 supported The generation counter is uint64.
+F29.02 364 supported Generation advances with an unconditional increment.
+F29.03 299 supported The stale-result test is equality of generation numbers.
+Q-expiry-closed 337 supported Closed expiry uses strict Before, excluding an equal timestamp.
+Q-expiry-open 341 supported Open expiry uses strict Before, excluding an equal timestamp.
+S-state-unlock 208 supported State releases the mutex when the state callback panics.
+S-admission-unlock 278 supported Admission releases the mutex when state resolution unwinds.
+S-closed-zero 371 supported The zero closed expiry is a literal zero time, not a computed deadline.
+S-wrap-closed 48 supported The admitted request count is uint32.

@@ -1,0 +1,2070 @@
+{
+  "gobreaker-baseline": {
+    "settings": {
+      "component": "gobreaker",
+      "variant": "baseline",
+      "pack": "f76591e06757a4520f49871e092c6e702861887c",
+      "source_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "output": "selective",
+      "timeout": 900,
+      "prompt_sha256": "8a9bc7946e4718090b268e8833c145f19876a4959a36a262f544e32e4f141175",
+      "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc"
+    },
+    "cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 12.45965,
+      "reported_codex_usd_estimate": 0.498386,
+      "settled_routing_usd": 0.005859,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.504245,
+      "total_usd_estimate": 0.504245,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "result": {
+      "elapsed_seconds": 658.201,
+      "tool_calls": 56
+    },
+    "controller_complete": true,
+    "probe_gate": true,
+    "bounded_acceptance": true,
+    "structure_gate": {
+      "exit": 0,
+      "stdout": "analysis/initial.json: 23 structurally valid findings; semantics not graded\nanalysis/final.json: 29 structurally valid findings; semantics not graded\n",
+      "stderr": ""
+    },
+    "source_unchanged": true,
+    "validator_sha256": "9bfc55146e42e3abc2c4c621e62ce443f32a7ed1ee98cc826de621904aa9ca6d",
+    "tool_calls": 56,
+    "commands": 52,
+    "log_rereads": 4,
+    "nonzero_commands": [
+      {
+        "log": "010",
+        "argv": [
+          "python3",
+          "../pack/tools/local_models.py",
+          "--ledger",
+          "../routing.sqlite",
+          "batch",
+          "--help"
+        ],
+        "exit_code": 2
+      }
+    ],
+    "mcp_errors": [],
+    "report_edits": {
+      "initial": 23,
+      "final": 29,
+      "added": [
+        "F24",
+        "F25",
+        "F26",
+        "F27",
+        "F28",
+        "F29"
+      ],
+      "removed": [],
+      "changed_fields": {
+        "F23": [
+          "outcome",
+          "test"
+        ],
+        "F04": [
+          "outcome",
+          "test"
+        ],
+        "F05": [
+          "outcome",
+          "test"
+        ],
+        "F03": [
+          "outcome",
+          "test"
+        ],
+        "F07": [
+          "outcome",
+          "test"
+        ],
+        "F12": [
+          "outcome",
+          "test"
+        ],
+        "F10": [
+          "outcome",
+          "test"
+        ],
+        "F22": [
+          "outcome",
+          "test"
+        ],
+        "F15": [
+          "outcome",
+          "test"
+        ],
+        "F14": [
+          "outcome",
+          "test"
+        ],
+        "F17": [
+          "outcome",
+          "test"
+        ],
+        "F13": [
+          "outcome",
+          "test"
+        ],
+        "F20": [
+          "outcome"
+        ],
+        "F21": [
+          "outcome",
+          "test"
+        ],
+        "F01": [
+          "outcome",
+          "test"
+        ],
+        "F08": [
+          "outcome",
+          "test"
+        ],
+        "F16": [
+          "outcome",
+          "test"
+        ],
+        "F19": [
+          "outcome",
+          "test"
+        ],
+        "F09": [
+          "outcome",
+          "test"
+        ],
+        "F06": [
+          "outcome",
+          "test"
+        ],
+        "F02": [
+          "outcome",
+          "test"
+        ],
+        "F18": [
+          "initial",
+          "outcome",
+          "test"
+        ],
+        "F11": [
+          "outcome",
+          "test"
+        ]
+      }
+    },
+    "model_review": {
+      "draft-verify.json": {
+        "keys": [
+          "source",
+          "source_sha256",
+          "draft",
+          "verification",
+          "claims",
+          "questions",
+          "review_required"
+        ],
+        "counts": {},
+        "draft_judgments": {
+          "supported": 33,
+          "unclear": 1
+        },
+        "questions": 20,
+        "claims": 34
+      },
+      "final-jev.json": {
+        "keys": [
+          "model",
+          "source_sha256",
+          "input_tokens",
+          "cost_microdollars",
+          "reservation_microdollars",
+          "checks"
+        ],
+        "counts": {
+          "supported": 78,
+          "unclear": 15
+        },
+        "draft_judgments": {},
+        "questions": 0,
+        "claims": 0
+      }
+    },
+    "probe_runs": [
+      {
+        "file": "analysis/probe-attempt-01.stdout.jsonl",
+        "started": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityTripHookAcrossExpiry": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3
+        },
+        "passed": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3,
+          "TestIdentityTripHookAcrossExpiry": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "complete_nonempty": true
+      },
+      {
+        "file": "analysis/probe-attempt-02.stdout.jsonl",
+        "started": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityTripHookAcrossExpiry": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3,
+          "TestIdentityTripPanicAfterInterval": 3,
+          "TestIdentityHalfOpenNotificationPanic": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/failure": 3,
+          "TestIdentityExecuteDepartedWaiter": 3,
+          "TestIdentityExecuteDepartedWaiter/no_result": 3,
+          "TestIdentityExecuteDepartedWaiter/success": 3,
+          "TestIdentityExecuteDepartedWaiter/failure": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_success": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_failure": 3
+        },
+        "passed": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3,
+          "TestIdentityTripHookAcrossExpiry": 3,
+          "TestIdentityTripPanicAfterInterval": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic": 3,
+          "TestIdentityExecuteDepartedWaiter/no_result": 3,
+          "TestIdentityExecuteDepartedWaiter/success": 3,
+          "TestIdentityExecuteDepartedWaiter/failure": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_success": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_failure": 3,
+          "TestIdentityExecuteDepartedWaiter": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "complete_nonempty": true
+      }
+    ]
+  },
+  "gobreaker-candidate": {
+    "settings": {
+      "component": "gobreaker",
+      "variant": "candidate",
+      "pack": "f76591e06757a4520f49871e092c6e702861887c",
+      "source_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "output": "selective",
+      "timeout": 900,
+      "prompt_sha256": "dee30117b2e1cf35405a861d6489e70ce5a512cb59cdb3a208270a4e398c6731",
+      "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc"
+    },
+    "cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 14.46303,
+      "reported_codex_usd_estimate": 0.5785212,
+      "settled_routing_usd": 0.004904,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.5834252,
+      "total_usd_estimate": 0.5834252,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "result": {
+      "elapsed_seconds": 686.094,
+      "tool_calls": 38
+    },
+    "controller_complete": true,
+    "probe_gate": true,
+    "bounded_acceptance": true,
+    "structure_gate": {
+      "exit": 0,
+      "stdout": "analysis/initial.json: 24 structurally valid findings; semantics not graded\nanalysis/final.json: 24 structurally valid findings; semantics not graded\n",
+      "stderr": ""
+    },
+    "source_unchanged": true,
+    "validator_sha256": "9bfc55146e42e3abc2c4c621e62ce443f32a7ed1ee98cc826de621904aa9ca6d",
+    "tool_calls": 38,
+    "commands": 35,
+    "log_rereads": 3,
+    "nonzero_commands": [],
+    "mcp_errors": [],
+    "report_edits": {
+      "initial": 24,
+      "final": 24,
+      "added": [],
+      "removed": [],
+      "changed_fields": {
+        "F23": [
+          "outcome",
+          "test"
+        ],
+        "F04": [
+          "outcome",
+          "test"
+        ],
+        "F05": [
+          "outcome",
+          "test"
+        ],
+        "F03": [
+          "outcome",
+          "test"
+        ],
+        "F07": [
+          "outcome",
+          "test"
+        ],
+        "F12": [
+          "outcome",
+          "test"
+        ],
+        "F10": [
+          "outcome",
+          "test"
+        ],
+        "F22": [
+          "outcome"
+        ],
+        "F15": [
+          "outcome",
+          "test"
+        ],
+        "F14": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F17": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F13": [
+          "outcome",
+          "test"
+        ],
+        "F24": [
+          "outcome",
+          "test"
+        ],
+        "F20": [
+          "outcome",
+          "test"
+        ],
+        "F21": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F01": [
+          "outcome",
+          "test"
+        ],
+        "F08": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F16": [
+          "outcome",
+          "test"
+        ],
+        "F19": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F09": [
+          "outcome",
+          "test"
+        ],
+        "F06": [
+          "outcome",
+          "test"
+        ],
+        "F02": [
+          "outcome",
+          "test"
+        ],
+        "F18": [
+          "outcome",
+          "test"
+        ],
+        "F11": [
+          "outcome",
+          "test"
+        ]
+      }
+    },
+    "model_review": {
+      "draft-verify.json": {
+        "keys": [
+          "source",
+          "source_sha256",
+          "draft",
+          "verification",
+          "claims",
+          "questions",
+          "review_required"
+        ],
+        "counts": {},
+        "draft_judgments": {
+          "supported": 29,
+          "unclear": 2
+        },
+        "questions": 10,
+        "claims": 31
+      },
+      "final-jev.json": {
+        "keys": [
+          "model",
+          "source_sha256",
+          "input_tokens",
+          "cost_microdollars",
+          "reservation_microdollars",
+          "checks"
+        ],
+        "counts": {
+          "supported": 80,
+          "unclear": 19,
+          "contradicted": 1
+        },
+        "draft_judgments": {},
+        "questions": 0,
+        "claims": 0
+      }
+    },
+    "probe_runs": [
+      {
+        "file": "analysis/probe-attempt-01.stdout.jsonl",
+        "started": {
+          "TestIdentityWrapperReplacement": 3,
+          "TestIdentityWrapperReplacement/success": 3,
+          "TestIdentityWrapperReplacement/failure": 3,
+          "TestIdentityWrapperCopyAndRebind": 3,
+          "TestIdentityWrapperMismatch": 3,
+          "TestIdentityWrapperMismatch/success": 3,
+          "TestIdentityWrapperMismatch/failure": 3,
+          "TestIdentityWrapperLazyBoundary": 3,
+          "TestIdentityWrapperLazyBoundary/success": 3,
+          "TestIdentityWrapperLazyBoundary/failure": 3,
+          "TestIdentityWrapperHalfOpenSuccess": 3,
+          "TestIdentityWrapperHalfOpenFailure": 3,
+          "TestIdentityWrapperZero": 3,
+          "TestIdentityWrapperZero/success": 3,
+          "TestIdentityWrapperZero/failure": 3,
+          "TestIdentityExecuteReceiver": 3,
+          "TestIdentityExecuteReceiver/success": 3,
+          "TestIdentityExecuteReceiver/failure": 3,
+          "TestIdentityRepeatedClosed": 3,
+          "TestIdentityRepeatedHalfOpen": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityAbandonedHalfOpen/success": 3,
+          "TestIdentityAbandonedHalfOpen/failure": 3,
+          "TestIdentityStaleHalfOpen": 3,
+          "TestIdentityStaleHalfOpen/success": 3,
+          "TestIdentityStaleHalfOpen/failure": 3,
+          "TestIdentityClosedExpiry": 3,
+          "TestIdentityClosedExpiry/success": 3,
+          "TestIdentityClosedExpiry/success/before": 3,
+          "TestIdentityClosedExpiry/success/expiry-by-State": 3,
+          "TestIdentityClosedExpiry/success/expiry-by-done": 3,
+          "TestIdentityClosedExpiry/failure": 3,
+          "TestIdentityClosedExpiry/failure/before": 3,
+          "TestIdentityClosedExpiry/failure/expiry-by-State": 3,
+          "TestIdentityClosedExpiry/failure/expiry-by-done": 3,
+          "TestIdentityDepartedExecute": 3,
+          "TestIdentityDepartedExecute/success": 3,
+          "TestIdentityDepartedExecute/failure": 3,
+          "TestIdentityClassifierOrdering": 3,
+          "TestIdentityClassifierOrdering/success": 3,
+          "TestIdentityClassifierOrdering/failure": 3,
+          "TestIdentityRequestAndClassifierPanic": 3,
+          "TestIdentityTripHookRetry": 3,
+          "TestIdentityTripHookReplacementPanic": 3,
+          "TestIdentityCompletionHookPanic": 3,
+          "TestIdentityCompletionHookPanic/closed-open": 3,
+          "TestIdentityCompletionHookPanic/half-open-open": 3,
+          "TestIdentityCompletionHookPanic/half-open-closed": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityAdmissionHookPanic/state": 3,
+          "TestIdentityAdmissionHookPanic/execute": 3,
+          "TestIdentityAdmissionHookPanic/allow": 3,
+          "TestIdentityStaleHookPanic": 3,
+          "TestIdentityStaleHookPanic/success": 3,
+          "TestIdentityStaleHookPanic/failure": 3,
+          "TestIdentitySettingsCallbacks": 3,
+          "TestIdentityTwoStepBypassesClassifier": 3
+        },
+        "passed": {
+          "TestIdentityWrapperReplacement/success": 3,
+          "TestIdentityWrapperReplacement/failure": 3,
+          "TestIdentityWrapperReplacement": 3,
+          "TestIdentityWrapperCopyAndRebind": 3,
+          "TestIdentityWrapperMismatch/success": 3,
+          "TestIdentityWrapperMismatch/failure": 3,
+          "TestIdentityWrapperMismatch": 3,
+          "TestIdentityWrapperLazyBoundary/success": 3,
+          "TestIdentityWrapperLazyBoundary/failure": 3,
+          "TestIdentityWrapperLazyBoundary": 3,
+          "TestIdentityWrapperHalfOpenSuccess": 3,
+          "TestIdentityWrapperHalfOpenFailure": 3,
+          "TestIdentityWrapperZero/success": 3,
+          "TestIdentityWrapperZero/failure": 3,
+          "TestIdentityWrapperZero": 3,
+          "TestIdentityExecuteReceiver/success": 3,
+          "TestIdentityExecuteReceiver/failure": 3,
+          "TestIdentityExecuteReceiver": 3,
+          "TestIdentityRepeatedClosed": 3,
+          "TestIdentityRepeatedHalfOpen": 3,
+          "TestIdentityAbandonedHalfOpen/success": 3,
+          "TestIdentityAbandonedHalfOpen/failure": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityStaleHalfOpen/success": 3,
+          "TestIdentityStaleHalfOpen/failure": 3,
+          "TestIdentityStaleHalfOpen": 3,
+          "TestIdentityClosedExpiry/success/before": 3,
+          "TestIdentityClosedExpiry/success/expiry-by-State": 3,
+          "TestIdentityClosedExpiry/success/expiry-by-done": 3,
+          "TestIdentityClosedExpiry/success": 3,
+          "TestIdentityClosedExpiry/failure/before": 3,
+          "TestIdentityClosedExpiry/failure/expiry-by-State": 3,
+          "TestIdentityClosedExpiry/failure/expiry-by-done": 3,
+          "TestIdentityClosedExpiry/failure": 3,
+          "TestIdentityClosedExpiry": 3,
+          "TestIdentityDepartedExecute/success": 3,
+          "TestIdentityDepartedExecute/failure": 3,
+          "TestIdentityDepartedExecute": 3,
+          "TestIdentityClassifierOrdering/success": 3,
+          "TestIdentityClassifierOrdering/failure": 3,
+          "TestIdentityClassifierOrdering": 3,
+          "TestIdentityRequestAndClassifierPanic": 3,
+          "TestIdentityTripHookRetry": 3,
+          "TestIdentityTripHookReplacementPanic": 3,
+          "TestIdentityCompletionHookPanic/closed-open": 3,
+          "TestIdentityCompletionHookPanic/half-open-open": 3,
+          "TestIdentityCompletionHookPanic/half-open-closed": 3,
+          "TestIdentityCompletionHookPanic": 3,
+          "TestIdentityAdmissionHookPanic/state": 3,
+          "TestIdentityAdmissionHookPanic/execute": 3,
+          "TestIdentityAdmissionHookPanic/allow": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityStaleHookPanic/success": 3,
+          "TestIdentityStaleHookPanic/failure": 3,
+          "TestIdentityStaleHookPanic": 3,
+          "TestIdentitySettingsCallbacks": 3,
+          "TestIdentityTwoStepBypassesClassifier": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "complete_nonempty": true
+      }
+    ]
+  },
+  "transfer-baseline": {
+    "settings": {
+      "component": "transfer",
+      "variant": "baseline",
+      "pack": "f76591e06757a4520f49871e092c6e702861887c",
+      "source_sha": "4d47aebcc0b5e04084d333a385c237105a889576",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "output": "selective",
+      "timeout": 900,
+      "prompt_sha256": "2ce5b810fd20e63b962070f397b32d0bd2244191491f3697dde27d6eb0f7a55b",
+      "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1"
+    },
+    "cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 12.55074,
+      "reported_codex_usd_estimate": 0.5020296,
+      "settled_routing_usd": 0.002671,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.5047006,
+      "total_usd_estimate": 0.5047006,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "result": {
+      "elapsed_seconds": 635.315,
+      "tool_calls": 45
+    },
+    "controller_complete": true,
+    "probe_gate": true,
+    "bounded_acceptance": true,
+    "structure_gate": {
+      "exit": 0,
+      "stdout": "analysis/initial.json: 66 structurally valid findings; semantics not graded\nanalysis/final.json: 74 structurally valid findings; semantics not graded\n",
+      "stderr": ""
+    },
+    "source_unchanged": true,
+    "validator_sha256": "9bfc55146e42e3abc2c4c621e62ce443f32a7ed1ee98cc826de621904aa9ca6d",
+    "tool_calls": 45,
+    "commands": 44,
+    "log_rereads": 1,
+    "nonzero_commands": [],
+    "mcp_errors": [],
+    "report_edits": {
+      "initial": 66,
+      "final": 74,
+      "added": [
+        "F67",
+        "F68",
+        "F69",
+        "F70",
+        "F71",
+        "F72",
+        "F73",
+        "F74"
+      ],
+      "removed": [],
+      "changed_fields": {
+        "F53": [
+          "outcome",
+          "test"
+        ],
+        "F41": [
+          "outcome",
+          "test"
+        ],
+        "F65": [
+          "outcome",
+          "test"
+        ],
+        "F29": [
+          "steps",
+          "outcome",
+          "test"
+        ],
+        "F23": [
+          "outcome",
+          "test"
+        ],
+        "F04": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F05": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F03": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F32": [
+          "outcome",
+          "test"
+        ],
+        "F07": [
+          "outcome",
+          "test"
+        ],
+        "F34": [
+          "outcome",
+          "test"
+        ],
+        "F58": [
+          "outcome",
+          "test"
+        ],
+        "F42": [
+          "outcome",
+          "test"
+        ],
+        "F54": [
+          "outcome",
+          "test"
+        ],
+        "F52": [
+          "outcome",
+          "test"
+        ],
+        "F59": [
+          "outcome",
+          "test"
+        ],
+        "F12": [
+          "outcome",
+          "test"
+        ],
+        "F10": [
+          "outcome",
+          "test"
+        ],
+        "F46": [
+          "outcome",
+          "test"
+        ],
+        "F22": [
+          "outcome",
+          "test"
+        ],
+        "F28": [
+          "steps",
+          "outcome",
+          "test"
+        ],
+        "F35": [
+          "outcome",
+          "test"
+        ],
+        "F40": [
+          "outcome",
+          "test"
+        ],
+        "F39": [
+          "outcome",
+          "test"
+        ],
+        "F15": [
+          "outcome",
+          "test"
+        ],
+        "F63": [
+          "outcome",
+          "test"
+        ],
+        "F45": [
+          "outcome",
+          "test"
+        ],
+        "F14": [
+          "outcome",
+          "test"
+        ],
+        "F43": [
+          "outcome",
+          "test"
+        ],
+        "F17": [
+          "outcome",
+          "test"
+        ],
+        "F13": [
+          "outcome",
+          "test"
+        ],
+        "F24": [
+          "outcome",
+          "test"
+        ],
+        "F31": [
+          "outcome",
+          "test"
+        ],
+        "F61": [
+          "outcome",
+          "citation",
+          "test"
+        ],
+        "F37": [
+          "outcome",
+          "test"
+        ],
+        "F20": [
+          "outcome",
+          "test"
+        ],
+        "F56": [
+          "outcome",
+          "test"
+        ],
+        "F30": [
+          "steps",
+          "outcome",
+          "test"
+        ],
+        "F21": [
+          "outcome",
+          "test"
+        ],
+        "F47": [
+          "outcome",
+          "test"
+        ],
+        "F60": [
+          "outcome",
+          "test"
+        ],
+        "F66": [
+          "outcome",
+          "test"
+        ],
+        "F01": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F36": [
+          "outcome",
+          "test"
+        ],
+        "F26": [
+          "steps",
+          "outcome",
+          "test"
+        ],
+        "F57": [
+          "outcome",
+          "test"
+        ],
+        "F48": [
+          "outcome",
+          "test"
+        ],
+        "F08": [
+          "outcome",
+          "test"
+        ],
+        "F27": [
+          "steps",
+          "outcome",
+          "test"
+        ],
+        "F51": [
+          "outcome",
+          "test"
+        ],
+        "F25": [
+          "steps",
+          "outcome",
+          "test"
+        ],
+        "F16": [
+          "outcome",
+          "test"
+        ],
+        "F38": [
+          "outcome",
+          "test"
+        ],
+        "F62": [
+          "outcome",
+          "test"
+        ],
+        "F50": [
+          "outcome",
+          "test"
+        ],
+        "F55": [
+          "outcome",
+          "test"
+        ],
+        "F19": [
+          "outcome",
+          "test"
+        ],
+        "F33": [
+          "outcome",
+          "test"
+        ],
+        "F09": [
+          "outcome",
+          "test"
+        ],
+        "F06": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F02": [
+          "outcome",
+          "test",
+          "question"
+        ],
+        "F18": [
+          "outcome",
+          "test"
+        ],
+        "F11": [
+          "outcome",
+          "test"
+        ],
+        "F44": [
+          "outcome",
+          "test"
+        ],
+        "F49": [
+          "outcome",
+          "test"
+        ],
+        "F64": [
+          "outcome",
+          "test"
+        ]
+      }
+    },
+    "model_review": {
+      "draft-verify.json": {
+        "keys": [
+          "source",
+          "source_sha256",
+          "draft",
+          "verification",
+          "claims",
+          "questions",
+          "review_required"
+        ],
+        "counts": {},
+        "draft_judgments": {
+          "supported": 15,
+          "unclear": 1
+        },
+        "questions": 12,
+        "claims": 16
+      },
+      "jev-results.json": {
+        "keys": [
+          "model",
+          "source_sha256",
+          "input_tokens",
+          "cost_microdollars",
+          "reservation_microdollars",
+          "checks"
+        ],
+        "counts": {
+          "supported": 61,
+          "contradicted": 1,
+          "unclear": 6
+        },
+        "draft_judgments": {},
+        "questions": 0,
+        "claims": 0
+      }
+    },
+    "probe_runs": [
+      {
+        "file": "analysis/probe-attempt-01.stdout.jsonl",
+        "started": {
+          "TestIdentityBaseline": 3,
+          "TestIdentityBaseline/A": 3,
+          "TestIdentityBaseline/B": 3,
+          "TestIdentityBaseline/C": 3,
+          "TestIdentityBaseline/D": 3,
+          "TestIdentityBaseline/E": 3,
+          "TestIdentityBaseline/F": 3,
+          "TestIdentitySameEpochReplacement": 3,
+          "TestIdentitySameEpochReplacement/A": 3,
+          "TestIdentitySameEpochReplacement/B": 3,
+          "TestIdentitySameEpochReplacement/C": 3,
+          "TestIdentitySameEpochReplacement/D": 3,
+          "TestIdentitySameEpochReplacement/E": 3,
+          "TestIdentitySameEpochReplacement/F": 3,
+          "TestIdentityDifferentEpochReplacement": 3,
+          "TestIdentityDifferentEpochReplacement/A": 3,
+          "TestIdentityDifferentEpochReplacement/B": 3,
+          "TestIdentityDifferentEpochReplacement/C": 3,
+          "TestIdentityDifferentEpochReplacement/D": 3,
+          "TestIdentityDifferentEpochReplacement/E": 3,
+          "TestIdentityDifferentEpochReplacement/F": 3,
+          "TestIdentityEpochChange": 3,
+          "TestIdentityEpochChange/A": 3,
+          "TestIdentityEpochChange/B": 3,
+          "TestIdentityEpochChange/C": 3,
+          "TestIdentityEpochChange/D": 3,
+          "TestIdentityEpochChange/E": 3,
+          "TestIdentityEpochChange/F": 3,
+          "TestIdentityCompletionBeforeBoundary": 3,
+          "TestIdentityCompletionBeforeBoundary/A": 3,
+          "TestIdentityCompletionBeforeBoundary/B": 3,
+          "TestIdentityCompletionBeforeBoundary/C": 3,
+          "TestIdentityCompletionBeforeBoundary/D": 3,
+          "TestIdentityCompletionBeforeBoundary/E": 3,
+          "TestIdentityCompletionBeforeBoundary/F": 3,
+          "TestIdentityDetachedPort": 3,
+          "TestIdentityDetachedPort/A": 3,
+          "TestIdentityDetachedPort/B": 3,
+          "TestIdentityDetachedPort/C": 3,
+          "TestIdentityDetachedPort/E": 3,
+          "TestIdentityDetachedPort/F": 3,
+          "TestIdentityRegistryAbsent": 3,
+          "TestIdentityRegistryAbsent/no_later_input": 3,
+          "TestIdentityRegistryAbsent/later_matching_key": 3,
+          "TestIdentityRegistryNilEntry": 3,
+          "TestIdentityRegistryNilEntry/no_later_input": 3,
+          "TestIdentityRegistryNilEntry/later_matching_key": 3,
+          "TestIdentityRegistryNilMap": 3,
+          "TestIdentityRegistryNilMap/no_later_input": 3,
+          "TestIdentityRegistryNilMap/later_matching_key": 3,
+          "TestIdentityRegistryMapReplacement": 3,
+          "TestIdentityEpochRestoration": 3,
+          "TestIdentityEpochRestoration/A": 3,
+          "TestIdentityEpochRestoration/C": 3,
+          "TestIdentityTargetRestoration": 3,
+          "TestIdentityTargetRestoration/A": 3,
+          "TestIdentityTargetRestoration/C": 3,
+          "TestIdentityAbandonedAndRepeated": 3,
+          "TestIdentityAbandonedAndRepeated/A": 3,
+          "TestIdentityAbandonedAndRepeated/B": 3,
+          "TestIdentityAbandonedAndRepeated/C": 3,
+          "TestIdentityAbandonedAndRepeated/D": 3,
+          "TestIdentityAbandonedAndRepeated/E": 3,
+          "TestIdentityAbandonedAndRepeated/F": 3,
+          "TestIdentityOverlappingAdmissions": 3,
+          "TestIdentityOverlappingAdmissions/A": 3,
+          "TestIdentityOverlappingAdmissions/B": 3,
+          "TestIdentityOverlappingAdmissions/C": 3,
+          "TestIdentityOverlappingAdmissions/D": 3,
+          "TestIdentityOverlappingAdmissions/E": 3,
+          "TestIdentityOverlappingAdmissions/F": 3,
+          "TestIdentityInvalidAdmission": 3,
+          "TestIdentityInvalidAdmission/A": 3,
+          "TestIdentityInvalidAdmission/B": 3,
+          "TestIdentityInvalidAdmission/C": 3,
+          "TestIdentityInvalidAdmission/D": 3,
+          "TestIdentityInvalidAdmission/D/missing": 3,
+          "TestIdentityInvalidAdmission/D/nil_entry": 3,
+          "TestIdentityInvalidAdmission/D/nil_map": 3,
+          "TestIdentityInvalidAdmission/E": 3,
+          "TestIdentityInvalidAdmission/F": 3,
+          "TestIdentityValueCopy": 3,
+          "TestIdentityCapturedObjectAfterReset": 3
+        },
+        "passed": {
+          "TestIdentityBaseline/A": 3,
+          "TestIdentityBaseline/B": 3,
+          "TestIdentityBaseline/C": 3,
+          "TestIdentityBaseline/D": 3,
+          "TestIdentityBaseline/E": 3,
+          "TestIdentityBaseline/F": 3,
+          "TestIdentityBaseline": 3,
+          "TestIdentitySameEpochReplacement/A": 3,
+          "TestIdentitySameEpochReplacement/B": 3,
+          "TestIdentitySameEpochReplacement/C": 3,
+          "TestIdentitySameEpochReplacement/D": 3,
+          "TestIdentitySameEpochReplacement/E": 3,
+          "TestIdentitySameEpochReplacement/F": 3,
+          "TestIdentitySameEpochReplacement": 3,
+          "TestIdentityDifferentEpochReplacement/A": 3,
+          "TestIdentityDifferentEpochReplacement/B": 3,
+          "TestIdentityDifferentEpochReplacement/C": 3,
+          "TestIdentityDifferentEpochReplacement/D": 3,
+          "TestIdentityDifferentEpochReplacement/E": 3,
+          "TestIdentityDifferentEpochReplacement/F": 3,
+          "TestIdentityDifferentEpochReplacement": 3,
+          "TestIdentityEpochChange/A": 3,
+          "TestIdentityEpochChange/B": 3,
+          "TestIdentityEpochChange/C": 3,
+          "TestIdentityEpochChange/D": 3,
+          "TestIdentityEpochChange/E": 3,
+          "TestIdentityEpochChange/F": 3,
+          "TestIdentityEpochChange": 3,
+          "TestIdentityCompletionBeforeBoundary/A": 3,
+          "TestIdentityCompletionBeforeBoundary/B": 3,
+          "TestIdentityCompletionBeforeBoundary/C": 3,
+          "TestIdentityCompletionBeforeBoundary/D": 3,
+          "TestIdentityCompletionBeforeBoundary/E": 3,
+          "TestIdentityCompletionBeforeBoundary/F": 3,
+          "TestIdentityCompletionBeforeBoundary": 3,
+          "TestIdentityDetachedPort/A": 3,
+          "TestIdentityDetachedPort/B": 3,
+          "TestIdentityDetachedPort/C": 3,
+          "TestIdentityDetachedPort/E": 3,
+          "TestIdentityDetachedPort/F": 3,
+          "TestIdentityDetachedPort": 3,
+          "TestIdentityRegistryAbsent/no_later_input": 3,
+          "TestIdentityRegistryAbsent/later_matching_key": 3,
+          "TestIdentityRegistryAbsent": 3,
+          "TestIdentityRegistryNilEntry/no_later_input": 3,
+          "TestIdentityRegistryNilEntry/later_matching_key": 3,
+          "TestIdentityRegistryNilEntry": 3,
+          "TestIdentityRegistryNilMap/no_later_input": 3,
+          "TestIdentityRegistryNilMap/later_matching_key": 3,
+          "TestIdentityRegistryNilMap": 3,
+          "TestIdentityRegistryMapReplacement": 3,
+          "TestIdentityEpochRestoration/A": 3,
+          "TestIdentityEpochRestoration/C": 3,
+          "TestIdentityEpochRestoration": 3,
+          "TestIdentityTargetRestoration/A": 3,
+          "TestIdentityTargetRestoration/C": 3,
+          "TestIdentityTargetRestoration": 3,
+          "TestIdentityAbandonedAndRepeated/A": 3,
+          "TestIdentityAbandonedAndRepeated/B": 3,
+          "TestIdentityAbandonedAndRepeated/C": 3,
+          "TestIdentityAbandonedAndRepeated/D": 3,
+          "TestIdentityAbandonedAndRepeated/E": 3,
+          "TestIdentityAbandonedAndRepeated/F": 3,
+          "TestIdentityAbandonedAndRepeated": 3,
+          "TestIdentityOverlappingAdmissions/A": 3,
+          "TestIdentityOverlappingAdmissions/B": 3,
+          "TestIdentityOverlappingAdmissions/C": 3,
+          "TestIdentityOverlappingAdmissions/D": 3,
+          "TestIdentityOverlappingAdmissions/E": 3,
+          "TestIdentityOverlappingAdmissions/F": 3,
+          "TestIdentityOverlappingAdmissions": 3,
+          "TestIdentityInvalidAdmission/A": 3,
+          "TestIdentityInvalidAdmission/B": 3,
+          "TestIdentityInvalidAdmission/C": 3,
+          "TestIdentityInvalidAdmission/D/missing": 3,
+          "TestIdentityInvalidAdmission/D/nil_entry": 3,
+          "TestIdentityInvalidAdmission/D/nil_map": 3,
+          "TestIdentityInvalidAdmission/D": 3,
+          "TestIdentityInvalidAdmission/E": 3,
+          "TestIdentityInvalidAdmission/F": 3,
+          "TestIdentityInvalidAdmission": 3,
+          "TestIdentityValueCopy": 3,
+          "TestIdentityCapturedObjectAfterReset": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "complete_nonempty": true
+      },
+      {
+        "file": "analysis/probe-attempt-02.stdout.jsonl",
+        "started": {
+          "TestIdentityBaseline": 3,
+          "TestIdentityBaseline/A": 3,
+          "TestIdentityBaseline/B": 3,
+          "TestIdentityBaseline/C": 3,
+          "TestIdentityBaseline/D": 3,
+          "TestIdentityBaseline/E": 3,
+          "TestIdentityBaseline/F": 3,
+          "TestIdentitySameEpochReplacement": 3,
+          "TestIdentitySameEpochReplacement/A": 3,
+          "TestIdentitySameEpochReplacement/B": 3,
+          "TestIdentitySameEpochReplacement/C": 3,
+          "TestIdentitySameEpochReplacement/D": 3,
+          "TestIdentitySameEpochReplacement/E": 3,
+          "TestIdentitySameEpochReplacement/F": 3,
+          "TestIdentityDifferentEpochReplacement": 3,
+          "TestIdentityDifferentEpochReplacement/A": 3,
+          "TestIdentityDifferentEpochReplacement/B": 3,
+          "TestIdentityDifferentEpochReplacement/C": 3,
+          "TestIdentityDifferentEpochReplacement/D": 3,
+          "TestIdentityDifferentEpochReplacement/E": 3,
+          "TestIdentityDifferentEpochReplacement/F": 3,
+          "TestIdentityEpochChange": 3,
+          "TestIdentityEpochChange/A": 3,
+          "TestIdentityEpochChange/B": 3,
+          "TestIdentityEpochChange/C": 3,
+          "TestIdentityEpochChange/D": 3,
+          "TestIdentityEpochChange/E": 3,
+          "TestIdentityEpochChange/F": 3,
+          "TestIdentityCompletionBeforeBoundary": 3,
+          "TestIdentityCompletionBeforeBoundary/A": 3,
+          "TestIdentityCompletionBeforeBoundary/B": 3,
+          "TestIdentityCompletionBeforeBoundary/C": 3,
+          "TestIdentityCompletionBeforeBoundary/D": 3,
+          "TestIdentityCompletionBeforeBoundary/E": 3,
+          "TestIdentityCompletionBeforeBoundary/F": 3,
+          "TestIdentityDetachedPort": 3,
+          "TestIdentityDetachedPort/A": 3,
+          "TestIdentityDetachedPort/B": 3,
+          "TestIdentityDetachedPort/C": 3,
+          "TestIdentityDetachedPort/E": 3,
+          "TestIdentityDetachedPort/F": 3,
+          "TestIdentityRegistryAbsent": 3,
+          "TestIdentityRegistryAbsent/no_later_input": 3,
+          "TestIdentityRegistryAbsent/later_matching_key": 3,
+          "TestIdentityRegistryNilEntry": 3,
+          "TestIdentityRegistryNilEntry/no_later_input": 3,
+          "TestIdentityRegistryNilEntry/later_matching_key": 3,
+          "TestIdentityRegistryNilMap": 3,
+          "TestIdentityRegistryNilMap/no_later_input": 3,
+          "TestIdentityRegistryNilMap/later_matching_key": 3,
+          "TestIdentityRegistryMapReplacement": 3,
+          "TestIdentityEpochRestoration": 3,
+          "TestIdentityEpochRestoration/A": 3,
+          "TestIdentityEpochRestoration/C": 3,
+          "TestIdentityTargetRestoration": 3,
+          "TestIdentityTargetRestoration/A": 3,
+          "TestIdentityTargetRestoration/C": 3,
+          "TestIdentityAbandonedAndRepeated": 3,
+          "TestIdentityAbandonedAndRepeated/A": 3,
+          "TestIdentityAbandonedAndRepeated/B": 3,
+          "TestIdentityAbandonedAndRepeated/C": 3,
+          "TestIdentityAbandonedAndRepeated/D": 3,
+          "TestIdentityAbandonedAndRepeated/E": 3,
+          "TestIdentityAbandonedAndRepeated/F": 3,
+          "TestIdentityOverlappingAdmissions": 3,
+          "TestIdentityOverlappingAdmissions/A": 3,
+          "TestIdentityOverlappingAdmissions/B": 3,
+          "TestIdentityOverlappingAdmissions/C": 3,
+          "TestIdentityOverlappingAdmissions/D": 3,
+          "TestIdentityOverlappingAdmissions/E": 3,
+          "TestIdentityOverlappingAdmissions/F": 3,
+          "TestIdentityInvalidAdmission": 3,
+          "TestIdentityInvalidAdmission/A": 3,
+          "TestIdentityInvalidAdmission/B": 3,
+          "TestIdentityInvalidAdmission/C": 3,
+          "TestIdentityInvalidAdmission/D": 3,
+          "TestIdentityInvalidAdmission/D/missing": 3,
+          "TestIdentityInvalidAdmission/D/nil_entry": 3,
+          "TestIdentityInvalidAdmission/D/nil_map": 3,
+          "TestIdentityInvalidAdmission/E": 3,
+          "TestIdentityInvalidAdmission/F": 3,
+          "TestIdentityValueCopy": 3,
+          "TestIdentityCapturedObjectAfterReset": 3,
+          "TestIdentityCallerDeparture": 3,
+          "TestIdentityCallerDeparture/A": 3,
+          "TestIdentityCallerDeparture/A/no_later_input": 3,
+          "TestIdentityCallerDeparture/A/later_completion": 3,
+          "TestIdentityCallerDeparture/B": 3,
+          "TestIdentityCallerDeparture/B/no_later_input": 3,
+          "TestIdentityCallerDeparture/B/later_completion": 3,
+          "TestIdentityCallerDeparture/C": 3,
+          "TestIdentityCallerDeparture/C/no_later_input": 3,
+          "TestIdentityCallerDeparture/C/later_completion": 3,
+          "TestIdentityCallerDeparture/D": 3,
+          "TestIdentityCallerDeparture/D/no_later_input": 3,
+          "TestIdentityCallerDeparture/D/later_completion": 3,
+          "TestIdentityCallerDeparture/E": 3,
+          "TestIdentityCallerDeparture/E/no_later_input": 3,
+          "TestIdentityCallerDeparture/E/later_completion": 3,
+          "TestIdentityCallerDeparture/F": 3,
+          "TestIdentityCallerDeparture/F/no_later_input": 3,
+          "TestIdentityCallerDeparture/F/later_completion": 3,
+          "TestIdentityMatchingAfterMismatch": 3,
+          "TestIdentityMatchingAfterMismatch/A": 3,
+          "TestIdentityMatchingAfterMismatch/C": 3
+        },
+        "passed": {
+          "TestIdentityBaseline/A": 3,
+          "TestIdentityBaseline/B": 3,
+          "TestIdentityBaseline/C": 3,
+          "TestIdentityBaseline/D": 3,
+          "TestIdentityBaseline/E": 3,
+          "TestIdentityBaseline/F": 3,
+          "TestIdentityBaseline": 3,
+          "TestIdentitySameEpochReplacement/A": 3,
+          "TestIdentitySameEpochReplacement/B": 3,
+          "TestIdentitySameEpochReplacement/C": 3,
+          "TestIdentitySameEpochReplacement/D": 3,
+          "TestIdentitySameEpochReplacement/E": 3,
+          "TestIdentitySameEpochReplacement/F": 3,
+          "TestIdentitySameEpochReplacement": 3,
+          "TestIdentityDifferentEpochReplacement/A": 3,
+          "TestIdentityDifferentEpochReplacement/B": 3,
+          "TestIdentityDifferentEpochReplacement/C": 3,
+          "TestIdentityDifferentEpochReplacement/D": 3,
+          "TestIdentityDifferentEpochReplacement/E": 3,
+          "TestIdentityDifferentEpochReplacement/F": 3,
+          "TestIdentityDifferentEpochReplacement": 3,
+          "TestIdentityEpochChange/A": 3,
+          "TestIdentityEpochChange/B": 3,
+          "TestIdentityEpochChange/C": 3,
+          "TestIdentityEpochChange/D": 3,
+          "TestIdentityEpochChange/E": 3,
+          "TestIdentityEpochChange/F": 3,
+          "TestIdentityEpochChange": 3,
+          "TestIdentityCompletionBeforeBoundary/A": 3,
+          "TestIdentityCompletionBeforeBoundary/B": 3,
+          "TestIdentityCompletionBeforeBoundary/C": 3,
+          "TestIdentityCompletionBeforeBoundary/D": 3,
+          "TestIdentityCompletionBeforeBoundary/E": 3,
+          "TestIdentityCompletionBeforeBoundary/F": 3,
+          "TestIdentityCompletionBeforeBoundary": 3,
+          "TestIdentityDetachedPort/A": 3,
+          "TestIdentityDetachedPort/B": 3,
+          "TestIdentityDetachedPort/C": 3,
+          "TestIdentityDetachedPort/E": 3,
+          "TestIdentityDetachedPort/F": 3,
+          "TestIdentityDetachedPort": 3,
+          "TestIdentityRegistryAbsent/no_later_input": 3,
+          "TestIdentityRegistryAbsent/later_matching_key": 3,
+          "TestIdentityRegistryAbsent": 3,
+          "TestIdentityRegistryNilEntry/no_later_input": 3,
+          "TestIdentityRegistryNilEntry/later_matching_key": 3,
+          "TestIdentityRegistryNilEntry": 3,
+          "TestIdentityRegistryNilMap/no_later_input": 3,
+          "TestIdentityRegistryNilMap/later_matching_key": 3,
+          "TestIdentityRegistryNilMap": 3,
+          "TestIdentityRegistryMapReplacement": 3,
+          "TestIdentityEpochRestoration/A": 3,
+          "TestIdentityEpochRestoration/C": 3,
+          "TestIdentityEpochRestoration": 3,
+          "TestIdentityTargetRestoration/A": 3,
+          "TestIdentityTargetRestoration/C": 3,
+          "TestIdentityTargetRestoration": 3,
+          "TestIdentityAbandonedAndRepeated/A": 3,
+          "TestIdentityAbandonedAndRepeated/B": 3,
+          "TestIdentityAbandonedAndRepeated/C": 3,
+          "TestIdentityAbandonedAndRepeated/D": 3,
+          "TestIdentityAbandonedAndRepeated/E": 3,
+          "TestIdentityAbandonedAndRepeated/F": 3,
+          "TestIdentityAbandonedAndRepeated": 3,
+          "TestIdentityOverlappingAdmissions/A": 3,
+          "TestIdentityOverlappingAdmissions/B": 3,
+          "TestIdentityOverlappingAdmissions/C": 3,
+          "TestIdentityOverlappingAdmissions/D": 3,
+          "TestIdentityOverlappingAdmissions/E": 3,
+          "TestIdentityOverlappingAdmissions/F": 3,
+          "TestIdentityOverlappingAdmissions": 3,
+          "TestIdentityInvalidAdmission/A": 3,
+          "TestIdentityInvalidAdmission/B": 3,
+          "TestIdentityInvalidAdmission/C": 3,
+          "TestIdentityInvalidAdmission/D/missing": 3,
+          "TestIdentityInvalidAdmission/D/nil_entry": 3,
+          "TestIdentityInvalidAdmission/D/nil_map": 3,
+          "TestIdentityInvalidAdmission/D": 3,
+          "TestIdentityInvalidAdmission/E": 3,
+          "TestIdentityInvalidAdmission/F": 3,
+          "TestIdentityInvalidAdmission": 3,
+          "TestIdentityValueCopy": 3,
+          "TestIdentityCapturedObjectAfterReset": 3,
+          "TestIdentityCallerDeparture/A/no_later_input": 3,
+          "TestIdentityCallerDeparture/A/later_completion": 3,
+          "TestIdentityCallerDeparture/A": 3,
+          "TestIdentityCallerDeparture/B/no_later_input": 3,
+          "TestIdentityCallerDeparture/B/later_completion": 3,
+          "TestIdentityCallerDeparture/B": 3,
+          "TestIdentityCallerDeparture/C/no_later_input": 3,
+          "TestIdentityCallerDeparture/C/later_completion": 3,
+          "TestIdentityCallerDeparture/C": 3,
+          "TestIdentityCallerDeparture/D/no_later_input": 3,
+          "TestIdentityCallerDeparture/D/later_completion": 3,
+          "TestIdentityCallerDeparture/D": 3,
+          "TestIdentityCallerDeparture/E/no_later_input": 3,
+          "TestIdentityCallerDeparture/E/later_completion": 3,
+          "TestIdentityCallerDeparture/E": 3,
+          "TestIdentityCallerDeparture/F/no_later_input": 3,
+          "TestIdentityCallerDeparture/F/later_completion": 3,
+          "TestIdentityCallerDeparture/F": 3,
+          "TestIdentityCallerDeparture": 3,
+          "TestIdentityMatchingAfterMismatch/A": 3,
+          "TestIdentityMatchingAfterMismatch/C": 3,
+          "TestIdentityMatchingAfterMismatch": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "complete_nonempty": true
+      }
+    ]
+  },
+  "transfer-candidate": {
+    "settings": {
+      "component": "transfer",
+      "variant": "candidate",
+      "pack": "f76591e06757a4520f49871e092c6e702861887c",
+      "source_sha": "4d47aebcc0b5e04084d333a385c237105a889576",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "output": "selective",
+      "timeout": 900,
+      "prompt_sha256": "5626085f42e269c0b7b0e526bb42139dc9d4f4e2521e6593a0cf85d29f9f1d2f",
+      "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1"
+    },
+    "cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 10.82017,
+      "reported_codex_usd_estimate": 0.4328068,
+      "settled_routing_usd": 0.002592,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.4353988,
+      "total_usd_estimate": 0.4353988,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "result": {
+      "elapsed_seconds": 537.521,
+      "tool_calls": 45
+    },
+    "controller_complete": true,
+    "probe_gate": true,
+    "bounded_acceptance": true,
+    "structure_gate": {
+      "exit": 0,
+      "stdout": "analysis/initial.json: 35 structurally valid findings; semantics not graded\nanalysis/final.json: 40 structurally valid findings; semantics not graded\n",
+      "stderr": ""
+    },
+    "source_unchanged": true,
+    "validator_sha256": "9bfc55146e42e3abc2c4c621e62ce443f32a7ed1ee98cc826de621904aa9ca6d",
+    "tool_calls": 45,
+    "commands": 45,
+    "log_rereads": 0,
+    "nonzero_commands": [],
+    "mcp_errors": [],
+    "report_edits": {
+      "initial": 35,
+      "final": 40,
+      "added": [
+        "F36",
+        "F37",
+        "F38",
+        "F39",
+        "F40"
+      ],
+      "removed": [],
+      "changed_fields": {
+        "F29": [
+          "steps",
+          "outcome"
+        ],
+        "F23": [
+          "steps",
+          "outcome"
+        ],
+        "F04": [
+          "steps",
+          "outcome"
+        ],
+        "F05": [
+          "steps",
+          "outcome"
+        ],
+        "F03": [
+          "steps",
+          "outcome"
+        ],
+        "F32": [
+          "steps",
+          "outcome"
+        ],
+        "F07": [
+          "steps",
+          "outcome"
+        ],
+        "F34": [
+          "steps",
+          "outcome"
+        ],
+        "F12": [
+          "steps",
+          "outcome"
+        ],
+        "F10": [
+          "steps",
+          "outcome"
+        ],
+        "F22": [
+          "steps",
+          "outcome"
+        ],
+        "F28": [
+          "steps",
+          "outcome"
+        ],
+        "F35": [
+          "outcome"
+        ],
+        "F15": [
+          "steps",
+          "outcome"
+        ],
+        "F14": [
+          "steps",
+          "outcome"
+        ],
+        "F17": [
+          "steps",
+          "outcome"
+        ],
+        "F13": [
+          "steps",
+          "outcome"
+        ],
+        "F24": [
+          "steps",
+          "outcome"
+        ],
+        "F31": [
+          "outcome"
+        ],
+        "F20": [
+          "steps",
+          "outcome"
+        ],
+        "F30": [
+          "steps",
+          "outcome"
+        ],
+        "F21": [
+          "steps",
+          "outcome"
+        ],
+        "F01": [
+          "steps",
+          "outcome"
+        ],
+        "F26": [
+          "steps",
+          "outcome"
+        ],
+        "F08": [
+          "initial",
+          "steps",
+          "outcome"
+        ],
+        "F27": [
+          "steps",
+          "outcome"
+        ],
+        "F25": [
+          "steps",
+          "outcome"
+        ],
+        "F16": [
+          "initial",
+          "steps",
+          "outcome"
+        ],
+        "F19": [
+          "initial",
+          "steps",
+          "outcome"
+        ],
+        "F33": [
+          "outcome"
+        ],
+        "F09": [
+          "steps",
+          "outcome"
+        ],
+        "F06": [
+          "steps",
+          "outcome"
+        ],
+        "F02": [
+          "steps",
+          "outcome"
+        ],
+        "F18": [
+          "steps",
+          "outcome"
+        ],
+        "F11": [
+          "steps",
+          "outcome"
+        ]
+      }
+    },
+    "model_review": {
+      "draft-verify.json": {
+        "keys": [
+          "source",
+          "source_sha256",
+          "draft",
+          "verification",
+          "claims",
+          "questions",
+          "review_required"
+        ],
+        "counts": {},
+        "draft_judgments": {
+          "supported": 12,
+          "unclear": 1
+        },
+        "questions": 22,
+        "claims": 13
+      },
+      "final-jev.json": {
+        "keys": [
+          "model",
+          "source_sha256",
+          "input_tokens",
+          "cost_microdollars",
+          "reservation_microdollars",
+          "checks"
+        ],
+        "counts": {
+          "supported": 54,
+          "unclear": 25
+        },
+        "draft_judgments": {},
+        "questions": 0,
+        "claims": 0
+      }
+    },
+    "probe_runs": [
+      {
+        "file": "analysis/probe-01.stdout.jsonl",
+        "started": {
+          "TestIdentityAEpochAndTarget": 3,
+          "TestIdentityAEpochAndTarget/unchanged": 3,
+          "TestIdentityAEpochAndTarget/matching_replacement": 3,
+          "TestIdentityAEpochAndTarget/different_epoch_replacement": 3,
+          "TestIdentityAEpochAndTarget/epoch_change_and_restoration": 3,
+          "TestIdentityAEpochAndTarget/cleared": 3,
+          "TestIdentityAPortIdentity": 3,
+          "TestIdentityAPortIdentity/caller_rebind_and_copy": 3,
+          "TestIdentityAPortIdentity/overwrite_original_port_and_copy_account": 3,
+          "TestIdentityCapturedAccounts": 3,
+          "TestIdentityCapturedAccounts/B": 3,
+          "TestIdentityCapturedAccounts/B/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/B/cleared_port": 3,
+          "TestIdentityCapturedAccounts/E": 3,
+          "TestIdentityCapturedAccounts/E/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/E/cleared_port": 3,
+          "TestIdentityCapturedAccounts/F": 3,
+          "TestIdentityCapturedAccounts/F/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/F/cleared_port": 3,
+          "TestIdentityCIdentityAndEpoch": 3,
+          "TestIdentityCIdentityAndEpoch/unchanged": 3,
+          "TestIdentityCIdentityAndEpoch/equal_account_copy_and_restored_pointer": 3,
+          "TestIdentityCIdentityAndEpoch/same_account_epoch_change_and_restoration": 3,
+          "TestIdentityCIdentityAndEpoch/cleared_port": 3,
+          "TestIdentityDRegistryAndKey": 3,
+          "TestIdentityDRegistryAndKey/unchanged": 3,
+          "TestIdentityDRegistryAndKey/entry_replacement": 3,
+          "TestIdentityDRegistryAndKey/delete": 3,
+          "TestIdentityDRegistryAndKey/nil_entry": 3,
+          "TestIdentityDRegistryAndKey/nil_map": 3,
+          "TestIdentityDRegistryAndKey/reinsert": 3,
+          "TestIdentityDRegistryAndKey/map_replacement": 3,
+          "TestIdentityDRegistryAndKey/caller_rebind": 3,
+          "TestIdentityDRegistryAndKey/copy_shares_map": 3,
+          "TestIdentityDRegistryAndKey/caller_reassigns_key": 3,
+          "TestIdentityAdmissionAndRepeat": 3,
+          "TestIdentityAdmissionAndRepeat/A": 3,
+          "TestIdentityAdmissionAndRepeat/B": 3,
+          "TestIdentityAdmissionAndRepeat/C": 3,
+          "TestIdentityAdmissionAndRepeat/D": 3,
+          "TestIdentityAdmissionAndRepeat/E": 3,
+          "TestIdentityAdmissionAndRepeat/F": 3,
+          "TestIdentityNilAdmission": 3,
+          "TestIdentityNilAdmission/A": 3,
+          "TestIdentityNilAdmission/B": 3,
+          "TestIdentityNilAdmission/E": 3,
+          "TestIdentityNilAdmission/D_absent_key": 3,
+          "TestIdentityNilAdmission/C": 3,
+          "TestIdentityNilAdmission/F": 3,
+          "TestIdentityNilAdmission/F_nil_port": 3,
+          "TestIdentityNilAdmission/D_nil_entry": 3,
+          "TestIdentityNilAdmission/D_nil_map": 3
+        },
+        "passed": {
+          "TestIdentityAEpochAndTarget/unchanged": 3,
+          "TestIdentityAEpochAndTarget/matching_replacement": 3,
+          "TestIdentityAEpochAndTarget/different_epoch_replacement": 3,
+          "TestIdentityAEpochAndTarget/epoch_change_and_restoration": 3,
+          "TestIdentityAEpochAndTarget/cleared": 3,
+          "TestIdentityAEpochAndTarget": 3,
+          "TestIdentityAPortIdentity/caller_rebind_and_copy": 3,
+          "TestIdentityAPortIdentity/overwrite_original_port_and_copy_account": 3,
+          "TestIdentityAPortIdentity": 3,
+          "TestIdentityCapturedAccounts/B/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/B/cleared_port": 3,
+          "TestIdentityCapturedAccounts/B": 3,
+          "TestIdentityCapturedAccounts/E/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/E/cleared_port": 3,
+          "TestIdentityCapturedAccounts/E": 3,
+          "TestIdentityCapturedAccounts/F/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/F/cleared_port": 3,
+          "TestIdentityCapturedAccounts/F": 3,
+          "TestIdentityCapturedAccounts": 3,
+          "TestIdentityCIdentityAndEpoch/unchanged": 3,
+          "TestIdentityCIdentityAndEpoch/equal_account_copy_and_restored_pointer": 3,
+          "TestIdentityCIdentityAndEpoch/same_account_epoch_change_and_restoration": 3,
+          "TestIdentityCIdentityAndEpoch/cleared_port": 3,
+          "TestIdentityCIdentityAndEpoch": 3,
+          "TestIdentityDRegistryAndKey/unchanged": 3,
+          "TestIdentityDRegistryAndKey/entry_replacement": 3,
+          "TestIdentityDRegistryAndKey/delete": 3,
+          "TestIdentityDRegistryAndKey/nil_entry": 3,
+          "TestIdentityDRegistryAndKey/nil_map": 3,
+          "TestIdentityDRegistryAndKey/reinsert": 3,
+          "TestIdentityDRegistryAndKey/map_replacement": 3,
+          "TestIdentityDRegistryAndKey/caller_rebind": 3,
+          "TestIdentityDRegistryAndKey/copy_shares_map": 3,
+          "TestIdentityDRegistryAndKey/caller_reassigns_key": 3,
+          "TestIdentityDRegistryAndKey": 3,
+          "TestIdentityAdmissionAndRepeat/A": 3,
+          "TestIdentityAdmissionAndRepeat/B": 3,
+          "TestIdentityAdmissionAndRepeat/C": 3,
+          "TestIdentityAdmissionAndRepeat/D": 3,
+          "TestIdentityAdmissionAndRepeat/E": 3,
+          "TestIdentityAdmissionAndRepeat/F": 3,
+          "TestIdentityAdmissionAndRepeat": 3,
+          "TestIdentityNilAdmission/A": 3,
+          "TestIdentityNilAdmission/B": 3,
+          "TestIdentityNilAdmission/E": 3,
+          "TestIdentityNilAdmission/D_absent_key": 3,
+          "TestIdentityNilAdmission/C": 3,
+          "TestIdentityNilAdmission/F": 3,
+          "TestIdentityNilAdmission/F_nil_port": 3,
+          "TestIdentityNilAdmission/D_nil_entry": 3,
+          "TestIdentityNilAdmission/D_nil_map": 3,
+          "TestIdentityNilAdmission": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "complete_nonempty": true
+      },
+      {
+        "file": "analysis/probe-02.stdout.jsonl",
+        "started": {
+          "TestIdentityDepartureWithoutDelivery": 3,
+          "TestIdentityDepartureWithoutDelivery/A": 3,
+          "TestIdentityDepartureWithoutDelivery/B": 3,
+          "TestIdentityDepartureWithoutDelivery/C": 3,
+          "TestIdentityDepartureWithoutDelivery/D": 3,
+          "TestIdentityDepartureWithoutDelivery/E": 3,
+          "TestIdentityDepartureWithoutDelivery/F": 3,
+          "TestIdentityDeliveryAcrossReplacement": 3,
+          "TestIdentityDeliveryAcrossReplacement/A_matching_replacement": 3,
+          "TestIdentityDeliveryAcrossReplacement/C_matching_replacement": 3,
+          "TestIdentityDeliveryAcrossReplacement/D_replacement_at_key": 3,
+          "TestIdentityAEpochAndTarget": 3,
+          "TestIdentityAEpochAndTarget/unchanged": 3,
+          "TestIdentityAEpochAndTarget/matching_replacement": 3,
+          "TestIdentityAEpochAndTarget/different_epoch_replacement": 3,
+          "TestIdentityAEpochAndTarget/epoch_change_and_restoration": 3,
+          "TestIdentityAEpochAndTarget/cleared": 3,
+          "TestIdentityAPortIdentity": 3,
+          "TestIdentityAPortIdentity/caller_rebind_and_copy": 3,
+          "TestIdentityAPortIdentity/overwrite_original_port_and_copy_account": 3,
+          "TestIdentityCapturedAccounts": 3,
+          "TestIdentityCapturedAccounts/B": 3,
+          "TestIdentityCapturedAccounts/B/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/B/cleared_port": 3,
+          "TestIdentityCapturedAccounts/E": 3,
+          "TestIdentityCapturedAccounts/E/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/E/cleared_port": 3,
+          "TestIdentityCapturedAccounts/F": 3,
+          "TestIdentityCapturedAccounts/F/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/F/cleared_port": 3,
+          "TestIdentityCIdentityAndEpoch": 3,
+          "TestIdentityCIdentityAndEpoch/unchanged": 3,
+          "TestIdentityCIdentityAndEpoch/equal_account_copy_and_restored_pointer": 3,
+          "TestIdentityCIdentityAndEpoch/same_account_epoch_change_and_restoration": 3,
+          "TestIdentityCIdentityAndEpoch/cleared_port": 3,
+          "TestIdentityDRegistryAndKey": 3,
+          "TestIdentityDRegistryAndKey/unchanged": 3,
+          "TestIdentityDRegistryAndKey/entry_replacement": 3,
+          "TestIdentityDRegistryAndKey/delete": 3,
+          "TestIdentityDRegistryAndKey/nil_entry": 3,
+          "TestIdentityDRegistryAndKey/nil_map": 3,
+          "TestIdentityDRegistryAndKey/reinsert": 3,
+          "TestIdentityDRegistryAndKey/map_replacement": 3,
+          "TestIdentityDRegistryAndKey/caller_rebind": 3,
+          "TestIdentityDRegistryAndKey/copy_shares_map": 3,
+          "TestIdentityDRegistryAndKey/caller_reassigns_key": 3,
+          "TestIdentityAdmissionAndRepeat": 3,
+          "TestIdentityAdmissionAndRepeat/A": 3,
+          "TestIdentityAdmissionAndRepeat/B": 3,
+          "TestIdentityAdmissionAndRepeat/C": 3,
+          "TestIdentityAdmissionAndRepeat/D": 3,
+          "TestIdentityAdmissionAndRepeat/E": 3,
+          "TestIdentityAdmissionAndRepeat/F": 3,
+          "TestIdentityNilAdmission": 3,
+          "TestIdentityNilAdmission/B": 3,
+          "TestIdentityNilAdmission/C": 3,
+          "TestIdentityNilAdmission/E": 3,
+          "TestIdentityNilAdmission/F_nil_port": 3,
+          "TestIdentityNilAdmission/D_absent_key": 3,
+          "TestIdentityNilAdmission/D_nil_map": 3,
+          "TestIdentityNilAdmission/A": 3,
+          "TestIdentityNilAdmission/F": 3,
+          "TestIdentityNilAdmission/D_nil_entry": 3
+        },
+        "passed": {
+          "TestIdentityDepartureWithoutDelivery/A": 3,
+          "TestIdentityDepartureWithoutDelivery/B": 3,
+          "TestIdentityDepartureWithoutDelivery/C": 3,
+          "TestIdentityDepartureWithoutDelivery/D": 3,
+          "TestIdentityDepartureWithoutDelivery/E": 3,
+          "TestIdentityDepartureWithoutDelivery/F": 3,
+          "TestIdentityDepartureWithoutDelivery": 3,
+          "TestIdentityDeliveryAcrossReplacement/A_matching_replacement": 3,
+          "TestIdentityDeliveryAcrossReplacement/C_matching_replacement": 3,
+          "TestIdentityDeliveryAcrossReplacement/D_replacement_at_key": 3,
+          "TestIdentityDeliveryAcrossReplacement": 3,
+          "TestIdentityAEpochAndTarget/unchanged": 3,
+          "TestIdentityAEpochAndTarget/matching_replacement": 3,
+          "TestIdentityAEpochAndTarget/different_epoch_replacement": 3,
+          "TestIdentityAEpochAndTarget/epoch_change_and_restoration": 3,
+          "TestIdentityAEpochAndTarget/cleared": 3,
+          "TestIdentityAEpochAndTarget": 3,
+          "TestIdentityAPortIdentity/caller_rebind_and_copy": 3,
+          "TestIdentityAPortIdentity/overwrite_original_port_and_copy_account": 3,
+          "TestIdentityAPortIdentity": 3,
+          "TestIdentityCapturedAccounts/B/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/B/cleared_port": 3,
+          "TestIdentityCapturedAccounts/B": 3,
+          "TestIdentityCapturedAccounts/E/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/E/cleared_port": 3,
+          "TestIdentityCapturedAccounts/E": 3,
+          "TestIdentityCapturedAccounts/F/retarget_and_epoch_change": 3,
+          "TestIdentityCapturedAccounts/F/cleared_port": 3,
+          "TestIdentityCapturedAccounts/F": 3,
+          "TestIdentityCapturedAccounts": 3,
+          "TestIdentityCIdentityAndEpoch/unchanged": 3,
+          "TestIdentityCIdentityAndEpoch/equal_account_copy_and_restored_pointer": 3,
+          "TestIdentityCIdentityAndEpoch/same_account_epoch_change_and_restoration": 3,
+          "TestIdentityCIdentityAndEpoch/cleared_port": 3,
+          "TestIdentityCIdentityAndEpoch": 3,
+          "TestIdentityDRegistryAndKey/unchanged": 3,
+          "TestIdentityDRegistryAndKey/entry_replacement": 3,
+          "TestIdentityDRegistryAndKey/delete": 3,
+          "TestIdentityDRegistryAndKey/nil_entry": 3,
+          "TestIdentityDRegistryAndKey/nil_map": 3,
+          "TestIdentityDRegistryAndKey/reinsert": 3,
+          "TestIdentityDRegistryAndKey/map_replacement": 3,
+          "TestIdentityDRegistryAndKey/caller_rebind": 3,
+          "TestIdentityDRegistryAndKey/copy_shares_map": 3,
+          "TestIdentityDRegistryAndKey/caller_reassigns_key": 3,
+          "TestIdentityDRegistryAndKey": 3,
+          "TestIdentityAdmissionAndRepeat/A": 3,
+          "TestIdentityAdmissionAndRepeat/B": 3,
+          "TestIdentityAdmissionAndRepeat/C": 3,
+          "TestIdentityAdmissionAndRepeat/D": 3,
+          "TestIdentityAdmissionAndRepeat/E": 3,
+          "TestIdentityAdmissionAndRepeat/F": 3,
+          "TestIdentityAdmissionAndRepeat": 3,
+          "TestIdentityNilAdmission/B": 3,
+          "TestIdentityNilAdmission/C": 3,
+          "TestIdentityNilAdmission/E": 3,
+          "TestIdentityNilAdmission/F_nil_port": 3,
+          "TestIdentityNilAdmission/D_absent_key": 3,
+          "TestIdentityNilAdmission/D_nil_map": 3,
+          "TestIdentityNilAdmission/A": 3,
+          "TestIdentityNilAdmission/F": 3,
+          "TestIdentityNilAdmission/D_nil_entry": 3,
+          "TestIdentityNilAdmission": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "complete_nonempty": true
+      }
+    ]
+  }
+}

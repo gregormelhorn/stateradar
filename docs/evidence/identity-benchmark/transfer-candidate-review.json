@@ -1,0 +1,187 @@
+{
+  "reviewer": "Codex supervising agent, final reports and generated public-seam probes reviewed 2026-11-14",
+  "scope": "Recipient/effect classes for six untuned synthetic controls, including two redirection positives. Four no-redirection classes have no false redirection claim in the mapped final findings. No universal false-positive rate or independent held-out result is claimed. Canonical F sequence remains unexecuted by either generated suite.",
+  "rows": [
+    {
+      "id": "T-A",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityAEpochAndTarget",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/final.json",
+          "sha256": "f410254f99b759b94fbfc82d0069acc74e7569cb941fe5e461292184ab6e945a",
+          "line": 28,
+          "quote": "      \"outcome\": \"observed-in-code component.go:10 (\\\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\\\"). A increments b.Successes. The completion leaves a.Successes at zero. observed-in-tests analysis/_probe/identity_test.go:40 (\\\"counters(t, a, 1, 0)\\\"), analysis/_probe/identity_test.go:41 (\\\"counters(t, b, 0, 1)\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/_probe/identity_test.go",
+          "sha256": "bddb7cdc43fc53c2f921dec0e3339659653262bb367eb3a95609f7066b3fa0a8",
+          "line": 26,
+          "quote": "func TestIdentityAEpochAndTarget(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-candidate-final.jsonl",
+          "sha256": "ea43e24e6c1f13e526a569ce0e0d7b150ef45d9a34968721bf52ef06ec0b0811",
+          "line": 69,
+          "quote": "{\"Time\":\"2026-11-14T22:54:52.456871+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentityAEpochAndTarget\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-B",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityCapturedAccounts",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/final.json",
+          "sha256": "f410254f99b759b94fbfc82d0069acc74e7569cb941fe5e461292184ab6e945a",
+          "line": 149,
+          "quote": "      \"outcome\": \"observed-in-code component.go:15 (\\\"return func() { target.Successes++ }\\\"). B increments a.Successes using the saved account pointer regardless of the epoch change. observed-in-tests analysis/_probe/identity_test.go:110 (\\\"counters(t, a, 1, 1)\\\"), analysis/_probe/identity_test.go:111 (\\\"counters(t, b, 0, 0)\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/_probe/identity_test.go",
+          "sha256": "bddb7cdc43fc53c2f921dec0e3339659653262bb367eb3a95609f7066b3fa0a8",
+          "line": 91,
+          "quote": "func TestIdentityCapturedAccounts(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-candidate-final.jsonl",
+          "sha256": "ea43e24e6c1f13e526a569ce0e0d7b150ef45d9a34968721bf52ef06ec0b0811",
+          "line": 121,
+          "quote": "{\"Time\":\"2026-11-14T22:54:52.458107+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentityCapturedAccounts\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-C",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityCIdentityAndEpoch",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch. The replacement is an account-value copy, so Requests starts at one rather than zero; no success is added to either object. The counter starting value is not a guard. The independent canonical oracle separately checks a new zero-counter replacement.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/final.json",
+          "sha256": "f410254f99b759b94fbfc82d0069acc74e7569cb941fe5e461292184ab6e945a",
+          "line": 267,
+          "quote": "      \"outcome\": \"observed-in-code component.go:20 (\\\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\\\"). C skips the success increment because b is a different account object despite the copied epoch. Both the original and the value copy retain their zero Successes. observed-in-tests analysis/_probe/identity_test.go:141 (\\\"counters(t, a, 1, 0)\\\"), analysis/_probe/identity_test.go:142 (\\\"counters(t, &copyAccount, 1, 0)\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/_probe/identity_test.go",
+          "sha256": "bddb7cdc43fc53c2f921dec0e3339659653262bb367eb3a95609f7066b3fa0a8",
+          "line": 125,
+          "quote": "func TestIdentityCIdentityAndEpoch(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-candidate-final.jsonl",
+          "sha256": "ea43e24e6c1f13e526a569ce0e0d7b150ef45d9a34968721bf52ef06ec0b0811",
+          "line": 141,
+          "quote": "{\"Time\":\"2026-11-14T22:54:52.458377+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentityCIdentityAndEpoch\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-D",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityDRegistryAndKey",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/final.json",
+          "sha256": "f410254f99b759b94fbfc82d0069acc74e7569cb941fe5e461292184ab6e945a",
+          "line": 368,
+          "quote": "      \"outcome\": \"observed-in-code component.go:24 (\\\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\\\"). D increments b.Successes without an epoch check. observed-in-tests analysis/_probe/identity_test.go:181 (\\\"case \\\"entry replacement\\\":\\\"), analysis/_probe/identity_test.go:218 (\\\"counters(t, a, 1, wantA)\\\"), analysis/_probe/identity_test.go:219 (\\\"counters(t, b, 0, wantB)\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/_probe/identity_test.go",
+          "sha256": "bddb7cdc43fc53c2f921dec0e3339659653262bb367eb3a95609f7066b3fa0a8",
+          "line": 168,
+          "quote": "func TestIdentityDRegistryAndKey(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-candidate-final.jsonl",
+          "sha256": "ea43e24e6c1f13e526a569ce0e0d7b150ef45d9a34968721bf52ef06ec0b0811",
+          "line": 185,
+          "quote": "{\"Time\":\"2026-11-14T22:54:52.458999+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentityDRegistryAndKey\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-E",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityCapturedAccounts",
+      "rationale": "The reported recipient and success effect match the frozen control. Probe uses the same identity/equality guard class; chosen epoch values do not introduce a different source branch.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/final.json",
+          "sha256": "f410254f99b759b94fbfc82d0069acc74e7569cb941fe5e461292184ab6e945a",
+          "line": 166,
+          "quote": "      \"outcome\": \"observed-in-code component.go:28 (\\\"return func() { p.Target.Successes++ }\\\"). E increments a.Successes through its receiver copy's Target pointer regardless of the epoch change. observed-in-tests analysis/_probe/identity_test.go:110 (\\\"counters(t, a, 1, 1)\\\"), analysis/_probe/identity_test.go:111 (\\\"counters(t, b, 0, 0)\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/_probe/identity_test.go",
+          "sha256": "bddb7cdc43fc53c2f921dec0e3339659653262bb367eb3a95609f7066b3fa0a8",
+          "line": 91,
+          "quote": "func TestIdentityCapturedAccounts(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-candidate-final.jsonl",
+          "sha256": "ea43e24e6c1f13e526a569ce0e0d7b150ef45d9a34968721bf52ef06ec0b0811",
+          "line": 121,
+          "quote": "{\"Time\":\"2026-11-14T22:54:52.458107+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentityCapturedAccounts\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-F",
+      "found": true,
+      "correct": true,
+      "tested": "partial",
+      "test_name": "TestIdentityCapturedAccounts",
+      "rationale": "The report explicitly retains F as a stable captured-target completion, correctly excluding redirection after a stronger mutation of the original Port.Target. The generated probe does not separately execute caller-variable rebinding from the canonical F control. Recipient-class coverage is retained, exact-sequence test coverage is partial. No claim that the generated probe ran that missing schedule.",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/final.json",
+          "sha256": "f410254f99b759b94fbfc82d0069acc74e7569cb941fe5e461292184ab6e945a",
+          "line": 183,
+          "quote": "      \"outcome\": \"observed-in-code component.go:33 (\\\"return func() { target.Successes++ }\\\"). F increments a.Successes using the saved account pointer regardless of the epoch change. observed-in-tests analysis/_probe/identity_test.go:110 (\\\"counters(t, a, 1, 1)\\\"), analysis/_probe/identity_test.go:111 (\\\"counters(t, b, 0, 0)\\\").\","
+        }
+      ],
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-benchmark/runs/transfer-candidate/analysis/_probe/identity_test.go",
+          "sha256": "bddb7cdc43fc53c2f921dec0e3339659653262bb367eb3a95609f7066b3fa0a8",
+          "line": 91,
+          "quote": "func TestIdentityCapturedAccounts(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-candidate-final.jsonl",
+          "sha256": "ea43e24e6c1f13e526a569ce0e0d7b150ef45d9a34968721bf52ef06ec0b0811",
+          "line": 121,
+          "quote": "{\"Time\":\"2026-11-14T22:54:52.458107+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentityCapturedAccounts\",\"Elapsed\":0}"
+        }
+      ]
+    }
+  ],
+  "refuted_claims": []
+}

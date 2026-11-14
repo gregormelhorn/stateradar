@@ -1,0 +1,44 @@
+package gobreaker
+
+import (
+ "errors"
+ "testing"
+ "time"
+)
+
+func TestBenchmarkWrapperReassignment(t *testing.T) {
+ a := NewTwoStepCircuitBreaker(Settings{Name:"a"})
+ b := NewTwoStepCircuitBreaker(Settings{Name:"b"})
+ done, err := a.Allow(); if err != nil { t.Fatal(err) }
+ *a = *b
+ done(true)
+ if got:=b.Counts(); got.Requests != 0 || got.TotalSuccesses != 1 { t.Fatal(got) }
+}
+func TestBenchmarkOutstandingAllow(t *testing.T) {
+ cb := NewTwoStepCircuitBreaker(Settings{MaxRequests:2, Timeout:time.Nanosecond, ReadyToTrip:func(Counts)bool{return true}})
+ trip,err:=cb.Allow(); if err!=nil {t.Fatal(err)}; trip(false)
+ first,err:=cb.Allow(); if err!=nil {t.Fatal(err)}
+ second,err:=cb.Allow(); if err!=nil {t.Fatal(err)}
+ first(true)
+ if got:=cb.Counts(); got.Requests!=2 || got.TotalSuccesses!=1 {t.Fatal(got)}
+ if _,err:=cb.Allow(); err!=ErrTooManyRequests {t.Fatalf("third request: %v",err)}
+ second(true)
+ if cb.State()!=StateClosed {t.Fatal("second distinct completion did not close")}
+}
+func TestBenchmarkStaleResultAndError(t *testing.T) {
+ fault:=errors.New("original error")
+ entered,resume:=make(chan struct{}),make(chan struct{})
+ type result struct {value interface{}; err error}
+ finished:=make(chan result,1)
+ cb:=NewCircuitBreaker(Settings{ReadyToTrip:func(Counts)bool{return true}, IsSuccessful:func(err error)bool{
+  if err==fault {close(entered); <-resume; return true}; return false
+ }})
+ go func(){value,err:=cb.Execute(func()(interface{},error){return 7,fault});finished<-result{value,err}}()
+ <-entered
+ _,err:=cb.Execute(func()(interface{},error){return nil,nil});if err!=nil {t.Fatal(err)}
+ if cb.State()!=StateOpen {t.Fatal("not open")}
+ close(resume)
+ got:=<-finished
+ if got.value!=7 || got.err!=fault {t.Fatalf("original result changed: %+v",got)}
+ if counts:=cb.Counts(); counts!=(Counts{}) {t.Fatal(counts)}
+}

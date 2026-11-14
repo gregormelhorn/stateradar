@@ -1,0 +1,1404 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc",
+  "input_tokens": 16841,
+  "cost_microdollars": 708,
+  "reservation_microdollars": 2928,
+  "checks": {
+    "F01.01": {
+      "kind": "claim",
+      "statement": "Admission increments Requests once per allowed request.",
+      "source": "gobreaker.go",
+      "line": 56,
+      "fragment": "c.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.82,
+        "contradicted": 0.0,
+        "unclear": 0.18
+      },
+      "confidence": 0.73,
+      "review_required": true
+    },
+    "F01.02": {
+      "kind": "claim",
+      "statement": "Each invocation of the returned closure forwards the same captured generation and supplied boolean, with no single-use guard.",
+      "source": "gobreaker.go",
+      "line": 272,
+      "fragment": "tscb.cb.afterRequest(generation, success)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.62,
+        "contradicted": 0.17,
+        "unclear": 0.21
+      },
+      "confidence": 0.43,
+      "review_required": true
+    },
+    "F01.03": {
+      "kind": "claim",
+      "statement": "Success increments TotalSuccesses.",
+      "source": "gobreaker.go",
+      "line": 60,
+      "fragment": "c.TotalSuccesses++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "F01.04": {
+      "kind": "claim",
+      "statement": "Failure increments TotalFailures.",
+      "source": "gobreaker.go",
+      "line": 66,
+      "fragment": "c.TotalFailures++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "F01.05": {
+      "kind": "claim",
+      "statement": "A recorded failure resets ConsecutiveSuccesses.",
+      "source": "gobreaker.go",
+      "line": 68,
+      "fragment": "c.ConsecutiveSuccesses = 0",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.0,
+        "unclear": 0.04
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "F02.01": {
+      "kind": "claim",
+      "statement": "The half-open closing threshold is consecutive recorded successes rather than a count of distinct admissions.",
+      "source": "gobreaker.go",
+      "line": 316,
+      "fragment": "if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.01,
+        "unclear": 0.0
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F02.02": {
+      "kind": "claim",
+      "statement": "Reaching the half-open success threshold closes the breaker.",
+      "source": "gobreaker.go",
+      "line": 317,
+      "fragment": "cb.setState(StateClosed, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F02.03": {
+      "kind": "claim",
+      "statement": "A report with a generation superseded by closing cannot contribute accounting.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.01,
+        "unclear": 0.07
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "F03.01": {
+      "kind": "claim",
+      "statement": "Half-open admission is blocked when Requests has reached maxRequests.",
+      "source": "gobreaker.go",
+      "line": 285,
+      "fragment": "} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "F03.02": {
+      "kind": "claim",
+      "statement": "Half-open installs zero expiry, with no half-open timeout transition.",
+      "source": "gobreaker.go",
+      "line": 378,
+      "fragment": "cb.expiry = zero",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.88,
+        "contradicted": 0.01,
+        "unclear": 0.11
+      },
+      "confidence": 0.82,
+      "review_required": true
+    },
+    "F03.03": {
+      "kind": "claim",
+      "statement": "An accepted admission increments Requests before returning.",
+      "source": "gobreaker.go",
+      "line": 289,
+      "fragment": "cb.counts.onRequest()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.88,
+        "contradicted": 0.01,
+        "unclear": 0.11
+      },
+      "confidence": 0.82,
+      "review_required": true
+    },
+    "F04.01": {
+      "kind": "claim",
+      "statement": "A matching half-open success that reaches the threshold closes the breaker.",
+      "source": "gobreaker.go",
+      "line": 317,
+      "fragment": "cb.setState(StateClosed, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F05.01": {
+      "kind": "claim",
+      "statement": "A matching half-open failure opens the breaker directly.",
+      "source": "gobreaker.go",
+      "line": 330,
+      "fragment": "cb.setState(StateOpen, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F05.02": {
+      "kind": "claim",
+      "statement": "Opening assigns an expiry of the sampled time plus the open timeout.",
+      "source": "gobreaker.go",
+      "line": 376,
+      "fragment": "cb.expiry = now.Add(cb.timeout)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "F06.01": {
+      "kind": "claim",
+      "statement": "Half-open success increments success counters, with no request-count decrement.",
+      "source": "gobreaker.go",
+      "line": 315,
+      "fragment": "cb.counts.onSuccess()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.65,
+        "contradicted": 0.02,
+        "unclear": 0.33
+      },
+      "confidence": 0.48,
+      "review_required": true
+    },
+    "F06.02": {
+      "kind": "claim",
+      "statement": "Half-open admission over the cap returns ErrTooManyRequests.",
+      "source": "gobreaker.go",
+      "line": 286,
+      "fragment": "return generation, ErrTooManyRequests",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F07.01": {
+      "kind": "claim",
+      "statement": "A stale completion returns without dispatching either success or failure.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F07.02": {
+      "kind": "claim",
+      "statement": "Failure accounting and its hook can be reached only after the generation guard.",
+      "source": "gobreaker.go",
+      "line": 306,
+      "fragment": "cb.onFailure(state, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.86,
+        "contradicted": 0.01,
+        "unclear": 0.13
+      },
+      "confidence": 0.79,
+      "review_required": true
+    },
+    "F08.01": {
+      "kind": "claim",
+      "statement": "Reporting resolves current state before testing the captured generation.",
+      "source": "gobreaker.go",
+      "line": 298,
+      "fragment": "state, generation := cb.currentState(now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.56,
+        "contradicted": 0.14,
+        "unclear": 0.3
+      },
+      "confidence": 0.34,
+      "review_required": true
+    },
+    "F08.02": {
+      "kind": "claim",
+      "statement": "An expired open state changes to half-open during state resolution.",
+      "source": "gobreaker.go",
+      "line": 342,
+      "fragment": "cb.setState(StateHalfOpen, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F08.03": {
+      "kind": "claim",
+      "statement": "A state transition invokes a configured state-change notification synchronously.",
+      "source": "gobreaker.go",
+      "line": 359,
+      "fragment": "cb.onStateChange(cb.name, prev, state)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "F08.04": {
+      "kind": "claim",
+      "statement": "Counts returns stored counters without calling time-based state resolution.",
+      "source": "gobreaker.go",
+      "line": 220,
+      "fragment": "return cb.counts",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.8,
+        "contradicted": 0.03,
+        "unclear": 0.17
+      },
+      "confidence": 0.7,
+      "review_required": true
+    },
+    "F09.01": {
+      "kind": "claim",
+      "statement": "Closed expiry starts a new generation without a state-change call.",
+      "source": "gobreaker.go",
+      "line": 338,
+      "fragment": "cb.toNewGeneration(now)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.41,
+        "contradicted": 0.17,
+        "unclear": 0.42
+      },
+      "confidence": 0.13,
+      "review_required": true
+    },
+    "F09.02": {
+      "kind": "claim",
+      "statement": "Starting a new generation clears counters.",
+      "source": "gobreaker.go",
+      "line": 365,
+      "fragment": "cb.counts.clear()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "F09.03": {
+      "kind": "claim",
+      "statement": "Calling State can itself resolve a closed interval.",
+      "source": "gobreaker.go",
+      "line": 211,
+      "fragment": "state, _ := cb.currentState(now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.9,
+        "contradicted": 0.0,
+        "unclear": 0.1
+      },
+      "confidence": 0.85,
+      "review_required": true
+    },
+    "F09.04": {
+      "kind": "claim",
+      "statement": "A completion invalidated by closed rollover returns without counting.",
+      "source": "gobreaker.go",
+      "line": 300,
+      "fragment": "return",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.45,
+        "contradicted": 0.01,
+        "unclear": 0.54
+      },
+      "confidence": 0.31,
+      "review_required": true
+    },
+    "F10.01": {
+      "kind": "claim",
+      "statement": "Execute calls the classifier as an argument to afterRequest, before entering that reporting function and its lock.",
+      "source": "gobreaker.go",
+      "line": 243,
+      "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.93,
+        "contradicted": 0.05,
+        "unclear": 0.02
+      },
+      "confidence": 0.89,
+      "review_required": true
+    },
+    "F10.02": {
+      "kind": "claim",
+      "statement": "If reporting returns normally, Execute returns the original request result and error unchanged.",
+      "source": "gobreaker.go",
+      "line": 244,
+      "fragment": "return result, err",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F11.01": {
+      "kind": "claim",
+      "statement": "The recovery branch reports false without calling the classifier.",
+      "source": "gobreaker.go",
+      "line": 237,
+      "fragment": "cb.afterRequest(generation, false)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.84,
+        "contradicted": 0.08,
+        "unclear": 0.08
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "F11.02": {
+      "kind": "claim",
+      "statement": "If the deferred report returns normally, Execute re-panics the recovered value.",
+      "source": "gobreaker.go",
+      "line": 238,
+      "fragment": "panic(e)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.55,
+        "contradicted": 0.36,
+        "unclear": 0.09
+      },
+      "confidence": 0.33,
+      "review_required": true
+    },
+    "F11.03": {
+      "kind": "claim",
+      "statement": "The recovery report also obeys the generation check.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.84,
+        "contradicted": 0.05,
+        "unclear": 0.11
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "F12.01": {
+      "kind": "claim",
+      "statement": "Execute's installed deferred recover covers a panic raised by the classifier.",
+      "source": "gobreaker.go",
+      "line": 235,
+      "fragment": "e := recover()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.19,
+        "contradicted": 0.1,
+        "unclear": 0.71
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "F12.02": {
+      "kind": "claim",
+      "statement": "A classifier panic causes a false report, without reevaluating the classifier.",
+      "source": "gobreaker.go",
+      "line": 237,
+      "fragment": "cb.afterRequest(generation, false)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.48,
+        "contradicted": 0.04,
+        "unclear": 0.48
+      },
+      "confidence": 0.22,
+      "review_required": true
+    },
+    "F12.03": {
+      "kind": "claim",
+      "statement": "The request pair is returned only if classification and reporting finish normally.",
+      "source": "gobreaker.go",
+      "line": 244,
+      "fragment": "return result, err",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.32,
+        "contradicted": 0.15,
+        "unclear": 0.53
+      },
+      "confidence": 0.3,
+      "review_required": true
+    },
+    "F13.01": {
+      "kind": "claim",
+      "statement": "Closed failure counters update before ReadyToTrip executes.",
+      "source": "gobreaker.go",
+      "line": 325,
+      "fragment": "cb.counts.onFailure()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F13.02": {
+      "kind": "claim",
+      "statement": "A panic from the normal afterRequest call is caught by Execute's defer and triggers one additional false report.",
+      "source": "gobreaker.go",
+      "line": 237,
+      "fragment": "cb.afterRequest(generation, false)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.65,
+        "contradicted": 0.16,
+        "unclear": 0.19
+      },
+      "confidence": 0.48,
+      "review_required": true
+    },
+    "F13.03": {
+      "kind": "claim",
+      "statement": "A second matching closed false report calls ReadyToTrip again.",
+      "source": "gobreaker.go",
+      "line": 326,
+      "fragment": "if cb.readyToTrip(cb.counts) {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.38,
+        "contradicted": 0.05,
+        "unclear": 0.57
+      },
+      "confidence": 0.35,
+      "review_required": true
+    },
+    "F14.01": {
+      "kind": "claim",
+      "statement": "The explicit rethrow can execute only if the deferred afterRequest call returns normally.",
+      "source": "gobreaker.go",
+      "line": 238,
+      "fragment": "panic(e)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.56,
+        "contradicted": 0.12,
+        "unclear": 0.32
+      },
+      "confidence": 0.34,
+      "review_required": true
+    },
+    "F14.02": {
+      "kind": "claim",
+      "statement": "On the closed reporting path, failure accounting precedes a panic raised by ReadyToTrip.",
+      "source": "gobreaker.go",
+      "line": 325,
+      "fragment": "cb.counts.onFailure()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.16,
+        "contradicted": 0.11,
+        "unclear": 0.73
+      },
+      "confidence": 0.6,
+      "review_required": true
+    },
+    "F15.01": {
+      "kind": "claim",
+      "statement": "The TwoStep callback forwards directly to afterRequest with no recovery or automatic retry.",
+      "source": "gobreaker.go",
+      "line": 272,
+      "fragment": "tscb.cb.afterRequest(generation, success)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.94,
+        "contradicted": 0.0,
+        "unclear": 0.06
+      },
+      "confidence": 0.91,
+      "review_required": true
+    },
+    "F15.02": {
+      "kind": "claim",
+      "statement": "A TwoStep closed failure has updated failure counters before the policy hook runs.",
+      "source": "gobreaker.go",
+      "line": 325,
+      "fragment": "cb.counts.onFailure()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F16.01": {
+      "kind": "claim",
+      "statement": "State is assigned before invoking the notification.",
+      "source": "gobreaker.go",
+      "line": 354,
+      "fragment": "cb.state = state",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F16.02": {
+      "kind": "claim",
+      "statement": "The new generation and count reset are installed before invoking the notification.",
+      "source": "gobreaker.go",
+      "line": 356,
+      "fragment": "cb.toNewGeneration(now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.0,
+        "unclear": 0.08
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "F16.03": {
+      "kind": "claim",
+      "statement": "A fallback report carrying the pre-transition generation skips accounting when it reaches the guard.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.85,
+        "contradicted": 0.03,
+        "unclear": 0.12
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "F17.01": {
+      "kind": "claim",
+      "statement": "Opening starts expiry from the time passed into the original report, before the notification.",
+      "source": "gobreaker.go",
+      "line": 376,
+      "fragment": "cb.expiry = now.Add(cb.timeout)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.49,
+        "contradicted": 0.07,
+        "unclear": 0.44
+      },
+      "confidence": 0.24,
+      "review_required": true
+    },
+    "F17.02": {
+      "kind": "claim",
+      "statement": "Execute's fallback report samples time again.",
+      "source": "gobreaker.go",
+      "line": 297,
+      "fragment": "now := time.Now()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.38,
+        "contradicted": 0.02,
+        "unclear": 0.6
+      },
+      "confidence": 0.4,
+      "review_required": true
+    },
+    "F17.03": {
+      "kind": "claim",
+      "statement": "An expired open state may advance to half-open during fallback state resolution.",
+      "source": "gobreaker.go",
+      "line": 342,
+      "fragment": "cb.setState(StateHalfOpen, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.0,
+        "unclear": 0.08
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "F17.04": {
+      "kind": "claim",
+      "statement": "A panic during the fallback can prevent rethrow of the initial notification panic.",
+      "source": "gobreaker.go",
+      "line": 238,
+      "fragment": "panic(e)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.04,
+        "contradicted": 0.19,
+        "unclear": 0.77
+      },
+      "confidence": 0.66,
+      "review_required": true
+    },
+    "F18.01": {
+      "kind": "claim",
+      "statement": "Execute calls admission before installing its recovery defer.",
+      "source": "gobreaker.go",
+      "line": 229,
+      "fragment": "generation, err := cb.beforeRequest()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.87,
+        "contradicted": 0.1,
+        "unclear": 0.03
+      },
+      "confidence": 0.8,
+      "review_required": true
+    },
+    "F18.02": {
+      "kind": "claim",
+      "statement": "Admission resolves expiry before counting a request.",
+      "source": "gobreaker.go",
+      "line": 281,
+      "fragment": "state, generation := cb.currentState(now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.84,
+        "contradicted": 0.01,
+        "unclear": 0.15
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "F18.03": {
+      "kind": "claim",
+      "statement": "If state resolution panics during admission, control never reaches the admission increment.",
+      "source": "gobreaker.go",
+      "line": 289,
+      "fragment": "cb.counts.onRequest()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.02,
+        "contradicted": 0.03,
+        "unclear": 0.95
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "F18.04": {
+      "kind": "claim",
+      "statement": "The user request runs only after beforeRequest returns successfully.",
+      "source": "gobreaker.go",
+      "line": 242,
+      "fragment": "result, err := req()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.69,
+        "contradicted": 0.0,
+        "unclear": 0.31
+      },
+      "confidence": 0.53,
+      "review_required": true
+    },
+    "F19.01": {
+      "kind": "claim",
+      "statement": "A notification reached during state resolution runs before the stale-result guard.",
+      "source": "gobreaker.go",
+      "line": 298,
+      "fragment": "state, generation := cb.currentState(now)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.26,
+        "contradicted": 0.14,
+        "unclear": 0.6
+      },
+      "confidence": 0.4,
+      "review_required": true
+    },
+    "F19.02": {
+      "kind": "claim",
+      "statement": "The transition assigning half-open can remain committed when its notification panics.",
+      "source": "gobreaker.go",
+      "line": 354,
+      "fragment": "cb.state = state",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.43,
+        "contradicted": 0.03,
+        "unclear": 0.54
+      },
+      "confidence": 0.31,
+      "review_required": true
+    },
+    "F19.03": {
+      "kind": "claim",
+      "statement": "A subsequent report carrying the old generation cannot account after that transition.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F20.01": {
+      "kind": "claim",
+      "statement": "Reporting acquires the breaker mutex before state and result handling.",
+      "source": "gobreaker.go",
+      "line": 294,
+      "fragment": "cb.mutex.Lock()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.65,
+        "contradicted": 0.02,
+        "unclear": 0.33
+      },
+      "confidence": 0.48,
+      "review_required": true
+    },
+    "F20.02": {
+      "kind": "claim",
+      "statement": "Admission acquires the breaker mutex before state resolution.",
+      "source": "gobreaker.go",
+      "line": 277,
+      "fragment": "cb.mutex.Lock()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.84,
+        "contradicted": 0.0,
+        "unclear": 0.16
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "F20.03": {
+      "kind": "claim",
+      "statement": "State takes the breaker mutex.",
+      "source": "gobreaker.go",
+      "line": 207,
+      "fragment": "cb.mutex.Lock()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.56,
+        "contradicted": 0.01,
+        "unclear": 0.43
+      },
+      "confidence": 0.34,
+      "review_required": true
+    },
+    "F20.04": {
+      "kind": "claim",
+      "statement": "Counts takes the breaker mutex.",
+      "source": "gobreaker.go",
+      "line": 217,
+      "fragment": "cb.mutex.Lock()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.48,
+        "contradicted": 0.01,
+        "unclear": 0.51
+      },
+      "confidence": 0.26,
+      "review_required": true
+    },
+    "F20.05": {
+      "kind": "claim",
+      "statement": "Name returns the stored name directly.",
+      "source": "gobreaker.go",
+      "line": 202,
+      "fragment": "return cb.name",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F20.06": {
+      "kind": "claim",
+      "statement": "ReadyToTrip runs synchronously inside closed failure handling.",
+      "source": "gobreaker.go",
+      "line": 326,
+      "fragment": "if cb.readyToTrip(cb.counts) {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.0,
+        "unclear": 0.08
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "F20.07": {
+      "kind": "claim",
+      "statement": "OnStateChange runs synchronously inside the transition path.",
+      "source": "gobreaker.go",
+      "line": 359,
+      "fragment": "cb.onStateChange(cb.name, prev, state)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.0,
+        "unclear": 0.08
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "F21.01": {
+      "kind": "claim",
+      "statement": "A deferred invocation with recover returning nil skips the failure report.",
+      "source": "gobreaker.go",
+      "line": 236,
+      "fragment": "if e != nil {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.87,
+        "contradicted": 0.02,
+        "unclear": 0.11
+      },
+      "confidence": 0.8,
+      "review_required": true
+    },
+    "F21.02": {
+      "kind": "claim",
+      "statement": "An admitted half-open request remains part of the admission cap if the reporting phase never runs.",
+      "source": "gobreaker.go",
+      "line": 285,
+      "fragment": "} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.4,
+        "contradicted": 0.04,
+        "unclear": 0.56
+      },
+      "confidence": 0.34,
+      "review_required": true
+    },
+    "F22.01": {
+      "kind": "claim",
+      "statement": "The retained closure dereferences tscb.cb when it is called, using the saved generation.",
+      "source": "gobreaker.go",
+      "line": 272,
+      "fragment": "tscb.cb.afterRequest(generation, success)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.01,
+        "unclear": 0.04
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "F22.02": {
+      "kind": "claim",
+      "statement": "The selected breaker's generation comparison checks the saved number without comparing breaker identity.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.77,
+        "contradicted": 0.02,
+        "unclear": 0.21
+      },
+      "confidence": 0.66,
+      "review_required": true
+    },
+    "F23.01": {
+      "kind": "claim",
+      "statement": "Closed failure accounting precedes ReadyToTrip.",
+      "source": "gobreaker.go",
+      "line": 325,
+      "fragment": "cb.counts.onFailure()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "F23.02": {
+      "kind": "claim",
+      "statement": "A true ReadyToTrip verdict directly opens using the previously supplied time.",
+      "source": "gobreaker.go",
+      "line": 327,
+      "fragment": "cb.setState(StateOpen, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "F23.03": {
+      "kind": "claim",
+      "statement": "Current state is resolved before processing a completion, with no post-hook resolution in that path.",
+      "source": "gobreaker.go",
+      "line": 298,
+      "fragment": "state, generation := cb.currentState(now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.89,
+        "contradicted": 0.03,
+        "unclear": 0.08
+      },
+      "confidence": 0.83,
+      "review_required": true
+    },
+    "F24.01": {
+      "kind": "claim",
+      "statement": "A deferred report may observe and process closed expiry when it resolves state.",
+      "source": "gobreaker.go",
+      "line": 337,
+      "fragment": "if !cb.expiry.IsZero() && cb.expiry.Before(now) {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.55,
+        "contradicted": 0.04,
+        "unclear": 0.41
+      },
+      "confidence": 0.33,
+      "review_required": true
+    },
+    "F24.02": {
+      "kind": "claim",
+      "statement": "The resulting generation rollover clears the first failure count.",
+      "source": "gobreaker.go",
+      "line": 365,
+      "fragment": "cb.counts.clear()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.76,
+        "contradicted": 0.01,
+        "unclear": 0.23
+      },
+      "confidence": 0.64,
+      "review_required": true
+    },
+    "F24.03": {
+      "kind": "claim",
+      "statement": "After rollover the old fallback report exits without a second policy hook.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.61,
+        "contradicted": 0.03,
+        "unclear": 0.36
+      },
+      "confidence": 0.42,
+      "review_required": true
+    },
+    "F25.01": {
+      "kind": "claim",
+      "statement": "A matching threshold half-open success commits a closing transition.",
+      "source": "gobreaker.go",
+      "line": 317,
+      "fragment": "cb.setState(StateClosed, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F25.02": {
+      "kind": "claim",
+      "statement": "A matching half-open failure opens directly without ReadyToTrip.",
+      "source": "gobreaker.go",
+      "line": 330,
+      "fragment": "cb.setState(StateOpen, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.77,
+        "contradicted": 0.02,
+        "unclear": 0.21
+      },
+      "confidence": 0.66,
+      "review_required": true
+    },
+    "F25.03": {
+      "kind": "claim",
+      "statement": "Either transition starts its generation before OnStateChange is invoked.",
+      "source": "gobreaker.go",
+      "line": 356,
+      "fragment": "cb.toNewGeneration(now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.89,
+        "contradicted": 0.01,
+        "unclear": 0.1
+      },
+      "confidence": 0.83,
+      "review_required": true
+    },
+    "F26.01": {
+      "kind": "claim",
+      "statement": "Execute synchronously awaits the supplied request before normal result reporting.",
+      "source": "gobreaker.go",
+      "line": 242,
+      "fragment": "result, err := req()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.0,
+        "unclear": 0.04
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "F26.02": {
+      "kind": "claim",
+      "statement": "While a half-open trial remains outstanding, its admission counts toward the half-open cap.",
+      "source": "gobreaker.go",
+      "line": 285,
+      "fragment": "} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.93,
+        "contradicted": 0.01,
+        "unclear": 0.06
+      },
+      "confidence": 0.89,
+      "review_required": true
+    },
+    "F27.01": {
+      "kind": "claim",
+      "statement": "Execute returns the request pair to its direct caller after normal reporting.",
+      "source": "gobreaker.go",
+      "line": 244,
+      "fragment": "return result, err",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.87,
+        "contradicted": 0.02,
+        "unclear": 0.11
+      },
+      "confidence": 0.8,
+      "review_required": true
+    },
+    "F27.02": {
+      "kind": "claim",
+      "statement": "A matching threshold success closes half-open.",
+      "source": "gobreaker.go",
+      "line": 317,
+      "fragment": "cb.setState(StateClosed, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.79,
+        "contradicted": 0.09,
+        "unclear": 0.12
+      },
+      "confidence": 0.68,
+      "review_required": true
+    },
+    "F27.03": {
+      "kind": "claim",
+      "statement": "A matching failure reopens half-open.",
+      "source": "gobreaker.go",
+      "line": 330,
+      "fragment": "cb.setState(StateOpen, now)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.83,
+        "contradicted": 0.03,
+        "unclear": 0.14
+      },
+      "confidence": 0.74,
+      "review_required": true
+    },
+    "F27.04": {
+      "kind": "claim",
+      "statement": "Stale success and stale failure are skipped by the same guard.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.0,
+        "unclear": 0.08
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "F28.01": {
+      "kind": "claim",
+      "statement": "A panic unwinding afterRequest runs the deferred mutex unlock.",
+      "source": "gobreaker.go",
+      "line": 295,
+      "fragment": "defer cb.mutex.Unlock()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.64,
+        "contradicted": 0.07,
+        "unclear": 0.29
+      },
+      "confidence": 0.46,
+      "review_required": true
+    },
+    "F28.02": {
+      "kind": "claim",
+      "statement": "Any fallback report must reacquire the same mutex.",
+      "source": "gobreaker.go",
+      "line": 294,
+      "fragment": "cb.mutex.Lock()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.16,
+        "contradicted": 0.0,
+        "unclear": 0.84
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "F28.03": {
+      "kind": "claim",
+      "statement": "The Execute defer initiates its fallback report outside the original afterRequest invocation.",
+      "source": "gobreaker.go",
+      "line": 237,
+      "fragment": "cb.afterRequest(generation, false)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.56,
+        "contradicted": 0.29,
+        "unclear": 0.15
+      },
+      "confidence": 0.34,
+      "review_required": true
+    },
+    "F29.01": {
+      "kind": "claim",
+      "statement": "The generation counter is uint64.",
+      "source": "gobreaker.go",
+      "line": 128,
+      "fragment": "generation uint64",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "F29.02": {
+      "kind": "claim",
+      "statement": "Generation advances with an unconditional increment.",
+      "source": "gobreaker.go",
+      "line": 364,
+      "fragment": "cb.generation++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.82,
+        "contradicted": 0.05,
+        "unclear": 0.13
+      },
+      "confidence": 0.73,
+      "review_required": true
+    },
+    "F29.03": {
+      "kind": "claim",
+      "statement": "The stale-result test is equality of generation numbers.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.01,
+        "unclear": 0.02
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "Q-expiry-closed": {
+      "kind": "claim",
+      "statement": "Closed expiry uses strict Before, excluding an equal timestamp.",
+      "source": "gobreaker.go",
+      "line": 337,
+      "fragment": "if !cb.expiry.IsZero() && cb.expiry.Before(now) {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "Q-expiry-open": {
+      "kind": "claim",
+      "statement": "Open expiry uses strict Before, excluding an equal timestamp.",
+      "source": "gobreaker.go",
+      "line": 341,
+      "fragment": "if cb.expiry.Before(now) {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "S-state-unlock": {
+      "kind": "claim",
+      "statement": "State releases the mutex when the state callback panics.",
+      "source": "gobreaker.go",
+      "line": 208,
+      "fragment": "defer cb.mutex.Unlock()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.48,
+        "contradicted": 0.12,
+        "unclear": 0.4
+      },
+      "confidence": 0.22,
+      "review_required": true
+    },
+    "S-admission-unlock": {
+      "kind": "claim",
+      "statement": "Admission releases the mutex when state resolution unwinds.",
+      "source": "gobreaker.go",
+      "line": 278,
+      "fragment": "defer cb.mutex.Unlock()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.89,
+        "contradicted": 0.01,
+        "unclear": 0.1
+      },
+      "confidence": 0.83,
+      "review_required": true
+    },
+    "S-closed-zero": {
+      "kind": "claim",
+      "statement": "The zero closed expiry is a literal zero time, not a computed deadline.",
+      "source": "gobreaker.go",
+      "line": 371,
+      "fragment": "cb.expiry = zero",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "S-wrap-closed": {
+      "kind": "claim",
+      "statement": "The admitted request count is uint32.",
+      "source": "gobreaker.go",
+      "line": 48,
+      "fragment": "Requests             uint32",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.78,
+        "contradicted": 0.01,
+        "unclear": 0.21
+      },
+      "confidence": 0.67,
+      "review_required": true
+    }
+  }
+}

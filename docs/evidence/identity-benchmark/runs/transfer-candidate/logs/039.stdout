@@ -1,0 +1,79 @@
+F01              supported  10: A increments a.Successes.
+F02              unclear    10: A increments b.Successes. The completion leaves a.Successes at zero.
+F03              supported  10: A skips the success increment when the replacement's epoch differs.
+F04              supported  10: A skips the success increment on the original account at its changed epoch.
+F05              unclear    10: The invocation after restoration increments a.Successes.
+F06              unclear    10: A panics evaluating the nil target's Epoch.
+F07              supported  10: A reads the original port object and increments a.Successes.
+F08              unclear    10: A increments the distinct copied account b.Successes because the copy has epoch 7.
+F09              supported  15: B increments a.Successes using the saved account pointer regardless of the epoch change.
+F10              supported  28: E increments a.Successes through its receiver copy's Target pointer regardless of the epoch change.
+F11              supported  33: F increments a.Successes using the saved account pointer regardless of the epoch change.
+F12              supported  15: B still increments the original account's Successes.
+F13              supported  28: E still increments the original account's Successes.
+F14              supported  33: F still increments the original account's Successes.
+F15              supported  20: C increments a.Successes when both guards match.
+F16              unclear    20: C skips the success increment because b is a different account object despite the copied epoch.
+F17              supported  20: C skips the success increment on the same account when its epoch differs.
+F18              unclear    20: C skips without panicking because the pointer comparison fails before the epoch comparison.
+F19              unclear    20: C increments a.Successes after restoration.
+F20              unclear    20: C increments a.Successes after epoch restoration.
+F21              unclear    24: D increments a.Successes.
+F22              supported  24: D increments b.Successes without an epoch check.
+F23              supported  24: D skips success credit for a missing key.
+F24              supported  24: D skips success credit for a present key with a nil value.
+F25              supported  24: D skips credit for a nil map without panicking.
+F26              unclear    24: The invocation after reinsertion increments b.Successes.
+F27              unclear    24: D increments b.Successes in the replacement map.
+F28              unclear    24: D reads the original registry object and increments a.Successes.
+F29              unclear    24: D increments b.Successes through the original registry's now-updated map.
+F30              supported  24: D uses the call's key value k and increments a.Successes.
+F31              supported   8: A increments Requests in the public call before returning its completion.
+F32              supported  10: A repeats its success increment on every invocation whose current target epoch equals the captured epoch.
+F33              supported   8: A panics on admission when Target is nil because it dereferences Target to access Requests.
+F34              supported  23: Registry.D panics on admission if its lookup yields nil.
+F35              unclear    31: F panics while reading p.Target before returning a completion.
+F31-A-deferred   supported  10: A only executes the success increment upon invocation of its returned function.
+F31-B            supported  14: B increments Requests before returning the completion.
+F32-B            supported  15: On two calls to the same returned completion with valid state unchanged, B increments Successes on each call.
+F31-B-deferred   supported  15: B only executes the success increment upon invocation of its returned function.
+F31-C            supported  19: C increments Requests before returning the completion.
+F32-C            supported  20: On two calls to the same returned completion with valid state unchanged, C increments Successes on each call.
+F31-C-deferred   supported  20: C only executes the success increment upon invocation of its returned function.
+F31-D            supported  23: D increments Requests before returning the completion.
+F32-D            supported  24: On two calls to the same returned completion with valid state unchanged, D increments Successes on each call.
+F31-D-deferred   supported  24: D only executes the success increment upon invocation of its returned function.
+F31-E            supported  27: E increments Requests before returning the completion.
+F32-E            supported  28: On two calls to the same returned completion with valid state unchanged, E increments Successes on each call.
+F31-E-deferred   supported  28: E only executes the success increment upon invocation of its returned function.
+F31-F            supported  32: F increments Requests before returning the completion.
+F32-F            supported  33: On two calls to the same returned completion with valid state unchanged, F increments Successes on each call.
+F31-F-deferred   supported  33: F only executes the success increment upon invocation of its returned function.
+F33-B            supported  14: B panics without returning a completion if a nonnil port has a nil Target when admitted.
+F33-C            supported  18: C panics without returning a completion if a nonnil port has a nil Target when admitted.
+F33-E            supported  27: E panics without returning a completion if a nonnil port has a nil Target when admitted.
+F33-F            supported  32: F panics without returning a completion if a nonnil port has a nil Target when admitted.
+F02-original     supported  10: After A admits on a and its port is retargeted to a distinct b at the captured epoch, invoking the completion does not increment a.Successes.
+F02-capture      supported   9: A copies the original target Epoch into a local integer at admission.
+F07-capture      supported   7: A has a pointer receiver and the returned function reads Target through that receiver.
+F09-capture      supported  13: B stores the Target account pointer in a local variable before returning its closure.
+F10-capture      supported  26: E has a Port value receiver, so the copy of the Port still carries its Target pointer.
+F11-capture      supported  31: F saves the Target account pointer from the passed port before returning its closure.
+F16-capture      supported  18: C saves the Target account pointer and a copy of its Epoch in local variables.
+F28-capture      supported  22: D takes a registry pointer receiver.
+F30-capture      supported  22: D takes key as a string value parameter.
+F34-missing      unclear    23: At admission D's map lookup for a missing key yields a nil account pointer and the field access panics.
+F34-nil-map      unclear    23: At admission D's lookup in a nil map yields a nil account pointer and the field access panics.
+F36              unclear    10: A credits a.Successes on the invocation after recovery and restoration.
+F37              unclear     8: After A admits work, clearing the port and never invoking the completion leaves the original request increment in place.
+F37-B            unclear    14: After B admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.
+F37-C            unclear    19: After C admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.
+F37-D            unclear    23: After D admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.
+F37-E            unclear    27: After E admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.
+F37-F            unclear    32: After F admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.
+F38              unclear    10: After a first A completion already incremented a, a second call after retargeting to a distinct account b at the captured epoch increments b.Successes.
+F39              supported  20: After a first C completion already incremented a, a second call after retargeting to a distinct account b at the captured epoch skips the success increment.
+F40              supported  24: After a first D completion already incremented a, a second call after replacing the entry for the captured key with b increments b.Successes.
+F38-before       supported  10: The first A completion credits a while its original valid admission state remains unchanged.
+F39-before       supported  20: The first C completion credits a while its original valid admission state remains unchanged.
+F40-before       unclear    24: The first D completion credits a while its original valid admission state remains unchanged.

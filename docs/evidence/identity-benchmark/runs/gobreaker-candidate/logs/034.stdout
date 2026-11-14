@@ -1,0 +1,29 @@
+25:func identityReject(t *testing.T, b *gb.TwoStepCircuitBreaker, want error) {
+93:		want := gb.Counts{TotalFailures: 1, ConsecutiveFailures: 1}
+120:	want := gb.Counts{Requests: 2, TotalSuccesses: 1, TotalFailures: 1, ConsecutiveFailures: 1}
+135:		identityReject(t, w, gb.ErrOpenState)
+181:	want := gb.StateOpen
+191:	identityReject(t, &alias, gb.ErrTooManyRequests)
+195:		identityReject(t, b, gb.ErrOpenState)
+241:			want := identityFailure(1)
+267:	want := identityFailure(2)
+293:		identityReject(t, b, gb.ErrTooManyRequests)
+302:			identityReject(t, b, gb.ErrOpenState)
+319:		identityReject(t, b, gb.ErrOpenState)
+347:				want := gb.Counts{}
+400:			if got.value != "payload" || got.err != requestErr {
+403:			want := gb.Counts{}
+454:			if got.value != "payload" || got.err != identityErr {
+457:			want := gb.StateOpen
+503:			want := identityFailure(1)
+531:	if got != "first" || calls != 2 {
+548:	if got != "second" || calls != 2 {
+611:				identityCounts(t, counts(), gb.Counts{})
+613:				if calls != 1 {
+642:				retry = func() { identityAllow(t, b); identityCounts(t, counts(), gb.Counts{Requests: 1}) }
+654:					_, err := b.Execute(func() (interface{}, error) { identityCounts(t, counts(), gb.Counts{Requests: 1}); return nil, nil })
+664:			identityCounts(t, counts(), gb.Counts{})
+666:			retry()
+667:			if calls != 1 {
+695:		if calls != 1 {
+738:	if calls != 1 {

@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport subprocess\nimport sys\nbase=Path('analysis')/sys.argv[1]\nwith base.with_suffix('.stdout.jsonl').open('x') as out, base.with_suffix('.stderr.log').open('x') as err:\n    result=subprocess.run(sys.argv[2:], stdout=out, stderr=err)\nprint(f'{base}: exit {result.returncode}')\nraise SystemExit(result.returncode)\n",
+    "probe-attempt-01",
+    "go",
+    "test",
+    "-race",
+    "-count=3",
+    "-timeout=30s",
+    "-json",
+    "-overlay",
+    "analysis/overlay.json",
+    "-run",
+    "^TestIdentity",
+    "."
+  ],
+  "exit_code": 0
+}

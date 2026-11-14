@@ -1,0 +1,226 @@
+{
+  "reviewer": "Codex supervising agent, source and archived final reports reviewed 2026-11-14",
+  "scope": "Post-run review of immutable final artifacts. Test labels describe archived probe assertions replayed now; not new pilot discoveries. Semantic absence is a reviewer judgment. No Q is resolved.",
+  "rows": [
+    {
+      "id": "B01",
+      "found": true,
+      "correct": true,
+      "tested": "partial",
+      "rationale": "The cited report describes this ordered consequence; grouping into a shared Q does not remove it. The archived probe does not execute both late success and failure branches from this starting condition.",
+      "evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 80,
+          "quote": "**Current behaviour:** observed-in-code. Normal Execute calls its classifier and returns the original outcome even when accounting is stale. A stale report still checks time, can refresh a generation or notify during open expiry, and skips closed trip policy or outcome writes. gobreaker.go:242 (\"result, err := req()\"). gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"). gobreaker.go:298 (\"state, generation := cb.currentState(now)\"). gobreaker.go:299 (\"if generation != before {\"). gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"). gobreaker.go:342 (\"cb.setState(StateHalfOpen, now)\")."
+        }
+      ],
+      "test_name": "TestPilotStaleReportReconcilesOpen",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/_probe/pilot_test.go",
+          "sha256": "c86c3c6e8f142174df92f8f3f8b4ebcb398d10da1bf98144b1ca2d15515d68b7",
+          "line": 47,
+          "quote": "func TestPilotStaleReportReconcilesOpen(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/matrix-replay.jsonl",
+          "sha256": "5a245ba9811b97ebae120dd17ce91ae2fa6285f6875405db61b65a9c9f56621f",
+          "line": 9,
+          "quote": "{\"Time\":\"2026-11-14T22:10:32.966136+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotStaleReportReconcilesOpen\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B02",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "rationale": "The cited report describes this ordered consequence; grouping into a shared Q does not remove it.",
+      "evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 46,
+          "quote": "**Current behaviour:** observed-in-code. While generation matches, repeat success can close half-open with fewer distinct completed requests; repeat failure can inflate counts or trip; opposite results serialize, and a generation change masks whichever report arrives later. gobreaker.go:271 (\"return func(success bool) {\"). gobreaker.go:294 (\"cb.mutex.Lock()\"). gobreaker.go:299 (\"if generation != before {\"). gobreaker.go:315 (\"cb.counts.onSuccess()\"). gobreaker.go:325 (\"cb.counts.onFailure()\")."
+        }
+      ],
+      "test_name": "TestPilotDuplicateAndAbandoned",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/_probe/pilot_test.go",
+          "sha256": "c86c3c6e8f142174df92f8f3f8b4ebcb398d10da1bf98144b1ca2d15515d68b7",
+          "line": 29,
+          "quote": "func TestPilotDuplicateAndAbandoned(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/matrix-replay.jsonl",
+          "sha256": "5a245ba9811b97ebae120dd17ce91ae2fa6285f6875405db61b65a9c9f56621f",
+          "line": 5,
+          "quote": "{\"Time\":\"2026-11-14T22:10:32.966111+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotDuplicateAndAbandoned\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B03",
+      "found": true,
+      "correct": true,
+      "tested": "partial",
+      "rationale": "The cited report describes this ordered consequence; grouping into a shared Q does not remove it. The archived probe does not execute both late success and failure branches from this starting condition.",
+      "evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 97,
+          "quote": "**Current behaviour:** observed-in-code. No cancellation or teardown registration is exposed. Missing reports retain admission counts; saturated HalfOpen cannot recover without a current outcome. A later success or failure may still affect the retained breaker or be stale. No per-request buffer was found. gobreaker.go:234 (\"defer func() {\"). gobreaker.go:235 (\"e := recover()\"). gobreaker.go:242 (\"result, err := req()\"). gobreaker.go:271 (\"return func(success bool) {\"). gobreaker.go:285 (\"} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {\"). gobreaker.go:299 (\"if generation != before {\"). gobreaker.go:334 (\"func (cb *CircuitBreaker) currentState(now time.Time) (State, uint64) {\")."
+        },
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 63,
+          "quote": "**Current behaviour:** observed-in-code. Admission charges a generation budget, capped at equality. Failure opens at once; consecutive reported successes reaching the budget close. Rejected requests leave counters alone. gobreaker.go:285 (\"} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {\"). gobreaker.go:289 (\"cb.counts.onRequest()\"). gobreaker.go:316 (\"if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {\"). gobreaker.go:330 (\"cb.setState(StateOpen, now)\")."
+        }
+      ],
+      "test_name": "TestPilotDuplicateAndAbandoned",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/_probe/pilot_test.go",
+          "sha256": "c86c3c6e8f142174df92f8f3f8b4ebcb398d10da1bf98144b1ca2d15515d68b7",
+          "line": 29,
+          "quote": "func TestPilotDuplicateAndAbandoned(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/matrix-replay.jsonl",
+          "sha256": "5a245ba9811b97ebae120dd17ce91ae2fa6285f6875405db61b65a9c9f56621f",
+          "line": 5,
+          "quote": "{\"Time\":\"2026-11-14T22:10:32.966111+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotDuplicateAndAbandoned\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B04",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "rationale": "The cited report describes this ordered consequence; grouping into a shared Q does not remove it.",
+      "evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 148,
+          "quote": "**Current behaviour:** observed-in-code. Both run synchronously under the same mutex used by State, Counts and admission. Same-goroutine reentry into those methods blocks; Name reads without the lock. Other callers wait until the callback returns. gobreaker.go:202 (\"return cb.name\"). gobreaker.go:207 (\"cb.mutex.Lock()\"). gobreaker.go:217 (\"cb.mutex.Lock()\"). gobreaker.go:277 (\"cb.mutex.Lock()\"). gobreaker.go:294 (\"cb.mutex.Lock()\"). gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"). gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\")."
+        }
+      ],
+      "test_name": "TestPilotReentryBounded",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/_probe/pilot_test.go",
+          "sha256": "c86c3c6e8f142174df92f8f3f8b4ebcb398d10da1bf98144b1ca2d15515d68b7",
+          "line": 95,
+          "quote": "func TestPilotReentryBounded(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/matrix-replay.jsonl",
+          "sha256": "5a245ba9811b97ebae120dd17ce91ae2fa6285f6875405db61b65a9c9f56621f",
+          "line": 25,
+          "quote": "{\"Time\":\"2026-11-14T22:10:33.030828+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotReentryBounded\",\"Elapsed\":0.06}"
+        }
+      ]
+    },
+    {
+      "id": "B05",
+      "found": false,
+      "correct": false,
+      "tested": "none",
+      "rationale": "Wrapper capture and ordinary copying are discussed, but not serialized assignment through the captured wrapper or the resulting counters.",
+      "evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 284,
+          "quote": "**Current behaviour:** observed-in-code. The returned closure captures the wrapper and generation; the breaker stores no per-callback registry. A copied wrapper shares its breaker pointer. Copying a mutex-bearing breaker after use conflicts with the Go mutex contract. gobreaker.go:126 (\"mutex      sync.Mutex\"). gobreaker.go:137 (\"cb *CircuitBreaker\"). gobreaker.go:271 (\"return func(success bool) {\"). gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\")."
+        }
+      ],
+      "test_name": null,
+      "test_evidence": []
+    },
+    {
+      "id": "B06",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "rationale": "The cited report describes this ordered consequence; grouping into a shared Q does not remove it.",
+      "evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 114,
+          "quote": "**Current behaviour:** observed-in-code. Both APIs count each successful admission. A second Execute can finish before the first. Two Allow calls below the cap return independent callbacks; at capacity the second is refused. Reporting one neither completes the other nor refunds a slot. gobreaker.go:242 (\"result, err := req()\"). gobreaker.go:266 (\"generation, err := tscb.cb.beforeRequest()\"). gobreaker.go:271 (\"return func(success bool) {\"). gobreaker.go:285 (\"} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {\"). gobreaker.go:289 (\"cb.counts.onRequest()\")."
+        }
+      ],
+      "test_name": "TestPilotSameOwnerOutstandingBelowBudget",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/_probe/pilot_test.go",
+          "sha256": "c86c3c6e8f142174df92f8f3f8b4ebcb398d10da1bf98144b1ca2d15515d68b7",
+          "line": 190,
+          "quote": "func TestPilotSameOwnerOutstandingBelowBudget(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/matrix-replay.jsonl",
+          "sha256": "5a245ba9811b97ebae120dd17ce91ae2fa6285f6875405db61b65a9c9f56621f",
+          "line": 45,
+          "quote": "{\"Time\":\"2026-11-14T22:10:33.031782+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotSameOwnerOutstandingBelowBudget\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B07",
+      "found": true,
+      "correct": true,
+      "tested": "none",
+      "rationale": "The cited report describes this ordered consequence; grouping into a shared Q does not remove it.",
+      "evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 165,
+          "quote": "**Current behaviour:** observed-in-code. A classifier panic can be treated as a request failure. A trip-policy panic during regular accounting may count the failure twice because Execute recovers and attempts accounting again after unlock. A notification panic during panic accounting can replace the request panic after state has committed. Panics during admission bypass Execute recovery. gobreaker.go:229 (\"generation, err := cb.beforeRequest()\"). gobreaker.go:234 (\"defer func() {\"). gobreaker.go:237 (\"cb.afterRequest(generation, false)\"). gobreaker.go:238 (\"panic(e)\"). gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"). gobreaker.go:295 (\"defer cb.mutex.Unlock()\"). gobreaker.go:325 (\"cb.counts.onFailure()\"). gobreaker.go:354 (\"cb.state = state\"). gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\")."
+        },
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/extraction.md",
+          "sha256": "6903544dcda5e917b710bf9e352ec1d1638d5a44d950bddaa4c611acb331761e",
+          "line": 12,
+          "quote": "- Normal return, input panic, policy panic, same-thread callback reentry, blocked request and Goexit have distinct failure outcomes. Execute only registers recovery after successful admission; the recovery scope includes classifier and accounting. Failure accounting can itself panic before the original panic is rethrown. No system retry of request work. observed-in-code gobreaker.go:229 (\"generation, err := cb.beforeRequest()\"). gobreaker.go:234 (\"defer func() {\"). gobreaker.go:235 (\"e := recover()\"). gobreaker.go:237 (\"cb.afterRequest(generation, false)\"). gobreaker.go:238 (\"panic(e)\"). gobreaker.go:295 (\"defer cb.mutex.Unlock()\"). Questions Q-06, Q-09, Q-10 and Q-15."
+        }
+      ],
+      "test_name": null,
+      "test_evidence": []
+    },
+    {
+      "id": "B08",
+      "found": true,
+      "correct": true,
+      "tested": "none",
+      "rationale": "The cited report describes this ordered consequence; grouping into a shared Q does not remove it.",
+      "evidence": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 80,
+          "quote": "**Current behaviour:** observed-in-code. Normal Execute calls its classifier and returns the original outcome even when accounting is stale. A stale report still checks time, can refresh a generation or notify during open expiry, and skips closed trip policy or outcome writes. gobreaker.go:242 (\"result, err := req()\"). gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"). gobreaker.go:298 (\"state, generation := cb.currentState(now)\"). gobreaker.go:299 (\"if generation != before {\"). gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\"). gobreaker.go:342 (\"cb.setState(StateHalfOpen, now)\")."
+        },
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/matrix/domain-analysis/circuitBreaker/open-questions.md",
+          "sha256": "831d83d6fe8800f2a81eeea7171fa803703aff0248ddb37cda940a1443266f05",
+          "line": 267,
+          "quote": "**Current behaviour:** observed-in-code. A classifier can mark a non-nil error successful or nil error unsuccessful. Execute returns the original value and error. ReadyToTrip consumes a copy of counters including the current failure when applicable. gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"). gobreaker.go:244 (\"return result, err\"). gobreaker.go:325 (\"cb.counts.onFailure()\"). gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\")."
+        }
+      ],
+      "test_name": null,
+      "test_evidence": []
+    }
+  ],
+  "refuted_claims": []
+}

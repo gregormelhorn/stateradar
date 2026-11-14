@@ -1,0 +1,31 @@
+C1 126 'mutex      sync.Mutex' supported
+C2 229 'generation, err := cb.beforeRequest()' supported
+C3 230 'if err != nil {' supported
+C4 234 'defer func() {' supported
+C5 237 'cb.afterRequest(generation, false)' supported
+C6 243 'cb.afterRequest(generation, cb.isSuccessful(err))' supported
+C7 284 'return generation, ErrOpenState' supported
+C8 285 'state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests' supported
+C9 289 'cb.counts.onRequest()' supported
+C10 299 'if generation != before {' supported
+C11 298 'state, generation := cb.currentState(now)' supported
+C12 313 'cb.counts.onSuccess()' supported
+C13 316 'if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {' supported
+C14 326 'if cb.readyToTrip(cb.counts) {' supported
+C15 330 'cb.setState(StateOpen, now)' supported
+C16 337 'if !cb.expiry.IsZero() && cb.expiry.Before(now) {' supported
+C17 341 'if cb.expiry.Before(now) {' supported
+C18 349 'if cb.state == state {' supported
+C19 356 'cb.toNewGeneration(now)' supported
+C20 359 'cb.onStateChange(cb.name, prev, state)' supported
+C21 365 'cb.counts.clear()' supported
+C22 371 'cb.expiry = zero' supported
+C23 376 'cb.expiry = now.Add(cb.timeout)' supported
+C24 378 'cb.expiry = zero' supported
+C25 267 'if err != nil {' supported
+C26 272 'tscb.cb.afterRequest(generation, success)' supported
+C27 95 'ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.' supported
+C28 242 'result, err := req()' unclear
+C29 238 'panic(e)' supported
+C30 294 'cb.mutex.Lock()' unclear
+C31 281 'state, generation := cb.currentState(now)' supported

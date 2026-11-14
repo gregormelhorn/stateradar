@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from collections import Counter\nimport json\nfrom pathlib import Path\nbase=Path('analysis/probe-attempt-02')\nrows=[json.loads(r) for r in base.with_suffix('.stdout.jsonl').read_text().splitlines()]\nruns=Counter(r['Test'] for r in rows if r['Action']=='run' and 'Test' in r)\npasses=Counter(r['Test'] for r in rows if r['Action']=='pass' and 'Test' in r)\nassert runs and runs==passes and set(runs.values())=={3}\nassert any(r['Action']=='pass' and 'Test' not in r for r in rows)\nprint('Named cases:',len(runs),'top-level:',sum('/' not in t for t in runs),'run/pass events:',sum(runs.values()))\nprint('Additional passing cases:',*[t for t in runs if t.startswith(('TestIdentityCallerDeparture','TestIdentityMatchingAfterMismatch'))],sep='\\n')\nprint('Fail/skip records:',sum(r['Action'] in ('fail','skip') for r in rows))\nprint('Stderr bytes:',base.with_suffix('.stderr.log').stat().st_size)"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,10 @@
+298 def jev_batch(budget: Budget, source: str, source_ref: str, checks: object, key: str | None,
+313         ident, kind = check.get("id"), check.get("kind")
+314         statement, fragment, line = check.get("statement"), check.get("fragment"), check.get("line")
+389             result: CheckResult = {"kind": check["kind"], "statement": check["statement"],
+390                                    "source": source_ref, "line": check["line"], "fragment": check["fragment"],
+393             results[check["id"]] = result
+394             if check["kind"] == "ordering":
+520                             "question_claims": {f"{prefix}_{index}": check["id"]
+523                                                 if prefix == "choice" or check["kind"] == "ordering"}}
+798                     choice = check["choice"]

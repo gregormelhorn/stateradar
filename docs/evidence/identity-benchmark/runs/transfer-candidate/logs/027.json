@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "rg",
+    "-n",
+    "^func TestIdentity|case \"|t.Run\\(|panics\\(t, done\\)",
+    "analysis/_probe/identity_test.go"
+  ],
+  "exit_code": 0
+}

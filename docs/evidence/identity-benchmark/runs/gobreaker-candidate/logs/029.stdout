@@ -1,0 +1,55 @@
+52:			t.Error("expected panic")
+92:		identityCounts(t, alias.Counts(), gb.Counts{Requests: 1})
+98:		identityCounts(t, b.Counts(), want)
+99:		identityCounts(t, a.Counts(), want)
+121:	identityCounts(t, a.Counts(), want)
+122:	identityCounts(t, alias.Counts(), want)
+136:		identityCounts(t, b.Counts(), gb.Counts{})
+137:		identityCounts(t, alias.Counts(), gb.Counts{Requests: 1})
+158:		if !reflect.DeepEqual(events, []gb.State{gb.StateOpen, gb.StateHalfOpen}) {
+161:		identityCounts(t, b.Counts(), gb.Counts{})
+162:		identityCounts(t, alias.Counts(), gb.Counts{Requests: 1})
+164:		identityCounts(t, b.Counts(), gb.Counts{Requests: 1})
+185:	if !reflect.DeepEqual(events, []gb.State{gb.StateOpen, gb.StateHalfOpen, want}) {
+188:	identityCounts(t, b.Counts(), gb.Counts{})
+189:	identityCounts(t, alias.Counts(), gb.Counts{Requests: 1})
+191:	identityReject(t, &alias, gb.ErrTooManyRequests)
+209:		identityCounts(t, alias.Counts(), gb.Counts{Requests: 1})
+249:					t.Fatal("wrong hook recipient after overwrite")
+252:				t.Fatal("wrong hook recipient after rebinding")
+254:			identityCounts(t, a.Counts(), want)
+255:			identityCounts(t, b.Counts(), gb.Counts{})
+269:	identityCounts(t, b.Counts(), want)
+279:	identityCounts(t, b.Counts(), identitySuccess(1))
+283:	identityCounts(t, b.Counts(), gb.Counts{})
+295:		identityCounts(t, b.Counts(), gb.Counts{Requests: 1})
+297:		identityCounts(t, b.Counts(), gb.Counts{})
+320:		identityCounts(t, b.Counts(), gb.Counts{})
+321:		if !reflect.DeepEqual(events, []gb.State{gb.StateOpen, gb.StateHalfOpen, gb.StateOpen}) {
+340:					identityCounts(t, b.Counts(), gb.Counts{Requests: 1})
+343:						identityCounts(t, b.Counts(), gb.Counts{})
+356:				identityCounts(t, b.Counts(), want)
+382:				case <-leave:
+394:			identityCounts(t, b.Counts(), gb.Counts{Requests: 1})
+411:			identityCounts(t, b.Counts(), want)
+420:			classifiedAt := make(chan gb.State, 1)
+431:					classifiedAt <- b.State()
+461:			identityState(t, <-classifiedAt, want)
+462:			identityCounts(t, b.Counts(), gb.Counts{})
+496:			wantCalls := 0
+498:				wantCalls = 1
+500:			if classifications != wantCalls {
+507:			identityCounts(t, b.Counts(), want)
+524:	if got := identityPanic(t, func() { done(false) }); got != "first" {
+527:	identityCounts(t, a.Counts(), identityFailure(1))
+531:	if got != "first" || calls != 2 {
+534:	identityCounts(t, b.Counts(), identityFailure(2))
+548:	if got != "second" || calls != 2 {
+551:	identityCounts(t, b.Counts(), identityFailure(2))
+608:				if got := identityPanic(t, complete); got != "transition" {
+661:			if got := identityPanic(t, first); got != "entry" {
+689:		if got := identityPanic(t, func() { stale(success) }); got != "entry" {
+692:		identityCounts(t, b.Counts(), gb.Counts{})
+721:	if !reflect.DeepEqual(events, []gb.State{gb.StateOpen}) {
+733:		t.Fatalf("classifier called by Allow")
+737:	identityCounts(t, b.Counts(), identityFailure(1))

@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import collections,json,sys\nfrom pathlib import Path\nfor path in map(Path,sys.argv[1:]):\n rows=[json.loads(line) for line in path.read_text().splitlines()]\n for action in (\"run\",\"pass\",\"fail\",\"skip\"):\n  names=collections.Counter(row[\"Test\"] for row in rows if row.get(\"Action\")==action and row.get(\"Test\",\"\").startswith(\"TestIdentity\") and \"/\" not in row[\"Test\"])\n  print(action,dict(sorted(names.items())))\n print(\"subtest executions:\",sum(row.get(\"Action\")==\"run\" and \"/\" in row.get(\"Test\",\"\") for row in rows))\n print(\"package completion:\",[(row.get(\"Action\"),row.get(\"Package\")) for row in rows if \"Test\" not in row and row.get(\"Action\") in (\"pass\",\"fail\",\"skip\")])",
+    "analysis/probe-01.stdout.jsonl"
+  ],
+  "exit_code": 0
+}

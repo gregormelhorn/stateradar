@@ -1,0 +1,205 @@
+{
+  "version": 1,
+  "source_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+  "scope": "Regression observations, not desired behavior or owner decisions",
+  "cases": [
+    {
+      "id": "B01",
+      "title": "Stale completion accounting",
+      "initial": "Open after one current failure; an older callback remains; timeout elapses",
+      "steps": [
+        "invoke old callback before a new admission",
+        "observe notifications and counters"
+      ],
+      "outcome": "Expiry can move Open to HalfOpen, but stale success/failure is not counted",
+      "proof": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/routed/domain-analysis/circuitBreaker/_probe/as_is_test.go",
+          "sha256": "f94e5b08faea539c3d1485f931e44a848164236a430b93c67d54d134051069ff",
+          "line": 139,
+          "quote": "func TestPilotExpiryAndStaleReport(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/benchmark-proof.jsonl",
+          "sha256": "a00b76e8ad9af671423f73c8eec956678a4dcaf5bb43100e7254ea78ac024158",
+          "line": 25,
+          "quote": "{\"Time\":\"2026-11-14T22:10:35.083032+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotExpiryAndStaleReport\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B02",
+      "title": "Duplicate completion",
+      "initial": "HalfOpen, MaxRequests=2, one admitted callback",
+      "steps": [
+        "report true",
+        "report true again"
+      ],
+      "outcome": "The same callback closes HalfOpen without two distinct admissions",
+      "proof": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/routed/domain-analysis/circuitBreaker/_probe/as_is_test.go",
+          "sha256": "f94e5b08faea539c3d1485f931e44a848164236a430b93c67d54d134051069ff",
+          "line": 30,
+          "quote": "func TestPilotDuplicateDone(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/benchmark-proof.jsonl",
+          "sha256": "a00b76e8ad9af671423f73c8eec956678a4dcaf5bb43100e7254ea78ac024158",
+          "line": 17,
+          "quote": "{\"Time\":\"2026-11-14T22:10:35.080308+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotDuplicateDone\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B03",
+      "title": "Abandoned HalfOpen allowance",
+      "initial": "HalfOpen, MaxRequests=1, admitted callback retained",
+      "steps": [
+        "omit completion",
+        "attempt additional admissions",
+        "deliver a late outcome"
+      ],
+      "outcome": "Further admissions are refused without autonomous recovery; late success/failure can close/reopen",
+      "proof": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/routed/domain-analysis/circuitBreaker/_probe/as_is_test.go",
+          "sha256": "f94e5b08faea539c3d1485f931e44a848164236a430b93c67d54d134051069ff",
+          "line": 46,
+          "quote": "func TestPilotAbandonAndLateReport(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/benchmark-proof.jsonl",
+          "sha256": "a00b76e8ad9af671423f73c8eec956678a4dcaf5bb43100e7254ea78ac024158",
+          "line": 21,
+          "quote": "{\"Time\":\"2026-11-14T22:10:35.080392+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotAbandonAndLateReport\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B04",
+      "title": "Callback reentry",
+      "initial": "ReadyToTrip or OnStateChange executes under the breaker mutex",
+      "steps": [
+        "callback enters Counts or State",
+        "observe bounded nonreturn"
+      ],
+      "outcome": "Same-breaker locking reentry blocks; source lock establishes the mechanism beyond the finite probe",
+      "proof": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/routed/domain-analysis/circuitBreaker/_probe/as_is_test.go",
+          "sha256": "f94e5b08faea539c3d1485f931e44a848164236a430b93c67d54d134051069ff",
+          "line": 207,
+          "quote": "func TestPilotCallbackReentry(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/benchmark-proof.jsonl",
+          "sha256": "a00b76e8ad9af671423f73c8eec956678a4dcaf5bb43100e7254ea78ac024158",
+          "line": 37,
+          "quote": "{\"Time\":\"2026-11-14T22:10:35.136255+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotCallbackReentry\",\"Elapsed\":0.05}"
+        }
+      ]
+    },
+    {
+      "id": "B05",
+      "title": "Serialized wrapper reassignment",
+      "initial": "Two new wrappers a and b with matching initial generation",
+      "steps": [
+        "done=a.Allow()",
+        "*a=*b",
+        "done(true)"
+      ],
+      "outcome": "b.Counts has Requests=0 and TotalSuccesses=1; closure dereferences the changed wrapper",
+      "proof": [
+        {
+          "file": "docs/evidence/identity-benchmark/fixtures/additional_test.go.txt",
+          "sha256": "88954c9329d7c88f3a332b239eb4fdc8943b82c4795cbd8cf47fb23a23354abd",
+          "line": 9,
+          "quote": "func TestBenchmarkWrapperReassignment(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/benchmark-proof.jsonl",
+          "sha256": "a00b76e8ad9af671423f73c8eec956678a4dcaf5bb43100e7254ea78ac024158",
+          "line": 5,
+          "quote": "{\"Time\":\"2026-11-14T22:10:35.080233+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestBenchmarkWrapperReassignment\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B06",
+      "title": "Two outstanding Allow calls below budget",
+      "initial": "HalfOpen, MaxRequests=2",
+      "steps": [
+        "admit first and second",
+        "report first true",
+        "attempt third admission",
+        "report second true"
+      ],
+      "outcome": "Requests stays 2 after first success; third refused; second distinct success closes",
+      "proof": [
+        {
+          "file": "docs/evidence/identity-benchmark/fixtures/additional_test.go.txt",
+          "sha256": "88954c9329d7c88f3a332b239eb4fdc8943b82c4795cbd8cf47fb23a23354abd",
+          "line": 17,
+          "quote": "func TestBenchmarkOutstandingAllow(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/benchmark-proof.jsonl",
+          "sha256": "a00b76e8ad9af671423f73c8eec956678a4dcaf5bb43100e7254ea78ac024158",
+          "line": 9,
+          "quote": "{\"Time\":\"2026-11-14T22:10:35.080254+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestBenchmarkOutstandingAllow\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B07",
+      "title": "Classifier panic",
+      "initial": "Closed with a classifier that panics; request itself returns normally",
+      "steps": [
+        "Execute request",
+        "classifier panics",
+        "recover at caller and read counters"
+      ],
+      "outcome": "Classifier panic propagates through Execute recovery; one failure is recorded",
+      "proof": [
+        {
+          "file": "docs/evidence/mutation-rationale-cost/runs/routed/domain-analysis/circuitBreaker/_probe/as_is_test.go",
+          "sha256": "f94e5b08faea539c3d1485f931e44a848164236a430b93c67d54d134051069ff",
+          "line": 234,
+          "quote": "func TestPilotCallbackPanics(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/benchmark-proof.jsonl",
+          "sha256": "a00b76e8ad9af671423f73c8eec956678a4dcaf5bb43100e7254ea78ac024158",
+          "line": 41,
+          "quote": "{\"Time\":\"2026-11-14T22:10:35.136405+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestPilotCallbackPanics\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "B08",
+      "title": "Stale classification and original return",
+      "initial": "Execute classifier paused on original error; another execution trips breaker",
+      "steps": [
+        "let second execution open breaker",
+        "resume classifier returning success",
+        "observe original return and counts"
+      ],
+      "outcome": "Original value and error are returned; stale classification adds no current-generation success",
+      "proof": [
+        {
+          "file": "docs/evidence/identity-benchmark/fixtures/additional_test.go.txt",
+          "sha256": "88954c9329d7c88f3a332b239eb4fdc8943b82c4795cbd8cf47fb23a23354abd",
+          "line": 28,
+          "quote": "func TestBenchmarkStaleResultAndError(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/benchmark-proof.jsonl",
+          "sha256": "a00b76e8ad9af671423f73c8eec956678a4dcaf5bb43100e7254ea78ac024158",
+          "line": 13,
+          "quote": "{\"Time\":\"2026-11-14T22:10:35.080279+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestBenchmarkStaleResultAndError\",\"Elapsed\":0}"
+        }
+      ]
+    }
+  ]
+}

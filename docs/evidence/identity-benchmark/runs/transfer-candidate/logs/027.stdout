@@ -1,0 +1,42 @@
+26:func TestIdentityAEpochAndTarget(t *testing.T) {
+28:		t.Run(scenario, func(t *testing.T) {
+34:			case "unchanged":
+37:			case "matching replacement":
+42:			case "different epoch replacement":
+48:			case "epoch change and restoration":
+55:			case "cleared":
+57:				panics(t, done)
+67:func TestIdentityAPortIdentity(t *testing.T) {
+68:	t.Run("caller rebind and copy", func(t *testing.T) {
+79:	t.Run("overwrite original port and copy account", func(t *testing.T) {
+91:func TestIdentityCapturedAccounts(t *testing.T) {
+101:		t.Run(method.name, func(t *testing.T) {
+102:			t.Run("retarget and epoch change", func(t *testing.T) {
+113:			t.Run("cleared port", func(t *testing.T) {
+125:func TestIdentityCIdentityAndEpoch(t *testing.T) {
+126:	t.Run("unchanged", func(t *testing.T) {
+134:	t.Run("equal account copy and restored pointer", func(t *testing.T) {
+147:	t.Run("same account epoch change and restoration", func(t *testing.T) {
+158:	t.Run("cleared port", func(t *testing.T) {
+168:func TestIdentityDRegistryAndKey(t *testing.T) {
+170:		t.Run(scenario, func(t *testing.T) {
+179:			case "unchanged":
+181:			case "entry replacement":
+184:			case "delete":
+186:			case "nil entry":
+188:			case "nil map":
+190:			case "reinsert":
+197:			case "map replacement":
+203:			case "caller rebind":
+207:			case "copy shares map":
+210:			case "caller reassigns key":
+224:func TestIdentityAdmissionAndRepeat(t *testing.T) {
+226:		t.Run(api, func(t *testing.T) {
+232:			case "A":
+234:			case "B":
+236:			case "C":
+238:			case "D":
+240:			case "E":
+242:			case "F":
+254:func TestIdentityNilAdmission(t *testing.T) {
+267:		t.Run(name, func(t *testing.T) {

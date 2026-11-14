@@ -1,0 +1,48 @@
+def jev_batch(budget: Budget, source: str, source_ref: str, checks: object, key: str | None,
+              model: str = "jev-latest") -> JevBatchResult:
+    """Evaluate independent cited claims or ordering checks against one source."""
+    if not all(isinstance(x, str) and x.strip() for x in (source, source_ref, key, model)):
+        raise ValueError("source, source reference, key, and model are required")
+    assert key is not None  # checked above; all() does not narrow the type
+    if not isinstance(checks, list) or not checks:
+        raise ValueError("checks must be a nonempty list")
+    questions: dict[str, dict[str, Any]] = {}
+    seen_ids: set[str] = set()
+    validated: list[Check] = []
+    source_lines = source.splitlines()
+    for index, check in enumerate(checks):
+        if not isinstance(check, dict):
+            raise ValueError("each check must be an object")
+        ident, kind = check.get("id"), check.get("kind")
+        statement, fragment, line = check.get("statement"), check.get("fragment"), check.get("line")
+        if not (isinstance(ident, str) and ident.strip() and isinstance(statement, str) and statement.strip()
+                and isinstance(fragment, str) and fragment.strip()):
+            raise ValueError("each check requires a nonempty id, statement, and fragment")
+        if ident in seen_ids:
+            raise ValueError(f"duplicate check id: {ident}")
+        seen_ids.add(ident)
+        if kind not in ("claim", "ordering"):
+            raise ValueError(f"unknown check kind: {kind}")
+        error = _citation_error(source_lines, line, fragment)
+        if error:
+            raise ValueError(f"{ident}: {error}")
+        assert isinstance(line, int)  # _citation_error rejected anything else
+        validated.append({"id": ident, "kind": kind, "statement": statement, "line": line,
+                          "fragment": fragment})
+        if kind == "ordering":
+            instruction = ("Does the cited fragment itself explicitly contemplate this specific event ordering? "
+                           "Use the surrounding source only to interpret the fragment. "
+                           "A general requirement does not establish an unmentioned ordering. ")
+        else:
+            instruction = ("Does the cited fragment support this specific claim? "
+                           "Use the surrounding source only to interpret the fragment. ")
+        questions[f"choice_{index}"] = {
+            "type": "choice",
+            "instructions": instruction + f"Claim or ordering: {statement}\nCited fragment: {fragment}",
+            "criteria": {
+                "supported": "The cited fragment explicitly supports the claim or contemplates the specific ordering.",
+                "contradicted": "The cited fragment explicitly contradicts the claim or rules out the specific ordering.",
+                "unclear": "The cited fragment does not establish either conclusion, or the evidence is insufficient.",
+            },
+        }
+        if kind == "ordering":

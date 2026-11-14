@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,re\nfrom pathlib import Path\nsrc={str(p):p.read_text().splitlines() for p in [Path('gobreaker.go'), Path('analysis/_probe/identity_test.go')]}\npaths=[Path('analysis')/k for k in ('final.json','review.md','summary.md','open-questions.md')]\ntexts=[json.loads(p.read_text()) if p.suffix=='.json' else p.read_text() for p in paths]\nstrings=['\\n'.join(r['outcome'] for r in value['findings']) if isinstance(value,dict) else value for value in texts]\ncount=0\nfor p,s in zip(paths,strings):\n for name,n,fragment in re.findall(r'(gobreaker\\.go|analysis/_probe/identity_test\\.go):(\\d+) \\(\"(.*?)\"\\)',s):\n  assert fragment in src[name][int(n)-1], (p,name,n,fragment,src[name][int(n)-1])\n  count+=1\nfindings=texts[0]['findings']\nruns=[json.loads(l) for l in Path('analysis/probe-attempt-02.stdout.jsonl').read_text().splitlines()]\npassed={e['Test'] for e in runs if e.get('Action')=='pass' and 'Test' in e}\nassert all(f['test']=='untested' or f['test'] in passed for f in findings)\nprint(count,'inline fragments verified at exact lines; all report probe names passed')\n"
+  ],
+  "exit_code": 0
+}

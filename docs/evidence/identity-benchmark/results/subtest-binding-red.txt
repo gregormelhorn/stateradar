@@ -1,0 +1,16 @@
+.....E.......
+======================================================================
+ERROR: test_completed_subtest_can_bind_to_parent_function (__main__.BenchmarkTests.test_completed_subtest_can_bind_to_parent_function)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_finding_benchmark.py", line 72, in test_completed_subtest_can_bind_to_parent_function
+    self.assertEqual(audit(self.spec,self.review,self.root)['tested_full'],1)
+                     ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/finding_benchmark.py", line 52, in audit
+    raise ValueError('tested verdict requires source and execution evidence')
+ValueError: tested verdict requires source and execution evidence
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.147s
+
+FAILED (errors=1)

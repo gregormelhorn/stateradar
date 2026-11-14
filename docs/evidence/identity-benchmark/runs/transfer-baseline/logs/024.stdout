@@ -1,0 +1,77 @@
+                    "sequence": statement,
+                    "scope": (
+                        "Check the starting condition, who acts, each event, their order, and the stated outcome or exclusion. "
+                        "Treat each material detail as required. Accept paraphrases that preserve meaning. "
+                        "Reject a plausible inference if the quote leaves any material detail open. "
+                        "An explicit reversal fails. A different sentence cannot supply missing evidence."
+                    ),
+                },
+                "criteria": {
+                    "true": "The quote establishes every material condition, event, order and outcome in the assertion.",
+                    "false": "The quote leaves at least one material detail open or conflicts with it.",
+                },
+            }
+    payload = {"model": model, "state": {"source": source}, "questions": questions}
+    response, input_tokens, cost, reserved = _jev_request(budget, payload, key)
+    try:
+        answers = response.get("answers")
+        if not isinstance(answers, dict) or set(answers) != set(questions):
+            raise ValueError("Jev response has missing or unexpected answers; usage was recorded")
+        model = response.get("model")
+        if not isinstance(model, str) or not model:
+            raise ValueError("Jev response lacks a model; usage was recorded")
+        results: dict[str, CheckResult] = {}
+        for index, check in enumerate(validated):
+            answer = answers[f"choice_{index}"]
+            if not isinstance(answer, dict):
+                raise ValueError("Jev response has an invalid answer; usage was recorded")
+            choice = answer.get("choice")
+            probabilities = answer.get("probabilities")
+            confidence = answer.get("confidence")
+            if (answer.get("type") != "choice" or choice not in ("supported", "contradicted", "unclear")
+                    or not isinstance(probabilities, dict) or set(probabilities) != {"supported", "contradicted", "unclear"}
+                    or any(isinstance(p, bool) or not isinstance(p, (int, float)) or not 0 <= p <= 1
+                           for p in probabilities.values())
+                    or isinstance(confidence, bool) or not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1):
+                raise ValueError("Jev response has an invalid choice answer; usage was recorded")
+            if abs(sum(probabilities.values()) - 1) > 0.03 or probabilities[choice] < max(probabilities.values()):
+                raise ValueError("Jev response has an inconsistent probability distribution; usage was recorded")
+            result: CheckResult = {"kind": check["kind"], "statement": check["statement"],
+                                   "source": source_ref, "line": check["line"], "fragment": check["fragment"],
+                                   "choice": choice, "probabilities": probabilities,
+                                   "confidence": confidence, "review_required": True}
+            results[check["id"]] = result
+            if check["kind"] == "ordering":
+                scope = answers[f"scope_{index}"]
+                if not isinstance(scope, dict) or scope.get("type") != "noul":
+                    raise ValueError("Jev response has an invalid ordering scope answer; usage was recorded")
+                probability = scope.get("noul")
+                if (isinstance(probability, bool) or not isinstance(probability, (int, float))
+                        or not 0 <= probability <= 1):
+                    raise ValueError("Jev response has an invalid ordering scope probability; usage was recorded")
+                result["ordering_scope_probability"] = probability
+    except ValueError as error:
+        raise JevAnswerError(str(error), input_tokens, cost) from error
+    return {"model": model, "source_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
+            "input_tokens": input_tokens, "cost_microdollars": cost,
+            "reservation_microdollars": reserved, "checks": results}
+
+
+class InvalidDraft(ValueError):
+    """A Flash draft that is not the required JSON structure. Keeps the raw text."""
+
+    def __init__(self, message: str, text: str) -> None:
+        self.text = text
+        super().__init__(f"Flash draft rejected: {message}; usage was recorded")
+
+
+DRAFT_INSTRUCTIONS = """You draft source-grounded claims for a StateRadar analysis. You propose; you do not decide.
+
+Task:
+{task}
+
+Rules:
+- Use only the numbered source below. Do not use outside knowledge.
+- Each claim cites ONE source line number and a short fragment copied verbatim from that line.
+- kind is "claim" for a statement of behaviour or requirement, "ordering" for a specific sequence of events.
+- A general requirement does not establish an ordering it does not mention: put such cases into questions.

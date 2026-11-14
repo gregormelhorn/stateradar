@@ -39,6 +39,16 @@ entries and separates the new model-routing plan from shipped capabilities.
    strengthen the explicit behavior benchmark before another optimization claim.
    The earlier missing Pool Codex cost remains unknown. These figures are model
    cost equivalents and exclude the supervising implementation/review chat.
+   Latest follow-up: [expanded finding benchmark and bounded identity comparison](evidence/identity-benchmark/comparison.md)
+   makes the shared archive omission executable: both reports cover 7/8 cases,
+   and the routed original-binding assertion is refuted in three race runs.
+   Four bounded sessions retain complete Codex and provider accounting. The
+   candidate costs 15.7% more on gobreaker and misses one explicit success
+   sequence; on six synthetic recipient classes it preserves coverage and
+   costs 13.7% less. Both transfer suites leave caller-variable rebinding only
+   partially tested. Keep the standard prompt and routed execution unchanged.
+   All four generated suites pass independent replay; this is not a full-pilot
+   comparison or an independently held-out quality result.
 2. **Broaden mutation coverage and validate on real components.** Continue
    [fault-class mutants](#8-ach-style-fault-class-mutants-testgen-upgrade):
    add supported classes and component bindings with observed red probes and
@@ -79,6 +89,14 @@ entries and separates the new model-routing plan from shipped capabilities.
    benchmark cases exist, test a small sub-prompt against held-out cases; see
    [GEPA experiment](#9-gepa-experiment-the-feedback-loop-as-an-algorithm).
    Keep this separate from assuming that a more stable model answer is correct.
+   The first [English reference/identity candidate](evidence/identity-benchmark/prompts/candidate.md)
+   has now been measured without retuning between runs. Its mixed result does
+   not justify promotion. Next proposed increment: evaluate identity tracing
+   as a final review of an existing findings list, retaining every earlier
+   ordered case, and require a direct caller-variable-rebinding probe. Fix the
+   experiment task's documented Jev schema hint before new calls. Use
+   independently reviewed transfer cases and matched repeated runs before
+   claiming reliable coverage or total-cost improvement.
 5. **Expand semantic reachability when needed.** The existing checker covers
    the minimal model; hierarchy and parallel regions remain a possible
    follow-up, described under [semantic analysis](#3-xstate--semantic-analysis).

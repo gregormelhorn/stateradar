@@ -1,0 +1,1029 @@
+[
+  {
+    "id": "F01",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A increments a.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F02",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A increments b.Successes. The completion leaves a.Successes at zero.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F03",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A skips the success increment when the replacement's epoch differs.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F04",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A skips the success increment on the original account at its changed epoch.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F05",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "The invocation after restoration increments a.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F06",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A panics evaluating the nil target's Epoch.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F07",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A reads the original port object and increments a.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F08",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A increments the distinct copied account b.Successes because the copy has epoch 7.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F09",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "B increments a.Successes using the saved account pointer regardless of the epoch change.",
+    "citation": {
+      "file": "component.go",
+      "line": 15,
+      "fragment": " return func() { target.Successes++ }"
+    },
+    "line": 15,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "F10",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "E increments a.Successes through its receiver copy's Target pointer regardless of the epoch change.",
+    "citation": {
+      "file": "component.go",
+      "line": 28,
+      "fragment": " return func() { p.Target.Successes++ }"
+    },
+    "line": 28,
+    "fragment": " return func() { p.Target.Successes++ }"
+  },
+  {
+    "id": "F11",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "F increments a.Successes using the saved account pointer regardless of the epoch change.",
+    "citation": {
+      "file": "component.go",
+      "line": 33,
+      "fragment": " return func() { target.Successes++ }"
+    },
+    "line": 33,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "F12",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "B still increments the original account's Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 15,
+      "fragment": " return func() { target.Successes++ }"
+    },
+    "line": 15,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "F13",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "E still increments the original account's Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 28,
+      "fragment": " return func() { p.Target.Successes++ }"
+    },
+    "line": 28,
+    "fragment": " return func() { p.Target.Successes++ }"
+  },
+  {
+    "id": "F14",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "F still increments the original account's Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 33,
+      "fragment": " return func() { target.Successes++ }"
+    },
+    "line": 33,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "F15",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C increments a.Successes when both guards match.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F16",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C skips the success increment because b is a different account object despite the copied epoch.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F17",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C skips the success increment on the same account when its epoch differs.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F18",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C skips without panicking because the pointer comparison fails before the epoch comparison.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F19",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C increments a.Successes after restoration.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F20",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C increments a.Successes after epoch restoration.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F21",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D increments a.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F22",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D increments b.Successes without an epoch check.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F23",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D skips success credit for a missing key.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F24",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D skips success credit for a present key with a nil value.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F25",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D skips credit for a nil map without panicking.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F26",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "The invocation after reinsertion increments b.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F27",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D increments b.Successes in the replacement map.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F28",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D reads the original registry object and increments a.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F29",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D increments b.Successes through the original registry's now-updated map.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F30",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D uses the call's key value k and increments a.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F31",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A increments Requests in the public call before returning its completion.",
+    "citation": {
+      "file": "component.go",
+      "line": 8,
+      "fragment": " p.Target.Requests++"
+    },
+    "line": 8,
+    "fragment": " p.Target.Requests++"
+  },
+  {
+    "id": "F32",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A repeats its success increment on every invocation whose current target epoch equals the captured epoch.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F33",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A panics on admission when Target is nil because it dereferences Target to access Requests.",
+    "citation": {
+      "file": "component.go",
+      "line": 8,
+      "fragment": " p.Target.Requests++"
+    },
+    "line": 8,
+    "fragment": " p.Target.Requests++"
+  },
+  {
+    "id": "F34",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "Registry.D panics on admission if its lookup yields nil.",
+    "citation": {
+      "file": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++"
+    },
+    "line": 23,
+    "fragment": " r.Entries[key].Requests++"
+  },
+  {
+    "id": "F35",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "F panics while reading p.Target before returning a completion.",
+    "citation": {
+      "file": "component.go",
+      "line": 31,
+      "fragment": " target := p.Target"
+    },
+    "line": 31,
+    "fragment": " target := p.Target"
+  },
+  {
+    "id": "F31-A-deferred",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A only executes the success increment upon invocation of its returned function.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F31-B",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "B increments Requests before returning the completion.",
+    "citation": {
+      "file": "component.go",
+      "line": 14,
+      "fragment": " target.Requests++"
+    },
+    "line": 14,
+    "fragment": " target.Requests++"
+  },
+  {
+    "id": "F32-B",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "On two calls to the same returned completion with valid state unchanged, B increments Successes on each call.",
+    "citation": {
+      "file": "component.go",
+      "line": 15,
+      "fragment": " return func() { target.Successes++ }"
+    },
+    "line": 15,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "F31-B-deferred",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "B only executes the success increment upon invocation of its returned function.",
+    "citation": {
+      "file": "component.go",
+      "line": 15,
+      "fragment": " return func() { target.Successes++ }"
+    },
+    "line": 15,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "F31-C",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C increments Requests before returning the completion.",
+    "citation": {
+      "file": "component.go",
+      "line": 19,
+      "fragment": " target.Requests++"
+    },
+    "line": 19,
+    "fragment": " target.Requests++"
+  },
+  {
+    "id": "F32-C",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "On two calls to the same returned completion with valid state unchanged, C increments Successes on each call.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F31-C-deferred",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C only executes the success increment upon invocation of its returned function.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F31-D",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D increments Requests before returning the completion.",
+    "citation": {
+      "file": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++"
+    },
+    "line": 23,
+    "fragment": " r.Entries[key].Requests++"
+  },
+  {
+    "id": "F32-D",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "On two calls to the same returned completion with valid state unchanged, D increments Successes on each call.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F31-D-deferred",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D only executes the success increment upon invocation of its returned function.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F31-E",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "E increments Requests before returning the completion.",
+    "citation": {
+      "file": "component.go",
+      "line": 27,
+      "fragment": " p.Target.Requests++"
+    },
+    "line": 27,
+    "fragment": " p.Target.Requests++"
+  },
+  {
+    "id": "F32-E",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "On two calls to the same returned completion with valid state unchanged, E increments Successes on each call.",
+    "citation": {
+      "file": "component.go",
+      "line": 28,
+      "fragment": " return func() { p.Target.Successes++ }"
+    },
+    "line": 28,
+    "fragment": " return func() { p.Target.Successes++ }"
+  },
+  {
+    "id": "F31-E-deferred",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "E only executes the success increment upon invocation of its returned function.",
+    "citation": {
+      "file": "component.go",
+      "line": 28,
+      "fragment": " return func() { p.Target.Successes++ }"
+    },
+    "line": 28,
+    "fragment": " return func() { p.Target.Successes++ }"
+  },
+  {
+    "id": "F31-F",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "F increments Requests before returning the completion.",
+    "citation": {
+      "file": "component.go",
+      "line": 32,
+      "fragment": " target.Requests++"
+    },
+    "line": 32,
+    "fragment": " target.Requests++"
+  },
+  {
+    "id": "F32-F",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "On two calls to the same returned completion with valid state unchanged, F increments Successes on each call.",
+    "citation": {
+      "file": "component.go",
+      "line": 33,
+      "fragment": " return func() { target.Successes++ }"
+    },
+    "line": 33,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "F31-F-deferred",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "F only executes the success increment upon invocation of its returned function.",
+    "citation": {
+      "file": "component.go",
+      "line": 33,
+      "fragment": " return func() { target.Successes++ }"
+    },
+    "line": 33,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "F33-B",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "B panics without returning a completion if a nonnil port has a nil Target when admitted.",
+    "citation": {
+      "file": "component.go",
+      "line": 14,
+      "fragment": " target.Requests++"
+    },
+    "line": 14,
+    "fragment": " target.Requests++"
+  },
+  {
+    "id": "F33-C",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C panics without returning a completion if a nonnil port has a nil Target when admitted.",
+    "citation": {
+      "file": "component.go",
+      "line": 18,
+      "fragment": " target, epoch := p.Target, p.Target.Epoch"
+    },
+    "line": 18,
+    "fragment": " target, epoch := p.Target, p.Target.Epoch"
+  },
+  {
+    "id": "F33-E",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "E panics without returning a completion if a nonnil port has a nil Target when admitted.",
+    "citation": {
+      "file": "component.go",
+      "line": 27,
+      "fragment": " p.Target.Requests++"
+    },
+    "line": 27,
+    "fragment": " p.Target.Requests++"
+  },
+  {
+    "id": "F33-F",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "F panics without returning a completion if a nonnil port has a nil Target when admitted.",
+    "citation": {
+      "file": "component.go",
+      "line": 32,
+      "fragment": " target.Requests++"
+    },
+    "line": 32,
+    "fragment": " target.Requests++"
+  },
+  {
+    "id": "F02-original",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "After A admits on a and its port is retargeted to a distinct b at the captured epoch, invoking the completion does not increment a.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F02-capture",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A copies the original target Epoch into a local integer at admission.",
+    "citation": {
+      "file": "component.go",
+      "line": 9,
+      "fragment": " epoch := p.Target.Epoch"
+    },
+    "line": 9,
+    "fragment": " epoch := p.Target.Epoch"
+  },
+  {
+    "id": "F07-capture",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "A has a pointer receiver and the returned function reads Target through that receiver.",
+    "citation": {
+      "file": "component.go",
+      "line": 7,
+      "fragment": "func (p *Port) A() func() {"
+    },
+    "line": 7,
+    "fragment": "func (p *Port) A() func() {"
+  },
+  {
+    "id": "F09-capture",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "B stores the Target account pointer in a local variable before returning its closure.",
+    "citation": {
+      "file": "component.go",
+      "line": 13,
+      "fragment": " target := p.Target"
+    },
+    "line": 13,
+    "fragment": " target := p.Target"
+  },
+  {
+    "id": "F10-capture",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "E has a Port value receiver, so the copy of the Port still carries its Target pointer.",
+    "citation": {
+      "file": "component.go",
+      "line": 26,
+      "fragment": "func (p Port) E() func() {"
+    },
+    "line": 26,
+    "fragment": "func (p Port) E() func() {"
+  },
+  {
+    "id": "F11-capture",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "F saves the Target account pointer from the passed port before returning its closure.",
+    "citation": {
+      "file": "component.go",
+      "line": 31,
+      "fragment": " target := p.Target"
+    },
+    "line": 31,
+    "fragment": " target := p.Target"
+  },
+  {
+    "id": "F16-capture",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "C saves the Target account pointer and a copy of its Epoch in local variables.",
+    "citation": {
+      "file": "component.go",
+      "line": 18,
+      "fragment": " target, epoch := p.Target, p.Target.Epoch"
+    },
+    "line": 18,
+    "fragment": " target, epoch := p.Target, p.Target.Epoch"
+  },
+  {
+    "id": "F28-capture",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D takes a registry pointer receiver.",
+    "citation": {
+      "file": "component.go",
+      "line": 22,
+      "fragment": "func (r *Registry) D(key string) func() {"
+    },
+    "line": 22,
+    "fragment": "func (r *Registry) D(key string) func() {"
+  },
+  {
+    "id": "F30-capture",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "D takes key as a string value parameter.",
+    "citation": {
+      "file": "component.go",
+      "line": 22,
+      "fragment": "func (r *Registry) D(key string) func() {"
+    },
+    "line": 22,
+    "fragment": "func (r *Registry) D(key string) func() {"
+  },
+  {
+    "id": "F34-missing",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "At admission D's map lookup for a missing key yields a nil account pointer and the field access panics.",
+    "citation": {
+      "file": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++"
+    },
+    "line": 23,
+    "fragment": " r.Entries[key].Requests++"
+  },
+  {
+    "id": "F34-nil-map",
+    "kind": "claim",
+    "type": "claim",
+    "statement": "At admission D's lookup in a nil map yields a nil account pointer and the field access panics.",
+    "citation": {
+      "file": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++"
+    },
+    "line": 23,
+    "fragment": " r.Entries[key].Requests++"
+  },
+  {
+    "id": "F36",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "A credits a.Successes on the invocation after recovery and restoration.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F37",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After A admits work, clearing the port and never invoking the completion leaves the original request increment in place.",
+    "citation": {
+      "file": "component.go",
+      "line": 8,
+      "fragment": " p.Target.Requests++"
+    },
+    "line": 8,
+    "fragment": " p.Target.Requests++"
+  },
+  {
+    "id": "F37-B",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After B admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+    "citation": {
+      "file": "component.go",
+      "line": 14,
+      "fragment": " target.Requests++"
+    },
+    "line": 14,
+    "fragment": " target.Requests++"
+  },
+  {
+    "id": "F37-C",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After C admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+    "citation": {
+      "file": "component.go",
+      "line": 19,
+      "fragment": " target.Requests++"
+    },
+    "line": 19,
+    "fragment": " target.Requests++"
+  },
+  {
+    "id": "F37-D",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After D admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+    "citation": {
+      "file": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++"
+    },
+    "line": 23,
+    "fragment": " r.Entries[key].Requests++"
+  },
+  {
+    "id": "F37-E",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After E admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+    "citation": {
+      "file": "component.go",
+      "line": 27,
+      "fragment": " p.Target.Requests++"
+    },
+    "line": 27,
+    "fragment": " p.Target.Requests++"
+  },
+  {
+    "id": "F37-F",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After F admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+    "citation": {
+      "file": "component.go",
+      "line": 32,
+      "fragment": " target.Requests++"
+    },
+    "line": 32,
+    "fragment": " target.Requests++"
+  },
+  {
+    "id": "F38",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After a first A completion already incremented a, a second call after retargeting to a distinct account b at the captured epoch increments b.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F39",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After a first C completion already incremented a, a second call after retargeting to a distinct account b at the captured epoch skips the success increment.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F40",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "After a first D completion already incremented a, a second call after replacing the entry for the captured key with b increments b.Successes.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "F38-before",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The first A completion credits a while its original valid admission state remains unchanged.",
+    "citation": {
+      "file": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+    },
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "F39-before",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The first C completion credits a while its original valid admission state remains unchanged.",
+    "citation": {
+      "file": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+    },
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "F40-before",
+    "type": "claim",
+    "kind": "claim",
+    "statement": "The first D completion credits a while its original valid admission state remains unchanged.",
+    "citation": {
+      "file": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+    },
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  }
+]

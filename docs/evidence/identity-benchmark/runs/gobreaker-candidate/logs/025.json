@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\na=json.load(open('analysis/final-jev.json'))\nfor k,v in a['checks'].items():\n if v['choice']!='supported': print(k,v['choice'],v['line'],v['statement'])\n"
+  ],
+  "exit_code": 0
+}

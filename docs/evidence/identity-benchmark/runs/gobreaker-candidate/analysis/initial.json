@@ -1,0 +1,415 @@
+{
+  "findings": [
+    {
+      "id": "F01",
+      "initial": "TwoStep wrapper W points to new A. B is separately constructed. Both have the same numeric generation.",
+      "steps": [
+        "Admit one A request through W",
+        "Keep a copy of W that still points to A",
+        "Overwrite W with B",
+        "Invoke the original done with true or false"
+      ],
+      "outcome": "observed-in-code: The outcome goes to B, which has zero admissions. A retains the admission with no outcome. A closed failure in B calls B's ReadyToTrip with B's counts.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "untested",
+      "question": "Should a callback follow replacement of its wrapper when the replacement accepts the captured generation?"
+    },
+    {
+      "id": "F02",
+      "initial": "New TwoStep wrapper W and a by-value wrapper copy both point to A. B is independent.",
+      "steps": [
+        "Admit through W and through its copy",
+        "Rebind only the variable holding W to B",
+        "Complete both callbacks without overwriting either captured wrapper"
+      ],
+      "outcome": "observed-in-code: Both outcomes go to shared A. B remains untouched. Variable rebinding changes the name used by the caller, while the captured wrapper objects remain where they were.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "untested",
+      "question": "Is sharing A via a shallow wrapper copy a supported public use?"
+    },
+    {
+      "id": "F03",
+      "initial": "A has a pending completion in its initial generation. B has tripped and is still open.",
+      "steps": [
+        "Copy W pointing to A",
+        "Overwrite W with B",
+        "Invoke the pending callback after replacement",
+        "Retry Allow on W"
+      ],
+      "outcome": "observed-in-code: B ignores either result and rejects retry with ErrOpenState while its timeout is unexpired. A retains its pending count.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "\tif generation != before {"
+      },
+      "test": "untested",
+      "question": "Should replacement mismatches be silent and should the original admission remain charged? README.md:77-79 covers clearing on one breaker."
+    },
+    {
+      "id": "F04",
+      "initial": "A pending callback was admitted closed. W now points to B, which is open with a short timeout.",
+      "steps": [
+        "Wait past B's timeout without touching B's state",
+        "Invoke the old done using W",
+        "Retry Allow on W"
+      ],
+      "outcome": "observed-in-code: For either result, B enters half-open and invokes B's notification before dropping the mismatching completion. No request is charged by done, and a retry can take the available slot.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 342,
+        "fragment": "\t\t\tcb.setState(StateHalfOpen, now)"
+      },
+      "test": "untested",
+      "question": "Should an unrelated callback be able to advance a replacement's state even when its result is discarded?"
+    },
+    {
+      "id": "F05",
+      "initial": "A and B are separate breakers that previously tripped. A has a pending half-open request, and B's open timeout has passed without a state check.",
+      "steps": [
+        "Admit A's half-open request",
+        "Overwrite W with B",
+        "Report A's success",
+        "Read B and try a new request"
+      ],
+      "outcome": "observed-in-code: B first notifies open to half-open, then half-open to closed without any B admission. B clears counts and admits a new request. A stays half-open with its slot charged.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 317,
+        "fragment": "\t\t\tcb.setState(StateClosed, now)"
+      },
+      "test": "untested",
+      "question": "Should a foreign completion be able to close a replacement when the numeric generation matches after expiry?"
+    },
+    {
+      "id": "F06",
+      "initial": "A and B are separate breakers that previously tripped. A has a pending half-open request, and B's open timeout has passed without a state check.",
+      "steps": [
+        "Admit A's half-open request",
+        "Overwrite W with B",
+        "Report A's failure",
+        "Read B and retry"
+      ],
+      "outcome": "observed-in-code: B notifies open to half-open and half-open to open, with no B admission or failure count carried forward. A stays half-open with its slot charged.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "\t\tcb.setState(StateOpen, now)"
+      },
+      "test": "untested",
+      "question": "Should a foreign completion be able to reopen a replacement before it has admitted a probe?"
+    },
+    {
+      "id": "F07",
+      "initial": "W points to A and an admitted callback is outstanding.",
+      "steps": [
+        "Save a shallow alias",
+        "Overwrite W with a zero-value TwoStepCircuitBreaker",
+        "Call the old callback with recovery supplied by the caller"
+      ],
+      "outcome": "observed-in-code: The old callback panics on a nil underlying receiver before accounting. A's admission remains via the saved alias.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "untested",
+      "question": "What validity contract applies to a captured wrapper overwritten with a zero value?"
+    },
+    {
+      "id": "F08",
+      "initial": "A new direct CircuitBreaker is used by Execute. B is newly constructed.",
+      "steps": [
+        "Inside the admitted request, rebind the caller's pointer variable to B or overwrite the receiver value with a fresh breaker value",
+        "Return either success or failure"
+      ],
+      "outcome": "observed-in-code: Rebinding leaves completion on A. Overwriting the receiver at the same address changes the classifier, current counters and trip callback used by Execute. With equal generations, the replacement counts an outcome with no admission.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 243,
+        "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))"
+      },
+      "test": "untested",
+      "question": "Is quiescent overwrite of a direct breaker during its request supported, and what object should receive the result?"
+    },
+    {
+      "id": "F09",
+      "initial": "A closed TwoStep breaker has one admitted request and ReadyToTrip always returns false.",
+      "steps": [
+        "Copy the returned function value",
+        "Call the original with true",
+        "Call its copy with false",
+        "Call it again with false"
+      ],
+      "outcome": "observed-in-code: All three outcomes are counted against one admission, with two consecutive failures.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "\treturn func(success bool) {"
+      },
+      "test": "untested",
+      "question": "Is done defined as exactly once, repeatable, or expected to signal misuse?"
+    },
+    {
+      "id": "F10",
+      "initial": "A half-open TwoStep breaker allows two requests.",
+      "steps": [
+        "Admit one request",
+        "Report success twice using the same callback",
+        "Call it again after close"
+      ],
+      "outcome": "observed-in-code: The two reports close the breaker without a second admission. Closing clears counts. The subsequent report is stale and is ignored.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 316,
+        "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+      },
+      "test": "untested",
+      "question": "Can repeated reports from one admission satisfy the full half-open threshold?"
+    },
+    {
+      "id": "F11",
+      "initial": "A half-open TwoStep breaker has a single allowed slot.",
+      "steps": [
+        "Admit one request and leave its callback uncalled",
+        "Let the caller leave and wait beyond the configured open timeout",
+        "Retry",
+        "Compare reporting success or failure later on separate breakers"
+      ],
+      "outcome": "observed-in-code: Without a report the breaker stays half-open and retry returns ErrTooManyRequests. A later success closes and permits new admissions. A later failure reopens and retry returns ErrOpenState before expiry.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 285,
+        "fragment": "\t} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+      },
+      "test": "untested",
+      "question": "What is the expected recovery when a half-open owner leaves without reporting? README.md:41-43 limits admission but says nothing about abandonment."
+    },
+    {
+      "id": "F12",
+      "initial": "Two requests are admitted in the same half-open generation.",
+      "steps": [
+        "Report failure for the first request",
+        "Report success or failure for the second before the new open timeout",
+        "Inspect state and counts"
+      ],
+      "outcome": "observed-in-code: The first opens and clears counts. Both possible second results are skipped, with no extra notification or accounting.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "\tif generation != before {"
+      },
+      "test": "untested",
+      "question": "explicit-requirement README.md:77-79 covers ignoring results sent before the state-change reset."
+    },
+    {
+      "id": "F13",
+      "initial": "A closed breaker with a finite interval has a pending result.",
+      "steps": [
+        "Compare reporting before expiry, reporting as the first state-aware call after expiry, and reporting after State refreshes expiry",
+        "Try both success and failure"
+      ],
+      "outcome": "observed-in-code: Before expiry the outcome counts and failure invokes ReadyToTrip. After expiry either outcome is discarded and counts are cleared, with no state notification or ReadyToTrip. Counts alone sees the old admission until a state-aware call.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 338,
+        "fragment": "\t\t\tcb.toNewGeneration(now)"
+      },
+      "test": "untested",
+      "question": "explicit-requirement README.md:77-79 covers outcome exclusion after clearing. Should Counts itself advance an expired window, and should completion be allowed to trigger the reset?"
+    },
+    {
+      "id": "F14",
+      "initial": "A worker has entered Execute on A. The caller can abandon waiting on the worker using its own channel. A has no interval.",
+      "steps": [
+        "Leave the worker blocked and inspect counts",
+        "Optionally trip A in a separate request",
+        "Release the worker with success or failure",
+        "Observe the buffered caller-owned result channel and A"
+      ],
+      "outcome": "observed-in-code: Without a later return the admission stays charged. With a later return in the same generation A counts it. After a trip the returned value and error still reach the worker's channel, but A discards the outcome. Breaker code supplies no channel cleanup or retry.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 244,
+        "fragment": "\treturn result, err"
+      },
+      "test": "untested",
+      "question": "Should the integration document caller-owned cancellation, result disposal and reporting after departure? README.md:89 covers return from Execute, not worker delivery."
+    },
+    {
+      "id": "F15",
+      "initial": "Execute has admitted a blocked request or entered a blocked IsSuccessful on A. Another request can trip A.",
+      "steps": [
+        "Trip A before request return or while its classifier is blocked",
+        "Let the old classifier return true or false",
+        "Take the old Execute result"
+      ],
+      "outcome": "observed-in-code: Classification still runs (or finishes) after the transition. Both results are stale. The original payload and error are returned. A classifier can use Counts while running because it runs before the accounting lock.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 243,
+        "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))"
+      },
+      "test": "untested",
+      "question": "Should an obsolete result still run IsSuccessful and its external side effects?"
+    },
+    {
+      "id": "F16",
+      "initial": "An admitted Execute request or its IsSuccessful callback can panic with a non-nil value.",
+      "steps": [
+        "Panic from each origin before a boundary, or after another request trips A",
+        "Recover outside Execute"
+      ],
+      "outcome": "observed-in-code: With an unchanged generation the defer counts a failure and re-panics the value if reporting returns. With a changed generation it still re-panics but skips failure accounting. Request panic bypasses IsSuccessful.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 237,
+        "fragment": "\t\t\tcb.afterRequest(generation, false)"
+      },
+      "test": "untested",
+      "question": "explicit-requirement README.md:90-91 covers a request panic. Should classifier panics have the same failure-reporting semantics?"
+    },
+    {
+      "id": "F17",
+      "initial": "A's closed ReadyToTrip can panic. A failure was already counted.",
+      "steps": [
+        "Compare a TwoStep report with Execute returning an error",
+        "Make ReadyToTrip panic on its first call and return false on a second call",
+        "Inspect counts and recover"
+      ],
+      "outcome": "observed-in-code: TwoStep exposes the panic after one counted failure. Execute retries accounting once with false inside the recovery defer, counts a second failure in the same generation, then propagates the original panic.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 326,
+        "fragment": "\t\tif cb.readyToTrip(cb.counts) {"
+      },
+      "test": "untested",
+      "question": "Should a panic in ReadyToTrip count the same admission twice?"
+    },
+    {
+      "id": "F18",
+      "initial": "A's ReadyToTrip panics twice with distinct values while A is closed.",
+      "steps": [
+        "Return an error from Execute",
+        "Let failure accounting and the recovery accounting both panic",
+        "Recover from Execute"
+      ],
+      "outcome": "observed-in-code: The second panic reaches the outer recover. The first is not re-raised by the explicit panic statement because retry did not return. Both failures were counted.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 238,
+        "fragment": "\t\t\tpanic(e)"
+      },
+      "test": "untested",
+      "question": "Which panic should escape when retry accounting also panics?"
+    },
+    {
+      "id": "F19",
+      "initial": "A has an OnStateChange callback that panics at a completion-driven transition.",
+      "steps": [
+        "Trigger closed to open by failure or half-open to open/closed by failure/success",
+        "Recover",
+        "Inspect state, counts and notification count"
+      ],
+      "outcome": "observed-in-code: The transition and count reset survive, and the mutex is released. Execute's recovery attempt sees a different generation so it does not apply a duplicate outcome. TwoStep propagates the hook panic directly.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "\t\tcb.onStateChange(cb.name, prev, state)"
+      },
+      "test": "untested",
+      "question": "What commit and propagation contract should apply to a failed state notification during completion?"
+    },
+    {
+      "id": "F20",
+      "initial": "A's open timeout passes and an OnStateChange callback panics only on open to half-open.",
+      "steps": [
+        "Compare State, Execute admission, and TwoStep Allow as the first caller after timeout",
+        "Recover",
+        "Inspect state and retry"
+      ],
+      "outcome": "observed-in-code: The breaker remains half-open with zero admissions. Execute did not arm its recover defer or run the request. Allow produced no callback. A later admission takes the free slot without retrying the notification.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 229,
+        "fragment": "\tgeneration, err := cb.beforeRequest()"
+      },
+      "test": "untested",
+      "question": "Should a failed expiry notification abort first admission while preserving the new state?"
+    },
+    {
+      "id": "F21",
+      "initial": "A stale TwoStep callback is pending while its original breaker is open past timeout.",
+      "steps": [
+        "Use the stale callback as the first call after open timeout",
+        "Have OnStateChange panic on open to half-open",
+        "Recover",
+        "Retry Allow"
+      ],
+      "outcome": "observed-in-code: Either bool can expose the hook panic before the mismatch return. Half-open remains committed with no admitted request until retry, and retry does not re-notify the transition.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 298,
+        "fragment": "\tstate, generation := cb.currentState(now)"
+      },
+      "test": "untested",
+      "question": "Should a result that will be discarded be able to surface a notification panic?"
+    },
+    {
+      "id": "F22",
+      "initial": "A transition notification or trip predicate is called for a breaker operation that holds the mutex.",
+      "steps": [
+        "Within the hook, compare Name with same-breaker State, Counts or admission",
+        "Consider waiting for another goroutine that needs the same lock"
+      ],
+      "outcome": "observed-in-code: Name reads without the mutex. A same-breaker lock-taking call cannot proceed while that hook holds the lock. Another operation cannot refresh expiry between entry into the locked hook and its return or unwind.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "\t\tcb.onStateChange(cb.name, prev, state)"
+      },
+      "test": "untested",
+      "question": "Which callbacks are allowed to reenter breaker APIs or wait for work using the same breaker?"
+    },
+    {
+      "id": "F23",
+      "initial": "A Settings value has callbacks referring to mutable caller variables and is passed to the constructor.",
+      "steps": [
+        "After construction, replace function fields in the Settings variable",
+        "Change state captured by the originally selected functions",
+        "Exercise failure, transition and classification"
+      ],
+      "outcome": "observed-in-code: The original function values run and see the changed captured state. Reassigning Settings fields does not replace the installed functions.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 174,
+        "fragment": "\t\tcb.isSuccessful = st.IsSuccessful"
+      },
+      "test": "untested",
+      "question": "explicit-requirement README.md:25-36 frames Settings as constructor configuration. Should capture lifetime and subsequent mutation be documented?"
+    },
+    {
+      "id": "F24",
+      "initial": "A TwoStep breaker is configured with a custom IsSuccessful callback.",
+      "steps": [
+        "Allow an admitted request and report a boolean",
+        "Compare Execute on a direct breaker configured with the same callback"
+      ],
+      "outcome": "observed-in-code: TwoStep accounts the boolean without calling IsSuccessful. Execute calls the classifier and accounts its result.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      },
+      "test": "untested",
+      "question": "Should the TwoStep constructor explicitly document that done bypasses the configured IsSuccessful function?"
+    }
+  ]
+}

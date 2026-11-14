@@ -1,0 +1,165 @@
+{
+  "cases": [
+    {
+      "id": "T-A",
+      "title": "Deferred recipient for A",
+      "initial": "Two distinct accounts; canonical zero counters and the epochs specified in the retained scenario.",
+      "steps": [
+        "a,b distinct, epoch=0",
+        "p.Target=a",
+        "done=p.A()",
+        "p.Target=b",
+        "done()"
+      ],
+      "outcome": "{\"a\": [1, 0], \"b\": [0, 1], \"redirected\": true}",
+      "proof": [
+        {
+          "file": "docs/evidence/identity-benchmark/fixtures/transfer/oracle_test.go.txt",
+          "sha256": "325781532a439e3197335f13eb6dc9e8b534f5d6d6b661bc5b5865c8ff9487d5",
+          "line": 9,
+          "quote": "  case \"A\":done=p.A();p.Target=b"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-proof.jsonl",
+          "sha256": "a5cb8ca98ef2ffcfbe73d906a24cdeceee65043fcb90fc70f1f6e9c76d31b7b6",
+          "line": 7,
+          "quote": "{\"Time\":\"2026-11-14T22:10:37.048413+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestTransferOracle/A\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-B",
+      "title": "Deferred recipient for B",
+      "initial": "Two distinct accounts; canonical zero counters and the epochs specified in the retained scenario.",
+      "steps": [
+        "a,b distinct",
+        "p.Target=a",
+        "done=p.B()",
+        "p.Target=b",
+        "done()"
+      ],
+      "outcome": "{\"a\": [1, 1], \"b\": [0, 0], \"redirected\": false}",
+      "proof": [
+        {
+          "file": "docs/evidence/identity-benchmark/fixtures/transfer/oracle_test.go.txt",
+          "sha256": "325781532a439e3197335f13eb6dc9e8b534f5d6d6b661bc5b5865c8ff9487d5",
+          "line": 10,
+          "quote": "  case \"B\":done=p.B();p.Target=b"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-proof.jsonl",
+          "sha256": "a5cb8ca98ef2ffcfbe73d906a24cdeceee65043fcb90fc70f1f6e9c76d31b7b6",
+          "line": 11,
+          "quote": "{\"Time\":\"2026-11-14T22:10:37.048458+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestTransferOracle/B\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-C",
+      "title": "Deferred recipient for C",
+      "initial": "Two distinct accounts; canonical zero counters and the epochs specified in the retained scenario.",
+      "steps": [
+        "a,b distinct, epoch=0",
+        "p.Target=a",
+        "done=p.C()",
+        "p.Target=b",
+        "done()"
+      ],
+      "outcome": "{\"a\": [1, 0], \"b\": [0, 0], \"redirected\": false}",
+      "proof": [
+        {
+          "file": "docs/evidence/identity-benchmark/fixtures/transfer/oracle_test.go.txt",
+          "sha256": "325781532a439e3197335f13eb6dc9e8b534f5d6d6b661bc5b5865c8ff9487d5",
+          "line": 11,
+          "quote": "  case \"C\":done=p.C();p.Target=b"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-proof.jsonl",
+          "sha256": "a5cb8ca98ef2ffcfbe73d906a24cdeceee65043fcb90fc70f1f6e9c76d31b7b6",
+          "line": 15,
+          "quote": "{\"Time\":\"2026-11-14T22:10:37.048516+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestTransferOracle/C\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-D",
+      "title": "Deferred recipient for D",
+      "initial": "Two distinct accounts; canonical zero counters and the epochs specified in the retained scenario.",
+      "steps": [
+        "r.Entries[k]=a",
+        "done=r.D(k)",
+        "r.Entries[k]=b",
+        "done()"
+      ],
+      "outcome": "{\"a\": [1, 0], \"b\": [0, 1], \"redirected\": true}",
+      "proof": [
+        {
+          "file": "docs/evidence/identity-benchmark/fixtures/transfer/oracle_test.go.txt",
+          "sha256": "325781532a439e3197335f13eb6dc9e8b534f5d6d6b661bc5b5865c8ff9487d5",
+          "line": 12,
+          "quote": "  case \"D\":r:=&Registry{map[string]*Account{\"k\":a}};done=r.D(\"k\");r.Entries[\"k\"]=b"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-proof.jsonl",
+          "sha256": "a5cb8ca98ef2ffcfbe73d906a24cdeceee65043fcb90fc70f1f6e9c76d31b7b6",
+          "line": 19,
+          "quote": "{\"Time\":\"2026-11-14T22:10:37.04858+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestTransferOracle/D\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-E",
+      "title": "Deferred recipient for E",
+      "initial": "Two distinct accounts; canonical zero counters and the epochs specified in the retained scenario.",
+      "steps": [
+        "a,b distinct",
+        "p.Target=a",
+        "done=p.E()",
+        "p.Target=b",
+        "done()"
+      ],
+      "outcome": "{\"a\": [1, 1], \"b\": [0, 0], \"redirected\": false}",
+      "proof": [
+        {
+          "file": "docs/evidence/identity-benchmark/fixtures/transfer/oracle_test.go.txt",
+          "sha256": "325781532a439e3197335f13eb6dc9e8b534f5d6d6b661bc5b5865c8ff9487d5",
+          "line": 13,
+          "quote": "  case \"E\":done=p.E();p.Target=b"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-proof.jsonl",
+          "sha256": "a5cb8ca98ef2ffcfbe73d906a24cdeceee65043fcb90fc70f1f6e9c76d31b7b6",
+          "line": 23,
+          "quote": "{\"Time\":\"2026-11-14T22:10:37.048629+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestTransferOracle/E\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-F",
+      "title": "Deferred recipient for F",
+      "initial": "Two distinct accounts; canonical zero counters and the epochs specified in the retained scenario.",
+      "steps": [
+        "p.Target=a",
+        "done=F(p)",
+        "p=&Port{b}",
+        "done()"
+      ],
+      "outcome": "{\"a\": [1, 1], \"b\": [0, 0], \"redirected\": false}",
+      "proof": [
+        {
+          "file": "docs/evidence/identity-benchmark/fixtures/transfer/oracle_test.go.txt",
+          "sha256": "325781532a439e3197335f13eb6dc9e8b534f5d6d6b661bc5b5865c8ff9487d5",
+          "line": 14,
+          "quote": "  case \"F\":done=F(p);p=&Port{b}"
+        },
+        {
+          "file": "docs/evidence/identity-benchmark/results/transfer-proof.jsonl",
+          "sha256": "a5cb8ca98ef2ffcfbe73d906a24cdeceee65043fcb90fc70f1f6e9c76d31b7b6",
+          "line": 27,
+          "quote": "{\"Time\":\"2026-11-14T22:10:37.048669+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestTransferOracle/F\",\"Elapsed\":0}"
+        }
+      ]
+    }
+  ],
+  "scope": "Two redirection positives and four no-redirection controls. The frozen expected.json retains canonical example values; review may use the same identity/equality guard class and effect deltas, with differences explicit."
+}

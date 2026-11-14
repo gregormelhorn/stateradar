@@ -1,0 +1,20 @@
+				identityCounts(t, cb, Counts{})
+				if len(changes) != 1 {
+					t.Fatal(changes)
+				}
+				if order == "state first" {
+					identityState(t, cb, StateHalfOpen)
+				}
+				old(success)
+				want := StateHalfOpen
+				if order == "during open" {
+					want = StateOpen
+					if len(changes) != 1 {
+						t.Fatal(changes)
+					}
+				} else if len(changes) != 2 || changes[1] != StateHalfOpen {
+					t.Fatal(changes)
+				}
+				identityState(t, cb, want)
+				identityCounts(t, cb, Counts{})
+				if trips != 1 {

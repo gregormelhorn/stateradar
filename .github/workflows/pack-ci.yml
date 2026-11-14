@@ -29,6 +29,7 @@ jobs:
         run: |
           python tools/selftest/test_mutation_binding.py
           python tools/selftest/test_cell_rationale.py
+          python tools/selftest/test_finding_benchmark.py
       # mypy over tools/ and tools/selftest/ (config: mypy.ini). Its first
       # run on main found 34 errors, one a real crash: both mutation
       # runners died on bytes + str in their timeout path.

@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import subprocess,sys\nfrom pathlib import Path\np=Path('analysis')\nf=p/'_probe/identity_test.go'\nformatted=subprocess.run(['gofmt',str(f)],capture_output=True,check=True).stdout\nf.write_bytes(formatted)\nwith (p/'probe-attempt-01.stdout.jsonl').open('wb') as out, (p/'probe-attempt-01.stderr.log').open('wb') as err:\n result=subprocess.run(['go','test','-race','-count=3','-timeout=30s','-json','-overlay','analysis/overlay.json','-run','^TestIdentity','.'],stdout=out,stderr=err)\nprint('go test exit',result.returncode)\nsys.exit(result.returncode)\n"
+  ],
+  "exit_code": 0
+}

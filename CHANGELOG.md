@@ -4,6 +4,18 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Reviewed finding benchmark.** Eight explicit gobreaker cases separate
+  finding presence, correctness and executed test depth. Exact report anchors
+  and completed-test evidence are checked; semantic judgments stay attributed
+  to the reviewer. Both archived routed/matrix reports fail full coverage at
+  serialized wrapper reassignment. A public-seam counterfactual probe also
+  refutes the routed report's unqualified original-breaker binding claim.
+  Four source-pinned bounded sessions compare an English identity candidate
+  with unchanged pilot excerpts, retaining complete controller/provider costs
+  and independently replayed probes. Mixed coverage/cost results keep the
+  candidate experimental and the standard prompt unchanged.
+  See `docs/evidence/identity-benchmark/README.md`.
+
 - **Behavioral mutation binding.** The weighted-semaphore cell suite consumes
   temporary JSON oracle mutations and four generated source mutants. Completed
   cell discovery and failure of the named cell are mandatory; process crashes,

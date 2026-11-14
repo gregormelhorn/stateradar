@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\na=json.load(open('analysis/final-jev.json'))\nprint([(k,type(v).__name__) for k,v in a.items()])\nfor k,v in a.items():\n if isinstance(v,dict) and v: print(k,next(iter(v.items())))\n"
+  ],
+  "exit_code": 0
+}

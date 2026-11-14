@@ -1,0 +1,36 @@
+dict_keys(['source', 'source_sha256', 'draft', 'verification', 'claims', 'questions', 'review_required'])
+1 C1
+2 C2
+3 C3
+4 C4
+5 C5
+6 C6
+7 C7
+8 C8
+9 C9
+10 C10
+11 C11
+12 C12
+13 C13
+1 For A, if Target is reassigned between the call and the closure invocation, does the closure's check against p.Target.Epoch refer to the new Target while Successes would increment on the new Target if epochs coincide, and is that intended?
+2 For A, is the request counted against the original Target while the success may be counted against a reassigned Target, and is that cross-target accounting intended?
+3 For A, what happens if Target is nil at call time or at closure invocation time, and is the resulting behavior (e.g., panic) intended?
+4 For B, is it intended that the closure credits Successes to the originally captured target even after p.Target is reassigned?
+5 For B, what happens if Target is nil at call time, and is the panic-like behavior intended?
+6 For C, if p.Target is reassigned away and then back to the same target, and the epoch is unchanged, the closure credits Successes; is identity-plus-epoch the intended staleness condition?
+7 For C, what happens if Target is nil at call time or closure invocation time?
+8 For C, is epoch comparison performed against the captured target's current Epoch (rather than p.Target's), and is that intended when p.Target differs from the captured target?
+9 For D, if Entries[key] is nil at D call time, the increment dereferences nil; is the resulting failure-mode intended?
+10 For D, if Entries[key] is replaced or removed between the call and the closure invocation, is crediting Successes to the entry currently at key (rather than the one requested) intended?
+11 For D, is it intended that the request is charged to the entry present at call time while the success is charged to whichever entry occupies the key at closure time?
+12 For D, is there any specified behavior for concurrent modification of Entries (map access races), and is concurrency in scope?
+13 For E, is it intended that the request and success are credited to the target captured at call time even if the caller's Port is later mutated?
+14 For E, what happens if the Port is copied but Target is nil, and is the resulting behavior intended?
+15 For F, is it intended that the closure always credits Successes to the target captured at call time regardless of later mutation to p.Target?
+16 For F, what happens if p or p.Target is nil, and is the resulting behavior intended?
+17 Is there any specified ordering between the immediate Requests increment and the later Successes increment for any of A/B/C/D/E/F beyond the code's sequential structure, and must any of these operations be serialized?
+18 Which of A, B, C, D, E, F are intended to be safe for serialized/sequential use only, and is any concurrency control in scope given the source is silent?
+19 Do A and C intentionally share the epoch-based staleness semantics, or is one of them a control case with a different intended purpose?
+20 Are B, E, and F intended as control cases (no epoch check) against A and C, or do they express intended behaviour in their own right?
+21 Is the epoch intended to be mutated by some external actor, and if so is any procedure for doing so specified?
+22 Is the Requests increment intended to be counted regardless of whether the returned closure is ever invoked, and is that accounted for in the intended accounting model?

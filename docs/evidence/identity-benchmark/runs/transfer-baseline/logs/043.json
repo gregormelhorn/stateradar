@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\np=Path('analysis/open-questions.md')\ns=p.read_text()\nbefore='What result belongs to a callback invoked with the entry unavailable, and should that call affect a later invocation once the key returns?'\nafter='Should the epoch of the current occupant affect eligibility? What result belongs to a callback invoked with the entry unavailable, and should that call affect a later invocation once the key returns?'\nassert s.count(before)==1\np.write_text(s.replace(before,after).replace('See F10, F16, F36–F42','See F10, F16, F22, F36–F42'))\n"
+  ],
+  "exit_code": 0
+}

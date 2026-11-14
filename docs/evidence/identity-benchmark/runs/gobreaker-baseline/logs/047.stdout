@@ -1,0 +1,13 @@
+					finished := make(chan pair, 1)
+					go func() { v, e := cb.Execute(request); finished <- pair{v, e} }()
+					<-started
+					cb.Execute(func() (interface{}, error) { return nil, trip })
+					close(release)
+					result = <-finished
+				}
+				if result.v != "result" || result.e != original || classified != 1 {
+					t.Fatal(result, classified)
+				}
+				if order != "fresh" {
+					identityState(t, cb, StateOpen)
+					identityCounts(t, cb, Counts{})

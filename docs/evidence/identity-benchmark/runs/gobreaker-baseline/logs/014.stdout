@@ -1,0 +1,27 @@
+"""Shape and exact fragment validation only; never grades semantic completeness."""
+import json
+import sys
+from pathlib import Path
+
+def validate(path):
+    data = json.loads(path.read_text())
+    rows = data['findings']
+    if not rows or len({r['id'] for r in rows}) != len(rows):
+        raise ValueError('nonempty distinct findings required')
+    for row in rows:
+        for key in ('initial','outcome','test','question'):
+            if not isinstance(row[key], str) or not row[key].strip():
+                raise ValueError(f'empty {key}')
+        if not row['steps'] or any(not isinstance(x,str) or not x.strip() for x in row['steps']):
+            raise ValueError('ordered steps required')
+        c = row['citation']; source = Path(c['file'])
+        if source.is_absolute() or '..' in source.parts or source.name not in ('gobreaker.go','component.go'):
+            raise ValueError('citation must name an input source')
+        lines = source.read_text().splitlines()
+        if type(c['line']) is not int or not 1 <= c['line'] <= len(lines) or not c['fragment'].strip() or c['fragment'] not in lines[c['line']-1]:
+            raise ValueError(f"fragment mismatch {row['id']}")
+    return len(rows)
+
+if __name__ == '__main__':
+    for arg in sys.argv[1:]:
+        print(f'{arg}: {validate(Path(arg))} structurally valid findings; semantics not graded')

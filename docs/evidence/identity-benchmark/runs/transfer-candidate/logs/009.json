@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport json,sys\nfor name, content in json.loads(sys.argv[1]).items():\n    with Path(name).open('x') as output:\n        output.write(content)",
+    "{\"analysis/draft-task.txt\":\"Extract source-supported observations and open intent questions for a bounded as-is analysis of the public operations, deferred work, accounting, reference identity, and lifecycle interactions. Include applicable control cases and limits in scope for serialized operations. Keep each claim independently verifiable with an exact source citation. Do not assume policy where the source is silent.\\n\"}"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,27 @@
+     1	"""Shape and exact fragment validation only; never grades semantic completeness."""
+     2	import json
+     3	import sys
+     4	from pathlib import Path
+     5	
+     6	def validate(path):
+     7	    data = json.loads(path.read_text())
+     8	    rows = data['findings']
+     9	    if not rows or len({r['id'] for r in rows}) != len(rows):
+    10	        raise ValueError('nonempty distinct findings required')
+    11	    for row in rows:
+    12	        for key in ('initial','outcome','test','question'):
+    13	            if not isinstance(row[key], str) or not row[key].strip():
+    14	                raise ValueError(f'empty {key}')
+    15	        if not row['steps'] or any(not isinstance(x,str) or not x.strip() for x in row['steps']):
+    16	            raise ValueError('ordered steps required')
+    17	        c = row['citation']; source = Path(c['file'])
+    18	        if source.is_absolute() or '..' in source.parts or source.name not in ('gobreaker.go','component.go'):
+    19	            raise ValueError('citation must name an input source')
+    20	        lines = source.read_text().splitlines()
+    21	        if type(c['line']) is not int or not 1 <= c['line'] <= len(lines) or not c['fragment'].strip() or c['fragment'] not in lines[c['line']-1]:
+    22	            raise ValueError(f"fragment mismatch {row['id']}")
+    23	    return len(rows)
+    24	
+    25	if __name__ == '__main__':
+    26	    for arg in sys.argv[1:]:
+    27	        print(f'{arg}: {validate(Path(arg))} structurally valid findings; semantics not graded')

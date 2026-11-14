@@ -1,0 +1,1194 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1",
+  "input_tokens": 13047,
+  "cost_microdollars": 548,
+  "reservation_microdollars": 2293,
+  "checks": {
+    "F01": {
+      "kind": "claim",
+      "statement": "A increments a.Successes.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.49,
+        "contradicted": 0.08,
+        "unclear": 0.43
+      },
+      "confidence": 0.24,
+      "review_required": true
+    },
+    "F02": {
+      "kind": "claim",
+      "statement": "A increments b.Successes. The completion leaves a.Successes at zero.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.05,
+        "contradicted": 0.14,
+        "unclear": 0.81
+      },
+      "confidence": 0.72,
+      "review_required": true
+    },
+    "F03": {
+      "kind": "claim",
+      "statement": "A skips the success increment when the replacement's epoch differs.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F04": {
+      "kind": "claim",
+      "statement": "A skips the success increment on the original account at its changed epoch.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.94,
+        "contradicted": 0.04,
+        "unclear": 0.02
+      },
+      "confidence": 0.91,
+      "review_required": true
+    },
+    "F05": {
+      "kind": "claim",
+      "statement": "The invocation after restoration increments a.Successes.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.08,
+        "contradicted": 0.05,
+        "unclear": 0.87
+      },
+      "confidence": 0.8,
+      "review_required": true
+    },
+    "F06": {
+      "kind": "claim",
+      "statement": "A panics evaluating the nil target's Epoch.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.22,
+        "contradicted": 0.19,
+        "unclear": 0.59
+      },
+      "confidence": 0.38,
+      "review_required": true
+    },
+    "F07": {
+      "kind": "claim",
+      "statement": "A reads the original port object and increments a.Successes.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.57,
+        "contradicted": 0.18,
+        "unclear": 0.25
+      },
+      "confidence": 0.35,
+      "review_required": true
+    },
+    "F08": {
+      "kind": "claim",
+      "statement": "A increments the distinct copied account b.Successes because the copy has epoch 7.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.01,
+        "contradicted": 0.43,
+        "unclear": 0.56
+      },
+      "confidence": 0.34,
+      "review_required": true
+    },
+    "F09": {
+      "kind": "claim",
+      "statement": "B increments a.Successes using the saved account pointer regardless of the epoch change.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.9,
+        "contradicted": 0.0,
+        "unclear": 0.1
+      },
+      "confidence": 0.85,
+      "review_required": true
+    },
+    "F10": {
+      "kind": "claim",
+      "statement": "E increments a.Successes through its receiver copy's Target pointer regardless of the epoch change.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": " return func() { p.Target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.73,
+        "contradicted": 0.02,
+        "unclear": 0.25
+      },
+      "confidence": 0.6,
+      "review_required": true
+    },
+    "F11": {
+      "kind": "claim",
+      "statement": "F increments a.Successes using the saved account pointer regardless of the epoch change.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.74,
+        "contradicted": 0.01,
+        "unclear": 0.25
+      },
+      "confidence": 0.61,
+      "review_required": true
+    },
+    "F12": {
+      "kind": "claim",
+      "statement": "B still increments the original account's Successes.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.88,
+        "contradicted": 0.01,
+        "unclear": 0.11
+      },
+      "confidence": 0.82,
+      "review_required": true
+    },
+    "F13": {
+      "kind": "claim",
+      "statement": "E still increments the original account's Successes.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": " return func() { p.Target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.61,
+        "contradicted": 0.25,
+        "unclear": 0.14
+      },
+      "confidence": 0.42,
+      "review_required": true
+    },
+    "F14": {
+      "kind": "claim",
+      "statement": "F still increments the original account's Successes.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.83,
+        "contradicted": 0.01,
+        "unclear": 0.16
+      },
+      "confidence": 0.74,
+      "review_required": true
+    },
+    "F15": {
+      "kind": "claim",
+      "statement": "C increments a.Successes when both guards match.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.94,
+        "contradicted": 0.0,
+        "unclear": 0.06
+      },
+      "confidence": 0.91,
+      "review_required": true
+    },
+    "F16": {
+      "kind": "claim",
+      "statement": "C skips the success increment because b is a different account object despite the copied epoch.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.12,
+        "contradicted": 0.17,
+        "unclear": 0.71
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "F17": {
+      "kind": "claim",
+      "statement": "C skips the success increment on the same account when its epoch differs.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F18": {
+      "kind": "claim",
+      "statement": "C skips without panicking because the pointer comparison fails before the epoch comparison.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.35,
+        "contradicted": 0.19,
+        "unclear": 0.46
+      },
+      "confidence": 0.19,
+      "review_required": true
+    },
+    "F19": {
+      "kind": "claim",
+      "statement": "C increments a.Successes after restoration.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.15,
+        "contradicted": 0.12,
+        "unclear": 0.73
+      },
+      "confidence": 0.6,
+      "review_required": true
+    },
+    "F20": {
+      "kind": "claim",
+      "statement": "C increments a.Successes after epoch restoration.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.1,
+        "contradicted": 0.35,
+        "unclear": 0.55
+      },
+      "confidence": 0.33,
+      "review_required": true
+    },
+    "F21": {
+      "kind": "claim",
+      "statement": "D increments a.Successes.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.31,
+        "contradicted": 0.04,
+        "unclear": 0.65
+      },
+      "confidence": 0.48,
+      "review_required": true
+    },
+    "F22": {
+      "kind": "claim",
+      "statement": "D increments b.Successes without an epoch check.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.47,
+        "contradicted": 0.11,
+        "unclear": 0.42
+      },
+      "confidence": 0.2,
+      "review_required": true
+    },
+    "F23": {
+      "kind": "claim",
+      "statement": "D skips success credit for a missing key.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.02,
+        "unclear": 0.06
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "F24": {
+      "kind": "claim",
+      "statement": "D skips success credit for a present key with a nil value.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.65,
+        "contradicted": 0.32,
+        "unclear": 0.03
+      },
+      "confidence": 0.48,
+      "review_required": true
+    },
+    "F25": {
+      "kind": "claim",
+      "statement": "D skips credit for a nil map without panicking.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.55,
+        "contradicted": 0.09,
+        "unclear": 0.36
+      },
+      "confidence": 0.33,
+      "review_required": true
+    },
+    "F26": {
+      "kind": "claim",
+      "statement": "The invocation after reinsertion increments b.Successes.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.03,
+        "contradicted": 0.03,
+        "unclear": 0.94
+      },
+      "confidence": 0.91,
+      "review_required": true
+    },
+    "F27": {
+      "kind": "claim",
+      "statement": "D increments b.Successes in the replacement map.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.11,
+        "contradicted": 0.13,
+        "unclear": 0.76
+      },
+      "confidence": 0.64,
+      "review_required": true
+    },
+    "F28": {
+      "kind": "claim",
+      "statement": "D reads the original registry object and increments a.Successes.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.29,
+        "contradicted": 0.15,
+        "unclear": 0.56
+      },
+      "confidence": 0.34,
+      "review_required": true
+    },
+    "F29": {
+      "kind": "claim",
+      "statement": "D increments b.Successes through the original registry's now-updated map.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.42,
+        "contradicted": 0.09,
+        "unclear": 0.49
+      },
+      "confidence": 0.24,
+      "review_required": true
+    },
+    "F30": {
+      "kind": "claim",
+      "statement": "D uses the call's key value k and increments a.Successes.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.61,
+        "contradicted": 0.04,
+        "unclear": 0.35
+      },
+      "confidence": 0.42,
+      "review_required": true
+    },
+    "F31": {
+      "kind": "claim",
+      "statement": "A increments Requests in the public call before returning its completion.",
+      "source": "component.go",
+      "line": 8,
+      "fragment": " p.Target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.0,
+        "unclear": 0.05
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "F32": {
+      "kind": "claim",
+      "statement": "A repeats its success increment on every invocation whose current target epoch equals the captured epoch.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F33": {
+      "kind": "claim",
+      "statement": "A panics on admission when Target is nil because it dereferences Target to access Requests.",
+      "source": "component.go",
+      "line": 8,
+      "fragment": " p.Target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.69,
+        "contradicted": 0.02,
+        "unclear": 0.29
+      },
+      "confidence": 0.53,
+      "review_required": true
+    },
+    "F34": {
+      "kind": "claim",
+      "statement": "Registry.D panics on admission if its lookup yields nil.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.64,
+        "contradicted": 0.05,
+        "unclear": 0.31
+      },
+      "confidence": 0.46,
+      "review_required": true
+    },
+    "F35": {
+      "kind": "claim",
+      "statement": "F panics while reading p.Target before returning a completion.",
+      "source": "component.go",
+      "line": 31,
+      "fragment": " target := p.Target",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.04,
+        "contradicted": 0.11,
+        "unclear": 0.85
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "F31-A-deferred": {
+      "kind": "claim",
+      "statement": "A only executes the success increment upon invocation of its returned function.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F31-B": {
+      "kind": "claim",
+      "statement": "B increments Requests before returning the completion.",
+      "source": "component.go",
+      "line": 14,
+      "fragment": " target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.93,
+        "contradicted": 0.0,
+        "unclear": 0.07
+      },
+      "confidence": 0.89,
+      "review_required": true
+    },
+    "F32-B": {
+      "kind": "claim",
+      "statement": "On two calls to the same returned completion with valid state unchanged, B increments Successes on each call.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.94,
+        "contradicted": 0.0,
+        "unclear": 0.06
+      },
+      "confidence": 0.91,
+      "review_required": true
+    },
+    "F31-B-deferred": {
+      "kind": "claim",
+      "statement": "B only executes the success increment upon invocation of its returned function.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F31-C": {
+      "kind": "claim",
+      "statement": "C increments Requests before returning the completion.",
+      "source": "component.go",
+      "line": 19,
+      "fragment": " target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.0,
+        "unclear": 0.05
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "F32-C": {
+      "kind": "claim",
+      "statement": "On two calls to the same returned completion with valid state unchanged, C increments Successes on each call.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.02,
+        "unclear": 0.03
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "F31-C-deferred": {
+      "kind": "claim",
+      "statement": "C only executes the success increment upon invocation of its returned function.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F31-D": {
+      "kind": "claim",
+      "statement": "D increments Requests before returning the completion.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F32-D": {
+      "kind": "claim",
+      "statement": "On two calls to the same returned completion with valid state unchanged, D increments Successes on each call.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.01,
+        "unclear": 0.04
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "F31-D-deferred": {
+      "kind": "claim",
+      "statement": "D only executes the success increment upon invocation of its returned function.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "F31-E": {
+      "kind": "claim",
+      "statement": "E increments Requests before returning the completion.",
+      "source": "component.go",
+      "line": 27,
+      "fragment": " p.Target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.0,
+        "unclear": 0.04
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "F32-E": {
+      "kind": "claim",
+      "statement": "On two calls to the same returned completion with valid state unchanged, E increments Successes on each call.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": " return func() { p.Target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.89,
+        "contradicted": 0.02,
+        "unclear": 0.09
+      },
+      "confidence": 0.83,
+      "review_required": true
+    },
+    "F31-E-deferred": {
+      "kind": "claim",
+      "statement": "E only executes the success increment upon invocation of its returned function.",
+      "source": "component.go",
+      "line": 28,
+      "fragment": " return func() { p.Target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "F31-F": {
+      "kind": "claim",
+      "statement": "F increments Requests before returning the completion.",
+      "source": "component.go",
+      "line": 32,
+      "fragment": " target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.0,
+        "unclear": 0.08
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "F32-F": {
+      "kind": "claim",
+      "statement": "On two calls to the same returned completion with valid state unchanged, F increments Successes on each call.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.0,
+        "unclear": 0.04
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "F31-F-deferred": {
+      "kind": "claim",
+      "statement": "F only executes the success increment upon invocation of its returned function.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.01,
+        "unclear": 0.04
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "F33-B": {
+      "kind": "claim",
+      "statement": "B panics without returning a completion if a nonnil port has a nil Target when admitted.",
+      "source": "component.go",
+      "line": 14,
+      "fragment": " target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.67,
+        "contradicted": 0.03,
+        "unclear": 0.3
+      },
+      "confidence": 0.5,
+      "review_required": true
+    },
+    "F33-C": {
+      "kind": "claim",
+      "statement": "C panics without returning a completion if a nonnil port has a nil Target when admitted.",
+      "source": "component.go",
+      "line": 18,
+      "fragment": " target, epoch := p.Target, p.Target.Epoch",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.81,
+        "contradicted": 0.05,
+        "unclear": 0.14
+      },
+      "confidence": 0.72,
+      "review_required": true
+    },
+    "F33-E": {
+      "kind": "claim",
+      "statement": "E panics without returning a completion if a nonnil port has a nil Target when admitted.",
+      "source": "component.go",
+      "line": 27,
+      "fragment": " p.Target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.77,
+        "contradicted": 0.03,
+        "unclear": 0.2
+      },
+      "confidence": 0.66,
+      "review_required": true
+    },
+    "F33-F": {
+      "kind": "claim",
+      "statement": "F panics without returning a completion if a nonnil port has a nil Target when admitted.",
+      "source": "component.go",
+      "line": 32,
+      "fragment": " target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.72,
+        "contradicted": 0.02,
+        "unclear": 0.26
+      },
+      "confidence": 0.58,
+      "review_required": true
+    },
+    "F02-original": {
+      "kind": "claim",
+      "statement": "After A admits on a and its port is retargeted to a distinct b at the captured epoch, invoking the completion does not increment a.Successes.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.48,
+        "contradicted": 0.18,
+        "unclear": 0.34
+      },
+      "confidence": 0.22,
+      "review_required": true
+    },
+    "F02-capture": {
+      "kind": "claim",
+      "statement": "A copies the original target Epoch into a local integer at admission.",
+      "source": "component.go",
+      "line": 9,
+      "fragment": " epoch := p.Target.Epoch",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.91,
+        "contradicted": 0.01,
+        "unclear": 0.08
+      },
+      "confidence": 0.86,
+      "review_required": true
+    },
+    "F07-capture": {
+      "kind": "claim",
+      "statement": "A has a pointer receiver and the returned function reads Target through that receiver.",
+      "source": "component.go",
+      "line": 7,
+      "fragment": "func (p *Port) A() func() {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.84,
+        "contradicted": 0.01,
+        "unclear": 0.15
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "F09-capture": {
+      "kind": "claim",
+      "statement": "B stores the Target account pointer in a local variable before returning its closure.",
+      "source": "component.go",
+      "line": 13,
+      "fragment": " target := p.Target",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F10-capture": {
+      "kind": "claim",
+      "statement": "E has a Port value receiver, so the copy of the Port still carries its Target pointer.",
+      "source": "component.go",
+      "line": 26,
+      "fragment": "func (p Port) E() func() {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.9,
+        "contradicted": 0.01,
+        "unclear": 0.09
+      },
+      "confidence": 0.85,
+      "review_required": true
+    },
+    "F11-capture": {
+      "kind": "claim",
+      "statement": "F saves the Target account pointer from the passed port before returning its closure.",
+      "source": "component.go",
+      "line": 31,
+      "fragment": " target := p.Target",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "F16-capture": {
+      "kind": "claim",
+      "statement": "C saves the Target account pointer and a copy of its Epoch in local variables.",
+      "source": "component.go",
+      "line": 18,
+      "fragment": " target, epoch := p.Target, p.Target.Epoch",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "F28-capture": {
+      "kind": "claim",
+      "statement": "D takes a registry pointer receiver.",
+      "source": "component.go",
+      "line": 22,
+      "fragment": "func (r *Registry) D(key string) func() {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "F30-capture": {
+      "kind": "claim",
+      "statement": "D takes key as a string value parameter.",
+      "source": "component.go",
+      "line": 22,
+      "fragment": "func (r *Registry) D(key string) func() {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "F34-missing": {
+      "kind": "claim",
+      "statement": "At admission D's map lookup for a missing key yields a nil account pointer and the field access panics.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.37,
+        "contradicted": 0.06,
+        "unclear": 0.57
+      },
+      "confidence": 0.35,
+      "review_required": true
+    },
+    "F34-nil-map": {
+      "kind": "claim",
+      "statement": "At admission D's lookup in a nil map yields a nil account pointer and the field access panics.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.33,
+        "contradicted": 0.03,
+        "unclear": 0.64
+      },
+      "confidence": 0.46,
+      "review_required": true
+    },
+    "F36": {
+      "kind": "claim",
+      "statement": "A credits a.Successes on the invocation after recovery and restoration.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.32,
+        "contradicted": 0.1,
+        "unclear": 0.58
+      },
+      "confidence": 0.37,
+      "review_required": true
+    },
+    "F37": {
+      "kind": "claim",
+      "statement": "After A admits work, clearing the port and never invoking the completion leaves the original request increment in place.",
+      "source": "component.go",
+      "line": 8,
+      "fragment": " p.Target.Requests++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.29,
+        "contradicted": 0.01,
+        "unclear": 0.7
+      },
+      "confidence": 0.55,
+      "review_required": true
+    },
+    "F37-B": {
+      "kind": "claim",
+      "statement": "After B admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+      "source": "component.go",
+      "line": 14,
+      "fragment": " target.Requests++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.29,
+        "contradicted": 0.0,
+        "unclear": 0.71
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "F37-C": {
+      "kind": "claim",
+      "statement": "After C admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+      "source": "component.go",
+      "line": 19,
+      "fragment": " target.Requests++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.34,
+        "contradicted": 0.0,
+        "unclear": 0.66
+      },
+      "confidence": 0.49,
+      "review_required": true
+    },
+    "F37-D": {
+      "kind": "claim",
+      "statement": "After D admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.37,
+        "contradicted": 0.0,
+        "unclear": 0.63
+      },
+      "confidence": 0.44,
+      "review_required": true
+    },
+    "F37-E": {
+      "kind": "claim",
+      "statement": "After E admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+      "source": "component.go",
+      "line": 27,
+      "fragment": " p.Target.Requests++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.25,
+        "contradicted": 0.0,
+        "unclear": 0.75
+      },
+      "confidence": 0.62,
+      "review_required": true
+    },
+    "F37-F": {
+      "kind": "claim",
+      "statement": "After F admits work, clearing the port or deleting the registry entry without invoking the completion leaves the original Requests increment in place.",
+      "source": "component.go",
+      "line": 32,
+      "fragment": " target.Requests++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.32,
+        "contradicted": 0.0,
+        "unclear": 0.68
+      },
+      "confidence": 0.52,
+      "review_required": true
+    },
+    "F38": {
+      "kind": "claim",
+      "statement": "After a first A completion already incremented a, a second call after retargeting to a distinct account b at the captured epoch increments b.Successes.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.26,
+        "contradicted": 0.37,
+        "unclear": 0.37
+      },
+      "confidence": 0.06,
+      "review_required": true
+    },
+    "F39": {
+      "kind": "claim",
+      "statement": "After a first C completion already incremented a, a second call after retargeting to a distinct account b at the captured epoch skips the success increment.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.91,
+        "contradicted": 0.04,
+        "unclear": 0.05
+      },
+      "confidence": 0.86,
+      "review_required": true
+    },
+    "F40": {
+      "kind": "claim",
+      "statement": "After a first D completion already incremented a, a second call after replacing the entry for the captured key with b increments b.Successes.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.64,
+        "contradicted": 0.17,
+        "unclear": 0.19
+      },
+      "confidence": 0.46,
+      "review_required": true
+    },
+    "F38-before": {
+      "kind": "claim",
+      "statement": "The first A completion credits a while its original valid admission state remains unchanged.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.71,
+        "contradicted": 0.09,
+        "unclear": 0.2
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "F39-before": {
+      "kind": "claim",
+      "statement": "The first C completion credits a while its original valid admission state remains unchanged.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.71,
+        "contradicted": 0.05,
+        "unclear": 0.24
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "F40-before": {
+      "kind": "claim",
+      "statement": "The first D completion credits a while its original valid admission state remains unchanged.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.16,
+        "contradicted": 0.04,
+        "unclear": 0.8
+      },
+      "confidence": 0.7,
+      "review_required": true
+    }
+  }
+}
