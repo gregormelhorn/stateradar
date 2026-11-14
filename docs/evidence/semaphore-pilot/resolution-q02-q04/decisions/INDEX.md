@@ -21,6 +21,9 @@ DR-001 / Q-01 remains in ../.. / resolution-q01/decisions.
 - DR-009: Q-09 — Require a conforming non-nil Context; no automatic repair/recovery.
   Accepted during the continuing interview; contract/conformance follow-up pending.
 
-Q-10 through Q-13 remain OPEN. This implements the explicitly selected next
+- DR-010: Q-10 — Defined cancellation checkpoints and rollback of own holdings; transient reservations permitted.
+  Accepted during the continuing interview; contract/conformance follow-up pending.
+
+Q-11 through Q-13 remain OPEN. This implements the explicitly selected next
 numeric-contract changes; prior recommendations for the other questions are
 not silently promoted to decisions. Q-13 still needs post-fix investigation.

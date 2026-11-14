@@ -1,4 +1,4 @@
-# Domain question register after Q-01 through Q-09
+# Domain question register after Q-01 through Q-10
 
 Behavior descriptions and citations below refer to the frozen upstream baseline
 `04914c200cb38d4ea960ee6a4c314a028c632991`. DR-001 through DR-004 subsequently change the
@@ -215,7 +215,19 @@ Options: document exact cancellation boundary and net accounting | define strict
 
 Proposed: Document the exact cancellation boundary and net accounting — distinguish ready notification, rollback and successful return; do not promise absence of transient reservations.
 
-Status: OPEN — human decision required
+Decision: Evaluate cancellation at the defined initial and post-queued-grant
+checkpoints. Processing cancellation removes the request or rolls back its grant
+before returning the Context error. Cancellation after the last applicable
+check may coexist with successful return and the DR-005 release obligation.
+Error return leaves no own holding or queued entry, but does not promise an
+unchanged global state or invisibility of temporary reservations. Existing
+negative/oversized input decisions remain unchanged. See DR-010 for boundaries.
+Rationale: proposal rationale adopted (owner-confirmed).
+Owner response: "Gut, übernehmen wir Q-10 so."
+Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
+Status: RESOLVED — DR-010
+Follow-up: contract documentation and focused conformance acceptance pending;
+this interview answer does not claim implementation/test completion.
 
 ## Q-11 — Does TryAcquire's without-blocking contract exclude ordinary mutex contention, and do canceled callers have a prompt-return guarantee while waiting for the mutex?
 
