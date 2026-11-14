@@ -89,5 +89,7 @@ model-quality or cost comparison.
 
 `implementation-gates.txt` records the complete successful pre-commit command
 above (exit 0). Expected red probes are checked as such; they are not ignored
-failures. Source/test anchoring is refreshed in a subsequent artifact-only
-reconciliation commit, with a final full acceptance run retained separately.
+failures. Source/test anchoring was refreshed to `0df22e08d74cb266a1f0b3c54c2ef0e7979a9997`
+in an artifact-only reconciliation. `reconciled-gates.txt` records the final
+full acceptance rerun (exit 0); `staleness-red.txt` retains the observed stale
+anchor before that refresh.

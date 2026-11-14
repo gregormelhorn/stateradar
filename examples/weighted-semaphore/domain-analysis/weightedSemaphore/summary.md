@@ -49,3 +49,33 @@ REACHABILITY CHECK: OK (2/2 states reachable from 'Acquire_NoWaiters', 0 termina
 ```
 
 **The component is in steady state; the standing instruction governs further changes; a stale manifest calls this prompt again.**
+
+
+## F-09 observability reconciliation — 2026-11-15
+
+Refreshed the manifest and sidecar to tested source/test commit **0df22e08d74cb266a1f0b3c54c2ef0e7979a9997**.
+The as-is behavior, all thirteen accepted decisions and source digest remain
+unchanged. This is an evidence refresh, with no model promotion or superseded
+artifact to archive. The new weak test and comparison runner are watched.
+
+The standalone F-09 omitted-unlink mutant survives the deliberately weak
+result-only suite and is killed by the full cancellation cell. An executed
+capacity canary proves the public projection before the slice evaluates F-09.
+P-06b adds an existing DR-010 capacity assertion before a blocking call, so the
+mutant now produces a completed failure instead of a truncated suite. All
+existing assertions remain. Five source mutants and 41 matrix mutants are
+killed; four contract limits and two unsupported queued matrix cells remain.
+
+Observed stale-manifest output and full acceptance are retained in
+`docs/evidence/semaphore-f09/`. The existing citation fragments remain in place:
+zero citation line changes are needed; the added assertion is below the
+referenced `TestStatePairs` declaration. The checker revalidates the current
+structured citations. All 52 historical semaphore artifacts remain unchanged.
+No OPEN questions or implementation deviations were added or resolved.
+
+```text
+DSC CHECK: OK (2 states x 19 events, 38 cells, 11 guard groups)
+REACHABILITY CHECK: OK (2/2 states reachable from 'Acquire_NoWaiters', 0 terminal)
+```
+
+**The component is in steady state; the standing instruction governs further changes; a stale manifest calls this prompt again.**
