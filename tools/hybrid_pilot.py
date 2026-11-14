@@ -15,10 +15,12 @@ from local_models import _citation_error
 
 WINDOW_PROMPT = """Propose source-grounded concurrency schedules for this component.
 Use only the supplied source. Domain intent stays open. Return a JSON object
-with one key candidates, a list of 1 to 12 schedule objects. Each object has
+with one key candidates, a list of up to 8 concise schedule objects. Each object has
 observation, mutator, branch, caller_outcomes, inventory, pending, later_effect
 (nonempty strings), and steps (2 to 10 ordered objects, each with actor,
-action, line and verbatim fragment from that numbered source line).
+action, integer line and verbatim fragment from that numbered source line).
+Keep every string under 180 characters. Use at most 7 steps per candidate.
+Each fragment is a short verbatim substring of one line; use no line ranges.
 
 Enumerate observes, locks, commits, waits and returns within each operation.
 An observation includes failed nonblocking receive/send, readiness and empty

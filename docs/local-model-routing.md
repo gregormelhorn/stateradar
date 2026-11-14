@@ -323,6 +323,26 @@ the corresponding comparison format. Use `--output-mode compare` for
 the standard/compact pair. `--compact-first` can be used alone as
 shorthand for the pair in reverse order.
 
+## Hybrid pilot
+
+Use `--routing-variant hybrid` with the Codex runner. Flash proposes
+bounded concurrent schedules against one implementation file per call.
+Every candidate includes cited ordered steps and observable outcomes.
+The tool marks fragment or shape problems, and the pilot reviews every
+candidate against the source before using it. For example:
+
+```sh
+python3 tools/local_models.py --ledger /tmp/pilot.sqlite flash-windows \
+  /path/to/component.go --output /tmp/windows.json
+```
+
+The full run retains the raw provider answer and the candidate review.
+Codex writes the matrix fields and uses `tools/hybrid_pilot.py` to render
+them. The renderer checks totality, vocabulary, question IDs, source
+fragments and round trips through the sidecar parser. The runner checks
+matrix identity and regenerates the sidecar before running the five pack
+gates. Jev continues to verify cited claims and requirement scope.
+
 ## Provider limits (checked 2026-11-12)
 
 From the TypeSafe and DeepSeek documentation:

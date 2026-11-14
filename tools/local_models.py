@@ -649,6 +649,7 @@ def main() -> int:
     cells_parser.add_argument("--max-tokens", type=int, default=16384, help="Flash output budget")
     windows = commands.add_parser("flash-windows", help="draft and cite bounded concurrent schedules")
     windows.add_argument("input", type=Path)
+    windows.add_argument("--max-tokens", type=int, default=16384)
     windows.add_argument("--output", type=Path, required=True)
     blind_parser = commands.add_parser("blind")
     blind_parser.add_argument("analysis")
@@ -703,7 +704,7 @@ def main() -> int:
             prompt = f"{WINDOW_PROMPT}\nSOURCE {args.input.name}\n{numbered}"
             raw = args.output.with_suffix(".raw.json")
             try:
-                draft = flash(budget, prompt, os.environ.get("DEEPSEEK_API_KEY"), 8192)
+                draft = flash(budget, prompt, os.environ.get("DEEPSEEK_API_KEY"), args.max_tokens)
             except IncompleteResponse as error:
                 raw.write_text(json.dumps(error.result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
                 error.saved_to = str(raw)
