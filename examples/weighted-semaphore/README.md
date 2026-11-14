@@ -15,8 +15,8 @@ weights. These evaluation-specific contracts differ from the pinned upstream.
 
 The [Q-01 evidence](../../docs/evidence/semaphore-pilot/resolution-q01/deviation-report.md)
 and [numeric-contract evidence](../../docs/evidence/semaphore-pilot/resolution-q02-q04/deviation-report.md)
-record the implemented decisions and red/green tests. Q-05 through Q-08 are also accepted as
-DR-005 through DR-008, with contract/conformance follow-up pending. Five questions remain OPEN.
+record the implemented decisions and red/green tests. Q-05 through Q-09 are also accepted as
+DR-005 through DR-009, with contract/conformance follow-up pending. Four questions remain OPEN.
 Tests use a read-only enqueue barrier only for scheduling and assert public
 outcomes; see the [seam](../../docs/evidence/semaphore-pilot/resolution-q02-q04/seam.md).
 

@@ -1,4 +1,4 @@
-# Domain question register after Q-01 through Q-08
+# Domain question register after Q-01 through Q-09
 
 Behavior descriptions and citations below refer to the frozen upstream baseline
 `04914c200cb38d4ea960ee6a4c314a028c632991`. DR-001 through DR-004 subsequently change the
@@ -191,7 +191,16 @@ Options: document conforming Context precondition | declare propagation semantic
 
 Proposed: Document a conforming Context precondition — rely on the copied Context contract, with no invented recovery or latency guarantees for violations.
 
-Status: OPEN — human decision required
+Decision: Require a non-nil, contract-conforming Context, including custom
+implementations that meet the Go contract. A nil Done channel remains valid.
+No automatic substitution, repair, recovery or additional progress guarantee
+is promised for blocking, panicking, inconsistent or reentrant methods.
+Rationale: proposal rationale adopted (owner-confirmed).
+Owner response: "Gut, übernehmen wir Q-09 so."
+Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
+Status: RESOLVED — DR-009
+Follow-up: contract documentation and focused conformance acceptance pending;
+this interview answer does not claim implementation/test completion.
 
 ## Q-10 — Which cancellation orderings promise failure, rollback or success, and what does unchanged mean with concurrent observers?
 

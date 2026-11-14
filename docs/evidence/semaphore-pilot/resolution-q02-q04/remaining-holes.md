@@ -1,9 +1,9 @@
 # Remaining scope
 
 Q-01 (DR-001), Q-03 (DR-002), Q-04 (DR-003) and Q-02 (DR-004) are accepted.
-Q-05 through Q-08 (DR-005 through DR-008) are accepted; their contract/conformance
-follow-up is pending. Q-09..Q-13 remain OPEN in open-questions.md. These decisions
-do not approve the earlier recommendations on invalid custom Contexts, cancellation races, timing, general FIFO policy or Release(0).
+Q-05 through Q-09 (DR-005 through DR-009) are accepted; their contract/conformance
+follow-up is pending. Q-10..Q-13 remain OPEN in open-questions.md. These decisions
+do not approve the earlier recommendations on cancellation races, timing, general FIFO policy or Release(0).
 
 This slice gives 13 original cells guarded numeric refinements with explicit
 test/DR links; 44 are outside it. Other branches of those 13 cells remain open.

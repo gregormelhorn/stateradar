@@ -18,6 +18,9 @@ DR-001 / Q-01 remains in ../.. / resolution-q01/decisions.
 - DR-008: Q-08 — Caller selects the instance and Context; no semantic-mismatch detection.
   Accepted during the continuing interview; contract/conformance follow-up pending.
 
-Q-09 through Q-13 remain OPEN. This implements the explicitly selected next
+- DR-009: Q-09 — Require a conforming non-nil Context; no automatic repair/recovery.
+  Accepted during the continuing interview; contract/conformance follow-up pending.
+
+Q-10 through Q-13 remain OPEN. This implements the explicitly selected next
 numeric-contract changes; prior recommendations for the other questions are
 not silently promoted to decisions. Q-13 still needs post-fix investigation.
