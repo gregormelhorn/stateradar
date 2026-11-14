@@ -1,4 +1,4 @@
-# Domain question register after Q-01 through Q-11
+# Domain question register after Q-01 through Q-12
 
 Behavior descriptions and citations below refer to the frozen upstream baseline
 `04914c200cb38d4ea960ee6a4c314a028c632991`. DR-001 through DR-004 subsequently change the
@@ -267,7 +267,17 @@ Options: publish FIFO grant policy and limits | specify another policy | keep po
 
 Proposed: Publish FIFO grant policy and limits — prevent barging, distinguish grant order from return order, and make the uncapped backlog and caller responsibility explicit.
 
-Status: OPEN — human decision required
+Decision: FIFO grants follow enqueue order, not concurrent method-entry order.
+A blocked head cannot be bypassed by smaller or new requests, including
+TryAcquire and zero-weight attempts. Return order is not guaranteed. The queue
+has no internal count limit; the application controls incoming work and
+cancels obsolete requests. FIFO does not guarantee bounded waiting time.
+Rationale: proposal rationale adopted (owner-confirmed).
+Owner response: "Gut, übernehmen wir Q-12 so."
+Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
+Status: RESOLVED — DR-012
+Follow-up: contract documentation and focused conformance acceptance pending;
+this interview answer does not claim implementation/test completion.
 
 ## Q-13 — Should a public API describe that Release(0) can change queue state and wake eligible waiters?
 
@@ -280,6 +290,14 @@ Current behaviour: A non-panicking Release(0) always invokes notification. (obse
 
 Options: document notification effect | constrain zero release | specify no-op
 
-Proposed: Document notification effect — Release(0) can notify eligible waiters; it is not necessarily an observable no-op. Recheck consistency with the owner decision on Q-01.
+Original pilot proposal (superseded by post-fix review): Document notification effect.
+
+Revised proposal: Permit Release(0) as a logical no-op for capacity, queue and
+grants in valid reachable states. Do not promise wakeup, flush, repair or extra
+synchronization semantics. The DR-001 fix removes the known stranded eligible
+head. Source reasoning and a bounded aggregate/queue exploration support this
+proposal; neither is a full Go implementation proof. See
+[q13-investigation/README.md](q13-investigation/README.md).
+No owner decision on this revised proposal has been recorded.
 
 Status: OPEN — human decision required

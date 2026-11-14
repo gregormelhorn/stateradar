@@ -27,6 +27,10 @@ DR-001 / Q-01 remains in ../.. / resolution-q01/decisions.
 - DR-011: Q-11 — No capacity-queue wait for TryAcquire; mutex waits allowed, no fixed latency bound.
   Accepted during the continuing interview; contract/conformance follow-up pending.
 
-Q-12 and Q-13 remain OPEN. This implements the explicitly selected next
+- DR-012: Q-12 — FIFO grants without bypass; return order unspecified, no internal queue cap.
+  Accepted during the continuing interview; contract/conformance follow-up pending.
+
+Q-13 remains OPEN. This implements the explicitly selected next
 numeric-contract changes; prior recommendations for the other questions are
-not silently promoted to decisions. Q-13 still needs post-fix investigation.
+not silently promoted to decisions. Q-13 has a post-fix investigation and revised proposal in q13-investigation;
+its owner decision and conformance acceptance remain pending.

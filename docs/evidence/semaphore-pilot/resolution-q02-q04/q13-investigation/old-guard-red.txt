@@ -1,0 +1,11 @@
+capacity=0, reachable=1, Release(0)-changes=0
+capacity=1, reachable=32, Release(0)-changes=15
+  example: ['Acquire(1)', 'Acquire(1)', 'Acquire(0)', 'CancelQueued(0)'] -> held/queue=(1, (0,)); Release(0) -> (1, ())
+capacity=2, reachable=163, Release(0)-changes=40
+  example: ['Acquire(2)', 'Acquire(1)', 'Acquire(0)', 'CancelQueued(0)'] -> held/queue=(2, (0,)); Release(0) -> (2, ())
+capacity=3, reachable=599, Release(0)-changes=85
+  example: ['Acquire(3)', 'Acquire(1)', 'Acquire(0)', 'CancelQueued(0)'] -> held/queue=(3, (0,)); Release(0) -> (3, ())
+capacity=4, reachable=1721, Release(0)-changes=156
+  example: ['Acquire(4)', 'Acquire(1)', 'Acquire(0)', 'CancelQueued(0)'] -> held/queue=(4, (0,)); Release(0) -> (4, ())
+BOUND: capacities 0..4, queue length <=4; 2516 reachable aggregate/queue states
+RESULT: 296 states where Release(0) changes holdings or queue
