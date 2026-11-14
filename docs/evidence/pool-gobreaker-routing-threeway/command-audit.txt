@@ -1,0 +1,165 @@
+RUN gobreaker-hybrid
+NONZERO 052 1 ['python3', '../pack/tools/hybrid_pilot.py', 'domain-analysis/circuitBreaker/matrix-fields.json', 'domain-analysis/circuitBreaker/disposition-matrix.md']
+MATRIX FIELDS: FAIL
+NONZERO 054 1 ['python3', 'domain-analysis/circuitBreaker/check_matrix.py']
+Traceback (most recent call last):
+    return PathBase.read_text(self, encoding, errors, newline)
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+    return io.open(self, mode, buffering, encoding, errors, newline)
+FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/stateradar-routing-threeway.GBCgIc/gobreaker-hybrid/selective/pool/domain-analysis/circuitBreaker/disposition-matrix.md'
+NONZERO 059 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', '/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go', 'domain-analysis/circuitBreaker/goexit-checks.json']
+LOCAL MODELS: S12: citation fragment missing near line 674
+NONZERO 060 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', 'README.md', 'domain-analysis/circuitBreaker/order-checks.json']
+LOCAL MODELS: O1: citation fragment missing near line 54
+NONZERO 063 1 ['python3', 'domain-analysis/circuitBreaker/check_matrix.py']
+CHECK MATRIX: FAIL
+NONZERO 073 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', '/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go', 'domain-analysis/circuitBreaker/goexit-checks.json']
+LOCAL MODELS: S12: citation fragment missing near line 675
+NONZERO 095 1 ['python3', '../pack/tools/dsc_check.py', 'domain-analysis/circuitBreaker', '--repo', '.', '--model', 'as-is.machine.mmd']
+DSC CHECK: FAIL
+ - UV coverage: ReportFailure/loss — no UV column and no asserted-absence entry (n/a: <reason>)
+ - UV coverage: ReportFailure/delay — no UV column and no asserted-absence entry (n/a: <reason>)
+ - UV coverage: ReportFailure/duplication — no UV column and no asserted-absence entry (n/a: <reason>)
+ - UV coverage: ReportFailure/out-of-order — no UV column and no asserted-absence entry (n/a: <reason>)
+ - UV coverage: ReportFailure/contradiction — no UV column and no asserted-absence entry (n/a: <reason>)
+ - UV coverage: ReportFailure/commission — no UV column and no asserted-absence entry (n/a: <reason>)
+ - UV coverage: ReportFailure/value — no UV column and no asserted-absence entry (n/a: <reason>)
+NONZERO 103 1 ['go', 'test', '-mod=readonly', '-race', '-overlay', 'domain-analysis/circuitBreaker/_probe/overlay.json', '-timeout=20s']
+WARNING: DATA RACE
+--- FAIL: TestCustomCircuitBreaker (0.10s)
+    testing.go:1867: race detected during execution of test
+FAIL
+FAIL	github.com/sony/gobreaker	2.644s
+FAIL
+NONZERO 113 1 ['rg', '-n', 'part-b-diff|divergence', '../pack/tools/dsc_check.py', '../pack/tools/gen_analysis_sidecar.py']
+
+RUN gobreaker-matrix
+NONZERO 009 2 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', '--help']
+
+NONZERO 077 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', 'README.md', 'domain-analysis/circuitBreaker/ordering-checks.json']
+LOCAL MODELS: C1: citation fragment missing near line 54
+NONZERO 083 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', 'README.md', 'domain-analysis/circuitBreaker/ordering-checks.json']
+LOCAL MODELS: C4: citation fragment missing near line 50
+NONZERO 085 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', 'README.md', 'domain-analysis/circuitBreaker/ordering-checks.json']
+LOCAL MODELS: C4: citation fragment missing near line 50
+NONZERO 099 1 ['python3', '../pack/tools/dsc_check.py', 'domain-analysis/circuitBreaker', '--repo', '.', '--model', 'as-is.machine.mmd']
+DSC CHECK: FAIL
+ - event Execute: missing gate-type annotation (R-GATE-TYPE)
+ - event Execute: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event Allow: missing gate-type annotation (R-GATE-TYPE)
+ - event Allow: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event State: missing gate-type annotation (R-GATE-TYPE)
+ - event State: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event Counts: missing gate-type annotation (R-GATE-TYPE)
+RUN gobreaker-routed
+TOOL_ERROR item_128 ['read-log', '075', 'lines', '1', '16'] {'message': 'tool call error: tool call failed for `pilot/command`\n\nCaused by:\n    Mcp error: -32602: line range must start within 1..0 and request at most 100 lines'}
+NONZERO 029 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'draft-verify', 'gobreaker_test.go', 'domain-analysis/circuitBreaker/gobreaker_test.task.md']
+
+NONZERO 037 1 ['python3', 'domain-analysis/circuitBreaker/check_matrix.py']
+CHECK MATRIX: FAIL
+NONZERO 065 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', 'README.md', 'domain-analysis/circuitBreaker/orders.task.json']
+LOCAL MODELS: O4: citation fragment missing near line 88
+NONZERO 104 1 ['go', 'test', '-race', '-count=1', '-timeout', '25s', './...']
+WARNING: DATA RACE
+--- FAIL: TestCustomCircuitBreaker (0.10s)
+    testing.go:1867: race detected during execution of test
+FAIL
+FAIL	github.com/sony/gobreaker	2.332s
+FAIL
+NONZERO 113 1 ['python3', '-c', "from pathlib import Path\nimport sys\nd=Path(sys.argv[1])\nf=d/'adversarial-traces.md';s=f.read_text()\ns=s.replace('explicitly ordered control','explicitly ordered control').replace('leave explicit late-report ordering open. Q-02.','leave explicit late-report ordering open. Q-20 and Q-02.')\ns=s.replace('Intent remains Q-03.\n\n
+SyntaxError: unterminated string literal (detected at line 6)
+RUN pool-hybrid
+NONZERO 014 1 ['go', 'test', '-timeout', '8s', './...']
+panic: test timed out after 8s
+FAIL	github.com/silenceper/pool	8.895s
+FAIL
+NONZERO 015 1 ['cat', 'undefined/flash-windows-channel.json']
+
+NONZERO 023 1 ['rg', '-n', 'add_argument|^def |^class |^    Usage|--stage', '../pack/tools/templates/check_matrix.py']
+
+NONZERO 055 1 ['rg', '-n', 'func Printf|func Debugf', '../pack/tools/run_sol_pilot.py']
+
+NONZERO 070 2 ['rg', '-n', '^func .*Debugf|^func .*log\\(', '/Users/gregormelhorn/go/pkg/mod/github.com/sirupsen/logrus@v1.4.2']
+rg: /Users/gregormelhorn/go/pkg/mod/github.com/sirupsen/logrus@v1.4.2: IO error for operation on /Users/gregormelhorn/go/pkg/mod/github.com/sirupsen/logrus@v1.4.2: No such file or directory (os error 2)
+NONZERO 083 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', '/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/rwmutex.go', 'domain-analysis/channelPool/mutex-checks.json']
+LOCAL MODELS: claim-1: citation fragment missing near line 142
+NONZERO 084 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', '/opt/homebrew/Cellar/go/1.27.3/libexec/src/net/rpc/client.go', 'domain-analysis/channelPool/rpc-checks.json']
+LOCAL MODELS: claim-2: citation fragment missing near line 282
+NONZERO 098 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'jev-batch', '../go-mod/github.com/sirupsen/logrus@v1.8.3/entry.go', 'domain-analysis/channelPool/logger-checks.json']
+LOCAL MODELS: claim-1: citation fragment missing near line 308
+NONZERO 109 1 ['go', 'test', '-race', '-overlay', 'domain-analysis/channelPool/_probe/overlay.json', '-run', '^TestPilotScopePingRace$']
+WARNING: DATA RACE
+  github.com/silenceper/pool.TestPilotScopePingRace.func3()
+  github.com/silenceper/pool.TestPilotScopePingRace()
+  github.com/silenceper/pool.TestPilotScopePingRace()
+--- FAIL: TestPilotScopePingRace (0.00s)
+    testing.go:1867: race detected during execution of test
+FAIL
+FAIL	github.com/silenceper/pool	0.718s
+NONZERO 112 1 ['python3', '../pack/tools/dsc_check.py', 'domain-analysis/channelPool', '--repo', '.', '--model', 'as-is.machine.mmd']
+DSC CHECK: FAIL
+ - event NewFault: missing gate-type annotation (R-GATE-TYPE)
+ - event NewFault: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event GetAgain: missing gate-type annotation (R-GATE-TYPE)
+ - event GetAgain: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event GetAbandoned: missing gate-type annotation (R-GATE-TYPE)
+ - event GetAbandoned: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event LateGet: missing gate-type annotation (R-GATE-TYPE)
+NONZERO 118 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'blind', 'domain-analysis/channelPool', '--repo']
+PART-B COVERAGE: FAIL
+ - missing row: UV-NewFault (no table row keyed by it)
+ - missing row: UV-GetAgain (no table row keyed by it)
+ - missing row: UV-GetAbandoned (no table row keyed by it)
+ - missing row: UV-LateGet (no table row keyed by it)
+ - missing row: UV-PutFault (no table row keyed by it)
+ - missing row: UV-CloseFault (no table row keyed by it)
+ - missing row: UV-ReleaseFault (no table row keyed by it)
+NONZERO 163 1 ['go', 'test', '-race', '-overlay', 'domain-analysis/channelPool/_probe/race-overlay.json', '-run', '^TestPilotScopePingRace$']
+WARNING: DATA RACE
+  github.com/silenceper/pool.TestPilotScopePingRace.func3()
+  github.com/silenceper/pool.TestPilotScopePingRace()
+  github.com/silenceper/pool.TestPilotScopePingRace()
+--- FAIL: TestPilotScopePingRace (0.00s)
+    testing.go:1867: race detected during execution of test
+FAIL
+FAIL	github.com/silenceper/pool	0.796s
+RUN pool-matrix
+NONZERO 011 1 ['go', 'test', '-timeout=20s', './...']
+panic: test timed out after 20s
+FAIL	github.com/silenceper/pool	20.820s
+FAIL
+NONZERO 033 1 ['rg', '-n', '^// .*|^func .*Debugf', 'example']
+
+NONZERO 063 1 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', 'blind', 'domain-analysis/channelPool', '--repo']
+
+NONZERO 087 1 ['python3', '../pack/tools/check_reachability.py', 'domain-analysis/channelPool', '--repo', '.']
+REACHABILITY CHECK: FAIL
+NONZERO 088 1 ['python3', '../pack/tools/dsc_check.py', 'domain-analysis/channelPool', '--repo', '.', '--model', 'as-is.machine.mmd']
+DSC CHECK: FAIL
+ - event Drain: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event IdleAge: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event Handoff: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event WaitClosed: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - event LateCallback: missing upstream-guard annotation (R-UPSTREAM-GUARD)
+ - UV coverage: InvalidConn/loss — no UV column and no asserted-absence entry (n/a: <reason>)
+ - UV coverage: InvalidConn/delay — no UV column and no asserted-absence entry (n/a: <reason>)
+NONZERO 140 1 ['rg', '-n', 'Append|GoMemory|After|New|Release', '../pack/tools/check_reachability.py']
+
+RUN pool-routed
+NONZERO 007 2 ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', '--help']
+
+NONZERO 011 1 ['go', 'test', '-timeout', '5s', './...']
+panic: test timed out after 5s
+FAIL	github.com/silenceper/pool	5.824s
+FAIL
+NONZERO 037 2 ['rg', '-n', 'func .*Debugf|Debugf logs', '../go-mod/github.com/sirupsen/logrus@v1.4.2']
+rg: ../go-mod/github.com/sirupsen/logrus@v1.4.2: IO error for operation on ../go-mod/github.com/sirupsen/logrus@v1.4.2: No such file or directory (os error 2)
+NONZERO 068 1 ['go', 'test', '-race', '-timeout', '10s', '-overlay', 'domain-analysis/channelPool/_probe/overlay.json']
+WARNING: DATA RACE
+  github.com/silenceper/pool.TestPilotPingReleaseRace.func4()
+  github.com/silenceper/pool.TestPilotPingReleaseRace()
+  github.com/silenceper/pool.TestPilotPingReleaseRace.func2()
+  github.com/silenceper/pool.TestPilotPingReleaseRace()
+WARNING: DATA RACE
+  github.com/silenceper/pool.TestPilotPingReleaseRace.func4()
+  github.com/silenceper/pool.TestPilotPingReleaseRace()

@@ -1,0 +1,207 @@
+package pool
+
+import (
+	"errors"
+	"runtime"
+	"testing"
+	"time"
+)
+
+type probeValue struct{ id int }
+type probeAnswer struct {
+	value interface{}
+	err   error
+}
+
+func probePool(t *testing.T, max, idle int, closeFn func(interface{}) error) (*channelPool, *int) {
+	t.Helper()
+	n := 0
+	p, err := NewChannelPool(&Config{MaxCap: max, MaxIdle: idle, Factory: func() (interface{}, error) { n++; return &probeValue{n}, nil }, Close: closeFn})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p.(*channelPool), &n
+}
+func probeGet(p *channelPool) chan probeAnswer {
+	out := make(chan probeAnswer, 1)
+	go func() { v, e := p.Get(); out <- probeAnswer{v, e} }()
+	return out
+}
+func probeWait(t *testing.T, p *channelPool, n int) {
+	t.Helper()
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		p.mu.Lock()
+		k := len(p.connReqs)
+		p.mu.Unlock()
+		if k == n {
+			return
+		}
+		runtime.Gosched()
+	}
+	t.Fatalf("waiting request count did not reach %d", n)
+}
+func probeReceive(t *testing.T, out chan probeAnswer) interface{} {
+	t.Helper()
+	select {
+	case a := <-out:
+		if a.err != nil {
+			t.Fatal(a.err)
+		}
+		return a.value
+	case <-time.After(time.Second):
+		t.Fatal("Get did not return")
+		return nil
+	}
+}
+func probePending(t *testing.T, out chan probeAnswer) {
+	t.Helper()
+	select {
+	case a := <-out:
+		t.Fatalf("Get unexpectedly returned %+v", a)
+	case <-time.After(15 * time.Millisecond):
+	}
+}
+func TestPilotSameCaller(t *testing.T) {
+	p, n := probePool(t, 2, 1, func(interface{}) error { return nil })
+	defer p.Release()
+	a, _ := p.Get()
+	b, _ := p.Get()
+	if a == b || *n != 2 {
+		t.Fatal("Get while holding did not consume independent capacity")
+	}
+	first := probeGet(p)
+	probeWait(t, p, 1)
+	second := probeGet(p)
+	probeWait(t, p, 2)
+	if err := p.Put(a); err != nil {
+		t.Fatal(err)
+	}
+	if probeReceive(t, first) != a {
+		t.Fatal("first Put did not serve first queued Get")
+	}
+	probePending(t, second)
+	if err := p.Put(b); err != nil {
+		t.Fatal(err)
+	}
+	if probeReceive(t, second) != b {
+		t.Fatal("second Put did not serve second queued Get")
+	}
+}
+func TestPilotCloseFailureAndRelease(t *testing.T) {
+	sentinel := errors.New("close failed")
+	calls := 0
+	p, _ := probePool(t, 1, 1, func(interface{}) error { calls++; return sentinel })
+	a, _ := p.Get()
+	pending := probeGet(p)
+	probeWait(t, p, 1)
+	if p.Close(a) != sentinel {
+		t.Fatal("Close did not return its callback error")
+	}
+	probePending(t, pending)
+	b, _ := p.Get()
+	if b == a || p.Len() != 0 {
+		t.Fatal("later Get did not obtain a new capacity slot")
+	}
+	p.Release()
+	if err := p.Put(b); err != nil || calls != 1 {
+		t.Fatalf("late Put result=%v callback count=%d", err, calls)
+	}
+	probePending(t, pending)
+	if _, err := p.Get(); err != ErrClosed {
+		t.Fatalf("late Get returned %v", err)
+	}
+}
+func TestPilotOverflowAndForeign(t *testing.T) {
+	calls := 0
+	p, _ := probePool(t, 2, 1, func(interface{}) error { calls++; return nil })
+	a, _ := p.Get()
+	if err := p.Put(a); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.Put(a); err != nil || calls != 1 {
+		t.Fatal("duplicate Put did not close buffered alias")
+	}
+	if got, _ := p.Get(); got != a {
+		t.Fatal("buffered alias was not returned")
+	}
+	if err := p.Close(&probeValue{99}); err != nil || p.openingConns != -1 {
+		t.Fatal("foreign Close did not decrement accounting")
+	}
+	p.Release()
+}
+func TestPilotObservationGap(t *testing.T) {
+	for _, atCap := range []bool{false, true} {
+		name := "BelowCapacity"
+		max := 3
+		if atCap {
+			name = "AtCapacity"
+			max = 2
+		}
+		t.Run(name, func(t *testing.T) {
+			p, n := probePool(t, max, 1, func(interface{}) error { return nil })
+			defer p.Release()
+			a, _ := p.Get()
+			b, _ := p.Get()
+			observed, resume := make(chan struct{}), make(chan struct{})
+			probeBeforeGetLock = func() { close(observed); <-resume }
+			first := probeGet(p)
+			select {
+			case <-observed:
+			case <-time.After(time.Second):
+				t.Fatal("Get did not reach observation hook")
+			}
+			if e := p.Put(a); e != nil {
+				t.Fatal(e)
+			}
+			// The paused hook has already been read. Clear it before starting any later caller.
+			probeBeforeGetLock = nil
+			close(resume)
+			if atCap {
+				probeWait(t, p, 1)
+				if p.Len() != 1 {
+					t.Fatal("idle inventory did not coexist with a pending Get")
+				}
+				if got := probeReceive(t, probeGet(p)); got != a {
+					t.Fatal("later Get did not take buffered Put")
+				}
+				probePending(t, first)
+				if e := p.Put(b); e != nil {
+					t.Fatal(e)
+				}
+				if got := probeReceive(t, first); got != b {
+					t.Fatal("second Put did not complete first Get")
+				}
+			} else {
+				if got := probeReceive(t, first); got == a || *n != 3 || p.Len() != 1 {
+					t.Fatal("Get did not create while a returned value was buffered")
+				}
+				if got := probeReceive(t, probeGet(p)); got != a {
+					t.Fatal("later Get did not take buffered Put")
+				}
+			}
+		})
+	}
+}
+func TestPilotReleaseBeforeGetCommit(t *testing.T) {
+	p, _ := probePool(t, 1, 1, func(interface{}) error { return nil })
+	if _, e := p.Get(); e != nil {
+		t.Fatal(e)
+	}
+	observed, resume := make(chan struct{}), make(chan struct{})
+	probeBeforeGetLock = func() { close(observed); <-resume }
+	out := probeGet(p)
+	select {
+	case <-observed:
+	case <-time.After(time.Second):
+		t.Fatal("Get did not reach observation hook")
+	}
+	p.Release()
+	probeBeforeGetLock = nil
+	close(resume)
+	probeWait(t, p, 1)
+	probePending(t, out)
+	if _, e := p.Get(); e != ErrClosed {
+		t.Fatal("new Get did not reject after Release")
+	}
+}

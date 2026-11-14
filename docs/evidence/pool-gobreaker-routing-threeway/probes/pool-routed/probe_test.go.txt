@@ -1,0 +1,327 @@
+package pool
+
+import (
+	"errors"
+	"runtime"
+	"testing"
+	"time"
+)
+
+var pilotMiss func()
+var pilotBeforePing func()
+var pilotAfterHandoff func()
+
+type pilotResult struct {
+	value interface{}
+	err   error
+}
+
+func pilotPool(t *testing.T, init, idle, max int, factory func() (interface{}, error), closeFn, pingFn func(interface{}) error) *channelPool {
+	t.Helper()
+	if factory == nil {
+		n := init
+		factory = func() (interface{}, error) { n++; return n, nil }
+	}
+	if closeFn == nil {
+		closeFn = func(interface{}) error { return nil }
+	}
+	p, err := NewChannelPool(&Config{InitialCap: init, MaxIdle: idle, MaxCap: max, Factory: factory, Close: closeFn, Ping: pingFn})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p.(*channelPool)
+}
+
+func pilotGet(p Pool) <-chan pilotResult {
+	ch := make(chan pilotResult, 1)
+	go func() { v, e := p.Get(); ch <- pilotResult{v, e} }()
+	return ch
+}
+
+func pilotReceive(t *testing.T, ch <-chan pilotResult) pilotResult {
+	t.Helper()
+	select {
+	case r := <-ch:
+		return r
+	case <-time.After(time.Second):
+		t.Fatal("Get did not complete")
+		return pilotResult{}
+	}
+}
+
+func pilotWaiters(t *testing.T, p *channelPool, n int) {
+	t.Helper()
+	end := time.Now().Add(time.Second)
+	for time.Now().Before(end) {
+		p.mu.Lock()
+		count := len(p.connReqs)
+		p.mu.Unlock()
+		if count == n {
+			return
+		}
+		runtime.Gosched()
+	}
+	t.Fatalf("waiter count never reached %d", n)
+}
+
+func pilotStillPending(t *testing.T, ch <-chan pilotResult) {
+	t.Helper()
+	select {
+	case r := <-ch:
+		t.Fatalf("Get unexpectedly finished: %+v", r)
+	case <-time.After(20 * time.Millisecond):
+	}
+}
+
+func pilotMustGet(t *testing.T, p Pool) interface{} {
+	t.Helper()
+	v, e := p.Get()
+	if e != nil {
+		t.Fatal(e)
+	}
+	return v
+}
+
+func TestPilotPutInMissWindow(t *testing.T) {
+	for _, max := range []int{1, 2} {
+		p := pilotPool(t, 1, 1, max, nil, nil, nil)
+		held := pilotMustGet(t, p)
+		arrived, resume := make(chan struct{}), make(chan struct{})
+		pilotMiss = func() { close(arrived); <-resume }
+		first := pilotGet(p)
+		<-arrived
+		if err := p.Put(held); err != nil {
+			t.Fatal(err)
+		}
+		pilotMiss = nil
+		close(resume)
+		if max == 1 {
+			pilotWaiters(t, p, 1)
+			if p.Len() != 1 {
+				t.Fatal("idle value and a pending Get must coexist")
+			}
+			pilotStillPending(t, first)
+			if got := pilotMustGet(t, p); got != held {
+				t.Fatal("later Get did not overtake")
+			}
+			if err := p.Put(held); err != nil {
+				t.Fatal(err)
+			}
+			if r := pilotReceive(t, first); r.value != held || r.err != nil {
+				t.Fatalf("handoff failed: %+v", r)
+			}
+		} else {
+			if r := pilotReceive(t, first); r.value == held || r.err != nil || p.Len() != 1 {
+				t.Fatalf("expected fresh value beside idle return: %+v", r)
+			}
+		}
+		p.Release()
+	}
+}
+
+func TestPilotCloseFreesSlotWithoutWake(t *testing.T) {
+	p := pilotPool(t, 1, 1, 1, nil, nil, nil)
+	held := pilotMustGet(t, p)
+	first := pilotGet(p)
+	pilotWaiters(t, p, 1)
+	if err := p.Close(held); err != nil {
+		t.Fatal(err)
+	}
+	pilotStillPending(t, first)
+	later := pilotMustGet(t, p)
+	if later == held {
+		t.Fatal("later Get did not create a replacement")
+	}
+	if err := p.Put(later); err != nil {
+		t.Fatal(err)
+	}
+	if r := pilotReceive(t, first); r.value != later || r.err != nil {
+		t.Fatalf("unexpected handoff: %+v", r)
+	}
+	p.Release()
+}
+
+func TestPilotReleaseWindows(t *testing.T) {
+	for _, max := range []int{1, 2} {
+		var closed int
+		p := pilotPool(t, 1, 1, max, nil, func(interface{}) error { closed++; return nil }, nil)
+		held := pilotMustGet(t, p)
+		arrived, resume := make(chan struct{}), make(chan struct{})
+		pilotMiss = func() { close(arrived); <-resume }
+		waiting := pilotGet(p)
+		<-arrived
+		p.Release()
+		pilotMiss = nil
+		close(resume)
+		if max == 1 {
+			pilotWaiters(t, p, 1)
+			pilotStillPending(t, waiting)
+		} else if r := pilotReceive(t, waiting); r.err != ErrClosed {
+			t.Fatalf("expected ErrClosed: %+v", r)
+		}
+		if err := p.Put(held); err != nil || closed != 0 {
+			t.Fatalf("late Put=%v callbacks=%d", err, closed)
+		}
+		if max == 1 {
+			pilotStillPending(t, waiting)
+		}
+		if r := pilotReceive(t, pilotGet(p)); r.err != ErrClosed {
+			t.Fatalf("fresh Get=%+v", r)
+		}
+	}
+}
+
+func TestPilotRepeatedAndAbandonedAcquisition(t *testing.T) {
+	p := pilotPool(t, 1, 1, 1, nil, nil, nil)
+	// Same logical caller already owns held and starts two more acquisitions.
+	held := pilotMustGet(t, p)
+	first := pilotGet(p)
+	pilotWaiters(t, p, 1)
+	second := pilotGet(p)
+	pilotWaiters(t, p, 2)
+	pilotStillPending(t, first)
+	pilotStillPending(t, second)
+	// The parent no longer consumes first's result. The worker's result buffer captures it.
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(time.Second)
+	for len(first) == 0 && time.Now().Before(deadline) {
+		runtime.Gosched()
+	}
+	if len(first) != 1 {
+		t.Fatal("abandoned result was not delivered to the worker buffer")
+	}
+	pilotWaiters(t, p, 1)
+	pilotStillPending(t, second)
+	p.Release()
+	pilotStillPending(t, second)
+}
+
+func TestPilotHandoffBeforeRelease(t *testing.T) {
+	var closed int
+	p := pilotPool(t, 1, 1, 1, nil, func(interface{}) error { closed++; return nil }, func(interface{}) error { return nil })
+	held := pilotMustGet(t, p)
+	arrived, resume := make(chan struct{}), make(chan struct{})
+	pilotAfterHandoff = func() { close(arrived); <-resume }
+	waiting := pilotGet(p)
+	pilotWaiters(t, p, 1)
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	<-arrived
+	p.Release()
+	pilotAfterHandoff = nil
+	close(resume)
+	if r := pilotReceive(t, waiting); r.value != held || r.err != nil || closed != 0 {
+		t.Fatalf("handoff lost at release: %+v, closed=%d", r, closed)
+	}
+}
+
+func TestPilotPingClearWindow(t *testing.T) {
+	p := pilotPool(t, 1, 1, 1, nil, nil, func(interface{}) error { return nil })
+	pilotBeforePing = func() { p.Release() }
+	defer func() {
+		pilotBeforePing = nil
+		if recover() == nil {
+			t.Fatal("expected nil callback panic after release")
+		}
+	}()
+	p.Get()
+}
+
+func TestPilotPingReturningAfterRelease(t *testing.T) {
+	for _, pingFails := range []bool{false, true} {
+		arrived, resume := make(chan struct{}), make(chan struct{})
+		var closed int
+		bad := errors.New("invalid")
+		p := pilotPool(t, 1, 1, 1, nil, func(interface{}) error { closed++; return nil }, func(interface{}) error {
+			close(arrived)
+			<-resume
+			if pingFails {
+				return bad
+			}
+			return nil
+		})
+		acquired := pilotGet(p)
+		<-arrived
+		p.Release()
+		close(resume)
+		r := pilotReceive(t, acquired)
+		if closed != 0 || (pingFails && r.err != ErrClosed) || (!pingFails && (r.err != nil || r.value == nil)) {
+			t.Fatalf("Ping failure=%t Get=%+v close=%d", pingFails, r, closed)
+		}
+	}
+}
+
+func TestPilotFailedCleanupAccounting(t *testing.T) {
+	failure := errors.New("close failed")
+	calls := 0
+	p := pilotPool(t, 1, 1, 1, nil, func(interface{}) error { calls++; return failure }, nil)
+	held := pilotMustGet(t, p)
+	if err := p.Close(held); err != failure {
+		t.Fatalf("expected close error, got %v", err)
+	}
+	later := pilotMustGet(t, p)
+	if later == held {
+		t.Fatal("failed close left no creation slot")
+	}
+	if err := p.Put(later); err != nil {
+		t.Fatal(err)
+	}
+	p.Release()
+	if calls != 2 {
+		t.Fatalf("want explicit close and drain despite errors, got %d", calls)
+	}
+}
+
+func TestPilotRepeatedReleaseDuringDrain(t *testing.T) {
+	arrived, resume, done := make(chan struct{}), make(chan struct{}), make(chan struct{})
+	p := pilotPool(t, 1, 1, 1, nil, func(interface{}) error { close(arrived); <-resume; return errors.New("ignored") }, nil)
+	go func() { p.Release(); close(done) }()
+	<-arrived
+	p.Release()
+	select {
+	case <-done:
+		t.Fatal("first Release completed before unblocking drain")
+	default:
+	}
+	close(resume)
+	<-done
+}
+
+func TestPilotLockedCallbacksReenter(t *testing.T) {
+	for _, inGet := range []bool{true, false} {
+		entered := make(chan struct{})
+		var p *channelPool
+		callback := func() { close(entered); _ = p.Len() }
+		p = pilotPool(t, 0, 1, 1, func() (interface{}, error) { callback(); return 1, nil }, func(interface{}) error { callback(); return nil }, nil)
+		done := make(chan struct{})
+		go func() {
+			if inGet {
+				_, _ = p.Get()
+			} else {
+				_ = p.Close(1)
+			}
+			close(done)
+		}()
+		<-entered
+		select {
+		case <-done:
+			t.Fatal("reentrant callback unexpectedly returned")
+		case <-time.After(20 * time.Millisecond):
+		}
+	}
+}
+
+func TestPilotPingReleaseRace(t *testing.T) {
+	for i := 0; i < 64; i++ {
+		p := pilotPool(t, 1, 1, 1, nil, nil, func(interface{}) error { return nil })
+		start, done := make(chan struct{}), make(chan struct{})
+		go func() { <-start; p.Release(); close(done) }()
+		pilotBeforePing = func() { close(start); runtime.Gosched() }
+		func() { defer func() { _ = recover() }(); _, _ = p.Get() }()
+		<-done
+		pilotBeforePing = nil
+	}
+}

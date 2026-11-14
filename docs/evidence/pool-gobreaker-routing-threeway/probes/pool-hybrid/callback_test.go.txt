@@ -1,0 +1,125 @@
+package pool
+
+import (
+	"errors"
+	"testing"
+	"time"
+)
+
+func TestPilotPingAcrossRelease(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		entered, resume := make(chan struct{}), make(chan struct{})
+		count := 0
+		value := new(probeValue)
+		api, err := NewChannelPool(&Config{InitialCap: 1, MaxIdle: 1, MaxCap: 1,
+			Factory: func() (interface{}, error) { return value, nil },
+			Ping: func(interface{}) error {
+				close(entered)
+				<-resume
+				if fail {
+					return errors.New("invalid")
+				}
+				return nil
+			},
+			Close: func(interface{}) error { count++; return nil },
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		p := api.(*channelPool)
+		out := probeGet(p)
+		select {
+		case <-entered:
+		case <-time.After(time.Second):
+			t.Fatal("Ping not entered")
+		}
+		p.Release()
+		close(resume)
+		select {
+		case a := <-out:
+			if fail && (a.err != ErrClosed || count != 0) {
+				t.Fatalf("failed Ping across release: result=%+v closes=%d", a, count)
+			}
+			if !fail && (a.value != value || a.err != nil || count != 0) {
+				t.Fatalf("successful Ping across release: result=%+v closes=%d", a, count)
+			}
+		case <-time.After(time.Second):
+			t.Fatal("late callback did not finish Get")
+		}
+	}
+}
+
+func TestPilotCleanupDrain(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		entered, resume, done := make(chan struct{}), make(chan struct{}), make(chan struct{})
+		count := 0
+		api, err := NewChannelPool(&Config{InitialCap: 2, MaxIdle: 2, MaxCap: 2,
+			Factory: func() (interface{}, error) { return new(probeValue), nil },
+			Close: func(interface{}) error {
+				count++
+				if count == 1 {
+					close(entered)
+					<-resume
+				}
+				if fail {
+					return errors.New("disposal failed")
+				}
+				return nil
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		p := api.(*channelPool)
+		go func() { p.Release(); close(done) }()
+		select {
+		case <-entered:
+		case <-time.After(time.Second):
+			t.Fatal("drain did not start")
+		}
+		if p.Len() != 0 {
+			t.Fatal("Len during drain did not see detached receiver")
+		}
+		p.Release()
+		select {
+		case <-done:
+			t.Fatal("first Release completed before callback")
+		default:
+		}
+		close(resume)
+		select {
+		case <-done:
+		case <-time.After(time.Second):
+			t.Fatal("drain did not finish")
+		}
+		if count != 2 || p.openingConns != 2 {
+			t.Fatalf("cleanup count=%d active counter=%d", count, p.openingConns)
+		}
+	}
+}
+
+func TestPilotHandoffSkipsPing(t *testing.T) {
+	p, count := probePool(t, 1, 1, func(interface{}) error { return nil })
+	p.ping = func(interface{}) error { t.Error("private handoff unexpectedly called Ping"); return nil }
+	defer p.Release()
+	value, _ := p.Get()
+	out := probeGet(p)
+	probeWait(t, p, 1)
+	if err := p.Put(value); err != nil {
+		t.Fatal(err)
+	}
+	if got := probeReceive(t, out); got != value || *count != 1 {
+		t.Fatal("private handoff did not return the same value")
+	}
+}
+
+func TestPilotScopePingRace(t *testing.T) {
+	p, _ := probePool(t, 1, 1, func(interface{}) error { return nil })
+	p.ping = func(interface{}) error { return nil }
+	// Let both goroutines start from the same signal without ordering either against the other.
+	start, done := make(chan struct{}), make(chan struct{})
+	go func() { defer close(done); defer func() { recover() }(); <-start; _ = p.Ping(new(probeValue)) }()
+	close(start)
+	p.Release()
+	<-done
+}

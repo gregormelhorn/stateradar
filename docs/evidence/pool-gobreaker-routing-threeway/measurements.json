@@ -1,0 +1,2524 @@
+{
+  "pool": {
+    "routed": {
+      "settings": {
+        "pack_sha": "1a55d9422c2d25dc33c4324ebe74fef30af31841",
+        "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "routed",
+        "output_mode": "selective"
+      },
+      "exit": 1,
+      "codex": {
+        "completed_turns": 0,
+        "counters": null
+      },
+      "result": null,
+      "failure": {
+        "error": "Codex exited 1; see /private/tmp/stateradar-routing-threeway.GBCgIc/pool-routed/selective/events.jsonl",
+        "elapsed_seconds": 941.608
+      },
+      "mcp_completed": 92,
+      "retained_log_reads": 4,
+      "acceptance_exit_codes": {
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 2,
+        "reachability": 1,
+        "blind-coverage": 0
+      },
+      "model_calls_by_command_status": {
+        "--help/exit-2": 1,
+        "blind/exit-0": 3,
+        "draft-verify/exit-0": 4,
+        "jev-batch/exit-0": 3
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {
+          "deepseek-flash/settled": 15959,
+          "jev/settled": 1153
+        },
+        "settled": 17112,
+        "reserved": 0
+      },
+      "gates": {
+        "blind-coverage": [
+          "PART-B COVERAGE: OK (47 events, 30 pair orderings)",
+          "PART-B INDEPENDENCE: 2 rows marked as-is (not independent): DuplicatePut, DuplicateClose"
+        ],
+        "guards": [
+          "group G-01 configuration: proven",
+          "group G-02 startup callbacks: proven"
+        ],
+        "matrix": [
+          "CHECK MATRIX: OK (9 rows x 47 events)"
+        ],
+        "reachability": [
+          "REACHABILITY CHECK: FAIL",
+          "  - no analysis.json at /private/tmp/stateradar-routing-threeway.GBCgIc/pool-routed/selective/pool/domain-analysis/channelPool"
+        ],
+        "sidecar": [
+          "DSC CHECK: no analysis.json in domain-analysis/channelPool",
+          "  Emit the sidecar (02-pilot step 4 / 06-reconcile step 4) \u2014"
+        ]
+      },
+      "artifact_sha256": {
+        "disposition-matrix.md": "33bcb33009a77623a1a81d8a882f6b7bd0409a0dac0d7d9eeb5d9c5509a17a68",
+        "part-b-blind.md": "70fc24a1f0a3af9ba6a48fac6283373f33b255222ae80ca7727c85df6beb72a8"
+      },
+      "schedule_outputs": [],
+      "cost": {
+        "codex_standard_credits": null,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": null,
+        "provider_conservative_usd": 0.017112,
+        "combined_conservative_usd_equivalent": null
+      },
+      "failed_tool_requests": [],
+      "retained_log_request_details": [
+        {
+          "item": "item_21",
+          "argv": [
+            "read-log",
+            "008.stdout",
+            "page",
+            "221",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_29",
+          "argv": [
+            "read-log",
+            "023.stdout",
+            "page",
+            "115",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json,glob\nfor p in sorted(glob.glob('domain-analysis/channelPool/draft-*.json')):\n d=json.load(open(p)); print(p)\n for c in d['claims'].values(): print(c.get('line'),c['statement'])\n for i,q in enumerate(d['questions'],1): print('Q',i,q)"
+          ]
+        },
+        {
+          "item": "item_50",
+          "argv": [
+            "read-log",
+            "048.stdout",
+            "page",
+            "124",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_80",
+          "argv": [
+            "read-log",
+            "076.stdout",
+            "page",
+            "57",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        }
+      ],
+      "nonzero_commands": [
+        {
+          "log": "007",
+          "exit_code": 2,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "--help"
+          ]
+        },
+        {
+          "log": "011",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-timeout",
+            "5s",
+            "./..."
+          ]
+        },
+        {
+          "log": "037",
+          "exit_code": 2,
+          "argv": [
+            "rg",
+            "-n",
+            "func .*Debugf|Debugf logs",
+            "../go-mod/github.com/sirupsen/logrus@v1.4.2"
+          ]
+        },
+        {
+          "log": "068",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-race",
+            "-timeout",
+            "10s",
+            "-overlay",
+            "domain-analysis/channelPool/_probe/overlay.json",
+            "-run",
+            "^TestPilotPingReleaseRace$",
+            "-count=1",
+            "."
+          ]
+        }
+      ]
+    },
+    "matrix": {
+      "settings": {
+        "pack_sha": "1a55d9422c2d25dc33c4324ebe74fef30af31841",
+        "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "matrix",
+        "output_mode": "selective"
+      },
+      "exit": 0,
+      "codex": {
+        "completed_turns": 1,
+        "counters": {
+          "input_tokens": 8079454,
+          "cached_input_tokens": 7892736,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 41773,
+          "reasoning_output_tokens": 2332
+        },
+        "input_excluding_cache_hits": 186718,
+        "input_plus_output": 8121227
+      },
+      "result": {
+        "elapsed_seconds": 1251.684,
+        "tool_calls": 168
+      },
+      "failure": null,
+      "mcp_completed": 168,
+      "retained_log_reads": 18,
+      "acceptance_exit_codes": {
+        "matrix-fields": 0,
+        "sidecar-regeneration": 0,
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "model_calls_by_command_status": {
+        "blind/exit-0": 6,
+        "blind/exit-1": 1,
+        "draft-verify/exit-0": 5,
+        "jev-batch/exit-0": 13,
+        "status/exit-0": 5
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {
+          "deepseek-flash/settled": 33804,
+          "jev/settled": 4626
+        },
+        "settled": 38430,
+        "reserved": 0
+      },
+      "sidecar_counts": {
+        "states": 7,
+        "events": 26,
+        "cells": 182,
+        "pairs": 42,
+        "questions": 19,
+        "guardGroups": 15
+      },
+      "pair_reachability_edges": [
+        {
+          "id": "P-05a",
+          "trace": "adversarial-traces.md#P-05a: Get then Put",
+          "reachability": {
+            "source": "Open_Empty",
+            "target": "Open_IdleAndWaiting",
+            "file": "domain-analysis/channelPool/_probe/domain_pilot_test.go",
+            "line": 105,
+            "fragment": "parked Get and idle connection did not coexist"
+          }
+        }
+      ],
+      "gates": {
+        "blind-coverage": [
+          "PART-B COVERAGE: OK (26 events, 42 pair orderings)"
+        ],
+        "guards": [
+          "group G-01 capacity config: proven",
+          "group G-02 callback presence: proven"
+        ],
+        "matrix-fields": [
+          "MATRIX FIELDS: OK (domain-analysis/channelPool/disposition-matrix.md)"
+        ],
+        "matrix": [
+          "CHECK MATRIX: OK (7 rows x 26 events)"
+        ],
+        "reachability": [
+          "REACHABILITY CHECK: OK (7/7 states reachable from 'New', 1 terminal)"
+        ],
+        "sidecar-regeneration": [
+          "OK channelPool: 7 states x 26 events = 182 cells, 19 questions, DRs []"
+        ],
+        "sidecar": [
+          "DSC CHECK: OK (7 states x 26 events, 182 cells, 15 guard groups)"
+        ]
+      },
+      "artifact_sha256": {
+        "matrix-fields.json": "ddeac8d54f3d394551f1c3fbce83a9b1ac095615fe4e0ff4bc698628ddf90c20",
+        "disposition-matrix.md": "5ff12f89d09659436eff80dba3a9c2589e89d4902c98e077ac6f50f348d09199",
+        "analysis.json": "b0bfc595c915fec7b00a56960612647547475b64a734946c32685451b351c4ae",
+        "part-b-blind.md": "3be3f6f4570a6bcdaec2b7f2407ceb85d611db825b1ddcb3c3cf0bf819c4a855"
+      },
+      "schedule_outputs": [],
+      "cost": {
+        "codex_standard_credits": 39.51099,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": 1.5804396,
+        "provider_conservative_usd": 0.03843,
+        "combined_conservative_usd_equivalent": 1.6188696
+      },
+      "failed_tool_requests": [],
+      "retained_log_request_details": [
+        {
+          "item": "item_24",
+          "argv": [
+            "read-log",
+            "014",
+            "lines",
+            "1",
+            "8"
+          ],
+          "failed": false,
+          "original_argv": [
+            "rg",
+            "-n",
+            "jev-batch|--package-only|--for-dispatch",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_37",
+          "argv": [
+            "read-log",
+            "032.stdout",
+            "page",
+            "123",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json,pathlib,sys\nfor f in sorted(pathlib.Path(sys.argv[1]).glob('draft-*.json')):\n d=json.loads(f.read_text());print(f.name,d.keys())\n for i,q in enumerate(d['questions'],1): print(i,q)\n for c in d['claims'].values():\n  print(c.get('id'),c.get('line'),c.get('statement'),c.get('citation_check'), c.get('jev',{}).get('choice'))\n",
+            "domain-analysis/channelPool"
+          ]
+        },
+        {
+          "item": "item_68",
+          "argv": [
+            "read-log",
+            "066.stdout",
+            "lines",
+            "155",
+            "254"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_69",
+          "argv": [
+            "read-log",
+            "066.stdout",
+            "lines",
+            "255",
+            "345"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_70",
+          "argv": [
+            "read-log",
+            "064.stderr",
+            "lines",
+            "1",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "blind",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--requirements",
+            "README.md:Feature",
+            "--contracts",
+            "domain-analysis/channelPool/event-contracts.md",
+            "--output",
+            "domain-analysis/channelPool/part-b-blind.md",
+            "--max-tokens",
+            "15000",
+            "--package-only"
+          ]
+        },
+        {
+          "item": "item_76",
+          "argv": [
+            "read-log",
+            "060.stdout",
+            "page",
+            "35",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json,sys\nfor f in sys.argv[1:]:\n d=json.load(open(f)); print(f)\n for i,c in d[\"checks\"].items():\n  if \"control\" in f or str(c).find(\"unclear\")>=0: print(i,c)\n",
+            "domain-analysis/channelPool/control-jev.json",
+            "domain-analysis/channelPool/findings-channel-jev.json"
+          ]
+        },
+        {
+          "item": "item_92",
+          "argv": [
+            "read-log",
+            "083.stdout",
+            "lines",
+            "24",
+            "71"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_93",
+          "argv": [
+            "read-log",
+            "086.stdout",
+            "page",
+            "101",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "status"
+          ]
+        },
+        {
+          "item": "item_94",
+          "argv": [
+            "read-log",
+            "088.stdout",
+            "page",
+            "128",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "../pack/tools/dsc_check.py",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--model",
+            "as-is.machine.mmd"
+          ]
+        },
+        {
+          "item": "item_96",
+          "argv": [
+            "read-log",
+            "083.stdout",
+            "lines",
+            "53",
+            "100"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_97",
+          "argv": [
+            "read-log",
+            "083.stdout",
+            "lines",
+            "101",
+            "141"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_100",
+          "argv": [
+            "read-log",
+            "083.stdout",
+            "page",
+            "24",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_109",
+          "argv": [
+            "read-log",
+            "104.stdout",
+            "page",
+            "241",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "from pathlib import Path\nimport re,sys,difflib\np=Path(sys.argv[1]); a=(p/'part-b-first.package.md').read_text(); b=(p/'part-b-blind.package.md').read_text()\nfor line in difflib.unified_diff(a.splitlines(),b.splitlines(),n=0):print(line)\nprint('Quote audit',[(i,l) for i,l in enumerate(b.splitlines(),1) if re.search(r'''\\(\\s*[\"'\u201c\u2018]''',l)])\n",
+            "domain-analysis/channelPool"
+          ]
+        },
+        {
+          "item": "item_118",
+          "argv": [
+            "read-log",
+            "114.stdout",
+            "page",
+            "78",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_119",
+          "argv": [
+            "read-log",
+            "110.stderr",
+            "lines",
+            "1",
+            "3"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "blind",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--requirements",
+            "README.md:Feature",
+            "--contracts",
+            "domain-analysis/channelPool/event-contracts.md",
+            "--output",
+            "domain-analysis/channelPool/part-b-blind.md",
+            "--max-tokens",
+            "15000"
+          ]
+        },
+        {
+          "item": "item_131",
+          "argv": [
+            "read-log",
+            "128.stdout",
+            "page",
+            "53",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_134",
+          "argv": [
+            "read-log",
+            "011",
+            "lines",
+            "1",
+            "36"
+          ],
+          "failed": false,
+          "original_argv": [
+            "go",
+            "test",
+            "-timeout=20s",
+            "./..."
+          ]
+        },
+        {
+          "item": "item_150",
+          "argv": [
+            "read-log",
+            "137.stdout",
+            "page",
+            "101",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "status"
+          ]
+        }
+      ],
+      "nonzero_commands": [
+        {
+          "log": "011",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-timeout=20s",
+            "./..."
+          ]
+        },
+        {
+          "log": "033",
+          "exit_code": 1,
+          "argv": [
+            "rg",
+            "-n",
+            "^// .*|^func .*Debugf",
+            "example"
+          ]
+        },
+        {
+          "log": "063",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "blind",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--requirements",
+            "README.md:^## Feature",
+            "--contracts",
+            "domain-analysis/channelPool/event-contracts.md",
+            "--output",
+            "domain-analysis/channelPool/part-b-blind.md",
+            "--max-tokens",
+            "15000",
+            "--package-only"
+          ]
+        },
+        {
+          "log": "087",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/check_reachability.py",
+            "domain-analysis/channelPool",
+            "--repo",
+            "."
+          ]
+        },
+        {
+          "log": "088",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/dsc_check.py",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--model",
+            "as-is.machine.mmd"
+          ]
+        },
+        {
+          "log": "140",
+          "exit_code": 1,
+          "argv": [
+            "rg",
+            "-n",
+            "Append|GoMemory|After|New|Release",
+            "../pack/tools/check_reachability.py"
+          ]
+        }
+      ]
+    },
+    "hybrid": {
+      "settings": {
+        "pack_sha": "1a55d9422c2d25dc33c4324ebe74fef30af31841",
+        "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "hybrid",
+        "output_mode": "selective"
+      },
+      "exit": 0,
+      "codex": {
+        "completed_turns": 1,
+        "counters": {
+          "input_tokens": 8050553,
+          "cached_input_tokens": 7874048,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 41521,
+          "reasoning_output_tokens": 2718
+        },
+        "input_excluding_cache_hits": 176505,
+        "input_plus_output": 8092074
+      },
+      "result": {
+        "elapsed_seconds": 1278.663,
+        "tool_calls": 164
+      },
+      "failure": null,
+      "mcp_completed": 164,
+      "retained_log_reads": 7,
+      "acceptance_exit_codes": {
+        "matrix-fields": 0,
+        "sidecar-regeneration": 0,
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "model_calls_by_command_status": {
+        "blind/exit-0": 6,
+        "blind/exit-1": 1,
+        "draft-verify/exit-0": 4,
+        "flash-windows/exit-0": 1,
+        "jev-batch/exit-0": 9,
+        "jev-batch/exit-1": 3,
+        "status/exit-0": 1
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {
+          "deepseek-flash/settled": 38054,
+          "jev/settled": 2696
+        },
+        "settled": 40750,
+        "reserved": 0
+      },
+      "sidecar_counts": {
+        "states": 3,
+        "events": 24,
+        "cells": 72,
+        "pairs": 22,
+        "questions": 14,
+        "guardGroups": 11
+      },
+      "pair_reachability_edges": [
+        {
+          "id": "P-01b",
+          "trace": "adversarial-traces.md#P-01b: Put commits before Get admission",
+          "reachability": {
+            "source": "Open",
+            "target": "WaitingWithIdle",
+            "file": "domain-analysis/channelPool/_probe/schedule_test.go",
+            "line": 163,
+            "fragment": "idle inventory did not coexist with a pending Get"
+          }
+        }
+      ],
+      "gates": {
+        "blind-coverage": [
+          "PART-B COVERAGE: OK (24 events, 22 pair orderings)"
+        ],
+        "guards": [
+          "group G-01: proven",
+          "group G-02: proven"
+        ],
+        "matrix-fields": [
+          "MATRIX FIELDS: OK (domain-analysis/channelPool/disposition-matrix.md)"
+        ],
+        "matrix": [
+          "CHECK MATRIX: OK (3 rows x 24 events)"
+        ],
+        "reachability": [
+          "REACHABILITY CHECK: OK (3/3 states reachable from 'Open', 1 terminal)"
+        ],
+        "sidecar-regeneration": [
+          "OK channelPool: 3 states x 24 events = 72 cells, 14 questions, DRs []"
+        ],
+        "sidecar": [
+          "DSC CHECK: OK (3 states x 24 events, 72 cells, 11 guard groups)"
+        ]
+      },
+      "artifact_sha256": {
+        "matrix-fields.json": "80484b6ac11a9e9b69a3438961c037dab16e1afc3957aacfb07d15215b993367",
+        "disposition-matrix.md": "c0d6d5172cb870390a89a32fec4102f171fec7b5b61e512ace2111ef122c7688",
+        "analysis.json": "e8305eed724833e3efd3b35f3a05b090da3f1c72519a12a976178426bc71e784",
+        "part-b-blind.md": "d39f8132d0764d7ad03b636330ab29e25bde8ad3e16a4eb732aa655ba5bcfcdd"
+      },
+      "schedule_outputs": [
+        {
+          "file": "flash-windows-channel.json",
+          "draft": {
+            "model": "deepseek-flash",
+            "finish_reason": "stop",
+            "input_tokens": 2685,
+            "output_tokens": 3506,
+            "cost_microdollars": 5013,
+            "reservation_microdollars": 22451
+          },
+          "candidates": 8,
+          "with_shape_or_citation_problems": 0
+        }
+      ],
+      "cost": {
+        "codex_standard_credits": 38.89062,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": 1.5556248,
+        "provider_conservative_usd": 0.04075,
+        "combined_conservative_usd_equivalent": 1.5963748
+      },
+      "failed_tool_requests": [],
+      "retained_log_request_details": [
+        {
+          "item": "item_16",
+          "argv": [
+            "read-log",
+            "007.stdout",
+            "page",
+            "197",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_26",
+          "argv": [
+            "read-log",
+            "007.stdout",
+            "page",
+            "377",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_31",
+          "argv": [
+            "read-log",
+            "027.stdout",
+            "page",
+            "9",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json\nx=json.load(open('domain-analysis/channelPool/flash-windows-channel.json'))\nprint(x.keys())\nfor c in x['candidates']: print(c)\n"
+          ]
+        },
+        {
+          "item": "item_62",
+          "argv": [
+            "read-log",
+            "060.stdout",
+            "page",
+            "150",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_90",
+          "argv": [
+            "read-log",
+            "076.stdout",
+            "page",
+            "24",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_134",
+          "argv": [
+            "read-log",
+            "131.stdout",
+            "page",
+            "74",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_139",
+          "argv": [
+            "read-log",
+            "109.stdout",
+            "lines",
+            "1",
+            "45"
+          ],
+          "failed": false,
+          "original_argv": [
+            "go",
+            "test",
+            "-race",
+            "-overlay",
+            "domain-analysis/channelPool/_probe/overlay.json",
+            "-run",
+            "^TestPilotScopePingRace$",
+            "-timeout",
+            "5s",
+            "-count=1",
+            "."
+          ]
+        }
+      ],
+      "nonzero_commands": [
+        {
+          "log": "014",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-timeout",
+            "8s",
+            "./..."
+          ]
+        },
+        {
+          "log": "015",
+          "exit_code": 1,
+          "argv": [
+            "cat",
+            "undefined/flash-windows-channel.json"
+          ]
+        },
+        {
+          "log": "023",
+          "exit_code": 1,
+          "argv": [
+            "rg",
+            "-n",
+            "add_argument|^def |^class |^    Usage|--stage",
+            "../pack/tools/templates/check_matrix.py"
+          ]
+        },
+        {
+          "log": "055",
+          "exit_code": 1,
+          "argv": [
+            "rg",
+            "-n",
+            "func Printf|func Debugf",
+            "../pack/tools/run_sol_pilot.py"
+          ]
+        },
+        {
+          "log": "070",
+          "exit_code": 2,
+          "argv": [
+            "rg",
+            "-n",
+            "^func .*Debugf|^func .*log\\(",
+            "/Users/gregormelhorn/go/pkg/mod/github.com/sirupsen/logrus@v1.4.2"
+          ]
+        },
+        {
+          "log": "083",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/rwmutex.go",
+            "domain-analysis/channelPool/mutex-checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--summary",
+            "--output",
+            "domain-analysis/channelPool/mutex.json"
+          ]
+        },
+        {
+          "log": "084",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "/opt/homebrew/Cellar/go/1.27.3/libexec/src/net/rpc/client.go",
+            "domain-analysis/channelPool/rpc-checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--summary",
+            "--output",
+            "domain-analysis/channelPool/rpc.json"
+          ]
+        },
+        {
+          "log": "098",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "../go-mod/github.com/sirupsen/logrus@v1.8.3/entry.go",
+            "domain-analysis/channelPool/logger-checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--summary",
+            "--output",
+            "domain-analysis/channelPool/logger.json"
+          ]
+        },
+        {
+          "log": "109",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-race",
+            "-overlay",
+            "domain-analysis/channelPool/_probe/overlay.json",
+            "-run",
+            "^TestPilotScopePingRace$",
+            "-timeout",
+            "5s",
+            "-count=1",
+            "."
+          ]
+        },
+        {
+          "log": "112",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/dsc_check.py",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--model",
+            "as-is.machine.mmd"
+          ]
+        },
+        {
+          "log": "118",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "blind",
+            "domain-analysis/channelPool",
+            "--repo",
+            ".",
+            "--requirements",
+            "domain-analysis/channelPool/requirements-prose.md",
+            "--contracts",
+            "domain-analysis/channelPool/event-contracts.md",
+            "--output",
+            "domain-analysis/channelPool/part-b-blind.md"
+          ]
+        },
+        {
+          "log": "163",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-race",
+            "-overlay",
+            "domain-analysis/channelPool/_probe/race-overlay.json",
+            "-run",
+            "^TestPilotScopePingRace$",
+            "-timeout",
+            "5s",
+            "-count=1",
+            "."
+          ]
+        }
+      ]
+    }
+  },
+  "gobreaker": {
+    "routed": {
+      "settings": {
+        "pack_sha": "1a55d9422c2d25dc33c4324ebe74fef30af31841",
+        "component": "gobreaker",
+        "component_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "routed",
+        "output_mode": "selective"
+      },
+      "exit": 0,
+      "codex": {
+        "completed_turns": 1,
+        "counters": {
+          "input_tokens": 4634524,
+          "cached_input_tokens": 4487424,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 33498,
+          "reasoning_output_tokens": 968
+        },
+        "input_excluding_cache_hits": 147100,
+        "input_plus_output": 4668022
+      },
+      "result": {
+        "elapsed_seconds": 961.682,
+        "tool_calls": 133
+      },
+      "failure": null,
+      "mcp_completed": 134,
+      "retained_log_reads": 13,
+      "acceptance_exit_codes": {
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "model_calls_by_command_status": {
+        "blind/exit-0": 4,
+        "draft-verify/exit-0": 2,
+        "draft-verify/exit-1": 1,
+        "jev-batch/exit-0": 7,
+        "jev-batch/exit-1": 1,
+        "status/exit-0": 2
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {
+          "deepseek-flash/settled": 22413,
+          "jev/settled": 3149
+        },
+        "settled": 25562,
+        "reserved": 0
+      },
+      "sidecar_counts": {
+        "states": 4,
+        "events": 28,
+        "cells": 112,
+        "pairs": 24,
+        "questions": 21,
+        "guardGroups": 12
+      },
+      "pair_reachability_edges": [
+        {
+          "id": "P-02b",
+          "trace": "adversarial-traces.md#P-02b: completion before Observer refresh",
+          "reachability": {
+            "source": "Open",
+            "target": "HalfOpen",
+            "file": "domain-analysis/circuitBreaker/_probe/breaker_test.go",
+            "line": 70,
+            "fragment": "if got != StateHalfOpen {"
+          }
+        }
+      ],
+      "gates": {
+        "blind-coverage": [
+          "PART-B COVERAGE: OK (28 events, 24 pair orderings)"
+        ],
+        "guards": [
+          "group G-01 admission: proven",
+          "group G-02 accounting: proven"
+        ],
+        "matrix": [
+          "CHECK MATRIX: OK (4 rows x 28 events)"
+        ],
+        "reachability": [
+          "REACHABILITY CHECK: OK (4/4 states reachable from 'Closed', 0 terminal)"
+        ],
+        "sidecar": [
+          "DSC CHECK: OK (4 states x 28 events, 112 cells, 12 guard groups)"
+        ]
+      },
+      "artifact_sha256": {
+        "disposition-matrix.md": "9aa6c8f5f2e457da6bba26ce75eb80309f20d89f90328121d84dbc6b63e22057",
+        "analysis.json": "c77739a2066eb5011bab6bd0304721f97ce9c61ccf28c753b8abf6c3a147dd80",
+        "part-b-blind.md": "d4e3c64cc5a0bf501f4a9694b69cdeff30f0f310437f99524858037cb7481783"
+      },
+      "schedule_outputs": [],
+      "cost": {
+        "codex_standard_credits": 26.94806,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": 1.0779224,
+        "provider_conservative_usd": 0.025562,
+        "combined_conservative_usd_equivalent": 1.1034844
+      },
+      "failed_tool_requests": [
+        {
+          "item": "item_128",
+          "argv": [
+            "read-log",
+            "075",
+            "lines",
+            "1",
+            "16"
+          ],
+          "error": {
+            "message": "tool call error: tool call failed for `pilot/command`\n\nCaused by:\n    Mcp error: -32602: line range must start within 1..0 and request at most 100 lines"
+          }
+        }
+      ],
+      "retained_log_request_details": [
+        {
+          "item": "item_8",
+          "argv": [
+            "read-log",
+            "005.stdout",
+            "page",
+            "317",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker_test.go"
+          ]
+        },
+        {
+          "item": "item_9",
+          "argv": [
+            "read-log",
+            "003.stdout",
+            "page",
+            "369",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker.go"
+          ]
+        },
+        {
+          "item": "item_17",
+          "argv": [
+            "read-log",
+            "007.stdout",
+            "page",
+            "162",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/AGENTS.md"
+          ]
+        },
+        {
+          "item": "item_19",
+          "argv": [
+            "read-log",
+            "010.stdout",
+            "page",
+            "221",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_48",
+          "argv": [
+            "read-log",
+            "046.stdout",
+            "page",
+            "185",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_49",
+          "argv": [
+            "read-log",
+            "046.stdout",
+            "page",
+            "384",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_54",
+          "argv": [
+            "read-log",
+            "052.stdout",
+            "page",
+            "185",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_55",
+          "argv": [
+            "read-log",
+            "052.stdout",
+            "page",
+            "370",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_75",
+          "argv": [
+            "read-log",
+            "073.stdout",
+            "page",
+            "35",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_79",
+          "argv": [
+            "read-log",
+            "077.stdout",
+            "page",
+            "107",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json,pathlib\nd=pathlib.Path('domain-analysis/circuitBreaker')\nfor n in ['README','gobreaker','findings.jev','orders.jev']:\n f=d/(n+'.json')\n if not f.exists(): continue\n a=json.loads(f.read_text()); print(n,list(a))\n for k,v in (a.get('checks') or a.get('claims') or {}).items():\n  print(k, v.get('line'), v.get('citation_check'), (v.get('jev') or v.get('judgment') or v).get('choice'),v.get('ordering_scope_probability'),v.get('statement'))\n for i,q in enumerate(a.get('questions',[]),1): print('Q',i,q)\n"
+          ]
+        },
+        {
+          "item": "item_107",
+          "argv": [
+            "read-log",
+            "104",
+            "lines",
+            "1",
+            "52"
+          ],
+          "failed": false,
+          "original_argv": [
+            "go",
+            "test",
+            "-race",
+            "-count=1",
+            "-timeout",
+            "25s",
+            "./..."
+          ]
+        },
+        {
+          "item": "item_127",
+          "argv": [
+            "read-log",
+            "087",
+            "lines",
+            "1",
+            "5"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "../pack/tools/gen_analysis_sidecar.py",
+            "domain-analysis/circuitBreaker/",
+            "--strict"
+          ]
+        },
+        {
+          "item": "item_128",
+          "argv": [
+            "read-log",
+            "075",
+            "lines",
+            "1",
+            "16"
+          ],
+          "failed": true,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import sys,pathlib,json; [pathlib.Path(k).write_text(v) for k,v in json.loads(sys.argv[1]).items()]",
+            "{\"domain-analysis/circuitBreaker/orders.task.json\":\"[\\n  {\\n    \\\"id\\\": \\\"O1\\\",\\n    \\\"kind\\\": \\\"ordering\\\",\\n    \\\"line\\\": 56,\\n    \\\"fragment\\\": \\\"Default `ReadyToTrip` returns true when the number of consecutive failures is more than 5.\\\",\\n    \\\"statement\\\": \\\"Closed under default ReadyToTrip with five consecutive failures \u2192 one failure is counted, making six consecutive failures, and then default ReadyToTrip evaluates \u2192 the predicate returns true.\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"O2\\\",\\n    \\\"kind\\\": \\\"ordering\\\",\\n    \\\"line\\\": 79,\\n    \\\"fragment\\\": \\\"Counts` ignores the results of the requests sent before clearing.\\\",\\n    \\\"statement\\\": \\\"A request was sent before a Counts clear \u2192 the clear happens, then the earlier request reports \u2192 that result is ignored by Counts.\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"O3\\\",\\n    \\\"kind\\\": \\\"ordering\\\",\\n    \\\"line\\\": 58,\\n    \\\"fragment\\\": \\\"`OnStateChange` is called whenever the state of `CircuitBreaker` changes.\\\",\\n    \\\"statement\\\": \\\"OnStateChange is installed and breaker changes state \u2192 callback is invoked synchronously under the mutex and another caller invokes State while callback is blocked \u2192 State cannot return until callback releases the mutex.\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"O4\\\",\\n    \\\"kind\\\": \\\"ordering\\\",\\n    \\\"line\\\": 88,\\n    \\\"fragment\\\": \\\"returns an error instantly if\\\",\\n    \\\"statement\\\": \\\"Open breaker with a previous callback holding the mutex \u2192 another caller invokes Execute before expiry \u2192 it returns instantly rather than waiting for the callback and mutex.\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"O5\\\",\\n    \\\"kind\\\": \\\"ordering\\\",\\n    \\\"line\\\": 50,\\n    \\\"fragment\\\": \\\"after which the state of `CircuitBreaker` becomes half-open.\\\",\\n    \\\"statement\\\": \\\"Open with no pending API calls \u2192 time passes strictly beyond Timeout without any call \u2192 the state becomes HalfOpen immediately and fires configured OnStateChange.\\\"\\n  }\\n]\"}"
+          ]
+        }
+      ],
+      "nonzero_commands": [
+        {
+          "log": "029",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "draft-verify",
+            "gobreaker_test.go",
+            "domain-analysis/circuitBreaker/gobreaker_test.task.md",
+            "--output",
+            "domain-analysis/circuitBreaker/gobreaker_test.json",
+            "--model",
+            "jev-1.14.0"
+          ]
+        },
+        {
+          "log": "037",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "domain-analysis/circuitBreaker/check_matrix.py"
+          ]
+        },
+        {
+          "log": "065",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "README.md",
+            "domain-analysis/circuitBreaker/orders.task.json",
+            "--output",
+            "domain-analysis/circuitBreaker/orders.jev.json",
+            "--model",
+            "jev-1.14.0",
+            "--summary"
+          ]
+        },
+        {
+          "log": "104",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-race",
+            "-count=1",
+            "-timeout",
+            "25s",
+            "./..."
+          ]
+        },
+        {
+          "log": "113",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "-c",
+            "from pathlib import Path\nimport sys\nd=Path(sys.argv[1])\nf=d/'adversarial-traces.md';s=f.read_text()\ns=s.replace('explicitly ordered control','explicitly ordered control').replace('leave explicit late-report ordering open. Q-02.','leave explicit late-",
+            "domain-analysis/circuitBreaker/"
+          ]
+        }
+      ]
+    },
+    "matrix": {
+      "settings": {
+        "pack_sha": "1a55d9422c2d25dc33c4324ebe74fef30af31841",
+        "component": "gobreaker",
+        "component_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "matrix",
+        "output_mode": "selective"
+      },
+      "exit": 0,
+      "codex": {
+        "completed_turns": 1,
+        "counters": {
+          "input_tokens": 5469204,
+          "cached_input_tokens": 5319424,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 32226,
+          "reasoning_output_tokens": 1339
+        },
+        "input_excluding_cache_hits": 149780,
+        "input_plus_output": 5501430
+      },
+      "result": {
+        "elapsed_seconds": 955.176,
+        "tool_calls": 150
+      },
+      "failure": null,
+      "mcp_completed": 150,
+      "retained_log_reads": 16,
+      "acceptance_exit_codes": {
+        "matrix-fields": 0,
+        "sidecar-regeneration": 0,
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "model_calls_by_command_status": {
+        "--help/exit-2": 1,
+        "blind/exit-0": 3,
+        "draft-verify/exit-0": 3,
+        "jev-batch/exit-0": 7,
+        "jev-batch/exit-1": 3,
+        "status/exit-0": 1
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {
+          "deepseek-flash/settled": 20938,
+          "jev/settled": 3641
+        },
+        "settled": 24579,
+        "reserved": 0
+      },
+      "sidecar_counts": {
+        "states": 4,
+        "events": 39,
+        "cells": 156,
+        "pairs": 30,
+        "questions": 21,
+        "guardGroups": 21
+      },
+      "pair_reachability_edges": [
+        {
+          "id": "P-09a",
+          "trace": "adversarial-traces.md#P-09a: External deadline passage vs admission",
+          "reachability": {
+            "source": "Open",
+            "target": "HalfOpen_AtCapacity",
+            "file": "domain-analysis/circuitBreaker/_probe/breaker_test.go",
+            "line": 187,
+            "fragment": "err != ErrTooManyRequests"
+          }
+        }
+      ],
+      "gates": {
+        "blind-coverage": [
+          "PART-B COVERAGE: OK (39 events, 30 pair orderings)",
+          "PART-B INDEPENDENCE: 6 rows marked as-is (not independent): Done, UV-RepeatDone, UV-WrongReceiver, UV-NilRequest, UV-InvalidReceiver, P-14a"
+        ],
+        "guards": [
+          "group G-01 half-open quota: proven",
+          "group G-02 zero max requests: proven"
+        ],
+        "matrix-fields": [
+          "MATRIX FIELDS: OK (domain-analysis/circuitBreaker/disposition-matrix.md)"
+        ],
+        "matrix": [
+          "CHECK MATRIX: OK (4 rows x 39 events)"
+        ],
+        "reachability": [
+          "REACHABILITY CHECK: OK (4/4 states reachable from 'Closed', 0 terminal)"
+        ],
+        "sidecar-regeneration": [
+          "OK circuitBreaker: 4 states x 39 events = 156 cells, 21 questions, DRs []"
+        ],
+        "sidecar": [
+          "DSC CHECK: OK (4 states x 39 events, 156 cells, 21 guard groups)"
+        ]
+      },
+      "artifact_sha256": {
+        "matrix-fields.json": "2b9121d603261075eda56d8b6323dbbd51850d2bd4a522fa3d42e2082d3791b6",
+        "disposition-matrix.md": "8c623d01f23223cd366296d5147fb6b593763ab87d665c603818fe23c11be056",
+        "analysis.json": "be7fad2a949e83a171fffe5a0a5f94884d3c5a0061ef9b0d18e8758dc29b06da",
+        "part-b-blind.md": "f8264976b2f367231610f00e60db1c9b5bf70e4221d48309a1c098f31ef223bb"
+      },
+      "schedule_outputs": [],
+      "cost": {
+        "codex_standard_credits": 28.84406,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": 1.1537624,
+        "provider_conservative_usd": 0.024579,
+        "combined_conservative_usd_equivalent": 1.1783414
+      },
+      "failed_tool_requests": [],
+      "retained_log_request_details": [
+        {
+          "item": "item_15",
+          "argv": [
+            "read-log",
+            "006.stdout",
+            "page",
+            "317",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker_test.go"
+          ]
+        },
+        {
+          "item": "item_16",
+          "argv": [
+            "read-log",
+            "005.stdout",
+            "page",
+            "369",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker.go"
+          ]
+        },
+        {
+          "item": "item_17",
+          "argv": [
+            "read-log",
+            "008.stdout",
+            "page",
+            "221",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_19",
+          "argv": [
+            "read-log",
+            "005",
+            "lines",
+            "369",
+            "380"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker.go"
+          ]
+        },
+        {
+          "item": "item_20",
+          "argv": [
+            "read-log",
+            "005",
+            "lines",
+            "369",
+            "380"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker.go"
+          ]
+        },
+        {
+          "item": "item_22",
+          "argv": [
+            "read-log",
+            "005",
+            "lines",
+            "369",
+            "380"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker.go"
+          ]
+        },
+        {
+          "item": "item_23",
+          "argv": [
+            "read-log",
+            "006",
+            "lines",
+            "317",
+            "392"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "gobreaker_test.go"
+          ]
+        },
+        {
+          "item": "item_24",
+          "argv": [
+            "read-log",
+            "008",
+            "lines",
+            "221",
+            "310"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_25",
+          "argv": [
+            "read-log",
+            "008",
+            "lines",
+            "311",
+            "400"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_26",
+          "argv": [
+            "read-log",
+            "008",
+            "lines",
+            "401",
+            "421"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_65",
+          "argv": [
+            "read-log",
+            "063",
+            "lines",
+            "145",
+            "234"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_66",
+          "argv": [
+            "read-log",
+            "063",
+            "lines",
+            "235",
+            "324"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_67",
+          "argv": [
+            "read-log",
+            "063",
+            "lines",
+            "325",
+            "414"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_68",
+          "argv": [
+            "read-log",
+            "063",
+            "lines",
+            "415",
+            "463"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_87",
+          "argv": [
+            "read-log",
+            "007",
+            "lines",
+            "49",
+            "51"
+          ],
+          "failed": false,
+          "original_argv": [
+            "nl",
+            "-ba",
+            "README.md"
+          ]
+        },
+        {
+          "item": "item_93",
+          "argv": [
+            "read-log",
+            "090",
+            "lines",
+            "63",
+            "143"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.md"
+          ]
+        }
+      ],
+      "nonzero_commands": [
+        {
+          "log": "009",
+          "exit_code": 2,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "--help"
+          ]
+        },
+        {
+          "log": "077",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "README.md",
+            "domain-analysis/circuitBreaker/ordering-checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--output",
+            "domain-analysis/circuitBreaker/ordering-jev.json",
+            "--summary"
+          ]
+        },
+        {
+          "log": "083",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "README.md",
+            "domain-analysis/circuitBreaker/ordering-checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--output",
+            "domain-analysis/circuitBreaker/ordering-jev.json",
+            "--summary"
+          ]
+        },
+        {
+          "log": "085",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "README.md",
+            "domain-analysis/circuitBreaker/ordering-checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--output",
+            "domain-analysis/circuitBreaker/ordering-jev.json",
+            "--summary"
+          ]
+        },
+        {
+          "log": "099",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/dsc_check.py",
+            "domain-analysis/circuitBreaker",
+            "--repo",
+            ".",
+            "--model",
+            "as-is.machine.mmd"
+          ]
+        }
+      ]
+    },
+    "hybrid": {
+      "settings": {
+        "pack_sha": "1a55d9422c2d25dc33c4324ebe74fef30af31841",
+        "component": "gobreaker",
+        "component_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+        "model": "gpt-6.1-sol",
+        "effort": "medium",
+        "auth": "chatgpt",
+        "timeout_seconds": 2700,
+        "smoke": false,
+        "arm_order": [
+          "selective"
+        ],
+        "routing_variant": "hybrid",
+        "output_mode": "selective"
+      },
+      "exit": 0,
+      "codex": {
+        "completed_turns": 1,
+        "counters": {
+          "input_tokens": 6313929,
+          "cached_input_tokens": 6155008,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 38266,
+          "reasoning_output_tokens": 1394
+        },
+        "input_excluding_cache_hits": 158921,
+        "input_plus_output": 6352195
+      },
+      "result": {
+        "elapsed_seconds": 1167.078,
+        "tool_calls": 140
+      },
+      "failure": null,
+      "mcp_completed": 140,
+      "retained_log_reads": 17,
+      "acceptance_exit_codes": {
+        "matrix-fields": 0,
+        "sidecar-regeneration": 0,
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "model_calls_by_command_status": {
+        "blind/exit-0": 2,
+        "draft-verify/exit-0": 3,
+        "flash-windows/exit-0": 1,
+        "jev-batch/exit-0": 9,
+        "jev-batch/exit-1": 3,
+        "status/exit-0": 2
+      },
+      "provider_ledger_microdollars": {
+        "by_provider_status": {
+          "deepseek-flash/settled": 25770,
+          "jev/settled": 4120
+        },
+        "settled": 29890,
+        "reserved": 0
+      },
+      "sidecar_counts": {
+        "states": 4,
+        "events": 30,
+        "cells": 120,
+        "pairs": 32,
+        "questions": 15,
+        "guardGroups": 17
+      },
+      "pair_reachability_edges": [],
+      "gates": {
+        "blind-coverage": [
+          "PART-B COVERAGE: OK (30 events, 32 pair orderings)",
+          "PART-B INDEPENDENCE: 1 rows marked as-is (not independent): Execute"
+        ],
+        "guards": [
+          "group G-01 protocol state: proven",
+          "group G-02 half-open admission: proven"
+        ],
+        "matrix-fields": [
+          "MATRIX FIELDS: OK (domain-analysis/circuitBreaker/disposition-matrix.md)"
+        ],
+        "matrix": [
+          "CHECK MATRIX: OK (4 rows x 30 events)"
+        ],
+        "reachability": [
+          "REACHABILITY CHECK: OK (4/4 states reachable from 'Closed', 0 terminal)"
+        ],
+        "sidecar-regeneration": [
+          "OK circuitBreaker: 4 states x 30 events = 120 cells, 15 questions, DRs []"
+        ],
+        "sidecar": [
+          "DSC CHECK: OK (4 states x 30 events, 120 cells, 17 guard groups)"
+        ]
+      },
+      "artifact_sha256": {
+        "matrix-fields.json": "2b1e994e953eef3d493cc3a2648b5246cf549467e3d0a2c3344a03a05101643a",
+        "disposition-matrix.md": "cdc1b6ccc8022c24df3a7856729e9dc963b1e920857aa27d3abf81ab0ad73fb0",
+        "analysis.json": "1736b803abba7ed1e342fa539d83fd96dc253ffbde340265b85f0e63de0f845d",
+        "part-b-blind.md": "c374380e6504a32fb151a70575a3b664e82713b047ec3741a61d8b1ebcea985c"
+      },
+      "schedule_outputs": [
+        {
+          "file": "flash-windows-gobreaker.json",
+          "draft": {
+            "model": "deepseek-flash",
+            "finish_reason": "stop",
+            "input_tokens": 3910,
+            "output_tokens": 2461,
+            "cost_microdollars": 4127,
+            "reservation_microdollars": 23884
+          },
+          "candidates": 7,
+          "with_shape_or_citation_problems": 0
+        }
+      ],
+      "cost": {
+        "codex_standard_credits": 32.90007,
+        "assumed_usd_per_credit": 0.04,
+        "codex_usd_equivalent": 1.3160028,
+        "provider_conservative_usd": 0.02989,
+        "combined_conservative_usd_equivalent": 1.3458928
+      },
+      "failed_tool_requests": [],
+      "retained_log_request_details": [
+        {
+          "item": "item_29",
+          "argv": [
+            "read-log",
+            "007.stdout",
+            "page",
+            "162",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/AGENTS.md"
+          ]
+        },
+        {
+          "item": "item_30",
+          "argv": [
+            "read-log",
+            "008.stdout",
+            "page",
+            "221",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_48",
+          "argv": [
+            "read-log",
+            "046.stdout",
+            "page",
+            "153",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_49",
+          "argv": [
+            "read-log",
+            "046.stdout",
+            "page",
+            "323",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.package.md"
+          ]
+        },
+        {
+          "item": "item_70",
+          "argv": [
+            "read-log",
+            "065.stdout",
+            "page",
+            "85",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_71",
+          "argv": [
+            "read-log",
+            "065.stdout",
+            "lines",
+            "1",
+            "100"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_80",
+          "argv": [
+            "read-log",
+            "065.stdout",
+            "lines",
+            "85",
+            "184"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_81",
+          "argv": [
+            "read-log",
+            "031.stdout",
+            "page",
+            "295",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/flash-windows-gobreaker.json"
+          ]
+        },
+        {
+          "item": "item_82",
+          "argv": [
+            "read-log",
+            "007.stdout",
+            "page",
+            "162",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/AGENTS.md"
+          ]
+        },
+        {
+          "item": "item_83",
+          "argv": [
+            "read-log",
+            "008.stdout",
+            "page",
+            "221",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "../pack/docs/local-model-routing.md"
+          ]
+        },
+        {
+          "item": "item_84",
+          "argv": [
+            "read-log",
+            "065.stdout",
+            "lines",
+            "85",
+            "184"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_85",
+          "argv": [
+            "read-log",
+            "065.stdout",
+            "lines",
+            "85",
+            "130"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_86",
+          "argv": [
+            "read-log",
+            "065.stdout",
+            "lines",
+            "131",
+            "184"
+          ],
+          "failed": false,
+          "original_argv": [
+            "cat",
+            "domain-analysis/circuitBreaker/part-b-blind.md"
+          ]
+        },
+        {
+          "item": "item_90",
+          "argv": [
+            "read-log",
+            "088.stdout",
+            "page",
+            "120",
+            "1"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json,sys\nfrom pathlib import Path\nfor n in ('requirements','implementation','tests','finding-code','finding-test'):\n p=Path(sys.argv[1])/(n+('-judgments' if n.startswith('finding') else '')+'.json')\n j=json.loads(p.read_text())\n for k,x in j.get('claims',j.get('checks',{})).items():\n  y=x.get('jev') or x\n  print(n,k,x[\"line\"],y.get(\"choice\"),x[\"statement\"])\n",
+            "domain-analysis/circuitBreaker"
+          ]
+        },
+        {
+          "item": "item_108",
+          "argv": [
+            "read-log",
+            "088.stdout",
+            "lines",
+            "101",
+            "145"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json,sys\nfrom pathlib import Path\nfor n in ('requirements','implementation','tests','finding-code','finding-test'):\n p=Path(sys.argv[1])/(n+('-judgments' if n.startswith('finding') else '')+'.json')\n j=json.loads(p.read_text())\n for k,x in j.get('claims',j.get('checks',{})).items():\n  y=x.get('jev') or x\n  print(n,k,x[\"line\"],y.get(\"choice\"),x[\"statement\"])\n",
+            "domain-analysis/circuitBreaker"
+          ]
+        },
+        {
+          "item": "item_111",
+          "argv": [
+            "read-log",
+            "103.stdout",
+            "lines",
+            "1",
+            "52"
+          ],
+          "failed": false,
+          "original_argv": [
+            "go",
+            "test",
+            "-mod=readonly",
+            "-race",
+            "-overlay",
+            "domain-analysis/circuitBreaker/_probe/overlay.json",
+            "-timeout=20s",
+            "-count=1",
+            "./..."
+          ]
+        },
+        {
+          "item": "item_112",
+          "argv": [
+            "read-log",
+            "088.stdout",
+            "lines",
+            "146",
+            "160"
+          ],
+          "failed": false,
+          "original_argv": [
+            "python3",
+            "-c",
+            "import json,sys\nfrom pathlib import Path\nfor n in ('requirements','implementation','tests','finding-code','finding-test'):\n p=Path(sys.argv[1])/(n+('-judgments' if n.startswith('finding') else '')+'.json')\n j=json.loads(p.read_text())\n for k,x in j.get('claims',j.get('checks',{})).items():\n  y=x.get('jev') or x\n  print(n,k,x[\"line\"],y.get(\"choice\"),x[\"statement\"])\n",
+            "domain-analysis/circuitBreaker"
+          ]
+        }
+      ],
+      "nonzero_commands": [
+        {
+          "log": "052",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/hybrid_pilot.py",
+            "domain-analysis/circuitBreaker/matrix-fields.json",
+            "domain-analysis/circuitBreaker/disposition-matrix.md"
+          ]
+        },
+        {
+          "log": "054",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "domain-analysis/circuitBreaker/check_matrix.py"
+          ]
+        },
+        {
+          "log": "059",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go",
+            "domain-analysis/circuitBreaker/goexit-checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--output",
+            "domain-analysis/circuitBreaker/goexit-judgments.json",
+            "--summary"
+          ]
+        },
+        {
+          "log": "060",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "README.md",
+            "domain-analysis/circuitBreaker/order-checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--output",
+            "domain-analysis/circuitBreaker/order-judgments.json",
+            "--summary"
+          ]
+        },
+        {
+          "log": "063",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "domain-analysis/circuitBreaker/check_matrix.py"
+          ]
+        },
+        {
+          "log": "073",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/local_models.py",
+            "--ledger",
+            "../routing.sqlite",
+            "jev-batch",
+            "/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go",
+            "domain-analysis/circuitBreaker/goexit-checks.json",
+            "--model",
+            "jev-1.14.0",
+            "--output",
+            "domain-analysis/circuitBreaker/goexit-judgments.json",
+            "--summary"
+          ]
+        },
+        {
+          "log": "095",
+          "exit_code": 1,
+          "argv": [
+            "python3",
+            "../pack/tools/dsc_check.py",
+            "domain-analysis/circuitBreaker",
+            "--repo",
+            ".",
+            "--model",
+            "as-is.machine.mmd"
+          ]
+        },
+        {
+          "log": "103",
+          "exit_code": 1,
+          "argv": [
+            "go",
+            "test",
+            "-mod=readonly",
+            "-race",
+            "-overlay",
+            "domain-analysis/circuitBreaker/_probe/overlay.json",
+            "-timeout=20s",
+            "-count=1",
+            "./..."
+          ]
+        },
+        {
+          "log": "113",
+          "exit_code": 1,
+          "argv": [
+            "rg",
+            "-n",
+            "part-b-diff|divergence",
+            "../pack/tools/dsc_check.py",
+            "../pack/tools/gen_analysis_sidecar.py"
+          ]
+        }
+      ]
+    }
+  }
+}

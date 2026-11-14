@@ -278,9 +278,9 @@ def execute(root, argv, _sequence, python):
             return 2, '', 'The pilot tool did not receive its provider credentials.'
         env.update({name: os.environ[name] for name in required})
         # Require the canonical ledger and command before any optional arguments.
-        allowed = {'status', 'flash', 'jev', 'jev-batch', 'draft-verify', 'draft-cells', 'flash-windows', 'blind'}
+        allowed = {'--help', 'status', 'flash', 'jev', 'jev-batch', 'draft-verify', 'draft-cells', 'flash-windows', 'blind'}
         if len(argv) < 5 or argv[2:4] != ['--ledger', '../routing.sqlite'] or argv[4] not in allowed:
-            return 2, '', 'Use --ledger ../routing.sqlite and a model or status command.'
+            return 2, '', 'Use --ledger ../routing.sqlite and a model, status or --help command.'
     else:
         env['GOPROXY'] = 'off'
     home = Path.home().resolve()

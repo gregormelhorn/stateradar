@@ -319,7 +319,10 @@ For targeted evidence, use the command tool with
 Append `.stderr` to the log ID to select stderr. Every command result carries
 `line_counts` for the retained streams. A line range may end beyond EOF and
 returns the available lines; its start must exist and its requested width
-must not exceed 100 lines. The response includes the actual total line count.
+must not exceed 100 lines. A range starting at line 1 of an empty stream
+returns an empty result with `total_lines: 0`. The response includes the actual
+total line count. The canonical routing command also accepts `--help` without
+making a provider call or creating a ledger.
 
 Use `--output-mode standard` or `--output-mode compact` for one run in
 the corresponding comparison format. Use `--output-mode compare` for

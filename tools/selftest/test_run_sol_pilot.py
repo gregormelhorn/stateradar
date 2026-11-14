@@ -8,10 +8,28 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from run_sol_pilot import brief, command_result, codex_environment, read_log, read_usage, serve_tools, verify_artifacts
+from run_sol_pilot import brief, command_result, codex_environment, execute, read_log, read_usage, serve_tools, verify_artifacts
 
 
 class SolPilotTest(unittest.TestCase):
+    def test_routing_help_keeps_canonical_ledger_and_command_restrictions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            argv = ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', '--help']
+            with (patch.dict('os.environ', {'DEEPSEEK_API_KEY': 'dummy', 'TYPESAFE_API_KEY': 'dummy'}),
+                  patch('run_sol_pilot.subprocess.Popen') as popen):
+                proc = popen.return_value.__enter__.return_value
+                proc.returncode = 0
+                proc.communicate.return_value = (b'usage: local_models.py', b'')
+                code, stdout, _ = execute(root, argv, 0, Path(sys.executable))
+                self.assertEqual(code, 0)
+                self.assertIn('usage:', stdout)
+                self.assertEqual(popen.call_count, 1)
+                for rejected in (argv[:4] + ['unknown'], argv[:3] + ['other.sqlite', '--help']):
+                    code, _, _ = execute(root, rejected, 0, Path(sys.executable))
+                    self.assertEqual(code, 2)
+                self.assertEqual(popen.call_count, 1)
+
     def test_short_log_range_returns_available_lines_and_reports_bounds(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -27,6 +45,18 @@ class SolPilotTest(unittest.TestCase):
                 read_log(root, ['read-log', '001', 'lines', '60', '90'])
             with self.assertRaises(ValueError):
                 read_log(root, ['read-log', '001', 'lines', '1', '101'])
+
+    def test_empty_stdout_read_returns_empty_and_stderr_remains_accessible(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with patch('run_sol_pilot.execute', return_value=(1, '', 'diagnostic\n')):
+                command_result(root, 'selective', ['check'], 1, Path(sys.executable))
+            selected = read_log(root, ['read-log', '001', 'lines', '1', '16'])
+            self.assertEqual(selected['total_lines'], 0)
+            self.assertEqual(selected['lines'], [])
+            self.assertFalse(selected['truncated'])
+            diagnostic = read_log(root, ['read-log', '001.stderr', 'lines', '1', '16'])
+            self.assertEqual(diagnostic['lines'], [(1, 'diagnostic')])
 
     def test_matrix_variant_uses_generator_gates(self):
         with tempfile.TemporaryDirectory() as directory:

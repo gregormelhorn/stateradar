@@ -1,0 +1,228 @@
+package gobreaker
+
+import (
+	"errors"
+	"runtime"
+	"testing"
+	"time"
+)
+
+func TestPilotRepeatedDone(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{MaxRequests: 2, ReadyToTrip: func(Counts) bool { return true }})
+	fail, _ := b.Allow()
+	fail(false)
+	pseudoSleep(b.cb, 2*time.Minute)
+	one, err := b.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	one(true)
+	one(true)
+	if b.State() != StateClosed {
+		t.Fatal("duplicate completion did not close half-open breaker")
+	}
+}
+
+func TestPilotAbandonedAndDuplicateAdmission(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{MaxRequests: 2, ReadyToTrip: func(Counts) bool { return true }})
+	fail, _ := b.Allow()
+	fail(false)
+	pseudoSleep(b.cb, 2*time.Minute)
+	first, err := b.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := b.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	second(true)
+	if _, err := b.Allow(); err != ErrTooManyRequests {
+		t.Fatalf("third call: %v", err)
+	}
+	if got := b.Counts(); got != (Counts{2, 1, 0, 1, 0}) {
+		t.Fatal(got)
+	}
+	first(true)
+	if b.State() != StateClosed {
+		t.Fatal("late matching callback did not complete the cohort")
+	}
+}
+
+func TestPilotCountsAndCompletionClock(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{Interval: time.Hour})
+	old, _ := b.Allow()
+	pseudoSleep(b.cb, 2*time.Hour)
+	if b.Counts().Requests != 1 {
+		t.Fatal("Counts unexpectedly moved epoch")
+	}
+	old(false)
+	if b.Counts() != (Counts{}) {
+		t.Fatal("completion did not reset and discard")
+	}
+}
+
+func TestPilotClassifierAndPolicyPanics(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		settings Settings
+		want     Counts
+	}{
+		{"classifier", Settings{IsSuccessful: func(error) bool { panic("boom") }}, Counts{1, 0, 1, 0, 1}},
+		{"policy", Settings{ReadyToTrip: func(Counts) bool { panic("boom") }}, Counts{1, 0, 2, 0, 2}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			b := NewCircuitBreaker(tc.settings)
+			func() {
+				defer func() {
+					if recover() != "boom" {
+						t.Error("wrong panic")
+					}
+				}()
+				_, _ = b.Execute(func() (interface{}, error) { return nil, errors.New("request error") })
+			}()
+			if b.Counts() != tc.want {
+				t.Fatalf("got %+v want %+v", b.Counts(), tc.want)
+			}
+		})
+	}
+}
+
+func TestPilotStateCallbackPanicCommits(t *testing.T) {
+	b := NewCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }, OnStateChange: func(string, State, State) { panic("notification") }})
+	func() {
+		defer func() {
+			if recover() != "notification" {
+				t.Error("wrong panic")
+			}
+		}()
+		_, _ = b.Execute(func() (interface{}, error) { return nil, errors.New("request error") })
+	}()
+	if b.State() != StateOpen || b.Counts() != (Counts{}) {
+		t.Fatal("transition not committed")
+	}
+}
+
+func TestPilotStateCallbackReentry(t *testing.T) {
+	entered, returned := make(chan struct{}), make(chan struct{})
+	var b *CircuitBreaker
+	b = NewCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }, OnStateChange: func(string, State, State) {
+		close(entered)
+		_ = b.Counts()
+		close(returned)
+	}})
+	go func() { _, _ = b.Execute(func() (interface{}, error) { return nil, errors.New("bad") }) }()
+	select {
+	case <-entered:
+	case <-time.After(time.Second):
+		t.Fatal("callback not entered")
+	}
+	select {
+	case <-returned:
+		t.Fatal("Counts unexpectedly returned")
+	case <-time.After(30 * time.Millisecond):
+	}
+}
+
+func TestPilotGoexitLeavesAdmission(t *testing.T) {
+	b := NewCircuitBreaker(Settings{})
+	f := make(chan struct{})
+	go func() {
+		defer close(f)
+		_, _ = b.Execute(func() (interface{}, error) { runtime.Goexit(); return nil, nil })
+	}()
+	<-f
+	if b.Counts() != (Counts{Requests: 1}) {
+		t.Fatal(b.Counts())
+	}
+}
+
+func TestPilotExpiryEquality(t *testing.T) {
+	b := NewCircuitBreaker(Settings{})
+	now := time.Now()
+	b.setState(StateOpen, now)
+	if s, _ := b.currentState(b.expiry); s != StateOpen {
+		t.Fatal(s)
+	}
+	if s, _ := b.currentState(b.expiry.Add(time.Nanosecond)); s != StateHalfOpen {
+		t.Fatal(s)
+	}
+}
+
+func TestPilotSecondExecuteCompletesFirst(t *testing.T) {
+	b := NewCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }})
+	_, _ = b.Execute(func() (interface{}, error) { return nil, errors.New("open") })
+	pseudoSleep(b, 2*time.Minute)
+	entered, release, returned := make(chan struct{}), make(chan struct{}), make(chan error, 1)
+	go func() {
+		_, err := b.Execute(func() (interface{}, error) { close(entered); <-release; return nil, nil })
+		returned <- err
+	}()
+	<-entered
+	_, err := b.Execute(func() (interface{}, error) { t.Error("over-quota request invoked"); return nil, nil })
+	close(release)
+	if err != ErrTooManyRequests || <-returned != nil || b.State() != StateClosed {
+		t.Fatal("wrong overlapping outcomes")
+	}
+}
+
+func TestPilotExpiredAdmissionUsesOnlySlot(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }})
+	prior, err := b.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	prior(false)
+	if b.State() != StateOpen {
+		t.Fatal("starting state is not Open")
+	}
+	pseudoSleep(b.cb, 2*time.Minute)
+	done, err := b.Allow()
+	if err != nil || done == nil {
+		t.Fatalf("first expired admission: %v", err)
+	}
+	if b.State() != StateHalfOpen {
+		t.Fatal("expected HalfOpen")
+	}
+	if _, err := b.Allow(); err != ErrTooManyRequests {
+		t.Fatalf("sole slot was not consumed: %v", err)
+	}
+	done(true)
+}
+
+func TestPilotLateClassificationAfterTrip(t *testing.T) {
+	entered, release := make(chan struct{}), make(chan struct{})
+	result := make(chan error, 1)
+	firstErr := errors.New("first")
+	b := NewCircuitBreaker(Settings{
+		ReadyToTrip: func(Counts) bool { return true },
+		IsSuccessful: func(err error) bool {
+			if err == firstErr {
+				close(entered)
+				<-release
+				return true
+			}
+			return false
+		},
+	})
+	go func() { _, err := b.Execute(func() (interface{}, error) { return nil, firstErr }); result <- err }()
+	select {
+	case <-entered:
+	case <-time.After(time.Second):
+		t.Fatal("classifier not entered")
+	}
+	second := errors.New("second")
+	if _, err := b.Execute(func() (interface{}, error) { return nil, second }); err != second {
+		t.Fatal(err)
+	}
+	if b.State() != StateOpen {
+		t.Fatal("other call did not trip")
+	}
+	close(release)
+	if err := <-result; err != firstErr {
+		t.Fatal(err)
+	}
+	if b.Counts() != (Counts{}) {
+		t.Fatal("stale success was counted")
+	}
+}
