@@ -1205,3 +1205,16 @@ enforcement = "checker"
 checker_ref = "tools/gen_rules.py --check (via tools/check_pack_consistency.py)"
 selftest_ref = "tools/gen_rules.py --selftest"
 added_by = "pack:v1.35"
+
+[[rules]]
+id = "R-CELL-RATIONALE"
+title = "structured cell rationale"
+class = "wellformedness"
+statement = "rationaleVersion=1 requires scoped rationale for every cell; no-action and contract exclusions cite accepted decisions, upstream guarantees cite callee contracts, and all evidence carries verified fragments"
+enforcement = "checker"
+checker_ref = "tools/cell_rationale.py via tools/dsc_check.py"
+selftest_ref = "tools/selftest/test_cell_rationale.py"
+catches = "opt-in cell rationale completeness and source-backed scope"
+catches_order = 22
+prose = "registry-only"
+added_by = "unreleased"

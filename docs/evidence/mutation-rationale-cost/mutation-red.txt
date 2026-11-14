@@ -1,0 +1,46 @@
+FFFF
+======================================================================
+FAIL: test_crash_is_not_kill (__main__.MutationBinding.test_crash_is_not_kill)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_mutation_binding.py", line 38, in test_crash_is_not_kill
+    self.assertNotEqual(code,0);self.assertNotIn(' KILLED ',out);self.assertIn('BLOCKED',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_json_oracle_reaches_real_test (__main__.MutationBinding.test_json_oracle_reaches_real_test)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_mutation_binding.py", line 65, in test_json_oracle_reaches_real_test
+    self.assertEqual(code,0,out.getvalue());self.assertIn('killed=3',out.getvalue())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : BASELINE: OK
+MUT-001 SURVIVED state=Busy event=Call kind=handle-to-ignore old='handle' new='ignore (documented)' exit=0 duration=0.030s
+MUT-002 SURVIVED state=Idle event=Call kind=transition-target-swap old='transition →Busy' new='transition →Idle' exit=0 duration=0.030s
+MUT-003 SURVIVED state=Idle event=Call kind=transition-to-ignore old='transition →Busy' new='ignore (documented)' exit=0 duration=0.030s
+MUTATION CHECK: FAIL (killed=0 survived=3 errors=0 blocked=0)
+
+
+======================================================================
+FAIL: test_wrong_cell_is_not_success (__main__.MutationBinding.test_wrong_cell_is_not_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_mutation_binding.py", line 42, in test_wrong_cell_is_not_success
+    self.assertNotEqual(code,0);self.assertIn('wrong cell',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+======================================================================
+FAIL: test_zero_discovery_is_blocked (__main__.MutationBinding.test_zero_discovery_is_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_mutation_binding.py", line 47, in test_zero_discovery_is_blocked
+    self.assertNotEqual(code,0);self.assertIn('BLOCKED: baseline',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+AssertionError: 0 == 0
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.150s
+
+FAILED (failures=4)

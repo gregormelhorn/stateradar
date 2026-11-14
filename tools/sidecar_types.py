@@ -34,6 +34,20 @@ class Citation(TypedDict):
     fragment: NotRequired[str]
 
 
+class RationaleEvidence(TypedDict):
+    kind: Literal["decision", "upstream-contract"]
+    citation: Citation
+    dr: NotRequired[str]
+    source: NotRequired[str]
+
+
+class Rationale(TypedDict):
+    kind: Literal["required-behavior", "documented-no-action", "upstream-guarantee", "outside-contract"]
+    claim: str
+    scope: str
+    evidence: list[RationaleEvidence]
+
+
 class Event(TypedDict):
     id: str
     undesired: NotRequired[bool]
@@ -48,6 +62,7 @@ class CellBody(TypedDict):
     dr: NotRequired[str]
     q: NotRequired[str]
     citation: NotRequired[Citation]
+    rationale: NotRequired[Rationale]
 
 
 class Cell(TypedDict):
@@ -58,6 +73,7 @@ class Cell(TypedDict):
     dr: NotRequired[str]
     q: NotRequired[str]
     citation: NotRequired[Citation]
+    rationale: NotRequired[Rationale]
 
 
 class PairReachability(TypedDict):
@@ -109,6 +125,7 @@ class Completeness(TypedDict, total=False):
 
 class Sidecar(TypedDict):
     formatVersion: Literal["1.0"]
+    rationaleVersion: NotRequired[Literal[1]]
     component: str
     states: list[str]
     events: list[Event]

@@ -307,19 +307,19 @@ Focused observed-in-tests evidence: examples/weighted-semaphore/semaphore/decisi
 
 Every P-01a through P-08b ordering is also executed directly by TestStatePairs. These named entry points include sequential post-cancellation admission and oversized admission after recovered over-release, in addition to the focused mechanisms cited above.
 
-- P-01a: `TestStatePairs/P-01a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-01b: `TestStatePairs/P-01b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-02a: `TestStatePairs/P-02a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-02b: `TestStatePairs/P-02b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-03a: `TestStatePairs/P-03a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-03b: `TestStatePairs/P-03b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-04a: `TestStatePairs/P-04a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-04b: `TestStatePairs/P-04b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-05a: `TestStatePairs/P-05a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-05b: `TestStatePairs/P-05b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-06a: `TestStatePairs/P-06a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-06b: `TestStatePairs/P-06b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-07a: `TestStatePairs/P-07a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-07b: `TestStatePairs/P-07b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-08a: `TestStatePairs/P-08a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
-- P-08b: `TestStatePairs/P-08b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:337 ("func TestStatePairs(").
+- P-01a: `TestStatePairs/P-01a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-01b: `TestStatePairs/P-01b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-02a: `TestStatePairs/P-02a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-02b: `TestStatePairs/P-02b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-03a: `TestStatePairs/P-03a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-03b: `TestStatePairs/P-03b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-04a: `TestStatePairs/P-04a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-04b: `TestStatePairs/P-04b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-05a: `TestStatePairs/P-05a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-05b: `TestStatePairs/P-05b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-06a: `TestStatePairs/P-06a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-06b: `TestStatePairs/P-06b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-07a: `TestStatePairs/P-07a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-07b: `TestStatePairs/P-07b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-08a: `TestStatePairs/P-08a` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").
+- P-08b: `TestStatePairs/P-08b` — examples/weighted-semaphore/cells/state_cells_test.go.txt:342 ("func TestStatePairs(").

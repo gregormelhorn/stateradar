@@ -17,7 +17,7 @@ schedule = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(schedule)
 
 
-def run(analysis=DEFAULT, count=10, output=None, red_probe=False):
+def run(analysis=DEFAULT, count=10, output=None, red_probe=False, mutation_check=False):
     analysis = analysis.resolve()
     model = json.loads((analysis/'analysis.json').read_text())
     tests = {'TestStateCells/'+c['state']+'/'+c['event'] for c in model['cells']
@@ -56,6 +56,16 @@ def run(analysis=DEFAULT, count=10, output=None, red_probe=False):
     expected = Counter({n:count for n in names})
     complete = (sum('CELL SUITE: 34 cells checked,' in r.get('Output','') for r in records)==count
                 and sum('PAIR SUITE: 16 orderings completed' in r.get('Output','') for r in records)==count)
+    if mutation_check:
+        # Only completed, exactly discovered Go verdicts reach the generic checker.
+        # Compiler failures, panics, truncated loops and missing tests emit no completion marker.
+        if count!=1 or started!=expected or passed+failed!=expected or not complete:
+            print(result.stdout); print(result.stderr)
+            raise SystemExit('BLOCKED: incomplete Go behavior verdict')
+        for record in records:
+            line=record.get('Output','').strip()
+            if line.startswith(('CELL FAIL ','CELL SUITE: ')):print(line)
+        raise SystemExit(result.returncode)
     if red_probe:
         bad = {'TestStateCells/Acquire_NoWaiters/TryAcquire', 'TestStateCells'}
         # testing.T.Run with slashes does not create independent parent invocations.
@@ -76,6 +86,7 @@ if __name__ == '__main__':
     p.add_argument('--count',type=int,default=10)
     p.add_argument('--output',type=Path)
     p.add_argument('--red-probe',action='store_true')
+    p.add_argument('--mutation-check',action='store_true',help='emit completed behavior markers and preserve the Go exit code')
     a=p.parse_args()
     if a.count<1: p.error('positive count required')
-    run(a.analysis,a.count,a.output,a.red_probe)
+    run(a.analysis,a.count,a.output,a.red_probe,a.mutation_check)

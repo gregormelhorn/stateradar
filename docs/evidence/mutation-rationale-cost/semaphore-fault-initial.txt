@@ -1,0 +1,7 @@
+BASELINE: OK
+MUT-001 KILLED fault=F-05 cell=Acquire_WaitersPending x UV-ContextOrder target=semaphore/semaphore.go exit=1 duration=0.888s
+MUT-002 BLOCKED fault=F-05 cell=Acquire_WaitersPending x UV-ContextOrder target=semaphore/semaphore.go exit=1 duration=0.816s
+  BLOCKED: suite reported no cell failure (expected a 'CELL FAIL Acquire_WaitersPending x UV-ContextOrder' line)
+MUT-003 KILLED fault=F-04 cell=Acquire_WaitersPending x TryAcquire target=semaphore/semaphore.go exit=1 duration=0.835s
+MUT-004 SURVIVED fault=F-05 cell=Acquire_NoWaiters x Release target=semaphore/semaphore.go exit=0 duration=1.835s
+FAULT MUTANTS: FAIL (killed=2 survived=1 errors=0 blocked=1)

@@ -1,0 +1,76 @@
+{
+  "formatVersion": 1,
+  "workingDirectory": "../..",
+  "source": "semaphore/semaphore.go",
+  "projections": {
+    "available_capacity": {
+      "kind": "public-try-acquire",
+      "provenBy": "zero-charges"
+    }
+  },
+  "bindings": [
+    {
+      "id": "omit-grant-rollback",
+      "fault": "F-05",
+      "cell": "Acquire_WaitersPending x UV-ContextOrder",
+      "variant": "mutants/omit-grant-rollback.go.txt",
+      "mode": "replace-block",
+      "match": [
+        "\t\t\ts.Release(n)"
+      ],
+      "replace": [
+        "\t\t\t// deliberately omitted grant rollback"
+      ],
+      "requiresProjection": "available_capacity",
+      "binder": "corrupt-state"
+    },
+    {
+      "id": "omit-selected-rollback",
+      "fault": "F-05",
+      "cell": "Acquire_WaitersPending x UV-ContextOrder",
+      "variant": "mutants/omit-selected-rollback.go.txt",
+      "mode": "replace-block",
+      "match": [
+        "\t\t\ts.cur -= n"
+      ],
+      "replace": [
+        "\t\t\t// deliberately omitted selected rollback"
+      ],
+      "requiresProjection": "available_capacity",
+      "binder": "corrupt-state"
+    },
+    {
+      "id": "try-bypass",
+      "fault": "F-04",
+      "cell": "Acquire_WaitersPending x TryAcquire",
+      "variant": "mutants/try-bypass.go.txt",
+      "mode": "replace-block",
+      "match": [
+        "\tsuccess := s.size-s.cur >= n && s.waiters.Len() == 0"
+      ],
+      "replace": [
+        "\tsuccess := s.size-s.cur >= n"
+      ],
+      "requiresProjection": "available_capacity",
+      "binder": "sneak-path"
+    },
+    {
+      "id": "zero-charges",
+      "fault": "F-05",
+      "cell": "Acquire_NoWaiters x Release",
+      "variant": "mutants/zero-charges.go.txt",
+      "mode": "replace-block",
+      "match": [
+        "\ts.cur -= n",
+        "\ts.notifyWaiters()"
+      ],
+      "replace": [
+        "\tif n == 0 { s.cur++ }",
+        "\ts.cur -= n",
+        "\ts.notifyWaiters()"
+      ],
+      "requiresProjection": "available_capacity",
+      "binder": "corrupt-state"
+    }
+  ]
+}

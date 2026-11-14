@@ -40,6 +40,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from cell_rationale import read_bindings
 from typing import Any, TypedDict, cast
 
 from check_reachability import pair_reachability
@@ -733,6 +734,14 @@ def generate(component: str, analysis_root: Path, src_index: dict[str, str], ove
         if prior.get("coverage") and not data.get("coverage"):
             data["coverage"] = prior["coverage"]
             completeness.pop("coverage", None)
+    bindings = adir / "cell-rationale.json"
+    if bindings.is_file():
+        reasons = read_bindings(bindings, data)
+        data["rationaleVersion"] = 1
+        for cell in data["cells"]:
+            cell["rationale"] = reasons[cell["state"], cell["event"]]
+    elif out.is_file() and json.loads(out.read_text()).get("rationaleVersion"):
+        raise ValueError("rationale-enabled regeneration requires cell-rationale.json; refusing silent loss")
     if not completeness:
         data.pop("completeness", None)
     return data

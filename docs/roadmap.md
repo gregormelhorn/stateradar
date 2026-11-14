@@ -58,8 +58,14 @@ entries and separates the new model-routing plan from shipped capabilities.
    pass. The manifest pins the tested source/test commit. Historical pilot
    artifacts and blind evidence stay immutable; generic mutation coverage is
    not claimed beyond the executed named fault probes.
-3. **Make disposition rationale machine-readable.** Design and validate a
-   representation for cell rationale before building checks that depend on it.
+   Next increment: [mutation binding and rationale](evidence/mutation-rationale-cost/README.md)
+   exercises 41 generic matrix mutations across 32 cells and four source faults.
+   Crashes and unrelated failures cannot count as kills. Four contract limits
+   and two queued cells without a supported operator remain explicit exclusions.
+3. **Make disposition rationale machine-readable.** Implemented as an optional
+   schema/checker/generator contract and adopted by all 38 semaphore cells.
+   [Format and limits](cell-rationale.md). Expand adoption only after reviewing
+   scenario scope and accepted decision or callee evidence for each component.
    See [machine-readable cell rationale](#10-machine-readable-cell-rationale).
 4. **Evaluate bounded prompt optimization.** After sufficient independent
    benchmark cases exist, test a small sub-prompt against held-out cases; see
@@ -223,7 +229,11 @@ optimizer second.
 
 ## 10. Machine-readable cell rationale
 
-**Status:** Planned. Measured at v1.52: 339 `ignore (documented)` cells across
+**Status:** Initial implementation and semaphore adoption complete; see
+[cell rationale](cell-rationale.md). The historical baseline below remains
+a measurement of v1.52, not the current adoption count.
+
+Measured at v1.52: 339 `ignore (documented)` cells across
 all sidecars, **0** carrying a machine-readable rationale. Every justification
 lives in matrix cell prose, where no checker reaches it — so "ignored because
 harmless" and "ignored because it cannot occur" are indistinguishable to any

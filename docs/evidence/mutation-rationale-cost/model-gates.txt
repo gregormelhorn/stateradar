@@ -1,0 +1,96 @@
+$ python /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore/check_matrix.py --selftest
+EXPECTED ARTIFACT RED: missing DR evidence => missing per-decision implementation evidence
+EXPECTED ARTIFACT RED: missing cell => 38-cell totality/coverage
+EXPECTED ARTIFACT RED: missing coverage => 38-cell totality/coverage
+EXPECTED ARTIFACT RED: broken fragment => broken fragment: {'file': 'examples/weighted-semaphore/semaphore/semaphore.go', 'line': 29, 'fragment': 'NONEXISTENT_SOURCE_ANCHOR'}
+EXPECTED ARTIFACT RED: false exclusion => missing/misnamed executable cell
+EXPECTED ARTIFACT RED: lost trace => trace consolidation dropped or duplicated an identity
+EXPECTED ARTIFACT RED: text drift => matrix text differs from sidecar
+ARTIFACT PASS: 38 cells; 34 executable; 4 contract limits; 30 traces; 13 resolved DRs; 232 verified fragment citations
+$ python tools/check_matrix.py /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore
+CHECK MATRIX: OK (2 rows x 19 events)
+$ python /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore/check_guards.py
+G-01 {'n': -1} => ['panic']
+G-01 {'n': 0} => ['continue']
+G-01 {'n': 1} => ['continue']
+G-02 {'done': False} => ['continue']
+G-02 {'done': True} => ['reject']
+G-03 {'size': 3, 'cur': 1, 'n': 0, 'length': 0} => ['fast']
+G-03 {'size': 3, 'cur': 1, 'n': 0, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 1, 'length': 0} => ['fast']
+G-03 {'size': 3, 'cur': 1, 'n': 1, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 2, 'length': 0} => ['fast']
+G-03 {'size': 3, 'cur': 1, 'n': 2, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 3, 'length': 0} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 3, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 4, 'length': 0} => ['oversized']
+G-03 {'size': 3, 'cur': 1, 'n': 4, 'length': 1} => ['oversized']
+G-04 {'size': 3, 'cur': 1, 'n': 1, 'length': 0} => ['admit']
+G-04 {'size': 3, 'cur': 1, 'n': 1, 'length': 1} => ['false']
+G-04 {'size': 3, 'cur': 1, 'n': 2, 'length': 0} => ['admit']
+G-04 {'size': 3, 'cur': 1, 'n': 2, 'length': 1} => ['false']
+G-04 {'size': 3, 'cur': 1, 'n': 3, 'length': 0} => ['false']
+G-04 {'size': 3, 'cur': 1, 'n': 3, 'length': 1} => ['false']
+G-05 {'cur': 2, 'n': 0} => ['release']
+G-05 {'cur': 2, 'n': 1} => ['release']
+G-05 {'cur': 2, 'n': 2} => ['release']
+G-05 {'cur': 2, 'n': 3} => ['panic']
+G-06 {'size': 3, 'cur': 1, 'head': 1, 'length': 0} => ['empty']
+G-06 {'size': 3, 'cur': 1, 'head': 1, 'length': 1} => ['grant']
+G-06 {'size': 3, 'cur': 1, 'head': 2, 'length': 0} => ['empty']
+G-06 {'size': 3, 'cur': 1, 'head': 2, 'length': 1} => ['grant']
+G-06 {'size': 3, 'cur': 1, 'head': 3, 'length': 0} => ['empty']
+G-06 {'size': 3, 'cur': 1, 'head': 3, 'length': 1} => ['stop']
+G-07 {'ready': False} => ['unlink']
+G-07 {'ready': True} => ['rollback']
+G-08 {'front': False, 'cur': 1, 'size': 2} => ['skip']
+G-08 {'front': False, 'cur': 2, 'size': 2} => ['skip']
+G-08 {'front': True, 'cur': 1, 'size': 2} => ['notify']
+G-08 {'front': True, 'cur': 2, 'size': 2} => ['notify']
+G-09 {'done': False} => ['success']
+G-09 {'done': True} => ['rollback']
+G-10 admit preserves count unsat (unsat required)
+G-10 release preserves count unsat (unsat required)
+G-10 grant preserves count unsat (unsat required)
+G-10 first enqueue is blocked unsat (unsat required)
+G-10 notifier stop is blocked unsat (unsat required)
+G-10 head removal cannot skip notification unsat (unsat required)
+G-10 retained blocked head cannot fit unsat (unsat required)
+group G-01: proven
+group G-02: proven
+group G-03: proven
+group G-04: proven
+group G-05: proven
+group G-06: proven
+group G-07: proven
+group G-08: proven
+group G-09: proven
+group G-10 queue-boundary preservation: proven (listed inductive obligations; source digest pinned)
+group G-11 queued select: not-formalizable: dynamic-state; both ready channels permit either selection; G-07/09 prove sampled cleanup branches
+GUARDS PASS: 10 proven groups; 1 explicitly non-formalizable group
+$ python docs/evidence/semaphore-pilot/resolution-q01/check_guards.py --source /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/semaphore-guard-red-vzfbppq3/old.go
+group G-Q01 cancellation rescan: proven
+{'size': 2, 'cur': 3, 'front': False} ['skip'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 3, 'front': True} ['skip'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 2, 'front': False} ['skip']
+{'size': 2, 'cur': 2, 'front': True} ['skip']
+{'size': 2, 'cur': 1, 'front': False} ['skip']
+{'size': 2, 'cur': 1, 'front': True} ['notify']
+DR-001 eligible-zero progress: sat (unsat required)
+Counterexample: [size = 1, cur = 1, head = 0, front = True]
+DR-001 positive-head fit at full capacity: unsat (unsat required)
+Source form: upstream
+$ python /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore/check_guards.py --source /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/semaphore-guard-red-vzfbppq3/old.go
+GUARD FAIL: reviewed source digest changed; re-extract guard expressions
+$ python examples/weighted-semaphore/cells/run.py --red-probe --count 1
+CELL RED PROBE: exit=1; executable=34; contract-limits=4; repeats=1; completed=True; failures={'TestStateCells/Acquire_NoWaiters/TryAcquire': 1, 'TestStateCells': 1}
+EXPECTED CELL RED OBSERVED
+$ python examples/weighted-semaphore/cells/run.py
+CELL BASELINE: exit=0; executable=34; contract-limits=4; repeats=10; completed=True; failures={}
+CELL PASS: 340 cell and 160 pair-ordering executions
+$ python tools/dsc_check.py /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore --repo . --model as-is.machine.mmd
+DSC CHECK: OK (2 states x 19 events, 38 cells, 11 guard groups)
+$ python tools/check_reachability.py /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore
+REACHABILITY CHECK: OK (2/2 states reachable from 'Acquire_NoWaiters', 0 terminal)
+HISTORY PASS: 52 retained artifacts unchanged
+CURRENT MODEL PASS: full matrix; explicit limits; guards; red probes; cells; pair scenarios; sidecar; reachability

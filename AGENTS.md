@@ -106,6 +106,7 @@ The checkers catch the following defects. Do not fight them. (Generated from `fo
 * abstraction statement in the matrix (PA-10)
 * scope lines on citing control traces
 * gate-type annotation presence on events
+* opt-in cell rationale completeness and source-backed scope
 * upstream-guard annotation presence on events
 <!-- /generated:rules -->
 

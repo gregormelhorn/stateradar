@@ -814,7 +814,7 @@ def main() -> int:
         weak = sidecar(tmp, gm)
         (weak / "matrix-mutation.json").write_text(json.dumps({
             "formatVersion": 1,
-            "testCommand": ["python3", "-c", "import sys; raise SystemExit(0)", "{analysis_dir}"],
+            "testCommand": ["python3", "-c", "print('CELL SUITE: 24 cells checked, 0 failed')", "{analysis_dir}"],
             "workingDirectory": ".",
             "timeoutSeconds": 5,
         }))

@@ -1,0 +1,15 @@
+..F.....
+======================================================================
+FAIL: test_decision_citation_must_reference_that_decision (__main__.RationaleTests.test_decision_citation_must_reference_that_decision)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_cell_rationale.py", line 65, in test_decision_citation_must_reference_that_decision
+    self.assertNotEqual(code,0,out);self.assertIn('decision citation',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: 0 == 0 : DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)
+
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.003s
+
+FAILED (failures=1)

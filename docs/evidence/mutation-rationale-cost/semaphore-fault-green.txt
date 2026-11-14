@@ -1,0 +1,6 @@
+BASELINE: OK
+MUT-001 KILLED fault=F-05 cell=Acquire_WaitersPending x UV-ContextOrder target=semaphore/semaphore.go exit=1 duration=0.795s
+MUT-002 KILLED fault=F-05 cell=Acquire_WaitersPending x UV-ContextOrder target=semaphore/semaphore.go exit=1 duration=0.803s
+MUT-003 KILLED fault=F-04 cell=Acquire_WaitersPending x TryAcquire target=semaphore/semaphore.go exit=1 duration=0.870s
+MUT-004 KILLED fault=F-05 cell=Acquire_NoWaiters x Release target=semaphore/semaphore.go exit=1 duration=0.882s
+FAULT MUTANTS: OK (killed=4 survived=0 errors=0 blocked=0)

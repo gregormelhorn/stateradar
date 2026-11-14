@@ -1,0 +1,65 @@
+F.FFFFF
+======================================================================
+FAIL: test_broken_fragment_fails (__main__.RationaleTests.test_broken_fragment_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_cell_rationale.py", line 43, in test_broken_fragment_fails
+    self.assertNotEqual(code,0,out);self.assertIn('rationale',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: 0 == 0 : DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)
+
+
+======================================================================
+FAIL: test_missing_decision_fails (__main__.RationaleTests.test_missing_decision_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_cell_rationale.py", line 58, in test_missing_decision_fails
+    self.assertNotEqual(code,0,out);self.assertIn('rationale',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: 0 == 0 : DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)
+
+
+======================================================================
+FAIL: test_missing_fragment_fails (__main__.RationaleTests.test_missing_fragment_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_cell_rationale.py", line 39, in test_missing_fragment_fails
+    self.assertNotEqual(code,0,out);self.assertIn('rationale',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: 0 == 0 : DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)
+
+
+======================================================================
+FAIL: test_missing_rationale_fails (__main__.RationaleTests.test_missing_rationale_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_cell_rationale.py", line 35, in test_missing_rationale_fails
+    self.assertNotEqual(code,0,out);self.assertIn('rationale',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: 0 == 0 : DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)
+
+
+======================================================================
+FAIL: test_outside_contract_needs_decision (__main__.RationaleTests.test_outside_contract_needs_decision)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_cell_rationale.py", line 54, in test_outside_contract_needs_decision
+    self.assertNotEqual(code,0,out);self.assertIn('rationale',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: 0 == 0 : DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)
+
+
+======================================================================
+FAIL: test_upstream_claim_needs_callee_contract (__main__.RationaleTests.test_upstream_claim_needs_callee_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_cell_rationale.py", line 47, in test_upstream_claim_needs_callee_contract
+    self.assertNotEqual(code,0,out);self.assertIn('rationale',out)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: 0 == 0 : DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)
+
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.837s
+
+FAILED (failures=6)

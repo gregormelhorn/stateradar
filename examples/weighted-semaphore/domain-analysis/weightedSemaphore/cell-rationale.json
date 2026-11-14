@@ -1,0 +1,821 @@
+{
+  "formatVersion": 1,
+  "cells": [
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "NewWeighted",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Independent new instance; negative constructor size panics without touching the existing instance.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x NewWeighted; representative guard and alternatives in the matrix; accepted DR-002 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-002",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-002.yaml",
+              "line": 10,
+              "fragment": "Evaluation copy only. NewWeighted, Acquire, TryAcquire and Release reject negative int64 arguments with panic before changing state. Zero remains supported under DR-001. All nonnegative int64 values are representable inputs; capacity accounting must stay within [0,size]."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Acquire",
+      "disposition": "transition",
+      "target": "Acquire_WaitersPending",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Feasible live request queues when admission is unavailable. Empty queue may instead grant immediately. Negative input panics, pre-canceled Context returns its error, and oversized input returns a size error without queueing.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x Acquire; representative guard and alternatives in the matrix; accepted DR-004 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-004",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-004.yaml",
+              "line": 10,
+              "fragment": "Evaluation copy only. Acquire with weight greater than capacity returns an explanatory error without waiting for context cancellation. Existing pre-canceled-context handling is retained; other cancellation orderings remain Q-10. TryAcquire continues to return false for positive oversized weights."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "TryAcquire",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "With no queue, fitting nonnegative weight grants, otherwise false. With a queue, false even when weight fits. Negative weight panics.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x TryAcquire; representative guard and alternatives in the matrix; accepted DR-011 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-011",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-011.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. TryAcquire obtains the synchronized state, checks once"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Release",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Valid positive release drains only the eligible FIFO prefix; a blocked tail may remain. Negative/over-release panics before mutation. Zero release changes neither accounting nor queue.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x Release; representative guard and alternatives in the matrix; accepted DR-013 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-013",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-013.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Release(0) is permitted and is a logical no-op for"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "ContextDone",
+      "disposition": "reject",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Preclosed acquisition fails; completed success stays held. Pending cancellation removes the entry or rolls back a racing grant. Removing a head notifies its eligible successors; a remaining blocked queue stays pending.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x ContextDone; representative guard and alternatives in the matrix; accepted DR-010 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-010",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-010.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy, conforming Contexts and valid feasible weights. Closed Done"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Grant",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Notification reserves and unlinks in FIFO order. This internal event is triggered by release/cancellation, not injected directly. A ready recipient may return or roll back; other queued requests may remain.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x Grant; representative guard and alternatives in the matrix; accepted DR-010 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-010",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-010.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy, conforming Contexts and valid feasible weights. Closed Done"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Abandon",
+      "disposition": "ignore (documented)",
+      "rationale": {
+        "kind": "documented-no-action",
+        "claim": "No automatic reclamation on caller disappearance. Pending work needs cancellation and success requires matching release; obligations remain with callers.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-Abandon; representative guard and alternatives in the matrix; accepted DR-005 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-005",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-005.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. An abandoned pending acquisition must be canceled and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Delay",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "outside-contract",
+        "claim": "No fixed latency bound is promised. A delay by itself changes no modeled state; eventual processing follows the original event. Finite tests cannot certify this absence of a bound.",
+        "scope": "Only a fixed return-time guarantee is excluded; ordinary event processing remains covered.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-011",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-011.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. TryAcquire obtains the synchronized state, checks once"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Recreate",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Recreation is independent; no cleanup or capacity transfer reaches the old receiver.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-Recreate; representative guard and alternatives in the matrix; accepted DR-005 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-005",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-005.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. An abandoned pending acquisition must be canceled and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatAcquire",
+      "disposition": "transition",
+      "target": "Acquire_WaitersPending",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Independent invocation: can grant again if room and no queue, or append a distinct feasible request. It can self-block; validation and cancellation rules still apply.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-RepeatAcquire; representative guard and alternatives in the matrix; accepted DR-006 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-006",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-006.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Every acquisition invocation is a separate request,"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatTry",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Each try is independent. Empty queue may charge repeatedly until full; queued predecessors prevent every bypass.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-RepeatTry; representative guard and alternatives in the matrix; accepted DR-006 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-006",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-006.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Every acquisition invocation is a separate request,"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatRelease",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Each call applies to the aggregate. An excess panics without mutation; duplicates covered by other holdings can go undetected. This is a caller-error detection limit, not permission to double-release.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-RepeatRelease; representative guard and alternatives in the matrix; accepted DR-003 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-003",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-003.yaml",
+              "line": 10,
+              "fragment": "Evaluation copy only. Release of more than the aggregate held weight panics before subtracting or notifying. Recovery preserves the component counter and queue; this is not a recovery guarantee for the calling application."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-WrongReceiver",
+      "disposition": "ignore (documented)",
+      "rationale": {
+        "kind": "documented-no-action",
+        "claim": "The intended instance sees no call. The actual receiver processes its own accounting; caller intent is not inferred.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-WrongReceiver; representative guard and alternatives in the matrix; accepted DR-008 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-008",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-008.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. The caller selects the intended semaphore instance and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Weight",
+      "disposition": "reject",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Negative arguments panic before mutation; oversized Acquire errors and oversized TryAcquire is false. Zero remains valid with FIFO; nonnegative int64 arithmetic stays within size.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-Weight; representative guard and alternatives in the matrix; accepted DR-002 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-002",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-002.yaml",
+              "line": 10,
+              "fragment": "Evaluation copy only. NewWeighted, Acquire, TryAcquire and Release reject negative int64 arguments with panic before changing state. Zero remains supported under DR-001. All nonnegative int64 values are representable inputs; capacity accounting must stay within [0,size]."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ForeignContext",
+      "disposition": "reject",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "A preclosed supplied Context rejects, independent of the intended Context. A live supplied Context follows Acquire admission; no identity check or Context substitution.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-ForeignContext; representative guard and alternatives in the matrix; accepted DR-008 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-008",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-008.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. The caller selects the intended semaphore instance and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-UnownedRelease",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Release responsibility can transfer. Aggregate accounting cannot distinguish an authorized transfer from a mistaken release while held weight covers it. Excess still panics unchanged.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-UnownedRelease; representative guard and alternatives in the matrix; accepted DR-007 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-007",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-007.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Acquisition and matching release may occur in different"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ContextFault",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "outside-contract",
+        "claim": "Delegates to the supplied Context. Outside NAT-Context no return, recovery or progress outcome is promised; handle denotes delegation, not successful completion.",
+        "scope": "Only outcomes for faulty or nonconforming Context implementations are excluded; conforming Contexts remain supported.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-009",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-009.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Acquire requires a non-nil Context conforming to the"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatedDone",
+      "disposition": "ignore (documented)",
+      "rationale": {
+        "kind": "upstream-guarantee",
+        "claim": "Standard CancelFunc repetition is idempotent. A successful acquisition stays held; a queued call cleans up once. This is upstream Context contract, not a second delivered channel event.",
+        "scope": "Repeat invocation of the same standard Go CancelFunc after a successful Acquire; DR-010/005 retain the holding obligation.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-010",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-010.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy, conforming Contexts and valid feasible weights. Closed Done"
+            }
+          },
+          {
+            "kind": "upstream-contract",
+            "source": "Go context.CancelFunc retained contract",
+            "citation": {
+              "file": "docs/evidence/semaphore-pilot/analysis/contracts-complete.md",
+              "line": 74,
+              "fragment": "After the first call, subsequent calls to a CancelFunc do nothing."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ContextOrder",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "After the final applicable check, success may coexist with cancellation. Before a queued final check cancellation rolls the grant back. Temporary reservation may affect other observers.",
+        "scope": "Evaluation copy: Acquire_NoWaiters x UV-ContextOrder; representative guard and alternatives in the matrix; accepted DR-010 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-010",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-010.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy, conforming Contexts and valid feasible weights. Closed Done"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "NewWeighted",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Independent new instance; negative constructor size panics without touching the existing instance.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x NewWeighted; representative guard and alternatives in the matrix; accepted DR-005 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-005",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-005.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. An abandoned pending acquisition must be canceled and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Acquire",
+      "disposition": "defer (queued)",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Feasible live request queues when admission is unavailable. Empty queue may instead grant immediately. Negative input panics, pre-canceled Context returns its error, and oversized input returns a size error without queueing.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x Acquire; representative guard and alternatives in the matrix; accepted DR-012 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-012",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-012.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Grant waiting requests in enqueue order, not wall-clock"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "TryAcquire",
+      "disposition": "reject",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "With no queue, fitting nonnegative weight grants, otherwise false. With a queue, false even when weight fits. Negative weight panics.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x TryAcquire; representative guard and alternatives in the matrix; accepted DR-012 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-012",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-012.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Grant waiting requests in enqueue order, not wall-clock"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Release",
+      "disposition": "transition",
+      "target": "Acquire_NoWaiters",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Valid positive release drains only the eligible FIFO prefix; a blocked tail may remain. Negative/over-release panics before mutation. Zero release changes neither accounting nor queue.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x Release; representative guard and alternatives in the matrix; accepted DR-001 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-001",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-001.yaml",
+              "line": 15,
+              "fragment": "Evaluation copy of golang.org/x/sync/semaphore at upstream"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "ContextDone",
+      "disposition": "transition",
+      "target": "Acquire_NoWaiters",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Preclosed acquisition fails; completed success stays held. Pending cancellation removes the entry or rolls back a racing grant. Removing a head notifies its eligible successors; a remaining blocked queue stays pending.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x ContextDone; representative guard and alternatives in the matrix; accepted DR-010 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-010",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-010.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy, conforming Contexts and valid feasible weights. Closed Done"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Grant",
+      "disposition": "transition",
+      "target": "Acquire_NoWaiters",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Notification reserves and unlinks in FIFO order. This internal event is triggered by release/cancellation, not injected directly. A ready recipient may return or roll back; other queued requests may remain.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x Grant; representative guard and alternatives in the matrix; accepted DR-012 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-012",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-012.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Grant waiting requests in enqueue order, not wall-clock"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Abandon",
+      "disposition": "ignore (documented)",
+      "rationale": {
+        "kind": "documented-no-action",
+        "claim": "No automatic reclamation on caller disappearance. Pending work needs cancellation and success requires matching release; obligations remain with callers.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-Abandon; representative guard and alternatives in the matrix; accepted DR-005 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-005",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-005.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. An abandoned pending acquisition must be canceled and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Delay",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "outside-contract",
+        "claim": "No fixed latency bound is promised. A delay by itself changes no modeled state; eventual processing follows the original event. Finite tests cannot certify this absence of a bound.",
+        "scope": "Only a fixed return-time guarantee is excluded; ordinary event processing remains covered.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-011",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-011.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. TryAcquire obtains the synchronized state, checks once"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Recreate",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Recreation is independent; no cleanup or capacity transfer reaches the old receiver.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-Recreate; representative guard and alternatives in the matrix; accepted DR-008 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-008",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-008.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. The caller selects the intended semaphore instance and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatAcquire",
+      "disposition": "defer (queued)",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Independent invocation: can grant again if room and no queue, or append a distinct feasible request. It can self-block; validation and cancellation rules still apply.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-RepeatAcquire; representative guard and alternatives in the matrix; accepted DR-006 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-006",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-006.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Every acquisition invocation is a separate request,"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatTry",
+      "disposition": "reject",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Each try is independent. Empty queue may charge repeatedly until full; queued predecessors prevent every bypass.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-RepeatTry; representative guard and alternatives in the matrix; accepted DR-006 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-006",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-006.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Every acquisition invocation is a separate request,"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatRelease",
+      "disposition": "transition",
+      "target": "Acquire_NoWaiters",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Each call applies to the aggregate. An excess panics without mutation; duplicates covered by other holdings can go undetected. This is a caller-error detection limit, not permission to double-release.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-RepeatRelease; representative guard and alternatives in the matrix; accepted DR-007 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-007",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-007.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Acquisition and matching release may occur in different"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-WrongReceiver",
+      "disposition": "ignore (documented)",
+      "rationale": {
+        "kind": "documented-no-action",
+        "claim": "The intended instance sees no call. The actual receiver processes its own accounting; caller intent is not inferred.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-WrongReceiver; representative guard and alternatives in the matrix; accepted DR-008 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-008",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-008.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. The caller selects the intended semaphore instance and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Weight",
+      "disposition": "reject",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Negative arguments panic before mutation; oversized Acquire errors and oversized TryAcquire is false. Zero remains valid with FIFO; nonnegative int64 arithmetic stays within size.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-Weight; representative guard and alternatives in the matrix; accepted DR-002 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-002",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-002.yaml",
+              "line": 10,
+              "fragment": "Evaluation copy only. NewWeighted, Acquire, TryAcquire and Release reject negative int64 arguments with panic before changing state. Zero remains supported under DR-001. All nonnegative int64 values are representable inputs; capacity accounting must stay within [0,size]."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ForeignContext",
+      "disposition": "reject",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "A preclosed supplied Context rejects, independent of the intended Context. A live supplied Context follows Acquire admission; no identity check or Context substitution.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-ForeignContext; representative guard and alternatives in the matrix; accepted DR-008 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-008",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-008.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. The caller selects the intended semaphore instance and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-UnownedRelease",
+      "disposition": "transition",
+      "target": "Acquire_NoWaiters",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Release responsibility can transfer. Aggregate accounting cannot distinguish an authorized transfer from a mistaken release while held weight covers it. Excess still panics unchanged.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-UnownedRelease; representative guard and alternatives in the matrix; accepted DR-007 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-007",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-007.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Acquisition and matching release may occur in different"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ContextFault",
+      "disposition": "handle",
+      "rationale": {
+        "kind": "outside-contract",
+        "claim": "Delegates to the supplied Context. Outside NAT-Context no return, recovery or progress outcome is promised; handle denotes delegation, not successful completion.",
+        "scope": "Only outcomes for faulty or nonconforming Context implementations are excluded; conforming Contexts remain supported.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-009",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-009.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. Acquire requires a non-nil Context conforming to the"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatedDone",
+      "disposition": "transition",
+      "target": "Acquire_NoWaiters",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "Standard CancelFunc repetition is idempotent. A successful acquisition stays held; a queued call cleans up once. This is upstream Context contract, not a second delivered channel event.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-RepeatedDone; representative guard and alternatives in the matrix; accepted DR-005 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-005",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-005.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy only. An abandoned pending acquisition must be canceled and"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ContextOrder",
+      "disposition": "transition",
+      "target": "Acquire_NoWaiters",
+      "rationale": {
+        "kind": "required-behavior",
+        "claim": "After the final applicable check, success may coexist with cancellation. Before a queued final check cancellation rolls the grant back. Temporary reservation may affect other observers.",
+        "scope": "Evaluation copy: Acquire_WaitersPending x UV-ContextOrder; representative guard and alternatives in the matrix; accepted DR-010 scope applies.",
+        "evidence": [
+          {
+            "kind": "decision",
+            "dr": "DR-010",
+            "citation": {
+              "file": "examples/weighted-semaphore/domain-analysis/weightedSemaphore/decisions/DR-010.yaml",
+              "line": 11,
+              "fragment": "Evaluation copy, conforming Contexts and valid feasible weights. Closed Done"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Sequence
 
 from subprocess_text import as_text
+from mutation_verdict import cell_verdict
 
 PLACEHOLDER = "{analysis_dir}"
 DEFAULT_TIMEOUT_SECONDS = 30
@@ -32,6 +33,8 @@ class Config:
     command: tuple[str, ...]
     working_directory: Path
     timeout_seconds: int
+    oracle: str = "markdown"
+    coverage_file: str | None = None
 
 
 @dataclass(frozen=True)
@@ -96,7 +99,13 @@ def load_config(adir: Path) -> Config:
     timeout = raw.get("timeoutSeconds", DEFAULT_TIMEOUT_SECONDS)
     if not isinstance(timeout, int) or isinstance(timeout, bool) or timeout <= 0:
         raise ConfigError("timeoutSeconds must be a positive integer")
-    return Config(tuple(command), working_directory, timeout)
+    oracle = raw.get("oracle", "markdown")
+    if oracle not in ("markdown", "sidecar"):
+        raise ConfigError("oracle must be markdown or sidecar")
+    coverage = raw.get("coverageFile")
+    if coverage is not None and (not isinstance(coverage,str) or Path(coverage).is_absolute() or ".." in Path(coverage).parts):
+        raise ConfigError("coverageFile must be a relative analysis file")
+    return Config(tuple(command), working_directory, timeout, oracle, coverage)
 
 
 def _states(lines: list[str]) -> tuple[str, ...]:
@@ -130,7 +139,7 @@ def parse_cells(matrix_path: Path) -> tuple[tuple[str, ...], list[Cell]]:
             events = None
             continue
         row = _split_row(line)
-        if row and row[0] == "state":
+        if row and row[0].lower() == "state":
             events = row[1:]
             if not events or len(events) != len(set(events)):
                 raise ConfigError("matrix table has invalid event headers")
@@ -322,11 +331,70 @@ def _print_mutation(mutation: Mutation, verdict: str, result: CommandResult) -> 
     )
 
 
+def sidecar_cells(adir: Path) -> tuple[tuple[str,...],list[Cell]]:
+    data=json.loads((adir/"analysis.json").read_text())
+    states=tuple(data["states"])
+    events={e["id"] for e in data["events"]}
+    cells=[]
+    for c in data["cells"]:
+        raw=c["disposition"]
+        if raw=="transition":raw+=" →"+c["target"]
+        cells.append(Cell(c["state"],c["event"],raw,-1,-1))
+    keys={(c.state,c.event) for c in cells}
+    if not states or not events or len(keys)!=len(cells) or keys!={(s,e) for s in states for e in events}:
+        raise ConfigError("sidecar grid must be nonempty and total")
+    return states,cells
+
+
+def apply_sidecar(adir: Path, mutation: Mutation, states: tuple[str,...]) -> None:
+    path=adir/"analysis.json"
+    data=json.loads(path.read_text())
+    matches=[c for c in data["cells"] if (c["state"],c["event"])==(mutation.state,mutation.event)]
+    if len(matches)!=1:raise ConfigError("mutated cell absent or ambiguous")
+    cell=matches[0]
+    old=cell["disposition"]+(" →"+cell["target"] if cell["disposition"]=="transition" else "")
+    if old!=mutation.old:raise ConfigError("sidecar mutation source drifted")
+    parts=_transition_parts(mutation.new,states)
+    cell["disposition"]="transition" if parts else mutation.new
+    cell.pop("target",None)
+    if parts:cell["target"]=parts[0]
+    # A counterfactual oracle must not retain authority for the old judgment.
+    for key in ("dr","q","rationale"):cell.pop(key,None)
+    data["mutation"]={"id":mutation.identifier,"state":mutation.state,"event":mutation.event,"kind":mutation.kind}
+    path.write_text(json.dumps(data,indent=2)+"\n")
+
+
+def exclusions(adir: Path, config: Config, cells: list[Cell]) -> dict[tuple[str,str],str]:
+    if config.coverage_file is None:return {}
+    rows=json.loads((adir/config.coverage_file).read_text())["cells"]
+    keys={(c.state,c.event) for c in cells}
+    if len(rows)!=len(keys) or {(c["state"],c["event"]) for c in rows}!=keys:
+        raise ConfigError("coverage file must cover each cell exactly once")
+    excluded={}
+    for c in rows:
+        reason=c.get("untestable-via-seam")
+        if reason is not None:
+            if not isinstance(reason,str) or len(reason)<12 or c.get("test"):
+                raise ConfigError("invalid untestable-via-seam declaration")
+            excluded[c["state"],c["event"]]=reason
+        elif not c.get("test"):
+            raise ConfigError("coverage cell has neither a test nor a reason")
+    return excluded
+
+
 def run(adir: Path) -> int:
     config = load_config(adir)
-    states, cells = parse_cells(adir / "disposition-matrix.md")
-    mutations = build_mutations(states, cells)
-    killed = survived = errors = 0
+    states, cells = sidecar_cells(adir) if config.oracle=="sidecar" else parse_cells(adir / "disposition-matrix.md")
+    excluded=exclusions(adir,config,cells)
+    eligible=[c for c in cells if (c.state,c.event) not in excluded]
+    mutations = build_mutations(states, eligible)
+    for (state,event),reason in sorted(excluded.items()):print(f"NOT APPLICABLE: {state} x {event}: {reason}")
+    represented={(m.state,m.event) for m in mutations}
+    for c in eligible:
+        if (c.state,c.event) not in represented:
+            print(f"NOT APPLICABLE: {c.state} x {c.event}: no supported operator for {c.raw}")
+    if not mutations:raise ConfigError("no applicable mutations")
+    killed = survived = errors = blocked = 0
     with tempfile.TemporaryDirectory(prefix="matrix-mutation-") as raw_tmp:
         tmp = Path(raw_tmp)
         baseline = run_command(config, copy_analysis(adir, tmp, "baseline"))
@@ -339,22 +407,45 @@ def run(adir: Path) -> int:
         if baseline.returncode != 0:
             print(f"BLOCKED: baseline exit={baseline.returncode}")
             return 1
+        try:
+            verdict=cell_verdict(baseline.output,len(eligible))
+            if verdict.failed:raise ValueError("baseline claims failures with exit zero")
+        except ValueError as exc:
+            print(f"BLOCKED: baseline {exc}")
+            return 1
         print("BASELINE: OK")
         for mutation in mutations:
             mutant_dir = copy_analysis(adir, tmp, mutation.identifier)
-            apply_mutation(mutant_dir / "disposition-matrix.md", mutation)
+            if config.oracle=="sidecar":apply_sidecar(mutant_dir,mutation,states)
+            else:apply_mutation(mutant_dir / "disposition-matrix.md", mutation)
             result = run_command(config, mutant_dir)
             if result.timed_out or result.launch_error:
                 errors += 1
                 _print_mutation(mutation, "ERROR", result)
-            elif result.returncode == 0:
-                survived += 1
-                _print_mutation(mutation, "SURVIVED", result)
             else:
-                killed += 1
-                _print_mutation(mutation, "KILLED", result)
-    if survived or errors:
-        print(f"MUTATION CHECK: FAIL (killed={killed} survived={survived} errors={errors} blocked=0)")
+                try:
+                    verdict=cell_verdict(result.output,len(eligible))
+                    if result.returncode==0 and verdict.failed:
+                        raise ValueError("failure markers with exit zero")
+                    if result.returncode!=0 and not verdict.failed:
+                        raise ValueError("suite reported no cell failure")
+                except ValueError as exc:
+                    blocked+=1
+                    _print_mutation(mutation,"BLOCKED",result)
+                    print(f"  BLOCKED: {exc}")
+                    continue
+                if result.returncode==0:
+                    survived+=1
+                    _print_mutation(mutation,"SURVIVED",result)
+                elif f"{mutation.state} x {mutation.event}" not in verdict.failed:
+                    blocked+=1
+                    _print_mutation(mutation,"BLOCKED (wrong cell)",result)
+                else:
+                    killed+=1
+                    _print_mutation(mutation,"KILLED",result)
+
+    if survived or errors or blocked:
+        print(f"MUTATION CHECK: FAIL (killed={killed} survived={survived} errors={errors} blocked={blocked})")
         return 1
     print(f"MUTATION CHECK: OK (killed={killed} survived=0 errors=0 blocked=0)")
     return 0

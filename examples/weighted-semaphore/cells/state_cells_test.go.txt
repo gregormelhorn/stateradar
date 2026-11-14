@@ -46,6 +46,7 @@ func observeCell(t *testing.T, state, event string) cellObservation {
 			return cellObservation{"handle", state}
 		}
 		TestScheduleDR010GrantedRollback(t)
+		TestScheduleDR010CancelSelectedRollback(t)
 		return cellObservation{"transition", "Acquire_NoWaiters"}
 	}
 	if event == "Grant" && state == "Acquire_NoWaiters" {
@@ -127,6 +128,10 @@ func observeCell(t *testing.T, state, event string) cellObservation {
 			numericAvailable(t, s, 2)
 		}
 	case "Release", "Grant":
+		if event == "Release" {
+			// DR-013: exercise the zero boundary as well as the positive representative.
+			TestDR013ZeroRelease(t)
+		}
 		s.Release(1)
 		if pending {
 			cellResult(t, head, nil)

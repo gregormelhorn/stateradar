@@ -14,6 +14,7 @@ from __future__ import annotations
 import json, re, subprocess, sys
 from functools import lru_cache
 from pathlib import Path
+from cell_rationale import rationale_errors
 
 VOCAB = {"transition", "handle", "ignore (documented)", "ignore (accidental)",
          "defer (queued)", "reject", "UNSPECIFIED"}
@@ -76,6 +77,7 @@ def main() -> int:
                       "structural checks only.")
                 return 1
             print("note: jsonschema not installed - structural checks only", file=sys.stderr)
+    errors.extend(rationale_errors(data, adir, repo))
     states = data["states"]
     events = [e["id"] for e in data["events"]]
     qids = {q["id"] for q in data.get("questions", [])}

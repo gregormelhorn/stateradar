@@ -40,3 +40,20 @@ remain archived. Use the original reproduction driver for that historical
 baseline; it must not be repurposed as conformance acceptance of this fix.
 
 The current-model verifier checks 38 matrix cells: 34 executable guarded scenarios and four explicit contract limits, plus all 16 interaction-pair orderings. It repeats executable scenarios ten times under the race detector, demonstrates a deliberately wrong matrix verdict, checks artifact mutations, and verifies all 52 retained historical artifact hashes. Faulty Context guarantees and absent fixed latency bounds are not counted as green tests.
+
+The generic mutation binding runs separately in CI:
+
+```sh
+.venv/bin/python tools/gen_mutant_variants.py examples/weighted-semaphore/domain-analysis/weightedSemaphore --check
+.venv/bin/python tools/check_matrix_mutation.py examples/weighted-semaphore/domain-analysis/weightedSemaphore
+.venv/bin/python tools/check_fault_mutants.py examples/weighted-semaphore/domain-analysis/weightedSemaphore
+```
+
+The JSON sidecar is the actual oracle consumed by the temporary cell suite.
+A kill requires completed cell discovery and failure of the targeted cell.
+Compilation errors, panics before completion and unrelated failures are blocked.
+The four contract-limit cells and two queued cells without a supported matrix
+operator are printed as not applicable. Supported mutations exercise 32 cells,
+with 41 matrix changes and four source faults. This is bounded evidence, not
+proof of every fault or interleaving. Structured rationale for all 38 cells is
+bound in `cell-rationale.json`; see [format](../../docs/cell-rationale.md).

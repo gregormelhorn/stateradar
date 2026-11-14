@@ -1,0 +1,44 @@
+{
+  "formatVersion": 1,
+  "testCommand": [
+    "python3",
+    "cells/run.py",
+    "--analysis",
+    "{analysis_dir}",
+    "--count",
+    "1",
+    "--mutation-check"
+  ],
+  "workingDirectory": "../..",
+  "timeoutSeconds": 120,
+  "mutants": [
+    {
+      "id": "omit-grant-rollback",
+      "fault": "F-05",
+      "cell": "Acquire_WaitersPending x UV-ContextOrder",
+      "target": "semaphore/semaphore.go",
+      "variant": "mutants/omit-grant-rollback.go.txt"
+    },
+    {
+      "id": "omit-selected-rollback",
+      "fault": "F-05",
+      "cell": "Acquire_WaitersPending x UV-ContextOrder",
+      "target": "semaphore/semaphore.go",
+      "variant": "mutants/omit-selected-rollback.go.txt"
+    },
+    {
+      "id": "try-bypass",
+      "fault": "F-04",
+      "cell": "Acquire_WaitersPending x TryAcquire",
+      "target": "semaphore/semaphore.go",
+      "variant": "mutants/try-bypass.go.txt"
+    },
+    {
+      "id": "zero-charges",
+      "fault": "F-05",
+      "cell": "Acquire_NoWaiters x Release",
+      "target": "semaphore/semaphore.go",
+      "variant": "mutants/zero-charges.go.txt"
+    }
+  ]
+}

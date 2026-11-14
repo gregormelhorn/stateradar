@@ -1,0 +1,49 @@
+NOT APPLICABLE: Acquire_NoWaiters x UV-ContextFault: DR-009 excludes faulty Contexts from the guaranteed-outcome domain; no finite verdict can assert an unconstrained response.
+NOT APPLICABLE: Acquire_NoWaiters x UV-Delay: DR-011 intentionally promises no finite latency bound. Finite timing tests cannot establish a universal bound or its absence; event-specific cancellation/order cases remain tested.
+NOT APPLICABLE: Acquire_WaitersPending x UV-ContextFault: DR-009 excludes faulty Contexts from the guaranteed-outcome domain; no finite verdict can assert an unconstrained response.
+NOT APPLICABLE: Acquire_WaitersPending x UV-Delay: DR-011 intentionally promises no finite latency bound. Finite timing tests cannot establish a universal bound or its absence; event-specific cancellation/order cases remain tested.
+NOT APPLICABLE: Acquire_WaitersPending x Acquire: no supported operator for defer (queued)
+NOT APPLICABLE: Acquire_WaitersPending x UV-RepeatAcquire: no supported operator for defer (queued)
+BASELINE: OK
+MUT-001 KILLED state=Acquire_NoWaiters event=Acquire kind=transition-target-swap old='transition →Acquire_WaitersPending' new='transition →Acquire_NoWaiters' exit=1 duration=0.685s
+MUT-002 KILLED state=Acquire_NoWaiters event=Acquire kind=transition-to-ignore old='transition →Acquire_WaitersPending' new='ignore (documented)' exit=1 duration=0.788s
+MUT-003 KILLED state=Acquire_NoWaiters event=ContextDone kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.576s
+MUT-004 KILLED state=Acquire_NoWaiters event=Grant kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.707s
+MUT-005 KILLED state=Acquire_NoWaiters event=NewWeighted kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.815s
+MUT-006 KILLED state=Acquire_NoWaiters event=Release kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.532s
+MUT-007 KILLED state=Acquire_NoWaiters event=TryAcquire kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.862s
+MUT-008 KILLED state=Acquire_NoWaiters event=UV-Abandon kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=0.507s
+MUT-009 KILLED state=Acquire_NoWaiters event=UV-ContextOrder kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.503s
+MUT-010 KILLED state=Acquire_NoWaiters event=UV-ForeignContext kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.508s
+MUT-011 KILLED state=Acquire_NoWaiters event=UV-Recreate kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.530s
+MUT-012 KILLED state=Acquire_NoWaiters event=UV-RepeatAcquire kind=transition-target-swap old='transition →Acquire_WaitersPending' new='transition →Acquire_NoWaiters' exit=1 duration=0.520s
+MUT-013 KILLED state=Acquire_NoWaiters event=UV-RepeatAcquire kind=transition-to-ignore old='transition →Acquire_WaitersPending' new='ignore (documented)' exit=1 duration=0.533s
+MUT-014 KILLED state=Acquire_NoWaiters event=UV-RepeatRelease kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.517s
+MUT-015 KILLED state=Acquire_NoWaiters event=UV-RepeatTry kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.526s
+MUT-016 KILLED state=Acquire_NoWaiters event=UV-RepeatedDone kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=0.521s
+MUT-017 KILLED state=Acquire_NoWaiters event=UV-UnownedRelease kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.517s
+MUT-018 KILLED state=Acquire_NoWaiters event=UV-Weight kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.736s
+MUT-019 KILLED state=Acquire_NoWaiters event=UV-WrongReceiver kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=0.528s
+MUT-020 KILLED state=Acquire_WaitersPending event=ContextDone kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.515s
+MUT-021 KILLED state=Acquire_WaitersPending event=ContextDone kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.514s
+MUT-022 KILLED state=Acquire_WaitersPending event=Grant kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.520s
+MUT-023 KILLED state=Acquire_WaitersPending event=Grant kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.505s
+MUT-024 KILLED state=Acquire_WaitersPending event=NewWeighted kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.511s
+MUT-025 KILLED state=Acquire_WaitersPending event=Release kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.520s
+MUT-026 KILLED state=Acquire_WaitersPending event=Release kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.519s
+MUT-027 KILLED state=Acquire_WaitersPending event=TryAcquire kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.527s
+MUT-028 KILLED state=Acquire_WaitersPending event=UV-Abandon kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=0.514s
+MUT-029 KILLED state=Acquire_WaitersPending event=UV-ContextOrder kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.529s
+MUT-030 KILLED state=Acquire_WaitersPending event=UV-ContextOrder kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.695s
+MUT-031 KILLED state=Acquire_WaitersPending event=UV-ForeignContext kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.537s
+MUT-032 KILLED state=Acquire_WaitersPending event=UV-Recreate kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.522s
+MUT-033 KILLED state=Acquire_WaitersPending event=UV-RepeatRelease kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.510s
+MUT-034 KILLED state=Acquire_WaitersPending event=UV-RepeatRelease kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.521s
+MUT-035 KILLED state=Acquire_WaitersPending event=UV-RepeatTry kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.523s
+MUT-036 KILLED state=Acquire_WaitersPending event=UV-RepeatedDone kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.629s
+MUT-037 KILLED state=Acquire_WaitersPending event=UV-RepeatedDone kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.543s
+MUT-038 KILLED state=Acquire_WaitersPending event=UV-UnownedRelease kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.525s
+MUT-039 KILLED state=Acquire_WaitersPending event=UV-UnownedRelease kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.519s
+MUT-040 KILLED state=Acquire_WaitersPending event=UV-Weight kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.567s
+MUT-041 KILLED state=Acquire_WaitersPending event=UV-WrongReceiver kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=0.564s
+MUTATION CHECK: OK (killed=41 survived=0 errors=0 blocked=0)

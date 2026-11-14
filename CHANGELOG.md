@@ -4,6 +4,19 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Behavioral mutation binding.** The weighted-semaphore cell suite consumes
+  temporary JSON oracle mutations and four generated source mutants. Completed
+  cell discovery and failure of the named cell are mandatory; process crashes,
+  zero discovery and unrelated failures do not count as kills. Four declared
+  contract limits and two cells without a supported mutation operator remain
+  explicit exclusions. Two already-decided boundary scenarios strengthen the
+  cell representatives; no runtime or domain contract changed.
+- **Structured cell rationale.** Optional adoption binds every cell to an
+  explicit claim, scope and cited accepted decision or callee contract. Schema,
+  checker and generator preserve and verify these bindings. All 38 current
+  semaphore cells adopt it. Historical sidecars are unchanged. See
+  `docs/cell-rationale.md`; citation validity is not proof of semantic entailment.
+
 - **Selective pilot output.** The signed-in Codex runner defaults to one
   analysis with full short reports, relevant Go failure stacks and paged
   reads of long documents. Read retained source and table evidence by name,

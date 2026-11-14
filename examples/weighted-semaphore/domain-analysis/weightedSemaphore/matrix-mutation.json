@@ -1,0 +1,16 @@
+{
+  "formatVersion": 1,
+  "oracle": "sidecar",
+  "coverageFile": "matrix-coverage.json",
+  "testCommand": [
+    "python3",
+    "cells/run.py",
+    "--analysis",
+    "{analysis_dir}",
+    "--count",
+    "1",
+    "--mutation-check"
+  ],
+  "workingDirectory": "../..",
+  "timeoutSeconds": 120
+}
