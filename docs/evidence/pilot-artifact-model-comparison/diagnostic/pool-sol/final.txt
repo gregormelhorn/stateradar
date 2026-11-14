@@ -1,0 +1,9 @@
+Completed the `channelPool` pilot with 6 states, 35 events, 210 matrix cells, and 22 open domain questions. Source code, existing tests, and configuration were left intact. [Summary](/private/tmp/stateradar-controller-4us5gpyo/pool-sol/selective/pool/domain-analysis/channelPool/summary.md) · [Open questions](/private/tmp/stateradar-controller-4us5gpyo/pool-sol/selective/pool/domain-analysis/channelPool/open-questions.md)
+
+- `Release` can strand a pending `Get`. A `Get` that observed an empty buffer before teardown can also enqueue after teardown when the pool is at capacity.
+- Between `Get`’s failed receive and its admission lock, `Put` can make a connection available. At capacity, the older `Get` can then queue while a newer caller takes the idle connection. Below capacity, it can create another connection while the idle one remains buffered.
+- The race detector confirmed a concurrent `Ping` read and `Release` write to the callback field. The probes also confirmed that a Ping already in progress can return a connection after teardown. [Validation](/private/tmp/stateradar-controller-4us5gpyo/pool-sol/selective/pool/domain-analysis/channelPool/as-is-validation.md)
+
+All artifact gates passed. Eleven bounded overlay probes passed their behavioral assertions. The full upstream suite timed out in `TestPool_Get`, and the separate race run failed with the diagnostic above. Both failures were preserved.
+
+The blind pass covered all 35 events and 32 pair orderings. Its 49 divergent situations were linked to open questions. Some agreements relied on implementation observations in the supplied catalogue, which limits their independence. [Blind comparison](/private/tmp/stateradar-controller-4us5gpyo/pool-sol/selective/pool/domain-analysis/channelPool/part-b-diff.md)

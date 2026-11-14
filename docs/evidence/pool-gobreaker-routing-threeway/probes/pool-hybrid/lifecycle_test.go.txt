@@ -1,0 +1,113 @@
+package pool
+
+import (
+	"errors"
+	"testing"
+	"time"
+)
+
+func TestPilotCallerDeparture(t *testing.T) {
+	p, _ := probePool(t, 1, 1, func(interface{}) error { return nil })
+	defer p.Release()
+	value, _ := p.Get()
+	outcome := probeGet(p)
+	probeWait(t, p, 1)
+	// A caller-side deadline fires without making a call into the pool.
+	probePending(t, outcome)
+	probeWait(t, p, 1)
+	if err := p.Put(value); err != nil {
+		t.Fatal(err)
+	}
+	if got := probeReceive(t, outcome); got != value {
+		t.Fatal("matching return did not complete abandoned acquisition")
+	}
+	if p.Len() != 0 {
+		t.Fatal("abandoned result remained in idle inventory")
+	}
+}
+
+func TestPilotLockedFactory(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		sentinel := errors.New("factory failure")
+		entered, resume, started, released := make(chan struct{}), make(chan struct{}), make(chan struct{}), make(chan struct{})
+		api, err := NewChannelPool(&Config{MaxCap: 1, MaxIdle: 1, Factory: func() (interface{}, error) {
+			close(entered)
+			<-resume
+			if fail {
+				return nil, sentinel
+			}
+			return new(probeValue), nil
+		}, Close: func(interface{}) error { return nil }})
+		if err != nil {
+			t.Fatal(err)
+		}
+		p := api.(*channelPool)
+		result := probeGet(p)
+		select {
+		case <-entered:
+		case <-time.After(time.Second):
+			t.Fatal("factory did not enter")
+		}
+		go func() { close(started); p.Release(); close(released) }()
+		<-started
+		select {
+		case <-released:
+			t.Fatal("Release completed while Factory held the mutex")
+		case <-time.After(15 * time.Millisecond):
+		}
+		close(resume)
+		select {
+		case a := <-result:
+			if fail && (a.err != sentinel || a.value != nil) {
+				t.Fatalf("factory error result %+v", a)
+			}
+			if !fail && (a.err != nil || a.value == nil) {
+				t.Fatalf("factory success result %+v", a)
+			}
+		case <-time.After(time.Second):
+			t.Fatal("factory result did not reach Get")
+		}
+		select {
+		case <-released:
+		case <-time.After(time.Second):
+			t.Fatal("Release did not finish")
+		}
+		if _, e := p.Get(); e != ErrClosed {
+			t.Fatal("new Get after Release did not reject")
+		}
+	}
+}
+
+func TestPilotFactoryAndCloseReentry(t *testing.T) {
+	for _, viaFactory := range []bool{false, true} {
+		entered, returned := make(chan struct{}), make(chan struct{})
+		var api Pool
+		reenter := func() { close(entered); api.Len(); close(returned) }
+		p, err := NewChannelPool(&Config{MaxCap: 1, MaxIdle: 1, Factory: func() (interface{}, error) {
+			if viaFactory {
+				reenter()
+			}
+			return new(probeValue), nil
+		}, Close: func(interface{}) error { reenter(); return nil }})
+		if err != nil {
+			t.Fatal(err)
+		}
+		api = p
+		if viaFactory {
+			go func() { _, _ = api.Get() }()
+		} else {
+			value, _ := api.Get()
+			go func() { _ = api.Close(value) }()
+		}
+		select {
+		case <-entered:
+		case <-time.After(time.Second):
+			t.Fatal("callback did not run")
+		}
+		select {
+		case <-returned:
+			t.Fatal("reentrant Len unexpectedly completed")
+		case <-time.After(15 * time.Millisecond):
+		}
+	}
+}

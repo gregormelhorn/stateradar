@@ -1,0 +1,18 @@
+stateDiagram-v2
+    [*] --> Closed: construction
+    Closed --> Closed: eligible call after closed interval / clear generation
+    Closed --> Open: current failure and ReadyToTrip true
+    Open --> HalfOpen: eligible call samples strictly after deadline
+    HalfOpen --> Open: current failure
+    HalfOpen --> Closed: current success reaches MaxRequests
+    note right of HalfOpen
+      Capacity is generation admissions.
+      Available and full are guard regions.
+    end note
+    state RequestLifecycle {
+        [*] --> AwaitingAdmission
+        AwaitingAdmission --> Refused: rejection
+        AwaitingAdmission --> Pending: admission commits
+        Pending --> Completed: return or report
+        Pending --> Abandoned: no completion or goroutine exit
+    }

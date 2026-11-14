@@ -1,0 +1,330 @@
+These fixes were made after all six measured pilots at 1a55d94 ended.
+
+RED help request
+.......F....
+======================================================================
+FAIL: test_routing_help_keeps_canonical_ledger_and_command_restrictions (__main__.SolPilotTest.test_routing_help_keeps_canonical_ledger_and_command_restrictions)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_run_sol_pilot.py", line 25, in test_routing_help_keeps_canonical_ledger_and_command_restrictions
+    self.assertEqual(code, 0)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+AssertionError: 2 != 0
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.023s
+
+FAILED (failures=1)
+
+GREEN help request
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.021s
+
+OK
+
+Sandbox integration: help exit 0, usage shown True, ledger created False.
+
+RED empty stdout read
+...E.........
+======================================================================
+ERROR: test_empty_stdout_read_returns_empty_and_stderr_remains_accessible (__main__.SolPilotTest.test_empty_stdout_read_returns_empty_and_stderr_remains_accessible)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_run_sol_pilot.py", line 54, in test_empty_stdout_read_returns_empty_and_stderr_remains_accessible
+    selected = read_log(root, ['read-log', '001', 'lines', '1', '16'])
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/run_sol_pilot.py", line 124, in read_log
+    return read_output(retained.read(), argv)
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/run_sol_pilot.py", line 137, in read_output
+    return select_lines(output, argv[2], argv[3:])
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/pilot_output.py", line 128, in select_lines
+    raise ValueError(f'line range must start within 1..{len(lines)} and request at most 100 lines')
+ValueError: line range must start within 1..0 and request at most 100 lines
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.021s
+
+FAILED (errors=1)
+
+GREEN runner regression suite
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.019s
+
+OK
+
+FULL ACCEPTANCE
+Command: bash /tmp/stateradar-promotion.y5vJyx/full-gates.sh
+Success: no issues found in 43 source files
+RULES REGISTRY: OK (72 rules, 22 fault classes, 0 warnings)
+ODC table: OK
+PACK CONSISTENCY: OK (20 artifacts, registry, version 1.53)
+  ok  checker without selftest_ref (fails as required)
+  ok  unknown fault id in detects (fails as required)
+  ok  fault-model without detects (fails as required)
+  ok  drifted block (fails as required)
+  ok  working tree (passes)
+  ok  implementation without precondition (fails as required)
+  ok  implementation with n/a observability (fails as required)
+  ok  matrix class with observability high (fails as required)
+  ok  none class without none_reason (fails as required)
+  ok  bad level value (fails as required)
+  ok  bad observability value (fails as required)
+  ok  matrix class carrying precondition (fails as required)
+  ok  matrix class carrying none_reason (fails as required)
+GEN_RULES SELFTEST: OK
+baseline
+  ok  flat fixture (passes)
+  ok  generator parses multi-table matrix with compound rows
+  ok  compound fixture (passes)
+  ok  TypeScript citations survive the generator
+  ok  citation fragments survive the generator
+  ok  quoted, typographic and backticked fragments are captured
+  ok  a file:line inside a fragment is never the citation
+  ok  punctuated question ids parse; Q-words do not
+  ok  '## Q-nn' question headings are parsed
+  ok  a prose table headed 'State' adds no events
+  ok  unbolded matrix rows are named; a prose table is not
+  ok  --strict fails on a note and passes a clean matrix
+  ok  pairs, guard groups and ODC fields come from their sources
+  ok  a crash cell is handle and needs a question
+  ok  doctrine map stops at the next heading of any level
+  ok  crash cell naming an undeclared question (fails as required)
+  ok  generated sidecar with a wrong fragment (fails as required)
+sidecar schema on generator output (fragment required on code citations)
+  ok  generator output on compound is schema-valid (passes)
+  ok  generator output on golden-mini is schema-valid (passes)
+  ok  generated code citation without a fragment (fails as required)
+  ok  dsc_check on a code citation without a fragment (fails as required)
+  ok  generator warns per component
+  ok  generator warnings stay with their component
+  ok  generator warns about an unresolved test-file citation
+  ok  generator points a prose citation to the overlay
+  ok  generator warns about a cited config file
+  ok  generator names the case of a source extension
+  ok  generator warns about a second citation next to a resolved one
+  ok  generator stays quiet on a file:line inside a fragment
+  ok  generator stays quiet on host:port text
+  ok  generator keeps a citation after host:port text
+  ok  requirements citation without a fragment (passes)
+  ok  upper-case prose extension without a fragment (passes)
+  ok  code citation without a fragment (fails as required)
+  ok  code file whose name contains .md, without a fragment (fails as required)
+  ok  code citation with an empty fragment (fails as required)
+sidecar types match the schema (tools/sidecar_types.py)
+  ok  sidecar TypedDicts agree with analysis.schema.json (passes)
+  ok  type drift: schema gains a cell property the type lacks (fails as required)
+  ok  type drift: schema gains a cell property CellBody lacks (fails as required)
+  ok  type drift: schema makes a question key required (fails as required)
+  ok  type drift: schema adds a disposition (fails as required)
+silent omission (v1.20: absence must be asserted)
+  ok  omitted sections (fails as required)
+  ok  asserted absence (passes)
+  ok  unreasoned absence (fails as required)
+model sync (compound states used to disable this check)
+  ok  state missing from diagram (fails as required)
+citation drift
+  ok  drifted fragment (fails as required)
+manifest discipline
+  ok  snake_case watchPaths (fails as required)
+registry-backed dsc red cases
+  ok  unknown disposition (fails as required)
+  ok  missing grid cell (fails as required)
+  ok  hole without Q (fails as required)
+  ok  guard outcome invalid (fails as required)
+  ok  not-formalizable without category (fails as required)
+  ok  pair without trace (fails as required)
+  ok  uncited behavioural DR (fails as required)
+  ok  cited DR file missing (fails as required)
+  ok  schema violation (fails as required)
+  ok  missing UV coverage entry (fails as required)
+  ok  unmapped doctrine line (fails as required)
+  ok  doctrine mapped to missing cell (fails as required)
+  ok  doctrine rejected without reason (fails as required)
+  ok  unknown ODC fault class (fails as required)
+  ok  missing gate-type annotation (fails as required)
+  ok  missing upstream-guard annotation (fails as required)
+  ok  UV binding permits prose and known variants (passes)
+  ok  phantom UV coverage binding (fails as required)
+  ok  UV coverage without assertions (fails as required)
+  ok  UV coverage with assertions (passes)
+matrix checker (markdown side)
+  ok  wrapper template, pack sibling stateradar (passes)
+  ok  wrapper template, wrong STATERADAR_PACK beside a sibling (fails as required)
+  ok  wrapper template, pack sibling pack (passes)
+  ok  wrapper template, pack sibling absent (fails as required)
+  ok  wrapper template, STATERADAR_PACK (passes)
+  ok  check_matrix green on golden-mini (passes)
+  ok  scope line missing under a '###' trace header (fails as required)
+  ok  scope line missing under a bold trace header (fails as required)
+  ok  scope lines present under '###' trace headers (passes)
+  ok  scope line missing under a 'T-F01' trace header (fails as required)
+  ok  mutation checker rejects missing configuration (fails as required)
+  ok  mutation checker reports weak suite survivors (fails as required)
+  ok  weak suite survives an ignore-to-handle mutant on a UV cell (fails as required)
+  ok  mutation checker leaves hole cells unmutated (passes)
+  ok  hole cell produces no ignore-to-handle mutant (passes)
+  ok  mutation checker golden-mini kills supported mutants (passes)
+  ok  matrix mutation count killed=28 (passes)
+  ok  matrix mutation family has 18 ignore-to-handle mutants (passes)
+  ok  UV matrix mutation has three KILLED UV-M1-lost mutants (passes)
+  ok  UV matrix mutation has three KILLED UV-M2-conflict mutants (passes)
+  ok  UV matrix mutation has three KILLED UV-M1-spurious mutants (passes)
+  ok  UV coverage binding M1/duplication=UV-M1-dup (passes)
+  ok  UV coverage binding M1/loss=UV-M1-lost (passes)
+  ok  UV coverage binding M2/contradiction=UV-M2-conflict (passes)
+  ok  UV coverage binding M1/commission=UV-M1-spurious (passes)
+  ok  ignore-to-handle replacement drops the (documented) annotation (passes)
+  ok  ignore-to-handle strips a DR annotation, keeps the citation (passes)
+  ok  mutation checker rejects missing placeholder (fails as required)
+  ok  mutation checker rejects repeated placeholder (fails as required)
+  ok  mutation checker rejects non-array command (fails as required)
+  ok  mutation checker blocks failed baseline (fails as required)
+  ok  mutation checker blocks timed-out baseline (fails as required)
+fault mutant checker
+  ok  fault mutant baseline kills all four fixture mutants (passes)
+  ok  fault mutant count killed=6 (passes)
+  ok  fault mutant kill proof (passes)
+  ok  mini.F-01-missing-transition.py single-region diff (passes)
+  ok  mini.F-02-transfer-fault.py single-region diff (passes)
+  ok  mini.F-04-sneak-path.py single-region diff (passes)
+  ok  mini.F-05-corrupt-state.py single-region diff (passes)
+  ok  mini.F-14-duplication.py single-region diff (passes)
+  ok  mini.F-05-corrupt-state-ignore.py single-region diff (passes)
+  ok  mirroring suite survives F-04 mutant (F-21 blind spot) (fails as required)
+  ok  fault mutant rejects missing config (fails as required)
+  ok  fault mutant rejects formatVersion 2 (fails as required)
+  ok  fault mutant rejects missing variant file (fails as required)
+  ok  fault mutant rejects missing placeholder (fails as required)
+  ok  fault mutant blocks failed baseline (fails as required)
+  ok  fault mutant blocks a crashing suite instead of counting a kill (fails as required)
+  ok  fault mutant reports a kill from an undeclared cell (fails as required)
+  ok  fault mutant blocks a suite that ignores the cell-failure contract (fails as required)
+binder-driven mutant generation
+  ok  generator check mode green on golden-mini (passes)
+  ok  generator green case checked=6 without DRIFT/BLOCKED/UNBOUND (passes)
+  ok  generator detects drift in a tracked variant (fails as required)
+  ok  generator drift case drift=1 (fails as required)
+  ok  generator blocks F-05 on an undeclared projection (fails as required)
+  ok  generator blocked case blocked=3 (fails as required)
+  ok  generator rejects a binding that matches no source block (fails as required)
+  ok  generator bad-match case errors=1 (fails as required)
+  ok  generator rejects a duplicate binding id (fails as required)
+  ok  empty coverage cell (fails as required)
+  ok  PA-17 naming violation (fails as required)
+  ok  missing abstraction statement (PA-10) (fails as required)
+  ok  unclassified event (PA-4) (fails as required)
+  ok  citing control trace without scope line (fails as required)
+  ok  scope line satisfied (wrapped across lines) (passes)
+part-B row coverage
+  ok  blind table complete (passes)
+  ok  blind table finer than one row per id (passes)
+  ok  blind table missing row (fails as required)
+  ok  blind partial fails only for missing row UV-M1-dup (passes)
+  ok  duplicated checklist tick (fails as required)
+  ok  blind dup fails only for duplicated checklist M2 (passes)
+  ok  blind table grows with catalogue (passes)
+  ok  blind fine table grows with catalogue (passes)
+  ok  blind partial grows with catalogue (fails as required)
+  ok  blind partial grows and still fails only for UV-M1-dup (passes)
+  ok  blind dup grows with catalogue (fails as required)
+  ok  blind dup grows and still fails only for M2 (passes)
+guard proofs (z3, PA-1/PA-2)
+  ok  disjoint covering group (passes)
+  ok  overlapping guards (PA-1) (fails as required)
+  ok  coverage gap (PA-2) (fails as required)
+  ok  has_else keeps disjointness red (fails as required)
+  ok  boundary probes assign below/at/above correctly
+reachability
+  ok  unreachable state must fail (fails as required)
+  ok  pair ordering reaches a state without a cell targeting it (passes)
+  ok  stale pair reachability metadata fails (fails as required)
+  ok  pair heading alone does not make a state reachable (fails as required)
+  ok  drifted pair evidence fails (fails as required)
+  ok  pair edge needs a reachable starting state (fails as required)
+  ok  pair target must be a declared state (fails as required)
+ensemble convergence
+  ok  ensemble convergent (identical) (passes)
+  ok  ensemble divergent (2 runs) (fails as required)
+  ok  ensemble divergent (3 runs) (fails as required)
+  ok  ensemble baseline: exit 1 + needle (fails as required)
+  ok  ensemble baseline: aligned grid 4×8 @ 93.8%
+  ok  ensemble deterministic output (byte-identical on repeat)
+  ok  ensemble input-order invariance (shuffled states/events/cells)
+  ok  ensemble zero-alignment (fails as required)
+  ok  ensemble collision guard (fails as required)
+  ok  ensemble baseline: exit 1 + structural >= 3
+  ok  ensemble baseline: aligned cells = 32
+benchmark dating protocol
+  ok  benchmark dating classification correct
+  ok  ignore-to-handle keeps fragment citations in every generator form
+  ok  check_fault_mutants reports a timeout with its partial output
+  ok  check_matrix_mutation reports a timeout with its partial output
+
+SELFTEST: OK
+Suite: local_budget
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.017s
+
+OK
+Suite: local_models
+.........PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpddgwvh1a/package.md (4218 chars, 1 events, 0 pair orderings)
+.PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpv2od_qsj/package.md (3994 chars, 1 events, 0 pair orderings)
+......PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmp7omxj_60/package.md (4230 chars, 1 events, 0 pair orderings)
+...PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpxc_lp6ez/package.md (4658 chars, 2 events, 0 pair orderings)
+.PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpx_37najw/package.md (3940 chars, 1 events, 0 pair orderings)
+PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpcgh0b7xu/package.md (3940 chars, 1 events, 0 pair orderings)
+PART-B COVERAGE: FAIL
+ - missing row: E01 (no table row keyed by it)
+ - missing checklist tick: E01
+.PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmp7ur_l518/package.md (3940 chars, 1 events, 0 pair orderings)
+.....PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpb4iqzj85/package.md (3985 chars, 1 events, 0 pair orderings)
+.PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpjgvs70z4/package.md (3940 chars, 1 events, 0 pair orderings)
+PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpbhf3wexb/package.md (4180 chars, 1 events, 0 pair orderings)
+..PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpnzryqg87/package.md (3940 chars, 1 events, 0 pair orderings)
+...PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmp8weo0yx3/package.md (3940 chars, 1 events, 0 pair orderings)
+.................
+----------------------------------------------------------------------
+Ran 49 tests in 0.255s
+
+OK
+{
+  "finish_reason": "stop"
+}
+Suite: jev_local
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK
+Suite: jev_eval
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.203s
+
+OK
+Suite: draft_verify
+....................
+----------------------------------------------------------------------
+Ran 20 tests in 0.069s
+
+OK
+Suite: draft_cells
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.208s
+
+OK
+Suite: run_sol_pilot
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.020s
+
+OK
+BENCH golden-mini: OK
+BENCH red-mini: OK
+2/2 cases pass
+OK mini: 3 states x 8 events = 24 cells, 0 questions, DRs []
+DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)
+REACHABILITY CHECK: OK (3/3 states reachable from 'Idle', 1 terminal)

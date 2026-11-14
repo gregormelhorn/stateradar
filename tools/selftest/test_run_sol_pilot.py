@@ -8,10 +8,67 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from run_sol_pilot import command_result, codex_environment, read_log, read_usage, serve_tools
+from run_sol_pilot import brief, command_result, codex_environment, execute, read_log, read_usage, serve_tools, verify_artifacts
 
 
 class SolPilotTest(unittest.TestCase):
+    def test_routing_help_keeps_canonical_ledger_and_command_restrictions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            argv = ['python3', '../pack/tools/local_models.py', '--ledger', '../routing.sqlite', '--help']
+            with (patch.dict('os.environ', {'DEEPSEEK_API_KEY': 'dummy', 'TYPESAFE_API_KEY': 'dummy'}),
+                  patch('run_sol_pilot.subprocess.Popen') as popen):
+                proc = popen.return_value.__enter__.return_value
+                proc.returncode = 0
+                proc.communicate.return_value = (b'usage: local_models.py', b'')
+                code, stdout, _ = execute(root, argv, 0, Path(sys.executable))
+                self.assertEqual(code, 0)
+                self.assertIn('usage:', stdout)
+                self.assertEqual(popen.call_count, 1)
+                for rejected in (argv[:4] + ['unknown'], argv[:3] + ['other.sqlite', '--help']):
+                    code, _, _ = execute(root, rejected, 0, Path(sys.executable))
+                    self.assertEqual(code, 2)
+                self.assertEqual(popen.call_count, 1)
+
+    def test_short_log_range_returns_available_lines_and_reports_bounds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            full = ''.join(f'line {i}\n' for i in range(1, 53))
+            with patch('run_sol_pilot.execute', return_value=(1, full, '')):
+                result = command_result(root, 'selective', ['go', 'test'], 1, Path(sys.executable))
+            self.assertEqual(result['line_counts'], {'stdout': 52, 'stderr': 0})
+            selected = read_log(root, ['read-log', '001', 'lines', '1', '90'])
+            self.assertEqual(selected['lines'][-1], (52, 'line 52'))
+            self.assertEqual(selected['total_lines'], 52)
+            self.assertFalse(selected['truncated'])
+            with self.assertRaisesRegex(ValueError, '52'):
+                read_log(root, ['read-log', '001', 'lines', '60', '90'])
+            with self.assertRaises(ValueError):
+                read_log(root, ['read-log', '001', 'lines', '1', '101'])
+
+    def test_empty_stdout_read_returns_empty_and_stderr_remains_accessible(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with patch('run_sol_pilot.execute', return_value=(1, '', 'diagnostic\n')):
+                command_result(root, 'selective', ['check'], 1, Path(sys.executable))
+            selected = read_log(root, ['read-log', '001', 'lines', '1', '16'])
+            self.assertEqual(selected['total_lines'], 0)
+            self.assertEqual(selected['lines'], [])
+            self.assertFalse(selected['truncated'])
+            diagnostic = read_log(root, ['read-log', '001.stderr', 'lines', '1', '16'])
+            self.assertEqual(diagnostic['lines'], [(1, 'diagnostic')])
+
+    def test_matrix_variant_uses_generator_gates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'logs').mkdir()
+            with patch('run_sol_pilot.execute', return_value=(0, 'OK', '')) as execute:
+                self.assertTrue(verify_artifacts(root, Path(sys.executable), structured=True))
+            self.assertEqual(execute.call_count, 7)
+            args = [call.args[1] for call in execute.call_args_list]
+            self.assertIn('../pack/tools/hybrid_pilot.py', args[0])
+            self.assertIn('--strict', args[1])
+
     def test_preserves_raw_log_and_uses_compact_tool_result(self):
         full = '=== RUN   TestPool_Get\n' + 'trace\n' * 8000
         full += 'panic: test timed out after 1m\n'
@@ -129,6 +186,18 @@ class SolPilotTest(unittest.TestCase):
                 followup = response['next']
             self.assertIsNone(followup)
             self.assertEqual(''.join(pages), full)
+
+    def test_matched_routing_briefs_differ_only_in_who_writes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'prompts').mkdir()
+            (root / 'prompts/02-pilot.md').write_text('Same English pilot.')
+            routed = brief(root, routing_variant='routed')
+            flash = brief(root, routing_variant='flash-writes')
+            self.assertIn('routing variant: flash-writes', flash)
+            self.assertIn('routing variant: routed', routed)
+            self.assertEqual(routed.replace('routing variant: routed',
+                                            'routing variant: flash-writes'), flash)
 
     def test_usage_preserves_codex_counters_and_requires_completed_turn(self):
         with tempfile.TemporaryDirectory() as directory:

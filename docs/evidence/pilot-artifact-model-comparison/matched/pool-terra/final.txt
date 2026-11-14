@@ -1,0 +1,11 @@
+The pilot is **incomplete**. I saved the preliminary [extraction](/private/tmp/stateradar-controller-matched-czn61wf4/pool-terra/selective/pool/domain-analysis/channelPool/extraction.md), [open questions](/private/tmp/stateradar-controller-matched-czn61wf4/pool-terra/selective/pool/domain-analysis/channelPool/open-questions.md), routed drafts, and [run summary](/private/tmp/stateradar-controller-matched-czn61wf4/pool-terra/selective/pool/domain-analysis/channelPool/summary.md).
+
+The strongest preliminary findings are:
+
+- The full test suite timed out in `TestPool_Get`: the test expects an error at capacity, but `Get` waits on a request channel.
+- `Release` does not notify pending waiters, and a connection returned after release encounters a cleared close callback. The intended ownership and waiter outcomes remain open questions.
+- A connection handed directly to a waiter bypasses the ping check used for an idle connection.
+
+Four routed extraction calls succeeded. A selected set of existing tests passed; the full suite timed out after eight seconds. The DSC and reachability checks ran but failed because the required sidecar has not been generated.
+
+The statechart, catalogue, matrix, guard proofs, probes, finding verification, and independent blind pass remain unfinished. The preliminary questions are not an exhaustive or validated set, and the analysis should not be treated as a completed pilot.

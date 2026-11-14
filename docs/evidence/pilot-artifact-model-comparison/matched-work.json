@@ -1,0 +1,406 @@
+{
+  "pool-sol": {
+    "catalogue_renders": [
+      {
+        "log": "037",
+        "exit": 0
+      }
+    ],
+    "catalogue_identity_checks": [],
+    "blind_dispatches": [
+      {
+        "log": "048",
+        "exit": 0
+      }
+    ],
+    "command_failures": [
+      {
+        "log": "009",
+        "exit": 2,
+        "argv": [
+          "python3",
+          "../pack/tools/local_models.py",
+          "draft-verify",
+          "--help"
+        ],
+        "diagnostic": "Use --ledger ../routing.sqlite and a model, status or --help command.\n"
+      },
+      {
+        "log": "015",
+        "exit": 1,
+        "argv": [
+          "go",
+          "test",
+          "-timeout=8s",
+          "./..."
+        ],
+        "diagnostic": "\npanic: test timed out after 8s\n\trunning tests:\n\t\tTestPool_Get (8s)\n\ngoroutine 500 [running]:\ntesting.(*M).startAlarm.func1()\n\t/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2961 +0x2c4\ncreated by time.goFunc\n\t/opt/homebrew/Cellar/go/1.27.3/libexec/src/time/sleep.go:182 +0x38\n\ngoroutine 1 [chan receive]:\ntesting.(*T).Run(0x634037bc008, {0x1031effc1?, 0x63403705a88?}, 0x1036db0d0)\n\t/"
+      },
+      {
+        "log": "024",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/local_models.py",
+          "--ledger",
+          "../routing.sqlite",
+          "draft-verify",
+          "channel.go",
+          "domain-analysis/channelPool/channel.go.task.md",
+          "--model",
+          "jev-1.14.0",
+          "--output",
+          "domain-analysis/channelPool/channel.go.review.json"
+        ],
+        "diagnostic": "LOCAL MODELS: Flash draft rejected: not JSON (Expecting ',' delimiter); usage was recorded\n\n"
+      },
+      {
+        "log": "034",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/pilot_artifacts.py",
+          "citations",
+          "channel.go",
+          "57",
+          "58",
+          "59",
+          "60",
+          "61",
+          "62",
+          "63",
+          "64",
+          "65",
+          "66",
+          "67",
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73",
+          "74",
+          "75",
+          "76",
+          "77",
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91",
+          "92",
+          "93",
+          "94",
+          "95",
+          "96",
+          "97",
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104",
+          "105",
+          "106",
+          "107",
+          "108",
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "115",
+          "116",
+          "117",
+          "118",
+          "119",
+          "120",
+          "121"
+        ],
+        "diagnostic": "PILOT ARTIFACTS: channel.go:68: missing or blank source line\n\n"
+      },
+      {
+        "log": "042",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/local_models.py",
+          "--ledger",
+          "../routing.sqlite",
+          "blind",
+          "domain-analysis/channelPool",
+          "--repo",
+          ".",
+          "--requirements",
+          "README.md:## Feature",
+          "--contracts",
+          "domain-analysis/channelPool/contracts.md",
+          "--output",
+          "domain-analysis/channelPool/part-b-blind.md",
+          "--package-only"
+        ],
+        "diagnostic": "PART-B PACK: input blocks suspiciously short \u2014 payload dropped?\n - INPUT 2: REQUIREMENTS (README.md:## Feature)\nLOCAL MODELS: blind input package failed validation\n\n"
+      },
+      {
+        "log": "057",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/local_models.py",
+          "--ledger",
+          "../routing.sqlite",
+          "jev-batch",
+          "channel.go",
+          "domain-analysis/channelPool/claims-channel.json",
+          "--model",
+          "jev-1.14.0",
+          "--output",
+          "domain-analysis/channelPool/claims-channel.result.json",
+          "--summary"
+        ],
+        "diagnostic": "LOCAL MODELS: C3: citation fragment must be a single line of at least 4 non-space characters\n\n"
+      },
+      {
+        "log": "080",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/dsc_check.py",
+          "domain-analysis/channelPool",
+          "--repo",
+          ".",
+          "--model",
+          "as-is.machine.mmd"
+        ],
+        "diagnostic": "\nDSC CHECK: FAIL\n - model sync: no edge Open --> Released for cell (Open, Release)\n - model sync: no edge Open_Waiting --> Released for cell (Open_Waiting, Release)\n - model sync: no edge Open_IdleAndWaiting --> Released for cell (Open_IdleAndWaiting, Release)\n - model sync: no edge Open --> Released for cell (Open, UV-OwnerOverlap)\n - model sync: no edge Open_Waiting --> Released for cell (Open_W"
+      },
+      {
+        "log": "086",
+        "exit": 1,
+        "argv": [
+          "rg",
+          "-n",
+          "part-b-diff|divergence",
+          "../pack/tools/check_matrix.py"
+        ],
+        "diagnostic": "\n"
+      },
+      {
+        "log": "101",
+        "exit": 1,
+        "argv": [
+          "go",
+          "test",
+          "-race",
+          "-timeout=8s",
+          "-overlay=domain-analysis/channelPool/_probe/overlay-original.json",
+          "-run",
+          "^TestPingReleaseRaceOriginal$",
+          "-count=1",
+          "."
+        ],
+        "diagnostic": "\n==================\nWARNING: DATA RACE\nWrite at 0x00c00019d3e0 by goroutine 10:\n  github.com/silenceper/pool.(*channelPool).Release()\n      /private/tmp/stateradar-controller-matched-czn61wf4/pool-sol/selective/pool/channel.go:229 +0xb0\n  github.com/silenceper/pool.TestPingReleaseRaceOriginal()\n      /private/tmp/stateradar-controller-matched-czn61wf4/pool-sol/selective/pool/pool_probe_test.go:368"
+      }
+    ]
+  },
+  "pool-terra": {
+    "catalogue_renders": [],
+    "catalogue_identity_checks": [],
+    "blind_dispatches": [],
+    "command_failures": [
+      {
+        "log": "007",
+        "exit": 2,
+        "argv": [
+          "python3",
+          "../pack/tools/local_models.py",
+          "--help"
+        ],
+        "diagnostic": "Use --ledger ../routing.sqlite and a model, status or --help command.\n"
+      },
+      {
+        "log": "008",
+        "exit": 1,
+        "argv": [
+          "go",
+          "test",
+          "-timeout",
+          "8s",
+          "./..."
+        ],
+        "diagnostic": "\npanic: test timed out after 8s\n\trunning tests:\n\t\tTestPool_Get (8s)\n\ngoroutine 485 [running]:\ntesting.(*M).startAlarm.func1()\n\t/opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2961 +0x2c4\ncreated by time.goFunc\n\t/opt/homebrew/Cellar/go/1.27.3/libexec/src/time/sleep.go:182 +0x38\n\ngoroutine 1 [chan receive]:\ntesting.(*T).Run(0xd75b23bc008, {0x100d33fc1?, 0xd75b22f7a88?}, 0x10121f0d0)\n\t/"
+      },
+      {
+        "log": "024",
+        "exit": 2,
+        "argv": [
+          "python3",
+          "../pack/tools/dsc_check.py",
+          "domain-analysis/channelPool",
+          "--repo",
+          ".",
+          "--model",
+          "as-is.machine.mmd"
+        ],
+        "diagnostic": "\nDSC CHECK: no analysis.json in domain-analysis/channelPool\n  Emit the sidecar (02-pilot step 4 / 06-reconcile step 4) \u2014\n  tools/gen_analysis_sidecar.py generates it from the disposition matrix.\n"
+      },
+      {
+        "log": "025",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/check_reachability.py",
+          "domain-analysis/channelPool",
+          "--repo",
+          "."
+        ],
+        "diagnostic": "\nREACHABILITY CHECK: FAIL\n  - no analysis.json at /private/tmp/stateradar-controller-matched-czn61wf4/pool-terra/selective/pool/domain-analysis/channelPool\n"
+      }
+    ]
+  },
+  "gobreaker-sol": {
+    "catalogue_renders": [
+      {
+        "log": "048",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/pilot_artifacts.py",
+          "catalogue",
+          "domain-analysis/circuitBreaker/catalogue-fields.json",
+          "domain-analysis/circuitBreaker/event-catalogue.md"
+        ],
+        "diagnostic": "PILOT ARTIFACTS: remembrance: needs nonempty single-line text\n\n"
+      },
+      {
+        "log": "052",
+        "exit": 0
+      }
+    ],
+    "catalogue_identity_checks": [
+      {
+        "log": "116",
+        "exit": 0
+      }
+    ],
+    "blind_dispatches": [
+      {
+        "log": "061",
+        "exit": 0
+      }
+    ],
+    "command_failures": [
+      {
+        "log": "023",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/local_models.py",
+          "--ledger",
+          "../routing.sqlite",
+          "draft-verify",
+          "gobreaker.go",
+          "domain-analysis/circuitBreaker/gobreaker.task.md",
+          "--model",
+          "jev-1.14.0",
+          "--output",
+          "domain-analysis/circuitBreaker/gobreaker.review.json"
+        ],
+        "diagnostic": "LOCAL MODELS: DeepSeek response incomplete (finish_reason=length); usage was recorded\n\n{\n  \"model\": \"deepseek-flash\",\n  \"finish_reason\": \"length\",\n  \"input_tokens\": 3795,\n  \"output_tokens\": 12000,\n  \"cost_microdollars\": 15539,\n  \"reservation_microdollars\": 18422,\n  \"text_saved_to\": \"domain-analysis/circuitBreaker/gobreaker.review.draft.txt\"\n}\n"
+      },
+      {
+        "log": "048",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/pilot_artifacts.py",
+          "catalogue",
+          "domain-analysis/circuitBreaker/catalogue-fields.json",
+          "domain-analysis/circuitBreaker/event-catalogue.md"
+        ],
+        "diagnostic": "PILOT ARTIFACTS: remembrance: needs nonempty single-line text\n\n"
+      },
+      {
+        "log": "057",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "domain-analysis/circuitBreaker/check_matrix.py"
+        ],
+        "diagnostic": "\nCHECK MATRIX: FAIL\n - missing state row: Closed\n - missing state row: Open\n - missing state row: HalfOpen\n - hole cell: Q-02 not in open-questions.md\n - hole cell: Q-02 not in open-questions.md\n - hole cell: Q-02 not in open-questions.md\n - hole cell: Q-02 not in open-questions.md\n - hole cell: Q-02 not in open-questions.md\n - hole cell: Q-02 not in open-questions.md\n - hole cell: Q-02 not in ope"
+      },
+      {
+        "log": "083",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "-c",
+          "import json\nfrom pathlib import Path\np=Path('domain-analysis/circuitBreaker')\nd=json.loads((p/'ordering.jev.json').read_text())\nfor k,v in d['checks'].items(): print(k,v)\nfor f in p.glob('*.review.json'):\n d=json.loads(f"
+        ],
+        "diagnostic": "Traceback (most recent call last):\n  File \"<string>\", line 9, in <module>\n    if c.get('jev',{}).get('choice') in ('unclear','contradicted') or c.get('citation_check')!='ok': print(f.name,k,c.get('citation_check'),c.get('jev',{}).get('choice'),c.get('line'),c.get('statement'))\n       ^^^^^^^^^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'get'\n\nordering-01 {'kind': 'ordering', 'sta"
+      }
+    ]
+  },
+  "gobreaker-terra": {
+    "catalogue_renders": [],
+    "catalogue_identity_checks": [],
+    "blind_dispatches": [],
+    "command_failures": [
+      {
+        "log": "007",
+        "exit": 2,
+        "argv": [
+          "python3",
+          "../pack/tools/local_models.py",
+          "--help"
+        ],
+        "diagnostic": "Use --ledger ../routing.sqlite and a model, status or --help command.\n"
+      },
+      {
+        "log": "024",
+        "exit": 2,
+        "argv": [
+          "python3",
+          "../pack/tools/dsc_check.py",
+          "--help"
+        ],
+        "diagnostic": "\nDSC CHECK: no analysis.json in --help\n  Emit the sidecar (02-pilot step 4 / 06-reconcile step 4) \u2014\n  tools/gen_analysis_sidecar.py generates it from the disposition matrix.\n"
+      },
+      {
+        "log": "028",
+        "exit": 1,
+        "argv": [
+          "python3",
+          "../pack/tools/check_reachability.py",
+          "domain-analysis/circuitBreaker"
+        ],
+        "diagnostic": "\nREACHABILITY CHECK: FAIL\n  - no analysis.json at /private/tmp/stateradar-controller-matched-czn61wf4/gobreaker-terra/selective/pool/domain-analysis/circuitBreaker\n"
+      },
+      {
+        "log": "029",
+        "exit": 2,
+        "argv": [
+          "python3",
+          "../pack/tools/dsc_check.py",
+          "domain-analysis/circuitBreaker",
+          "--repo",
+          ".",
+          "--model",
+          "as-is.machine.mmd"
+        ],
+        "diagnostic": "\nDSC CHECK: no analysis.json in domain-analysis/circuitBreaker\n  Emit the sidecar (02-pilot step 4 / 06-reconcile step 4) \u2014\n  tools/gen_analysis_sidecar.py generates it from the disposition matrix.\n"
+      }
+    ]
+  }
+}

@@ -1,0 +1,3111 @@
+{
+ "formatVersion": "1.0",
+ "component": "channelPool",
+ "packVersion": "",
+ "analyzedSha": "WORKTREE",
+ "watchPaths": [],
+ "states": [
+  "Initializing",
+  "Open",
+  "Open_Waiting",
+  "Open_WaitingWithIdle",
+  "Released",
+  "Released_Waiting"
+ ],
+ "events": [
+  {
+   "id": "New",
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "Constructor validates the capacity relation and callback presence locally",
+    "channel.go:59 (\"poolConfig.InitialCap <= poolConfig.MaxIdle\"). No upstream config validation is shown."
+   ]
+  },
+  {
+   "id": "Get",
+   "undesired": false,
+   "gate": "service-side state",
+   "upstream_guards": [
+    "No caller identity",
+    "context or ownership token in the public API",
+    "pool.go:12 (\"Get() (interface{}",
+    "error)\")."
+   ]
+  },
+  {
+   "id": "Put",
+   "undesired": false,
+   "gate": "payload content and service-side state",
+   "upstream_guards": [
+    "Example intends a return after use",
+    "README.md:52 (\"Put the connection back into the connection pool",
+    "when the connection is no longer in use\"). No upstream enforcement of receiver",
+    "ownership or affinity."
+   ]
+  },
+  {
+   "id": "Close",
+   "undesired": false,
+   "gate": "payload content and service-side state",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "Release",
+   "undesired": false,
+   "gate": "service-side state",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "Len",
+   "undesired": false,
+   "gate": "service-side state",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "DirectPing",
+   "undesired": false,
+   "gate": "payload content and service-side state",
+   "upstream_guards": [
+    "Adapter must obtain interface exposing Ping. That assertion does not establish configuration",
+    "channel.go:78 (\"if poolConfig.Ping != nil {\")."
+   ]
+  },
+  {
+   "id": "FactoryResult",
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "Caller supplies the callback. Error result is typed. No stronger upstream lifecycle",
+    "panic",
+    "timing or reentrancy guarantee is documented."
+   ]
+  },
+  {
+   "id": "CloseResult",
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "Caller supplies the callback. Error result is typed. No stronger upstream lifecycle",
+    "panic",
+    "timing or reentrancy guarantee is documented."
+   ]
+  },
+  {
+   "id": "PingResult",
+   "undesired": false,
+   "gate": "payload content",
+   "upstream_guards": [
+    "Caller supplies the callback. Error result is typed. No stronger upstream lifecycle",
+    "panic",
+    "timing or reentrancy guarantee is documented."
+   ]
+  },
+  {
+   "id": "IdleAge",
+   "undesired": false,
+   "gate": "service-side state",
+   "upstream_guards": [
+    "No injected pool clock. Time is sampled by Get",
+    "channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\")."
+   ]
+  },
+  {
+   "id": "WaitDelivery",
+   "undesired": false,
+   "gate": "service-side state",
+   "upstream_guards": [
+    "Only Put produces delivery in this component",
+    "channel.go:183 (\"req <- connReq{\"). No requester identifier in payload",
+    "channel.go:36 (\"idleConn *idleConn\")."
+   ]
+  },
+  {
+   "id": "DrainDone",
+   "undesired": false,
+   "gate": "service-side state",
+   "upstream_guards": [
+    "Only the first successful detachment can drain its captured channel",
+    "channel.go:227 (\"c.conns = nil\")",
+    "channel.go:234 (\"if conns == nil {\")."
+   ]
+  },
+  {
+   "id": "UV-NewOmitted",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-NewRepeated",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-BadConfig",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-GetOmitted",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-GetAgain",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-AbandonGet",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-LateGet",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-ContendedGet",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-WrongPoolGet",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-ReturnMissing",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-LatePut",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-LateClose",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-BadOwnership",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-WrongPoolPut",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-ReleaseOmitted",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-ReleaseAgain",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-WrongPoolRelease",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-LateRead",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-FactoryFault",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-CloseFault",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-PingFault",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  },
+  {
+   "id": "UV-CallbackDelay",
+   "undesired": true,
+   "gate": "observed service state and/or payload as for base event",
+   "upstream_guards": [
+    "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+   ]
+  }
+ ],
+ "cells": [
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "New"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "Get"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "Put"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "Close"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "Release"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "Len"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "DirectPing"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Open",
+   "event": "New"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Open",
+   "event": "Get"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open",
+   "event": "Put"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open",
+   "event": "Close"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   },
+   "state": "Open",
+   "event": "Release"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open",
+   "event": "Len"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open",
+   "event": "DirectPing"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Open_Waiting",
+   "event": "New"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Open_Waiting",
+   "event": "Get"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "channel.go",
+    "line": 182,
+    "fragment": "c.connReqs = c.connReqs[:l-1]"
+   },
+   "state": "Open_Waiting",
+   "event": "Put"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting",
+   "event": "Close"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   },
+   "state": "Open_Waiting",
+   "event": "Release"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_Waiting",
+   "event": "Len"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_Waiting",
+   "event": "DirectPing"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "New"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 110,
+    "fragment": "case wrapConn := <-conns:"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "Get"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "channel.go",
+    "line": 182,
+    "fragment": "c.connReqs = c.connReqs[:l-1]"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "Put"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "Close"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "Release"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "Len"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "DirectPing"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Released",
+   "event": "New"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released",
+   "event": "Get"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released",
+   "event": "Put"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released",
+   "event": "Close"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-15",
+   "citation": {
+    "file": "channel.go",
+    "line": 234,
+    "fragment": "if conns == nil {"
+   },
+   "state": "Released",
+   "event": "Release"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Released",
+   "event": "Len"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Released",
+   "event": "DirectPing"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Released_Waiting",
+   "event": "New"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released_Waiting",
+   "event": "Get"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released_Waiting",
+   "event": "Put"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released_Waiting",
+   "event": "Close"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-15",
+   "citation": {
+    "file": "channel.go",
+    "line": 234,
+    "fragment": "if conns == nil {"
+   },
+   "state": "Released_Waiting",
+   "event": "Release"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Released_Waiting",
+   "event": "Len"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-13",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Released_Waiting",
+   "event": "DirectPing"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 83,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Initializing",
+   "event": "FactoryResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Initializing",
+   "event": "CloseResult"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "PingResult"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "IdleAge"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "WaitDelivery"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 239,
+    "fragment": "for wrapConn := range conns {"
+   },
+   "state": "Initializing",
+   "event": "DrainDone"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 58,
+    "fragment": "func NewChannelPool(poolConfig *Config) (Pool, error) {"
+   },
+   "state": "Initializing",
+   "event": "UV-NewOmitted"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open",
+   "event": "FactoryResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open",
+   "event": "CloseResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 124,
+    "fragment": "if err := c.Ping(wrapConn.conn); err != nil {"
+   },
+   "state": "Open",
+   "event": "PingResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+   },
+   "state": "Open",
+   "event": "IdleAge"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 148,
+    "fragment": "return ret.idleConn.conn, nil"
+   },
+   "state": "Open",
+   "event": "WaitDelivery"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 226,
+    "fragment": "conns := c.conns"
+   },
+   "state": "Open",
+   "event": "DrainDone"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Open",
+   "event": "UV-NewOmitted"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting",
+   "event": "FactoryResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting",
+   "event": "CloseResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 124,
+    "fragment": "if err := c.Ping(wrapConn.conn); err != nil {"
+   },
+   "state": "Open_Waiting",
+   "event": "PingResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+   },
+   "state": "Open_Waiting",
+   "event": "IdleAge"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 148,
+    "fragment": "return ret.idleConn.conn, nil"
+   },
+   "state": "Open_Waiting",
+   "event": "WaitDelivery"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 226,
+    "fragment": "conns := c.conns"
+   },
+   "state": "Open_Waiting",
+   "event": "DrainDone"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-NewOmitted"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "FactoryResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "CloseResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 124,
+    "fragment": "if err := c.Ping(wrapConn.conn); err != nil {"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "PingResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "IdleAge"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 148,
+    "fragment": "return ret.idleConn.conn, nil"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "WaitDelivery"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 226,
+    "fragment": "conns := c.conns"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "DrainDone"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-NewOmitted"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 161,
+    "fragment": "return conn, nil"
+   },
+   "state": "Released",
+   "event": "FactoryResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Released",
+   "event": "CloseResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 129,
+    "fragment": "return wrapConn.conn, nil"
+   },
+   "state": "Released",
+   "event": "PingResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+   },
+   "state": "Released",
+   "event": "IdleAge"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 148,
+    "fragment": "return ret.idleConn.conn, nil"
+   },
+   "state": "Released",
+   "event": "WaitDelivery"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 239,
+    "fragment": "for wrapConn := range conns {"
+   },
+   "state": "Released",
+   "event": "DrainDone"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Released",
+   "event": "UV-NewOmitted"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 161,
+    "fragment": "return conn, nil"
+   },
+   "state": "Released_Waiting",
+   "event": "FactoryResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Released_Waiting",
+   "event": "CloseResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 129,
+    "fragment": "return wrapConn.conn, nil"
+   },
+   "state": "Released_Waiting",
+   "event": "PingResult"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 116,
+    "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+   },
+   "state": "Released_Waiting",
+   "event": "IdleAge"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 148,
+    "fragment": "return ret.idleConn.conn, nil"
+   },
+   "state": "Released_Waiting",
+   "event": "WaitDelivery"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 239,
+    "fragment": "for wrapConn := range conns {"
+   },
+   "state": "Released_Waiting",
+   "event": "DrainDone"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-NewOmitted"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-NewRepeated"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-12",
+   "citation": {
+    "file": "channel.go",
+    "line": 59,
+    "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {"
+   },
+   "state": "Initializing",
+   "event": "UV-BadConfig"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-GetOmitted"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-GetAgain"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-AbandonGet"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-LateGet"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-ContendedGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Open",
+   "event": "UV-NewRepeated"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 59,
+    "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {"
+   },
+   "state": "Open",
+   "event": "UV-BadConfig"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Open",
+   "event": "UV-GetOmitted"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Open",
+   "event": "UV-GetAgain"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-04",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open",
+   "event": "UV-AbandonGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 104,
+    "fragment": "conns := c.getConns()"
+   },
+   "state": "Open",
+   "event": "UV-LateGet"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Open",
+   "event": "UV-ContendedGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-NewRepeated"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 59,
+    "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-BadConfig"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-GetOmitted"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-GetAgain"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-04",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-AbandonGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 104,
+    "fragment": "conns := c.getConns()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-LateGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 133,
+    "fragment": "if c.openingConns >= c.maxActive {"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-ContendedGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-NewRepeated"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 59,
+    "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-BadConfig"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-GetOmitted"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 110,
+    "fragment": "case wrapConn := <-conns:"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-GetAgain"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-04",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-AbandonGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 104,
+    "fragment": "conns := c.getConns()"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-LateGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 133,
+    "fragment": "if c.openingConns >= c.maxActive {"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-ContendedGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Released",
+   "event": "UV-NewRepeated"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 59,
+    "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {"
+   },
+   "state": "Released",
+   "event": "UV-BadConfig"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Released",
+   "event": "UV-GetOmitted"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released",
+   "event": "UV-GetAgain"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-04",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Released",
+   "event": "UV-AbandonGet"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Released",
+   "event": "UV-LateGet"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released",
+   "event": "UV-ContendedGet"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 69,
+    "fragment": "c := &channelPool{"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-NewRepeated"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 59,
+    "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-BadConfig"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 103,
+    "fragment": "func (c *channelPool) Get() (interface{}, error) {"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-GetOmitted"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-GetAgain"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-04",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-AbandonGet"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-LateGet"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-ContendedGet"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-WrongPoolGet"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-ReturnMissing"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-LatePut"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-LateClose"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-BadOwnership"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-WrongPoolPut"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-ReleaseOmitted"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Open",
+   "event": "UV-WrongPoolGet"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open",
+   "event": "UV-ReturnMissing"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open",
+   "event": "UV-LatePut"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open",
+   "event": "UV-LateClose"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open",
+   "event": "UV-BadOwnership"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open",
+   "event": "UV-WrongPoolPut"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open",
+   "event": "UV-ReleaseOmitted"
+  },
+  {
+   "disposition": "defer (queued)",
+   "citation": {
+    "file": "channel.go",
+    "line": 135,
+    "fragment": "c.connReqs = append(c.connReqs, req)"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-WrongPoolGet"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-ReturnMissing"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "channel.go",
+    "line": 182,
+    "fragment": "c.connReqs = c.connReqs[:l-1]"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-LatePut"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-LateClose"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-BadOwnership"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-WrongPoolPut"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-ReleaseOmitted"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 110,
+    "fragment": "case wrapConn := <-conns:"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-WrongPoolGet"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-ReturnMissing"
+  },
+  {
+   "disposition": "transition",
+   "target": "Open",
+   "citation": {
+    "file": "channel.go",
+    "line": 182,
+    "fragment": "c.connReqs = c.connReqs[:l-1]"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-LatePut"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 211,
+    "fragment": "c.openingConns--"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-LateClose"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-BadOwnership"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 190,
+    "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-WrongPoolPut"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-ReleaseOmitted"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released",
+   "event": "UV-WrongPoolGet"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Released",
+   "event": "UV-ReturnMissing"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released",
+   "event": "UV-LatePut"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released",
+   "event": "UV-LateClose"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released",
+   "event": "UV-BadOwnership"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released",
+   "event": "UV-WrongPoolPut"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Released",
+   "event": "UV-ReleaseOmitted"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 106,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-WrongPoolGet"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-ReturnMissing"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-LatePut"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-LateClose"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-BadOwnership"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-05",
+   "citation": {
+    "file": "channel.go",
+    "line": 209,
+    "fragment": "return nil"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-WrongPoolPut"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-19",
+   "citation": {
+    "file": "channel.go",
+    "line": 137,
+    "fragment": "ret, ok := <-req"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-ReleaseOmitted"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-ReleaseAgain"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-WrongPoolRelease"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-LateRead"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "channel.go",
+    "line": 83,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Initializing",
+   "event": "UV-FactoryFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-10",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Initializing",
+   "event": "UV-CloseFault"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 91,
+    "fragment": "return c, nil"
+   },
+   "state": "Initializing",
+   "event": "UV-PingFault"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 83,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Initializing",
+   "event": "UV-CallbackDelay"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   },
+   "state": "Open",
+   "event": "UV-ReleaseAgain"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   },
+   "state": "Open",
+   "event": "UV-WrongPoolRelease"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open",
+   "event": "UV-LateRead"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open",
+   "event": "UV-FactoryFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-10",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open",
+   "event": "UV-CloseFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open",
+   "event": "UV-PingFault"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open",
+   "event": "UV-CallbackDelay"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-ReleaseAgain"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-WrongPoolRelease"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-LateRead"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-FactoryFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-10",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-CloseFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-PingFault"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_Waiting",
+   "event": "UV-CallbackDelay"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-ReleaseAgain"
+  },
+  {
+   "disposition": "transition",
+   "target": "Released_Waiting",
+   "citation": {
+    "file": "channel.go",
+    "line": 227,
+    "fragment": "c.conns = nil"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-WrongPoolRelease"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-LateRead"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-09",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-FactoryFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-10",
+   "citation": {
+    "file": "channel.go",
+    "line": 212,
+    "fragment": "return c.close(conn)"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-CloseFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-PingFault"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 154,
+    "fragment": "conn, err := c.factory()"
+   },
+   "state": "Open_WaitingWithIdle",
+   "event": "UV-CallbackDelay"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-15",
+   "citation": {
+    "file": "channel.go",
+    "line": 234,
+    "fragment": "if conns == nil {"
+   },
+   "state": "Released",
+   "event": "UV-ReleaseAgain"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-15",
+   "citation": {
+    "file": "channel.go",
+    "line": 234,
+    "fragment": "if conns == nil {"
+   },
+   "state": "Released",
+   "event": "UV-WrongPoolRelease"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Released",
+   "event": "UV-LateRead"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 152,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released",
+   "event": "UV-FactoryFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-10",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Released",
+   "event": "UV-CloseFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Released",
+   "event": "UV-PingFault"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Released",
+   "event": "UV-CallbackDelay"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-15",
+   "citation": {
+    "file": "channel.go",
+    "line": 234,
+    "fragment": "if conns == nil {"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-ReleaseAgain"
+  },
+  {
+   "disposition": "ignore (accidental)",
+   "q": "Q-15",
+   "citation": {
+    "file": "channel.go",
+    "line": 234,
+    "fragment": "if conns == nil {"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-WrongPoolRelease"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 247,
+    "fragment": "return len(c.getConns())"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-LateRead"
+  },
+  {
+   "disposition": "reject",
+   "citation": {
+    "file": "channel.go",
+    "line": 152,
+    "fragment": "return nil, ErrClosed"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-FactoryFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-10",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-CloseFault"
+  },
+  {
+   "disposition": "handle",
+   "q": "Q-06",
+   "citation": {
+    "file": "channel.go",
+    "line": 220,
+    "fragment": "return c.ping(conn)"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-PingFault"
+  },
+  {
+   "disposition": "handle",
+   "citation": {
+    "file": "channel.go",
+    "line": 241,
+    "fragment": "closeFun(wrapConn.conn)"
+   },
+   "state": "Released_Waiting",
+   "event": "UV-CallbackDelay"
+  }
+ ],
+ "questions": [
+  {
+   "id": "Q-01",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-20"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-02",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-04"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-03",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-20"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-04",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-09"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-05",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-07"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-06",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-15"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-07",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-19"
+   ],
+   "trigger": "doctrine mapping"
+  },
+  {
+   "id": "Q-08",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-11"
+   ],
+   "trigger": "step-3 lock-discipline annotation"
+  },
+  {
+   "id": "Q-09",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "seam-contract sweep"
+  },
+  {
+   "id": "Q-10",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-05"
+   ],
+   "trigger": "seam-contract sweep"
+  },
+  {
+   "id": "Q-11",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-08"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-12",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-18"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-13",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "step-4 matrix walk"
+  },
+  {
+   "id": "Q-14",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "step-1 extraction"
+  },
+  {
+   "id": "Q-15",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-08"
+   ],
+   "trigger": "adversarial trace"
+  },
+  {
+   "id": "Q-16",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "step-5 lint"
+  },
+  {
+   "id": "Q-17",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-13"
+   ],
+   "trigger": "doctrine mapping"
+  },
+  {
+   "id": "Q-18",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-05"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-19",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-12"
+   ],
+   "trigger": "step-3 checklist"
+  },
+  {
+   "id": "Q-20",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-10"
+   ],
+   "trigger": "multi-instance probes"
+  },
+  {
+   "id": "Q-21",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-03"
+   ],
+   "trigger": "seam-contract sweep"
+  },
+  {
+   "id": "Q-22",
+   "status": "OPEN — human decision required",
+   "fault": [
+    "F-15"
+   ],
+   "trigger": "part-B diff"
+  }
+ ],
+ "behaviouralDrs": [],
+ "docLines": [
+  {
+   "id": "DOC-1",
+   "mapping": "structural",
+   "target": "Pool API shape is checked against pool.go declarations and model review"
+  },
+  {
+   "id": "DOC-2",
+   "mapping": "invariant",
+   "target": "SYS-02"
+  },
+  {
+   "id": "DOC-3",
+   "mapping": "invariant",
+   "target": "SYS-03"
+  },
+  {
+   "id": "DOC-4",
+   "mapping": "cell",
+   "target": "Open x Get"
+  },
+  {
+   "id": "DOC-5",
+   "mapping": "cell",
+   "target": "Initializing x FactoryResult"
+  },
+  {
+   "id": "DOC-6",
+   "mapping": "cell",
+   "target": "Open x Close"
+  },
+  {
+   "id": "DOC-7",
+   "mapping": "cell",
+   "target": "Open x PingResult"
+  },
+  {
+   "id": "DOC-8",
+   "mapping": "rejected",
+   "target": "The numbers are an illustrative configuration. The general capacity relation is proven by G-01"
+  },
+  {
+   "id": "DOC-9",
+   "mapping": "invariant",
+   "target": "SYS-02"
+  },
+  {
+   "id": "DOC-10",
+   "mapping": "cell",
+   "target": "Open x Get"
+  },
+  {
+   "id": "DOC-11",
+   "mapping": "cell",
+   "target": "Open x Put"
+  },
+  {
+   "id": "DOC-12",
+   "mapping": "invariant",
+   "target": "SYS-04"
+  },
+  {
+   "id": "DOC-13",
+   "mapping": "invariant",
+   "target": "SYS-05"
+  }
+ ],
+ "pairs": [
+  {
+   "id": "P-01a",
+   "trace": "adversarial-traces.md#P-01a: Get → Put",
+   "reachability": {
+    "source": "Open",
+    "target": "Open_WaitingWithIdle",
+    "file": "domain-analysis/channelPool/_probe/window_test.go",
+    "line": 34,
+    "fragment": "waiter failed to coexist with idle storage"
+   }
+  },
+  {
+   "id": "P-01b",
+   "trace": "adversarial-traces.md#P-01b: Put → Get"
+  },
+  {
+   "id": "P-02a",
+   "trace": "adversarial-traces.md#P-02a: Get → Close"
+  },
+  {
+   "id": "P-02b",
+   "trace": "adversarial-traces.md#P-02b: Close → Get"
+  },
+  {
+   "id": "P-03a",
+   "trace": "adversarial-traces.md#P-03a: Get → Release",
+   "reachability": {
+    "source": "Open_Waiting",
+    "target": "Released_Waiting",
+    "file": "domain-analysis/channelPool/_probe/observe_test.go",
+    "line": 79,
+    "fragment": "pending(t, waiting)"
+   }
+  },
+  {
+   "id": "P-03b",
+   "trace": "adversarial-traces.md#P-03b: Release → Get"
+  },
+  {
+   "id": "P-04a",
+   "trace": "adversarial-traces.md#P-04a: Put → Release"
+  },
+  {
+   "id": "P-04b",
+   "trace": "adversarial-traces.md#P-04b: Release → Put"
+  },
+  {
+   "id": "P-05a",
+   "trace": "adversarial-traces.md#P-05a: Close → Release"
+  },
+  {
+   "id": "P-05b",
+   "trace": "adversarial-traces.md#P-05b: Release → Close"
+  },
+  {
+   "id": "P-06a",
+   "trace": "adversarial-traces.md#P-06a: Len → Release"
+  },
+  {
+   "id": "P-06b",
+   "trace": "adversarial-traces.md#P-06b: Release → Len"
+  },
+  {
+   "id": "P-07a",
+   "trace": "adversarial-traces.md#P-07a: Put → Close"
+  },
+  {
+   "id": "P-07b",
+   "trace": "adversarial-traces.md#P-07b: Close → Put"
+  },
+  {
+   "id": "P-08a",
+   "trace": "adversarial-traces.md#P-08a: PingResult → Release"
+  },
+  {
+   "id": "P-08b",
+   "trace": "adversarial-traces.md#P-08b: Release → PingResult"
+  },
+  {
+   "id": "P-09a",
+   "trace": "adversarial-traces.md#P-09a: FactoryResult → Release"
+  },
+  {
+   "id": "P-09b",
+   "trace": "adversarial-traces.md#P-09b: Release → FactoryResult"
+  },
+  {
+   "id": "P-10a",
+   "trace": "adversarial-traces.md#P-10a: CloseResult → Release"
+  },
+  {
+   "id": "P-10b",
+   "trace": "adversarial-traces.md#P-10b: Release → CloseResult"
+  },
+  {
+   "id": "P-11a",
+   "trace": "adversarial-traces.md#P-11a: Len → Put"
+  },
+  {
+   "id": "P-11b",
+   "trace": "adversarial-traces.md#P-11b: Put → Len"
+  },
+  {
+   "id": "P-12a",
+   "trace": "adversarial-traces.md#P-12a: Len → Get"
+  },
+  {
+   "id": "P-12b",
+   "trace": "adversarial-traces.md#P-12b: Get → Len"
+  },
+  {
+   "id": "P-13a",
+   "trace": "adversarial-traces.md#P-13a: DirectPing → Release"
+  },
+  {
+   "id": "P-13b",
+   "trace": "adversarial-traces.md#P-13b: Release → DirectPing"
+  },
+  {
+   "id": "P-14a",
+   "trace": "adversarial-traces.md#P-14a: Len → Close"
+  },
+  {
+   "id": "P-14b",
+   "trace": "adversarial-traces.md#P-14b: Close → Len"
+  },
+  {
+   "id": "P-15a",
+   "trace": "adversarial-traces.md#P-15a: DirectPing → Put"
+  },
+  {
+   "id": "P-15b",
+   "trace": "adversarial-traces.md#P-15b: Put → DirectPing"
+  },
+  {
+   "id": "P-16a",
+   "trace": "adversarial-traces.md#P-16a: DirectPing → Close"
+  },
+  {
+   "id": "P-16b",
+   "trace": "adversarial-traces.md#P-16b: Close → DirectPing"
+  }
+ ],
+ "guardGroups": [
+  {
+   "id": "G-01",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-02",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-03",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-04",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-05",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-06",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-07",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-08",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-10",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-11",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-12",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-13",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-14",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-15",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-16",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-17",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-18",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-19",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-20",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-22",
+   "outcome": "proven"
+  },
+  {
+   "id": "G-09",
+   "outcome": "not-formalizable",
+   "reason": "clock: channel.go:116, 142. Comparing effective deadline against the live clock. Inspection: sample before/equal keeps the resource, later discards."
+  },
+  {
+   "id": "G-21",
+   "outcome": "not-formalizable",
+   "reason": "dynamic-state: channel.go:110, 190. Readiness includes concurrent send and receive, including unbuffered rendezvous. Inspection: ready chooses the channel case, unavailable chooses default."
+  },
+  {
+   "id": "G-23",
+   "outcome": "not-formalizable",
+   "reason": "external-call: channel.go:83, 124, 154, 212, 220, 241. Boolean return tests are separately proven. Actual cleanup, health, blocking and panic contracts are external."
+  }
+ ],
+ "coverage": {
+  "New": {
+   "loss": "UV-NewOmitted",
+   "delay": "UV-CallbackDelay",
+   "duplication": "UV-NewRepeated",
+   "out-of-order": "UV-NewRepeated",
+   "contradiction": "UV-BadConfig",
+   "commission": "UV-NewRepeated",
+   "value": "UV-BadConfig"
+  },
+  "Get": {
+   "loss": "UV-GetOmitted",
+   "delay": "UV-AbandonGet",
+   "duplication": "UV-GetAgain",
+   "out-of-order": "UV-LateGet",
+   "contradiction": "UV-ContendedGet",
+   "commission": "UV-GetOmitted",
+   "value": "UV-WrongPoolGet"
+  },
+  "Put": {
+   "loss": "UV-ReturnMissing",
+   "delay": "UV-LatePut",
+   "duplication": "UV-BadOwnership",
+   "out-of-order": "UV-LatePut",
+   "contradiction": "UV-BadOwnership",
+   "commission": "UV-BadOwnership",
+   "value": "UV-WrongPoolPut, UV-BadOwnership"
+  },
+  "Close": {
+   "loss": "UV-ReturnMissing",
+   "delay": "UV-LateClose",
+   "duplication": "UV-BadOwnership",
+   "out-of-order": "UV-LateClose",
+   "contradiction": "UV-BadOwnership",
+   "commission": "UV-BadOwnership",
+   "value": "UV-WrongPoolPut, UV-BadOwnership"
+  },
+  "Release": {
+   "loss": "UV-ReleaseOmitted",
+   "delay": "UV-ReleaseOmitted",
+   "duplication": "UV-ReleaseAgain",
+   "out-of-order": "UV-ReleaseAgain",
+   "contradiction": "UV-LateGet",
+   "commission": "UV-ReleaseAgain",
+   "value": "UV-WrongPoolRelease"
+  },
+  "Len": {
+   "loss": "n/a: omitting a read has no state effect, channel.go:247 (\"return len(c.getConns())\").",
+   "delay": "UV-LateRead",
+   "duplication": "UV-LateRead",
+   "out-of-order": "UV-LateRead",
+   "contradiction": "UV-LateRead",
+   "commission": "n/a: an unsolicited read has no state effect, channel.go:247 (\"return len(c.getConns())\").",
+   "value": "UV-LateRead"
+  },
+  "DirectPing": {
+   "loss": "UV-PingFault",
+   "delay": "UV-CallbackDelay",
+   "duplication": "UV-PingFault",
+   "out-of-order": "UV-PingFault",
+   "contradiction": "UV-PingFault",
+   "commission": "UV-PingFault",
+   "value": "UV-PingFault"
+  },
+  "FactoryResult": {
+   "loss": "UV-FactoryFault",
+   "delay": "UV-CallbackDelay",
+   "duplication": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:154 (\"conn, err := c.factory()\").",
+   "out-of-order": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:154 (\"conn, err := c.factory()\").",
+   "contradiction": "UV-FactoryFault",
+   "commission": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:154 (\"conn, err := c.factory()\").",
+   "value": "UV-FactoryFault"
+  },
+  "CloseResult": {
+   "loss": "UV-CloseFault",
+   "delay": "UV-CallbackDelay",
+   "duplication": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:212 (\"return c.close(conn)\").",
+   "out-of-order": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:212 (\"return c.close(conn)\").",
+   "contradiction": "UV-CloseFault",
+   "commission": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:212 (\"return c.close(conn)\").",
+   "value": "UV-CloseFault"
+  },
+  "PingResult": {
+   "loss": "UV-PingFault",
+   "delay": "UV-CallbackDelay",
+   "duplication": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:220 (\"return c.ping(conn)\").",
+   "out-of-order": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:220 (\"return c.ping(conn)\").",
+   "contradiction": "UV-PingFault",
+   "commission": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:220 (\"return c.ping(conn)\").",
+   "value": "UV-PingFault"
+  },
+  "IdleAge": {
+   "loss": "n/a: local time sampling has no delivery channel, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+   "delay": "UV-AbandonGet",
+   "duplication": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+   "out-of-order": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+   "contradiction": "n/a: one observation per branch, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+   "commission": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+   "value": "UV-BadConfig"
+  },
+  "WaitDelivery": {
+   "loss": "UV-ReturnMissing",
+   "delay": "UV-AbandonGet",
+   "duplication": "n/a: serialized dequeue before send to a private request channel, channel.go:182 (\"c.connReqs = c.connReqs[:l-1]\").",
+   "out-of-order": "UV-LatePut",
+   "contradiction": "UV-ContendedGet",
+   "commission": "n/a: delivery requires registered work, channel.go:179 (\"if l := len(c.connReqs); l > 0 {\").",
+   "value": "UV-BadOwnership"
+  },
+  "DrainDone": {
+   "loss": "UV-CloseFault",
+   "delay": "UV-CallbackDelay",
+   "duplication": "n/a: there is one drain per captured channel, channel.go:234 (\"if conns == nil {\").",
+   "out-of-order": "n/a: the range executes after detachment in the same call, channel.go:239 (\"for wrapConn := range conns {\").",
+   "contradiction": "UV-LateGet",
+   "commission": "n/a: requires prior detachment, channel.go:234 (\"if conns == nil {\").",
+   "value": "n/a: payloadless method or completion signal, channel.go:239 (\"for wrapConn := range conns {\")."
+  }
+ }
+}

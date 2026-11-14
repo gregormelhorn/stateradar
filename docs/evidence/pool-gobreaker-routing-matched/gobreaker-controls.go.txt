@@ -1,0 +1,83 @@
+package gobreaker
+
+import (
+	"errors"
+	"os"
+	"os/exec"
+	"strings"
+	"testing"
+	"time"
+)
+
+func TestPilotStaleDone(t *testing.T) {
+	cb := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }})
+	trip, _ := cb.Allow()
+	late, _ := cb.Allow()
+	trip(false)
+	before := cb.Counts()
+	late(true)
+	if cb.State() != StateOpen || cb.Counts() != before || before != (Counts{}) {
+		t.Fatalf("late completion changed open generation: %v %v", cb.State(), cb.Counts())
+	}
+}
+
+func TestPilotDuplicateDone(t *testing.T) {
+	cb := NewTwoStepCircuitBreaker(Settings{})
+	done, _ := cb.Allow()
+	done(true)
+	done(true)
+	got := cb.Counts()
+	if got.Requests != 1 || got.TotalSuccesses != 2 {
+		t.Fatalf("duplicate completion yielded %+v", got)
+	}
+}
+
+func TestPilotMissingHalfOpenDone(t *testing.T) {
+	cb := NewTwoStepCircuitBreaker(Settings{Timeout: time.Millisecond, ReadyToTrip: func(Counts) bool { return true }})
+	trip, _ := cb.Allow()
+	trip(false)
+	time.Sleep(3 * time.Millisecond)
+	done, err := cb.Allow()
+	if done == nil || err != nil || cb.State() != StateHalfOpen {
+		t.Fatalf("half-open probe: %v", err)
+	}
+	for i := 0; i < 2; i++ {
+		time.Sleep(3 * time.Millisecond)
+		if _, err := cb.Allow(); !errors.Is(err, ErrTooManyRequests) {
+			t.Fatalf("half-open did not retain its only slot: %v", err)
+		}
+	}
+}
+
+func TestPilotStateChangeReentry(t *testing.T) {
+	if os.Getenv("STATERADAR_REENTRY_PROBE") == "1" {
+		var cb *TwoStepCircuitBreaker
+		cb = NewTwoStepCircuitBreaker(Settings{
+			ReadyToTrip: func(Counts) bool { return true },
+			OnStateChange: func(string, State, State) {
+				println("entered callback")
+				cb.Counts()
+				println("callback returned")
+			},
+		})
+		done, _ := cb.Allow()
+		done(false)
+		return
+	}
+	cmd := exec.Command(os.Args[0], "-test.run=^TestPilotStateChangeReentry$", "-test.timeout=500ms")
+	cmd.Env = append(os.Environ(), "STATERADAR_REENTRY_PROBE=1")
+	output, err := cmd.CombinedOutput()
+	s := string(output)
+	if err == nil || !containsAll(s, "entered callback", "test timed out", "(*CircuitBreaker).Counts", "sync.(*Mutex).Lock") {
+		t.Fatalf("did not observe reentry deadlock: %v\n%s", err, output)
+	}
+}
+
+func containsAll(s string, parts ...string) bool {
+	for _, p := range parts {
+		if !strings.Contains(s, p) {
+			return false
+		}
+	}
+	return true
+}

@@ -1,0 +1,16 @@
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Closed: expiry observed with interval enabled / clear generation
+    Closed --> Open: current failure and ReadyToTrip returns true
+    Open --> HalfOpen: strict expiry observed by State, admission or completion
+    HalfOpen --> HalfOpen: admit below budget or current success below threshold
+    HalfOpen --> Open: current failure
+    HalfOpen --> Closed: current success reaches threshold
+    note right of Closed
+      Expiry is unset or set by the interval.
+      Classification and request work run outside the lock.
+    end note
+    note right of HalfOpen
+      No expiry. Admission budget is per generation.
+      Pending work is represented by caller-held continuations.
+    end note

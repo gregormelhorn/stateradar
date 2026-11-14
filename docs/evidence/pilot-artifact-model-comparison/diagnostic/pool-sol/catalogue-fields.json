@@ -1,0 +1,607 @@
+{
+  "events": [
+    {
+      "id": "New",
+      "classification": "external",
+      "undesired": false,
+      "source": "configuration caller",
+      "description": "Create a pool from capacities, time limit and callbacks. Constructor entry observed in code, channel.go:58 (\"func NewChannelPool(poolConfig *Config) (Pool, error) {\").",
+      "gate": "payload content",
+      "upstream_guards": [
+        "Constructor validates the capacity relation and callback presence locally, channel.go:59 (\"poolConfig.InitialCap <= poolConfig.MaxIdle\"). No upstream config validation is shown."
+      ],
+      "coverage": {
+        "loss": "UV-NewOmitted",
+        "delay": "UV-CallbackDelay",
+        "duplication": "UV-NewRepeated",
+        "out-of-order": "UV-NewRepeated",
+        "contradiction": "UV-BadConfig",
+        "commission": "UV-NewRepeated",
+        "value": "UV-BadConfig"
+      }
+    },
+    {
+      "id": "Get",
+      "classification": "external",
+      "undesired": false,
+      "source": "borrower",
+      "description": "Request a resource and receive a value or error. Pool API entry observed in code, channel.go:103 (\"func (c *channelPool) Get() (interface{}, error) {\").",
+      "gate": "service-side state",
+      "upstream_guards": [
+        "No caller identity, context or ownership token in the public API, pool.go:12 (\"Get() (interface{}, error)\")."
+      ],
+      "coverage": {
+        "loss": "UV-GetOmitted",
+        "delay": "UV-AbandonGet",
+        "duplication": "UV-GetAgain",
+        "out-of-order": "UV-LateGet",
+        "contradiction": "UV-ContendedGet",
+        "commission": "UV-GetOmitted",
+        "value": "UV-WrongPoolGet"
+      }
+    },
+    {
+      "id": "Put",
+      "classification": "external",
+      "undesired": false,
+      "source": "resource returner",
+      "description": "Offer a resource after use. Pool API entry observed in code, channel.go:167 (\"func (c *channelPool) Put(conn interface{}) error {\").",
+      "gate": "payload content and service-side state",
+      "upstream_guards": [
+        "Example intends a return after use, README.md:52 (\"Put the connection back into the connection pool, when the connection is no longer in use\"). No upstream enforcement of receiver, ownership or affinity."
+      ],
+      "coverage": {
+        "loss": "UV-ReturnMissing",
+        "delay": "UV-LatePut",
+        "duplication": "UV-BadOwnership",
+        "out-of-order": "UV-LatePut",
+        "contradiction": "UV-BadOwnership",
+        "commission": "UV-BadOwnership",
+        "value": "UV-WrongPoolPut, UV-BadOwnership"
+      }
+    },
+    {
+      "id": "Close",
+      "classification": "external",
+      "undesired": false,
+      "source": "resource closer",
+      "description": "Request closure of a supplied resource. Pool API entry observed in code, channel.go:202 (\"func (c *channelPool) Close(conn interface{}) error {\").",
+      "gate": "payload content and service-side state",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ],
+      "coverage": {
+        "loss": "UV-ReturnMissing",
+        "delay": "UV-LateClose",
+        "duplication": "UV-BadOwnership",
+        "out-of-order": "UV-LateClose",
+        "contradiction": "UV-BadOwnership",
+        "commission": "UV-BadOwnership",
+        "value": "UV-WrongPoolPut, UV-BadOwnership"
+      }
+    },
+    {
+      "id": "Release",
+      "classification": "external",
+      "undesired": false,
+      "source": "lifecycle owner",
+      "description": "Request teardown. Pool API entry observed in code, channel.go:224 (\"func (c *channelPool) Release() {\").",
+      "gate": "service-side state",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ],
+      "coverage": {
+        "loss": "UV-ReleaseOmitted",
+        "delay": "UV-ReleaseOmitted",
+        "duplication": "UV-ReleaseAgain",
+        "out-of-order": "UV-ReleaseAgain",
+        "contradiction": "UV-LateGet",
+        "commission": "UV-ReleaseAgain",
+        "value": "UV-WrongPoolRelease"
+      }
+    },
+    {
+      "id": "Len",
+      "classification": "external",
+      "undesired": false,
+      "source": "observer",
+      "description": "Query current count. Pool API entry observed in code, channel.go:246 (\"func (c *channelPool) Len() int {\").",
+      "gate": "service-side state",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ],
+      "coverage": {
+        "loss": "n/a: omitting a read has no state effect, channel.go:247 (\"return len(c.getConns())\").",
+        "delay": "UV-LateRead",
+        "duplication": "UV-LateRead",
+        "out-of-order": "UV-LateRead",
+        "contradiction": "UV-LateRead",
+        "commission": "n/a: an unsolicited read has no state effect, channel.go:247 (\"return len(c.getConns())\").",
+        "value": "UV-LateRead"
+      }
+    },
+    {
+      "id": "DirectPing",
+      "classification": "external",
+      "undesired": false,
+      "source": "concrete-method adapter",
+      "description": "Optional health callback can be requested via a structural interface assertion on the concrete value. It is absent from Pool's declared methods, pool.go:20 (\"Len() int\"). Method observed in code, channel.go:216 (\"func (c *channelPool) Ping(conn interface{}) error {\").",
+      "gate": "payload content and service-side state",
+      "upstream_guards": [
+        "Adapter must obtain interface exposing Ping. That assertion does not establish configuration, channel.go:78 (\"if poolConfig.Ping != nil {\")."
+      ],
+      "coverage": {
+        "loss": "UV-PingFault",
+        "delay": "UV-CallbackDelay",
+        "duplication": "UV-PingFault",
+        "out-of-order": "UV-PingFault",
+        "contradiction": "UV-PingFault",
+        "commission": "UV-PingFault",
+        "value": "UV-PingFault"
+      }
+    },
+    {
+      "id": "FactoryResult",
+      "classification": "external",
+      "undesired": false,
+      "source": "injected Factory",
+      "description": "Synchronous value or error for a construction or acquisition. Invocation observed in code, channel.go:83 (\"conn, err := c.factory()\"), channel.go:154 (\"conn, err := c.factory()\").",
+      "gate": "payload content",
+      "upstream_guards": [
+        "Caller supplies the callback. Error result is typed. No stronger upstream lifecycle, panic, timing or reentrancy guarantee is documented."
+      ],
+      "coverage": {
+        "loss": "UV-FactoryFault",
+        "delay": "UV-CallbackDelay",
+        "duplication": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:154 (\"conn, err := c.factory()\").",
+        "out-of-order": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:154 (\"conn, err := c.factory()\").",
+        "contradiction": "UV-FactoryFault",
+        "commission": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:154 (\"conn, err := c.factory()\").",
+        "value": "UV-FactoryFault"
+      }
+    },
+    {
+      "id": "CloseResult",
+      "classification": "external",
+      "undesired": false,
+      "source": "injected Close",
+      "description": "Synchronous completion or error from resource cleanup. Invocation observed in code, channel.go:212 (\"return c.close(conn)\"), channel.go:241 (\"closeFun(wrapConn.conn)\").",
+      "gate": "payload content",
+      "upstream_guards": [
+        "Caller supplies the callback. Error result is typed. No stronger upstream lifecycle, panic, timing or reentrancy guarantee is documented."
+      ],
+      "coverage": {
+        "loss": "UV-CloseFault",
+        "delay": "UV-CallbackDelay",
+        "duplication": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:212 (\"return c.close(conn)\").",
+        "out-of-order": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:212 (\"return c.close(conn)\").",
+        "contradiction": "UV-CloseFault",
+        "commission": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:212 (\"return c.close(conn)\").",
+        "value": "UV-CloseFault"
+      }
+    },
+    {
+      "id": "PingResult",
+      "classification": "external",
+      "undesired": false,
+      "source": "injected Ping",
+      "description": "Synchronous health result while checking a resource. Invocation observed in code, channel.go:220 (\"return c.ping(conn)\").",
+      "gate": "payload content",
+      "upstream_guards": [
+        "Caller supplies the callback. Error result is typed. No stronger upstream lifecycle, panic, timing or reentrancy guarantee is documented."
+      ],
+      "coverage": {
+        "loss": "UV-PingFault",
+        "delay": "UV-CallbackDelay",
+        "duplication": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:220 (\"return c.ping(conn)\").",
+        "out-of-order": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:220 (\"return c.ping(conn)\").",
+        "contradiction": "UV-PingFault",
+        "commission": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:220 (\"return c.ping(conn)\").",
+        "value": "UV-PingFault"
+      }
+    },
+    {
+      "id": "IdleAge",
+      "classification": "internal",
+      "undesired": false,
+      "source": "clock sample in Get",
+      "description": "Evaluate the age of an acquired candidate using IdleTimeout, a duration. MaxIdle is the maximum count of idle entries. Trigger observed in code, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\"), channel.go:142 (\"if ret.idleConn.t.Add(timeout).Before(time.Now()) {\").",
+      "gate": "service-side state",
+      "upstream_guards": [
+        "No injected pool clock. Time is sampled by Get, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\")."
+      ],
+      "coverage": {
+        "loss": "n/a: local time sampling has no delivery channel, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+        "delay": "UV-AbandonGet",
+        "duplication": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+        "out-of-order": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+        "contradiction": "n/a: one observation per branch, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+        "commission": "n/a: synchronous result has no autonomous or duplicate delivery after the invocation returns, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+        "value": "UV-BadConfig"
+      }
+    },
+    {
+      "id": "WaitDelivery",
+      "classification": "internal",
+      "undesired": false,
+      "source": "pool return path",
+      "description": "Value sent to a registered acquisition. Producer and consumer observed in code, channel.go:183 (\"req <- connReq{\"), channel.go:137 (\"ret, ok := <-req\").",
+      "gate": "service-side state",
+      "upstream_guards": [
+        "Only Put produces delivery in this component, channel.go:183 (\"req <- connReq{\"). No requester identifier in payload, channel.go:36 (\"idleConn *idleConn\")."
+      ],
+      "coverage": {
+        "loss": "UV-ReturnMissing",
+        "delay": "UV-AbandonGet",
+        "duplication": "n/a: serialized dequeue before send to a private request channel, channel.go:182 (\"c.connReqs = c.connReqs[:l-1]\").",
+        "out-of-order": "UV-LatePut",
+        "contradiction": "UV-ContendedGet",
+        "commission": "n/a: delivery requires registered work, channel.go:179 (\"if l := len(c.connReqs); l > 0 {\").",
+        "value": "UV-BadOwnership"
+      }
+    },
+    {
+      "id": "DrainDone",
+      "classification": "internal",
+      "undesired": false,
+      "source": "pool teardown path",
+      "description": "Finish processing detached idle storage. Completion boundary observed in code, channel.go:239 (\"for wrapConn := range conns {\").",
+      "gate": "service-side state",
+      "upstream_guards": [
+        "Only the first successful detachment can drain its captured channel, channel.go:227 (\"c.conns = nil\"), channel.go:234 (\"if conns == nil {\")."
+      ],
+      "coverage": {
+        "loss": "UV-CloseFault",
+        "delay": "UV-CallbackDelay",
+        "duplication": "n/a: there is one drain per captured channel, channel.go:234 (\"if conns == nil {\").",
+        "out-of-order": "n/a: the range executes after detachment in the same call, channel.go:239 (\"for wrapConn := range conns {\").",
+        "contradiction": "UV-LateGet",
+        "commission": "n/a: requires prior detachment, channel.go:234 (\"if conns == nil {\").",
+        "value": "n/a: payloadless method or completion signal, channel.go:239 (\"for wrapConn := range conns {\")."
+      }
+    },
+    {
+      "id": "UV-NewOmitted",
+      "classification": "external",
+      "undesired": true,
+      "source": "configuration caller",
+      "description": "Construction omitted or deferred. Boundary observed in code, channel.go:58 (\"func NewChannelPool(poolConfig *Config) (Pool, error) {\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-NewRepeated",
+      "classification": "external",
+      "undesired": true,
+      "source": "configuration caller",
+      "description": "Duplicate or overlapping construction against the same backend, including an unintended extra pool. Boundary observed in code, channel.go:69 (\"c := &channelPool{\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-BadConfig",
+      "classification": "external",
+      "undesired": true,
+      "source": "configuration caller",
+      "description": "Nil configuration, invalid capacities, absent callbacks, zero capacity or unintended idle time including negative. Boundary observed in code, channel.go:59 (\"if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-GetOmitted",
+      "classification": "external",
+      "undesired": true,
+      "source": "borrower",
+      "description": "Omitted acquisition or unsolicited acquisition with no application demand. Boundary observed in code, channel.go:103 (\"func (c *channelPool) Get() (interface{}, error) {\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-GetAgain",
+      "classification": "external",
+      "undesired": true,
+      "source": "borrower",
+      "description": "Second acquisition by the same caller while the first is pending or while its first resource is held. Boundary observed in code, channel.go:135 (\"c.connReqs = append(c.connReqs, req)\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-AbandonGet",
+      "classification": "external",
+      "undesired": true,
+      "source": "borrower",
+      "description": "Caller stops waiting externally, with no later matching return or with a later matching return. Boundary observed in code, channel.go:137 (\"ret, ok := <-req\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-LateGet",
+      "classification": "external",
+      "undesired": true,
+      "source": "borrower and lifecycle owner",
+      "description": "Get overlaps or follows Release, including a prior observation of empty or ready storage. Boundary observed in code, channel.go:104 (\"conns := c.getConns()\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-ContendedGet",
+      "classification": "external",
+      "undesired": true,
+      "source": "borrower and resource returner",
+      "description": "Put or Close changes availability between Get's failed receive and admission decision. Boundary observed in code, channel.go:131 (\"c.mu.Lock()\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-WrongPoolGet",
+      "classification": "external",
+      "undesired": true,
+      "source": "borrower",
+      "description": "Get sent to the wrong pool instance. Boundary observed in code, channel.go:104 (\"conns := c.getConns()\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-ReturnMissing",
+      "classification": "external",
+      "undesired": true,
+      "source": "resource holder",
+      "description": "Omit Put or Close after acquisition, leaving resource use and pending requests to be resolved. Boundary observed in code, channel.go:129 (\"return wrapConn.conn, nil\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-LatePut",
+      "classification": "external",
+      "undesired": true,
+      "source": "resource returner",
+      "description": "Put overlaps teardown or returns a resource after shutdown or requester departure. Boundary observed in code, channel.go:174 (\"if c.conns == nil {\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-LateClose",
+      "classification": "external",
+      "undesired": true,
+      "source": "resource closer",
+      "description": "Close after Release, or after Put selected overflow cleanup. Boundary observed in code, channel.go:208 (\"if c.close == nil {\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-BadOwnership",
+      "classification": "external",
+      "undesired": true,
+      "source": "resource returner or closer",
+      "description": "Duplicate Put or Close, nil including typed nil, stale or wrong payload, or contradictory Put and Close for one resource. Boundary observed in code, channel.go:168 (\"if conn == nil {\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-WrongPoolPut",
+      "classification": "external",
+      "undesired": true,
+      "source": "resource returner or closer",
+      "description": "Put or Close sent to the wrong pool instance. Boundary observed in code, channel.go:172 (\"c.mu.Lock()\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-ReleaseOmitted",
+      "classification": "external",
+      "undesired": true,
+      "source": "lifecycle owner",
+      "description": "Omit or delay Release. Boundary observed in code, channel.go:224 (\"func (c *channelPool) Release() {\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-ReleaseAgain",
+      "classification": "external",
+      "undesired": true,
+      "source": "lifecycle owner",
+      "description": "Repeat Release before drain completes or after it returns, including unsolicited teardown. Boundary observed in code, channel.go:234 (\"if conns == nil {\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-WrongPoolRelease",
+      "classification": "external",
+      "undesired": true,
+      "source": "lifecycle owner",
+      "description": "Release the wrong instance. Boundary observed in code, channel.go:227 (\"c.conns = nil\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-LateRead",
+      "classification": "external",
+      "undesired": true,
+      "source": "observer",
+      "description": "Repeated, stale or wrong-receiver Len during concurrent changes or teardown. Boundary observed in code, channel.go:247 (\"return len(c.getConns())\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-FactoryFault",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected Factory",
+      "description": "Factory error, panic, nil success, or value accompanying an error or of unexpected type. Boundary observed in code, channel.go:154 (\"conn, err := c.factory()\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-CloseFault",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected Close",
+      "description": "Close error or panic including during expiry, overflow and drain, or success without cleanup. Boundary observed in code, channel.go:212 (\"return c.close(conn)\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-PingFault",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected Ping or concrete-method adapter",
+      "description": "Absent callback, delayed or invalid health result, panic, or overlapping call and Release. Boundary observed in code, channel.go:220 (\"return c.ping(conn)\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    },
+    {
+      "id": "UV-CallbackDelay",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected Factory, Close or Ping",
+      "description": "Callback stalls or re-enters Get, Put, Close, Release or Len while the original call is in progress. Boundary observed in code, channel.go:207 (\"defer c.mu.Unlock()\").",
+      "gate": "observed service state and/or payload as for base event",
+      "upstream_guards": [
+        "No deployment-wide upstream guarantee. Tests and example are representative callers only."
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "id": "P-01",
+      "first": "Get",
+      "second": "Put",
+      "entity": "same pool, borrower and returning holder"
+    },
+    {
+      "id": "P-02",
+      "first": "Get",
+      "second": "Close",
+      "entity": "same pool, borrower and resource closer"
+    },
+    {
+      "id": "P-03",
+      "first": "Get",
+      "second": "Release",
+      "entity": "same pool, borrower and lifecycle owner"
+    },
+    {
+      "id": "P-04",
+      "first": "Put",
+      "second": "Release",
+      "entity": "same pool and resource, returning holder and lifecycle owner"
+    },
+    {
+      "id": "P-05",
+      "first": "Close",
+      "second": "Release",
+      "entity": "same pool and resource, closer and lifecycle owner"
+    },
+    {
+      "id": "P-06",
+      "first": "Len",
+      "second": "Release",
+      "entity": "same pool, observer and lifecycle owner"
+    },
+    {
+      "id": "P-07",
+      "first": "Put",
+      "second": "Close",
+      "entity": "same resource, distinct returner and closer"
+    },
+    {
+      "id": "P-08",
+      "first": "PingResult",
+      "second": "Release",
+      "entity": "same pool, health callback completion and lifecycle owner"
+    },
+    {
+      "id": "P-09",
+      "first": "FactoryResult",
+      "second": "Release",
+      "entity": "same published pool, creation callback completion and lifecycle owner"
+    },
+    {
+      "id": "P-10",
+      "first": "CloseResult",
+      "second": "Release",
+      "entity": "same pool, cleanup callback completion and lifecycle owner"
+    },
+    {
+      "id": "P-11",
+      "first": "Len",
+      "second": "Put",
+      "entity": "same pool, observer and returner"
+    },
+    {
+      "id": "P-12",
+      "first": "Len",
+      "second": "Get",
+      "entity": "same pool, observer and borrower"
+    },
+    {
+      "id": "P-13",
+      "first": "DirectPing",
+      "second": "Release",
+      "entity": "same pool, optional direct health caller and lifecycle owner"
+    },
+    {
+      "id": "P-14",
+      "first": "Len",
+      "second": "Close",
+      "entity": "same pool, observer and closer"
+    },
+    {
+      "id": "P-15",
+      "first": "DirectPing",
+      "second": "Put",
+      "entity": "same resource, health caller and returner"
+    },
+    {
+      "id": "P-16",
+      "first": "DirectPing",
+      "second": "Close",
+      "entity": "same resource, health caller and closer"
+    }
+  ],
+  "remembrance": "Observed in code. Idle channel and pending request queue are distinct, channel.go:42 (\"conns                    chan *idleConn\"), channel.go:49 (\"connReqs                 []chan connReq\"). A checked-out resource has no identity record. Put slides the queue and reslices without clearing the former last slot, channel.go:181 (\"copy(c.connReqs, c.connReqs[1:])\"), channel.go:182 (\"c.connReqs = c.connReqs[:l-1]\"). Release detaches idle storage and leaves pending request storage and accounting untouched, channel.go:227 (\"c.conns = nil\"), channel.go:238 (\"close(conns)\"). Counter begins at InitialCap, increments on successful dynamic creation and decrements before delegated Close, channel.go:75 (\"openingConns: poolConfig.InitialCap,\"), channel.go:159 (\"c.openingConns++\"), channel.go:211 (\"c.openingConns--\"). Storage-retention cost depends on runtime reachability and workload.",
+  "lock_discipline": "Observed in code. Published Factory runs under the mutex, channel.go:131 (\"c.mu.Lock()\"), channel.go:154 (\"conn, err := c.factory()\"). Direct Close calls its callback under the mutex, channel.go:206 (\"c.mu.Lock()\"), channel.go:212 (\"return c.close(conn)\"). Put sends to a private buffered request while holding the mutex, channel.go:134 (\"req := make(chan connReq, 1)\"), channel.go:183 (\"req <- connReq{\"). getConns only snapshots under the mutex, channel.go:96 (\"c.mu.Lock()\"). Constructor Factory, health checking and detached Release draining invoke callbacks outside the published pool lock, channel.go:83 (\"conn, err := c.factory()\"), channel.go:124 (\"if err := c.Ping(wrapConn.conn); err != nil {\"), channel.go:232 (\"c.mu.Unlock()\"), channel.go:241 (\"closeFun(wrapConn.conn)\"). The callback descriptions state roles only, channel.go:25 (\"//生成连接的方法\"), channel.go:27 (\"//关闭连接的方法\"), channel.go:29 (\"//检查连接是否有效的方法\").",
+  "notes": "The four primary actor roles are configuration caller, borrower or resource holder, lifecycle owner and configured callback provider. Runtime time samples and private handoffs are internal."
+}

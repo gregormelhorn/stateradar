@@ -30,8 +30,8 @@ Validate a blind output:
   python3 tools/part_b_pack.py <analysis-dir> --check blind_output.md
 
   Every catalogue event id and every interaction-pair ordering must
-  appear exactly once in the blind table. Missing or duplicated rows
-  are a hard failure — a coverage gap must be impossible to miss.
+  appear in the blind table. Repeated IDs need distinct explicit situations (legacy ID qualifiers also count);
+  the checklist ticks each ID exactly once. Missing or duplicate situations fail.
 
 The instruction block is extracted live from prompts/02-pilot.md so
 the assembled prompt never drifts from the canonical text.
@@ -556,7 +556,7 @@ def assemble(args: argparse.Namespace, pack_root: Path) -> int:
         parts.append(f"=== {name} ===\n\n{text}\n")
     parts.append(
         "Respond with ONLY the table and the coverage checklist: every "
-        "catalogue event id, listed once, ticked. A missing row must be "
+        "catalogue event and pair-ordering id, listed once in the checklist, ticked. A missing row must be "
         "impossible to miss."
     )
     package = "\n".join(parts)
@@ -595,11 +595,29 @@ def check(args: argparse.Namespace) -> int:
     # once. A missing row must be impossible to miss; granularity is
     # the blind pass's choice.
     key_cells = []
+    situations: dict[str, list[str]] = {}
+    situation_column = None
+    missing_situation: set[str] = set()
     as_is = []
     for ln in blind.split("\n"):
         s = ln.strip()
         if s.startswith("|"):
-            key_cells.append(s.split("|")[1].strip().lstrip("*").strip())
+            cells = [c.strip().strip("*`").strip() for c in re.split(r"(?<!\\)\|", s)[1:-1]]
+            if not cells:
+                continue
+            key_cells.append(cells[0])
+            keyed_id = next((ident for ident in events + pairs
+                             if re.match(rf"{re.escape(ident)}(?![\w-])", cells[0])), None)
+            if keyed_id is None and not all(re.fullmatch(r"[: -]+", c) for c in cells):
+                situation_column = next((i for i, c in enumerate(cells)
+                                         if c.lower() in ('situation', 'state', 'condition', 'scenario')), None)
+            if keyed_id is not None:
+                situation = (cells[situation_column].casefold() if situation_column is not None
+                             and situation_column < len(cells) else
+                             cells[0][len(keyed_id):].strip(' *`').casefold())
+                if situation_column is not None and not situation:
+                    missing_situation.add(keyed_id)
+                situations.setdefault(keyed_id, []).append(situation)
             if _AS_IS_ROW.search(s):
                 as_is.append(key_cells[-1])
     checklist = re.findall(r"^\s*- \[x\] ([\w-]+)\s*$", blind, re.M)
@@ -609,6 +627,9 @@ def check(args: argparse.Namespace) -> int:
                     if re.match(rf"{re.escape(ident)}(?![\w-])", c))
         if keyed == 0:
             errors.append(f"missing row: {ident} (no table row keyed by it)")
+        labels = situations.get(ident, [])
+        if len(labels) > 1 and (ident in missing_situation or len(set(labels)) != len(labels)):
+            errors.append(f"duplicate or missing situation: {ident} (repeated IDs need distinct Situation cells)")
         ticks = checklist.count(ident)
         if ticks == 0:
             errors.append(f"missing checklist tick: {ident}")

@@ -1,0 +1,554 @@
+{
+  "events": [
+    {
+      "id": "New",
+      "source": "Lifecycle owner",
+      "description": "Creates configured pool and requests initial resources. channel.go:58 (\"func NewChannelPool(poolConfig *Config) (Pool, error) {\")",
+      "gate": "Configuration content",
+      "upstream_guards": [
+        "README.md:30 gives example values. Validation is local."
+      ],
+      "classification": "external",
+      "undesired": false,
+      "coverage": {
+        "loss": "UV-NoOwner",
+        "delay": "UV-OwnerLate",
+        "duplication": "UV-NewAgain",
+        "out-of-order": "UV-OwnerLate",
+        "contradiction": "UV-OwnerOverlap",
+        "commission": "UV-NewAgain",
+        "value": "UV-Config"
+      }
+    },
+    {
+      "id": "Get",
+      "source": "Request caller",
+      "description": "Requests a connection. channel.go:103 (\"func (c *channelPool) Get() (interface{}, error) {\")",
+      "gate": "Idle readiness, pool availability, active count and validation",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": false,
+      "coverage": {
+        "loss": "UV-Abandon",
+        "delay": "UV-Abandon",
+        "duplication": "UV-GetAgain",
+        "out-of-order": "UV-AfterRelease",
+        "contradiction": "UV-Overlap",
+        "commission": "UV-Unsolicited",
+        "value": "UV-WrongPool"
+      }
+    },
+    {
+      "id": "Put",
+      "source": "Resource holder",
+      "description": "Returns opaque connection. channel.go:167 (\"func (c *channelPool) Put(conn interface{}) error {\")",
+      "gate": "Nil interface, availability, waiting requests and send readiness",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": false,
+      "coverage": {
+        "loss": "UV-Abandon",
+        "delay": "UV-Abandon",
+        "duplication": "UV-DuplicateResource",
+        "out-of-order": "UV-LateResource",
+        "contradiction": "UV-Overlap",
+        "commission": "UV-ForeignResource",
+        "value": "UV-ForeignResource, UV-WrongPool"
+      }
+    },
+    {
+      "id": "Close",
+      "source": "Resource holder",
+      "description": "Requests disposal of a single opaque connection. channel.go:202 (\"func (c *channelPool) Close(conn interface{}) error {\")",
+      "gate": "Nil interface and configured close method",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": false,
+      "coverage": {
+        "loss": "UV-Abandon",
+        "delay": "UV-Abandon",
+        "duplication": "UV-DuplicateResource",
+        "out-of-order": "UV-LateResource",
+        "contradiction": "UV-Overlap",
+        "commission": "UV-ForeignResource",
+        "value": "UV-ForeignResource, UV-WrongPool"
+      }
+    },
+    {
+      "id": "Release",
+      "source": "Lifecycle owner",
+      "description": "Requests pool shutdown. channel.go:224 (\"func (c *channelPool) Release() {\")",
+      "gate": "Pool availability",
+      "upstream_guards": [
+        "README.md:55 describes caller-initiated destruction. No enforced lifecycle-owner check at pool.go:18 (\"Release()\")."
+      ],
+      "classification": "external",
+      "undesired": false,
+      "coverage": {
+        "loss": "UV-NoOwner",
+        "delay": "UV-OwnerLate",
+        "duplication": "UV-ReleaseAgain",
+        "out-of-order": "UV-OwnerLate",
+        "contradiction": "UV-OwnerOverlap, UV-Overlap",
+        "commission": "UV-OwnerOverlap",
+        "value": "UV-WrongPool"
+      }
+    },
+    {
+      "id": "Len",
+      "source": "Observer",
+      "description": "Reads available count. channel.go:246 (\"func (c *channelPool) Len() int {\")",
+      "gate": "Pool availability and idle depth",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": false,
+      "coverage": {
+        "loss": "n/a: synchronous invocation or observation only, channel.go:247 (\"return len(c.getConns())\").",
+        "delay": "UV-Observer",
+        "duplication": "UV-Observer",
+        "out-of-order": "UV-Observer",
+        "contradiction": "UV-Observer",
+        "commission": "UV-Observer",
+        "value": "UV-WrongPool"
+      }
+    },
+    {
+      "id": "Factory",
+      "source": "Factory callback",
+      "description": "Synchronous creation completion supplies a connection and error. channel.go:83 (\"conn, err := c.factory()\"), channel.go:154 (\"conn, err := c.factory()\")",
+      "gate": "Error and construction versus acquisition phase",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "internal",
+      "undesired": false,
+      "coverage": {
+        "loss": "UV-FactoryError",
+        "delay": "UV-FactoryDelay",
+        "duplication": "n/a: synchronous invocation or observation only, channel.go:154 (\"conn, err := c.factory()\").",
+        "out-of-order": "n/a: synchronous invocation or observation only, channel.go:154 (\"conn, err := c.factory()\").",
+        "contradiction": "UV-FactoryDelay",
+        "commission": "n/a: synchronous invocation or observation only, channel.go:154 (\"conn, err := c.factory()\").",
+        "value": "UV-FactoryValue"
+      }
+    },
+    {
+      "id": "PingResult",
+      "source": "Ping callback",
+      "description": "Synchronous connectivity check outcome. channel.go:124 (\"if err := c.Ping(wrapConn.conn); err != nil {\")",
+      "gate": "Error and callback availability",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "internal",
+      "undesired": false,
+      "coverage": {
+        "loss": "UV-PingError",
+        "delay": "UV-PingDelay",
+        "duplication": "n/a: synchronous invocation or observation only, channel.go:124 (\"if err := c.Ping(wrapConn.conn); err != nil {\").",
+        "out-of-order": "UV-PingDelay",
+        "contradiction": "UV-PingDelay",
+        "commission": "n/a: synchronous invocation or observation only, channel.go:124 (\"if err := c.Ping(wrapConn.conn); err != nil {\").",
+        "value": "UV-PingValue"
+      }
+    },
+    {
+      "id": "CloseResult",
+      "source": "Close callback",
+      "description": "Synchronous disposal outcome. channel.go:212 (\"return c.close(conn)\"), channel.go:241 (\"closeFun(wrapConn.conn)\")",
+      "gate": "Error and cleanup phase",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "internal",
+      "undesired": false,
+      "coverage": {
+        "loss": "UV-CloseError",
+        "delay": "UV-CloseDelay",
+        "duplication": "n/a: synchronous invocation or observation only, channel.go:212 (\"return c.close(conn)\").",
+        "out-of-order": "UV-CloseDelay",
+        "contradiction": "UV-CloseDelay",
+        "commission": "n/a: synchronous invocation or observation only, channel.go:212 (\"return c.close(conn)\").",
+        "value": "UV-CloseValue"
+      }
+    },
+    {
+      "id": "IdleCheck",
+      "source": "Clock",
+      "description": "Sample connection age during acquisition. channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\"), channel.go:142 (\"if ret.idleConn.t.Add(timeout).Before(time.Now()) {\")",
+      "gate": "Configured timeout and sampled age",
+      "upstream_guards": [
+        "No caller-supplied time. channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\")"
+      ],
+      "classification": "internal",
+      "undesired": false,
+      "coverage": {
+        "loss": "n/a: synchronous invocation or observation only, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+        "delay": "UV-Aged",
+        "duplication": "n/a: synchronous invocation or observation only, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+        "out-of-order": "UV-Aged",
+        "contradiction": "n/a: synchronous invocation or observation only, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+        "commission": "n/a: synchronous invocation or observation only, channel.go:116 (\"if wrapConn.t.Add(timeout).Before(time.Now()) {\").",
+        "value": "UV-Aged"
+      }
+    },
+    {
+      "id": "UV-NoOwner",
+      "source": "Lifecycle owner",
+      "description": "Construction or teardown omitted. channel.go:58 (\"func NewChannelPool(poolConfig *Config) (Pool, error) {\")",
+      "gate": "Absent lifecycle call",
+      "upstream_guards": [
+        "README.md:55 describes caller-initiated destruction. No enforced lifecycle-owner check at pool.go:18 (\"Release()\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-OwnerLate",
+      "source": "Lifecycle owner",
+      "description": "Construction or teardown delayed while caller work continues. channel.go:224 (\"func (c *channelPool) Release() {\")",
+      "gate": "Lifecycle order",
+      "upstream_guards": [
+        "README.md:55 describes caller-initiated destruction. No enforced lifecycle-owner check at pool.go:18 (\"Release()\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-NewAgain",
+      "source": "Lifecycle owner",
+      "description": "Repeated or unsolicited construction with same configuration. channel.go:69 (\"c := &channelPool{\")",
+      "gate": "Configuration and independent instance",
+      "upstream_guards": [
+        "README.md:55 describes caller-initiated destruction. No enforced lifecycle-owner check at pool.go:18 (\"Release()\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-OwnerOverlap",
+      "source": "Lifecycle owner",
+      "description": "Teardown overlaps construction of another pool or is issued while old work runs. channel.go:225 (\"c.mu.Lock()\")",
+      "gate": "Receiver and availability",
+      "upstream_guards": [
+        "README.md:55 describes caller-initiated destruction. No enforced lifecycle-owner check at pool.go:18 (\"Release()\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-Config",
+      "source": "Lifecycle owner",
+      "description": "Nil config, invalid bounds, zero capacity, zero idle capacity, absent callbacks, nonpositive timeout or valid unintended limits. channel.go:59 (\"if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {\")",
+      "gate": "Configuration content",
+      "upstream_guards": [
+        "README.md:55 describes caller-initiated destruction. No enforced lifecycle-owner check at pool.go:18 (\"Release()\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-Abandon",
+      "source": "Caller or holder",
+      "description": "Get result abandoned by caller, or Put/Close omitted or delayed after checkout. channel.go:137 (\"ret, ok := <-req\")",
+      "gate": "No cancellation parameter and no deadline for queue",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-GetAgain",
+      "source": "Request caller",
+      "description": "Second Get while first awaits a resource, or after first returned a resource the same caller still holds. channel.go:133 (\"if c.openingConns >= c.maxActive {\")",
+      "gate": "Admission and idle readiness, no caller identity",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-AfterRelease",
+      "source": "Request caller",
+      "description": "Fresh Get on an already released pool. channel.go:105 (\"if conns == nil {\")",
+      "gate": "Pool availability",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-Overlap",
+      "source": "Caller, holder and owner",
+      "description": "Overlapping Get, Put, Close or Release on a shared pool. channel.go:131 (\"c.mu.Lock()\")",
+      "gate": "Idle readiness, count, pending queue and cutoff",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-Unsolicited",
+      "source": "Request caller",
+      "description": "Unsolicited Get without an application-level reason. channel.go:103 (\"func (c *channelPool) Get() (interface{}, error) {\")",
+      "gate": "Same admission gates as Get",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-WrongPool",
+      "source": "Public caller",
+      "description": "Valid public call on an unintended receiver, separately from a wrong resource payload. channel.go:104 (\"conns := c.getConns()\")",
+      "gate": "Receiver and local state",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-DuplicateResource",
+      "source": "Resource holder",
+      "description": "Duplicate Put or Close, or both for one resource. channel.go:168 (\"if conn == nil {\")",
+      "gate": "Presence of value and local counts",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-LateResource",
+      "source": "Resource holder",
+      "description": "Put or Close after release or before other ownership work completes. channel.go:174 (\"if c.conns == nil {\")",
+      "gate": "Availability at commit",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-ForeignResource",
+      "source": "Resource holder",
+      "description": "No matching checkout, foreign connection, typed nil or stale payload presented to intended pool. channel.go:203 (\"if conn == nil {\")",
+      "gate": "Interface nil and callback-specific type requirements",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-ReleaseAgain",
+      "source": "Lifecycle owner",
+      "description": "Second Release after detach or during draining. channel.go:234 (\"if conns == nil {\")",
+      "gate": "Availability",
+      "upstream_guards": [
+        "README.md:55 describes caller-initiated destruction. No enforced lifecycle-owner check at pool.go:18 (\"Release()\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-Observer",
+      "source": "Observer",
+      "description": "Late, repeated, unsolicited or overlapping observation. channel.go:247 (\"return len(c.getConns())\")",
+      "gate": "Channel snapshot and length",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-FactoryError",
+      "source": "Factory callback",
+      "description": "Creation returns error, including a value together with error. channel.go:155 (\"if err != nil {\")",
+      "gate": "Callback error",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-FactoryDelay",
+      "source": "Factory callback",
+      "description": "Slow, blocked, panicking or reentrant creation. channel.go:154 (\"conn, err := c.factory()\")",
+      "gate": "Callback progress and phase",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-FactoryValue",
+      "source": "Factory callback",
+      "description": "Nil, typed nil, reused or foreign connection with successful creation. channel.go:161 (\"return conn, nil\")",
+      "gate": "Callback result",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-PingError",
+      "source": "Ping callback",
+      "description": "Connectivity check returns an error. channel.go:124 (\"if err := c.Ping(wrapConn.conn); err != nil {\")",
+      "gate": "Callback error",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-PingDelay",
+      "source": "Ping callback",
+      "description": "Slow, blocked, panicking or reentrant validation, overlapping release. channel.go:124 (\"if err := c.Ping(wrapConn.conn); err != nil {\")",
+      "gate": "Callback progress and teardown",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-PingValue",
+      "source": "Ping callback",
+      "description": "Healthy resource reported invalid or invalid resource reported healthy. channel.go:124 (\"if err := c.Ping(wrapConn.conn); err != nil {\")",
+      "gate": "Callback verdict",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-CloseError",
+      "source": "Close callback",
+      "description": "Disposal returns error in direct, overflow, expiry, invalid cleanup or release drain paths. channel.go:212 (\"return c.close(conn)\")",
+      "gate": "Phase and callback error",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-CloseDelay",
+      "source": "Close callback",
+      "description": "Slow, blocked, panicking or reentrant disposal in live or drain phase. channel.go:241 (\"closeFun(wrapConn.conn)\")",
+      "gate": "Phase and callback progress",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-CloseValue",
+      "source": "Close callback",
+      "description": "Disposal reports success with resource still live or error after disposing it. channel.go:212 (\"return c.close(conn)\")",
+      "gate": "Callback side effect",
+      "upstream_guards": [
+        "Injected callback contract describes purpose only. No independent callback registration or result ingress."
+      ],
+      "classification": "external",
+      "undesired": true
+    },
+    {
+      "id": "UV-Aged",
+      "source": "Clock",
+      "description": "Idle age below, equal to or beyond timeout, including handoff delivery delayed by scheduling. channel.go:142 (\"if ret.idleConn.t.Add(timeout).Before(time.Now()) {\")",
+      "gate": "Age and timeout",
+      "upstream_guards": [
+        "Public Pool calls carry no actor, ownership token, or context. pool.go:11 (\"type Pool interface {\")."
+      ],
+      "classification": "internal",
+      "undesired": true
+    }
+  ],
+  "pairs": [
+    {
+      "id": "P-01",
+      "first": "Get",
+      "second": "Put",
+      "entity": "Requester and holder on one pool"
+    },
+    {
+      "id": "P-02",
+      "first": "Get",
+      "second": "Close",
+      "entity": "Requester and holder on one pool"
+    },
+    {
+      "id": "P-03",
+      "first": "Get",
+      "second": "Release",
+      "entity": "Requester and owner on one pool"
+    },
+    {
+      "id": "P-04",
+      "first": "Put",
+      "second": "Release",
+      "entity": "Holder and owner on one pool"
+    },
+    {
+      "id": "P-05",
+      "first": "Close",
+      "second": "Release",
+      "entity": "Holder and owner on one pool"
+    },
+    {
+      "id": "P-06",
+      "first": "Len",
+      "second": "Release",
+      "entity": "Observer and owner on one pool"
+    },
+    {
+      "id": "P-07",
+      "first": "Len",
+      "second": "Get",
+      "entity": "Observer and requester on one pool"
+    },
+    {
+      "id": "P-08",
+      "first": "Len",
+      "second": "Put",
+      "entity": "Observer and holder on one pool"
+    },
+    {
+      "id": "P-09",
+      "first": "Len",
+      "second": "Close",
+      "entity": "Observer and holder on one pool"
+    },
+    {
+      "id": "P-10",
+      "first": "Put",
+      "second": "Close",
+      "entity": "Independently acting holders or cleanup agents for one resource"
+    }
+  ],
+  "remembrance": "Observed in code. Outstanding resource identity and owner are not stored. The idle channel holds up to MaxIdle opaque wrappers, each timed on construction, return or handoff. channel.go:70 (\"conns:        make(chan *idleConn, poolConfig.MaxIdle),\"), channel.go:88 (\"c.conns <- &idleConn{conn: conn, t: time.Now()}\"), channel.go:184 (\"idleConn: &idleConn{conn: conn, t: time.Now()},\"), channel.go:190 (\"case c.conns <- &idleConn{conn: conn, t: time.Now()}:\"). The FIFO slice is unbounded and removes logically via shift and reslice without clearing the tail, preserving a reference to the last copied or removed channel until overwrite or collection. channel.go:135 (\"c.connReqs = append(c.connReqs, req)\"), channel.go:181 (\"copy(c.connReqs, c.connReqs[1:])\"), channel.go:182 (\"c.connReqs = c.connReqs[:l-1]\"). Each requester channel has room for one reply. channel.go:134 (\"req := make(chan connReq, 1)\"). Release detaches and drains the idle buffer, leaves the waiter slice and counter alone, and keeps a local closer while draining. channel.go:226 (\"conns := c.conns\"), channel.go:230 (\"closeFun := c.close\"), channel.go:238 (\"close(conns)\"), channel.go:241 (\"closeFun(wrapConn.conn)\"). The counter starts at InitialCap, increments on reported creation success, decrements before live disposal outcome, and has no change on return, handoff, failed creation or release. channel.go:75 (\"openingConns: poolConfig.InitialCap,\"), channel.go:159 (\"c.openingConns++\"), channel.go:187 (\"return nil\"), channel.go:211 (\"c.openingConns--\"), channel.go:231 (\"c.close = nil\"). Late references resolve through the receiver's current availability and callback fields. channel.go:174 (\"if c.conns == nil {\"), channel.go:208 (\"if c.close == nil {\"). Runtime retention cost is unmeasured.",
+  "lock_discipline": "Observed in code. Channel snapshots copy the field under the mutex. channel.go:96 (\"c.mu.Lock()\"), channel.go:98 (\"c.mu.Unlock()\"). Get admission, Debugf and post-start Factory execute under the lock. channel.go:131 (\"c.mu.Lock()\"), channel.go:132 (\"log.Debugf(\"openConn %v %v\", c.openingConns, c.maxActive)\"), channel.go:154 (\"conn, err := c.factory()\"), channel.go:160 (\"c.mu.Unlock()\"). Constructor Factory runs outside the lock before publication. channel.go:83 (\"conn, err := c.factory()\"), channel.go:91 (\"return c, nil\"). Put selects delivery or buffering under lock, then releases it before overflow disposal. channel.go:172 (\"c.mu.Lock()\"), channel.go:183 (\"req <- connReq{\"), channel.go:190 (\"case c.conns <- &idleConn{conn: conn, t: time.Now()}:\"), channel.go:194 (\"c.mu.Unlock()\"). Live Close invokes Close under lock. channel.go:206 (\"c.mu.Lock()\"), channel.go:212 (\"return c.close(conn)\"). Ping reads and calls the callback outside the lock. channel.go:123 (\"if c.ping != nil {\"), channel.go:220 (\"return c.ping(conn)\"). Release detaches under lock and drains with captured callback outside. channel.go:225 (\"c.mu.Lock()\"), channel.go:232 (\"c.mu.Unlock()\"), channel.go:241 (\"closeFun(wrapConn.conn)\"). No reentrancy restrictions in the callback descriptions at channel.go:25 (\"//生成连接的方法\"), channel.go:27 (\"//关闭连接的方法\"), or channel.go:29 (\"//检查连接是否有效的方法\")."
+}

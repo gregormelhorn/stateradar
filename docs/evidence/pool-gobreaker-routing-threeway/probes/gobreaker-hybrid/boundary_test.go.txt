@@ -1,0 +1,184 @@
+package gobreaker
+
+import (
+	"context"
+	"errors"
+	"os"
+	"os/exec"
+	"runtime"
+	"testing"
+	"time"
+)
+
+func pilotOpen(b *TwoStepCircuitBreaker) {
+	done, err := b.Allow()
+	if err != nil {
+		panic(err)
+	}
+	done(false)
+}
+
+func pilotHalfOpen(b *TwoStepCircuitBreaker) {
+	pilotOpen(b)
+	b.cb.mutex.Lock()
+	b.cb.expiry = time.Now().Add(-time.Second)
+	b.cb.mutex.Unlock()
+}
+
+func TestPilotHalfOpenAdmissionAndReports(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{MaxRequests: 2, ReadyToTrip: func(Counts) bool { return true }})
+	pilotHalfOpen(b)
+	first, e := b.Allow()
+	if e != nil {
+		t.Fatal(e)
+	}
+	second, e := b.Allow()
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = b.Allow(); e != ErrTooManyRequests {
+		t.Fatalf("at capacity: %v", e)
+	}
+	first(true)
+	if _, e = b.Allow(); e != ErrTooManyRequests {
+		t.Fatalf("success did not reopen capacity: %v", e)
+	}
+	first(true)
+	if b.State() != StateClosed {
+		t.Fatal("duplicate success did not close")
+	}
+	second(false)
+	if b.Counts() != (Counts{}) {
+		t.Fatal("late report changed counts")
+	}
+}
+func TestPilotMissingReportAndRepeatedFailure(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{})
+	lost, e := b.Allow()
+	if e != nil {
+		t.Fatal(e)
+	}
+	for i := 0; i < 6; i++ {
+		lost(false)
+	}
+	if b.State() != StateOpen {
+		t.Fatal("one callback with six failures did not open")
+	}
+	b.cb.mutex.Lock()
+	b.cb.expiry = time.Now().Add(-time.Second)
+	b.cb.mutex.Unlock()
+	_, e = b.Allow()
+	if e != nil {
+		t.Fatal(e)
+	}
+	lost(false)
+	if b.State() != StateHalfOpen {
+		t.Fatal("stale failure changed half-open state")
+	}
+	if _, e = b.Allow(); e != ErrTooManyRequests {
+		t.Fatalf("lost report admission: %v", e)
+	}
+}
+func TestPilotLateCompletionRefresh(t *testing.T) {
+	changes := 0
+	b := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }, OnStateChange: func(string, State, State) { changes++ }})
+	stale, e := b.Allow()
+	if e != nil {
+		t.Fatal(e)
+	}
+	pilotHalfOpen(b)
+	if b.Counts() != (Counts{}) || changes != 1 {
+		t.Fatal("Counts refreshed expired Open")
+	}
+	stale(true)
+	if changes != 2 || b.Counts() != (Counts{}) {
+		t.Fatal("stale report did not advance expiry without counting")
+	}
+}
+func TestPilotAdmissionThenLaterCallFinishesFirst(t *testing.T) {
+	b := NewCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }})
+	entered, release, finished := make(chan struct{}), make(chan struct{}), make(chan interface{}, 1)
+	go func() {
+		v, _ := b.Execute(func() (interface{}, error) { close(entered); <-release; return 42, nil })
+		finished <- v
+	}()
+	<-entered
+	_, _ = b.Execute(func() (interface{}, error) { return nil, errors.New("trip") })
+	if b.State() != StateOpen {
+		t.Fatal("later request did not trip")
+	}
+	close(release)
+	if <-finished != 42 || b.Counts() != (Counts{}) {
+		t.Fatal("admitted request did not return its stale result")
+	}
+}
+func TestPilotCallbackPanics(t *testing.T) {
+	t.Run("trip predicate re-entered by panic recovery", func(t *testing.T) {
+		calls := 0
+		b := NewCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { calls++; panic(calls) }})
+		var got interface{}
+		func() {
+			defer func() { got = recover() }()
+			_, _ = b.Execute(func() (interface{}, error) { return nil, errors.New("fail") })
+		}()
+		if got != 2 || calls != 2 || b.Counts().TotalFailures != 2 {
+			t.Fatalf("panic=%v calls=%d counts=%+v", got, calls, b.Counts())
+		}
+	})
+	t.Run("state change commits before panic", func(t *testing.T) {
+		b := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }, OnStateChange: func(string, State, State) { panic("notify") }})
+		func() {
+			defer func() {
+				if recover() != "notify" {
+					t.Error("expected notify panic")
+				}
+			}()
+			pilotOpen(b)
+		}()
+		if b.State() != StateOpen || b.Counts() != (Counts{}) {
+			t.Fatal("transition was rolled back")
+		}
+	})
+	t.Run("classifier panic counts as failure", func(t *testing.T) {
+		b := NewCircuitBreaker(Settings{IsSuccessful: func(error) bool { panic("classify") }})
+		func() {
+			defer func() {
+				if recover() != "classify" {
+					t.Error("expected classify panic")
+				}
+			}()
+			_, _ = b.Execute(func() (interface{}, error) { return 1, nil })
+		}()
+		if b.Counts() != (Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1}) {
+			t.Fatal(b.Counts())
+		}
+	})
+}
+func TestPilotReentrantStateChangeWaits(t *testing.T) {
+	if os.Getenv("PILOT_REENTER") == "1" {
+		var b *TwoStepCircuitBreaker
+		b = NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }, OnStateChange: func(string, State, State) { os.Stdout.WriteString("callback entered\n"); b.Counts() }})
+		pilotOpen(b)
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestPilotReentrantStateChangeWaits$", "-test.timeout=2s")
+	cmd.Env = append(os.Environ(), "PILOT_REENTER=1")
+	out, err := cmd.CombinedOutput()
+	if ctx.Err() != context.DeadlineExceeded || err == nil || string(out) != "callback entered\n" {
+		t.Fatalf("got %q, %v", out, err)
+	}
+}
+func TestPilotGoexitLeavesAdmission(t *testing.T) {
+	b := NewCircuitBreaker(Settings{})
+	ended := make(chan struct{})
+	go func() {
+		defer close(ended)
+		_, _ = b.Execute(func() (interface{}, error) { runtime.Goexit(); return nil, nil })
+	}()
+	<-ended
+	if b.Counts() != (Counts{Requests: 1}) {
+		t.Fatal(b.Counts())
+	}
+}

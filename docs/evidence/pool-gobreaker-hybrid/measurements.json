@@ -1,0 +1,270 @@
+{
+  "pool": {
+    "usage": null,
+    "result": null,
+    "acceptance": {
+      "matrix-fields": 0,
+      "sidecar-regeneration": 0,
+      "matrix": 0,
+      "guards": 0,
+      "sidecar": 0,
+      "reachability": 0,
+      "blind-coverage": 0
+    },
+    "failure": {
+      "error": "Codex exited 1; see /private/tmp/stateradar-hybrid-routing.KBX5gr/pool/selective/events.jsonl",
+      "elapsed_seconds": 929.431,
+      "reason": "Codex service flagged possible cybersecurity risk before sending usage"
+    },
+    "settings": {
+      "pack_sha": "e2ab4eeb8cccbbaf5985a2148b6f13fdc77debd2",
+      "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "auth": "chatgpt",
+      "timeout_seconds": 2700,
+      "smoke": false,
+      "arm_order": [
+        "selective"
+      ],
+      "routing_variant": "hybrid",
+      "output_mode": "selective"
+    },
+    "exit": 1,
+    "logged_reads": 5,
+    "route_commands": {
+      "blind/exit-0": 2,
+      "draft-verify/exit-0": 4,
+      "flash-windows/exit-1": 1,
+      "jev-batch/exit-0": 7,
+      "status/exit-0": 1
+    },
+    "mcp_completed": 110,
+    "mcp_read_attempts": 5,
+    "ledger_microdollars": {
+      "deepseek-flash/settled": 25951,
+      "jev/settled": 2382
+    },
+    "ledger_total_settled_microdollars": 28333,
+    "ledger_total_reserved_microdollars": 0,
+    "counts": {
+      "states": 4,
+      "events": 26,
+      "cells": 104,
+      "pairs": 36,
+      "questions": 20
+    },
+    "reachability_edges": [
+      {
+        "id": "P-01a",
+        "trace": "adversarial-traces.md#P-01a: Get misses receive then Put commits",
+        "reachability": {
+          "source": "Ready",
+          "target": "GetWaitingWithIdle",
+          "file": "domain-analysis/channelPool/pool_probe_test.go",
+          "line": 87,
+          "fragment": "expected idle inventory beside a pending Get"
+        }
+      }
+    ],
+    "gate_stdout": {
+      "blind-coverage": [
+        "PART-B COVERAGE: OK (26 events, 36 pair orderings)",
+        "PART-B INDEPENDENCE: 2 rows marked as-is (not independent): Expiry, UV-15"
+      ],
+      "guards": [
+        "group G-01 constructor admission: proven",
+        "group G-02 Get admission: proven",
+        "group G-03 Put priority after lock: proven"
+      ],
+      "matrix-fields": [
+        "MATRIX FIELDS: OK (domain-analysis/channelPool/disposition-matrix.md)"
+      ],
+      "matrix": [
+        "CHECK MATRIX: OK (4 rows x 26 events)"
+      ],
+      "reachability": [
+        "REACHABILITY CHECK: OK (4/4 states reachable from 'Ready', 1 terminal)"
+      ],
+      "sidecar-regeneration": [
+        "OK channelPool: 4 states x 26 events = 104 cells, 20 questions, DRs []"
+      ],
+      "sidecar": [
+        "DSC CHECK: OK (4 states x 26 events, 104 cells, 13 guard groups)"
+      ]
+    },
+    "artifact_sha256": {
+      "matrix-fields.json": "80fd5ff208cf37f035f958fb3fd131e6ec37dc5fdd01822ea6e987a829f57f4b",
+      "disposition-matrix.md": "f368d63e71a74cf2749173e5519bf2e5860d2d71d582b3ebb56d49b6a53641ee",
+      "analysis.json": "24760dbeaa304dc1a24adaaca261e0d374cc0dfdbf6457c295f14a75cc2e4224",
+      "part-b-blind.md": "56da41eac139d4a27ec4afd404f7f540fbf334b305f43f610b6b55732150bd61"
+    },
+    "schedules": [],
+    "artifact_checks_run_by": "independent postflight",
+    "fresh_copy_sidecar_byte_identical": true,
+    "standalone_schedule_retest": {
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 2685,
+        "output_tokens": 3669,
+        "cost_microdollars": 5209,
+        "reservation_microdollars": 22451
+      },
+      "candidates": 8,
+      "candidates_with_problems": 0,
+      "exact_historical_p04a": false
+    },
+    "initial_schedule_call": {
+      "finish_reason": "length",
+      "output_tokens": 8192,
+      "cost_microdollars": 10626,
+      "complete_candidates_recovered": 9,
+      "candidates_with_citation_problems": 9,
+      "candidate_containing_historical_p04a": "W-06"
+    }
+  },
+  "gobreaker": {
+    "usage": {
+      "input_tokens": 6369297,
+      "cached_input_tokens": 6208512,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 37277,
+      "reasoning_output_tokens": 1564
+    },
+    "result": {
+      "elapsed_seconds": 1101.887,
+      "tool_calls": 142
+    },
+    "acceptance": {
+      "matrix-fields": 0,
+      "sidecar-regeneration": 0,
+      "matrix": 0,
+      "guards": 0,
+      "sidecar": 0,
+      "reachability": 0,
+      "blind-coverage": 0
+    },
+    "failure": null,
+    "settings": {
+      "pack_sha": "bd8a61f3eac0a42b8586dfba58f21412d5ed8667",
+      "component": "gobreaker",
+      "component_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "auth": "chatgpt",
+      "timeout_seconds": 2700,
+      "smoke": false,
+      "arm_order": [
+        "selective"
+      ],
+      "routing_variant": "hybrid",
+      "output_mode": "selective"
+    },
+    "exit": 0,
+    "logged_reads": 14,
+    "route_commands": {
+      "blind/exit-0": 3,
+      "blind/exit-1": 1,
+      "draft-verify/exit-0": 3,
+      "flash-windows/exit-0": 1,
+      "jev-batch/exit-0": 3,
+      "jev-batch/exit-1": 2,
+      "status/exit-0": 1
+    },
+    "mcp_completed": 143,
+    "mcp_read_attempts": 15,
+    "codex_total_tokens": 6406574,
+    "codex_uncached_input": 160785,
+    "ledger_microdollars": {
+      "deepseek-flash/settled": 27007,
+      "jev/settled": 2187
+    },
+    "ledger_total_settled_microdollars": 29194,
+    "ledger_total_reserved_microdollars": 0,
+    "counts": {
+      "states": 3,
+      "events": 30,
+      "cells": 90,
+      "pairs": 26,
+      "questions": 16
+    },
+    "reachability_edges": [
+      {
+        "id": "P-06b",
+        "trace": "adversarial-traces.md#P-06b: old completion obtains lock first after deadline",
+        "reachability": {
+          "source": "Open",
+          "target": "HalfOpen",
+          "file": "domain-analysis/circuitBreaker/_probes/breaker_probe_test.go",
+          "line": 109,
+          "fragment": "changed != 1 || cb.State() != StateHalfOpen"
+        }
+      }
+    ],
+    "gate_stdout": {
+      "blind-coverage": [
+        "PART-B COVERAGE: OK (30 events, 26 pair orderings)"
+      ],
+      "guards": [
+        "group G-01 admission: proven",
+        "group G-02 epoch match: proven",
+        "group G-03 HalfOpen outcome: proven"
+      ],
+      "matrix-fields": [
+        "MATRIX FIELDS: OK (domain-analysis/circuitBreaker/disposition-matrix.md)"
+      ],
+      "matrix": [
+        "CHECK MATRIX: OK (3 rows x 30 events)"
+      ],
+      "reachability": [
+        "REACHABILITY CHECK: OK (3/3 states reachable from 'Closed', 0 terminal)"
+      ],
+      "sidecar-regeneration": [
+        "OK circuitBreaker: 3 states x 30 events = 90 cells, 16 questions, DRs []"
+      ],
+      "sidecar": [
+        "DSC CHECK: OK (3 states x 30 events, 90 cells, 12 guard groups)"
+      ]
+    },
+    "artifact_sha256": {
+      "matrix-fields.json": "8a8f0da3192724c88e80a23bb16bcd9aba987fb01cc207817678873eec9bb93e",
+      "disposition-matrix.md": "b0d86f1a4ba036d9323af72a7a9d3d5e0590ff7bef2741496c0cafe052ba0660",
+      "analysis.json": "d16e4ab06e49071fb6321eaeab96b60b6870bae77a5f7a7f3e3b2011e993b9d8",
+      "part-b-blind.md": "89b7185cc73e73174447b382db91d05b62333397896ebfca44064e003aa1ced7"
+    },
+    "schedules": [
+      {
+        "file": "flash-windows-gobreaker.json",
+        "draft": {
+          "model": "deepseek-flash",
+          "finish_reason": "stop",
+          "input_tokens": 3910,
+          "output_tokens": 3265,
+          "cost_microdollars": 5091,
+          "reservation_microdollars": 23884
+        },
+        "count": 8,
+        "with_citation_or_shape_problems": 0
+      }
+    ],
+    "artifact_checks_run_by": "runner",
+    "fresh_copy_sidecar_byte_identical": true,
+    "standalone_schedule_retest": {
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 3910,
+        "output_tokens": 2577,
+        "cost_microdollars": 4266,
+        "reservation_microdollars": 23884
+      },
+      "candidates": 8,
+      "candidates_with_problems": 0
+    },
+    "schedule_candidate_review": {
+      "retained": 3,
+      "corrected": 5
+    }
+  }
+}

@@ -60,9 +60,18 @@ class Cell(TypedDict):
     citation: NotRequired[Citation]
 
 
+class PairReachability(TypedDict):
+    source: str
+    target: str
+    file: str
+    line: int
+    fragment: str
+
+
 class Pair(TypedDict):
     id: str
     trace: str
+    reachability: NotRequired[PairReachability]
 
 
 class GuardGroup(TypedDict):

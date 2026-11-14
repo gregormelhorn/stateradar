@@ -1,0 +1,271 @@
+package gobreaker
+
+import (
+	"errors"
+	"runtime"
+	"testing"
+	"time"
+)
+
+func pilotExpire(cb *CircuitBreaker) {
+	cb.mutex.Lock()
+	cb.expiry = time.Now().Add(-time.Second)
+	cb.mutex.Unlock()
+}
+
+func pilotAllow(t *testing.T, b *TwoStepCircuitBreaker) func(bool) {
+	t.Helper()
+	done, err := b.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return done
+}
+
+func TestPilotDuplicateHalfOpen(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{MaxRequests: 2, ReadyToTrip: func(Counts) bool { return true }})
+	pilotAllow(t, b)(false)
+	pilotExpire(b.cb)
+	done := pilotAllow(t, b)
+	done(true)
+	if c := b.Counts(); c.Requests != 1 || c.TotalSuccesses != 1 {
+		t.Fatal(c)
+	}
+	done(true)
+	if got := b.State(); got != StateClosed {
+		t.Fatal(got)
+	}
+}
+
+func TestPilotAbandonedTrialAndCap(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }})
+	pilotAllow(t, b)(false)
+	pilotExpire(b.cb)
+	done := pilotAllow(t, b)
+	if _, err := b.Allow(); err != ErrTooManyRequests {
+		t.Fatal(err)
+	}
+	if got := b.State(); got != StateHalfOpen {
+		t.Fatal(got)
+	}
+	done(true)
+	if got := b.State(); got != StateClosed {
+		t.Fatal(got)
+	}
+	pilotAllow(t, b)(true)
+}
+
+func TestPilotStaleReportRefreshesOpen(t *testing.T) {
+	notified := make(chan State, 2)
+	b := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }, OnStateChange: func(_ string, _, to State) { notified <- to }})
+	old := pilotAllow(t, b)
+	pilotAllow(t, b)(false)
+	if got := <-notified; got != StateOpen {
+		t.Fatal(got)
+	}
+	pilotExpire(b.cb)
+	old(true)
+	select {
+	case got := <-notified:
+		if got != StateHalfOpen {
+			t.Fatal(got)
+		}
+	default:
+		t.Fatal("stale report did not notify")
+	}
+	if c := b.Counts(); c != (Counts{}) {
+		t.Fatal(c)
+	}
+}
+
+func TestPilotCountsBeforeAndAfterRefresh(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{Interval: time.Minute})
+	done := pilotAllow(t, b)
+	pilotExpire(b.cb)
+	if c := b.Counts(); c.Requests != 1 {
+		t.Fatal(c)
+	}
+	done(false)
+	if c := b.Counts(); c != (Counts{}) {
+		t.Fatal(c)
+	}
+}
+
+func TestPilotSecondExecuteReturnsFirst(t *testing.T) {
+	b := NewCircuitBreaker(Settings{})
+	entered, release := make(chan struct{}), make(chan struct{})
+	first := make(chan error, 1)
+	go func() {
+		_, err := b.Execute(func() (interface{}, error) { close(entered); <-release; return nil, nil })
+		first <- err
+	}()
+	<-entered
+	if _, err := b.Execute(func() (interface{}, error) { return 2, nil }); err != nil {
+		t.Fatal(err)
+	}
+	if c := b.Counts(); c.Requests != 2 || c.TotalSuccesses != 1 {
+		t.Fatal(c)
+	}
+	close(release)
+	if err := <-first; err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPilotTripPanicRetry(t *testing.T) {
+	calls := 0
+	b := NewCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool {
+		calls++
+		if calls == 1 {
+			panic("policy")
+		}
+		return false
+	}})
+	func() {
+		defer func() {
+			if got := recover(); got != "policy" {
+				t.Errorf("panic = %v", got)
+			}
+		}()
+		_, _ = b.Execute(func() (interface{}, error) { return nil, errors.New("work") })
+	}()
+	if c := b.Counts(); calls != 2 || c.Requests != 1 || c.TotalFailures != 2 {
+		t.Fatalf("calls %d, counts %+v", calls, c)
+	}
+}
+
+func TestPilotClassifierAfterReset(t *testing.T) {
+	entered, release := make(chan struct{}), make(chan struct{})
+	b := NewCircuitBreaker(Settings{Interval: time.Minute, IsSuccessful: func(error) bool {
+		close(entered)
+		<-release
+		return true
+	}})
+	result := make(chan interface{}, 1)
+	go func() { value, _ := b.Execute(func() (interface{}, error) { return "value", nil }); result <- value }()
+	<-entered
+	pilotExpire(b)
+	if got := b.State(); got != StateClosed {
+		t.Fatal(got)
+	}
+	close(release)
+	if got := <-result; got != "value" {
+		t.Fatal(got)
+	}
+	if c := b.Counts(); c != (Counts{}) {
+		t.Fatal(c)
+	}
+}
+
+func TestPilotGoexitKeepsAdmission(t *testing.T) {
+	b := NewCircuitBreaker(Settings{})
+	exited := make(chan struct{})
+	go func() {
+		defer close(exited)
+		_, _ = b.Execute(func() (interface{}, error) { runtime.Goexit(); return nil, nil })
+	}()
+	<-exited
+	if c := b.Counts(); c.Requests != 1 || c.TotalSuccesses != 0 || c.TotalFailures != 0 {
+		t.Fatal(c)
+	}
+}
+
+func TestPilotNotificationPanicCommits(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }, OnStateChange: func(string, State, State) { panic("hook") }})
+	done := pilotAllow(t, b)
+	func() {
+		defer func() {
+			if got := recover(); got != "hook" {
+				t.Errorf("panic = %v", got)
+			}
+		}()
+		done(false)
+	}()
+	if got := b.State(); got != StateOpen {
+		t.Fatal(got)
+	}
+	if c := b.Counts(); c != (Counts{}) {
+		t.Fatal(c)
+	}
+}
+
+func TestPilotSameMutexReentry(t *testing.T) {
+	for _, mode := range []string{"notify", "trip"} {
+		t.Run(mode, func(t *testing.T) {
+			entered, returned := make(chan struct{}), make(chan struct{})
+			var b *CircuitBreaker
+			reenter := func() { close(entered); _ = b.State() }
+			st := Settings{ReadyToTrip: func(Counts) bool {
+				if mode == "trip" {
+					reenter()
+				}
+				return true
+			},
+				OnStateChange: func(string, State, State) {
+					if mode == "notify" {
+						reenter()
+					}
+				}}
+			b = NewCircuitBreaker(st)
+			go func() {
+				_, _ = b.Execute(func() (interface{}, error) { return nil, errors.New("fail") })
+				close(returned)
+			}()
+			<-entered
+			select {
+			case <-returned:
+				t.Fatal("reentrant State returned")
+			case <-time.After(50 * time.Millisecond):
+			}
+		})
+	}
+}
+
+func TestPilotDistinctReceiver(t *testing.T) {
+	old := NewTwoStepCircuitBreaker(Settings{})
+	done := pilotAllow(t, old)
+	replacement := NewTwoStepCircuitBreaker(Settings{})
+	done(true)
+	if c := old.Counts(); c.TotalSuccesses != 1 {
+		t.Fatal(c)
+	}
+	if c := replacement.Counts(); c != (Counts{}) {
+		t.Fatal(c)
+	}
+}
+
+func TestPilotDeadlineEquality(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }})
+	pilotAllow(t, b)(false)
+	b.cb.mutex.Lock()
+	defer b.cb.mutex.Unlock()
+	deadline := b.cb.expiry
+	if got, _ := b.cb.currentState(deadline); got != StateOpen {
+		t.Fatalf("at deadline: %v", got)
+	}
+	if got, _ := b.cb.currentState(deadline.Add(time.Nanosecond)); got != StateHalfOpen {
+		t.Fatalf("after deadline: %v", got)
+	}
+}
+
+func TestPilotRetainedCallbackAfterFailure(t *testing.T) {
+	b := NewTwoStepCircuitBreaker(Settings{MaxRequests: 2, ReadyToTrip: func(Counts) bool { return true }})
+	pilotAllow(t, b)(false)
+	pilotExpire(b.cb)
+	first := pilotAllow(t, b)
+	second := pilotAllow(t, b)
+	if _, err := b.Allow(); err != ErrTooManyRequests {
+		t.Fatal(err)
+	}
+	first(false)
+	if _, err := b.Allow(); err != ErrOpenState {
+		t.Fatal(err)
+	}
+	second(true)
+	if got := b.State(); got != StateOpen {
+		t.Fatal(got)
+	}
+	if got := b.Counts(); got != (Counts{}) {
+		t.Fatal(got)
+	}
+}

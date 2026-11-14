@@ -1,0 +1,339 @@
+{
+  "baseline": {
+    "prompt_tokens": 1159894,
+    "prompt_cache_hit_tokens": 1091200,
+    "prompt_cache_miss_tokens": 68694,
+    "completion_tokens": 10845,
+    "steering_microdollars": 20095,
+    "requests": 26,
+    "ledger": {
+      "deepseek-flash-steering/settled": {
+        "microdollars": 20095,
+        "calls": 26
+      }
+    },
+    "experiment": {
+      "pack_sha": "ba14ef0249c9a70ce45d2458bd657528c95677f2",
+      "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+      "steering_model": "deepseek-flash",
+      "effort": "high",
+      "blind_model": "gpt-6.1-sol",
+      "blind_effort": "medium",
+      "output_mode": "selective",
+      "timeout_seconds": 2400,
+      "smoke": false
+    },
+    "failure": {
+      "error": "DeepSeek stopped with 'length'; see provider-usage.jsonl"
+    },
+    "earlier_failures": [],
+    "blind_codex_usages": [],
+    "tool_calls": 38,
+    "rereads": 5,
+    "malformed_tool_calls": 1,
+    "provider_request_span_seconds": 42
+  },
+  "reference-prompt": {
+    "prompt_tokens": 85621026,
+    "prompt_cache_hit_tokens": 85311616,
+    "prompt_cache_miss_tokens": 309410,
+    "completion_tokens": 138065,
+    "steering_microdollars": 385461,
+    "requests": 564,
+    "ledger": {
+      "deepseek-flash/settled": {
+        "microdollars": 12719,
+        "calls": 5
+      },
+      "deepseek-flash-steering/reserved": {
+        "microdollars": 291880,
+        "calls": 1
+      },
+      "deepseek-flash-steering/settled": {
+        "microdollars": 385461,
+        "calls": 564
+      },
+      "jev/settled": {
+        "microdollars": 1401,
+        "calls": 9
+      }
+    },
+    "experiment": {
+      "pack_sha": "ba14ef0249c9a70ce45d2458bd657528c95677f2",
+      "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+      "steering_model": "deepseek-flash",
+      "thinking": "disabled",
+      "blind_model": "gpt-6.1-sol",
+      "blind_effort": "medium",
+      "output_mode": "selective",
+      "timeout_seconds": 2400,
+      "smoke": false
+    },
+    "result": {
+      "requests": 564,
+      "tool_calls": 627,
+      "elapsed_seconds": 626.38774091698
+    },
+    "acceptance": {
+      "matrix": 0,
+      "guards": 0,
+      "sidecar": 0,
+      "reachability": 0,
+      "blind-coverage": 0
+    },
+    "earlier_failures": [
+      {
+        "error": "request failed ([Errno 54] Connection reset by peer); reservation 440 kept: check the provider's usage, then run 'settle 440 <actual microdollars>'"
+      }
+    ],
+    "blind_codex_usages": [
+      {
+        "input_tokens": 34172,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 4875,
+        "reasoning_output_tokens": 1126
+      }
+    ],
+    "tool_calls": 627,
+    "rereads": 11,
+    "malformed_tool_calls": 18,
+    "analysis_counts": {
+      "states": 4,
+      "events": 36,
+      "cells": 144,
+      "pairs": 6,
+      "questions": 18
+    },
+    "question_statuses": {
+      "OPEN": 18
+    },
+    "provider_request_span_seconds": 2207,
+    "fresh_regeneration": {
+      "generator_exit": 0,
+      "gates": {
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "byte_identical": true,
+      "path": "/private/tmp/flash-fresh-audit.y4hs59rx"
+    }
+  },
+  "tuned-prompt": {
+    "prompt_tokens": 82005088,
+    "prompt_cache_hit_tokens": 81684992,
+    "prompt_cache_miss_tokens": 320096,
+    "completion_tokens": 184553,
+    "steering_microdollars": 404090,
+    "requests": 572,
+    "ledger": {
+      "deepseek-flash/settled": {
+        "microdollars": 23965,
+        "calls": 6
+      },
+      "deepseek-flash-steering/reserved": {
+        "microdollars": 229787,
+        "calls": 1
+      },
+      "deepseek-flash-steering/settled": {
+        "microdollars": 404090,
+        "calls": 572
+      },
+      "jev/settled": {
+        "microdollars": 1381,
+        "calls": 7
+      }
+    },
+    "experiment": {
+      "pack_sha": "0db469f15f93ef5751dfa1b02ab4b4a48f3689fc",
+      "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+      "steering_model": "deepseek-flash",
+      "thinking": "disabled",
+      "blind_model": "gpt-6.1-sol",
+      "blind_effort": "medium",
+      "output_mode": "selective",
+      "timeout_seconds": 2400,
+      "smoke": false
+    },
+    "result": {
+      "requests": 572,
+      "tool_calls": 648,
+      "elapsed_seconds": 1034.0848607920343
+    },
+    "acceptance": {
+      "matrix": 0,
+      "guards": 0,
+      "sidecar": 0,
+      "reachability": 0,
+      "blind-coverage": 0
+    },
+    "earlier_failures": [
+      {
+        "error": "request failed (The read operation timed out); reservation 158 kept: check the provider's usage, then run 'settle 158 <actual microdollars>'"
+      }
+    ],
+    "blind_codex_usages": [
+      {
+        "input_tokens": 22867,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 4326,
+        "reasoning_output_tokens": 516
+      }
+    ],
+    "tool_calls": 648,
+    "rereads": 5,
+    "malformed_tool_calls": 18,
+    "operator_dispatched_blind": true,
+    "analysis_counts": {
+      "states": 5,
+      "events": 37,
+      "cells": 185,
+      "pairs": 12,
+      "questions": 22
+    },
+    "question_statuses": {
+      "OPEN": 22
+    },
+    "provider_request_span_seconds": 1912,
+    "fresh_regeneration": {
+      "generator_exit": 0,
+      "gates": {
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "byte_identical": true,
+      "path": "/private/tmp/flash-fresh-audit.ks7wmohe"
+    },
+    "final_codex_blind_audit": {
+      "gates": {
+        "matrix": 0,
+        "guards": 0,
+        "sidecar": 0,
+        "reachability": 0,
+        "blind-coverage": 0
+      },
+      "usage": {
+        "input_tokens": 29216,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 5277,
+        "reasoning_output_tokens": 910
+      }
+    }
+  },
+  "staged-prompt": {
+    "prompt_tokens": 63929409,
+    "prompt_cache_hit_tokens": 63754624,
+    "prompt_cache_miss_tokens": 174785,
+    "completion_tokens": 136856,
+    "steering_microdollars": 299768,
+    "requests": 355,
+    "ledger": {
+      "deepseek-flash/settled": {
+        "microdollars": 25217,
+        "calls": 9
+      },
+      "deepseek-flash-steering/reserved": {
+        "microdollars": 349944,
+        "calls": 1
+      },
+      "deepseek-flash-steering/settled": {
+        "microdollars": 299768,
+        "calls": 355
+      },
+      "jev/settled": {
+        "microdollars": 1274,
+        "calls": 7
+      }
+    },
+    "experiment": {
+      "pack_sha": "0db469f15f93ef5751dfa1b02ab4b4a48f3689fc",
+      "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+      "steering_model": "deepseek-flash",
+      "thinking": "disabled",
+      "blind_model": "gpt-6.1-sol",
+      "blind_effort": "medium",
+      "output_mode": "selective",
+      "timeout_seconds": 2400,
+      "smoke": false
+    },
+    "failure": {
+      "error": "Operator stopped the additional checkpoint experiment. It repeatedly failed reachability and its trace claimed a retry after Factory returned an error."
+    },
+    "acceptance": {
+      "matrix": 0,
+      "guards": 0,
+      "sidecar": 1,
+      "reachability": 1,
+      "blind-coverage": 1
+    },
+    "earlier_failures": [],
+    "blind_codex_usages": [],
+    "tool_calls": 410,
+    "rereads": 9,
+    "malformed_tool_calls": 9,
+    "analysis_counts": {
+      "states": 10,
+      "events": 19,
+      "cells": 190,
+      "pairs": 6,
+      "questions": 24
+    },
+    "question_statuses": {
+      "OPEN - human decision required": 23,
+      "OPEN": 1
+    },
+    "provider_request_span_seconds": 1328
+  },
+  "window_diagnostics": {
+    "window-probe": {
+      "usage": {
+        "prompt_tokens": 2609,
+        "completion_tokens": 4596,
+        "total_tokens": 7205,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2609
+      },
+      "finish_reason": "stop",
+      "usd": 0.003149
+    },
+    "window-branch-probe": {
+      "usage": {
+        "prompt_tokens": 2617,
+        "completion_tokens": 6919,
+        "total_tokens": 9536,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2617
+      },
+      "finish_reason": "stop",
+      "usd": 0.004544
+    },
+    "window-product-probe": {
+      "usage": {
+        "prompt_tokens": 2486,
+        "completion_tokens": 4675,
+        "total_tokens": 7161,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2486
+      },
+      "finish_reason": "stop",
+      "usd": 0.003178
+    }
+  }
+}

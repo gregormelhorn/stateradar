@@ -1,0 +1,124 @@
+{
+  "routed": {
+    "settings": {
+      "pack_sha": "ba14ef0249c9a70ce45d2458bd657528c95677f2",
+      "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "auth": "chatgpt",
+      "timeout_seconds": 2400,
+      "smoke": false,
+      "arm_order": [
+        "selective"
+      ],
+      "routing_variant": "routed",
+      "output_mode": "selective"
+    },
+    "runner_exit": 0,
+    "usage": {
+      "input_tokens": 7060574,
+      "cached_input_tokens": 6895104,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 39956,
+      "reasoning_output_tokens": 3087
+    },
+    "elapsed_seconds": 1126.237,
+    "tool_calls": 149,
+    "reread_attempts": 9,
+    "acceptance": {
+      "matrix": 0,
+      "guards": 0,
+      "sidecar": 0,
+      "reachability": 0,
+      "blind-coverage": 0
+    },
+    "ledger": {
+      "charged_microdollars": 18308,
+      "reserved_microdollars": 0
+    },
+    "analysis_counts": {
+      "states": 6,
+      "events": 25,
+      "cells": 150,
+      "pairs": 28,
+      "questions": 20
+    },
+    "reachability": "REACHABILITY CHECK: OK (6/6 states reachable from 'NewChannelPool', 1 terminal)"
+  },
+  "flash-writes": {
+    "settings": {
+      "pack_sha": "ba14ef0249c9a70ce45d2458bd657528c95677f2",
+      "pool_sha": "6084537e520652192f41aebfd88d822c00b9447a",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "auth": "chatgpt",
+      "timeout_seconds": 2400,
+      "smoke": false,
+      "arm_order": [
+        "selective"
+      ],
+      "routing_variant": "flash-writes",
+      "output_mode": "selective"
+    },
+    "runner_exit": 0,
+    "usage": {
+      "input_tokens": 8308771,
+      "cached_input_tokens": 8125184,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 41117,
+      "reasoning_output_tokens": 4068
+    },
+    "elapsed_seconds": 1248.254,
+    "tool_calls": 165,
+    "reread_attempts": 7,
+    "acceptance": {
+      "matrix": 0,
+      "guards": 0,
+      "sidecar": 0,
+      "reachability": 0,
+      "blind-coverage": 0
+    },
+    "ledger": {
+      "charged_microdollars": 40228,
+      "reserved_microdollars": 0
+    },
+    "analysis_counts": {
+      "states": 4,
+      "events": 17,
+      "cells": 68,
+      "pairs": 30,
+      "questions": 21
+    },
+    "reachability": "REACHABILITY CHECK: OK (4/4 states reachable from 'Open', 1 terminal)",
+    "draft_cells": {
+      "drafted": 68,
+      "by_jev_choice": {
+        "supported": {
+          "unchanged": 13,
+          "changed": 26,
+          "dropped": 0
+        },
+        "not judged": {
+          "unchanged": 0,
+          "changed": 3,
+          "dropped": 0
+        },
+        "unclear": {
+          "unchanged": 5,
+          "changed": 20,
+          "dropped": 0
+        },
+        "contradicted": {
+          "unchanged": 0,
+          "changed": 1,
+          "dropped": 0
+        }
+      },
+      "changed_fields": {
+        "disposition": 46,
+        "target": 9,
+        "citation": 35
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+package pool
+
+import (
+	"runtime"
+	"testing"
+	"time"
+)
+
+type probeValue struct{ id int }
+type probeAnswer struct {
+	value interface{}
+	err   error
+}
+
+func probePool(t *testing.T, max, idle int, closeFn func(interface{}) error) (*channelPool, *int) {
+	t.Helper()
+	n := 0
+	p, err := NewChannelPool(&Config{MaxCap: max, MaxIdle: idle, Factory: func() (interface{}, error) { n++; return &probeValue{n}, nil }, Close: closeFn})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p.(*channelPool), &n
+}
+func probeGet(p *channelPool) chan probeAnswer {
+	out := make(chan probeAnswer, 1)
+	go func() { v, e := p.Get(); out <- probeAnswer{v, e} }()
+	return out
+}
+func probeWait(t *testing.T, p *channelPool, n int) {
+	t.Helper()
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		p.mu.Lock()
+		k := len(p.connReqs)
+		p.mu.Unlock()
+		if k == n {
+			return
+		}
+		runtime.Gosched()
+	}
+	t.Fatalf("waiting request count did not reach %d", n)
+}
+func probeReceive(t *testing.T, out chan probeAnswer) interface{} {
+	t.Helper()
+	select {
+	case a := <-out:
+		if a.err != nil {
+			t.Fatal(a.err)
+		}
+		return a.value
+	case <-time.After(time.Second):
+		t.Fatal("Get did not return")
+		return nil
+	}
+}
+func probePending(t *testing.T, out chan probeAnswer) {
+	t.Helper()
+	select {
+	case a := <-out:
+		t.Fatalf("Get unexpectedly returned %+v", a)
+	case <-time.After(15 * time.Millisecond):
+	}
+}

@@ -2,34 +2,91 @@
 """Reachability and completeness checker for StateRadar analysis.json.
 
 Reads the sidecar produced by gen_analysis_sidecar.py and verifies:
-  1. Every state is reachable from the initial state (or via a
-     documenting edge from a compound parent).
-  2. Every event has at least one transition (no dead events).
-  3. No state is a sink unless marked as terminal.
+  1. Non-terminal states are reachable from the initial state through
+     matrix transitions or cited interaction-pair sequences.
+  2. No state is a sink unless marked as terminal.
 
 The analysis.json schema already carries all the data needed; this
 checker adds a semantic layer on top of the structural checks that
 dsc_check.py already performs.
 
 Usage:
-  python3 tools/check_reachability.py <analysis-dir>
+  python3 tools/check_reachability.py <analysis-dir> [--repo ROOT]
 """
 
 from __future__ import annotations
 
+import argparse
 import json
-import sys
+import re
 from pathlib import Path
 
+from sidecar_types import PairReachability, Sidecar
 
-def load_graph(analysis_dir: Path) -> tuple[set[str], str | None, set[str], dict[str, set[str]], set[str], set[str]]:
-    """Load states, events, transitions, and terminal states from analysis.json.
 
-    Returns (states, initial, events, adjacency, terminals, events_with_transitions).
-    """
+_HEADING = re.compile(r"^ {0,3}#{1,6}[ \t]+")
+_PAIR_HEADER = re.compile(r"^ {0,3}#{1,6}[ \t]+(P-\d+[a-z])\b")
+_PROOF = re.compile(
+    r'- Reachability: (\S+) → (\S+) — ([\w./-]+):([1-9]\d*) \("(.{4,})"\)'
+)
+
+
+def pair_reachability(traces: Path) -> dict[str, PairReachability]:
+    """Read each explicit, cited edge under its own pair ordering."""
+    if not traces.is_file():
+        return {}
+    edges: dict[str, PairReachability] = {}
+    pair = None
+    for number, line in enumerate(traces.read_text(encoding="utf-8").splitlines(), 1):
+        if _HEADING.match(line):
+            heading = _PAIR_HEADER.match(line)
+            pair = heading[1] if heading else None
+        if not line.lstrip().startswith("- Reachability:"):
+            continue
+        proof = _PROOF.fullmatch(line.strip())
+        if pair is None or proof is None or pair in edges:
+            raise ValueError(f"{traces.name}:{number}: invalid or repeated pair Reachability line")
+        edges[pair] = {
+            "source": proof[1], "target": proof[2], "file": proof[3],
+            "line": int(proof[4]), "fragment": proof[5],
+        }
+    return edges
+
+
+def pair_edges(data: Sidecar, analysis_dir: Path, repo: Path) -> list[tuple[str, str]]:
+    documented = pair_reachability(analysis_dir / "adversarial-traces.md")
+    pairs = data.get("pairs", [])
+    saved = {pair["id"]: pair["reachability"] for pair in pairs if "reachability" in pair}
+    for pair_id in sorted(documented.keys() | saved.keys()):
+        if documented.get(pair_id) != saved.get(pair_id):
+            raise ValueError(f"pair {pair_id}: reachability differs from its trace; regenerate analysis.json")
+    edges = []
+    for pair_id, proof in documented.items():
+        matches = [pair for pair in pairs if pair["id"] == pair_id]
+        trace = f"adversarial-traces.md#{pair_id}"
+        if len(matches) != 1 or matches[0]["trace"].partition(":")[0] != trace:
+            raise ValueError(f"pair {pair_id}: expected one declared pair and its matching trace")
+        src, target = proof["source"], proof["target"]
+        for state in (src, target):
+            if state not in data["states"]:
+                raise ValueError(f"pair {pair_id}: unknown state {state!r}")
+        path = Path(proof["file"])
+        file = (repo / path).resolve()
+        if path.is_absolute() or not file.is_relative_to(repo) or not file.is_file():
+            raise ValueError(f"pair {pair_id}: invalid evidence file {path}")
+        lines = file.read_text(encoding="utf-8", errors="replace").splitlines()
+        line = proof["line"]
+        if line > len(lines) or proof["fragment"] not in "\n".join(lines[max(0, line - 4):line + 3]):
+            raise ValueError(f"pair {pair_id}: evidence fragment missing near {path}:{line}")
+        edges.append((src, target))
+    return edges
+
+
+def load_graph(analysis_dir: Path, repo: Path) -> tuple[set[str], str | None, dict[str, set[str]], set[str]]:
+    """Load states, transitions and terminal states from the analysis."""
     sidecar = analysis_dir / "analysis.json"
     if not sidecar.is_file():
-        sys.exit(f"no analysis.json at {analysis_dir}")
+        raise ValueError(f"no analysis.json at {analysis_dir}")
 
     data = json.loads(sidecar.read_text(encoding="utf-8"))
     cells = data.get("cells", [])
@@ -38,13 +95,11 @@ def load_graph(analysis_dir: Path) -> tuple[set[str], str | None, set[str], dict
     state_list: list[str] = data.get("states", [])
     states = set(state_list)
     initial = state_list[0] if state_list else None
-    events = {e["id"] for e in data.get("events", [])}
 
     # Parse terminal states from the matrix comment
     matrix_path = analysis_dir / "disposition-matrix.md"
     terminals: set[str] = set()
     if matrix_path.is_file():
-        import re
         text = matrix_path.read_text(encoding="utf-8")
         tm = re.search(r"<!--\s*terminal:\s*(.+?) -->", text)
         if tm:
@@ -52,7 +107,6 @@ def load_graph(analysis_dir: Path) -> tuple[set[str], str | None, set[str], dict
 
     # Build adjacency: state -> set of reachable states
     adjacency: dict[str, set[str]] = {s: set() for s in states}
-    events_with_transitions: set[str] = set()
 
     for c in cells:
         src = c.get("state", "")
@@ -60,9 +114,11 @@ def load_graph(analysis_dir: Path) -> tuple[set[str], str | None, set[str], dict
             tgt = c.get("target", "")
             if tgt and tgt in states:
                 adjacency.setdefault(src, set()).add(tgt)
-                events_with_transitions.add(c.get("event", ""))
 
-    return states, initial, events, adjacency, terminals, events_with_transitions
+    for src, tgt in pair_edges(data, analysis_dir, repo):
+        adjacency[src].add(tgt)
+
+    return states, initial, adjacency, terminals
 
 
 def reachable_from(start: str, adjacency: dict[str, set[str]]) -> set[str]:
@@ -81,13 +137,17 @@ def reachable_from(start: str, adjacency: dict[str, set[str]]) -> set[str]:
 
 
 def main() -> int:
-    if len(sys.argv) < 2:
-        print("Usage: python3 tools/check_reachability.py <analysis-dir>")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("analysis_dir", type=Path)
+    parser.add_argument("--repo", type=Path, help="root for pair evidence paths")
+    args = parser.parse_args()
+    adir = args.analysis_dir.resolve()
+    try:
+        states, initial, adjacency, terminals = load_graph(
+            adir, (args.repo or adir.parent.parent).resolve())
+    except (OSError, ValueError) as exc:
+        print(f"REACHABILITY CHECK: FAIL\n  - {exc}")
         return 1
-
-    adir = Path(sys.argv[1])
-    states, initial, events, adjacency, terminals, events_with_transitions = load_graph(adir)
-
     if initial is None:
         print("REACHABILITY CHECK: FAIL — no states in sidecar")
         return 1
@@ -105,14 +165,7 @@ def main() -> int:
                 f"state '{s}' is unreachable from initial state '{initial}'"
             )
 
-    # 2. Dead events: no transition from any state
-    dead_events = events - events_with_transitions
-    for e in sorted(dead_events):
-        # Events that are only handled (not transitions) are fine
-        pass  # We can't distinguish from the sidecar alone
-
-    # 3. Non-terminal sink states
-    all_sources = set(adjacency.keys()) | {tgt for tgts in adjacency.values() for tgt in tgts}
+    # 2. Non-terminal sink states
     for s in sorted(states):
         if s not in adjacency or not adjacency[s]:
             if s not in terminals and s != "[*]":
@@ -138,4 +191,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

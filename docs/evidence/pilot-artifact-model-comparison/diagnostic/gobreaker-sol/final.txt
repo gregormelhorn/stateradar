@@ -1,0 +1,10 @@
+The CircuitBreaker pilot, including the TwoStep wrapper, produced [23 open domain questions](/private/tmp/stateradar-controller-4us5gpyo/gobreaker-sol/selective/pool/domain-analysis/circuitBreaker/open-questions.md) across 105 matrix cells and 36 interaction orderings. All decisions remain open.
+
+- `OnStateChange` and `ReadyToTrip` run under the breaker mutex. Calling a lock-taking method from either callback can deadlock.
+- Repeating one `Allow` callback can close HalfOpen without enough distinct successful requests. An abandoned callback can leave HalfOpen at capacity indefinitely.
+- A stale completion can advance expiry before its outcome is discarded. `Counts()` reads the stored counters without refreshing expiry.
+- A `ReadyToTrip` panic can count one Execute failure twice. An `OnStateChange` panic can replace the original request panic.
+
+The catalogue, matrix, guard, sidecar, reachability, and final blind-coverage checks passed. The first blind response omitted `Result` and was preserved. The fresh response covered all IDs, and all 31 divergences link to open questions. The model uses the three public states and represents expiry and capacity as guards. The optional independent code review was skipped. [Summary and executed checks](/private/tmp/stateradar-controller-4us5gpyo/gobreaker-sol/selective/pool/domain-analysis/circuitBreaker/summary.md)
+
+The upstream tests passed without the race detector, and all nine overlay probes passed with it. The upstream race-detector run failed because `TestCustomCircuitBreaker` reads private counters concurrently with admission. The component source and existing tests were preserved. [Race-detector output](/private/tmp/stateradar-controller-4us5gpyo/gobreaker-sol/selective/pool/domain-analysis/circuitBreaker/upstream-race-failure.txt)

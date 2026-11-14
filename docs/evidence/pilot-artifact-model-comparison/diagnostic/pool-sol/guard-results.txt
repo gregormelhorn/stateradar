@@ -1,0 +1,96 @@
+group G-01 capacities: proven
+group G-02 factory presence: proven
+group G-03 close presence: proven
+group G-04 ping configuration: proven
+group G-05 active limit: proven
+group G-06 channel snapshot: proven
+group G-07 factory admission: proven
+group G-08 idle timeout enable: proven
+group G-10 buffered ping decision: proven
+group G-11 Put nil payload: proven
+group G-12 Put detached: proven
+group G-13 Put queue length: proven
+group G-14 Close and Ping payload: proven
+group G-15 Close callback: proven
+group G-16 Release snapshot: proven
+group G-17 request channel receive: proven
+group G-18 buffered nil receive: proven
+group G-19 Factory result: proven
+group G-20 Ping result: proven
+group G-22 initialization bound: proven
+group G-09 idle age comparison: not-formalizable: clock: channel.go:116, 142. Comparing effective deadline against the live clock. Inspection: sample before/equal keeps the resource, later discards.
+group G-21 runtime channel readiness: not-formalizable: dynamic-state: channel.go:110, 190. Readiness includes concurrent send and receive, including unbuffered rendezvous. Inspection: ready chooses the channel case, unavailable chooses default.
+group G-23 callback outcome effects: not-formalizable: external-call: channel.go:83, 124, 154, 212, 220, 241. Boolean return tests are separately proven. Actual cleanup, health, blocking and panic contracts are external.
+
+G-01 capacities: channel.go:59 ("poolConfig.InitialCap <= poolConfig.MaxIdle"). Assumptions: typed domain only.
+  {'initial': -1, 'idle': 1, 'maximum': 2} -> ['reject']
+  {'initial': 0, 'idle': 1, 'maximum': 2} -> ['accept']
+  {'initial': 1, 'idle': 1, 'maximum': 2} -> ['accept']
+  {'initial': 2, 'idle': 1, 'maximum': 2} -> ['reject']
+  {'initial': 0, 'idle': 1, 'maximum': 0} -> ['reject']
+  {'initial': 0, 'idle': 1, 'maximum': 1} -> ['accept']
+  {'initial': 0, 'idle': 1, 'maximum': 2} -> ['accept']
+G-02 factory presence: channel.go:62 ("if poolConfig.Factory == nil"). Assumptions: typed domain only.
+  {'factory_present': False} -> ['reject']
+  {'factory_present': True} -> ['continue']
+G-03 close presence: channel.go:65 ("if poolConfig.Close == nil"). Assumptions: typed domain only.
+  {'close_present': False} -> ['reject']
+  {'close_present': True} -> ['continue']
+G-04 ping configuration: channel.go:78 ("if poolConfig.Ping != nil"). Assumptions: typed domain only.
+  {'ping_configured': False} -> ['skip assignment']
+  {'ping_configured': True} -> ['remember']
+G-05 active limit: channel.go:133 ("c.openingConns >= c.maxActive"). Count unrestricted because provenance and cleanup can corrupt it. Assumptions: [maximum >= 0].
+  {'count': 0, 'maximum': 1} -> ['check factory']
+  {'count': 1, 'maximum': 1} -> ['queue']
+  {'count': 2, 'maximum': 1} -> ['queue']
+  {'count': -1, 'maximum': 0} -> ['check factory']
+  {'count': 0, 'maximum': 0} -> ['queue']
+  {'count': 1, 'maximum': 0} -> ['queue']
+G-06 channel snapshot: channel.go:105 ("if conns == nil"). Assumptions: typed domain only.
+  {'snapshot_present': False} -> ['reject']
+  {'snapshot_present': True} -> ['observe']
+G-07 factory admission: channel.go:150 ("if c.factory == nil"). Assumptions: typed domain only.
+  {'factory_available': False} -> ['closed']
+  {'factory_available': True} -> ['call']
+G-08 idle timeout enable: channel.go:115 ("timeout > 0"), channel.go:141 ("timeout > 0"). Assumptions: typed domain only.
+  {'duration': -1} -> ['skip']
+  {'duration': 0} -> ['skip']
+  {'duration': 1} -> ['check age']
+G-10 buffered ping decision: channel.go:123 ("if c.ping != nil"). Assumptions: typed domain only.
+  {'has_ping': False} -> ['skip']
+  {'has_ping': True} -> ['call']
+G-11 Put nil payload: channel.go:168 ("if conn == nil"). Assumptions: typed domain only.
+  {'put_nil': False} -> ['lock']
+  {'put_nil': True} -> ['reject']
+G-12 Put detached: channel.go:174 ("if c.conns == nil"). Assumptions: typed domain only.
+  {'put_detached': False} -> ['check waiters']
+  {'put_detached': True} -> ['Close']
+G-13 Put queue length: channel.go:179 ("len(c.connReqs)"). Negative probe is outside slice domain. Assumptions: [queue >= 0].
+  {'queue': -1} -> ['idle attempt']
+  {'queue': 0} -> ['idle attempt']
+  {'queue': 1} -> ['handoff']
+G-14 Close and Ping payload: channel.go:203 ("if conn == nil"), channel.go:217 ("if conn == nil"). Assumptions: typed domain only.
+  {'payload_nil': False} -> ['delegate path']
+  {'payload_nil': True} -> ['reject']
+G-15 Close callback: channel.go:208 ("if c.close == nil"). Assumptions: typed domain only.
+  {'close_missing': False} -> ['decrement and call']
+  {'close_missing': True} -> ['return nil']
+G-16 Release snapshot: channel.go:234 ("if conns == nil"). Assumptions: typed domain only.
+  {'release_nil': False} -> ['drain']
+  {'release_nil': True} -> ['return']
+G-17 request channel receive: channel.go:138 ("if !ok"). False is structurally unreachable on current producer paths. Assumptions: typed domain only.
+  {'request_ok': False} -> ['reject']
+  {'request_ok': True} -> ['consume']
+G-18 buffered nil receive: channel.go:111 ("if wrapConn == nil"). Assumptions: typed domain only.
+  {'buffer_nil': False} -> ['check age']
+  {'buffer_nil': True} -> ['ErrClosed']
+G-19 Factory result: channel.go:84 ("if err != nil"), channel.go:155 ("if err != nil"). Assumptions: typed domain only.
+  {'factory_error': False} -> ['commit']
+  {'factory_error': True} -> ['reject']
+G-20 Ping result: channel.go:124 ("err != nil"). Effect of injected callback remains open. Assumptions: typed domain only.
+  {'ping_error': False} -> ['return']
+  {'ping_error': True} -> ['discard and retry']
+G-22 initialization bound: channel.go:82 ("i < poolConfig.InitialCap"). Variables stand for loop index and configured initial count in this group. Assumptions: [idle >= 0, initial >= 0].
+  {'initial': 0, 'idle': 1} -> ['iterate']
+  {'initial': 1, 'idle': 1} -> ['exit']
+  {'initial': 2, 'idle': 1} -> ['exit']

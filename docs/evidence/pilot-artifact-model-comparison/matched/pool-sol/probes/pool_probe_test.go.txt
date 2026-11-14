@@ -1,0 +1,371 @@
+package pool
+
+import (
+	"errors"
+	"fmt"
+	"runtime"
+	"testing"
+	"time"
+)
+
+var pauseMiss func()
+var pausePing func()
+var pauseOverflow func()
+
+type result struct {
+	v   interface{}
+	err error
+}
+
+func getAsync(p Pool) <-chan result {
+	ch := make(chan result, 1)
+	go func() { v, err := p.Get(); ch <- result{v, err} }()
+	return ch
+}
+func recv(t *testing.T, ch <-chan result) result {
+	t.Helper()
+	select {
+	case r := <-ch:
+		return r
+	case <-time.After(time.Second):
+		t.Fatal("Get did not finish")
+		return result{}
+	}
+}
+func quiet(t *testing.T, ch <-chan result) {
+	t.Helper()
+	select {
+	case r := <-ch:
+		t.Fatalf("unexpected completed Get: %+v", r)
+	case <-time.After(25 * time.Millisecond):
+	}
+}
+func waitQueue(t *testing.T, p Pool, n int) {
+	t.Helper()
+	c := p.(*channelPool)
+	until := time.Now().Add(time.Second)
+	for time.Now().Before(until) {
+		c.mu.Lock()
+		ready := len(c.connReqs) == n
+		c.mu.Unlock()
+		if ready {
+			return
+		}
+		runtime.Gosched()
+	}
+	t.Fatalf("schedule fixture did not see %d waiters", n)
+}
+func fixture(t *testing.T, i, m, a int, closer func(interface{}) error, ping func(interface{}) error) Pool {
+	t.Helper()
+	seq := 0
+	if closer == nil {
+		closer = func(interface{}) error { return nil }
+	}
+	p, err := NewChannelPool(&Config{InitialCap: i, MaxIdle: m, MaxCap: a, Factory: func() (interface{}, error) { seq++; return seq, nil }, Close: closer, Ping: ping})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p
+}
+func TestProbeWaitersAfterCloseAndRelease(t *testing.T) {
+	p := fixture(t, 0, 1, 1, nil, nil)
+	v, _ := p.Get()
+	a := getAsync(p)
+	waitQueue(t, p, 1)
+	if err := p.Close(v); err != nil {
+		t.Fatal(err)
+	}
+	quiet(t, a)
+	b := recv(t, getAsync(p))
+	if b.err != nil || b.v == v {
+		t.Fatalf("later Get should create replacement: %+v", b)
+	}
+	p.Release()
+	if err := p.Put(b.v); err != nil {
+		t.Fatal(err)
+	}
+	quiet(t, a)
+	if _, err := p.Get(); err != ErrClosed {
+		t.Fatalf("fresh Get: %v", err)
+	}
+}
+func TestProbeAcquisitionOrders(t *testing.T) {
+	p := fixture(t, 0, 1, 1, nil, nil)
+	defer p.Release()
+	held, _ := p.Get()
+	first := getAsync(p)
+	waitQueue(t, p, 1)
+	second := getAsync(p)
+	waitQueue(t, p, 2)
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	a := recv(t, first)
+	if a.v != held || a.err != nil {
+		t.Fatalf("first handoff: %+v", a)
+	}
+	quiet(t, second)
+	if err := p.Put(a.v); err != nil {
+		t.Fatal(err)
+	}
+	if b := recv(t, second); b.v != held || b.err != nil {
+		t.Fatalf("second handoff: %+v", b)
+	}
+	p2 := fixture(t, 0, 1, 2, nil, nil)
+	defer p2.Release()
+	x, _ := p2.Get()
+	y, _ := p2.Get()
+	if x == y || x == nil || y == nil {
+		t.Fatalf("two held resources: %v, %v", x, y)
+	}
+}
+func firstPause() (func(), <-chan struct{}, func()) {
+	entered, resume := make(chan struct{}), make(chan struct{})
+	count := make(chan struct{}, 1)
+	return func() {
+		select {
+		case count <- struct{}{}:
+			close(entered)
+			<-resume
+		default:
+		}
+	}, entered, func() { close(resume) }
+}
+func enter(t *testing.T, ch <-chan struct{}) {
+	t.Helper()
+	select {
+	case <-ch:
+	case <-time.After(time.Second):
+		t.Fatal("schedule point not reached")
+	}
+}
+func TestProbeMissThenPut(t *testing.T) {
+	for _, a := range []int{1, 2} {
+		t.Run(fmt.Sprint(a), func(t *testing.T) {
+			p := fixture(t, 0, 1, a, nil, nil)
+			defer p.Release()
+			held, _ := p.Get()
+			hook, at, resume := firstPause()
+			pauseMiss = hook
+			first := getAsync(p)
+			enter(t, at)
+			if err := p.Put(held); err != nil {
+				t.Fatal(err)
+			}
+			resume()
+			if a == 1 {
+				waitQueue(t, p, 1)
+				if p.Len() != 1 {
+					t.Fatal("expected idle value alongside waiter")
+				}
+				quiet(t, first)
+				b := recv(t, getAsync(p))
+				if b.v != held {
+					t.Fatalf("later Get did not take idle: %+v", b)
+				}
+				if err := p.Put(b.v); err != nil {
+					t.Fatal(err)
+				}
+				if b = recv(t, first); b.v != held {
+					t.Fatalf("waiter got %+v", b)
+				}
+			} else {
+				b := recv(t, first)
+				if b.err != nil || b.v == held || p.Len() != 1 {
+					t.Fatalf("expected replacement and idle value: %+v", b)
+				}
+			}
+			pauseMiss = nil
+		})
+	}
+}
+func TestProbeMissThenRelease(t *testing.T) {
+	for _, a := range []int{1, 2} {
+		t.Run(fmt.Sprint(a), func(t *testing.T) {
+			p := fixture(t, 0, 1, a, nil, nil)
+			_, _ = p.Get()
+			hook, at, resume := firstPause()
+			pauseMiss = hook
+			first := getAsync(p)
+			enter(t, at)
+			p.Release()
+			resume()
+			if a == 1 {
+				waitQueue(t, p, 1)
+				quiet(t, first)
+			} else if b := recv(t, first); b.err != ErrClosed {
+				t.Fatalf("below cap: %+v", b)
+			}
+			pauseMiss = nil
+		})
+	}
+}
+func TestProbePingRelease(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		t.Run(fmt.Sprint(fail), func(t *testing.T) {
+			entered, resume := make(chan struct{}), make(chan struct{})
+			closed := 0
+			p := fixture(t, 1, 1, 1, func(interface{}) error { closed++; return nil }, func(interface{}) error {
+				close(entered)
+				<-resume
+				if fail {
+					return errors.New("ping failed")
+				}
+				return nil
+			})
+			pending := getAsync(p)
+			enter(t, entered)
+			p.Release()
+			close(resume)
+			got := recv(t, pending)
+			if fail && got.err != ErrClosed {
+				t.Fatalf("ping failure: %+v", got)
+			}
+			if !fail && (got.v != 1 || got.err != nil) {
+				t.Fatalf("ping success: %+v", got)
+			}
+			if closed != 0 {
+				t.Fatalf("dequeued connection was closed %d times", closed)
+			}
+		})
+	}
+}
+func TestProbePingDispatchAfterRelease(t *testing.T) {
+	p := fixture(t, 1, 1, 1, nil, func(interface{}) error { return nil })
+	hook, at, resume := firstPause()
+	pausePing = hook
+	panicked := make(chan interface{}, 1)
+	go func() { defer func() { panicked <- recover() }(); _, _ = p.Get() }()
+	enter(t, at)
+	p.Release()
+	resume()
+	select {
+	case v := <-panicked:
+		if v == nil {
+			t.Fatal("expected nil Ping invocation panic")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Get did not exit")
+	}
+	pausePing = nil
+}
+func TestProbeOverflowThenRelease(t *testing.T) {
+	closed := 0
+	p := fixture(t, 0, 0, 1, func(interface{}) error { closed++; return nil }, nil)
+	held, _ := p.Get()
+	hook, at, resume := firstPause()
+	pauseOverflow = hook
+	put := make(chan error, 1)
+	go func() { put <- p.Put(held) }()
+	enter(t, at)
+	p.Release()
+	resume()
+	select {
+	case err := <-put:
+		if err != nil || closed != 0 {
+			t.Fatalf("overflow cleanup: err=%v close calls=%d", err, closed)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Put did not finish")
+	}
+	pauseOverflow = nil
+}
+func TestProbeCloseErrorFreesAdmission(t *testing.T) {
+	boom := errors.New("live resource")
+	p := fixture(t, 0, 1, 1, func(interface{}) error { return boom }, nil)
+	defer p.Release()
+	v, _ := p.Get()
+	if err := p.Close(v); err != boom {
+		t.Fatalf("Close: %v", err)
+	}
+	if b := recv(t, getAsync(p)); b.err != nil || b.v == v {
+		t.Fatalf("replacement after error: %+v", b)
+	}
+}
+
+func TestProbeAbandonedWrapper(t *testing.T) {
+	p := fixture(t, 0, 1, 1, nil, nil)
+	defer p.Release()
+	held, _ := p.Get()
+	abandoned := getAsync(p)
+	waitQueue(t, p, 1)
+	quiet(t, abandoned)
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	// The observer stands in for the abandoned wrapper's result storage.
+	if got := recv(t, abandoned); got.v != held || got.err != nil {
+		t.Fatalf("abandoned handoff %+v", got)
+	}
+	next := getAsync(p)
+	waitQueue(t, p, 1)
+	quiet(t, next)
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	if got := recv(t, next); got.v != held {
+		t.Fatalf("handoff after external recovery %+v", got)
+	}
+}
+func TestProbeRepeatReleaseWhileDraining(t *testing.T) {
+	entered, resume := make(chan struct{}), make(chan struct{})
+	calls := 0
+	p := fixture(t, 1, 1, 1, func(interface{}) error {
+		calls++
+		close(entered)
+		<-resume
+		return errors.New("drain error")
+	}, nil)
+	first, second := make(chan struct{}), make(chan struct{})
+	go func() { p.Release(); close(first) }()
+	enter(t, entered)
+	go func() { p.Release(); close(second) }()
+	enter(t, second)
+	select {
+	case <-first:
+		t.Fatal("initial drain returned before closer resumed")
+	default:
+	}
+	if n := p.Len(); n != 0 {
+		t.Fatalf("Len during drain %d", n)
+	}
+	close(resume)
+	enter(t, first)
+	if calls != 1 {
+		t.Fatalf("close calls %d", calls)
+	}
+}
+func TestProbeHandoffSkipsPing(t *testing.T) {
+	calls := 0
+	p := fixture(t, 0, 1, 1, nil, func(interface{}) error { calls++; return errors.New("invalid") })
+	defer p.Release()
+	held, _ := p.Get()
+	waiter := getAsync(p)
+	waitQueue(t, p, 1)
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	if got := recv(t, waiter); got.v != held || got.err != nil || calls != 0 {
+		t.Fatalf("handoff got %+v, Ping calls %d", got, calls)
+	}
+}
+func TestProbeLiveFactoryReentry(t *testing.T) {
+	entered := make(chan struct{})
+	var p Pool
+	p, _ = NewChannelPool(&Config{MaxIdle: 1, MaxCap: 1, Factory: func() (interface{}, error) {
+		close(entered)
+		return p.Len(), nil
+	}, Close: func(interface{}) error { return nil }})
+	got := getAsync(p)
+	enter(t, entered)
+	quiet(t, got)
+}
+func TestPingReleaseRaceOriginal(t *testing.T) {
+	for i := 0; i < 250; i++ {
+		p := fixture(t, 1, 1, 1, nil, func(interface{}) error { return nil })
+		done := make(chan struct{})
+		go func() { defer close(done); defer func() { _ = recover() }(); _, _ = p.Get() }()
+		p.Release()
+		enter(t, done)
+	}
+}

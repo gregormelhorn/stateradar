@@ -147,6 +147,18 @@
      },
      "trace": {
       "type": "string"
+     },
+     "reachability": {
+      "type": "object",
+      "required": ["source", "target", "file", "line", "fragment"],
+      "additionalProperties": false,
+      "properties": {
+       "source": {"type": "string", "minLength": 1},
+       "target": {"type": "string", "minLength": 1},
+       "file": {"type": "string", "minLength": 1},
+       "line": {"type": "integer", "minimum": 1},
+       "fragment": {"type": "string", "minLength": 4}
+      }
      }
     }
    }

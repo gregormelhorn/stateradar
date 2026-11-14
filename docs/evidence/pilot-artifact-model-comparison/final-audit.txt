@@ -1,0 +1,14 @@
+PACK CONSISTENCY: OK (20 artifacts, registry, version 1.53)
+AUDIT: settings matched within component except model; counters preserved;
+missing matched Pool/Sol usage and combined cost remain null;
+all provider ledgers settled; no tracked component source/test changes;
+credit formulas checked against independent arithmetic cases.
+Fresh strict sidecar regeneration:
+  Pool/Sol: 4 states x 36 events = 144 cells, 22 questions; unchanged SHA256.
+  gobreaker/Sol: 3 states x 26 events = 78 cells, 17 questions; unchanged SHA256.
+Postflight: 6/6 green for each Sol artifact set; Pool checks ran after service abort.
+Blind row audit: Pool 101/101; gobreaker 115/115. Dropped-classification red
+probe failed for both; original classifications passed.
+Matched Terra: both explicitly incomplete, 0/6 postflight gates on each component.
+Known experiment model-cost subtotal: $4.579938 plus unknown Pool/Sol Codex cost.
+No total bill or successful Pool/Sol service completion is claimed.

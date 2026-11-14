@@ -316,12 +316,43 @@ For targeted evidence, use the command tool with
 `["read-log", "012", "rows", "GetAgain"]`,
 `["read-log", "012", "lines", "20", "45"]`, or
 `["read-log", "012", "find", "generation"]`.
-Append `.stderr` to the log ID to select stderr.
+Append `.stderr` to the log ID to select stderr. Every command result carries
+`line_counts` for the retained streams. A line range may end beyond EOF and
+returns the available lines; its start must exist and its requested width
+must not exceed 100 lines. A range starting at line 1 of an empty stream
+returns an empty result with `total_lines: 0`. The response includes the actual
+total line count. The canonical routing command also accepts `--help` without
+making a provider call or creating a ledger.
 
 Use `--output-mode standard` or `--output-mode compact` for one run in
 the corresponding comparison format. Use `--output-mode compare` for
 the standard/compact pair. `--compact-first` can be used alone as
 shorthand for the pair in reverse order.
+
+## Structured matrix and hybrid pilots
+
+Use `--routing-variant routed` for standard routing. The `matrix` variant
+keeps that routing and adds the structured matrix workflow and its two
+postflight gates. The `hybrid` variant additionally asks Flash for concurrent
+schedules. All three use the same selective output by default.
+
+Use `--routing-variant hybrid` with the Codex runner. Flash proposes
+bounded concurrent schedules against one implementation file per call.
+Every candidate includes cited ordered steps and observable outcomes.
+The tool marks fragment or shape problems, and the pilot reviews every
+candidate against the source before using it. For example:
+
+```sh
+python3 tools/local_models.py --ledger /tmp/pilot.sqlite flash-windows \
+  /path/to/component.go --output /tmp/windows.json
+```
+
+The full run retains the raw provider answer and the candidate review.
+In both `matrix` and `hybrid`, Codex writes the matrix fields and uses `tools/hybrid_pilot.py` to render
+them. The renderer checks totality, vocabulary, question IDs, source
+fragments and round trips through the sidecar parser. The runner checks
+matrix identity and regenerates the sidecar before running the five pack
+gates. Jev continues to verify cited claims and requirement scope.
 
 ## Provider limits (checked 2026-11-12)
 
@@ -391,3 +422,38 @@ python3 tools/local_models.py --ledger "$ledger" set-limit 3000000
 The ledger includes no prompt text, but its database is local task data.
 Prices and usage figures are estimates in US dollars. An output ending for any
 reason other than `stop` may be incomplete and must be reviewed.
+
+
+### Predictable pilot artifacts and controller comparison
+
+The pilot runner defaults to `--routing-variant routed` with selective
+output. Matrix rendering and the Flash schedule sweep remain explicit
+variants. `--model gpt-6.1-sol` is the reference; `--model gpt-6.1-terra`
+is an experimental controller using the same ChatGPT login and medium
+reasoning effort. The experiment manifest records the selected model.
+Model choice does not change the provider ledger or pilot instructions.
+
+Prompt v1.29 requires reviewed `catalogue-fields.json`, rendered by
+`tools/pilot_artifacts.py catalogue FIELDS OUTPUT`. The runner verifies
+that the catalogue still matches those fields. Coverage omissions,
+unknown UV references, and inconsistent UV prefixes fail before writing.
+`pilot_artifacts.py citations SOURCE LINE [LINE ...]` copies exact source
+lines as JSON without judging the associated claim.
+
+Blind coverage accepts distinct situations for the same event, with an
+explicit Situation column; duplicate or missing situation labels fail.
+The checklist still ticks each event and pair ordering exactly once.
+A Part-A controller never edits a blind response to make it pass.
+
+The controller runs with `--sandbox workspace-write` in the disposable
+component checkout, matching its artifact-writing task. The pilot command
+server still applies its macOS sandbox and restricts credentials to routing
+commands. A read-only controller setting conflicts with authorized artifact
+creation even when the external command server can perform writes.
+
+The [matched Sol/Terra screen](evidence/pilot-artifact-model-comparison/README.md)
+did not support changing the default controller: Terra stopped incomplete
+on both components. Sol's Pool artifacts passed local checks after a service
+cutoff, but its final controller cost is missing. Treat the reported dollar
+figures as cost equivalents under the stated credit conversion, and include
+failed attempts and fallback work before claiming savings.

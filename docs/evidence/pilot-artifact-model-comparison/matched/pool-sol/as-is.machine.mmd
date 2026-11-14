@@ -1,0 +1,38 @@
+stateDiagram-v2
+    [*] --> Initializing
+    Initializing --> Available: New succeeds
+    Initializing --> [*]: invalid configuration or factory error
+    state Available {
+        [*] --> Open
+        Open --> Open_Waiting: Get misses and enqueues at capacity
+        Open_Waiting --> Open: Put hands off to last waiter
+        Open --> Open_IdleAndWaiting: Get missed before Put buffered, then enqueued
+        Open_IdleAndWaiting --> Open_Waiting: Get consumes last idle value
+        Open_IdleAndWaiting --> Open: Put serves last waiter
+    }
+    Open --> Released: Release detaches
+    Open_Waiting --> Released: Release detaches
+    Open_IdleAndWaiting --> Released: Release detaches
+    state Released {
+        [*] --> Draining
+        Draining --> Detached: drain complete
+    }
+    state RequestTrack {
+        [*] --> Inspecting
+        Inspecting --> Validating: receive idle value
+        Inspecting --> Waiting: enqueue
+        Inspecting --> Creating: below active limit
+        Waiting --> Validating: receive handoff, age only
+        Validating --> Inspecting: age or Ping failure
+        Validating --> [*]: return value
+        Creating --> [*]: return value or error
+        Inspecting --> [*]: closed snapshot
+    }
+    state ResourceTrack {
+        Idle --> Held: Get
+        Held --> Idle: Put buffers
+        Held --> Held: Put hands off
+        Held --> Disposing: Close or overflow
+        Idle --> Disposing: Release drains
+        Disposing --> [*]: callback returns
+    }

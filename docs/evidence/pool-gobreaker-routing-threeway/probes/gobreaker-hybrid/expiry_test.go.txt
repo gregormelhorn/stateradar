@@ -1,0 +1,53 @@
+package gobreaker
+
+import (
+	"testing"
+	"time"
+)
+
+func TestPilotExpiryEquality(t *testing.T) {
+	cb := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }}).cb
+	two := &TwoStepCircuitBreaker{cb: cb}
+	pilotOpen(two)
+	cb.mutex.Lock()
+	sampled := cb.expiry
+	at, _ := cb.currentState(sampled)
+	after, _ := cb.currentState(sampled.Add(time.Nanosecond))
+	cb.mutex.Unlock()
+	if at != StateOpen || after != StateHalfOpen {
+		t.Fatalf("expiry equality and after: %s, %s", at, after)
+	}
+}
+
+func TestPilotSynchronizedTrialWaves(t *testing.T) {
+	const instances = 4
+	breakers := make([]*TwoStepCircuitBreaker, instances)
+	for i := range breakers {
+		breakers[i] = NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool { return true }})
+		pilotOpen(breakers[i])
+	}
+	for cycle := 0; cycle < 3; cycle++ {
+		admitted, refused := 0, 0
+		reports := make([]func(bool), 0, instances)
+		for _, b := range breakers {
+			b.cb.mutex.Lock()
+			b.cb.expiry = time.Now().Add(-time.Second)
+			b.cb.mutex.Unlock()
+			done, err := b.Allow()
+			if err != nil {
+				t.Fatal(err)
+			}
+			admitted++
+			reports = append(reports, done)
+			if _, err = b.Allow(); err == ErrTooManyRequests {
+				refused++
+			}
+		}
+		if admitted != instances || refused != instances {
+			t.Fatalf("cycle %d admitted=%d refused=%d", cycle, admitted, refused)
+		}
+		for _, done := range reports {
+			done(false)
+		}
+	}
+}

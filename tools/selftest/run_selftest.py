@@ -516,6 +516,8 @@ def main() -> int:
                     ("Cell", sidecar_types.Cell, items("cells")),
                     ("Citation", sidecar_types.Citation, items("cells")["properties"]["citation"]),
                     ("Pair", sidecar_types.Pair, items("pairs")),
+                    ("PairReachability", sidecar_types.PairReachability,
+                     items("pairs")["properties"]["reachability"]),
                     ("GuardGroup", sidecar_types.GuardGroup, items("guardGroups")),
                     ("Question", sidecar_types.Question, items("questions")),
                     ("DocLine", sidecar_types.DocLine, items("docLines")),
@@ -1385,6 +1387,45 @@ def main() -> int:
     expect("unreachable state must fail", True,
            *chk(adir),
            needle="unreachable")
+
+    # Pair-only reachability needs checked evidence in its own ordering.
+    pair_root = tmp / "reach-pair"
+    adir = pair_root / "domain-analysis" / "gate"
+    adir.mkdir(parents=True)
+    (adir / "disposition-matrix.md").write_text(
+        "<!-- states: Ready, Stranded -->\n"
+        "| state | retry |\n"
+        "| **Ready** | handle |\n"
+        "| **Stranded** | transition → Ready |\n"
+    )
+    (adir / "event-catalogue.md").write_text("P-01a and P-01b\n")
+    source = pair_root / "test_gate.py"
+    source.write_text("assert idle_count() == 1\n")
+    traces = adir / "adversarial-traces.md"
+    proof = '- Reachability: Ready → Stranded — test_gate.py:1 ("idle_count() == 1")'
+    document = f"### P-01a — return before wait\n{proof}\n### P-01b — reverse\n"
+    traces.write_text(document)
+    gen_sidecar(adir)
+    expect("pair ordering reaches a state without a cell targeting it", False,
+           *chk(adir), needle="2/2 states reachable")
+    traces.write_text(document.replace(proof, ""))
+    expect("stale pair reachability metadata fails", True, *chk(adir),
+           needle="P-01a")
+    gen_sidecar(adir)
+    expect("pair heading alone does not make a state reachable", True, *chk(adir),
+           needle="unreachable")
+    traces.write_text(document)
+    gen_sidecar(adir)
+    source.write_text("assert idle_count() == 0\n")
+    expect("drifted pair evidence fails", True, *chk(adir), needle="fragment")
+    source.write_text("assert idle_count() == 1\n")
+    traces.write_text(document.replace("Ready → Stranded", "Stranded → Stranded"))
+    gen_sidecar(adir)
+    expect("pair edge needs a reachable starting state", True, *chk(adir),
+           needle="unreachable")
+    traces.write_text(document.replace("Ready → Stranded", "Ready → Unknown"))
+    gen_sidecar(adir)
+    expect("pair target must be a declared state", True, *chk(adir), needle="Unknown")
 
     print("ensemble convergence")
 

@@ -1,0 +1,40 @@
+stateDiagram-v2
+    [*] --> Initializing
+    Initializing --> Open: New successful
+    Initializing --> Initializing: invalid config or factory error returns no pool
+    state PoolLifecycle {
+        Open --> Open_Waiting: saturated Get commits a waiter
+        Open_Waiting --> Open: last waiter gets Put
+        Open --> Open_WaitingWithIdle: Get misses then Put buffers then saturated admission commits
+        Open_WaitingWithIdle --> Open_Waiting: newer Get takes last idle connection
+        Open_WaitingWithIdle --> Open: Put serves last waiter and idle remains
+        Open_WaitingWithIdle --> Open_WaitingWithIdle: Put serves one of multiple waiters
+        Open --> Released: Release detaches
+        Open_Waiting --> Released_Waiting: Release leaves queue
+        Open_WaitingWithIdle --> Released_Waiting: Release leaves queue
+        Released --> Released_Waiting: stale at-capacity Get commits
+        Released --> Released: fresh Get rejected
+        Released_Waiting --> Released_Waiting: wait survives teardown
+    }
+    state RequestLifecycle {
+        [*] --> Observing
+        Observing --> CheckingCandidate: channel receive
+        Observing --> Admitting: receive default
+        Admitting --> Waiting: append private request
+        Admitting --> Completed: Factory result or ErrClosed
+        Waiting --> CheckingDelivery: Put sends
+        CheckingDelivery --> Observing: expired
+        CheckingDelivery --> Completed: fresh handoff
+        CheckingCandidate --> Observing: expired or invalid
+        CheckingCandidate --> Completed: valid or closed channel
+    }
+    state TeardownWork {
+        [*] --> Attached
+        Attached --> Draining: Release detaches
+        Draining --> DrainFinished: detached channel drained
+        Draining --> DrainAborted: Close callback panics
+    }
+    note right of Released
+        API calls remain observable.
+        Drain work can still be active.
+    end note

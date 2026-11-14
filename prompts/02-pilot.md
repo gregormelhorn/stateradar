@@ -1,8 +1,18 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.24.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.29.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.29 — render reviewed catalogue fields with a shared helper, copy exact
+  citation lines, and distinguish repeated blind IDs from duplicate situations.
+* v1.28 — separate the matrix renderer from the optional Flash schedule sweep
+  so each can be evaluated with the same routing and validation workflow.
+* v1.27 — add the optional hybrid variant with cited Flash schedule
+  proposals and deterministic rendering of the reviewed matrix.
+* v1.26 — inspect interleavings inside operations, and validate each
+  generated artifact before building later steps on it.
+* v1.25 — account for a state reached through a cited interaction-pair
+  ordering, with the starting and resulting states recorded in its trace.
 * v1.24 — trace a second acquisition from the same caller while its
   first request is pending or its first resource is still held.
 * v1.23 — preserve source-specific fault cases, storage and counter
@@ -156,7 +166,7 @@ Rules for every routed step:
 4. **Ordering checks read both answers.** Every `ordering` result carries a `choice` and an independent `ordering_scope_probability`; they often disagree (first live run: `supported` with scope 0.11 for an ordering the text never describes). A Jev result never establishes scope. If the choice is not `supported`, or the scope probability is below 0.5, the ordering is not source-backed and a drafted ordering claim becomes a question. The 0.5 is provisional and uncalibrated (see the cascade plan): it can only add questions, and a result above it backs nothing by itself.
 5. **Scope line.** On a Step-6 control trace you decide *cited text contemplates this ordering: yes/no* from the quoted text, then add `jev: <choice>, scope <probability>`, or `jev: failed (<reason>)`, or `jev: not run (<reason>)`. With routing on, `not run` is allowed only when the ledger is exhausted; every `failed` or `not run` is listed in `summary.md`. If you write `yes` and Jev does not back the ordering under rule 4, the control verdict is void: raise a question that cites both. Record every run that Jev answered; never re-run an answered check with another fragment, another source, or a reworded statement to change its result. A batch rejected before Jev answered (for example a citation error) has no result: correct it and run it again. For a control trace, use the original requirements or DR file. For a callee guarantee or finding, use the original contract, code or test that supplies the citation. Never use an analysis artifact such as `extraction.md` as evidence.
 6. **Carry every draft question forward.** Each entry in a draft's `questions` list ends as a Q in Step 7, as a reasoned fold into an existing Q, or as a reasoned disposition recorded in `extraction.md`: `answered: <file:line>` when the sources settle it, or `outside scope: <why>`. `answered:` settles only what the code does; when the requirements are silent on whether that behaviour is intended, the intent part becomes a Q or folds into one. `outside scope:` never applies to behaviour of the component under analysis. A model judgment never answers one.
-7. **Part B is never done by you.** You have seen the code and the matrix. `blind` takes only prepared text files (`.md`, `.txt`, `.rst`): requirements prose (a whole file, or one section selected with `FILE.md:PATTERN`), and a whole contracts file into which you copied each contract docstring or schema description verbatim, headed by its `file:line`, with no added, summarised, or reworded text; it refuses source files and class specs. First run `blind … --package-only`, read `<output stem>.package.md`, and confirm it holds no implementation code; then run `blind` without the flag and without changing the inputs. The real run sends only that inspected package and refuses if the inputs changed. The analysis directory, `--requirements` and `--contracts` are relative to `--repo` (or absolute). The package carries the catalogue with code fragments, line numbers and analysis ids removed; file names stay, and so do quotes cited from the requirements and contracts files or from the prose files the doctrine lines cite (never from a file of the analysis directory). Q-, PA-, SYS-, NAT- and DR- ids are always removed; L-, G-, F- and T- ids stay only when the requirements, the contracts or the quoted text of a doctrine line use them, and the command names on stderr each id it kept and each it removed: check both lists, list each kept id in `part-b-diff.md` with why it stays, and record any removed domain term as a known loss; never edit the inputs to restore one. The command refuses the package when a cited file name is still followed by a quoted fragment after stripping (put each fragment on one line right after `file:N` or `file:N-M`, escape each `|` of a fragment in a table cell as `\|` in the catalogue, rephrase a parenthesised prose quote that follows a code file name, and rebuild) or when a table row's cell count changed (repair that row's escaping and rebuild); never send such a package and never work around the refusal. Write each line number as part of a citation (`file:N`, `file:N, M or K`, `file:N-M`, ranges without spaces) and end the run with `,` `;` `.` `:` `?` `!`, a bracket, a double quote or `*`, or join its last number with `and`/`or`; never end it with a dash or a slash or put a prose count directly after it; a bare number in prose ("unlock at 136") is not recognised and reaches the package. The refusal does not catch a quote after the citation's own `;` or `)`, or more than 80 characters after the file name: search the package for every `(` followed by a quote (straight, single or typographic, also with a space between) and confirm that each one is a kept prose-source quote. The package labels the catalogue's gate-type, remembrance, upstream-guard, lock-discipline, event-annotation and undesired-coverage headings, and each `gate:` and `upstream_guards:` field, `observed in code`; the coverage check (run by `blind`, or `part_b_pack.py --check`) lists the rows Part B marked `as-is:`, and Part B's agreement on each of them is not independent: list them in `part-b-diff.md`. The mark is Part B's own report and can be missing: it adds to your reading, never replaces it. Still read it: prose that states an as-is conclusion (a deadlock, a lost wake-up, a hole) elsewhere, such as an event table cell, is a known leak; list each in `part-b-diff.md` and treat Part B's agreement on that row as not independent. Never repair such text by restating it as intent or as a hole or question; a repaired line states provenance only ("observed in code"). If code reaches a sent package anyway, discard the blind output, record the contamination in `part-b-diff.md`, and re-dispatch with clean inputs. A passing coverage check proves row presence only: confirm the pair count against the pairs table. A row whose disposition word is outside the closed vocabulary is listed as `vocabulary-drift` in `part-b-diff.md`; classify it only where its described behaviour maps unambiguously to one vocabulary value, and state that mapping. If the behaviour differs from the matrix it is a `divergence` with a Q; if it is ambiguous, raise a Q. If `blind` fails or routing is not configured, dispatch a fresh blind session as the Part B dispatch notes describe, with the same prepared text files and no `FILE:Class` specs; never write, edit, rewrite, or complete a blind table yourself.
+7. **Part B is never done by you.** You have seen the code and the matrix. `blind` takes only prepared text files (`.md`, `.txt`, `.rst`): requirements prose (a whole file, or one section selected with `FILE.md:PATTERN`), and a whole contracts file into which you copied each contract docstring or schema description verbatim, headed by its `file:line`, with no added, summarised, or reworded text; it refuses source files and class specs. First run `blind … --package-only`, read `<output stem>.package.md`, and confirm it holds no implementation code; then run `blind` without the flag and without changing the inputs. The real run sends only that inspected package and refuses if the inputs changed. The analysis directory, `--requirements` and `--contracts` are relative to `--repo` (or absolute). The package carries the catalogue with code fragments, line numbers and analysis ids removed; file names stay, and so do quotes cited from the requirements and contracts files or from the prose files the doctrine lines cite (never from a file of the analysis directory). Q-, PA-, SYS-, NAT- and DR- ids are always removed; L-, G-, F- and T- ids stay only when the requirements, the contracts or the quoted text of a doctrine line use them, and the command names on stderr each id it kept and each it removed: check both lists, list each kept id in `part-b-diff.md` with why it stays, and record any removed domain term as a known loss; never edit the inputs to restore one. The command refuses the package when a cited file name is still followed by a quoted fragment after stripping (put each fragment on one line right after `file:N` or `file:N-M`, escape each `|` of a fragment in a table cell as `\|` in the catalogue, rephrase a parenthesised prose quote that follows a code file name, and rebuild) or when a table row's cell count changed (repair that row's escaping and rebuild); never send such a package and never work around the refusal. Write each line number as part of a citation (`file:N`, `file:N, M or K`, `file:N-M`, ranges without spaces) and end the run with `,` `;` `.` `:` `?` `!`, a bracket, a double quote or `*`, or join its last number with `and`/`or`; never end it with a dash or a slash or put a prose count directly after it; a bare number in prose ("unlock at 136") is not recognised and reaches the package. The refusal does not catch a quote after the citation's own `;` or `)`, or more than 80 characters after the file name: search the package for every `(` followed by a quote (straight, single or typographic, also with a space between) and confirm that each one is a kept prose-source quote. The package labels the catalogue's gate-type, remembrance, upstream-guard, lock-discipline, event-annotation and undesired-coverage headings, and each `gate:` and `upstream_guards:` field, `observed in code`; the coverage check (run by `blind`, or `part_b_pack.py --check`) lists the rows Part B marked `as-is:`, and Part B's agreement on each of them is not independent: list them in `part-b-diff.md`. The mark is Part B's own report and can be missing: it adds to your reading, never replaces it. Still read it: prose that states an as-is conclusion (a deadlock, a lost wake-up, a hole) elsewhere, such as an event table cell, is a known leak; list each in `part-b-diff.md` and treat Part B's agreement on that row as not independent. Never repair such text by restating it as intent or as a hole or question; a repaired line states provenance only ("observed in code"). If code reaches a sent package anyway, discard the blind output, record the contamination in `part-b-diff.md`, and re-dispatch with clean inputs. Repeated blind IDs are valid when their explicit Situation cells differ; classify every situation. Prefer one conditional row per ID. Never request a new blind pass merely because valid situations share an ID. A passing coverage check proves row presence only: confirm the pair count against the pairs table. A row whose disposition word is outside the closed vocabulary is listed as `vocabulary-drift` in `part-b-diff.md`; classify it only where its described behaviour maps unambiguously to one vocabulary value, and state that mapping. If the behaviour differs from the matrix it is a `divergence` with a Q; if it is ambiguous, raise a Q. If `blind` fails or routing is not configured, dispatch a fresh blind session as the Part B dispatch notes describe, with the same prepared text files and no `FILE:Class` specs; never write, edit, rewrite, or complete a blind table yourself.
 8. **Failures are results.** A rejected draft, an incomplete response, an API error, or an exceeded ledger stops that call only. Record it in `summary.md` and do Steps 1, 6 or 8 yourself (Part B: rule 7; an oversized source: rule 9, which takes precedence). A `citation fragment missing` error from `jev-batch` is a correction: fix the citation or raise a question, then re-run the batch with every check. Never retry by loosening the task, dropping a check, or weakening the citation check. A draft cut off at the output budget (`finish_reason=length`, kept as `<stem>.draft.txt`) is not loosening: re-run it once with a larger `--max-tokens` (at most 16384); if it is cut off again, split the source under rule 9 or do the step yourself.
 9. **Excerpts keep their line numbers.** Split a file only when a call fails with HTTP 400 and the error text names `max_tokens_exceeded`, or when a draft is cut off again after the rule-8 re-run. Cut on line boundaries, record each excerpt's start line, and add `start - 1` to every cited line before it enters an artifact.
 10. **Draft tasks are finding-neutral.** A `draft-verify` task names what to extract (events, states, guards, orderings, contracts) in general terms, never a suspected defect, race, or scenario: you have seen the code, and a named scenario steers Flash (first routed pilot: the task's example race was the benchmark finding, so Flash raising it was not independent). Keep every task file next to its output.
@@ -171,6 +181,60 @@ Use it only when the run brief names `routing variant: flash-writes`, and write 
 2. **Step 4.** You decide the states (each with the condition that defines it) and the events, and write them to a cells task file (JSON: `states` with `name` and `condition`, `events` with `id` and `gist`, optional `notes`). Rule 10 applies to the whole task file: conditions, gists and notes describe states and events in general terms and never name a suspected defect, race or scenario. Run `draft-cells <source> <task> --output <stem>.json` once per source file that holds the handling (split the events across calls if a draft is cut off; rule 9 still applies). It checks each drafted cell (state, event, vocabulary, target, citation, one cell per pair), sends every clean cell to one Jev batch as a claim, and writes `<stem>.md`: a matrix block in the cell form of this step, then a review list. Read the source file once and check every drafted cell against it; correct a wrong cell in place, decide every `→ Q-?` (a hole's question or fold, or a cell whose citation failed) and every `MISSING`, and add guards, `→ Q-nn` links and pair notes as this step requires. Jev's answer orders your reading and is never a reason to keep or drop a cell (routing rule 2); on a hole cell Jev can judge what the code does, not whether it is intended, so `unclear` there is expected. Keep the task file, the JSON and the rendered draft.
 3. **As-is tests.** Write a test plan, one line per test: its name, the claim it observes, and the cited line. Then draft the test code with `flash` from a prompt that holds the plan and the source, and run it. Fix what does not compile or does not observe its claim, and keep the plan, the prompt and the draft next to the tests.
 4. **Measure.** After the sidecar is generated, run `python3 <pack>/tools/draft_cells.py compare <stem>.json … --sidecar analysis.json` and put its output in `summary.md`. It counts each drafted cell as unchanged, changed (disposition, target or citation) or dropped, split by Jev's choice, and lists the final cells Flash did not draft; the counts come from the files, not from your report. Also record the tests drafted and the tests you changed, and the Step-1 items you added. These numbers are the variant's result next to cost and time, and the first labelled data on Jev for matrix cells.
+
+#### Routing variant `hybrid`
+
+Use only when the run brief names `routing variant: hybrid`. Keep the
+normal routed Step 1, Jev verification, blind Part B and all pilot steps.
+Before authoring the catalogue, run this once for each implementation file
+with shared mutable state or a lock, using the same ledger:
+
+```sh
+python3 ../pack/tools/local_models.py --ledger ../routing.sqlite flash-windows source.go --output domain-analysis/component/flash-windows-source.json
+```
+
+Read all proposals and cite each accepted observation and commit against
+the original source. Write `flash-window-review.md` with one row per
+source and candidate ID, the disposition of the proposal (kept, corrected
+or unsupported), and the trace or open question if kept. A citation check
+only verifies the fragment. Test material candidate schedules at the
+boundary and run your own sweep for missed cases, including readiness or
+buffer changes between a failed observation and lock, with branch
+conditions after the lock. Identify who waits, who returns, and what a
+later invocation or input does. Analyze below-capacity and at-capacity
+separately whenever the code branches on capacity. Where relevant, verify
+claims against Jev in the existing Step 8 batches.
+
+Then use the structured matrix workflow below.
+
+#### Structured matrix workflow for `matrix` and `hybrid`
+
+Use this workflow only when the run brief names `routing variant: matrix`
+or `routing variant: hybrid`. The `matrix` variant follows normal routed
+Step 1, Jev verification, blind Part B and all pilot steps. The `hybrid`
+variant also performs the Flash schedule sweep above.
+
+For Step 4, write `matrix-fields.json`. The object has strings `abstraction`, state names
+`states` (initial first), event IDs `events`, optional `terminal` state
+names and optional single-line `guard_notes`. Arrays of IDs use a single
+token per name. Its `cells` array has one object for every state/event
+pair, including terminal states. Each cell needs `state`, `event`,
+`disposition` (the literal vocabulary word), and any applicable fields
+`target`, `q`, `dr`, `crash` (boolean), `note` (single line without
+a table bar), and `citation` (object with repository-relative `file`,
+integer `line`, and verbatim, single-line `fragment`). Non-hole cells
+need either a source citation or a decision record. A hole or crash
+needs its Q ID. Use the exact evidence fragment from source. For
+example, a cell can be written as:
+
+```json
+{"state":"Ready","event":"Read","disposition":"handle","citation":{"file":"example.go","line":42,"fragment":"return value, nil"},"note":"Return the stored value."}
+```
+
+Generate the matrix with `python3 ../pack/tools/hybrid_pilot.py <output-dir>/matrix-fields.json <output-dir>/disposition-matrix.md`.
+Run the usual gates. Correct the fields and regenerate the matrix and
+sidecar when a gate fails. Keep structured fields and all gate and probe
+results in the run. In hybrid, also retain checked proposals and their raw outputs.
 
 ### Step 0 — Scope statement
 
@@ -281,6 +345,53 @@ finding) and the lock-acquisition site (file:line). This annotation
 feeds adversarial traces that deliberately re-enter from callbacks; a
 deadlock becomes a matrix disposition, not a surprise.
 
+**Canonical catalogue fields.** Write `catalogue-fields.json` and generate
+`event-catalogue.md` with:
+
+```sh
+python3 ../pack/tools/pilot_artifacts.py catalogue <output-dir>/catalogue-fields.json <output-dir>/event-catalogue.md
+```
+
+The fields preserve your analysis; the renderer supplies the Markdown
+structure required by the checkers. Correct the fields and regenerate
+when a check fails. Do not edit the generated catalogue independently.
+The JSON object has:
+
+* `events`: a nonempty array. Each event has `id`, `classification`
+  (`external` or `internal`), `undesired` (boolean matching its `UV-`
+  prefix), `source`, `description` (payload, production/consumption and
+  cited evidence), `gate`, and `upstream_guards` (a nonempty string array;
+  explicitly record absent or unknown guarantees).
+* Every base event, including internal events, also has `coverage`:
+  an object with all seven checklist keys above. Each value is a
+  comma-separated list of declared UV IDs, or `n/a: <source-backed reason>`.
+  A UV event may also carry coverage when needed.
+* `pairs`: an explicit array of objects with `id` (for example `P-01`),
+  `first` and `second` (declared event IDs), and `entity` (the shared
+  entity and actor context). The renderer emits both a/b orderings.
+  An empty array requires `no_pairs_reason`.
+* `remembrance` and `lock_discipline`: the complete cited annotations
+  requested above. `notes` can hold additional catalogue context.
+
+All text fields are single-line strings; keep distinct observations and
+citations within them. The renderer escapes table bars and writes event
+classifications, coverage, and the exact `Event annotations` structure.
+It never infers behavior or adds a finding. Review the rendered catalogue
+for completeness before preparing Part B. The runner checks that the
+retained fields reproduce it exactly.
+
+For a citation, copy a precise source line instead of reconstructing a
+fragment from wrapped output:
+
+```sh
+python3 ../pack/tools/pilot_artifacts.py citations source.go 42 57
+```
+
+The returned JSON contains `file`, `line`, and the exact `fragment` for
+each requested line. You still choose the claim, read its context and
+review whether the line supports it. Do not use a copied line as a
+substitute for verification.
+
 **Checklist coverage table (machine-readable).** Emit a table `undesired-coverage`: rows = external sources, columns = the checklist categories. Each cell holds the derived variant id(s), or an explicit `n/a: <reason>`. An empty cell is an error. This table prevents a checklist category from silently producing no variant.
 
 **Cross-source interaction pairs.** Enumerate every pair of *external* events from *different* sources that reference the same entity (room, session, stream, id) and can plausibly arrive near-simultaneously. Both orderings of each pair get an id (`P-01a`, `P-01b`, …) in a pairs table. The per-source checklist covers single-source orderings. This table exists because a per-source checklist structurally misses the races *between* sources.
@@ -311,6 +422,13 @@ For each group establish, under the declared NAT assumptions: (a) **pairwise dis
 
 A guard you cannot formalize gets the mark `not-formalizable: <category>: <reason>` and keeps its inspection reasoning, labelled unproven. The category comes from a closed vocabulary — `external-call` (the guard calls out of the machine), `dynamic-state` (the guard reads mutable runtime content), `clock` (floating-point or wall time), `unstructured-payload` (free-form content) — because the not-formalizable outcome is a judgment call, and the category makes it reviewable (the pack checker enforces the vocabulary). Every guard group must end as `proven`, `violation` (a finding), or `not-formalizable`. To skip a group silently is an error. Write the outcomes to `guard-results.txt` and back into the matrix's guard notes.
 
+Write and validate each artifact as soon as its inputs exist. Build large
+tables in blocks and use the shipped wrapper for stage checks. Write probe
+files with a literal-preserving tool call, format them and run each bounded
+probe before expanding the test set. Record compilation and runtime
+failures. Keep the component sources and existing tests intact, and
+retain a failing observation as evidence when the code produces it.
+
 **Mechanical self-check (mandatory).** Wire the pack's generic checker: copy `tools/templates/check_matrix.py` into the output directory (it calls `tools/check_matrix.py`, which covers grid totality, citations, hole→Q links, pair→trace links, and undesired-coverage totality) and execute it. Write component-specific checks only when the matrix needs something the generic checker does not verify — never duplicate its logic per component (four ~90% copies existed in dobby before the generic one). The catalogue must carry a machine-readable id declaration (`<!-- event-ids: ... -->`) and the matrix a state declaration (`<!-- states: ... -->`). Checkers parse these declarations, never prose.
 
 Stage 1 (after this step): every state row contains exactly one disposition per catalogue event column. No catalogue column is missing. Every `ignore (documented)` and `reject` cell carries a citation. The `undesired-coverage` table is total (no empty cells).
@@ -324,7 +442,7 @@ citation to the state's entry condition. This eliminates repetitive cells
 
 Stage 2 (after Step 7, re-run): every hole cell (`UNSPECIFIED` or `ignore (accidental)`) carries a `→ Q-nn` back-reference that exists in `open-questions.md`. Every interaction pair `P-nn` appears in at least one trace in `adversarial-traces.md`. Every guard group has an outcome from `check_guards.py`. Every control-trace verdict that cites a requirement or decision carries the scope line ("cited text contemplates this ordering: yes/no").
 
-Also emit the machine-readable sidecar `analysis.json` (schema: pack `formats/analysis.schema.json`). Contents: states, events, cells with dispositions and links, pairs with traces, guard outcomes, the coverage table, questions, behavioural DRs. Generate it with the pack's `tools/gen_analysis_sidecar.py`, never by hand: it reads the matrix, the pair ids in `event-catalogue.md` with their `### P-01a — …` headings in `adversarial-traces.md`, the `group G-nn …: <outcome>` lines of `guard-results.txt` and the first `**Fault:**` / `**Trigger:**` line (or `- fault:` list item) of each question, so no per-run merge script is needed; `--strict` fails the run on any note it prints. Run the pack checker `tools/dsc_check.py <output-dir> --repo . --model as-is.machine.mmd` in addition to the two per-run scripts. Then run the pack's `tools/check_reachability.py <output-dir>`: it follows `transition` cells only, one sidecar `target` per cell, and takes the first declared state as the initial state. It fails on a non-terminal state that is unreachable from the initial state and on a non-terminal state with no outgoing transition; a state declared terminal (`<!-- terminal: S1, S2 -->` in the matrix) is exempt from both. Write a guarded state change as `transition → <target>` and keep the staying branch in the cell text. A cell with two targets carries only one in the sidecar, so a state reached only through the second one is reported unreachable: split the cell by guard where the catalogue allows it, otherwise record the state as a known limit of the check in `summary.md`; never reorder targets to satisfy the checker. Include all outputs in `summary.md`. Deliver checks as executed code, never as claims.
+Also emit the machine-readable sidecar `analysis.json` (schema: pack `formats/analysis.schema.json`). Contents: states, events, cells with dispositions and links, pairs with traces, guard outcomes, the coverage table, questions, behavioural DRs. Generate it with the pack's `tools/gen_analysis_sidecar.py`, never by hand: it reads the matrix, the pair ids in `event-catalogue.md` with their `### P-01a — …` headings in `adversarial-traces.md`, the `group G-nn …: <outcome>` lines of `guard-results.txt` and the first `**Fault:**` / `**Trigger:**` line (or `- fault:` list item) of each question, so no per-run merge script is needed; `--strict` fails the run on any note it prints. Run the pack checker `tools/dsc_check.py <output-dir> --repo . --model as-is.machine.mmd` in addition to the two per-run scripts. Then run the pack's `tools/check_reachability.py <output-dir>`: it follows `transition` cells and the verified reachability entries in Step 6, and takes the first declared state as the initial state. The checker reads pair evidence relative to the component repository (override with `--repo`). It fails on a non-terminal state that is unreachable from the initial state and on a non-terminal state with no outgoing transition; a state declared terminal (`<!-- terminal: S1, S2 -->` in the matrix) is exempt from both. Write a guarded state change as `transition → <target>` and keep the staying branch in the cell text. A cell with two targets carries only one in the sidecar, so a state reached only through the second one is reported unreachable: split the cell by guard where the catalogue allows it, otherwise use a verified pair ordering if the state requires that sequence, or record the limit in `summary.md`; never reorder targets to satisfy the checker. Include all outputs in `summary.md`. Deliver checks as executed code, never as claims.
 
 **Assert every absence.** An empty `pairs`, `guardGroups`, or `coverage` section is a claim, not a silence: it says this component has no interaction pairs, no formalizable guard groups, or no external sources. State it in the `completeness` block with a reason, or the checker fails the sidecar:
 
@@ -432,6 +550,30 @@ Produce concrete, numbered event sequences of these kinds:
    * **Shared-fate reset.** All N instances reset internal state on the same external signal (for example connection opened). Does this create a synchronization cascade? Trace the aggregate load on the external resource over 3 failure/recovery cycles.
    * **Backoff dispersion.** If backoff windows share the same random seed, the same min/max bounds, and the same reset trigger — do they converge or diverge over time?
    * **Degraded-recovery herd.** The external resource recovers partially. Instance A connects, resets its state, then the resource fails again. Instance B connects, resets, fails. Do they amplify the degradation?
+
+For overlapping calls, split each operation at the first observation,
+the acquisition or release of synchronization, and the commit or wait.
+Check whether the other actor can change an observed condition in each
+gap. For a reachable overlap, state whether the first operation rechecks
+that condition and trace both actors through their actual results. Include
+any disagreement between admission, stored work and pending work, and
+whether a later request can complete first. Cite the observed decision
+and commit sites. Use a scheduling-only probe when a hook is needed, and
+assert externally visible results. Record a question when intent is open.
+
+When an interaction ordering reaches a modeled state and no single event
+cell represents that sequence, write the starting state, ordered steps and
+observable result in the trace. After a behavior probe confirms the result,
+add this line under the matching pair heading in `adversarial-traces.md`:
+
+```text
+- Reachability: StartingState → ResultingState — test_file.go:42 ("verbatim assertion fragment")
+```
+
+Regenerate the sidecar after Step 6 or after adding the probe. The checker
+validates the states, ordering link and citation, and follows the edge from
+the stated starting state. Record the executed probe in `as-is-validation.md`.
+If the order or resulting state remains uncertain, keep the question open.
 
 For a second acquisition, state how the caller can issue it and trace
 both calls to their outcomes. Check whether the boundary can associate
@@ -567,7 +709,7 @@ removed with a note in the summary.
 
 Run this in a **new** agent session with no access to the as-is model, the matrix, the traces, or the code. Provide only these inputs. First: `event-catalogue.md`, with gate-type annotations, upstream-guard annotations, and the pairs table. Second: the prose requirements. Third: the **normative contract text of every event the component emits or consumes**. Contract text means contract docstrings and schema descriptions: requirements-level material, never component code.
 
-> Here is the event catalogue of a component, and its requirements. For every event — including undesired variants and both orderings of every interaction pair — state in which situations the component should handle, ignore, or reject it, and what should happen. Describe situations in requirement terms. Name states per PA-17 (state naming convention): prefer public API names, name sub-states by their condition, use PascalCase with `_` as separator. If you must assume a lifecycle state the requirements do not name, label it `assumed-state:` with the condition that defines it. You have no access to the implementation. Be concrete. Produce a table keyed by the catalogue's event ids. End with a coverage checklist: every catalogue event id, listed once, ticked. A missing row must be impossible to miss.
+> Here is the event catalogue of a component, and its requirements. For every event — including undesired variants and both orderings of every interaction pair — state in which situations the component should handle, ignore, or reject it, and what should happen. Describe situations in requirement terms. Name states per PA-17 (state naming convention): prefer public API names, name sub-states by their condition, use PascalCase with `_` as separator. If you must assume a lifecycle state the requirements do not name, label it `assumed-state:` with the condition that defines it. You have no access to the implementation. Be concrete. Produce a table keyed by the catalogue's event ids and pair-ordering ids. Prefer one row per id with conditional outcomes. If you split an id into several rows, use an explicit `Situation` column with distinct, nonempty labels. Do not repeat the same situation. End with a coverage checklist: every catalogue event id, listed once, ticked. A missing row must be impossible to miss.
 >
 > Catalogue headings and fields labelled `observed in code` say what the implementation does, not what it should do. Base each row on the requirements, the contracts and the doctrine lines. When a row's expected behaviour rests only on observed-in-code text, start its behaviour cell with `as-is:`.
 >
@@ -582,7 +724,7 @@ inputs VERBATIM in the dispatch — a placeholder payload is the known
 failure, and `tools/part_b_pack.py --for-dispatch` exists so it cannot
 happen silently. If the blind agent refuses to run because its context
 is contaminated, that refusal IS the control working: fix the inputs
-or the context, never the agent. Before you classify: verify blind-table coverage mechanically. Every catalogue event id has exactly one row. Report any miscount. Then classify **every** row of the blind table into exactly one class:
+or the context, never the agent. Before you classify: verify blind-table coverage mechanically. Every catalogue event and pair-ordering id has at least one row; repeated ids need distinct explicit Situation cells. The checklist ticks each id exactly once. Report missing or duplicate situations; do not confuse distinct situations with duplicate coverage. Then classify **every** row of the blind table into exactly one class:
 
 * `convergent`: the blind pass reproduces the documented disposition: agreement, no gap, no action
 * `convergent-hole`: the blind pass independently flags a gap that pass A found: this strengthens the finding; note it on the existing Q

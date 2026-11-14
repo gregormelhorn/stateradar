@@ -1,0 +1,496 @@
+package pool
+
+import (
+	"errors"
+	"sync"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+type answer struct {
+	value interface{}
+	err   error
+}
+
+func pilotGet(p Pool) <-chan answer {
+	out := make(chan answer, 1)
+	go func() { v, e := p.Get(); out <- answer{v, e} }()
+	return out
+}
+func pilotAnswer(t *testing.T, out <-chan answer) answer {
+	t.Helper()
+	select {
+	case a := <-out:
+		return a
+	case <-time.After(time.Second):
+		t.Fatal("Get did not return")
+	}
+	return answer{}
+}
+func pilotPending(t *testing.T, out <-chan answer) {
+	t.Helper()
+	select {
+	case a := <-out:
+		t.Fatalf("unexpected completion: %+v", a)
+	case <-time.After(20 * time.Millisecond):
+	}
+}
+func pilotPool(t *testing.T, init, idle, max int, f func() (interface{}, error), cl func(interface{}) error, ping func(interface{}) error) *channelPool {
+	t.Helper()
+	p, e := NewChannelPool(&Config{InitialCap: init, MaxIdle: idle, MaxCap: max, Factory: f, Close: cl, Ping: ping})
+	if e != nil {
+		t.Fatal(e)
+	}
+	return p.(*channelPool)
+}
+func pilotWaiters(t *testing.T, p *channelPool, n int) {
+	t.Helper()
+	end := time.After(time.Second)
+	for {
+		p.mu.Lock()
+		got := len(p.connReqs)
+		p.mu.Unlock()
+		if got == n {
+			return
+		}
+		select {
+		case <-end:
+			t.Fatalf("waiters=%d, want %d", got, n)
+		case <-time.After(time.Millisecond):
+		}
+	}
+}
+func pilotFactory() (interface{}, error) { return new(int), nil }
+func pilotClose(interface{}) error       { return nil }
+
+var pilotBeforeDefaultLock func(*channelPool)
+var pilotBeforePingCall func(*channelPool)
+
+func pilotPause(t *testing.T, p *channelPool, hook *func(*channelPool)) (<-chan answer, func()) {
+	t.Helper()
+	var once atomic.Bool
+	observed, resume := make(chan struct{}), make(chan struct{})
+	*hook = func(c *channelPool) {
+		if p == c && once.CompareAndSwap(false, true) {
+			close(observed)
+			<-resume
+		}
+	}
+	out := pilotGet(p)
+	select {
+	case <-observed:
+	case <-time.After(time.Second):
+		t.Fatal("schedule point not reached")
+	}
+	var release sync.Once
+	t.Cleanup(func() { release.Do(func() { close(resume) }); *hook = nil })
+	return out, func() { release.Do(func() { close(resume) }) }
+}
+
+func TestPilotPutAfterEmptyObservation(t *testing.T) {
+	for _, max := range []int{1, 2} {
+		t.Run(map[int]string{1: "AtCapacity", 2: "BelowCapacity"}[max], func(t *testing.T) {
+			p := pilotPool(t, 1, 1, max, pilotFactory, pilotClose, nil)
+			defer p.Release()
+			held, _ := p.Get()
+			first, resume := pilotPause(t, p, &pilotBeforeDefaultLock)
+			if err := p.Put(held); err != nil {
+				t.Fatal(err)
+			}
+			resume()
+			if max == 1 {
+				pilotWaiters(t, p, 1)
+				if p.Len() != 1 {
+					t.Fatal("parked Get and idle connection did not coexist")
+				}
+				pilotPending(t, first)
+				second := pilotAnswer(t, pilotGet(p))
+				if second.err != nil || second.value != held {
+					t.Fatalf("later Get: %+v", second)
+				}
+				if err := p.Put(second.value); err != nil {
+					t.Fatal(err)
+				}
+				if a := pilotAnswer(t, first); a.err != nil || a.value != held {
+					t.Fatalf("first Get: %+v", a)
+				}
+			} else {
+				a := pilotAnswer(t, first)
+				if a.err != nil || a.value == held || p.Len() != 1 {
+					t.Fatalf("new Get: %+v idle=%d", a, p.Len())
+				}
+				if b := pilotAnswer(t, pilotGet(p)); b.value != held {
+					t.Fatalf("later Get: %+v", b)
+				}
+			}
+		})
+	}
+}
+
+func TestPilotReleaseAfterEmptyObservation(t *testing.T) {
+	for _, max := range []int{1, 2} {
+		t.Run(map[int]string{1: "AtCapacity", 2: "BelowCapacity"}[max], func(t *testing.T) {
+			p := pilotPool(t, 1, 1, max, pilotFactory, pilotClose, nil)
+			held, _ := p.Get()
+			first, resume := pilotPause(t, p, &pilotBeforeDefaultLock)
+			p.Release()
+			resume()
+			if max == 1 {
+				pilotWaiters(t, p, 1)
+				if err := p.Put(held); err != nil {
+					t.Fatal(err)
+				}
+				pilotPending(t, first)
+				if a := pilotAnswer(t, pilotGet(p)); a.err != ErrClosed {
+					t.Fatalf("fresh Get: %+v", a)
+				}
+			} else if a := pilotAnswer(t, first); a.err != ErrClosed {
+				t.Fatalf("paused Get: %+v", a)
+			}
+		})
+	}
+}
+
+func TestPilotRepeatedGetAndLatePut(t *testing.T) {
+	var closes atomic.Int32
+	p := pilotPool(t, 1, 1, 1, pilotFactory, func(interface{}) error { closes.Add(1); return nil }, nil)
+	held, _ := p.Get()
+	one := pilotGet(p)
+	pilotWaiters(t, p, 1)
+	two := pilotGet(p)
+	pilotWaiters(t, p, 2)
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	if a := pilotAnswer(t, one); a.err != nil || a.value != held {
+		t.Fatalf("first: %+v", a)
+	}
+	pilotPending(t, two)
+	p.Release()
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	pilotPending(t, two)
+	if closes.Load() != 0 {
+		t.Fatal("released pool invoked callback for late Put")
+	}
+}
+
+func TestPilotCloseDoesNotWake(t *testing.T) {
+	bad := errors.New("close failed")
+	p := pilotPool(t, 1, 1, 1, pilotFactory, func(interface{}) error { return bad }, nil)
+	held, _ := p.Get()
+	first := pilotGet(p)
+	pilotWaiters(t, p, 1)
+	if p.Close(held) != bad {
+		t.Fatal("close failure lost")
+	}
+	next := pilotAnswer(t, pilotGet(p))
+	if next.err != nil {
+		t.Fatal(next.err)
+	}
+	pilotPending(t, first)
+	if p.Put(next.value) != nil {
+		t.Fatal("handoff failed")
+	}
+	pilotAnswer(t, first)
+}
+
+func TestPilotPingNilAfterRelease(t *testing.T) {
+	p := pilotPool(t, 1, 1, 1, pilotFactory, pilotClose, func(interface{}) error { return nil })
+	a := make(chan interface{}, 1)
+	go func() { defer func() { a <- recover() }(); p.Get() }()
+	// The companion subtest below installs the hook before invocation.
+	select {
+	case got := <-a:
+		if got != nil {
+			t.Fatalf("unexpected panic: %v", got)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Get did not finish")
+	}
+	p = pilotPool(t, 1, 1, 1, pilotFactory, pilotClose, func(interface{}) error { return nil })
+	observed, resume := make(chan struct{}), make(chan struct{})
+	pilotBeforePingCall = func(c *channelPool) {
+		if c == p {
+			close(observed)
+			<-resume
+		}
+	}
+	defer func() { pilotBeforePingCall = nil }()
+	go func() { defer func() { a <- recover() }(); p.Get() }()
+	select {
+	case <-observed:
+	case <-time.After(time.Second):
+		t.Fatal("Ping gate not reached")
+	}
+	p.Release()
+	close(resume)
+	select {
+	case got := <-a:
+		if got == nil {
+			t.Fatal("expected nil callback panic")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Get did not panic")
+	}
+}
+
+func TestPilotHandoffSkipsPingAndRetainsSlot(t *testing.T) {
+	var pings atomic.Int32
+	p := pilotPool(t, 1, 1, 1, pilotFactory, pilotClose, func(interface{}) error { pings.Add(1); return nil })
+	held, _ := p.Get()
+	pending := pilotGet(p)
+	pilotWaiters(t, p, 1)
+	if err := p.Put(held); err != nil {
+		t.Fatal(err)
+	}
+	a := pilotAnswer(t, pending)
+	if a.value != held || pings.Load() != 1 {
+		t.Fatalf("handoff value=%v pings=%d", a.value, pings.Load())
+	}
+	p.mu.Lock()
+	retained := p.connReqs[:cap(p.connReqs)][0] != nil
+	p.mu.Unlock()
+	if !retained {
+		t.Fatal("expected stale backing-array slot")
+	}
+}
+
+func TestPilotFactoryAndCloseSerializeRelease(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		t.Run(map[bool]string{false: "Success", true: "Failure"}[fail], func(t *testing.T) {
+			callbackErr := errors.New("callback failure")
+			for _, operation := range []string{"Factory", "Close"} {
+				t.Run(operation, func(t *testing.T) {
+					started, resume, released := make(chan struct{}), make(chan struct{}), make(chan struct{})
+					callback := func() error {
+						close(started)
+						<-resume
+						if fail {
+							return callbackErr
+						}
+						return nil
+					}
+					f, cl := pilotFactory, pilotClose
+					if operation == "Factory" {
+						f = func() (interface{}, error) { return new(int), callback() }
+					} else {
+						cl = func(interface{}) error { return callback() }
+					}
+					p := pilotPool(t, 0, 1, 1, f, cl, nil)
+					var out <-chan answer
+					if operation == "Factory" {
+						out = pilotGet(p)
+					} else {
+						a := make(chan answer, 1)
+						out = a
+						go func() { a <- answer{err: p.Close(new(int))} }()
+					}
+					<-started
+					go func() { p.Release(); close(released) }()
+					select {
+					case <-released:
+						t.Fatal("Release passed held callback")
+					case <-time.After(20 * time.Millisecond):
+					}
+					close(resume)
+					got := pilotAnswer(t, out)
+					if (got.err == callbackErr) != fail {
+						t.Fatalf("callback result: %+v", got)
+					}
+					select {
+					case <-released:
+					case <-time.After(time.Second):
+						t.Fatal("Release remained blocked")
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestPilotEnteredPingAcrossRelease(t *testing.T) {
+	for _, fail := range []bool{false, true} {
+		t.Run(map[bool]string{false: "Success", true: "Failure"}[fail], func(t *testing.T) {
+			entered, resume := make(chan struct{}), make(chan struct{})
+			var closes atomic.Int32
+			p := pilotPool(t, 1, 1, 1, pilotFactory, func(interface{}) error { closes.Add(1); return nil }, func(interface{}) error {
+				close(entered)
+				<-resume
+				if fail {
+					return errors.New("bad ping")
+				}
+				return nil
+			})
+			out := pilotGet(p)
+			select {
+			case <-entered:
+			case <-time.After(time.Second):
+				t.Fatal("Ping did not enter")
+			}
+			p.Release()
+			close(resume)
+			a := pilotAnswer(t, out)
+			if fail && a.err != ErrClosed {
+				t.Fatalf("failed Ping after detach: %+v", a)
+			}
+			if !fail && (a.err != nil || a.value == nil) {
+				t.Fatalf("successful Ping after detach: %+v", a)
+			}
+			if closes.Load() != 0 {
+				t.Fatal("selected resource was closed by pool")
+			}
+		})
+	}
+}
+func TestPilotDrainFailureAndDuplicateRelease(t *testing.T) {
+	entered, resume, done := make(chan struct{}), make(chan struct{}), make(chan struct{})
+	var calls atomic.Int32
+	p := pilotPool(t, 2, 2, 2, pilotFactory, func(interface{}) error {
+		if calls.Add(1) == 1 {
+			close(entered)
+			<-resume
+			return errors.New("drain failure")
+		}
+		return nil
+	}, nil)
+	go func() { p.Release(); close(done) }()
+	select {
+	case <-entered:
+	case <-time.After(time.Second):
+		t.Fatal("drain did not begin")
+	}
+	p.Release()
+	if p.Len() != 0 || calls.Load() != 1 {
+		t.Fatal("duplicate Release did not return during first cleanup")
+	}
+	close(resume)
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("Release did not drain")
+	}
+	if calls.Load() != 2 {
+		t.Fatal("Release did not continue after returned cleanup failure")
+	}
+}
+func TestPilotAbandonedCaller(t *testing.T) {
+	p := pilotPool(t, 1, 1, 1, pilotFactory, pilotClose, nil)
+	held, _ := p.Get()
+	out := pilotGet(p)
+	pilotWaiters(t, p, 1)
+	select {
+	case <-out:
+		t.Fatal("unexpected Get result")
+	case <-time.After(20 * time.Millisecond):
+	}
+	if p.Len() != 0 {
+		t.Fatal("unexpected idle resource")
+	}
+	if p.Put(held) != nil {
+		t.Fatal("Put failed")
+	}
+	pilotWaiters(t, p, 0)
+	select {
+	case <-time.After(time.Second):
+		t.Fatal("abandoned result was not published")
+	case a := <-out:
+		if a.value != held {
+			t.Fatalf("wrong resource: %+v", a)
+		}
+	}
+	if p.Len() != 0 {
+		t.Fatal("abandoned result was reclaimed into pool")
+	}
+}
+func TestPilotHeldSecondAcquisition(t *testing.T) {
+	p := pilotPool(t, 1, 1, 2, pilotFactory, pilotClose, nil)
+	first, _ := p.Get()
+	second := pilotAnswer(t, pilotGet(p))
+	if second.err != nil || second.value == first {
+		t.Fatalf("second held acquisition: %+v", second)
+	}
+	third := pilotGet(p)
+	pilotWaiters(t, p, 1)
+	if p.Put(first) != nil {
+		t.Fatal("Put failed")
+	}
+	if a := pilotAnswer(t, third); a.value != first {
+		t.Fatalf("third acquisition: %+v", a)
+	}
+}
+
+func TestPilotLockedCallbackReentry(t *testing.T) {
+	for _, operation := range []string{"Factory", "Close"} {
+		t.Run(operation, func(t *testing.T) {
+			var p *channelPool
+			entered := make(chan struct{})
+			callback := func() error { close(entered); p.Len(); return nil }
+			f, cl := pilotFactory, pilotClose
+			if operation == "Factory" {
+				f = func() (interface{}, error) { return new(int), callback() }
+			} else {
+				cl = func(interface{}) error { return callback() }
+			}
+			p = pilotPool(t, 0, 1, 1, f, cl, nil)
+			var out <-chan answer
+			if operation == "Factory" {
+				out = pilotGet(p)
+			} else {
+				a := make(chan answer, 1)
+				out = a
+				go func() { a <- answer{err: p.Close(new(int))} }()
+			}
+			select {
+			case <-entered:
+			case <-time.After(time.Second):
+				t.Fatal("callback did not begin")
+			}
+			pilotPending(t, out)
+		})
+	}
+}
+func TestPilotDrainPanicInterrupts(t *testing.T) {
+	var calls int
+	p := pilotPool(t, 2, 2, 2, pilotFactory, func(interface{}) error {
+		calls++
+		if calls == 1 {
+			panic("drain panic")
+		}
+		return nil
+	}, nil)
+	recovered := func() (v interface{}) { defer func() { v = recover() }(); p.Release(); return nil }()
+	if recovered != "drain panic" || calls != 1 || p.Len() != 0 {
+		t.Fatalf("recovered=%v calls=%d len=%d", recovered, calls, p.Len())
+	}
+	p.Release()
+	if calls != 1 {
+		t.Fatal("duplicate release resumed interrupted drain")
+	}
+}
+func TestPilotDuplicateAndForeignValues(t *testing.T) {
+	var closeCalls int
+	p := pilotPool(t, 0, 2, 2, pilotFactory, func(interface{}) error { closeCalls++; return nil }, nil)
+	held, _ := p.Get()
+	if p.Put(held) != nil || p.Put(held) != nil {
+		t.Fatal("duplicate Put refused")
+	}
+	first, _ := p.Get()
+	second, _ := p.Get()
+	if first != held || second != held {
+		t.Fatal("duplicate value not returned twice")
+	}
+	other := pilotPool(t, 1, 1, 1, pilotFactory, pilotClose, nil)
+	foreign, _ := other.Get()
+	if p.Close(foreign) != nil || p.Close(foreign) != nil || closeCalls != 2 {
+		t.Fatal("foreign repeated Close not applied twice")
+	}
+	p.mu.Lock()
+	opening := p.openingConns
+	p.mu.Unlock()
+	if opening != -1 {
+		t.Fatalf("opening=%d", opening)
+	}
+}

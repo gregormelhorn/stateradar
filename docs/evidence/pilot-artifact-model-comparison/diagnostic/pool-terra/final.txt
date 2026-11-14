@@ -1,0 +1,5 @@
+The pilot is **incomplete**. I saved the routed drafts and preliminary observations in [domain-analysis/channelPool](/private/tmp/stateradar-controller-4us5gpyo/pool-terra/selective/pool/domain-analysis/channelPool/summary.md), but the statechart, matrix, probes, finding verification, sidecar and blind Part B remain unfinished. The questions in [open-questions.md](/private/tmp/stateradar-controller-4us5gpyo/pool-terra/selective/pool/domain-analysis/channelPool/open-questions.md) are preliminary and remain open.
+
+The clearest test result is that `go test -timeout 20s ./...` failed: `TestPool_Get` timed out while a `Get` waited at capacity. The test expects an immediate error; the README describes waiting. Preliminary code review also identified questions about pending requests during `Release`, callback reentrancy under the mutex, and Ping validation on waiter handoff.
+
+All four routed extraction calls completed, with two unclear Jev judgments in the test-file batch still requiring review. The DSC and reachability checks failed because the required `analysis.json` has not yet been generated. No source code or existing tests were modified.

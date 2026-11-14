@@ -1,0 +1,61 @@
+FEEEEF
+======================================================================
+ERROR: test_catalogue_gate_cannot_skip_missing_fields (__main__.PilotArtifactsTest.test_catalogue_gate_cannot_skip_missing_fields)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_artifacts.py", line 106, in test_catalogue_gate_cannot_skip_missing_fields
+    self.assertFalse(run_sol_pilot.verify_artifacts(root, Path(sys.executable), catalogue=True))
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: verify_artifacts() got an unexpected keyword argument 'catalogue'
+
+======================================================================
+ERROR: test_catalogue_roundtrip_and_reject_bad_coverage (__main__.PilotArtifactsTest.test_catalogue_roundtrip_and_reject_bad_coverage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_artifacts.py", line 22, in test_catalogue_roundtrip_and_reject_bad_coverage
+    import pilot_artifacts as artifacts
+ModuleNotFoundError: No module named 'pilot_artifacts'
+
+======================================================================
+ERROR: test_citations_copy_exact_lines_and_reject_invalid_line (__main__.PilotArtifactsTest.test_citations_copy_exact_lines_and_reject_invalid_line)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_artifacts.py", line 53, in test_citations_copy_exact_lines_and_reject_invalid_line
+    import pilot_artifacts as artifacts
+ModuleNotFoundError: No module named 'pilot_artifacts'
+
+======================================================================
+ERROR: test_model_selection_reaches_codex_command (__main__.PilotArtifactsTest.test_model_selection_reaches_codex_command)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_artifacts.py", line 96, in test_model_selection_reaches_codex_command
+    run_sol_pilot.run_arm(root, 'selective', 'task', 'codex', Path(sys.executable), 10,
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                          model='gpt-6.1-terra')
+                          ^^^^^^^^^^^^^^^^^^^^^^
+TypeError: run_arm() got an unexpected keyword argument 'model'. Did you mean 'codex'?
+
+======================================================================
+FAIL: test_blind_duplicate_situation_fails_but_distinct_situations_pass (__main__.PilotArtifactsTest.test_blind_duplicate_situation_fails_but_distinct_situations_pass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_artifacts.py", line 74, in test_blind_duplicate_situation_fails_but_distinct_situations_pass
+    self.assertEqual(result, expected, out.getvalue())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1 : PART-B COVERAGE: OK (1 events, 0 pair orderings)
+
+
+======================================================================
+FAIL: test_zero_row_matrix_is_not_green (__main__.PilotArtifactsTest.test_zero_row_matrix_is_not_green)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_artifacts.py", line 88, in test_zero_row_matrix_is_not_green
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 == 0 : CHECK MATRIX: OK (0 rows x 1 events)
+
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.036s
+
+FAILED (failures=2, errors=4)
