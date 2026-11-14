@@ -13,7 +13,8 @@ Follow-up: **Q-01 through Q-04 are now accepted and implemented in the
 progress. The [numeric resolution](resolution-q02-q04/deviation-report.md)
 adds negative-input rejection, state-preserving over-release rejection and an
 immediate oversized-request error. Combined acceptance passes 15 groups x 50
-with the race detector plus upstream tests. **Nine questions remain OPEN** in
+with the race detector plus upstream tests. **Q-05 is additionally accepted as
+DR-005; its contract/conformance follow-up is pending. Eight questions remain OPEN** in
 the [active question register](resolution-q02-q04/open-questions.md). The
 historical analysis below remains the original baseline, not a reconciled model.
 

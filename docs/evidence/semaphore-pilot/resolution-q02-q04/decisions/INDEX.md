@@ -6,6 +6,9 @@ DR-001 / Q-01 remains in ../.. / resolution-q01/decisions.
 - DR-003: Q-04 — Keep state unchanged after over-release panic.
 - DR-004: Q-02 — Reject an impossible oversized acquisition promptly.
 
-Q-05 through Q-13 remain OPEN. This implements the explicitly selected next
+- DR-005: Q-05 — Explicit cancellation and release; no automatic reclamation.
+  Accepted during the continuing interview; contract/conformance follow-up pending.
+
+Q-06 through Q-13 remain OPEN. This implements the explicitly selected next
 numeric-contract changes; prior recommendations for the other questions are
 not silently promoted to decisions. Q-13 still needs post-fix investigation.

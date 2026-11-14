@@ -46,7 +46,9 @@ entries and separates the new model-routing plan from shipped capabilities.
    [numeric-contract fixes](evidence/semaphore-pilot/resolution-q02-q04/deviation-report.md):
    immediate oversized error, negative-input panic before mutation and
    state-preserving over-release panic. Combined acceptance covers 15 test
-   groups x 50 repetitions plus upstream tests. Nine questions remain open.
+   groups x 50 repetitions plus upstream tests. Q-05 is now accepted as DR-005
+   (explicit cancellation and release); its contract/conformance follow-up is
+   pending. Eight questions remain open.
    Continue their owner interview and decided
    conformance slices; full reconciliation and generic F-20 mutation support
    remain pending. This real progress case is evidence, not broader coverage.

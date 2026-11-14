@@ -1,4 +1,4 @@
-# Domain question register after Q-01 through Q-04
+# Domain question register after Q-01 through Q-05
 
 Behavior descriptions and citations below refer to the frozen upstream baseline
 `04914c200cb38d4ea960ee6a4c314a028c632991`. DR-001 through DR-004 subsequently change the
@@ -93,7 +93,16 @@ Options: document explicit cancellation and release | define reclamation | defin
 
 Proposed: Document explicit cancellation and release — each pending call needs cancellation, each successful charge needs release, and creating a new instance does not clean up an old one.
 
-Status: OPEN — human decision required
+Decision: Explicit cancellation and release. Cancel abandoned pending calls and
+handle their return values. Do not release after failure; successful acquisition
+requires matching release after work ends, even after Context cancellation.
+New instances do not clean up old instances. No automatic reclamation.
+Rationale: proposal rationale adopted (owner-confirmed).
+Owner response: "Gut, übernehmen wir Q-05 so."
+Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
+Status: RESOLVED — DR-005
+Follow-up: contract documentation and focused conformance acceptance pending;
+this interview answer does not claim implementation/test completion.
 
 ## Q-06 — Should a second acquisition by the same logical caller be independent while the first is pending and while it is held?
 

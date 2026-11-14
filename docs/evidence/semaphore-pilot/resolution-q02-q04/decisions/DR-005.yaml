@@ -1,0 +1,24 @@
+id: DR-005
+date: 2026-11-14
+source_question: Q-05
+question: Who cleans up abandoned pending acquisitions, held weight and old instances?
+options: [explicit-cancellation-and-release, automatic-reclamation, lifecycle-reset]
+decision: explicit-cancellation-and-release
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Gut, übernehmen wir Q-05 so."
+scope: >-
+  Evaluation copy only. An abandoned pending acquisition must be canceled and
+  its result handled. A failed Acquire must not be matched by caller Release;
+  its internal reservation, if any, is rolled back. A successful Acquire must
+  be matched by release after protected work ends, including when cancellation
+  occurs concurrently or afterward. Context cancellation does not automatically
+  reclaim a successful acquisition. Constructing a new instance does not cancel
+  or release work on the old instance. Per-caller ownership and exact competing
+  cancellation orderings remain Q-07 and Q-10 respectively.
+links:
+  - "guarded matrix branch: UV-Abandon"
+  - "guarded matrix branch: ContextDone"
+  - "guarded matrix branch: UV-Recreate"
+status: accepted
+implementation_status: pending-contract-and-conformance-follow-up
