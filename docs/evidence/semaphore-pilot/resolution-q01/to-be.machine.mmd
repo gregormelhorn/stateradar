@@ -1,0 +1,27 @@
+%% Partial to-be amendment only; all other policy questions remain OPEN.
+stateDiagram-v2
+    [*] --> Acquire_NoWaiters
+    Acquire_NoWaiters --> Acquire_WaitersPending: feasible but cannot admit
+    Acquire_WaitersPending --> Acquire_NoWaiters: final waiter canceled or granted
+    %% DR-001: valid head cancellation notifies the newly eligible zero prefix.
+    Acquire_WaitersPending --> Acquire_NoWaiters: DR-001 cancel head, grant zero-only tail
+    Acquire_WaitersPending --> Acquire_WaitersPending: DR-001 grant zero prefix, positive tail remains blocked
+    Acquire_EligibleHeadPending --> Acquire_WaitersPending: notification reaches blocked tail or removal exposes it
+    Acquire_EligibleHeadPending --> Acquire_NoWaiters: later release grants last or last canceled
+    state "One Acquire call (orthogonal to instance)" as Invocation {
+      [*] --> Acquire_Entering
+      Acquire_Entering --> Acquire_Failed: Done detected under mutex
+      Acquire_Entering --> Acquire_Succeeded: immediate charge
+      Acquire_Entering --> Acquire_OversizedWaiting: too large and unlock
+      Acquire_OversizedWaiting --> Acquire_Failed: context closes
+      Acquire_Entering --> Acquire_Queued: create private ready and enqueue
+      Acquire_Queued --> Acquire_Failed: canceled and unlinked
+      Acquire_Queued --> Acquire_Granted: reserve unlink and close ready
+      Acquire_Granted --> Acquire_Succeeded: observes Ready and no Done
+      Acquire_Granted --> Acquire_Failed: observes Done and returns weight
+    }
+    state "Aggregate weight classification" as Counter {
+      [*] --> WeightWithinCapacity
+      WeightWithinCapacity --> WeightOutsideCapacity: unchecked signed weight or recovered over-release
+      WeightOutsideCapacity --> WeightWithinCapacity: later arithmetic
+    }

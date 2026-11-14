@@ -12,6 +12,12 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -r tools/requirements-dev.txt
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: examples/weighted-semaphore/go.mod
+          cache: false
+      - name: weighted semaphore DR-001 acceptance
+        run: python examples/weighted-semaphore/verify_q01.py
       # mypy over tools/ and tools/selftest/ (config: mypy.ini). Its first
       # run on main found 34 errors, one a real crash: both mutation
       # runners died on bytes + str in their timeout path.

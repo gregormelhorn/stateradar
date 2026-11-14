@@ -1,11 +1,19 @@
 # Third-component pilot: weighted semaphore
 
-The new runner completed a routed, selective pilot of one `semaphore.Weighted`
+The original runner completed a routed, selective pilot of one `semaphore.Weighted`
 instance in golang.org/x/sync v0.17.0. Review then repaired two artifact/input
-omissions. The reviewed result passes **7/7 gates**, covers the five independent
-public-boundary controls, and leaves **13 domain questions OPEN**. No domain
+omissions. At that checkpoint the reviewed result passed **7/7 gates**, covered
+the five independent public-boundary controls, and left **13 domain questions OPEN**. No domain
 implementation change, accepted DR, to-be promotion or Step-04 conformance
-suite is claimed. The next action is the pending owner choice on Q-01.
+suite was claimed at that pilot checkpoint.
+
+Follow-up: the owner has now accepted **Q-01 as DR-001**. The
+[focused resolution](resolution-q01/deviation-report.md) records the expected-red
+tests and the minimal fix in the [evaluation copy](../../../examples/weighted-semaphore/README.md).
+Its five scenarios pass 50 times each with the race detector; upstream tests
+also pass. **Twelve questions remain OPEN** in the
+[active question register](resolution-q01/open-questions.md). The historical
+analysis below remains the original baseline, not a reconciled fixed model.
 
 ## Frozen inputs and scope
 
@@ -120,11 +128,12 @@ preserve canonical renderer output, existing Markdown hard breaks, and the
 verbatim indentation of the public Go contract example unchanged;
 the semantic and catalogue checks remain enabled.
 
-Q-01 was presented to the owner: permit zero weight with FIFO progress
-(recommended), make it an immediate no-op, or disallow it. No response has yet
-been recorded. The [questions](analysis/open-questions.md) contain explicit
-proposals, not decisions. After an answer, record an attributed DR and to-be
-change, then produce the corresponding expected-red conformance test before
-changing code. Other unanswered questions stay OPEN and block only their cells.
-Reconciliation requires green conformance and scenario suites and zero remaining
-deviations; those preconditions are not yet established.
+Q-01 was accepted as [DR-001](resolution-q01/decisions/DR-001.yaml): keep zero
+weight and FIFO, and notify an eligible zero prefix after the blocking head
+cancels even at full capacity. The focused to-be refinement, red/green tests and
+evaluation fix are complete. The next domain step is the next unanswered
+question in the [active register](resolution-q01/open-questions.md), one per
+round. Other questions stay OPEN and block only their own branches. Full
+conformance and reconciliation remain pending; this partial DR implementation
+does not promote the historical as-is analysis or establish generic F-20
+mutation coverage.

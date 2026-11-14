@@ -1,0 +1,17 @@
+=== RUN   TestDR001FullSingleZero
+    decision_q01_test.go:64: DR-001: eligible zero waiter did not complete without another input
+--- FAIL: TestDR001FullSingleZero (2.00s)
+=== RUN   TestDR001FullZeroPrefix
+    decision_q01_test.go:90: DR-001: eligible zero waiter did not complete without another input
+--- FAIL: TestDR001FullZeroPrefix (2.01s)
+=== RUN   TestDR001SpareCapacity
+--- PASS: TestDR001SpareCapacity (0.00s)
+=== RUN   TestDR001RetainedHeadPreservesFIFO
+    decision_q01_test.go:143: DR-001: eligible zero waiter did not complete without another input
+--- FAIL: TestDR001RetainedHeadPreservesFIFO (2.00s)
+=== RUN   TestDR001ZeroTryDoesNotBypass
+    decision_q01_test.go:164: DR-001: eligible zero waiter did not complete without another input
+--- FAIL: TestDR001ZeroTryDoesNotBypass (2.00s)
+FAIL
+FAIL	golang.org/x/sync/semaphore	8.502s
+FAIL

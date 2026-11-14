@@ -1,0 +1,420 @@
+{
+  "scope": "Partial DR-001 resolution, not full cell conformance coverage",
+  "cells": [
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "NewWeighted",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Acquire",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "TryAcquire",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Release",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "ContextDone",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Grant",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Abandon",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "NewWeighted",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Acquire",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "TryAcquire",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Release",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "ContextDone",
+      "status": "partially-decided",
+      "decision": "DR-001",
+      "tests": [
+        "TestDR001FullSingleZero",
+        "TestDR001FullZeroPrefix",
+        "TestDR001SpareCapacity",
+        "TestDR001RetainedHeadPreservesFIFO",
+        "TestDR001ZeroTryDoesNotBypass"
+      ],
+      "limit": "Only Q-01 guarded cancellation cases; Q-10 and other branches remain open."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Grant",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Abandon",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "NewWeighted",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "Acquire",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "TryAcquire",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "Release",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "ContextDone",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "Grant",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-Abandon",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Delay",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Recreate",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatAcquire",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatTry",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatRelease",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-WrongReceiver",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Weight",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Delay",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Recreate",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatAcquire",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatTry",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatRelease",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-WrongReceiver",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Weight",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-Delay",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-Recreate",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-RepeatAcquire",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-RepeatTry",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-RepeatRelease",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-WrongReceiver",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-Weight",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ForeignContext",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-UnownedRelease",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ContextFault",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatedDone",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ContextOrder",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ForeignContext",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-UnownedRelease",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ContextFault",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatedDone",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ContextOrder",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-ForeignContext",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-UnownedRelease",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-ContextFault",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-RepeatedDone",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    },
+    {
+      "state": "Acquire_EligibleHeadPending",
+      "event": "UV-ContextOrder",
+      "status": "outside-this-resolution",
+      "decision": null,
+      "tests": []
+    }
+  ],
+  "additionalControls": [
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "TryAcquire",
+      "test": "TestDR001ZeroTryDoesNotBypass",
+      "decision": "DR-001",
+      "scope": "Zero-weight FIFO bypass control only; no approval of the entire cell."
+    }
+  ]
+}

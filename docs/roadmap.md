@@ -38,10 +38,13 @@ entries and separates the new model-routing plan from shipped capabilities.
    fixture results alone do not prove coverage on a consuming component.
    The [weighted-semaphore pilot](evidence/semaphore-pilot/README.md) now passes
    seven artifact gates after review, with all five independent controls covered
-   and 13 open questions. Next resolve Q-01 (zero-weight progress), write its DR
-   and to-be expectation, then demonstrate the behavior test red before a fix.
-   No accepted decisions, conformance suite, reconciliation or broader mutation
-   coverage are claimed yet. The observed F-20 case is a candidate for that work.
+   and initially 13 open questions. Q-01 is now accepted as DR-001: the
+   [focused resolution](evidence/semaphore-pilot/resolution-q01/deviation-report.md)
+   demonstrates four expected-red cases, a minimal evaluation-copy fix, and
+   five scenarios x 50 green race-detector repetitions plus upstream tests.
+   Twelve questions remain open. Continue their owner interview and decided
+   conformance slices; full reconciliation and generic F-20 mutation support
+   remain pending. This real progress case is evidence, not broader coverage.
 3. **Make disposition rationale machine-readable.** Design and validate a
    representation for cell rationale before building checks that depend on it.
    See [machine-readable cell rationale](#10-machine-readable-cell-rationale).

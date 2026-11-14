@@ -1,0 +1,7 @@
+--- a/semaphore/semaphore.go
++++ b/semaphore/semaphore.go
+@@ -86,2 +86,2 @@
+-			// If we're at the front and there're extra tokens left, notify other waiters.
+-			if isFront && s.size > s.cur {
++			// Notify the new front even at capacity: it may request zero tokens.
++			if isFront {

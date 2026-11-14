@@ -1,0 +1,11 @@
+group G-Q01 cancellation rescan: proven
+{'size': 2, 'cur': 3, 'front': False} ['skip'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 3, 'front': True} ['skip'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 2, 'front': False} ['skip']
+{'size': 2, 'cur': 2, 'front': True} ['skip']
+{'size': 2, 'cur': 1, 'front': False} ['skip']
+{'size': 2, 'cur': 1, 'front': True} ['notify']
+DR-001 eligible-zero progress: sat (unsat required)
+Counterexample: [size = 1, cur = 1, head = 0, front = True]
+DR-001 positive-head fit at full capacity: unsat (unsat required)
+Source form: upstream

@@ -1,0 +1,26 @@
+id: DR-001
+date: 2026-11-14
+source_question: Q-01
+question: Should a zero-weight acquisition progress after cancellation removes the preceding queue head?
+options:
+  - permit-zero-with-fifo-progress
+  - zero-as-immediate-no-op
+  - disallow-zero
+decision: permit-zero-with-fifo-progress
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Der Empfehlung folgen"
+decided_via: chat acceptance of the presented Q-01 recommendation
+scope: >-
+  Evaluation copy of golang.org/x/sync/semaphore at upstream
+  04914c200cb38d4ea960ee6a4c314a028c632991. Zero-weight requests remain
+  subject to FIFO admission. Removing the head must notify the now-eligible
+  zero-weight prefix even when all positive capacity is held. No later Release
+  or new input is required for those live requests to return successfully.
+  A still-blocking earlier positive waiter must not be bypassed.
+links:
+  - "matrix: Acquire_WaitersPending x ContextDone"
+  - "control: Acquire_WaitersPending x TryAcquire (zero FIFO only)"
+  - "trace: P-07a"
+  - "trace: T-10"
+status: accepted
