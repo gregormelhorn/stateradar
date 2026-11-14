@@ -1,0 +1,34 @@
+{
+  "id": "DR-014",
+  "source_question": "Q-14",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Report failure per exhausted address-list pass",
+  "decision": "Use the same per-list-pass TransientFailure policy in all handshake modes. Individual failed addresses remain Connecting while alternatives remain. Document the chosen subchannel-level interpretation and its deviation from a literal per-address reading.",
+  "rationale": "This agrees with the explicit existing multi-address test and avoids mode-dependent output noise.",
+  "kind": "behavior-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "Connecting_Dialing x E07"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn_state_transition_test.go",
+      "line": 269,
+      "fragment": "func (s) TestStateTransitions_TriesAllAddrsBeforeTransientFailure",
+      "provenance": "observed-in-tests"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1097,
+      "fragment": "ac.updateConnectivityState(connectivity.TransientFailure)",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

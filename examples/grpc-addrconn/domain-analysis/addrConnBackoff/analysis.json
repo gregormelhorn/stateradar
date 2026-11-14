@@ -1,0 +1,256 @@
+{
+  "formatVersion": "1.0",
+  "component": "addrConnBackoff",
+  "packVersion": "1.53",
+  "analyzedSha": "a02b0774206b209466313a0b525d2c738fe407eb",
+  "watchPaths": [
+    "clientconn.go"
+  ],
+  "states": [
+    "BackoffWaiting",
+    "ShutdownPending",
+    "ShutdownStopped"
+  ],
+  "events": [
+    {
+      "id": "TearDown",
+      "undesired": false,
+      "gate": "projected worker/state at controlled scheduling boundary",
+      "upstream_guards": [
+        "one worker already in backoff; no live transport; parent context stays live"
+      ],
+      "classification": "external local teardown"
+    },
+    {
+      "id": "ObserveWorker",
+      "undesired": false,
+      "gate": "projected worker/state at controlled scheduling boundary",
+      "upstream_guards": [
+        "one worker already in backoff; no live transport; parent context stays live"
+      ],
+      "classification": "test-seam observation and scheduler resume"
+    }
+  ],
+  "cells": [
+    {
+      "state": "BackoffWaiting",
+      "event": "TearDown",
+      "disposition": "transition",
+      "dr": "DR-011",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "clientconn.go",
+        "line": 1337,
+        "fragment": "ac.cancel()"
+      },
+      "target": "ShutdownPending"
+    },
+    {
+      "state": "BackoffWaiting",
+      "event": "ObserveWorker",
+      "disposition": "handle",
+      "dr": "DR-011",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "clientconn.go",
+        "line": 1140,
+        "fragment": "case <-acctx.Done():"
+      }
+    },
+    {
+      "state": "ShutdownPending",
+      "event": "TearDown",
+      "disposition": "handle",
+      "dr": "DR-011",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "clientconn.go",
+        "line": 1337,
+        "fragment": "ac.cancel()"
+      }
+    },
+    {
+      "state": "ShutdownPending",
+      "event": "ObserveWorker",
+      "disposition": "transition",
+      "dr": "DR-011",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "clientconn.go",
+        "line": 1140,
+        "fragment": "case <-acctx.Done():"
+      },
+      "target": "ShutdownStopped"
+    },
+    {
+      "state": "ShutdownStopped",
+      "event": "TearDown",
+      "disposition": "handle",
+      "dr": "DR-011",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "clientconn.go",
+        "line": 1337,
+        "fragment": "ac.cancel()"
+      }
+    },
+    {
+      "state": "ShutdownStopped",
+      "event": "ObserveWorker",
+      "disposition": "handle",
+      "dr": "DR-011",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "clientconn.go",
+        "line": 1140,
+        "fragment": "case <-acctx.Done():"
+      }
+    }
+  ],
+  "coverage": {
+    "TearDown": {
+      "loss": "n/a: absence is the waiting observation; a missing TearDown has no cleanup obligation",
+      "delay": "n/a: no domain latency bound; progress watchdogs classify the test execution only",
+      "duplication": "n/a: repeated TearDown and repeated observation are covered in both Shutdown rows",
+      "out-of-order": "n/a: both operations are applied in every scoped state; no payload or identity changes",
+      "contradiction": "n/a: parent cancellation, reset and timer delivery are excluded by the controlled precondition",
+      "commission": "n/a: an unsolicited local TearDown has the same no-transport behavior as an ordinary call",
+      "value": "n/a: observation has no payload; this slice fixes the non-drain reason with no transport present"
+    },
+    "ObserveWorker": {
+      "loss": "n/a: absence is the waiting observation; a missing TearDown has no cleanup obligation",
+      "delay": "n/a: no domain latency bound; progress watchdogs classify the test execution only",
+      "duplication": "n/a: repeated TearDown and repeated observation are covered in both Shutdown rows",
+      "out-of-order": "n/a: both operations are applied in every scoped state; no payload or identity changes",
+      "contradiction": "n/a: parent cancellation, reset and timer delivery are excluded by the controlled precondition",
+      "commission": "n/a: an unsolicited local TearDown has the same no-transport behavior as an ordinary call",
+      "value": "n/a: observation has no payload; this slice fixes the non-drain reason with no transport present"
+    }
+  },
+  "pairs": [
+    {
+      "id": "P-01a",
+      "trace": "scope.md: observe waiting, then local teardown, then completion probe"
+    },
+    {
+      "id": "P-01b",
+      "trace": "scope.md: local teardown, then observe worker completion"
+    }
+  ],
+  "guardGroups": [
+    {
+      "id": "G-01 shutdown dispatch",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-02 completion scheduling",
+      "outcome": "not-formalizable",
+      "reason": "dynamic-state: worker scheduling and callback ordering; controlled trace and watchdog, no bounded-latency theorem"
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-01",
+      "status": "ANSWERED",
+      "dr": "DR-001",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-02",
+      "status": "ANSWERED",
+      "dr": "DR-002",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-03",
+      "status": "ANSWERED",
+      "dr": "DR-003",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-04",
+      "status": "ANSWERED",
+      "dr": "DR-004",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-05",
+      "status": "ANSWERED",
+      "dr": "DR-005",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-06",
+      "status": "ANSWERED",
+      "dr": "DR-006",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-07",
+      "status": "ANSWERED",
+      "dr": "DR-007",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-08",
+      "status": "ANSWERED",
+      "dr": "DR-008",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-09",
+      "status": "ANSWERED",
+      "dr": "DR-009",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-10",
+      "status": "ANSWERED",
+      "dr": "DR-010",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-11",
+      "status": "ANSWERED",
+      "dr": "DR-011",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-12",
+      "status": "ANSWERED",
+      "dr": "DR-012",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-13",
+      "status": "ANSWERED",
+      "dr": "DR-013",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-14",
+      "status": "ANSWERED",
+      "dr": "DR-014",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-15",
+      "status": "ANSWERED",
+      "dr": "DR-015",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    },
+    {
+      "id": "Q-16",
+      "status": "ANSWERED",
+      "dr": "DR-016",
+      "note": "Full evaluation decision; implementation pending, not complete conformance of this scoped slice."
+    }
+  ],
+  "behaviouralDrs": [
+    "DR-011"
+  ],
+  "initialState": "BackoffWaiting",
+  "terminalStates": [
+    "ShutdownStopped"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "DR-003",
+  "source_question": "Q-03",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Honor accepted connections and reset generations",
+  "decision": "A SETTINGS-confirmed successful connection starts the next reconnect attempt without the stale pre-success delay. Explicit reset zeroes the failure history and advances a generation; the upcoming or current backoff wait must observe that generation atomically. A reset before wait registration cannot be lost. Subsequent failed attempts resume normal jittered backoff.",
+  "rationale": "Recomputing a duration alone does not close the channel-generation lost-wakeup window. Success and explicit reset are distinct triggers.",
+  "kind": "behavior-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "Ready x E09",
+    "TransientFailure_Backoff x E05",
+    "P-02a",
+    "P-02b"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 975,
+      "fragment": "backoffFor := ac.dopts.bs.Backoff(ac.backoffIdx)",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1128,
+      "fragment": "b := ac.resetBackoff",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1294,
+      "fragment": "ac.backoffIdx = 0",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

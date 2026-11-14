@@ -1,0 +1,35 @@
+{
+  "id": "DR-001",
+  "source_question": "Q-01",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Prevent resurrection and dispose late transports",
+  "decision": "Guard both transport publication and connectivity writes against Shutdown. A late successful transport must be closed outside ac.mu, without publishing it or notifying Ready.",
+  "rationale": "Both guards are needed: suppressing a notification alone does not release the returned resource.",
+  "kind": "behavior-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "Shutdown x UV08",
+    "P-01a"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 1027,
+      "fragment": "ac.mu.Lock()",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 935,
+      "fragment": "func (ac *addrConn) updateConnectivityState",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

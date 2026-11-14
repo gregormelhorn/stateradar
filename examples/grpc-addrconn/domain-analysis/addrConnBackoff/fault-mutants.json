@@ -1,0 +1,35 @@
+{
+  "formatVersion": 1,
+  "workingDirectory": "../..",
+  "testCommand": [
+    "python3",
+    "stateradar/run.py",
+    "--analysis",
+    "{analysis_dir}"
+  ],
+  "expectedCells": 6,
+  "timeoutSeconds": 120,
+  "mutants": [
+    {
+      "id": "omit-backoff-stop",
+      "fault": "F-09",
+      "cell": "BackoffWaiting x TearDown",
+      "target": "clientconn.go",
+      "variant": "stateradar/mutants/omit-backoff-stop.go.txt"
+    },
+    {
+      "id": "wait-for-parent",
+      "fault": "F-09",
+      "cell": "BackoffWaiting x TearDown",
+      "target": "clientconn.go",
+      "variant": "stateradar/mutants/wait-for-parent.go.txt"
+    },
+    {
+      "id": "omit-local-cancel",
+      "fault": "F-09",
+      "cell": "BackoffWaiting x TearDown",
+      "target": "clientconn.go",
+      "variant": "stateradar/mutants/omit-local-cancel.go.txt"
+    }
+  ]
+}

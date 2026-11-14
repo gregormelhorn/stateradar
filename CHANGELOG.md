@@ -4,6 +4,15 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Second real-component F-09 slice.** Pinned grpc-go addrConn backoff
+  teardown is tested with a live parent, controlled nonfiring timer and an
+  observed real-worker return. Two independent resource canaries plus omitted
+  local cancellation are killed through the generic dependency gate; weak
+  state-only controls survive. Six scoped cells are exercised, not the full
+  historical pilot. Sixteen evaluation answers record the owner's delegated
+  adoption of recommendations separately from pending implementation work.
+  See `docs/evidence/addrconn-f09/README.md`.
+
 - **Executed generic canaries and strict fault verdicts.** The general runner
   reads projection dependencies from `mutant-generation.json`, runs each canary
   once, and blocks dependents unless its declared cell fails in a complete run.

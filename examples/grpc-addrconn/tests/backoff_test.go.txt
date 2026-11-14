@@ -1,0 +1,217 @@
+package grpc
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"google.golang.org/grpc/connectivity"
+	"net"
+	"os"
+	"sync"
+	"testing"
+	"time"
+)
+
+// This seam replaces only the backoff timer, suspends just before its select,
+// and observes return from the real resetTransport function. It never changes
+// ac state, contexts, reset channels or transport fields.
+type radarTimer struct {
+	C      chan time.Time
+	mu     sync.Mutex
+	active bool
+}
+
+func (t *radarTimer) Stop() bool {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	old := t.active
+	t.active = false
+	return old
+}
+func (t *radarTimer) Active() bool { t.mu.Lock(); defer t.mu.Unlock(); return t.active }
+
+type radarProbe struct {
+	ac                  *addrConn
+	timer               *radarTimer
+	ready, resume, done chan struct{}
+	release             sync.Once
+}
+
+var radarMu sync.Mutex
+var radarCurrent *radarProbe
+
+func radarNewTimer(ac *addrConn, d time.Duration) *radarTimer {
+	radarMu.Lock()
+	defer radarMu.Unlock()
+	p := radarCurrent
+	if p == nil || p.ac != nil {
+		panic("unexpected backoff worker/timer")
+	}
+	p.ac = ac
+	p.timer = &radarTimer{C: make(chan time.Time), active: true}
+	return p.timer
+}
+func radarReady(ac *addrConn) {
+	radarMu.Lock()
+	p := radarCurrent
+	radarMu.Unlock()
+	if p == nil || p.ac != ac {
+		panic("unbound backoff checkpoint")
+	}
+	close(p.ready)
+	<-p.resume
+}
+func radarDone(ac *addrConn) {
+	radarMu.Lock()
+	p := radarCurrent
+	radarMu.Unlock()
+	if p != nil && p.ac == ac {
+		close(p.done)
+	}
+}
+func radarWait(t *testing.T, ch <-chan struct{}, what string) {
+	t.Helper()
+	select {
+	case <-ch:
+	case <-time.After(2 * time.Second):
+		t.Fatalf("probe watchdog: %s did not complete", what)
+	}
+}
+func radarIsDone(p *radarProbe) bool {
+	select {
+	case <-p.done:
+		return true
+	default:
+		return false
+	}
+}
+func radarStart(t *testing.T) (*radarProbe, *ClientConn) {
+	t.Helper()
+	p := &radarProbe{ready: make(chan struct{}), resume: make(chan struct{}), done: make(chan struct{})}
+	radarMu.Lock()
+	radarCurrent = p
+	radarMu.Unlock()
+	cc, err := Dial("passthrough:///radar-invalid", WithInsecure(), WithDialer(func(string, time.Duration) (net.Conn, error) { return nil, errors.New("controlled failed dial") }), withBackoff(backoffForever{}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		// Cleanup occurs AFTER verdict collection; it must never masquerade as local
+		// cancellation. Parent close also releases the independent worker canary.
+		cc.Close()
+		if p.ac != nil {
+			p.ac.cancel()
+		}
+		p.release.Do(func() { close(p.resume) })
+		select {
+		case <-p.done:
+		case <-time.After(3 * time.Second):
+			t.Error("cleanup failed to join observed worker")
+		}
+		if p.timer != nil {
+			p.timer.Stop()
+		}
+		radarMu.Lock()
+		radarCurrent = nil
+		radarMu.Unlock()
+	})
+	radarWait(t, p.ready, "backoff entry")
+	if p.ac.getState() != connectivity.TransientFailure || !p.timer.Active() || radarIsDone(p) {
+		t.Fatal("invalid waiting setup")
+	}
+	return p, cc
+}
+func radarParentAlive(t *testing.T, cc *ClientConn) {
+	t.Helper()
+	select {
+	case <-cc.ctx.Done():
+		t.Fatal("parent canceled before resource observation")
+	default:
+	}
+}
+func radarResources(t *testing.T, p *radarProbe, cc *ClientConn) {
+	t.Helper()
+	radarParentAlive(t, cc)
+	p.release.Do(func() { close(p.resume) })
+	radarWait(t, p.done, "locally canceled worker exit")
+	if p.timer.Active() {
+		t.Fatal("backoff timer still active after worker exit")
+	}
+	radarParentAlive(t, cc)
+}
+func radarCell(t *testing.T, state, event string, weak bool) string {
+	p, cc := radarStart(t)
+	if state != "BackoffWaiting" {
+		p.ac.tearDown(errConnClosing)
+	}
+	if state == "ShutdownStopped" {
+		p.release.Do(func() { close(p.resume) })
+		radarWait(t, p.done, "setup worker exit")
+	}
+	target := state
+	switch event {
+	case "TearDown":
+		p.ac.tearDown(errConnClosing)
+		if p.ac.getState() != connectivity.Shutdown {
+			t.Fatal("local teardown did not publish Shutdown")
+		}
+		if state == "BackoffWaiting" {
+			target = "ShutdownPending"
+		}
+		// The cell observes pending shutdown at the controlled scheduling boundary;
+		// its mandatory follow-up trace resumes the worker and checks release.
+		if !weak {
+			radarResources(t, p, cc)
+		}
+	case "ObserveWorker":
+		if state == "ShutdownPending" {
+			radarResources(t, p, cc)
+			target = "ShutdownStopped"
+		}
+		if state == "BackoffWaiting" && (radarIsDone(p) || !p.timer.Active()) {
+			t.Fatal("waiting worker/resource unexpectedly ended")
+		}
+		if state == "ShutdownStopped" && (!radarIsDone(p) || p.timer.Active()) {
+			t.Fatal("completed worker retained resource")
+		}
+	default:
+		t.Fatal("unknown event")
+	}
+	radarParentAlive(t, cc)
+	return target
+}
+func TestRadarCells(t *testing.T) {
+	var model struct {
+		Cells []struct{ State, Event, Disposition, Target string }
+	}
+	raw, err := os.ReadFile(os.Getenv("STATERADAR_ANALYSIS") + "/analysis.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal(raw, &model); err != nil {
+		t.Fatal(err)
+	}
+	if len(model.Cells) != 6 {
+		t.Fatal("expected six representative cells")
+	}
+	failed := 0
+	for _, c := range model.Cells {
+		if !t.Run(c.State+"/"+c.Event, func(t *testing.T) {
+			got := radarCell(t, c.State, c.Event, false)
+			want := c.State
+			if c.Disposition == "transition" {
+				want = c.Target
+			} else if c.Disposition != "handle" {
+				t.Fatal("unsupported oracle disposition")
+			}
+			if got != want {
+				t.Fatalf("projected target %s, expected %s", got, want)
+			}
+		}) {
+			failed++
+			fmt.Printf("CELL FAIL %s x %s\n", c.State, c.Event)
+		}
+	}
+	fmt.Printf("CELL SUITE: 6 cells checked, %d failed\n", failed)
+}
+func TestRadarWeak(t *testing.T) { radarCell(t, "BackoffWaiting", "TearDown", true) }

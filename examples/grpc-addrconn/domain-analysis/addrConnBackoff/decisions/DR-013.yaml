@@ -1,0 +1,35 @@
+{
+  "id": "DR-013",
+  "source_question": "Q-13",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Keep explicit resets immediate and document herd risk",
+  "decision": "Do not add hidden jitter to the immediate ResetConnectBackoff API. Retain ordinary backoff jitter; document fleet reset coordination and rate limiting as operator/caller responsibilities.",
+  "rationale": "Changing immediate reset timing would silently change the public promise. No claim that all synchronized retry risk is eliminated.",
+  "kind": "documentation",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "all states x E05",
+    "multi-instance M-01/M-03"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 833,
+      "fragment": "ResetConnectBackoff wakes up all subchannels",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "internal/backoff/backoff.go",
+      "line": 73,
+      "fragment": "grpcrand.Float64()",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

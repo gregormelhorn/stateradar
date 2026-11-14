@@ -1,0 +1,48 @@
+{
+  "id": "DR-008",
+  "source_question": "Q-08",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Separate missing first health status from stable watches",
+  "decision": "Bound the first valid health response using a configurable first-verdict timeout, defaulting in this evaluation to the existing getMinConnectTimeout() duration. Expiry cancels that health attempt, releases its transport and enters ordinary reconnect/backoff. After a valid SERVING or NOT_SERVING status, silence alone is permitted; no heartbeat timeout or forced reconnect for stable NOT_SERVING. Keep the existing health client retry/backoff for ordinary stream failures. An unexpected terminal helper return while its context is live is a monitoring failure: remove Ready eligibility and restart monitoring with bounded backoff and the first-verdict timeout. UNIMPLEMENTED retains the explicitly documented healthy fallback; canceled or stale generations cannot change the active instance.",
+  "rationale": "The callee retries ordinary stream errors itself. Blindly recycling on each stream error duplicates policy; stable watch silence is not the same as a missing initial verdict. New timeout and unexpected-return behavior are evaluation policy, not a claimed upstream requirement.",
+  "kind": "behavior-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "Connecting_HealthChecking x UV09",
+    "TransientFailure_ServerUnhealthy x UV09",
+    "Ready x E14"
+  ],
+  "evidence": [
+    {
+      "file": "health/client.go",
+      "line": 54,
+      "fragment": "func clientHealthCheck",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "health/client.go",
+      "line": 91,
+      "fragment": "if status.Code(err) == codes.Unimplemented",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "health/client.go",
+      "line": 97,
+      "fragment": "if err != nil",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1275,
+      "fragment": "err := ac.cc.dopts.healthCheckFunc",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

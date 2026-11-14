@@ -88,8 +88,15 @@ entries and separates the new model-routing plan from shipped capabilities.
    now gates dependencies in the general runner and validates declared suite
    cardinality plus consistent, completed correct-cell outcomes. Canary results
    are counted once; wrong-cell failures are only BLOCKED. The pinned addrConn
-   readiness probe passes even with omitted cancellation: a dedicated scoped
-   seam and updated evaluation artifacts are still needed for a second F-09 proof.
+   readiness probe passed even with omitted cancellation, motivating a dedicated
+   scoped seam and updated evaluation artifacts for a second F-09 proof.
+   The [addrConn backoff slice](evidence/addrconn-f09/README.md) supplies a
+   second real-component F-09 binding: local cancellation is omitted while the
+   parent remains alive. Separate worker/timer canaries and the fault all fail
+   the declared cell; weak controls survive. Its six-cell projection is not a
+   complete replay of the 182-cell historical pilot. The owner delegated adoption
+   of the reviewed recommendations for Q-01..Q-16; all are ANSWERED in the new
+   evaluation records, with broad implementation work explicitly pending.
    Crashes and unrelated failures cannot count as kills. Four contract limits
    and two queued cells without a supported operator remain explicit exclusions.
 3. **Make disposition rationale machine-readable.** Implemented as an optional

@@ -1,0 +1,7 @@
+BASELINE: OK (cells=6)
+MUT-001 BLOCKED fault=F-09 cell=BackoffWaiting x TearDown id=omit-backoff-stop target=clientconn.go exit=1 duration=2.602s
+  BLOCKED: WRONG CELL: declared 'BackoffWaiting x TearDown', suite reported ['ShutdownStopped x ObserveWorker']
+CANARY id=omit-backoff-stop: BLOCKED
+MUT-002 BLOCKED id=wait-for-parent fault=F-09 cell=BackoffWaiting x TearDown canary=omit-backoff-stop verdict=BLOCKED; not executed
+MUT-003 BLOCKED id=omit-local-cancel fault=F-09 cell=BackoffWaiting x TearDown canary=wait-for-parent verdict=BLOCKED; not executed
+FAULT MUTANTS: FAIL (killed=0 survived=0 errors=0 blocked=3)

@@ -1,0 +1,28 @@
+{
+  "id": "DR-006",
+  "source_question": "Q-06",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Assign IDLE policy to ClientConn",
+  "decision": "Treat idle timeout and channel-level GOAWAY/no-RPC idleness as ClientConn responsibilities. Keep an explicit model link and an unimplemented owning-model work item; do not add addrConn idle timers to satisfy a channel requirement.",
+  "rationale": "Moving the obligation to its actual owner does not claim it is implemented there.",
+  "kind": "scope-decision",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "ClientConn model / DOC-4"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 670,
+      "fragment": "func (ac *addrConn) connect() error",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "formatVersion": 1,
+  "workingDirectory": "../..",
+  "source": "clientconn.go",
+  "projections": {
+    "timer_release": {
+      "kind": "controlled-timer-active",
+      "provenBy": "omit-backoff-stop"
+    },
+    "worker_release": {
+      "kind": "worker-return-signal",
+      "provenBy": "wait-for-parent"
+    }
+  },
+  "bindings": [
+    {
+      "id": "omit-backoff-stop",
+      "fault": "F-09",
+      "cell": "BackoffWaiting x TearDown",
+      "variant": "stateradar/mutants/omit-backoff-stop.go.txt",
+      "mode": "replace-block",
+      "match": [
+        "\t\tcase <-acctx.Done():",
+        "\t\t\ttimer.Stop()",
+        "\t\t\treturn"
+      ],
+      "replace": [
+        "\t\tcase <-acctx.Done():",
+        "\t\t\t// canary: timer remains live",
+        "\t\t\treturn"
+      ],
+      "requiresProjection": "timer_release",
+      "binder": "cancellation-leak"
+    },
+    {
+      "id": "wait-for-parent",
+      "fault": "F-09",
+      "cell": "BackoffWaiting x TearDown",
+      "variant": "stateradar/mutants/wait-for-parent.go.txt",
+      "mode": "replace-block",
+      "match": [
+        "\t\tcase <-acctx.Done():",
+        "\t\t\ttimer.Stop()",
+        "\t\t\treturn"
+      ],
+      "replace": [
+        "\t\tcase <-acctx.Done():",
+        "\t\t\ttimer.Stop()",
+        "\t\t\t<-ac.cc.ctx.Done() // canary: worker outlives local teardown",
+        "\t\t\treturn"
+      ],
+      "requiresProjection": "timer_release",
+      "binder": "cancellation-leak"
+    },
+    {
+      "id": "omit-local-cancel",
+      "fault": "F-09",
+      "cell": "BackoffWaiting x TearDown",
+      "variant": "stateradar/mutants/omit-local-cancel.go.txt",
+      "mode": "replace-block",
+      "match": [
+        "\tac.cancel()"
+      ],
+      "replace": [
+        "\t// deliberately omit local cancellation"
+      ],
+      "requiresProjection": "worker_release",
+      "binder": "cancellation-leak"
+    }
+  ]
+}

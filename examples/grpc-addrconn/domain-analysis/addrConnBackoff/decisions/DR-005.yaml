@@ -1,0 +1,34 @@
+{
+  "id": "DR-005",
+  "source_question": "Q-05",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Parse explicit on as On",
+  "decision": "The literal on selects RequireHandshakeOn, as does the existing default. Off and Hybrid retain their explicit mappings. Cover the actual environment parser in a fresh process.",
+  "rationale": "Tests that directly assign the enum cannot detect the parser defect. The owning component is envconfig.",
+  "kind": "neighbor-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "envconfig parser / DOC-20"
+  ],
+  "evidence": [
+    {
+      "file": "internal/envconfig/envconfig.go",
+      "line": 61,
+      "fragment": "case \"on\":",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "internal/envconfig/envconfig.go",
+      "line": 63,
+      "fragment": "RequireHandshake = RequireHandshakeOn",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

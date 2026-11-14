@@ -1,0 +1,34 @@
+{
+  "id": "DR-007",
+  "source_question": "Q-07",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Allow health recovery over an existing transport",
+  "decision": "Allow TransientFailure_ServerUnhealthy directly to Ready on a valid current-generation SERVING report. No artificial Connecting notification. Document the health extension to the older transition table.",
+  "rationale": "No network reconnection occurred; a synthetic Connecting step would misrepresent the operation.",
+  "kind": "documentation",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "TransientFailure_ServerUnhealthy x E12"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 1262,
+      "fragment": "if ac.transport != newTr",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1270,
+      "fragment": "ac.updateConnectivityState(connectivity.Ready)",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

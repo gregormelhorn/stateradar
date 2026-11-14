@@ -1,0 +1,35 @@
+{
+  "id": "DR-002",
+  "source_question": "Q-02",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Remove cross-object lock inversion",
+  "decision": "Snapshot cc.conns under cc.mu, release that lock, then reset each addrConn. Never acquire an ac lock while holding cc.mu; current ac-to-cc calls remain ordered. Recheck Shutdown in reset.",
+  "rationale": "A snapshot plus terminal no-op closes the reset/state-update deadlock without making the public API unsafe.",
+  "kind": "behavior-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "P-03a",
+    "all states x E05"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 844,
+      "fragment": "cc.mu.Lock()",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 949,
+      "fragment": "ac.cc.handleSubConnStateChange",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

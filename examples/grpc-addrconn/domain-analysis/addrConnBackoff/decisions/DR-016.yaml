@@ -1,0 +1,28 @@
+{
+  "id": "DR-016",
+  "source_question": "Q-16",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Retain server-directed keepalive floor with saturation",
+  "decision": "Keep the nondecreasing keepalive floor for the lifetime of its owning ClientConn, with no automatic decay. Double using saturating duration arithmetic capped at the largest representable positive duration; never overflow to a negative or shorter interval. Record this as a ClientConn model obligation.",
+  "rationale": "Accepting the ratchet must not accept integer overflow. The owning object is ClientConn, not addrConn.",
+  "kind": "neighbor-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "ClientConn keepalive / GOAWAY too_many_pings"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 957,
+      "fragment": "v := 2 * ac.dopts.copts.KeepaliveParams.Time",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

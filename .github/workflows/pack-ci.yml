@@ -16,6 +16,10 @@ jobs:
         with:
           go-version-file: examples/weighted-semaphore/go.mod
           cache: false
+      - name: pinned addrConn backoff slice and decisions
+        run: |
+          python tools/selftest/test_addrconn_f09.py
+          python tools/addrconn_f09.py
       - name: weighted semaphore accepted decisions
         run: python examples/weighted-semaphore/verify_q01.py
       - name: weighted semaphore current model and cells

@@ -1,0 +1,42 @@
+{
+  "id": "DR-009",
+  "source_question": "Q-09",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Ignore mutations on a terminal addrConn",
+  "decision": "After Shutdown, resetConnectBackoff is a no-op. tryUpdateAddrs returns true without changing the address list, preserving the wrapper convention that an update to a retired instance does not recreate it. connect continues returning errConnClosing. The wrapper handles an empty address list as teardown; direct empty updates to live instances are rejected without mutation.",
+  "rationale": "Returning false is not sufficient to promise recreation: the wrapper explicitly declines replacement when the old state is Shutdown. Preserve terminality without mutating dead context.",
+  "kind": "behavior-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "Shutdown x E03",
+    "Shutdown x E05",
+    "Shutdown x E17"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 698,
+      "fragment": "if ac.state == connectivity.Shutdown",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "balancer_conn_wrappers.go",
+      "line": 299,
+      "fragment": "if acState == connectivity.Shutdown",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "balancer_conn_wrappers.go",
+      "line": 281,
+      "fragment": "if len(addrs) <= 0",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

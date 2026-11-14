@@ -1,0 +1,21 @@
+DECISIONS: 16 ANSWERED with delegated attribution; implementation pending
+DSC CHECK: OK (3 states x 2 events, 6 cells, 1 guard groups)
+GENERATED F-09 omit-backoff-stop -> stateradar/mutants/omit-backoff-stop.go.txt
+GENERATED F-09 wait-for-parent -> stateradar/mutants/wait-for-parent.go.txt
+GENERATED F-09 omit-local-cancel -> stateradar/mutants/omit-local-cancel.go.txt
+MUTANT GENERATION: OK (generated=3 drift=0 blocked=0 errors=0)
+OK F-09 omit-backoff-stop
+OK F-09 wait-for-parent
+OK F-09 omit-local-cancel
+MUTANT GENERATION: OK (checked=3 drift=0 blocked=0 errors=0)
+BASELINE: OK (cells=6)
+MUT-001 KILLED fault=F-09 cell=BackoffWaiting x TearDown id=omit-backoff-stop target=clientconn.go exit=1 duration=2.387s
+CANARY id=omit-backoff-stop: KILLED
+MUT-002 KILLED fault=F-09 cell=BackoffWaiting x TearDown id=wait-for-parent target=clientconn.go exit=1 duration=12.299s
+CANARY id=wait-for-parent: KILLED
+MUT-003 KILLED fault=F-09 cell=BackoffWaiting x TearDown id=omit-local-cancel target=clientconn.go exit=1 duration=12.304s
+FAULT MUTANTS: OK (killed=3 survived=0 errors=0 blocked=0)
+WEAK omit-backoff-stop: SURVIVED (10 repeats)
+WEAK wait-for-parent: SURVIVED (10 repeats)
+WEAK omit-local-cancel: SURVIVED (10 repeats)
+ADDRCONN F-09 PASS: 6 cells x 10 baseline repetitions; 3/3 generic mutants killed; weak controls survive

@@ -1,0 +1,34 @@
+{
+  "id": "DR-015",
+  "source_question": "Q-15",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Scope ResetConnectBackoff to backoff, not health status",
+  "decision": "Reset the retry history in every live state and wake a real backoff wait. Do not recycle a live transport merely because its health status is NOT_SERVING. Document that immediate reconnection applies to backoff-TF, not health-TF; health recovery follows DR-008.",
+  "rationale": "A health verdict is not a dial-backoff timer. The broad old API prose needs explicit qualification for this substate.",
+  "kind": "documentation",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "TransientFailure_ServerUnhealthy x E05"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 1070,
+      "fragment": "<-reconnect.Done()",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1291,
+      "fragment": "func (ac *addrConn) resetConnectBackoff",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+BASELINE: OK (cells=6)
+MUT-001 KILLED fault=F-09 cell=BackoffWaiting x TearDown id=omit-backoff-stop target=clientconn.go exit=1 duration=2.387s
+CANARY id=omit-backoff-stop: KILLED
+MUT-002 KILLED fault=F-09 cell=BackoffWaiting x TearDown id=wait-for-parent target=clientconn.go exit=1 duration=12.299s
+CANARY id=wait-for-parent: KILLED
+MUT-003 KILLED fault=F-09 cell=BackoffWaiting x TearDown id=omit-local-cancel target=clientconn.go exit=1 duration=12.304s
+FAULT MUTANTS: OK (killed=3 survived=0 errors=0 blocked=0)

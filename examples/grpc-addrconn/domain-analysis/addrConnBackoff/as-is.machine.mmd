@@ -1,0 +1,5 @@
+stateDiagram-v2
+ [*] --> BackoffWaiting
+ BackoffWaiting --> ShutdownPending: TearDown
+ ShutdownPending --> ShutdownStopped: ObserveWorker
+ ShutdownStopped --> [*]

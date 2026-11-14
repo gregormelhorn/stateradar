@@ -1,0 +1,34 @@
+{
+  "id": "DR-012",
+  "source_question": "Q-12",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Scope attempt cleanup to one attempt",
+  "decision": "Restructure per-attempt ownership so its cancel is released on every exit path at the end of that attempt; use an attempt-scoped helper/defer or equivalently proven explicit cleanup. Do not accumulate deferred closures in the long-lived reconnect loop.",
+  "rationale": "A helper with bounded lifetime is easier to audit than deleting the defer while assuming every early return is covered. Active health monitoring retains ownership until that attempt ends.",
+  "kind": "behavior-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "Connecting_Dialing attempt lifecycle / Q-12"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 1012,
+      "fragment": "hctx, hcancel := context.WithCancel(ac.ctx)",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1013,
+      "fragment": "defer hcancel()",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

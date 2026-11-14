@@ -1,0 +1,47 @@
+{
+  "id": "DR-011",
+  "source_question": "Q-11",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Give local teardown explicit resource ownership",
+  "decision": "Local teardown always cancels its owned dial/backoff/health activity, independently of parent ClientConn cancellation. A canceled backoff worker eventually exits and stops its timer; no fixed completion latency is promised. If a transport exists, detach it under lock; call GracefulClose for errConnDrain and Close for non-drain reasons outside ac.mu. Graceful drain may retain active RPCs; abrupt close terminates them. Late transports follow DR-001.",
+  "rationale": "The transport lifetime is derived from cc.ctx, so the old NAT-5 inference from ac.cancel is invalid. Distinguish graceful drain from abrupt teardown and never call reentrant close callbacks under ac.mu. The current no-transport backoff path already satisfies this contract and is the F-09 slice.",
+  "kind": "behavior-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "all states x E02",
+    "TransientFailure_Backoff x E02"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 1187,
+      "fragment": "transport.NewClientTransport(connectCtx, ac.cc.ctx",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1337,
+      "fragment": "ac.cancel()",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1140,
+      "fragment": "case <-acctx.Done():",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "internal/transport/http2_client.go",
+      "line": 795,
+      "fragment": "func (t *http2Client) GracefulClose",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

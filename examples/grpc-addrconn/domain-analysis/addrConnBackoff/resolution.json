@@ -1,0 +1,587 @@
+{
+  "upstreamSha": "a02b0774206b209466313a0b525d2c738fe407eb",
+  "historical_questions": "tests/benchmarks/grpc-go-2669/open-questions.md",
+  "records": [
+    {
+      "id": "DR-001",
+      "source_question": "Q-01",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Prevent resurrection and dispose late transports",
+      "decision": "Guard both transport publication and connectivity writes against Shutdown. A late successful transport must be closed outside ac.mu, without publishing it or notifying Ready.",
+      "rationale": "Both guards are needed: suppressing a notification alone does not release the returned resource.",
+      "kind": "behavior-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "Shutdown x UV08",
+        "P-01a"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 1027,
+          "fragment": "ac.mu.Lock()",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 935,
+          "fragment": "func (ac *addrConn) updateConnectivityState",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-002",
+      "source_question": "Q-02",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Remove cross-object lock inversion",
+      "decision": "Snapshot cc.conns under cc.mu, release that lock, then reset each addrConn. Never acquire an ac lock while holding cc.mu; current ac-to-cc calls remain ordered. Recheck Shutdown in reset.",
+      "rationale": "A snapshot plus terminal no-op closes the reset/state-update deadlock without making the public API unsafe.",
+      "kind": "behavior-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "P-03a",
+        "all states x E05"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 844,
+          "fragment": "cc.mu.Lock()",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 949,
+          "fragment": "ac.cc.handleSubConnStateChange",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-003",
+      "source_question": "Q-03",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Honor accepted connections and reset generations",
+      "decision": "A SETTINGS-confirmed successful connection starts the next reconnect attempt without the stale pre-success delay. Explicit reset zeroes the failure history and advances a generation; the upcoming or current backoff wait must observe that generation atomically. A reset before wait registration cannot be lost. Subsequent failed attempts resume normal jittered backoff.",
+      "rationale": "Recomputing a duration alone does not close the channel-generation lost-wakeup window. Success and explicit reset are distinct triggers.",
+      "kind": "behavior-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "Ready x E09",
+        "TransientFailure_Backoff x E05",
+        "P-02a",
+        "P-02b"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 975,
+          "fragment": "backoffFor := ac.dopts.bs.Backoff(ac.backoffIdx)",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1128,
+          "fragment": "b := ac.resetBackoff",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1294,
+          "fragment": "ac.backoffIdx = 0",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-004",
+      "source_question": "Q-04",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Require SETTINGS for success-based backoff reset",
+      "decision": "Across On, Hybrid and Off modes, reset failure history only after SETTINGS confirms server acceptance, or on explicit ResetConnectBackoff. Keep Off admission compatibility separately documented.",
+      "rationale": "TCP acceptance is not proof that the server accepted gRPC. This does not silently remove Off mode.",
+      "kind": "behavior-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "Connecting_Dialing x E10",
+        "Ready x E09"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 1073,
+          "fragment": "if reqHandshake == envconfig.RequireHandshakeHybrid",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1112,
+          "fragment": "ac.backoffIdx = 0",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-005",
+      "source_question": "Q-05",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Parse explicit on as On",
+      "decision": "The literal on selects RequireHandshakeOn, as does the existing default. Off and Hybrid retain their explicit mappings. Cover the actual environment parser in a fresh process.",
+      "rationale": "Tests that directly assign the enum cannot detect the parser defect. The owning component is envconfig.",
+      "kind": "neighbor-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "envconfig parser / DOC-20"
+      ],
+      "evidence": [
+        {
+          "file": "internal/envconfig/envconfig.go",
+          "line": 61,
+          "fragment": "case \"on\":",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "internal/envconfig/envconfig.go",
+          "line": 63,
+          "fragment": "RequireHandshake = RequireHandshakeOn",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-006",
+      "source_question": "Q-06",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Assign IDLE policy to ClientConn",
+      "decision": "Treat idle timeout and channel-level GOAWAY/no-RPC idleness as ClientConn responsibilities. Keep an explicit model link and an unimplemented owning-model work item; do not add addrConn idle timers to satisfy a channel requirement.",
+      "rationale": "Moving the obligation to its actual owner does not claim it is implemented there.",
+      "kind": "scope-decision",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "ClientConn model / DOC-4"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 670,
+          "fragment": "func (ac *addrConn) connect() error",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-007",
+      "source_question": "Q-07",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Allow health recovery over an existing transport",
+      "decision": "Allow TransientFailure_ServerUnhealthy directly to Ready on a valid current-generation SERVING report. No artificial Connecting notification. Document the health extension to the older transition table.",
+      "rationale": "No network reconnection occurred; a synthetic Connecting step would misrepresent the operation.",
+      "kind": "documentation",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "TransientFailure_ServerUnhealthy x E12"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 1262,
+          "fragment": "if ac.transport != newTr",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1270,
+          "fragment": "ac.updateConnectivityState(connectivity.Ready)",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-008",
+      "source_question": "Q-08",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Separate missing first health status from stable watches",
+      "decision": "Bound the first valid health response using a configurable first-verdict timeout, defaulting in this evaluation to the existing getMinConnectTimeout() duration. Expiry cancels that health attempt, releases its transport and enters ordinary reconnect/backoff. After a valid SERVING or NOT_SERVING status, silence alone is permitted; no heartbeat timeout or forced reconnect for stable NOT_SERVING. Keep the existing health client retry/backoff for ordinary stream failures. An unexpected terminal helper return while its context is live is a monitoring failure: remove Ready eligibility and restart monitoring with bounded backoff and the first-verdict timeout. UNIMPLEMENTED retains the explicitly documented healthy fallback; canceled or stale generations cannot change the active instance.",
+      "rationale": "The callee retries ordinary stream errors itself. Blindly recycling on each stream error duplicates policy; stable watch silence is not the same as a missing initial verdict. New timeout and unexpected-return behavior are evaluation policy, not a claimed upstream requirement.",
+      "kind": "behavior-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "Connecting_HealthChecking x UV09",
+        "TransientFailure_ServerUnhealthy x UV09",
+        "Ready x E14"
+      ],
+      "evidence": [
+        {
+          "file": "health/client.go",
+          "line": 54,
+          "fragment": "func clientHealthCheck",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "health/client.go",
+          "line": 91,
+          "fragment": "if status.Code(err) == codes.Unimplemented",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "health/client.go",
+          "line": 97,
+          "fragment": "if err != nil",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1275,
+          "fragment": "err := ac.cc.dopts.healthCheckFunc",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-009",
+      "source_question": "Q-09",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Ignore mutations on a terminal addrConn",
+      "decision": "After Shutdown, resetConnectBackoff is a no-op. tryUpdateAddrs returns true without changing the address list, preserving the wrapper convention that an update to a retired instance does not recreate it. connect continues returning errConnClosing. The wrapper handles an empty address list as teardown; direct empty updates to live instances are rejected without mutation.",
+      "rationale": "Returning false is not sufficient to promise recreation: the wrapper explicitly declines replacement when the old state is Shutdown. Preserve terminality without mutating dead context.",
+      "kind": "behavior-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "Shutdown x E03",
+        "Shutdown x E05",
+        "Shutdown x E17"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 698,
+          "fragment": "if ac.state == connectivity.Shutdown",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "balancer_conn_wrappers.go",
+          "line": 299,
+          "fragment": "if acState == connectivity.Shutdown",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "balancer_conn_wrappers.go",
+          "line": 281,
+          "fragment": "if len(addrs) <= 0",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-010",
+      "source_question": "Q-10",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Remove the unused restart signal",
+      "decision": "Remove tryNextAddrFromStart and its unreachable branches after verifying that no producer fires it. Preserve address-update replacement and its tested restart-from-first-address behavior.",
+      "rationale": "An unproduced signal is not a useful alternate mechanism. Do not introduce in-place restart semantics as cleanup.",
+      "kind": "cleanup",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "Connecting_Dialing x E03",
+        "P-04b"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 968,
+          "fragment": "tryNextAddrFromStart := grpcsync.NewEvent()",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1060,
+          "fragment": "if tryNextAddrFromStart.HasFired()",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-011",
+      "source_question": "Q-11",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Give local teardown explicit resource ownership",
+      "decision": "Local teardown always cancels its owned dial/backoff/health activity, independently of parent ClientConn cancellation. A canceled backoff worker eventually exits and stops its timer; no fixed completion latency is promised. If a transport exists, detach it under lock; call GracefulClose for errConnDrain and Close for non-drain reasons outside ac.mu. Graceful drain may retain active RPCs; abrupt close terminates them. Late transports follow DR-001.",
+      "rationale": "The transport lifetime is derived from cc.ctx, so the old NAT-5 inference from ac.cancel is invalid. Distinguish graceful drain from abrupt teardown and never call reentrant close callbacks under ac.mu. The current no-transport backoff path already satisfies this contract and is the F-09 slice.",
+      "kind": "behavior-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "all states x E02",
+        "TransientFailure_Backoff x E02"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 1187,
+          "fragment": "transport.NewClientTransport(connectCtx, ac.cc.ctx",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1337,
+          "fragment": "ac.cancel()",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1140,
+          "fragment": "case <-acctx.Done():",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "internal/transport/http2_client.go",
+          "line": 795,
+          "fragment": "func (t *http2Client) GracefulClose",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-012",
+      "source_question": "Q-12",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Scope attempt cleanup to one attempt",
+      "decision": "Restructure per-attempt ownership so its cancel is released on every exit path at the end of that attempt; use an attempt-scoped helper/defer or equivalently proven explicit cleanup. Do not accumulate deferred closures in the long-lived reconnect loop.",
+      "rationale": "A helper with bounded lifetime is easier to audit than deleting the defer while assuming every early return is covered. Active health monitoring retains ownership until that attempt ends.",
+      "kind": "behavior-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "Connecting_Dialing attempt lifecycle / Q-12"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 1012,
+          "fragment": "hctx, hcancel := context.WithCancel(ac.ctx)",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1013,
+          "fragment": "defer hcancel()",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-013",
+      "source_question": "Q-13",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Keep explicit resets immediate and document herd risk",
+      "decision": "Do not add hidden jitter to the immediate ResetConnectBackoff API. Retain ordinary backoff jitter; document fleet reset coordination and rate limiting as operator/caller responsibilities.",
+      "rationale": "Changing immediate reset timing would silently change the public promise. No claim that all synchronized retry risk is eliminated.",
+      "kind": "documentation",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "all states x E05",
+        "multi-instance M-01/M-03"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 833,
+          "fragment": "ResetConnectBackoff wakes up all subchannels",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "internal/backoff/backoff.go",
+          "line": 73,
+          "fragment": "grpcrand.Float64()",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-014",
+      "source_question": "Q-14",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Report failure per exhausted address-list pass",
+      "decision": "Use the same per-list-pass TransientFailure policy in all handshake modes. Individual failed addresses remain Connecting while alternatives remain. Document the chosen subchannel-level interpretation and its deviation from a literal per-address reading.",
+      "rationale": "This agrees with the explicit existing multi-address test and avoids mode-dependent output noise.",
+      "kind": "behavior-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "Connecting_Dialing x E07"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn_state_transition_test.go",
+          "line": 269,
+          "fragment": "func (s) TestStateTransitions_TriesAllAddrsBeforeTransientFailure",
+          "provenance": "observed-in-tests"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1097,
+          "fragment": "ac.updateConnectivityState(connectivity.TransientFailure)",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-015",
+      "source_question": "Q-15",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Scope ResetConnectBackoff to backoff, not health status",
+      "decision": "Reset the retry history in every live state and wake a real backoff wait. Do not recycle a live transport merely because its health status is NOT_SERVING. Document that immediate reconnection applies to backoff-TF, not health-TF; health recovery follows DR-008.",
+      "rationale": "A health verdict is not a dial-backoff timer. The broad old API prose needs explicit qualification for this substate.",
+      "kind": "documentation",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "TransientFailure_ServerUnhealthy x E05"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 1070,
+          "fragment": "<-reconnect.Done()",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "clientconn.go",
+          "line": 1291,
+          "fragment": "func (ac *addrConn) resetConnectBackoff",
+          "provenance": "observed-in-code"
+        }
+      ]
+    },
+    {
+      "id": "DR-016",
+      "source_question": "Q-16",
+      "date": "2026-11-15",
+      "status": "accepted",
+      "question_status": "ANSWERED",
+      "title": "Retain server-directed keepalive floor with saturation",
+      "decision": "Keep the nondecreasing keepalive floor for the lifetime of its owning ClientConn, with no automatic decay. Double using saturating duration arithmetic capped at the largest representable positive duration; never overflow to a negative or shorter interval. Record this as a ClientConn model obligation.",
+      "rationale": "Accepting the ratchet must not accept integer overflow. The owning object is ClientConn, not addrConn.",
+      "kind": "neighbor-change",
+      "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+      "owner": "Gregor Melhorn",
+      "recommendation_author": "Codex",
+      "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+      "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+      "implementation_status": "pending",
+      "affects": [
+        "ClientConn keepalive / GOAWAY too_many_pings"
+      ],
+      "evidence": [
+        {
+          "file": "clientconn.go",
+          "line": 957,
+          "fragment": "v := 2 * ac.dopts.copts.KeepaliveParams.Time",
+          "provenance": "observed-in-code"
+        }
+      ]
+    }
+  ]
+}

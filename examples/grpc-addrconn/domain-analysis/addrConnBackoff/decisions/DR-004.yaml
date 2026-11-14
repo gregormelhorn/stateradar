@@ -1,0 +1,35 @@
+{
+  "id": "DR-004",
+  "source_question": "Q-04",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Require SETTINGS for success-based backoff reset",
+  "decision": "Across On, Hybrid and Off modes, reset failure history only after SETTINGS confirms server acceptance, or on explicit ResetConnectBackoff. Keep Off admission compatibility separately documented.",
+  "rationale": "TCP acceptance is not proof that the server accepted gRPC. This does not silently remove Off mode.",
+  "kind": "behavior-change",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "Connecting_Dialing x E10",
+    "Ready x E09"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 1073,
+      "fragment": "if reqHandshake == envconfig.RequireHandshakeHybrid",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1112,
+      "fragment": "ac.backoffIdx = 0",
+      "provenance": "observed-in-code"
+    }
+  ]
+}

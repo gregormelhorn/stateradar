@@ -1,0 +1,5 @@
+REACHABILITY CHECK: FAIL
+  - state 'ShutdownStopped' has no outgoing transitions and is not marked terminal
+
+The matrix now declares its terminal state using the checker-supported comment.
+Reachability is also called by the fixture runner so future omissions fail CI.

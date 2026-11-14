@@ -1,0 +1,35 @@
+{
+  "id": "DR-010",
+  "source_question": "Q-10",
+  "date": "2026-11-15",
+  "status": "accepted",
+  "question_status": "ANSWERED",
+  "title": "Remove the unused restart signal",
+  "decision": "Remove tryNextAddrFromStart and its unreachable branches after verifying that no producer fires it. Preserve address-update replacement and its tested restart-from-first-address behavior.",
+  "rationale": "An unproduced signal is not a useful alternate mechanism. Do not introduce in-place restart semantics as cleanup.",
+  "kind": "cleanup",
+  "scope": "StateRadar evaluation of grpc-go v1.18.0; not an upstream maintainer decision",
+  "owner": "Gregor Melhorn",
+  "recommendation_author": "Codex",
+  "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
+  "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
+  "implementation_status": "pending",
+  "affects": [
+    "Connecting_Dialing x E03",
+    "P-04b"
+  ],
+  "evidence": [
+    {
+      "file": "clientconn.go",
+      "line": 968,
+      "fragment": "tryNextAddrFromStart := grpcsync.NewEvent()",
+      "provenance": "observed-in-code"
+    },
+    {
+      "file": "clientconn.go",
+      "line": 1060,
+      "fragment": "if tryNextAddrFromStart.HasFired()",
+      "provenance": "observed-in-code"
+    }
+  ]
+}
