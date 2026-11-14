@@ -30,4 +30,22 @@ The routing ledger uses observed provider token counts and peak cache-miss Flash
 
 Keep routed as the current standard and hybrid as opt-in. For further evaluation, measure the deterministic renderer and the Flash schedule call independently. These runs compare the combined workflow and do not identify the contribution of each change. The single pair per component does not estimate variance.
 
+## Follow-up work caused by the workflow
+
+The gobreaker retained-log requests can be traced to their original commands. Of the seven additional requests in hybrid, four came from race-test log inspection. Two of those were invalid line-range requests against a 52-line log. The other three additional requests read source, the ordinary extraction draft, and the Flash schedule proposal respectively. These counts include failed requests. Most additional retained-log requests therefore came from test-log handling. The logs do not establish that Flash caused the total Codex cost increase.
+
+| Retained-log request purpose | Routed | Hybrid |
+| --- | ---: | ---: |
+| Pack instructions | 2 | 2 |
+| Source and original tests | 1 | 2 |
+| Ordinary extraction drafts | 0 | 1 |
+| Extra Flash schedule proposal | 0 | 1 |
+| Blind package and answer | 3 | 3 |
+| Race-test logs, including invalid ranges | 1 | 5 |
+| Total | 7 | 14 |
+
+The semantic correction burden is separate. Codex corrected six of eight Pool schedule proposals and five of eight gobreaker proposals. These counts measure review outcomes, and do not measure the time or credits spent on each correction. Both variants use Flash for extraction and blind Part B, so this experiment tests the added schedule sweep and renderer together. A source citation passing mechanical validation does not establish a possible interleaving.
+
+Evaluate total cost per independently verified result, including drafting, review, retries and any stronger-model escalation. Compare routed, routed with the renderer, and routed with both renderer and schedule proposals before attributing an effect to Flash. Then compare steering models on the selected workflow. Keep P-04a and the other external controls outside the drafting inputs. Record missing findings, invalid accepted schedules, successful completion and operator recovery alongside cost. Additional gate counts alone do not establish higher semantic quality.
+
 [Exact counters and gate outputs](measurements.json). Raw local artifacts and logs are under `/private/tmp/stateradar-hybrid-matched.dS9o5q`.
