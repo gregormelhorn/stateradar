@@ -1,0 +1,15 @@
+id: DR-004
+date: 2026-11-14
+source_question: Q-02
+question: Reject an impossible oversized acquisition promptly
+decision: immediate-error
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Q-02: sofort verständlichen fehler zurückgeben"
+scope: >-
+  Evaluation copy only. Acquire with weight greater than capacity returns an explanatory error without waiting for context cancellation. Existing pre-canceled-context handling is retained; other cancellation orderings remain Q-10. TryAcquire continues to return false for positive oversized weights.
+links:
+  - "guarded matrix branch: Acquire"
+status: accepted
+
+canonical_record: docs/evidence/semaphore-pilot/resolution-q02-q04/decisions/DR-004.yaml

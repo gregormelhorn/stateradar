@@ -1,0 +1,1957 @@
+{
+  "formatVersion": "1.0",
+  "component": "weightedSemaphore",
+  "packVersion": "1.53",
+  "events": [
+    {
+      "id": "NewWeighted",
+      "undesired": false,
+      "gate": "Independent new instance; negative constructor size panics without touching the existing instance.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "external"
+    },
+    {
+      "id": "Acquire",
+      "undesired": false,
+      "gate": "Feasible live request queues when admission is unavailable. Empty queue may instead grant immediately. Negative input panics, pre-canceled Context returns its error, and oversized input returns a size error without queueing.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "external"
+    },
+    {
+      "id": "TryAcquire",
+      "undesired": false,
+      "gate": "With no queue, fitting nonnegative weight grants, otherwise false. With a queue, false even when weight fits. Negative weight panics.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "external"
+    },
+    {
+      "id": "Release",
+      "undesired": false,
+      "gate": "Valid positive release drains only the eligible FIFO prefix; a blocked tail may remain. Negative/over-release panics before mutation. Zero release changes neither accounting nor queue.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "external"
+    },
+    {
+      "id": "ContextDone",
+      "undesired": false,
+      "gate": "Preclosed acquisition fails; completed success stays held. Pending cancellation removes the entry or rolls back a racing grant. Removing a head notifies its eligible successors; a remaining blocked queue stays pending.",
+      "upstream_guards": [
+        "NAT-Context: supplied Context controls Done; standard CancelFunc is idempotent. See extraction.md callee contracts."
+      ],
+      "classification": "internal"
+    },
+    {
+      "id": "Grant",
+      "undesired": false,
+      "gate": "Notification reserves and unlinks in FIFO order. This internal event is triggered by release/cancellation, not injected directly. A ready recipient may return or roll back; other queued requests may remain.",
+      "upstream_guards": [
+        "Private channel created with each queue entry; notifyWaiters is called under the mutex. No external injection seam."
+      ],
+      "classification": "internal"
+    },
+    {
+      "id": "UV-Abandon",
+      "undesired": true,
+      "gate": "No automatic reclamation on caller disappearance. Pending work needs cancellation and success requires matching release; obligations remain with callers.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-Delay",
+      "undesired": true,
+      "gate": "No fixed latency bound is promised. A delay by itself changes no modeled state; eventual processing follows the original event. Finite tests cannot certify this absence of a bound.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-Recreate",
+      "undesired": true,
+      "gate": "Recreation is independent; no cleanup or capacity transfer reaches the old receiver.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-RepeatAcquire",
+      "undesired": true,
+      "gate": "Independent invocation: can grant again if room and no queue, or append a distinct feasible request. It can self-block; validation and cancellation rules still apply.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-RepeatTry",
+      "undesired": true,
+      "gate": "Each try is independent. Empty queue may charge repeatedly until full; queued predecessors prevent every bypass.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-RepeatRelease",
+      "undesired": true,
+      "gate": "Each call applies to the aggregate. An excess panics without mutation; duplicates covered by other holdings can go undetected. This is a caller-error detection limit, not permission to double-release.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-WrongReceiver",
+      "undesired": true,
+      "gate": "The intended instance sees no call. The actual receiver processes its own accounting; caller intent is not inferred.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-Weight",
+      "undesired": true,
+      "gate": "Negative arguments panic before mutation; oversized Acquire errors and oversized TryAcquire is false. Zero remains valid with FIFO; nonnegative int64 arithmetic stays within size.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-ForeignContext",
+      "undesired": true,
+      "gate": "A preclosed supplied Context rejects, independent of the intended Context. A live supplied Context follows Acquire admission; no identity check or Context substitution.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-UnownedRelease",
+      "undesired": true,
+      "gate": "Release responsibility can transfer. Aggregate accounting cannot distinguish an authorized transfer from a mistaken release while held weight covers it. Excess still panics unchanged.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-ContextFault",
+      "undesired": true,
+      "gate": "Delegates to the supplied Context. Outside NAT-Context no return, recovery or progress outcome is promised; handle denotes delegation, not successful completion.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-RepeatedDone",
+      "undesired": true,
+      "gate": "Standard CancelFunc repetition is idempotent. A successful acquisition stays held; a queued call cleans up once. This is upstream Context contract, not a second delivered channel event.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    },
+    {
+      "id": "UV-ContextOrder",
+      "undesired": true,
+      "gate": "After the final applicable check, success may coexist with cancellation. Before a queued final check cancellation rolls the grant back. Temporary reservation may affect other observers.",
+      "upstream_guards": [
+        "Direct boundary call; caller selects receiver/Context (DR-008). Context methods must satisfy NAT-Context (DR-009). Numeric validation is inside this component (DR-002/004)."
+      ],
+      "classification": "undesired-variant"
+    }
+  ],
+  "coverage": {
+    "NewWeighted": {
+      "loss": "UV-Abandon",
+      "delay": "UV-Delay",
+      "duplication": "UV-Recreate",
+      "out-of-order": "UV-Recreate",
+      "contradiction": "UV-Recreate",
+      "commission": "UV-Recreate",
+      "value": "UV-Weight"
+    },
+    "Acquire": {
+      "loss": "UV-Abandon",
+      "delay": "UV-Delay",
+      "duplication": "UV-RepeatAcquire",
+      "out-of-order": "UV-RepeatAcquire",
+      "contradiction": "UV-RepeatAcquire",
+      "commission": "UV-WrongReceiver",
+      "value": "UV-Weight, UV-ForeignContext"
+    },
+    "TryAcquire": {
+      "loss": "UV-Abandon",
+      "delay": "UV-Delay",
+      "duplication": "UV-RepeatTry",
+      "out-of-order": "UV-RepeatTry",
+      "contradiction": "UV-RepeatTry",
+      "commission": "UV-WrongReceiver",
+      "value": "UV-Weight"
+    },
+    "Release": {
+      "loss": "UV-Abandon",
+      "delay": "UV-Delay",
+      "duplication": "UV-RepeatRelease",
+      "out-of-order": "UV-RepeatRelease",
+      "contradiction": "UV-RepeatRelease",
+      "commission": "UV-UnownedRelease",
+      "value": "UV-WrongReceiver, UV-Weight"
+    },
+    "ContextDone": {
+      "loss": "UV-ContextFault",
+      "delay": "UV-Delay",
+      "duplication": "UV-RepeatedDone",
+      "out-of-order": "UV-ContextOrder",
+      "contradiction": "UV-ContextOrder",
+      "commission": "UV-ContextFault",
+      "value": "UV-ForeignContext, UV-ContextFault"
+    },
+    "Grant": {
+      "loss": "n/a: grant is an inline close; examples/weighted-semaphore/semaphore/semaphore.go:200 (\"close(w.ready)\").",
+      "delay": "n/a: close is inline; receiver scheduling is separate; examples/weighted-semaphore/semaphore/semaphore.go:200 (\"close(w.ready)\").",
+      "duplication": "n/a: head is first unlinked under the lock; examples/weighted-semaphore/semaphore/semaphore.go:199 (\"s.waiters.Remove(next)\").",
+      "out-of-order": "n/a: the notifier reads the current head; examples/weighted-semaphore/semaphore/semaphore.go:183 (\"if s.size-s.cur < w.n {\").",
+      "contradiction": "n/a: notification is called with the mutex held; examples/weighted-semaphore/semaphore/semaphore.go:108 (\"s.notifyWaiters()\").",
+      "commission": "n/a: ready is private; examples/weighted-semaphore/semaphore/semaphore.go:95 (\"ready := make(chan struct{})\").",
+      "value": "n/a: entry and channel are paired; examples/weighted-semaphore/semaphore/semaphore.go:96 (\"w := waiter{n: n, ready: ready}\")."
+    }
+  },
+  "states": [
+    "Acquire_NoWaiters",
+    "Acquire_WaitersPending"
+  ],
+  "cells": [
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "NewWeighted",
+      "disposition": "handle",
+      "dr": "DR-002",
+      "q": "Q-03",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 29,
+        "fragment": "w := &Weighted{size: n}"
+      },
+      "provenance": "observed-in-code",
+      "note": "Independent new instance; negative constructor size panics without touching the existing instance."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Acquire",
+      "disposition": "transition",
+      "dr": "DR-004",
+      "q": "Q-02",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 97,
+        "fragment": "elem := s.waiters.PushBack(w)"
+      },
+      "provenance": "observed-in-code",
+      "note": "Feasible live request queues when admission is unavailable. Empty queue may instead grant immediately. Negative input panics, pre-canceled Context returns its error, and oversized input returns a size error without queueing.",
+      "target": "Acquire_WaitersPending"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "TryAcquire",
+      "disposition": "handle",
+      "dr": "DR-011",
+      "q": "Q-11",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 145,
+        "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+      },
+      "provenance": "observed-in-code",
+      "note": "With no queue, fitting nonnegative weight grants, otherwise false. With a queue, false even when weight fits. Negative weight panics."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Release",
+      "disposition": "handle",
+      "dr": "DR-013",
+      "q": "Q-13",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 171,
+        "fragment": "s.notifyWaiters()"
+      },
+      "provenance": "observed-in-code",
+      "note": "Valid positive release drains only the eligible FIFO prefix; a blocked tail may remain. Negative/over-release panics before mutation. Zero release changes neither accounting nor queue."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "ContextDone",
+      "disposition": "reject",
+      "dr": "DR-010",
+      "q": "Q-10",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 111,
+        "fragment": "s.waiters.Remove(elem)"
+      },
+      "provenance": "observed-in-code",
+      "note": "Preclosed acquisition fails; completed success stays held. Pending cancellation removes the entry or rolls back a racing grant. Removing a head notifies its eligible successors; a remaining blocked queue stays pending."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Grant",
+      "disposition": "handle",
+      "dr": "DR-010",
+      "q": "Q-10",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 200,
+        "fragment": "close(w.ready)"
+      },
+      "provenance": "observed-in-code",
+      "note": "Notification reserves and unlinks in FIFO order. This internal event is triggered by release/cancellation, not injected directly. A ready recipient may return or roll back; other queued requests may remain."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Abandon",
+      "disposition": "ignore (documented)",
+      "dr": "DR-005",
+      "q": "Q-05",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "note": "No automatic reclamation on caller disappearance. Pending work needs cancellation and success requires matching release; obligations remain with callers."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Delay",
+      "disposition": "handle",
+      "dr": "DR-011",
+      "q": "Q-11",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 68,
+        "fragment": "s.mu.Lock()"
+      },
+      "provenance": "observed-in-code",
+      "note": "No fixed latency bound is promised. A delay by itself changes no modeled state; eventual processing follows the original event. Finite tests cannot certify this absence of a bound."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Recreate",
+      "disposition": "handle",
+      "dr": "DR-005",
+      "q": "Q-05",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 29,
+        "fragment": "w := &Weighted{size: n}"
+      },
+      "provenance": "observed-in-code",
+      "note": "Recreation is independent; no cleanup or capacity transfer reaches the old receiver."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatAcquire",
+      "disposition": "transition",
+      "dr": "DR-006",
+      "q": "Q-06",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 97,
+        "fragment": "elem := s.waiters.PushBack(w)"
+      },
+      "provenance": "observed-in-code",
+      "note": "Independent invocation: can grant again if room and no queue, or append a distinct feasible request. It can self-block; validation and cancellation rules still apply.",
+      "target": "Acquire_WaitersPending"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatTry",
+      "disposition": "handle",
+      "dr": "DR-006",
+      "q": "Q-06",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 145,
+        "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+      },
+      "provenance": "observed-in-code",
+      "note": "Each try is independent. Empty queue may charge repeatedly until full; queued predecessors prevent every bypass."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatRelease",
+      "disposition": "handle",
+      "dr": "DR-003",
+      "q": "Q-04",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 166,
+        "fragment": "if n > s.cur {"
+      },
+      "provenance": "observed-in-code",
+      "note": "Each call applies to the aggregate. An excess panics without mutation; duplicates covered by other holdings can go undetected. This is a caller-error detection limit, not permission to double-release."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-WrongReceiver",
+      "disposition": "ignore (documented)",
+      "dr": "DR-008",
+      "q": "Q-08",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 161,
+        "fragment": "func (s *Weighted) Release(n int64) {"
+      },
+      "provenance": "observed-in-code",
+      "note": "The intended instance sees no call. The actual receiver processes its own accounting; caller intent is not inferred."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Weight",
+      "disposition": "reject",
+      "dr": "DR-002",
+      "q": "Q-03",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 64,
+        "fragment": "panic(\"semaphore: negative weight\")"
+      },
+      "provenance": "observed-in-code",
+      "note": "Negative arguments panic before mutation; oversized Acquire errors and oversized TryAcquire is false. Zero remains valid with FIFO; nonnegative int64 arithmetic stays within size."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ForeignContext",
+      "disposition": "reject",
+      "dr": "DR-008",
+      "q": "Q-08",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "note": "A preclosed supplied Context rejects, independent of the intended Context. A live supplied Context follows Acquire admission; no identity check or Context substitution."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-UnownedRelease",
+      "disposition": "handle",
+      "dr": "DR-007",
+      "q": "Q-07",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 166,
+        "fragment": "if n > s.cur {"
+      },
+      "provenance": "observed-in-code",
+      "note": "Release responsibility can transfer. Aggregate accounting cannot distinguish an authorized transfer from a mistaken release while held weight covers it. Excess still panics unchanged."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ContextFault",
+      "disposition": "handle",
+      "dr": "DR-009",
+      "q": "Q-09",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "note": "Delegates to the supplied Context. Outside NAT-Context no return, recovery or progress outcome is promised; handle denotes delegation, not successful completion."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatedDone",
+      "disposition": "ignore (documented)",
+      "dr": "DR-010",
+      "q": "Q-10",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "note": "Standard CancelFunc repetition is idempotent. A successful acquisition stays held; a queued call cleans up once. This is upstream Context contract, not a second delivered channel event."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ContextOrder",
+      "disposition": "handle",
+      "dr": "DR-010",
+      "q": "Q-10",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 120,
+        "fragment": "case <-ready:"
+      },
+      "provenance": "observed-in-code",
+      "note": "After the final applicable check, success may coexist with cancellation. Before a queued final check cancellation rolls the grant back. Temporary reservation may affect other observers."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "NewWeighted",
+      "disposition": "handle",
+      "dr": "DR-005",
+      "q": "Q-05",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 29,
+        "fragment": "w := &Weighted{size: n}"
+      },
+      "provenance": "observed-in-code",
+      "note": "Independent new instance; negative constructor size panics without touching the existing instance."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Acquire",
+      "disposition": "defer (queued)",
+      "dr": "DR-012",
+      "q": "Q-12",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 97,
+        "fragment": "elem := s.waiters.PushBack(w)"
+      },
+      "provenance": "observed-in-code",
+      "note": "Feasible live request queues when admission is unavailable. Empty queue may instead grant immediately. Negative input panics, pre-canceled Context returns its error, and oversized input returns a size error without queueing."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "TryAcquire",
+      "disposition": "reject",
+      "dr": "DR-012",
+      "q": "Q-12",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 145,
+        "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+      },
+      "provenance": "observed-in-code",
+      "note": "With no queue, fitting nonnegative weight grants, otherwise false. With a queue, false even when weight fits. Negative weight panics."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Release",
+      "disposition": "transition",
+      "dr": "DR-001",
+      "q": "Q-01",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 171,
+        "fragment": "s.notifyWaiters()"
+      },
+      "provenance": "observed-in-code",
+      "note": "Valid positive release drains only the eligible FIFO prefix; a blocked tail may remain. Negative/over-release panics before mutation. Zero release changes neither accounting nor queue.",
+      "target": "Acquire_NoWaiters"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "ContextDone",
+      "disposition": "transition",
+      "dr": "DR-010",
+      "q": "Q-10",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 111,
+        "fragment": "s.waiters.Remove(elem)"
+      },
+      "provenance": "observed-in-code",
+      "note": "Preclosed acquisition fails; completed success stays held. Pending cancellation removes the entry or rolls back a racing grant. Removing a head notifies its eligible successors; a remaining blocked queue stays pending.",
+      "target": "Acquire_NoWaiters"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Grant",
+      "disposition": "transition",
+      "dr": "DR-012",
+      "q": "Q-12",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 200,
+        "fragment": "close(w.ready)"
+      },
+      "provenance": "observed-in-code",
+      "note": "Notification reserves and unlinks in FIFO order. This internal event is triggered by release/cancellation, not injected directly. A ready recipient may return or roll back; other queued requests may remain.",
+      "target": "Acquire_NoWaiters"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Abandon",
+      "disposition": "ignore (documented)",
+      "dr": "DR-005",
+      "q": "Q-05",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "note": "No automatic reclamation on caller disappearance. Pending work needs cancellation and success requires matching release; obligations remain with callers."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Delay",
+      "disposition": "handle",
+      "dr": "DR-011",
+      "q": "Q-11",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 68,
+        "fragment": "s.mu.Lock()"
+      },
+      "provenance": "observed-in-code",
+      "note": "No fixed latency bound is promised. A delay by itself changes no modeled state; eventual processing follows the original event. Finite tests cannot certify this absence of a bound."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Recreate",
+      "disposition": "handle",
+      "dr": "DR-008",
+      "q": "Q-08",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 29,
+        "fragment": "w := &Weighted{size: n}"
+      },
+      "provenance": "observed-in-code",
+      "note": "Recreation is independent; no cleanup or capacity transfer reaches the old receiver."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatAcquire",
+      "disposition": "defer (queued)",
+      "dr": "DR-006",
+      "q": "Q-06",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 97,
+        "fragment": "elem := s.waiters.PushBack(w)"
+      },
+      "provenance": "observed-in-code",
+      "note": "Independent invocation: can grant again if room and no queue, or append a distinct feasible request. It can self-block; validation and cancellation rules still apply."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatTry",
+      "disposition": "reject",
+      "dr": "DR-006",
+      "q": "Q-06",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 145,
+        "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+      },
+      "provenance": "observed-in-code",
+      "note": "Each try is independent. Empty queue may charge repeatedly until full; queued predecessors prevent every bypass."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatRelease",
+      "disposition": "transition",
+      "dr": "DR-007",
+      "q": "Q-07",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 166,
+        "fragment": "if n > s.cur {"
+      },
+      "provenance": "observed-in-code",
+      "note": "Each call applies to the aggregate. An excess panics without mutation; duplicates covered by other holdings can go undetected. This is a caller-error detection limit, not permission to double-release.",
+      "target": "Acquire_NoWaiters"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-WrongReceiver",
+      "disposition": "ignore (documented)",
+      "dr": "DR-008",
+      "q": "Q-08",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 161,
+        "fragment": "func (s *Weighted) Release(n int64) {"
+      },
+      "provenance": "observed-in-code",
+      "note": "The intended instance sees no call. The actual receiver processes its own accounting; caller intent is not inferred."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Weight",
+      "disposition": "reject",
+      "dr": "DR-002",
+      "q": "Q-03",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 64,
+        "fragment": "panic(\"semaphore: negative weight\")"
+      },
+      "provenance": "observed-in-code",
+      "note": "Negative arguments panic before mutation; oversized Acquire errors and oversized TryAcquire is false. Zero remains valid with FIFO; nonnegative int64 arithmetic stays within size."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ForeignContext",
+      "disposition": "reject",
+      "dr": "DR-008",
+      "q": "Q-08",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "note": "A preclosed supplied Context rejects, independent of the intended Context. A live supplied Context follows Acquire admission; no identity check or Context substitution."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-UnownedRelease",
+      "disposition": "transition",
+      "dr": "DR-007",
+      "q": "Q-07",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 166,
+        "fragment": "if n > s.cur {"
+      },
+      "provenance": "observed-in-code",
+      "note": "Release responsibility can transfer. Aggregate accounting cannot distinguish an authorized transfer from a mistaken release while held weight covers it. Excess still panics unchanged.",
+      "target": "Acquire_NoWaiters"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ContextFault",
+      "disposition": "handle",
+      "dr": "DR-009",
+      "q": "Q-09",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "note": "Delegates to the supplied Context. Outside NAT-Context no return, recovery or progress outcome is promised; handle denotes delegation, not successful completion."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatedDone",
+      "disposition": "transition",
+      "dr": "DR-005",
+      "q": "Q-05",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "note": "Standard CancelFunc repetition is idempotent. A successful acquisition stays held; a queued call cleans up once. This is upstream Context contract, not a second delivered channel event.",
+      "target": "Acquire_NoWaiters"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ContextOrder",
+      "disposition": "transition",
+      "dr": "DR-010",
+      "q": "Q-10",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 120,
+        "fragment": "case <-ready:"
+      },
+      "provenance": "observed-in-code",
+      "note": "After the final applicable check, success may coexist with cancellation. Before a queued final check cancellation rolls the grant back. Temporary reservation may affect other observers.",
+      "target": "Acquire_NoWaiters"
+    }
+  ],
+  "analyzedSha": "WORKTREE",
+  "watchPaths": [
+    "examples/weighted-semaphore/semaphore",
+    "examples/weighted-semaphore/go.mod",
+    "examples/weighted-semaphore/CONTRACT.md",
+    "examples/weighted-semaphore/schedule",
+    "examples/weighted-semaphore/cells",
+    "examples/weighted-semaphore/verify_q01.py",
+    "examples/weighted-semaphore/domain-analysis/weightedSemaphore/check_matrix.py",
+    "examples/weighted-semaphore/domain-analysis/weightedSemaphore/check_guards.py",
+    "examples/weighted-semaphore/domain-analysis/weightedSemaphore/verify.py",
+    "examples/weighted-semaphore/domain-analysis/weightedSemaphore/source-pins.json"
+  ],
+  "questions": [
+    {
+      "id": "Q-01",
+      "status": "RESOLVED",
+      "fault": [
+        "F-20"
+      ],
+      "trigger": "adversarial trace"
+    },
+    {
+      "id": "Q-02",
+      "status": "RESOLVED",
+      "fault": [
+        "F-13"
+      ],
+      "trigger": "step-5 lint"
+    },
+    {
+      "id": "Q-03",
+      "status": "RESOLVED",
+      "fault": [
+        "F-05"
+      ],
+      "trigger": "step-1 extraction"
+    },
+    {
+      "id": "Q-04",
+      "status": "RESOLVED",
+      "fault": [
+        "F-05"
+      ],
+      "trigger": "step-8 verification"
+    },
+    {
+      "id": "Q-05",
+      "status": "RESOLVED",
+      "fault": [
+        "F-07"
+      ],
+      "trigger": "step-5 lint"
+    },
+    {
+      "id": "Q-06",
+      "status": "RESOLVED",
+      "fault": [
+        "F-14"
+      ],
+      "trigger": "step-3 checklist"
+    },
+    {
+      "id": "Q-07",
+      "status": "RESOLVED",
+      "fault": [
+        "F-08"
+      ],
+      "trigger": "step-3 checklist"
+    },
+    {
+      "id": "Q-08",
+      "status": "RESOLVED",
+      "fault": [
+        "F-18"
+      ],
+      "trigger": "step-3 checklist"
+    },
+    {
+      "id": "Q-09",
+      "status": "RESOLVED",
+      "fault": [
+        "F-11"
+      ],
+      "trigger": "seam-contract sweep"
+    },
+    {
+      "id": "Q-10",
+      "status": "RESOLVED",
+      "fault": [
+        "F-16"
+      ],
+      "trigger": "adversarial trace"
+    },
+    {
+      "id": "Q-11",
+      "status": "RESOLVED",
+      "fault": [
+        "F-13"
+      ],
+      "trigger": "step-5 lint"
+    },
+    {
+      "id": "Q-12",
+      "status": "RESOLVED",
+      "fault": [
+        "F-20"
+      ],
+      "trigger": "step-5 lint"
+    },
+    {
+      "id": "Q-13",
+      "status": "RESOLVED",
+      "fault": [
+        "F-15"
+      ],
+      "trigger": "part-B diff"
+    }
+  ],
+  "behaviouralDrs": [
+    "DR-001",
+    "DR-002",
+    "DR-003",
+    "DR-004",
+    "DR-005",
+    "DR-006",
+    "DR-007",
+    "DR-008",
+    "DR-009",
+    "DR-010",
+    "DR-011",
+    "DR-012",
+    "DR-013"
+  ],
+  "pairs": [
+    {
+      "id": "P-01a",
+      "trace": "adversarial-traces.md#P-01a"
+    },
+    {
+      "id": "P-01b",
+      "trace": "adversarial-traces.md#P-01b"
+    },
+    {
+      "id": "P-02a",
+      "trace": "adversarial-traces.md#P-02a"
+    },
+    {
+      "id": "P-02b",
+      "trace": "adversarial-traces.md#P-02b"
+    },
+    {
+      "id": "P-03a",
+      "trace": "adversarial-traces.md#P-03a"
+    },
+    {
+      "id": "P-03b",
+      "trace": "adversarial-traces.md#P-03b"
+    },
+    {
+      "id": "P-04a",
+      "trace": "adversarial-traces.md#P-04a"
+    },
+    {
+      "id": "P-04b",
+      "trace": "adversarial-traces.md#P-04b"
+    },
+    {
+      "id": "P-05a",
+      "trace": "adversarial-traces.md#P-05a"
+    },
+    {
+      "id": "P-05b",
+      "trace": "adversarial-traces.md#P-05b"
+    },
+    {
+      "id": "P-06a",
+      "trace": "adversarial-traces.md#P-06a"
+    },
+    {
+      "id": "P-06b",
+      "trace": "adversarial-traces.md#P-06b"
+    },
+    {
+      "id": "P-07a",
+      "trace": "adversarial-traces.md#P-07a"
+    },
+    {
+      "id": "P-07b",
+      "trace": "adversarial-traces.md#P-07b"
+    },
+    {
+      "id": "P-08a",
+      "trace": "adversarial-traces.md#P-08a"
+    },
+    {
+      "id": "P-08b",
+      "trace": "adversarial-traces.md#P-08b"
+    }
+  ],
+  "guardGroups": [
+    {
+      "id": "G-01",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-02",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-03",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-04",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-05",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-06",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-07",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-08",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-09",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-10",
+      "outcome": "proven"
+    },
+    {
+      "id": "G-11",
+      "outcome": "not-formalizable",
+      "reason": "dynamic-state: scheduler chooses from Done/ready; G-07/09 verify sampled cleanup decisions."
+    }
+  ],
+  "docLines": [
+    {
+      "id": "DOC-01",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 11,
+        "fragment": "Cancel an abandoned pending request and consume its result. Do not call Release for a failed Acquire; any own reservation is rolled back before error return."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-02",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 14,
+        "fragment": "Every successful acquisition requires matching release after protected work ends, even if its Context is canceled later. Cancellation does not automatically reclaim a successful holding."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-03",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 17,
+        "fragment": "Creating a new semaphore does not cancel pending work or release holdings on an old instance."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-04",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 22,
+        "fragment": "Each invocation is a separate acquisition, including repeat calls from the same logical caller. No deduplication, replacement or reentrant success is provided."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-05",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 25,
+        "fragment": "A caller holding capacity can block itself by awaiting another acquisition before releasing its existing holding."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-06",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 28,
+        "fragment": "Independent requests can share a Context, in which case cancellation can affect all of them."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-07",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 33,
+        "fragment": "Release responsibility may transfer to another goroutine. The application must match releases to actually held, not already released capacity."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-08",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 36,
+        "fragment": "The semaphore checks aggregate holdings, not caller identity. A duplicate release may remain undetected while other holdings cover it; this is a detection limit, not permission to release twice."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-09",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 41,
+        "fragment": "The caller selects the receiver. Release affects only that instance; release responsibility can transfer but capacity cannot transfer across instances."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-10",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 44,
+        "fragment": "The supplied Context governs the request. The semaphore does not infer a different intended Context."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-11",
+      "mapping": "constraint",
+      "target": "NAT-Context",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 49,
+        "fragment": "Acquire requires a non-nil Context conforming to the Go Context contract. Conforming custom implementations are supported, including concurrent-safe methods, stable Done and consistent cancellation errors."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-12",
+      "mapping": "constraint",
+      "target": "NAT-Context",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 52,
+        "fragment": "A nil Done channel is valid for a Context that cannot be canceled; it is distinct from a nil Context."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-13",
+      "mapping": "constraint",
+      "target": "NAT-Context",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 55,
+        "fragment": "No automatic substitution, repair, panic recovery or additional progress guarantee is promised for faulty, blocking or reentrant custom Context methods."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-14",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 60,
+        "fragment": "For a valid nonnegative weight, closed Done at the initial under-lock check causes a Context error without acquisition. Negative weights retain DR-002 panic priority; oversized errors retain DR-004 rules."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-15",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 63,
+        "fragment": "Processing queued cancellation removes the request or reverses a grant that raced with cleanup before returning the Context error."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-16",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 66,
+        "fragment": "A queued request receiving a grant checks cancellation again; if cancellation is observed, its grant is returned before error return."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-17",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 69,
+        "fragment": "Cancellation after the last applicable checkpoint may coexist with nil return. That success retains its release obligation. Grant notification alone is not successful API return."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-18",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 72,
+        "fragment": "An error return leaves no own holding or queue entry. Temporary reservations may affect other operations; global state and observations need not be unchanged."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-19",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 77,
+        "fragment": "TryAcquire obtains the synchronized state, checks once whether admission is permitted, and returns false if not. It does not join the capacity queue or await a future release."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-20",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 80,
+        "fragment": "Internal mutex waiting is permitted. Context cancellation does not interrupt mutex acquisition; cancellation is processed at the defined checkpoints."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-21",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 83,
+        "fragment": "No fixed return or cancellation-latency bound is promised. A Context deadline does not guarantee that Acquire has already returned at that instant."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-22",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 88,
+        "fragment": "Queued grants follow enqueue order, not wall-clock method-entry order."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-23",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 91,
+        "fragment": "A blocked head cannot be bypassed by later smaller requests or new Acquire/TryAcquire calls, including zero-weight requests. FIFO can leave capacity idle and does not promise progress without required releases."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-24",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 94,
+        "fragment": "Grant order does not guarantee goroutine execution order or API-return order."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-25",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 97,
+        "fragment": "There is no internal waiter-count cap. The application controls incoming work and cancels obsolete requests; the semaphore bounds held capacity, not queue length."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-26",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 102,
+        "fragment": "Release(0) is permitted and is a logical no-op for capacity, queue and grants in valid reachable states. Internal mutex waiting remains permitted."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-27",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/CONTRACT.md",
+        "line": 105,
+        "fragment": "Release(0) is not a promised wakeup, repair, flush or extra synchronization API. Progress must follow the actual enabling event, including DR-001 head removal."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-28",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 21,
+        "fragment": "// NewWeighted creates a new weighted semaphore with the given"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-29",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 22,
+        "fragment": "// maximum combined weight for concurrent access."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-30",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 23,
+        "fragment": "// A negative capacity panics (evaluation decision DR-002)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-31",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 24,
+        "fragment": "// A new instance does not reset or clean up existing instances (DR-005/008)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-32",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 33,
+        "fragment": "// Weighted provides a way to bound concurrent access to a resource."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-33",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 34,
+        "fragment": "// The callers can request access with a given weight."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-34",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 42,
+        "fragment": "// Acquire acquires the semaphore with a weight of n, blocking until resources"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-35",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 43,
+        "fragment": "// are available or ctx is done. On success, returns nil. On cancellation,"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-36",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 44,
+        "fragment": "// returns ctx.Err(). Errors leave no net holding for this request. A negative"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-37",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 45,
+        "fragment": "// weight panics (DR-002). An oversized weight returns a size error without waiting for"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-38",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 46,
+        "fragment": "// cancellation; an already canceled context retains priority (DR-004)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-39",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 48,
+        "fragment": "// Each invocation is independent, including repeat calls by one caller;"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-40",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 49,
+        "fragment": "// holding capacity while awaiting another acquisition can self-block (DR-006)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-41",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 50,
+        "fragment": "// A successful call requires matching release after work ends. Later Context"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-42",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 51,
+        "fragment": "// cancellation does not reclaim that holding (DR-005). Errors leave no own"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-43",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 52,
+        "fragment": "// holding or queue entry, but transient reservations can affect concurrent"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-44",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 53,
+        "fragment": "// operations. Cancellation after the last check can coexist with success"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-45",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 54,
+        "fragment": "// (DR-010); the return value determines the release obligation."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-46",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 56,
+        "fragment": "// ctx must be a non-nil, conforming Context. A nil Done channel is valid;"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-47",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 57,
+        "fragment": "// faulty custom methods have no recovery or extra progress guarantee (DR-009)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-48",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 58,
+        "fragment": "// The caller selects the correct instance and Context (DR-008). Mutex waits"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-49",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 59,
+        "fragment": "// are permitted and no fixed cancellation-latency bound is promised (DR-011)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-50",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 60,
+        "fragment": "// Queued grants are FIFO by enqueue order without bypass of a blocked head;"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-51",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 61,
+        "fragment": "// return order is unspecified. The queue has no internal count cap (DR-012)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-52",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 135,
+        "fragment": "// TryAcquire attempts to acquire weight n without joining the capacity queue"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-53",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 136,
+        "fragment": "// or awaiting a future release. It may wait for the internal mutex (DR-011)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-54",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 137,
+        "fragment": "// On success, returns true. On failure, returns false and leaves the semaphore unchanged."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-55",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 138,
+        "fragment": "// A negative weight panics before mutation (DR-002)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-56",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 139,
+        "fragment": "// Existing queued requests cannot be bypassed, including by weight zero (DR-012)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-57",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 153,
+        "fragment": "// Release releases the semaphore with a weight of n."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-58",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 154,
+        "fragment": "// Negative weights or release above the aggregate held weight panic without"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-59",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 155,
+        "fragment": "// changing the instance (evaluation decisions DR-002 and DR-003)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-60",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 156,
+        "fragment": "// Responsibility may transfer between goroutines, but the application must"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-61",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 157,
+        "fragment": "// match releases to held, not already released capacity on this instance."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-62",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 158,
+        "fragment": "// Aggregate accounting does not detect every duplicate release (DR-007/008)."
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-63",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 159,
+        "fragment": "// Release(0) is a logical no-op for capacity, queue and grants in valid reachable"
+      },
+      "provenance": "explicit-requirement"
+    },
+    {
+      "id": "DOC-64",
+      "mapping": "constraint",
+      "target": "SYS-Contract",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 160,
+        "fragment": "// states, not a wakeup, repair or extra synchronization operation (DR-013)."
+      },
+      "provenance": "explicit-requirement"
+    }
+  ],
+  "decisionEvidence": [
+    {
+      "dr": "DR-001",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 113,
+        "fragment": "if isFront {"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_q01_test.go",
+        "line": 76,
+        "fragment": "func TestDR001FullZeroPrefix("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-002",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 64,
+        "fragment": "panic(\"semaphore: negative weight\")"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_numeric_test.go",
+        "line": 97,
+        "fragment": "func TestDR002NegativeAcquire("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-003",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 166,
+        "fragment": "if n > s.cur {"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_numeric_test.go",
+        "line": 165,
+        "fragment": "func TestDR003OverReleaseQueued("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-004",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 92,
+        "fragment": "return fmt.Errorf("
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_numeric_test.go",
+        "line": 201,
+        "fragment": "func TestDR004OversizedImmediateError("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-005",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 29,
+        "fragment": "func TestDR005CancelHeld("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-006",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 97,
+        "fragment": "elem := s.waiters.PushBack(w)"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 82,
+        "fragment": "func TestDR006RepeatedPending("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-007",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 107,
+        "fragment": "s.cur -= n"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 131,
+        "fragment": "func TestDR007DuplicateWithinAggregate("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-008",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 161,
+        "fragment": "func (s *Weighted) Release(n int64) {"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 157,
+        "fragment": "func TestDR008SelectedContext("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-009",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 184,
+        "fragment": "func TestDR009ConformingContexts("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-010",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 127,
+        "fragment": "s.Release(n)"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/schedule/checkpoints_test.go.txt",
+        "line": 65,
+        "fragment": "func TestScheduleDR010GrantedRollback("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-011",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 145,
+        "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 245,
+        "fragment": "func TestDR011TryDoesNotQueue("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-012",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 183,
+        "fragment": "if s.size-s.cur < w.n {"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 265,
+        "fragment": "func TestDR012HeadOfLineFIFO("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    },
+    {
+      "dr": "DR-013",
+      "code": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 108,
+        "fragment": "s.notifyWaiters()"
+      },
+      "test": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 288,
+        "fragment": "func TestDR013ZeroRelease("
+      },
+      "provenance": [
+        "observed-in-code",
+        "observed-in-tests"
+      ]
+    }
+  ]
+}

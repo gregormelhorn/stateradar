@@ -1,0 +1,58 @@
+G-01 {'n': -1} => ['panic']
+G-01 {'n': 0} => ['continue']
+G-01 {'n': 1} => ['continue']
+G-02 {'done': False} => ['continue']
+G-02 {'done': True} => ['reject']
+G-03 {'size': 3, 'cur': 1, 'n': 0, 'length': 0} => ['fast']
+G-03 {'size': 3, 'cur': 1, 'n': 0, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 1, 'length': 0} => ['fast']
+G-03 {'size': 3, 'cur': 1, 'n': 1, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 2, 'length': 0} => ['fast']
+G-03 {'size': 3, 'cur': 1, 'n': 2, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 3, 'length': 0} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 3, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 4, 'length': 0} => ['oversized']
+G-03 {'size': 3, 'cur': 1, 'n': 4, 'length': 1} => ['oversized']
+G-04 {'size': 3, 'cur': 1, 'n': 1, 'length': 0} => ['admit']
+G-04 {'size': 3, 'cur': 1, 'n': 1, 'length': 1} => ['false']
+G-04 {'size': 3, 'cur': 1, 'n': 2, 'length': 0} => ['admit']
+G-04 {'size': 3, 'cur': 1, 'n': 2, 'length': 1} => ['false']
+G-04 {'size': 3, 'cur': 1, 'n': 3, 'length': 0} => ['false']
+G-04 {'size': 3, 'cur': 1, 'n': 3, 'length': 1} => ['false']
+G-05 {'cur': 2, 'n': 0} => ['release']
+G-05 {'cur': 2, 'n': 1} => ['release']
+G-05 {'cur': 2, 'n': 2} => ['release']
+G-05 {'cur': 2, 'n': 3} => ['panic']
+G-06 {'size': 3, 'cur': 1, 'head': 1, 'length': 0} => ['empty']
+G-06 {'size': 3, 'cur': 1, 'head': 1, 'length': 1} => ['grant']
+G-06 {'size': 3, 'cur': 1, 'head': 2, 'length': 0} => ['empty']
+G-06 {'size': 3, 'cur': 1, 'head': 2, 'length': 1} => ['grant']
+G-06 {'size': 3, 'cur': 1, 'head': 3, 'length': 0} => ['empty']
+G-06 {'size': 3, 'cur': 1, 'head': 3, 'length': 1} => ['stop']
+G-07 {'ready': False} => ['unlink']
+G-07 {'ready': True} => ['rollback']
+G-08 {'front': False, 'cur': 1, 'size': 2} => ['skip']
+G-08 {'front': False, 'cur': 2, 'size': 2} => ['skip']
+G-08 {'front': True, 'cur': 1, 'size': 2} => ['notify']
+G-08 {'front': True, 'cur': 2, 'size': 2} => ['notify']
+G-09 {'done': False} => ['success']
+G-09 {'done': True} => ['rollback']
+G-10 admit preserves count unsat (unsat required)
+G-10 release preserves count unsat (unsat required)
+G-10 grant preserves count unsat (unsat required)
+G-10 first enqueue is blocked unsat (unsat required)
+G-10 notifier stop is blocked unsat (unsat required)
+G-10 head removal cannot skip notification unsat (unsat required)
+G-10 retained blocked head cannot fit unsat (unsat required)
+group G-01: proven
+group G-02: proven
+group G-03: proven
+group G-04: proven
+group G-05: proven
+group G-06: proven
+group G-07: proven
+group G-08: proven
+group G-09: proven
+group G-10 queue-boundary preservation: proven (listed inductive obligations; source digest pinned)
+group G-11 queued select: not-formalizable: dynamic-state; both ready channels permit either selection; G-07/09 prove sampled cleanup branches
+GUARDS PASS: 10 proven groups; 1 explicitly non-formalizable group

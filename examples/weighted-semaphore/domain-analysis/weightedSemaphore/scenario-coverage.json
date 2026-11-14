@@ -1,0 +1,474 @@
+{
+  "traces": [
+    {
+      "id": "P-01a",
+      "dr": "DR-012",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 97,
+        "fragment": "elem := s.waiters.PushBack(w)"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-01a",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-01b",
+      "dr": "DR-012",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 79,
+        "fragment": "if s.size-s.cur >= n && s.waiters.Len() == 0 {"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-01b",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-02a",
+      "dr": "DR-011",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 145,
+        "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-02a",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-02b",
+      "dr": "DR-011",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 145,
+        "fragment": "success := s.size-s.cur >= n && s.waiters.Len() == 0"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-02b",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-03a",
+      "dr": "DR-010",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 84,
+        "fragment": "s.cur += n"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-03a",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-03b",
+      "dr": "DR-010",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 76,
+        "fragment": "return ctx.Err()"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-03b",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-04a",
+      "dr": "DR-010",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 107,
+        "fragment": "s.cur -= n"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-04a",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-04b",
+      "dr": "DR-010",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 127,
+        "fragment": "s.Release(n)"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-04b",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-05a",
+      "dr": "DR-006",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 97,
+        "fragment": "elem := s.waiters.PushBack(w)"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-05a",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-05b",
+      "dr": "DR-006",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 79,
+        "fragment": "if s.size-s.cur >= n && s.waiters.Len() == 0 {"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-05b",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-06a",
+      "dr": "DR-001",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 113,
+        "fragment": "if isFront {"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-06a",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-06b",
+      "dr": "DR-010",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 76,
+        "fragment": "return ctx.Err()"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-06b",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-07a",
+      "dr": "DR-001",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 113,
+        "fragment": "if isFront {"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-07a",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-07b",
+      "dr": "DR-010",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 127,
+        "fragment": "s.Release(n)"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-07b",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-08a",
+      "dr": "DR-003",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 166,
+        "fragment": "if n > s.cur {"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-08a",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "P-08b",
+      "dr": "DR-007",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 107,
+        "fragment": "s.cur -= n"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestStatePairs/P-08b",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/cells/state_cells_test.go.txt",
+        "line": 337,
+        "fragment": "func TestStatePairs("
+      }
+    },
+    {
+      "id": "T-01",
+      "dr": "DR-004",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 92,
+        "fragment": "return fmt.Errorf("
+      },
+      "provenance": "observed-in-code",
+      "test": "TestDR004OversizedImmediateError",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/semaphore/decision_numeric_test.go",
+        "line": 201,
+        "fragment": "func TestDR004OversizedImmediateError("
+      }
+    },
+    {
+      "id": "T-02",
+      "dr": "DR-005",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestDR005CancelPending",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 15,
+        "fragment": "func TestDR005CancelPending("
+      }
+    },
+    {
+      "id": "T-03",
+      "dr": "DR-011",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 68,
+        "fragment": "s.mu.Lock()"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestScheduleDR011CancelBeforeMutex",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/schedule/checkpoints_test.go.txt",
+        "line": 117,
+        "fragment": "func TestScheduleDR011CancelBeforeMutex("
+      }
+    },
+    {
+      "id": "T-04",
+      "dr": "DR-010",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 84,
+        "fragment": "s.cur += n"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestScheduleDR010FastLateCancel",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/schedule/checkpoints_test.go.txt",
+        "line": 46,
+        "fragment": "func TestScheduleDR010FastLateCancel("
+      }
+    },
+    {
+      "id": "T-05",
+      "dr": "DR-002",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 26,
+        "fragment": "if n < 0 {"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestDR002ZeroAndMaxBoundaries",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/semaphore/decision_numeric_test.go",
+        "line": 102,
+        "fragment": "func TestDR002ZeroAndMaxBoundaries("
+      }
+    },
+    {
+      "id": "T-06",
+      "dr": "DR-008",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 161,
+        "fragment": "func (s *Weighted) Release(n int64) {"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestDR008WrongReceiver",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 143,
+        "fragment": "func TestDR008WrongReceiver("
+      }
+    },
+    {
+      "id": "T-07",
+      "dr": "DR-005",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 29,
+        "fragment": "w := &Weighted{size: n}"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestDR005NewInstanceIndependent",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 45,
+        "fragment": "func TestDR005NewInstanceIndependent("
+      }
+    },
+    {
+      "id": "T-08",
+      "dr": "DR-009",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 66,
+        "fragment": "done := ctx.Done()"
+      },
+      "provenance": "observed-in-code",
+      "untestable-via-seam": "DR-009 supplies no required outcome for a faulty Context."
+    },
+    {
+      "id": "T-09",
+      "dr": "DR-009",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 76,
+        "fragment": "return ctx.Err()"
+      },
+      "provenance": "observed-in-code",
+      "untestable-via-seam": "DR-009 supplies no required outcome for a faulty Context."
+    },
+    {
+      "id": "T-10",
+      "dr": "DR-001",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 113,
+        "fragment": "if isFront {"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestDR001RetainedHeadPreservesFIFO",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/semaphore/decision_q01_test.go",
+        "line": 126,
+        "fragment": "func TestDR001RetainedHeadPreservesFIFO("
+      }
+    },
+    {
+      "id": "T-11",
+      "dr": "DR-012",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 200,
+        "fragment": "close(w.ready)"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestScheduleDR012ReturnOrder",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/schedule/checkpoints_test.go.txt",
+        "line": 134,
+        "fragment": "func TestScheduleDR012ReturnOrder("
+      }
+    },
+    {
+      "id": "T-12",
+      "dr": "DR-010",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 127,
+        "fragment": "s.Release(n)"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestScheduleDR010GrantedRollback",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/schedule/checkpoints_test.go.txt",
+        "line": 65,
+        "fragment": "func TestScheduleDR010GrantedRollback("
+      }
+    },
+    {
+      "id": "T-13",
+      "dr": "DR-005",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 84,
+        "fragment": "s.cur += n"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestDR005CancelHeld",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 29,
+        "fragment": "func TestDR005CancelHeld("
+      }
+    },
+    {
+      "id": "T-14",
+      "dr": "DR-012",
+      "citation": {
+        "file": "examples/weighted-semaphore/semaphore/semaphore.go",
+        "line": 97,
+        "fragment": "elem := s.waiters.PushBack(w)"
+      },
+      "provenance": "observed-in-code",
+      "test": "TestDR012Backlog",
+      "testCitation": {
+        "file": "examples/weighted-semaphore/semaphore/decision_contract_test.go",
+        "line": 317,
+        "fragment": "func TestDR012Backlog("
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="/Users/gregormelhorn/workspace/domain-statechart/.venv/bin:$PATH"
+mypy
+python tools/check_pack_consistency.py
+python tools/gen_rules.py --selftest
+python tools/selftest/run_selftest.py
+for suite in local_budget local_models jev_local jev_eval draft_verify draft_cells pilot_artifacts run_sol_pilot run_flash_pilot hybrid_pilot; do
+  if [[ -f tools/selftest/test_${suite}.py ]]; then
+    printf '%s\n' "Suite: ${suite}"
+    python "tools/selftest/test_${suite}.py"
+  fi
+done
+python tools/run_tool_tests.py
+python tools/gen_analysis_sidecar.py --root tests/golden-mini
+python tools/dsc_check.py tests/golden-mini/domain-analysis/mini --repo tests/golden-mini
+python tools/check_reachability.py tests/golden-mini/domain-analysis/mini
+git diff --check

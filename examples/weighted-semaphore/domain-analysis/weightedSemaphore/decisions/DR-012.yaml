@@ -1,0 +1,28 @@
+id: DR-012
+date: 2026-11-14
+source_question: Q-12
+question: Which FIFO order and queue limits are guaranteed?
+options: [fifo-grants-with-uncapped-queue, alternative-policy, implementation-defined]
+decision: fifo-grants-with-uncapped-queue
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Gut, übernehmen wir Q-12 so."
+scope: >-
+  Evaluation copy only. Grant waiting requests in enqueue order, not wall-clock
+  method-entry order. An unfit head blocks later requests even if their smaller
+  weight would fit. New acquisitions and TryAcquire must not bypass queued
+  requests, including zero-weight attempts under DR-001. Grant order does not
+  guarantee goroutine execution or API-return order. No internal waiter-count
+  limit is introduced; the application bounds incoming work and cancels obsolete
+  requests. The semaphore bounds held capacity, not queued request count. FIFO
+  does not promise a maximum waiting time or progress without required releases.
+links:
+  - "guarded matrix branch: Acquire"
+  - "guarded matrix branch: TryAcquire"
+  - "guarded matrix branch: Grant"
+  - "guarded matrix branch: UV-Delay"
+status: accepted
+implementation_status: contract-and-focused-conformance-complete
+implementation_evidence: docs/evidence/semaphore-pilot/contracts-q05-q13/README.md
+
+canonical_record: docs/evidence/semaphore-pilot/resolution-q02-q04/decisions/DR-012.yaml

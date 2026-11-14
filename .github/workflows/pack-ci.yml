@@ -18,6 +18,8 @@ jobs:
           cache: false
       - name: weighted semaphore accepted decisions
         run: python examples/weighted-semaphore/verify_q01.py
+      - name: weighted semaphore current model and cells
+        run: python examples/weighted-semaphore/domain-analysis/weightedSemaphore/verify.py
       # mypy over tools/ and tools/selftest/ (config: mypy.ini). Its first
       # run on main found 34 errors, one a real crash: both mutation
       # runners died on bytes + str in their timeout path.

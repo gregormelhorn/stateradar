@@ -1,0 +1,433 @@
+package semaphore
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+type stateCell struct {
+	State       string `json:"state"`
+	Event       string `json:"event"`
+	Disposition string `json:"disposition"`
+	Target      string `json:"target"`
+}
+type cellObservation struct{ kind, next string }
+
+// State projection is public: under the valid numeric contract, TryAcquire(0)
+// is true exactly when the queue is empty and consumes no capacity.
+func cellState(s *Weighted) string {
+	if s.TryAcquire(0) {
+		return "Acquire_NoWaiters"
+	}
+	return "Acquire_WaitersPending"
+}
+func cellResult(t *testing.T, ch <-chan error, want error) { t.Helper(); q01Result(t, ch, want) }
+func cellRequest(t *testing.T, s *Weighted, n int64, count int) (context.CancelFunc, chan error) {
+	t.Helper()
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	ch := make(chan error, 1)
+	go func() { ch <- s.Acquire(ctx, n) }()
+	q01Enqueued(t, s, count)
+	return cancel, ch
+}
+
+// Each event scenario starts at the named projection. Internal Grant uses its
+// real Release trigger; no queue, counter or ready channel is written by tests.
+func observeCell(t *testing.T, state, event string) cellObservation {
+	t.Helper()
+	if event == "UV-ContextOrder" {
+		if state == "Acquire_NoWaiters" {
+			TestScheduleDR010FastLateCancel(t)
+			return cellObservation{"handle", state}
+		}
+		TestScheduleDR010GrantedRollback(t)
+		return cellObservation{"transition", "Acquire_NoWaiters"}
+	}
+	if event == "Grant" && state == "Acquire_NoWaiters" {
+		s := NewWeighted(1)
+		s.TryAcquire(1)
+		_, ch := cellRequest(t, s, 1, 1)
+		s.Release(1)
+		if cellState(s) != state {
+			t.Fatal("grant continuation did not start with empty queue")
+		}
+		cellResult(t, ch, nil)
+		if s.TryAcquire(1) {
+			t.Fatal("grant not reserved")
+		}
+		s.Release(1)
+		numericAvailable(t, s, 1)
+		return cellObservation{"handle", state}
+	}
+	s := NewWeighted(3)
+	if !s.TryAcquire(1) {
+		t.Fatal("setup holding failed")
+	}
+	pending := state == "Acquire_WaitersPending"
+	var cancelHead context.CancelFunc
+	var head chan error
+	if pending {
+		cancelHead, head = cellRequest(t, s, 3, 1)
+	}
+	if got := cellState(s); got != state {
+		t.Fatalf("setup state %s, want %s", got, state)
+	}
+	kind := "handle"
+	switch event {
+	case "NewWeighted", "UV-Recreate":
+		fresh := NewWeighted(3)
+		numericAvailable(t, fresh, 3)
+		numericPanic(t, func() { NewWeighted(-1) })
+		if pending {
+			q01Pending(t, head)
+		} else {
+			numericAvailable(t, s, 2)
+		}
+	case "Acquire", "UV-RepeatAcquire":
+		n, count := int64(3), 1
+		if pending {
+			n, count = 1, 2
+		}
+		cancel, ch := cellRequest(t, s, n, count)
+		if cellState(s) != "Acquire_WaitersPending" {
+			t.Fatal("feasible acquisition did not queue")
+		}
+		q01Pending(t, ch)
+		if pending {
+			kind = "defer (queued)"
+		} else {
+			kind = "transition"
+		}
+		// Observe the event before teardown, then consume canceled results separately.
+		outcome := cellObservation{kind, cellState(s)}
+		cancel()
+		cellResult(t, ch, context.Canceled)
+		if pending {
+			cancelHead()
+			cellResult(t, head, context.Canceled)
+		}
+		return outcome
+	case "TryAcquire":
+		got := s.TryAcquire(2)
+		if pending {
+			if got {
+				t.Fatal("try bypassed head")
+			}
+			kind = "reject"
+		} else {
+			if !got || s.TryAcquire(1) {
+				t.Fatal("fitting try or accounting wrong")
+			}
+			s.Release(2)
+			numericAvailable(t, s, 2)
+		}
+	case "Release", "Grant":
+		s.Release(1)
+		if pending {
+			cellResult(t, head, nil)
+			if s.TryAcquire(1) {
+				t.Fatal("grant not charged")
+			}
+			kind = "transition"
+		} else {
+			numericAvailable(t, s, 3)
+		}
+	case "ContextDone":
+		if pending {
+			cancelHead()
+			cellResult(t, head, context.Canceled)
+			numericAvailable(t, s, 2)
+			kind = "transition"
+		} else {
+			ctx, cancel := context.WithCancel(context.Background())
+			cancel()
+			if err := s.Acquire(ctx, 1); err != context.Canceled {
+				t.Fatalf("preclosed got %v", err)
+			}
+			numericAvailable(t, s, 2)
+			kind = "reject"
+		}
+	case "UV-Abandon":
+		// No cancellation/release is delivered. Observation is not a time-bound claim.
+		if pending {
+			q01Pending(t, head)
+		} else {
+			numericAvailable(t, s, 2)
+		}
+		kind = "ignore (documented)"
+	case "UV-RepeatTry":
+		if pending {
+			if s.TryAcquire(1) || s.TryAcquire(1) {
+				t.Fatal("repeated try bypassed queue")
+			}
+			kind = "reject"
+		} else {
+			if !s.TryAcquire(1) || !s.TryAcquire(1) || s.TryAcquire(1) {
+				t.Fatal("repeat try not independent")
+			}
+			s.Release(2)
+			numericAvailable(t, s, 2)
+		}
+	case "UV-RepeatRelease":
+		s.Release(1)
+		if pending {
+			cellResult(t, head, nil)
+			s.Release(1)
+			numericAvailable(t, s, 1)
+			kind = "transition"
+		} else {
+			numericPanic(t, func() { s.Release(1) })
+			numericAvailable(t, s, 3)
+		}
+	case "UV-WrongReceiver":
+		other := NewWeighted(1)
+		other.TryAcquire(1)
+		other.Release(1)
+		numericAvailable(t, other, 1)
+		if !pending {
+			numericAvailable(t, s, 2)
+		} else {
+			q01Pending(t, head)
+		}
+		kind = "ignore (documented)"
+	case "UV-Weight":
+		numericPanic(t, func() { s.Acquire(context.Background(), -1) })
+		numericPanic(t, func() { s.TryAcquire(-1) })
+		numericPanic(t, func() { s.Release(-1) })
+		numericPanic(t, func() { s.Release(4) })
+		// Oversized must return a non-Context error without a cancellation input.
+		ch := make(chan error, 1)
+		go func() { ch <- s.Acquire(context.Background(), 4) }()
+		select {
+		case err := <-ch:
+			if err == nil || err == context.Canceled {
+				t.Fatalf("oversized got %v", err)
+			}
+		case <-contractTimeout():
+			t.Fatal("oversized request did not reject")
+		}
+		if s.TryAcquire(4) {
+			t.Fatal("oversized try admitted")
+		}
+		if !pending {
+			numericAvailable(t, s, 2)
+		} else {
+			q01Pending(t, head)
+		}
+		kind = "reject"
+	case "UV-ForeignContext":
+		supplied, cancel := context.WithCancel(context.Background())
+		cancel()
+		if err := s.Acquire(supplied, 1); err != context.Canceled {
+			t.Fatalf("wrong supplied-context result %v", err)
+		}
+		if !pending {
+			numericAvailable(t, s, 2)
+		} else {
+			q01Pending(t, head)
+		}
+		kind = "reject"
+	case "UV-UnownedRelease":
+		done := make(chan error, 1)
+		go func() { s.Release(1); done <- nil }()
+		cellResult(t, done, nil)
+		if pending {
+			cellResult(t, head, nil)
+			if s.TryAcquire(1) {
+				t.Fatal("transfer grant not charged")
+			}
+			kind = "transition"
+		} else {
+			numericAvailable(t, s, 3)
+		}
+	case "UV-RepeatedDone":
+		if pending {
+			cancelHead()
+			cancelHead()
+			cellResult(t, head, context.Canceled)
+			numericAvailable(t, s, 2)
+			kind = "transition"
+		} else {
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			if err := s.Acquire(ctx, 1); err != nil {
+				t.Fatal(err)
+			}
+			cancel()
+			cancel()
+			numericAvailable(t, s, 1)
+			s.Release(1)
+			numericAvailable(t, s, 2)
+			kind = "ignore (documented)"
+		}
+	default:
+		t.Fatalf("no observation for %s", event)
+	}
+	next := cellState(s)
+	// Confirm remaining pending state has retained its original holder after teardown.
+	if pending && next == "Acquire_WaitersPending" {
+		cancelHead()
+		cellResult(t, head, context.Canceled)
+		numericAvailable(t, s, 2)
+	}
+	return cellObservation{kind, next}
+}
+
+func TestStateCells(t *testing.T) {
+	adir := os.Getenv("STATERADAR_CELL_ANALYSIS")
+	if adir == "" {
+		t.Fatal("analysis path is required")
+	}
+	raw, err := os.ReadFile(filepath.Join(adir, "analysis.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var model struct {
+		Cells []stateCell `json:"cells"`
+	}
+	if err = json.Unmarshal(raw, &model); err != nil {
+		t.Fatal(err)
+	}
+	if len(model.Cells) != 38 {
+		t.Fatalf("expected complete 38-cell model, got %d", len(model.Cells))
+	}
+	seen := map[string]bool{}
+	checked, failed, excluded := 0, 0, 0
+	for _, c := range model.Cells {
+		key := c.State + "/" + c.Event
+		if seen[key] {
+			t.Fatalf("duplicate cell %s", key)
+		}
+		seen[key] = true
+		if c.Event == "UV-ContextFault" || c.Event == "UV-Delay" {
+			excluded++
+			continue
+		}
+		checked++
+		if !t.Run(key, func(t *testing.T) {
+			got := observeCell(t, c.State, c.Event)
+			if got.kind != c.Disposition {
+				t.Errorf("observed disposition %q; model requires %q", got.kind, c.Disposition)
+			}
+			want := c.State
+			if c.Disposition == "transition" {
+				want = c.Target
+			}
+			if got.next != want {
+				t.Errorf("observed projected state %s; model requires %s", got.next, want)
+			}
+		}) {
+			failed++
+			fmt.Printf("CELL FAIL %s x %s\n", c.State, c.Event)
+		}
+	}
+	fmt.Printf("CELL COVERAGE: %d executable, %d explicit contract limits\n", checked, excluded)
+	fmt.Printf("CELL SUITE: %d cells checked, %d failed\n", checked, failed)
+	if checked != 34 || excluded != 4 {
+		t.Fatal("unexpected cell discovery")
+	}
+}
+
+// Every historical interaction-pair ordering has a named current scenario.
+func TestStatePairs(t *testing.T) {
+	pairs := map[string]func(*testing.T){
+		"P-01a": TestDR006RepeatedPending,
+		"P-03a": TestScheduleDR010FastLateCancel,
+		"P-03b": TestDR010PreCanceled,
+		"P-04a": TestScheduleDR010CancelSelectedRollback,
+		"P-04b": func(t *testing.T) { TestScheduleDR010GrantedRollback(t); TestScheduleDR010QueuedLateCancel(t) },
+		"P-05a": func(t *testing.T) { TestDR006RepeatedPending(t); TestScheduleDR012ReturnOrder(t) },
+		"P-05b": TestDR006RepeatedHeld,
+		"P-06a": func(t *testing.T) { TestDR001SpareCapacity(t); TestDR006SharedContext(t) },
+		"P-07a": func(t *testing.T) { TestDR001FullZeroPrefix(t); TestDR001RetainedHeadPreservesFIFO(t) },
+		"P-07b": func(t *testing.T) { TestScheduleDR010GrantedRollback(t); TestScheduleDR010QueuedLateCancel(t) },
+		"P-08b": func(t *testing.T) { TestDR007TransferredRelease(t); TestDR007DuplicateWithinAggregate(t) },
+		"P-01b": func(t *testing.T) {
+			s := NewWeighted(1)
+			s.TryAcquire(1)
+			s.Release(1)
+			if err := s.Acquire(context.Background(), 1); err != nil {
+				t.Fatal(err)
+			}
+			if s.TryAcquire(1) {
+				t.Fatal("new admission was not charged")
+			}
+			s.Release(1)
+			numericAvailable(t, s, 1)
+		},
+		"P-02a": func(t *testing.T) {
+			s := NewWeighted(2)
+			s.TryAcquire(1)
+			if s.TryAcquire(2) {
+				t.Fatal("insufficient try succeeded")
+			}
+			s.Release(1)
+			if !s.TryAcquire(2) {
+				t.Fatal("failed try queued or changed accounting")
+			}
+			s.Release(2)
+		},
+		"P-02b": func(t *testing.T) {
+			s := NewWeighted(2)
+			s.TryAcquire(1)
+			s.Release(1)
+			if !s.TryAcquire(2) {
+				t.Fatal("try did not observe preceding release")
+			}
+			s.Release(2)
+		},
+		"P-06b": func(t *testing.T) {
+			s := NewWeighted(2)
+			s.TryAcquire(1)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			first := make(chan error, 1)
+			go func() { first <- s.Acquire(ctx, 2) }()
+			q01Enqueued(t, s, 1)
+			cancel()
+			cellResult(t, first, context.Canceled)
+			if err := s.Acquire(ctx, 1); err != context.Canceled {
+				t.Fatalf("reused canceled context: %v", err)
+			}
+			if err := s.Acquire(context.Background(), 1); err != nil {
+				t.Fatal(err)
+			}
+			if s.TryAcquire(1) {
+				t.Fatal("independent successor not charged")
+			}
+			s.Release(2)
+			numericAvailable(t, s, 2)
+		},
+		"P-08a": func(t *testing.T) {
+			s := NewWeighted(1)
+			numericPanic(t, func() { s.Release(1) })
+			numericAvailable(t, s, 1)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			result := make(chan error, 1)
+			go func() { result <- s.Acquire(ctx, 2) }()
+			select {
+			case err := <-result:
+				if err == nil || err == context.Canceled {
+					t.Fatalf("oversized after excess release: %v", err)
+				}
+			case <-contractTimeout():
+				t.Fatal("oversized after excess release waited")
+			}
+			numericAvailable(t, s, 1)
+		},
+	}
+	// Fixed traversal makes each run and its failure ledger directly comparable.
+	for i := 1; i <= 8; i++ {
+		for _, order := range []string{"a", "b"} {
+			id := fmt.Sprintf("P-%02d%s", i, order)
+			t.Run(id, pairs[id])
+		}
+	}
+	fmt.Println("PAIR SUITE: 16 orderings completed")
+}

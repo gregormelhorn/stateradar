@@ -1,0 +1,6 @@
+stateDiagram-v2
+    [*] --> Acquire_NoWaiters
+    Acquire_NoWaiters --> Acquire_WaitersPending: DR-006/012 feasible live acquisition queues
+    Acquire_WaitersPending --> Acquire_NoWaiters: DR-001/010/012 last cancellation or FIFO grant
+    Acquire_NoWaiters --> Acquire_NoWaiters: DR-003/005/008/013 held/independent/no-op operations
+    Acquire_WaitersPending --> Acquire_WaitersPending: DR-006/012 blocked head or remaining tail

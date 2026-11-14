@@ -1,0 +1,271 @@
+{
+  "cells": [
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "NewWeighted",
+      "dr": "DR-002",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_NoWaiters/NewWeighted"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Acquire",
+      "dr": "DR-004",
+      "disposition": "transition",
+      "test": "TestStateCells/Acquire_NoWaiters/Acquire"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "TryAcquire",
+      "dr": "DR-011",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_NoWaiters/TryAcquire"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Release",
+      "dr": "DR-013",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_NoWaiters/Release"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "ContextDone",
+      "dr": "DR-010",
+      "disposition": "reject",
+      "test": "TestStateCells/Acquire_NoWaiters/ContextDone"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "Grant",
+      "dr": "DR-010",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_NoWaiters/Grant"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Abandon",
+      "dr": "DR-005",
+      "disposition": "ignore (documented)",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-Abandon"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Delay",
+      "dr": "DR-011",
+      "disposition": "handle",
+      "untestable-via-seam": "DR-011 intentionally promises no finite latency bound. Finite timing tests cannot establish a universal bound or its absence; event-specific cancellation/order cases remain tested."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Recreate",
+      "dr": "DR-005",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-Recreate"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatAcquire",
+      "dr": "DR-006",
+      "disposition": "transition",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-RepeatAcquire"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatTry",
+      "dr": "DR-006",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-RepeatTry"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatRelease",
+      "dr": "DR-003",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-RepeatRelease"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-WrongReceiver",
+      "dr": "DR-008",
+      "disposition": "ignore (documented)",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-WrongReceiver"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-Weight",
+      "dr": "DR-002",
+      "disposition": "reject",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-Weight"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ForeignContext",
+      "dr": "DR-008",
+      "disposition": "reject",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-ForeignContext"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-UnownedRelease",
+      "dr": "DR-007",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-UnownedRelease"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ContextFault",
+      "dr": "DR-009",
+      "disposition": "handle",
+      "untestable-via-seam": "DR-009 excludes faulty Contexts from the guaranteed-outcome domain; no finite verdict can assert an unconstrained response."
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-RepeatedDone",
+      "dr": "DR-010",
+      "disposition": "ignore (documented)",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-RepeatedDone"
+    },
+    {
+      "state": "Acquire_NoWaiters",
+      "event": "UV-ContextOrder",
+      "dr": "DR-010",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_NoWaiters/UV-ContextOrder"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "NewWeighted",
+      "dr": "DR-005",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_WaitersPending/NewWeighted"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Acquire",
+      "dr": "DR-012",
+      "disposition": "defer (queued)",
+      "test": "TestStateCells/Acquire_WaitersPending/Acquire"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "TryAcquire",
+      "dr": "DR-012",
+      "disposition": "reject",
+      "test": "TestStateCells/Acquire_WaitersPending/TryAcquire"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Release",
+      "dr": "DR-001",
+      "disposition": "transition",
+      "test": "TestStateCells/Acquire_WaitersPending/Release"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "ContextDone",
+      "dr": "DR-010",
+      "disposition": "transition",
+      "test": "TestStateCells/Acquire_WaitersPending/ContextDone"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "Grant",
+      "dr": "DR-012",
+      "disposition": "transition",
+      "test": "TestStateCells/Acquire_WaitersPending/Grant"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Abandon",
+      "dr": "DR-005",
+      "disposition": "ignore (documented)",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-Abandon"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Delay",
+      "dr": "DR-011",
+      "disposition": "handle",
+      "untestable-via-seam": "DR-011 intentionally promises no finite latency bound. Finite timing tests cannot establish a universal bound or its absence; event-specific cancellation/order cases remain tested."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Recreate",
+      "dr": "DR-008",
+      "disposition": "handle",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-Recreate"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatAcquire",
+      "dr": "DR-006",
+      "disposition": "defer (queued)",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-RepeatAcquire"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatTry",
+      "dr": "DR-006",
+      "disposition": "reject",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-RepeatTry"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatRelease",
+      "dr": "DR-007",
+      "disposition": "transition",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-RepeatRelease"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-WrongReceiver",
+      "dr": "DR-008",
+      "disposition": "ignore (documented)",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-WrongReceiver"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-Weight",
+      "dr": "DR-002",
+      "disposition": "reject",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-Weight"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ForeignContext",
+      "dr": "DR-008",
+      "disposition": "reject",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-ForeignContext"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-UnownedRelease",
+      "dr": "DR-007",
+      "disposition": "transition",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-UnownedRelease"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ContextFault",
+      "dr": "DR-009",
+      "disposition": "handle",
+      "untestable-via-seam": "DR-009 excludes faulty Contexts from the guaranteed-outcome domain; no finite verdict can assert an unconstrained response."
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-RepeatedDone",
+      "dr": "DR-005",
+      "disposition": "transition",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-RepeatedDone"
+    },
+    {
+      "state": "Acquire_WaitersPending",
+      "event": "UV-ContextOrder",
+      "dr": "DR-010",
+      "disposition": "transition",
+      "test": "TestStateCells/Acquire_WaitersPending/UV-ContextOrder"
+    }
+  ],
+  "supplemental": "Existing DR-001..013 boundary/scenario suites remain mandatory."
+}

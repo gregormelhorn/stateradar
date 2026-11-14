@@ -1,0 +1,32 @@
+id: DR-010
+date: 2026-11-14
+source_question: Q-10
+question: Which cancellation checkpoints and accounting guarantees apply?
+options: [defined-checkpoints-and-net-accounting, strict-observational-rollback]
+decision: defined-checkpoints-and-net-accounting
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Gut, übernehmen wir Q-10 so."
+scope: >-
+  Evaluation copy, conforming Contexts and valid feasible weights. Closed Done
+  at the initial under-lock check causes a Context error without acquisition.
+  A queued call processing cancellation removes its entry or reverses any grant
+  already made to it before returning the Context error. A queued call receiving
+  a grant checks cancellation again: if observed, it returns the grant before
+  failing. Cancellation after the last applicable check may coexist with a nil
+  return, which retains the release obligation under DR-005. Internal grant
+  notification alone is not successful API return. At error return this request
+  has no remaining own holding or queue entry; concurrent operations may change
+  the global state. Transient reservations and effects on other callers are
+  permitted; observational invisibility is not promised. DR-002 negative-weight
+  panic and DR-004 oversized error/pre-canceled priority remain unchanged.
+links:
+  - "guarded matrix branch: Acquire"
+  - "guarded matrix branch: ContextDone"
+  - "guarded matrix branch: Grant"
+  - "guarded matrix branch: UV-ContextOrder"
+status: accepted
+implementation_status: contract-and-focused-conformance-complete
+implementation_evidence: docs/evidence/semaphore-pilot/contracts-q05-q13/README.md
+
+canonical_record: docs/evidence/semaphore-pilot/resolution-q02-q04/decisions/DR-010.yaml

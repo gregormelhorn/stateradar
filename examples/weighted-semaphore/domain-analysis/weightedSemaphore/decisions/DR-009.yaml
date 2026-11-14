@@ -1,0 +1,27 @@
+id: DR-009
+date: 2026-11-14
+source_question: Q-09
+question: What Context implementations does Acquire support?
+options: [conforming-context-precondition, recovery-semantics, runtime-validation]
+decision: conforming-context-precondition
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Gut, übernehmen wir Q-09 so."
+scope: >-
+  Evaluation copy only. Acquire requires a non-nil Context conforming to the
+  Go Context contract. Custom implementations are supported when conforming:
+  methods must be safe for concurrent use, Done must be stable, and closed Done
+  must correspond to a consistent non-nil cancellation error from Err. A nil
+  Done channel is valid for a Context that cannot be canceled; it is distinct
+  from a nil Context. No substitution with Background, automatic repair, panic
+  recovery or additional progress/latency guarantee is promised for blocking,
+  panicking, inconsistent or reentrant custom implementations. Exact supported
+  cancellation orderings remain Q-10. No general runtime validator is added.
+links:
+  - "guarded matrix branch: Acquire"
+  - "guarded matrix branch: UV-ContextFault"
+status: accepted
+implementation_status: contract-and-focused-conformance-complete
+implementation_evidence: docs/evidence/semaphore-pilot/contracts-q05-q13/README.md
+
+canonical_record: docs/evidence/semaphore-pilot/resolution-q02-q04/decisions/DR-009.yaml

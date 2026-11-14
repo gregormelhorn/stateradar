@@ -18,12 +18,13 @@ The [Q-01 evidence](../../docs/evidence/semaphore-pilot/resolution-q01/deviation
 and [final contract evidence](../../docs/evidence/semaphore-pilot/contracts-q05-q13/README.md)
 record all thirteen accepted decisions and completed focused conformance work.
 [CONTRACT.md](CONTRACT.md) is the normative evaluation contract. No original
-question remains open. Historical as-is reconciliation remains separate.
+question remains open. The [current analysis](domain-analysis/weightedSemaphore/summary.md) records the resolved matrix, cell coverage and reconciliation evidence. The original upstream pilot remains historical.
 
 From the pack root, with Go 1.24+ and the pack Python dependencies:
 
 ```sh
 .venv/bin/python examples/weighted-semaphore/verify_q01.py
+.venv/bin/python examples/weighted-semaphore/domain-analysis/weightedSemaphore/verify.py
 ```
 
 The original entry-point name is retained; it now checks all thirteen decisions.
@@ -37,3 +38,5 @@ all scheduler interleavings or a production wall-clock latency bound.
 The original pilot's as-is probes intentionally describe the old behavior and
 remain archived. Use the original reproduction driver for that historical
 baseline; it must not be repurposed as conformance acceptance of this fix.
+
+The current-model verifier checks 38 matrix cells: 34 executable guarded scenarios and four explicit contract limits, plus all 16 interaction-pair orderings. It repeats executable scenarios ten times under the race detector, demonstrates a deliberately wrong matrix verdict, checks artifact mutations, and verifies all 52 retained historical artifact hashes. Faulty Context guarantees and absent fixed latency bounds are not counted as green tests.

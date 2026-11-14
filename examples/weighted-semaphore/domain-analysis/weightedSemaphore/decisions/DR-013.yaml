@@ -1,0 +1,23 @@
+id: DR-013
+date: 2026-11-14
+source_question: Q-13
+question: Is Release(0) a wakeup operation or a logical no-op?
+options: [logical-no-op, notification-contract, disallow-zero-release]
+decision: logical-no-op
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Gut, übernehmen wir Q-13 so."
+scope: >-
+  Evaluation copy only. Release(0) is permitted and is a logical no-op for
+  capacity, queue and grants in valid reachable states. It is not a promised
+  wakeup, repair, flush or extra synchronization operation. Internal mutex waits
+  remain allowed under DR-011. Progress follows from the actual enabling event,
+  including removal of a blocking head under DR-001. Retain the existing internal
+  notification call; no optimization or additional timing guarantee is decided.
+links:
+  - "guarded matrix branch: Release"
+status: accepted
+implementation_status: contract-and-focused-conformance-complete
+implementation_evidence: docs/evidence/semaphore-pilot/contracts-q05-q13/README.md
+
+canonical_record: docs/evidence/semaphore-pilot/resolution-q02-q04/decisions/DR-013.yaml
