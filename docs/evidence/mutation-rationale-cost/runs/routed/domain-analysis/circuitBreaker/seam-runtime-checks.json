@@ -1,0 +1,23 @@
+[
+  {
+    "id": "S01",
+    "kind": "claim",
+    "statement": "Goexit terminates the caller goroutine.",
+    "line": 672,
+    "fragment": "Goexit terminates the goroutine that calls it."
+  },
+  {
+    "id": "S02",
+    "kind": "claim",
+    "statement": "Goexit executes deferred calls.",
+    "line": 673,
+    "fragment": "Goexit runs all deferred calls"
+  },
+  {
+    "id": "S03",
+    "kind": "claim",
+    "statement": "Deferred recover during Goexit returns nil because this is not a panic.",
+    "line": 674,
+    "fragment": "recover calls in those deferred functions will return nil"
+  }
+]

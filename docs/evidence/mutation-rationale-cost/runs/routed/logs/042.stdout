@@ -1,0 +1,177 @@
+[
+  {
+    "file": "gobreaker.go",
+    "line": 285,
+    "fragment": "\t} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 286,
+    "fragment": "\t\treturn generation, ErrTooManyRequests"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 289,
+    "fragment": "\tcb.counts.onRequest()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 290,
+    "fragment": "\treturn generation, nil"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 294,
+    "fragment": "\tcb.mutex.Lock()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 295,
+    "fragment": "\tdefer cb.mutex.Unlock()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 297,
+    "fragment": "\tnow := time.Now()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 298,
+    "fragment": "\tstate, generation := cb.currentState(now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 299,
+    "fragment": "\tif generation != before {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 300,
+    "fragment": "\t\treturn"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 303,
+    "fragment": "\tif success {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 304,
+    "fragment": "\t\tcb.onSuccess(state, now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 306,
+    "fragment": "\t\tcb.onFailure(state, now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 313,
+    "fragment": "\t\tcb.counts.onSuccess()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 315,
+    "fragment": "\t\tcb.counts.onSuccess()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 316,
+    "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 317,
+    "fragment": "\t\t\tcb.setState(StateClosed, now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 325,
+    "fragment": "\t\tcb.counts.onFailure()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 326,
+    "fragment": "\t\tif cb.readyToTrip(cb.counts) {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 327,
+    "fragment": "\t\t\tcb.setState(StateOpen, now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 330,
+    "fragment": "\t\tcb.setState(StateOpen, now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 337,
+    "fragment": "\t\tif !cb.expiry.IsZero() && cb.expiry.Before(now) {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 338,
+    "fragment": "\t\t\tcb.toNewGeneration(now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 341,
+    "fragment": "\t\tif cb.expiry.Before(now) {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 342,
+    "fragment": "\t\t\tcb.setState(StateHalfOpen, now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 349,
+    "fragment": "\tif cb.state == state {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 354,
+    "fragment": "\tcb.state = state"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 356,
+    "fragment": "\tcb.toNewGeneration(now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 358,
+    "fragment": "\tif cb.onStateChange != nil {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 359,
+    "fragment": "\t\tcb.onStateChange(cb.name, prev, state)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 364,
+    "fragment": "\tcb.generation++"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 365,
+    "fragment": "\tcb.counts.clear()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 370,
+    "fragment": "\t\tif cb.interval == 0 {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 371,
+    "fragment": "\t\t\tcb.expiry = zero"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 373,
+    "fragment": "\t\t\tcb.expiry = now.Add(cb.interval)"
+  }
+]

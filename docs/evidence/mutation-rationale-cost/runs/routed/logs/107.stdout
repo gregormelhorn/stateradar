@@ -1,0 +1,27 @@
+ordering-review.json
+O01 unclear A constructed Closed breaker accepts an Execute request → caller supplies a request → Execute runs the given request. 0.02
+O03 unclear A request was sent before a count clear → it completes after the clear → its result does not affect the cleared Counts. 0.18
+O04 unclear An idle Open breaker has no State, admission or completion calls → time is exactly at the timeout deadline → state changes autonomously and immediately to HalfOpen. 0.01
+O05 unclear A breaker changes state with nonnil OnStateChange → state and counts are committed while the breaker holds its mutex → callback runs inside the same lock and returns before public calls can proceed. 0.01
+seam-builtin-review.json
+seam-go-review.json
+seam-mutex-review.json
+seam-runtime-review.json
+seam-time-review.json
+verification-code-review.json
+V45 unclear Admission samples time after taking the mutex. None
+V46 unclear Completion samples time after taking the mutex. None
+verification-test-review.json
+draft-code.json
+C5 61 A success increments TotalSuccesses and ConsecutiveSuccesses and resets ConsecutiveFailures to 0.
+C6 67 A failure increments TotalFailures and ConsecutiveFailures and resets ConsecutiveSuccesses to 0.
+C24 242 Execute calls beforeRequest, then runs req, then calls afterRequest with the isSuccessful result.
+draft-readme.json
+C2 19 NewCircuitBreaker creates a new CircuitBreaker from Settings.
+draft-test.json
+C3 131 A CircuitBreaker created with empty Settings has empty name, maxRequests 1, interval 0, timeout 60s, non-nil readyToTrip, nil onStateChange, state StateClosed, zero Counts, and zero expiry.
+C4 147 A CircuitBreaker created from custom settings retains the configured name, MaxRequests, Interval, Timeout, and a non-nil OnStateChange, starting in StateClosed with zero Counts and non-zero expiry.
+C7 182 In StateClosed, reaching 6 consecutive failures trips the breaker to StateOpen and clears Counts to zero, with expiry set non-zero.
+C9 195 While StateOpen, after 59s of pseudoSleep the state remains StateOpen; after an additional 1s (over Timeout) the state transitions to StateHalfOpen and expiry is zeroed.
+C11 210 Sequence: after another 60s of pseudoSleep, StateOpen transitions to StateHalfOpen with expiry zeroed; then a success transitions StateHalfOpen to StateClosed with cleared Counts and zero expiry.
+C17 290 TwoStepCircuitBreaker mirrors CircuitBreaker state transitions for failure/success flows: counting failures, tripping at 6 consecutive failures, open-to-halfopen after timeout, halfopen-to-open on failure, and halfopen-to-closed on success.

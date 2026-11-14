@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path; import sys,json; root=Path(sys.argv[1]); (root/'overlay.json').write_text(json.dumps({'Replace':{'zz_pilot_test.go':str(root/'_probe/pilot_test.go')}},indent=2)+'\\n')",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

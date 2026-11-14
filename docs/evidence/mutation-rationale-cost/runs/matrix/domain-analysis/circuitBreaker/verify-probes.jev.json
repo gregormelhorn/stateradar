@@ -1,0 +1,144 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "c86c3c6e8f142174df92f8f3f8b4ebcb398d10da1bf98144b1ca2d15515d68b7",
+  "input_tokens": 3496,
+  "cost_microdollars": 147,
+  "reservation_microdollars": 564,
+  "checks": {
+    "probe-01": {
+      "kind": "claim",
+      "statement": "Two true calls on a single half-open completion can leave the breaker Closed.",
+      "source": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+      "line": 35,
+      "fragment": "t.Fatalf(\"duplicate success state = %v\", got)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.69,
+        "contradicted": 0.04,
+        "unclear": 0.27
+      },
+      "confidence": 0.53,
+      "review_required": true
+    },
+    "probe-02": {
+      "kind": "claim",
+      "statement": "An omitted completion can leave a half-open breaker rejecting a later call with ErrTooManyRequests.",
+      "source": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+      "line": 43,
+      "fragment": "t.Fatalf(\"after abandonment: %v\", err)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.76,
+        "contradicted": 0.0,
+        "unclear": 0.24
+      },
+      "confidence": 0.64,
+      "review_required": true
+    },
+    "probe-03": {
+      "kind": "claim",
+      "statement": "Calling a stale report can trigger a HalfOpen notification before another admission.",
+      "source": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+      "line": 57,
+      "fragment": "t.Fatalf(\"state notifications before any new call: %v\", changes)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.74,
+        "contradicted": 0.02,
+        "unclear": 0.24
+      },
+      "confidence": 0.61,
+      "review_required": true
+    },
+    "probe-04": {
+      "kind": "claim",
+      "statement": "The second Execute can complete and count its result while the first remains pending.",
+      "source": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+      "line": 82,
+      "fragment": "t.Fatalf(\"counts before first returns: %+v\", got)",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.34,
+        "contradicted": 0.43,
+        "unclear": 0.23
+      },
+      "confidence": 0.14,
+      "review_required": true
+    },
+    "probe-05": {
+      "kind": "claim",
+      "statement": "The probe expects the callback State reentry not to return in its observation window.",
+      "source": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+      "line": 116,
+      "fragment": "t.Fatal(\"same-goroutine State reentry returned\")",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.87,
+        "contradicted": 0.11,
+        "unclear": 0.02
+      },
+      "confidence": 0.8,
+      "review_required": true
+    },
+    "probe-06": {
+      "kind": "claim",
+      "statement": "A policy panic can lead to two closed failure-accounting attempts for one admission.",
+      "source": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+      "line": 135,
+      "fragment": "t.Fatalf(\"counts=%+v calls=%d\", got, calls)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.3,
+        "contradicted": 0.05,
+        "unclear": 0.65
+      },
+      "confidence": 0.48,
+      "review_required": true
+    },
+    "probe-07": {
+      "kind": "claim",
+      "statement": "The notification panic replaces the original request panic in this schedule.",
+      "source": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+      "line": 146,
+      "fragment": "if got := recover(); got != \"notification\" {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.84,
+        "contradicted": 0.01,
+        "unclear": 0.15
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "probe-08": {
+      "kind": "claim",
+      "statement": "State Open and zeroed counts remain committed when notification panics.",
+      "source": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+      "line": 153,
+      "fragment": "t.Fatal(\"transition did not commit\")",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.43,
+        "contradicted": 0.09,
+        "unclear": 0.48
+      },
+      "confidence": 0.22,
+      "review_required": true
+    },
+    "probe-09": {
+      "kind": "claim",
+      "statement": "The first post-expiry Allow can consume the sole half-open slot.",
+      "source": "domain-analysis/circuitBreaker/_probe/pilot_test.go",
+      "line": 182,
+      "fragment": "t.Fatalf(\"second admission after open expiry = %v\", err)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.57,
+        "contradicted": 0.06,
+        "unclear": 0.37
+      },
+      "confidence": 0.35,
+      "review_required": true
+    }
+  }
+}

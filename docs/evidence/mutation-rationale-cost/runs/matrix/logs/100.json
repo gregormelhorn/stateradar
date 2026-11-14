@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import pathlib,json,sys\np=pathlib.Path(sys.argv[1])\nfor name in ('orderings','seams-time','verify'):\n s=json.loads((p/(name+'.jev.json')).read_text());print(name,s.keys()); checks=s['checks']\n for k,v in checks.items():\n  if name=='orderings' or (v.get('choice') or v.get('jev',{}).get('choice'))!='supported': print(k,v)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

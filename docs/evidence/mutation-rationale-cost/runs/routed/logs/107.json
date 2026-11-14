@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,sys\nfrom pathlib import Path\nd=Path(sys.argv[1])\nfor p in sorted(d.glob('*-review.json')):\n j=json.loads(p.read_text())\n print(p.name)\n for k,v in j['checks'].items():\n  if v['choice']!='supported': print(k,v['choice'],v.get('statement'),v.get('ordering_scope_probability'))\nfor p in sorted(d.glob('draft-*.json')):\n print(p.name)\n for k,v in json.loads(p.read_text())['claims'].items():\n  if (v.get('jev') or {}).get('choice')!='supported':print(k,v['line'],v['statement'])\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

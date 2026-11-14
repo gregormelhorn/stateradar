@@ -1,0 +1,118 @@
+requirements
+C1 18 supported CircuitBreaker is a state machine that prevents sending requests likely to fail.
+C2 19 unclear NewCircuitBreaker creates a new CircuitBreaker from Settings.
+C3 41 supported MaxRequests bounds how many requests may pass through in half-open state.
+C4 43 supported If MaxRequests is 0, only 1 request is allowed in half-open state.
+C5 45 supported Interval defines the cyclic period of the closed state for clearing internal Counts.
+C6 47 supported If Interval is 0, internal Counts are not cleared during the closed state.
+C7 49 supported Timeout is the period of the open state after which the state becomes half-open.
+C8 51 supported If Timeout is 0, its value is set to 60 seconds.
+C9 53 supported ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.
+C10 54 supported If ReadyToTrip returns true, CircuitBreaker is placed into the open state.
+C11 55 supported If ReadyToTrip is nil, a default ReadyToTrip is used.
+C12 56 supported Default ReadyToTrip returns true when consecutive failures exceed 5.
+C13 58 supported OnStateChange is called whenever CircuitBreaker's state changes.
+C14 60 supported IsSuccessful is called with the error returned from a request.
+C15 61 supported If IsSuccessful returns true, the error counts as a success.
+C16 62 supported Otherwise the error counts as a failure.
+C17 63 supported If IsSuccessful is nil, a default is used that returns false for all non-nil errors.
+C18 77 supported CircuitBreaker clears internal Counts on state change or at closed-state intervals.
+C19 78 supported Counts on the change of state or at closed-state intervals; Counts ignores results of requests sent before clearing.
+C20 79 supported Counts ignores results of requests sent before clearing.
+C21 87 supported Execute runs the given request if CircuitBreaker accepts it.
+C22 88 supported Execute returns an error instantly if CircuitBreaker rejects the request.
+C23 89 supported Otherwise Execute returns the result of the request.
+C24 90 supported If a panic occurs in the request, CircuitBreaker handles it as an error and causes the same panic again.
+source
+C1 16 supported The CircuitBreaker has three states: closed, half-open, and open.
+C2 23 None ErrTooManyRequests is returned when the breaker is half open and the request count is over maxRequests.
+C3 25 supported ErrOpenState is returned when the breaker is open.
+C4 48 unclear Counts includes Requests, TotalSuccesses, TotalFailures, ConsecutiveSuccesses, and ConsecutiveFailures.
+C5 44 supported The internal Counts are cleared on a change of state or at the closed-state intervals.
+C6 46 supported Counts ignores results of requests sent before clearing.
+C7 56 supported onRequest increments Requests.
+C8 60 unclear onSuccess increments TotalSuccesses and ConsecutiveSuccesses and resets ConsecutiveFailures to zero.
+C9 66 unclear onFailure increments TotalFailures and ConsecutiveFailures and resets ConsecutiveSuccesses to zero.
+C10 72 unclear clear resets all five counters to zero.
+C11 83 supported MaxRequests is the maximum number of requests allowed to pass through when the breaker is half-open.
+C12 85 supported If MaxRequests is 0, the breaker allows only 1 request.
+C13 87 supported Interval is the cyclic period of the closed state for clearing the internal Counts.
+C14 89 supported If Interval is less than or equal to 0, Counts are not cleared during the closed state.
+C15 91 supported Timeout is the period of the open state, after which the state becomes half-open.
+C16 93 supported If Timeout is less than or equal to 0, the timeout value is set to 60 seconds.
+C17 95 supported ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.
+C18 96 supported If ReadyToTrip returns true, the breaker is placed into the open state.
+C19 98 supported The default ReadyToTrip returns true when the number of consecutive failures is more than 5.
+C20 100 supported OnStateChange is called whenever the state changes.
+C21 102 supported IsSuccessful is called with the error returned from a request; if it returns true, the error is counted as a success, otherwise as a failure.
+C22 105 supported The default IsSuccessful returns false for all non-nil errors.
+C23 147 supported NewCircuitBreaker sets maxRequests to 1 when Settings.MaxRequests is 0, otherwise uses the given value.
+C24 153 supported NewCircuitBreaker sets interval to defaultInterval when Settings.Interval <= 0.
+C25 159 supported NewCircuitBreaker sets timeout to defaultTimeout when Settings.Timeout <= 0.
+C26 165 supported NewCircuitBreaker uses defaultReadyToTrip when Settings.ReadyToTrip is nil.
+C27 171 supported NewCircuitBreaker uses defaultIsSuccessful when Settings.IsSuccessful is nil.
+C28 177 supported NewCircuitBreaker calls toNewGeneration at construction time.
+C29 189 supported defaultInterval is zero seconds and defaultTimeout is 60 seconds.
+C30 190 supported defaultTimeout is 60 seconds.
+C31 193 supported defaultReadyToTrip returns true when ConsecutiveFailures > 5.
+C32 197 supported defaultIsSuccessful returns true only when err is nil.
+C33 211 supported State() acquires the mutex, calls currentState, and returns the resulting state.
+C34 220 supported Counts() acquires the mutex and returns the internal counts.
+C35 224 supported Execute returns an error instantly if the breaker rejects the request.
+C36 226 supported If a panic occurs in the request, Execute handles it as an error and causes the same panic again.
+C37 229 supported Execute calls beforeRequest and returns its error without running the request if error occurs.
+C38 237 supported Execute's deferred recover records the panic as a failure via afterRequest(false) and re-panics.
+C39 243 supported Execute records the request outcome via afterRequest using isSuccessful(err).
+C40 262 supported TwoStepCircuitBreaker.Allow checks whether a request can proceed and returns a callback for reporting success or failure separately.
+C41 266 supported Allow calls beforeRequest and returns its error if not allowed.
+C42 272 supported The callback returned by Allow calls afterRequest with the recorded generation and the boolean success value.
+C43 283 supported beforeRequest acquires the mutex, calls currentState, and rejects with ErrOpenState when the state is open.
+C44 285 supported beforeRequest rejects with ErrTooManyRequests when state is half-open and Requests >= maxRequests.
+C45 289 supported beforeRequest increments Requests via onRequest when the request is accepted.
+C46 299 supported afterRequest ignores the outcome if the current generation differs from the generation captured before the request.
+C47 303 supported afterRequest dispatches to onSuccess or onFailure based on the success flag.
+C48 313 supported In closed state, onSuccess calls counts.onSuccess.
+C49 316 supported In half-open state, onSuccess calls counts.onSuccess and transitions to closed when ConsecutiveSuccesses >= maxRequests.
+C50 326 supported In closed state, onFailure calls counts.onFailure and transitions to open when readyToTrip returns true.
+C51 330 supported In half-open state, onFailure transitions to open.
+C52 337 supported currentState in closed state calls toNewGeneration when expiry is nonzero and has passed.
+C53 341 supported currentState in open state transitions to half-open when expiry has passed.
+C54 345 supported currentState returns the current state and generation.
+C55 349 supported setState returns without change if the target state equals the current state.
+C56 353 supported setState records the previous state, assigns the new state, and calls toNewGeneration.
+C57 358 supported setState calls onStateChange with name, previous state, and new state if the callback is non-nil.
+C58 364 supported toNewGeneration increments the generation and clears counts.
+C59 370 supported In toNewGeneration for closed state, expiry is zero when interval is 0, otherwise now+interval.
+C60 376 supported In toNewGeneration for open state, expiry is now+timeout.
+C61 378 supported In toNewGeneration for half-open state (default), expiry is zero.
+C62 242 unclear Execute acquires a generation via beforeRequest before invoking req, and then calls afterRequest with that generation.
+C63 238 supported On Execute, a panic in req triggers the deferred recover to call afterRequest(false) before re-panicking.
+C64 271 supported On Allow, beforeRequest runs first and the returned callback later calls afterRequest.
+C65 356 supported In setState, generation update and counts clearing via toNewGeneration occur before onStateChange is invoked.
+C66 369 supported In new-generation processing for closed state, the interval is checked before expiry is set or zeroed.
+tests
+C1 116 supported State constants are State(0)=StateClosed, State(1)=StateHalfOpen, State(2)=StateOpen.
+C2 120 supported StateClosed, StateHalfOpen, and StateOpen have string forms "closed", "half-open", and "open" respectively.
+C3 123 supported An unknown state value 100 formats as "unknown state: 100".
+C4 131 unclear A default CircuitBreaker constructed with empty Settings has name "", maxRequests 1, interval 0, timeout 60s, StateClosed state, zero counts, and zero expiry.
+C5 132 unclear A default CircuitBreaker has a non-nil readyToTrip and a nil onStateChange.
+C6 140 unclear A CircuitBreaker built with custom settings reflects name "cb", maxRequests 3, interval 30s, timeout 90s, non-nil readyToTrip and onStateChange, StateClosed, zero counts, and non-zero expiry.
+C7 152 unclear Negative Interval and Timeout settings are normalized to interval 0 and timeout 60s, with a nil onStateChange and zero expiry.
+C8 168 supported With default settings, five failures leave the breaker in StateClosed with counts {5, 0, 5, 0, 5}.
+C9 172 supported A success while in StateClosed updates counts to {6, 1, 5, 1, 0}.
+C10 182 None After a total of 6 consecutive failures the default breaker transitions from StateClosed to StateOpen, with counts reset to zero and a non-zero expiry.
+C11 186 supported While StateOpen, both succeed and fail return errors, and counts remain zero.
+C12 195 supported After pseudoSleeping 59s while StateOpen the breaker remains StateOpen; after 1 more second (over Timeout) it becomes StateHalfOpen with zero expiry.
+C13 199 unclear A failure while StateHalfOpen transitions the breaker to StateOpen with counts reset to zero and non-zero expiry.
+C14 211 unclear A success in StateHalfOpen transitions the default breaker to StateClosed with zero counts and zero expiry.
+C15 239 unclear With custom settings, alternating successes and failures keep the breaker StateClosed until the custom ReadyToTrip (requests >= 3 and failure ratio >= 0.6) trips.
+C16 242 supported A successful state change invokes OnStateChange with the breaker name and from/to states.
+C17 248 supported After pseudoSleeping 90s (Timeout) with custom settings, the breaker goes StateOpen to StateHalfOpen and OnStateChange fires with {Open, HalfOpen}.
+C18 259 supported In StateHalfOpen with maxRequests 3, a third in-flight request is counted before completion, and an additional request over MaxRequests returns an error.
+C19 264 supported After the third consecutive success in StateHalfOpen completes, the breaker transitions to StateClosed with zero counts and fires OnStateChange {HalfOpen, Closed}.
+C20 276 unclear The TwoStepCircuitBreaker mirrors the single-step breaker's counts and state transitions.
+C21 326 supported A panic in the request propagates to the caller and is counted as a failure with counts {1, 0, 1, 0, 1}.
+C22 341 unclear A request from a previous generation does not affect the current generation's counts after Interval elapses.
+C23 355 supported A custom IsSuccessful function can reclassify failures as successes, updating TotalSuccesses and ConsecutiveSuccesses.
+C24 365 supported After replacing isSuccessful with nil-checking, 6 failures under the new rule trip the breaker to StateOpen.
+C25 391 contradicted Concurrent successes across 10 goroutines totaling 100000 requests all return nil and produce counts {total, total, 0, total, 0}.

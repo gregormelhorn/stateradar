@@ -1,0 +1,39 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "ad355380e1cb2d25de87ac8b66e7d12fc25d75d8e6b18bee38f3bbb1e1c35758",
+  "input_tokens": 4561,
+  "cost_microdollars": 192,
+  "reservation_microdollars": 626,
+  "checks": {
+    "V01": {
+      "kind": "claim",
+      "statement": "The custom-breaker scenario asserts defaultCB.expiry instead of customCB.expiry.",
+      "source": "gobreaker_test.go",
+      "line": 247,
+      "fragment": "assert.True(t, defaultCB.expiry.IsZero())",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.95,
+        "contradicted": 0.01,
+        "unclear": 0.04
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "V02": {
+      "kind": "claim",
+      "statement": "The test reads customCB.counts directly between spawning a delayed request and receiving its result.",
+      "source": "gobreaker_test.go",
+      "line": 258,
+      "fragment": "assert.Equal(t, Counts{3, 2, 0, 2, 0}, customCB.counts)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    }
+  }
+}

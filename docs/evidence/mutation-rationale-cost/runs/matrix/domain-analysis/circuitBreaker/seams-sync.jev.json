@@ -1,0 +1,39 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "3dec4264678744c4ce15a05ba0cc88e5e8b155f071b71d74eb7ed229ca72c114",
+  "input_tokens": 1076,
+  "cost_microdollars": 46,
+  "reservation_microdollars": 186,
+  "checks": {
+    "seams-sync-01": {
+      "kind": "claim",
+      "statement": "A goroutine invoking Lock on an already held Mutex blocks until the mutex is available.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+      "line": 43,
+      "fragment": "// If the lock is already in use, the calling goroutine",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "seams-sync-02": {
+      "kind": "claim",
+      "statement": "A Mutex must not be copied after first use.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+      "line": 20,
+      "fragment": "// A Mutex must not be copied after first use.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    }
+  }
+}

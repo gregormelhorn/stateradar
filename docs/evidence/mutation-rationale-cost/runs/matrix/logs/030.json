@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path; import sys; root=Path(sys.argv[1]); [(root/n).write_text(s) for n,s in zip(sys.argv[2::2],sys.argv[3::2])]",
+    "domain-analysis/circuitBreaker",
+    "scope.md",
+    "# Scope\n\nOne constructed CircuitBreaker and its TwoStepCircuitBreaker façade. Model admission, synchronous request execution, caller-held completion callbacks, configuration policies, generation and counter lifetime, lazy time reconciliation and state observation. Actors are the settings provider, request caller, completion reporter, observer, injected request and policy callbacks, and the runtime clock. The protected service owns network, retry, cancellation and teardown; no neighbouring analysis was supplied. The illustrative HTTP client is outside the breaker. Shared-resource probes assume independent breaker instances and callers using the same downstream service. The model projects constructed breaker modes and tracks in-flight work and mutex ownership separately. Questions on zero-value objects and copying mark public-boundary concerns.\n",
+    "as-is.machine.mmd",
+    "stateDiagram-v2\n[*] --> StateClosed: constructor initializes generation\nStateClosed --> StateClosed: expired interval observed / clear counts and advance generation\nStateClosed --> StateOpen: current failure trips policy\nStateOpen --> StateHalfOpen: State or stale completion first observes expiry\nStateOpen --> StateHalfOpen_Saturated: expired admission takes sole slot\nStateHalfOpen --> StateHalfOpen_Saturated: admission takes final slot\nStateHalfOpen --> StateClosed: repeated success on same callback reaches threshold\nStateHalfOpen --> StateOpen: current failure\nStateHalfOpen_Saturated --> StateClosed: current success reaches threshold\nStateHalfOpen_Saturated --> StateOpen: current failure\nnote right of StateHalfOpen_Saturated\nAdmission budget is per generation.\nMissing reports leave the budget consumed.\nend note\n"
+  ],
+  "exit_code": 0
+}

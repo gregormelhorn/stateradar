@@ -1,0 +1,23 @@
+[
+  {
+    "id": "seams-runtime-01",
+    "kind": "claim",
+    "statement": "Goexit terminates the calling goroutine.",
+    "line": 672,
+    "fragment": "// Goexit terminates the goroutine that calls it. No other goroutine is affected."
+  },
+  {
+    "id": "seams-runtime-02",
+    "kind": "claim",
+    "statement": "Goexit runs deferred calls before terminating the goroutine.",
+    "line": 673,
+    "fragment": "// Goexit runs all deferred calls before terminating the goroutine. Because Goexit"
+  },
+  {
+    "id": "seams-runtime-03",
+    "kind": "claim",
+    "statement": "Recover from a defer during Goexit returns nil because Goexit is not a panic.",
+    "line": 674,
+    "fragment": "// is not a panic, any recover calls in those deferred functions will return nil."
+  }
+]

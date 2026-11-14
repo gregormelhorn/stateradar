@@ -1,0 +1,79 @@
+group G-01 admission: proven
+  - Assumptions: mode >= 0, mode <= 2, limit >= 1, limit <= 4294967295, requests >= 0, requests <= 4294967295
+  - {'mode': 0, 'requests': 1, 'limit': 2}: admit
+  - {'mode': 0, 'requests': 2, 'limit': 2}: admit
+  - {'mode': 0, 'requests': 3, 'limit': 2}: admit
+  - {'mode': 1, 'requests': 1, 'limit': 2}: admit
+  - {'mode': 1, 'requests': 2, 'limit': 2}: full
+  - {'mode': 1, 'requests': 3, 'limit': 2}: full
+  - {'mode': 2, 'requests': 1, 'limit': 2}: open
+  - {'mode': 2, 'requests': 2, 'limit': 2}: open
+  - {'mode': 2, 'requests': 3, 'limit': 2}: open
+group G-02 generation: proven
+  - Assumptions: before >= 0, before <= 18446744073709551615, current >= 0, current <= 18446744073709551615
+  - {'before': 1, 'current': 2}: discard
+  - {'before': 2, 'current': 2}: apply
+  - {'before': 3, 'current': 2}: discard
+group G-03 successful half-open completion: proven
+  - Assumptions: successes >= 0, successes <= 4294967295, limit >= 1, limit <= 4294967295
+  - {'successes': 1, 'limit': 2}: stay
+  - {'successes': 2, 'limit': 2}: close
+  - {'successes': 3, 'limit': 2}: close
+  - {'successes': 0, 'limit': 1}: stay
+  - {'successes': 4294967295, 'limit': 4294967295}: close
+group G-04 default trip: proven
+  - Assumptions: failures >= 0, failures <= 4294967295
+  - {'failures': 4}: stay
+  - {'failures': 5}: stay
+  - {'failures': 6}: trip
+group G-07 duration defaults: proven
+  - Assumptions: duration >= -9223372036854775808, duration < 9223372036854775808
+  - {'duration': -1}: default
+  - {'duration': 0}: default
+  - {'duration': 1}: custom
+group G-07 request budget default: proven
+  - Assumptions: limit >= 0, limit <= 4294967295
+  - {'limit': 0}: default
+  - {'limit': 1}: custom
+group G-08 successful: proven
+  - Assumptions: 
+  - {'successful': False}: no
+  - {'successful': True}: yes
+group G-09 callbackPresent: proven
+  - Assumptions: 
+  - {'callbackPresent': False}: no
+  - {'callbackPresent': True}: yes
+group G-11 constructorPolicyPresent: proven
+  - Assumptions: 
+  - {'constructorPolicyPresent': False}: no
+  - {'constructorPolicyPresent': True}: yes
+group G-11 errorNil: proven
+  - Assumptions: 
+  - {'errorNil': False}: no
+  - {'errorNil': True}: yes
+group G-12 intervalZero: proven
+  - Assumptions: 
+  - {'intervalZero': False}: no
+  - {'intervalZero': True}: yes
+group G-09 same-state suppression: proven
+  - Assumptions: mode >= 0, mode <= 2, current >= 0, current <= 2
+  - {'mode': 0, 'current': 0}: no transition
+  - {'mode': 0, 'current': 1}: transition
+  - {'mode': 0, 'current': 2}: transition
+  - {'mode': 1, 'current': 0}: transition
+  - {'mode': 1, 'current': 1}: no transition
+  - {'mode': 1, 'current': 2}: transition
+  - {'mode': 2, 'current': 0}: transition
+  - {'mode': 2, 'current': 1}: transition
+  - {'mode': 2, 'current': 2}: no transition
+group G-10 final available slot: proven
+  - Assumptions: limit >= 1, limit <= 4294967295, requests >= 0, requests <= 4294967295, requests < limit
+  - {'requests': 0, 'limit': 2}: stay
+  - {'requests': 1, 'limit': 2}: saturate
+group G-12 mode dispatch: proven
+  - Assumptions: mode >= 0, mode <= 2
+  - {'mode': 0}: closed
+  - {'mode': 1}: half-open
+  - {'mode': 2}: open
+group G-05 time reconciliation: not-formalizable: clock: real Go time.Time clock samples, zero sentinel, and strict Before. Below or equal expiry stays; above reconciles.
+group G-06 custom trip policy liveness: not-formalizable: external-call: user callback may panic or never return under the mutex.

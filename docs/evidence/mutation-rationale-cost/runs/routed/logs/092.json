@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,sys\nfrom pathlib import Path\np=Path(sys.argv[1]); j=json.loads(p.read_text()); j[-1]['line']=50;j[-1]['fragment']='using the monotonic clock readings alone, ignoring the wall clock';p.write_text(json.dumps(j,indent=2))",
+    "domain-analysis/circuitBreaker/seam-time-checks.json"
+  ],
+  "exit_code": 0
+}

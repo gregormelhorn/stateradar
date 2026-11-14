@@ -1,0 +1,64 @@
+        if not isinstance(citation, dict) or not isinstance(citation.get('file'), str):
+            raise ValueError('citation needs a repository-relative file')
+        name, line, fragment = citation['file'], citation.get('line'), citation.get('fragment')
+        path = (repo / name).resolve()
+        if not re.fullmatch(r'[\w./-]+\.[A-Za-z]{1,4}', name) or Path(name).is_absolute() or not path.is_relative_to(repo):
+            raise ValueError('citation needs a repository-relative file')
+        if name not in sources:
+            try:
+                sources[name] = path.read_text(encoding='utf-8').splitlines()
+            except (OSError, UnicodeError) as error:
+                raise ValueError(f'cannot read citation file {name}') from error
+        citation_error = _citation_error(sources[name], line, fragment)
+        if citation_error:
+            raise ValueError(citation_error)
+        assert isinstance(fragment, str)
+        if '|' in fragment:
+            raise ValueError('citation fragment must have no table bar; choose a shorter verbatim fragment')
+        excerpt = f' {name}:{line} ("{fragment}")'
+        src_index[Path(name).name] = name
+    elif disposition not in HOLES and not decision:
+        raise ValueError('cell needs a citation or decision')
+    head = disposition + (f' → {target}' if target else '')
+    if crash:
+        head += f' crash: {note}'
+    text = head + (f' → {question}' if question else '') + (f' {decision}' if decision else '')
+    text += excerpt + (f' — {note}' if note and not crash else '')
+    parsed = _parse_cell(text, None, states, src_index)
+    keys: dict[str, Any] = {'disposition': disposition}
+    if target:
+        keys['target'] = target
+    if question and (crash or disposition in HOLES):
+        keys['q'] = question
+    if decision:
+        keys['dr'] = decision
+    if citation:
+        keys['citation'] = citation
+    if parsed != keys:
+        raise ValueError('cell does not round-trip through the sidecar parser; inspect note and citation delimiters')
+    return text
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('fields', type=Path)
+    parser.add_argument('output', type=Path)
+    parser.add_argument('--repo', type=Path, default=Path('.'))
+    parser.add_argument('--check', action='store_true', help='verify that output matches structured fields')
+    args = parser.parse_args()
+    try:
+        result = render_matrix(json.loads(args.fields.read_text(encoding='utf-8')), args.repo)
+        if args.check:
+            if args.output.read_text(encoding='utf-8') != result:
+                raise ValueError('matrix differs from the rendered fields')
+        else:
+            args.output.write_text(result, encoding='utf-8')
+        print(f'MATRIX FIELDS: OK ({args.output})')
+    except (OSError, ValueError) as error:
+        print(f'MATRIX FIELDS: FAIL\n{error}', file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

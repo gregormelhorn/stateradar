@@ -1,0 +1,74 @@
+{
+  "baseline": {
+    "exit": 0,
+    "started": {
+      "TestPilotDuplicateDone": 5,
+      "TestPilotAbandonAndLateReport": 5,
+      "TestPilotAdmissionOrdering": 5,
+      "TestPilotExecuteOvertakes": 5,
+      "TestPilotExpiryAndStaleReport": 5,
+      "TestPilotStaleClassifierAndReturn": 5,
+      "TestPilotCallbackReentry": 5,
+      "TestPilotCallbackReentry/notification": 5,
+      "TestPilotCallbackReentry/policy": 5,
+      "TestPilotCallbackPanics": 5,
+      "TestPilotGoexit": 5,
+      "TestPilotSharedRecoveryWaves": 5
+    },
+    "passed": {
+      "TestPilotDuplicateDone": 5,
+      "TestPilotAbandonAndLateReport": 5,
+      "TestPilotAdmissionOrdering": 5,
+      "TestPilotExecuteOvertakes": 5,
+      "TestPilotExpiryAndStaleReport": 5,
+      "TestPilotStaleClassifierAndReturn": 5,
+      "TestPilotCallbackReentry/notification": 5,
+      "TestPilotCallbackReentry/policy": 5,
+      "TestPilotCallbackReentry": 5,
+      "TestPilotCallbackPanics": 5,
+      "TestPilotGoexit": 5,
+      "TestPilotSharedRecoveryWaves": 5
+    },
+    "failed": {}
+  },
+  "generation-guard-disabled": {
+    "exit": 1,
+    "started": {
+      "TestPilotDuplicateDone": 5,
+      "TestPilotAbandonAndLateReport": 5,
+      "TestPilotAdmissionOrdering": 5,
+      "TestPilotExecuteOvertakes": 5,
+      "TestPilotExpiryAndStaleReport": 5,
+      "TestPilotStaleClassifierAndReturn": 5,
+      "TestPilotCallbackReentry": 5,
+      "TestPilotCallbackReentry/notification": 5,
+      "TestPilotCallbackReentry/policy": 5,
+      "TestPilotCallbackPanics": 5,
+      "TestPilotGoexit": 5,
+      "TestPilotSharedRecoveryWaves": 5
+    },
+    "passed": {
+      "TestPilotDuplicateDone": 5,
+      "TestPilotAbandonAndLateReport": 5,
+      "TestPilotAdmissionOrdering": 5,
+      "TestPilotExecuteOvertakes": 5,
+      "TestPilotStaleClassifierAndReturn": 5,
+      "TestPilotCallbackReentry/notification": 5,
+      "TestPilotCallbackReentry/policy": 5,
+      "TestPilotCallbackReentry": 5,
+      "TestPilotCallbackPanics": 5,
+      "TestPilotGoexit": 5,
+      "TestPilotSharedRecoveryWaves": 5
+    },
+    "failed": {
+      "TestPilotExpiryAndStaleReport": 5
+    }
+  },
+  "diagnostic": "KILLED",
+  "mutation": {
+    "source": "gobreaker.go",
+    "old": "if generation != before {",
+    "new": "if false && generation != before {"
+  },
+  "scope": "Post-run diagnostic only; not a predeclared primary control. No pilot artifact was repaired."
+}

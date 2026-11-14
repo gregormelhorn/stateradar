@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "rg",
+    "-n",
+    "// (Lock locks|Before reports|Goexit terminates|A Mutex must not|IsZero reports|Now returns|Add returns|New returns|If Body|Get issues)",
+    "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+    "/opt/homebrew/Cellar/go/1.27.3/libexec/src/time/time.go",
+    "/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go",
+    "/opt/homebrew/Cellar/go/1.27.3/libexec/src/errors/errors.go",
+    "/opt/homebrew/Cellar/go/1.27.3/libexec/src/net/http/client.go"
+  ],
+  "exit_code": 0
+}

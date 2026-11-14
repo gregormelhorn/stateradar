@@ -1,0 +1,37 @@
+[
+  {
+    "id": "S01",
+    "kind": "claim",
+    "statement": "Mutex excludes simultaneous holders.",
+    "line": 17,
+    "fragment": "A Mutex is a mutual exclusion lock."
+  },
+  {
+    "id": "S02",
+    "kind": "claim",
+    "statement": "A Mutex must not be copied after first use.",
+    "line": 20,
+    "fragment": "A Mutex must not be copied after first use."
+  },
+  {
+    "id": "S03",
+    "kind": "claim",
+    "statement": "Earlier Unlock synchronizes before later Lock.",
+    "line": 23,
+    "fragment": "for any n < m."
+  },
+  {
+    "id": "S04",
+    "kind": "claim",
+    "statement": "Lock on an already held mutex blocks until available.",
+    "line": 43,
+    "fragment": "the calling goroutine"
+  },
+  {
+    "id": "S05",
+    "kind": "claim",
+    "statement": "Unlock on a mutex that is unlocked is a runtime error.",
+    "line": 59,
+    "fragment": "It is a run-time error if m is not locked on entry to Unlock."
+  }
+]

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "orderings-01",
+    "kind": "ordering",
+    "statement": "Closed breaker uses the default ReadyToTrip \u2192 policy is presented counts whose consecutive failures are six \u2192 default policy returns true.",
+    "line": 56,
+    "fragment": "Default `ReadyToTrip` returns true when the number of consecutive failures is more than 5."
+  },
+  {
+    "id": "orderings-02",
+    "kind": "ordering",
+    "statement": "Open breaker reaches exactly Timeout with no API activity \u2192 clock reaches equality \u2192 the stored state autonomously becomes half-open and synchronously calls any installed handler.",
+    "line": 50,
+    "fragment": "after which the state of `CircuitBreaker` becomes half-open."
+  },
+  {
+    "id": "orderings-03",
+    "kind": "ordering",
+    "statement": "A request was sent before Counts cleared \u2192 its result arrives after clearing \u2192 Counts ignores that result.",
+    "line": 79,
+    "fragment": "`Counts` ignores the results of the requests sent before clearing."
+  },
+  {
+    "id": "orderings-04",
+    "kind": "ordering",
+    "statement": "Open breaker has an unrelated callback holding its mutex \u2192 another actor calls Execute before expiry \u2192 caller receives a rejection immediately despite contention.",
+    "line": 88,
+    "fragment": "`Execute` returns an error instantly if `CircuitBreaker` rejects the request."
+  }
+]

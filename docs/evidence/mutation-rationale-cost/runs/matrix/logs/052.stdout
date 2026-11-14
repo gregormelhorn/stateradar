@@ -1,0 +1,29 @@
+11:The catalogue's event ids are: Execute Allow StateRead CountsRead NameRead Report RequestReturn Classify TripPolicy Notify ReconcileTime UV-01 UV-02 UV-03 UV-04 UV-05 UV-06 UV-07 UV-08 UV-09 UV-10 UV-11 UV-12 UV-13 UV-14 UV-15 UV-16 UV-17 UV-18 UV-19 — plus the pair orderings P-01a P-01b P-02a P-02b P-03a P-03b P-04a P-04b P-05a P-05b P-06a P-06b P-07a P-07b P-08a P-08b P-09a P-09b P-10a P-10b P-11a P-11b P-12a P-12b P-13a P-13b P-14a P-14b P-15a P-15b P-16a P-16b P-17a P-17b P-18a P-18b P-19a P-19b P-20a P-20b P-21a P-21b P-22a P-22b P-23a P-23b P-24a P-24b P-25a P-25b P-26a P-26b P-27a P-27b P-28a P-28b.
+90:| P-10a | Classify → Notify | Classifier and notification for different admitted calls |
+91:| P-10b | Notify → Classify | Classifier and notification for different admitted calls |
+118:| P-24a | Report → Notify | Competing reports and a transition notification |
+119:| P-24b | Notify → Report | Competing reports and a transition notification |
+120:| P-25a | RequestReturn → Notify | An in-flight request returns during notification |
+121:| P-25b | Notify → RequestReturn | An in-flight request returns during notification |
+122:| P-26a | Classify → TripPolicy | Classification and trip policy for different requests |
+123:| P-26b | TripPolicy → Classify | Classification and trip policy for different requests |
+124:| P-27a | RequestReturn → TripPolicy | In-flight work returns during failure policy |
+125:| P-27b | TripPolicy → RequestReturn | In-flight work returns during failure policy |
+126:| P-28a | Report → TripPolicy | Another report competes with a trip policy |
+127:| P-28b | TripPolicy → Report | Another report competes with a trip policy |
+407:gobreaker.go:23
+410:gobreaker.go:25
+413:gobreaker.go:43-46
+419:gobreaker.go:79-105
+448:gobreaker.go:116
+451:gobreaker.go:133-135
+456:gobreaker.go:140
+459:gobreaker.go:182
+462:gobreaker.go:200
+465:gobreaker.go:205
+468:gobreaker.go:215
+471:gobreaker.go:223-227
+478:gobreaker.go:247
+481:gobreaker.go:252
+484:gobreaker.go:257
+487:gobreaker.go:262-264

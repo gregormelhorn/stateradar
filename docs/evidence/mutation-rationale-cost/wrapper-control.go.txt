@@ -1,0 +1,16 @@
+package gobreaker
+import "testing"
+
+func TestPilotWrapperReassignmentRedirectsReport(t *testing.T) {
+	a := NewTwoStepCircuitBreaker(Settings{Name: "first"})
+	b := NewTwoStepCircuitBreaker(Settings{Name: "second"})
+	done, err := a.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	*a = *b
+	done(true)
+	if got := b.Counts(); got.Requests != 0 || got.TotalSuccesses != 1 {
+		t.Fatalf("reassigned wrapper reported to counts %+v", got)
+	}
+}

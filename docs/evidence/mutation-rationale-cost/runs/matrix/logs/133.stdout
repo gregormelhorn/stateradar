@@ -1,0 +1,10 @@
+Counter({'handle': 43, 'transition': 30, 'UNSPECIFIED': 23, 'reject': 14, 'ignore (documented)': 10})
+probe-01 supported 35 Two true calls on a single half-open completion can leave the breaker Closed.
+probe-02 supported 43 An omitted completion can leave a half-open breaker rejecting a later call with ErrTooManyRequests.
+probe-03 supported 57 Calling a stale report can trigger a HalfOpen notification before another admission.
+probe-04 contradicted 82 The second Execute can complete and count its result while the first remains pending.
+probe-05 supported 116 The probe expects the callback State reentry not to return in its observation window.
+probe-06 unclear 135 A policy panic can lead to two closed failure-accounting attempts for one admission.
+probe-07 supported 146 The notification panic replaces the original request panic in this schedule.
+probe-08 unclear 153 State Open and zeroed counts remain committed when notification panics.
+probe-09 supported 182 The first post-expiry Allow can consume the sole half-open slot.

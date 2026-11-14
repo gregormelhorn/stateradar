@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys\nd=Path(sys.argv[1])\np=d/'_probe/as_is_test.go';s=p.read_text()\nold='done(true)\\n\\tif _, err = cb.Allow(); err != nil {'\nnew='done(true)\\n\\tif got := cb.State(); got != StateClosed {\\n\\t\\tt.Fatalf(\"ordered success left state %v\", got)\\n\\t}\\n\\tif _, err = cb.Allow(); err != nil {'\nassert old in s;p.write_text(s.replace(old,new,1))\np=d/'disposition-matrix.md';s=p.read_text().replace(' per README.md:79','')\np.write_text(s)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

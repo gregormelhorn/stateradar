@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys,re\nd=Path(sys.argv[1])\nr=Path('README.md').read_text().splitlines()\nindices=[(18,19),(25,25),(39,65),(77,81),(87,91)]\n(d/'requirements-prose.md').write_text('\\n\\n'.join('\\n'.join(r[a-1:b]) for a,b in indices)+'\\n')\ng=Path('gobreaker.go').read_text().splitlines()\nsections=[(23,23),(25,25),(43,46),(79,105),(133,135),(140,140),(182,182),(200,200),(205,205),(215,215),(223,227),(247,247),(252,252),(257,257),(262,264)]\n(d/'event-contracts.md').write_text('\\n\\n'.join(f'gobreaker.go:{a}\\n'+'\\n'.join(g[a-1:b]) for a,b in sections)+'\\n')\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

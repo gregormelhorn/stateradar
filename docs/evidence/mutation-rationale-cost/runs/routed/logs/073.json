@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys,re\np=Path(sys.argv[1]); s=p.read_text().replace('**Abstraction:**','Abstraction:');p.write_text(re.sub(r'^\\| (Closed|Open|HalfOpen) \\|',r'| **\\1** |',s,flags=re.M))",
+    "domain-analysis/circuitBreaker/disposition-matrix.md"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,1 @@
+Step 1. Extract tested scenarios, event sequences, guards, outcomes, and test oracles.

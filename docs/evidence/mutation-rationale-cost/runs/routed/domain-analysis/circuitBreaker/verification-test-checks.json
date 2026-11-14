@@ -1,0 +1,16 @@
+[
+  {
+    "id": "V01",
+    "kind": "claim",
+    "line": 247,
+    "statement": "The custom-breaker scenario asserts defaultCB.expiry instead of customCB.expiry.",
+    "fragment": "assert.True(t, defaultCB.expiry.IsZero())"
+  },
+  {
+    "id": "V02",
+    "kind": "claim",
+    "line": 258,
+    "statement": "The test reads customCB.counts directly between spawning a delayed request and receiving its result.",
+    "fragment": "assert.Equal(t, Counts{3, 2, 0, 2, 0}, customCB.counts)"
+  }
+]

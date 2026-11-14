@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys\nd=Path(sys.argv[1])\np=d/'adversarial-traces.md';s=p.read_text()\nold='- cited text contemplates this ordering: yes\\n- jev: unclear, scope 0.02\\n- Verdict: Control verdict void under routing rule 5. Q-21.'\nnew='- cited text contemplates this ordering: no\\n- jev: unclear, scope 0.02\\n- Verdict: Q-21. The submitted assertion places acceptance before supplying the function, while Execute receives the function first. The source describes what Execute does with an accepted call. The original answered check is retained and was not repeated.'\nassert old in s;p.write_text(s.replace(old,new))\np=d/'open-questions.md';s=p.read_text().replace('README line 87 appears to cover the stated control sequence, but Jev returned unclear with scope 0.02, so its control verdict is void under routing rule 5.','The submitted O01 phrased acceptance before the caller supplied the function. README line 87 describes the accepted-call outcome, without that ordering. Jev returned unclear with scope 0.02. The original result is retained and the asserted ordering is not a control.')\np.write_text(s)\np=d/'summary.md';s=p.read_text().replace('Q-21 and Q-22 are routing-added.','Q-21 and Q-22 were retained from routing. O01 also placed acceptance before function supply. The scope review records that wording issue and keeps the answered check.').replace('log 129. Git emitted','logs 129 and 140. Git emitted')\np.write_text(s)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

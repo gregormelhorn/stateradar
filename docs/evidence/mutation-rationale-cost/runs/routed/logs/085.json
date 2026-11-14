@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,sys\nfrom pathlib import Path\nd=Path(sys.argv[1]).resolve()\n(d/'_probe/overlay.json').write_text(json.dumps({\"Replace\":{str(Path('pilot_as_is_test.go').resolve()):str(d/'_probe/as_is_test.go')}},indent=2)+\"\\n\")\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

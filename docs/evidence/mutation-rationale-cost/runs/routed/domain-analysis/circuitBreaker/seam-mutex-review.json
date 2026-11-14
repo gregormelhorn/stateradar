@@ -1,0 +1,84 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "3dec4264678744c4ce15a05ba0cc88e5e8b155f071b71d74eb7ed229ca72c114",
+  "input_tokens": 1495,
+  "cost_microdollars": 63,
+  "reservation_microdollars": 260,
+  "checks": {
+    "S01": {
+      "kind": "claim",
+      "statement": "Mutex excludes simultaneous holders.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+      "line": 17,
+      "fragment": "A Mutex is a mutual exclusion lock.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.92,
+        "contradicted": 0.0,
+        "unclear": 0.08
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "S02": {
+      "kind": "claim",
+      "statement": "A Mutex must not be copied after first use.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+      "line": 20,
+      "fragment": "A Mutex must not be copied after first use.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "S03": {
+      "kind": "claim",
+      "statement": "Earlier Unlock synchronizes before later Lock.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+      "line": 23,
+      "fragment": "for any n < m.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "S04": {
+      "kind": "claim",
+      "statement": "Lock on an already held mutex blocks until available.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+      "line": 43,
+      "fragment": "the calling goroutine",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.59,
+        "contradicted": 0.0,
+        "unclear": 0.41
+      },
+      "confidence": 0.38,
+      "review_required": true
+    },
+    "S05": {
+      "kind": "claim",
+      "statement": "Unlock on a mutex that is unlocked is a runtime error.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go",
+      "line": 59,
+      "fragment": "It is a run-time error if m is not locked on entry to Unlock.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    }
+  }
+}

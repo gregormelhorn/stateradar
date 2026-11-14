@@ -1,0 +1,1 @@
+Step 1. Extract public and internal events, reachable states, guards, transitions, synchronization, timers, effects, failure modes, and seam contracts.

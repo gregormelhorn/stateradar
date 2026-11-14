@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "python3",
+    "../pack/tools/local_models.py",
+    "--ledger",
+    "../routing.sqlite",
+    "jev-batch",
+    "gobreaker.go",
+    "domain-analysis/circuitBreaker/verification-code-checks.json",
+    "--model",
+    "jev-1.14.0",
+    "--output",
+    "domain-analysis/circuitBreaker/verification-code-review.json",
+    "--summary"
+  ],
+  "exit_code": 0
+}

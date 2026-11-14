@@ -1,0 +1,132 @@
+     1	gobreaker
+     2	=========
+     3	
+     4	[![GoDoc](https://godoc.org/github.com/sony/gobreaker?status.svg)](https://godoc.org/github.com/sony/gobreaker)
+     5	
+     6	[gobreaker][repo-url] implements the [Circuit Breaker pattern](https://msdn.microsoft.com/en-us/library/dn589784.aspx) in Go.
+     7	
+     8	Installation
+     9	------------
+    10	
+    11	```
+    12	go get github.com/sony/gobreaker
+    13	```
+    14	
+    15	Usage
+    16	-----
+    17	
+    18	The struct `CircuitBreaker` is a state machine to prevent sending requests that are likely to fail.
+    19	The function `NewCircuitBreaker` creates a new `CircuitBreaker`.
+    20	
+    21	```go
+    22	func NewCircuitBreaker(st Settings) *CircuitBreaker
+    23	```
+    24	
+    25	You can configure `CircuitBreaker` by the struct `Settings`:
+    26	
+    27	```go
+    28	type Settings struct {
+    29		Name          string
+    30		MaxRequests   uint32
+    31		Interval      time.Duration
+    32		Timeout       time.Duration
+    33		ReadyToTrip   func(counts Counts) bool
+    34		OnStateChange func(name string, from State, to State)
+    35		IsSuccessful  func(err error) bool
+    36	}
+    37	```
+    38	
+    39	- `Name` is the name of the `CircuitBreaker`.
+    40	
+    41	- `MaxRequests` is the maximum number of requests allowed to pass through
+    42	  when the `CircuitBreaker` is half-open.
+    43	  If `MaxRequests` is 0, `CircuitBreaker` allows only 1 request.
+    44	
+    45	- `Interval` is the cyclic period of the closed state
+    46	  for `CircuitBreaker` to clear the internal `Counts`, described later in this section.
+    47	  If `Interval` is 0, `CircuitBreaker` doesn't clear the internal `Counts` during the closed state.
+    48	
+    49	- `Timeout` is the period of the open state,
+    50	  after which the state of `CircuitBreaker` becomes half-open.
+    51	  If `Timeout` is 0, the timeout value of `CircuitBreaker` is set to 60 seconds.
+    52	
+    53	- `ReadyToTrip` is called with a copy of `Counts` whenever a request fails in the closed state.
+    54	  If `ReadyToTrip` returns true, `CircuitBreaker` will be placed into the open state.
+    55	  If `ReadyToTrip` is `nil`, default `ReadyToTrip` is used.
+    56	  Default `ReadyToTrip` returns true when the number of consecutive failures is more than 5.
+    57	
+    58	- `OnStateChange` is called whenever the state of `CircuitBreaker` changes.
+    59	
+    60	- `IsSuccessful` is called with the error returned from a request.
+    61	  If `IsSuccessful` returns true, the error is counted as a success.
+    62	  Otherwise the error is counted as a failure.
+    63	  If `IsSuccessful` is nil, default `IsSuccessful` is used, which returns false for all non-nil errors.
+    64	
+    65	The struct `Counts` holds the numbers of requests and their successes/failures:
+    66	
+    67	```go
+    68	type Counts struct {
+    69		Requests             uint32
+    70		TotalSuccesses       uint32
+    71		TotalFailures        uint32
+    72		ConsecutiveSuccesses uint32
+    73		ConsecutiveFailures  uint32
+    74	}
+    75	```
+    76	
+    77	`CircuitBreaker` clears the internal `Counts` either
+    78	on the change of the state or at the closed-state intervals.
+    79	`Counts` ignores the results of the requests sent before clearing.
+    80	
+    81	`CircuitBreaker` can wrap any function to send a request:
+    82	
+    83	```go
+    84	func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{}, error)
+    85	```
+    86	
+    87	The method `Execute` runs the given request if `CircuitBreaker` accepts it.
+    88	`Execute` returns an error instantly if `CircuitBreaker` rejects the request.
+    89	Otherwise, `Execute` returns the result of the request.
+    90	If a panic occurs in the request, `CircuitBreaker` handles it as an error
+    91	and causes the same panic again.
+    92	
+    93	Example
+    94	-------
+    95	
+    96	```go
+    97	var cb *breaker.CircuitBreaker
+    98	
+    99	func Get(url string) ([]byte, error) {
+   100		body, err := cb.Execute(func() (interface{}, error) {
+   101			resp, err := http.Get(url)
+   102			if err != nil {
+   103				return nil, err
+   104			}
+   105	
+   106			defer resp.Body.Close()
+   107			body, err := ioutil.ReadAll(resp.Body)
+   108			if err != nil {
+   109				return nil, err
+   110			}
+   111	
+   112			return body, nil
+   113		})
+   114		if err != nil {
+   115			return nil, err
+   116		}
+   117	
+   118		return body.([]byte), nil
+   119	}
+   120	```
+   121	
+   122	See [example](https://github.com/sony/gobreaker/blob/master/example) for details.
+   123	
+   124	License
+   125	-------
+   126	
+   127	The MIT License (MIT)
+   128	
+   129	See [LICENSE](https://github.com/sony/gobreaker/blob/master/LICENSE) for details.
+   130	
+   131	
+   132	[repo-url]: https://github.com/sony/gobreaker

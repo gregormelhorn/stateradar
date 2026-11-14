@@ -1,0 +1,59 @@
+requirements dict_keys(['source', 'source_sha256', 'draft', 'verification', 'claims', 'questions', 'review_required'])
+1 What happens in the half-open state when a request succeeds or fails — what are the transitions and guards?
+2 How are requests counted toward MaxRequests in the half-open state, and is a request that is still in flight counted?
+3 If Interval is non-zero, what exactly is the 'cyclic period' start point (from creation, from entering closed state, or from last clear)?
+4 What happens if ReadyToTrip is non-nil but returns false — is it called on every closed-state failure with no other effect?
+5 Does the default ReadyToTrip count consecutive failures including the current failing request?
+6 What error does Execute return when it rejects a request — is it specified?
+7 Are the Counts incremented before or after IsSuccessful is consulted, and does a panic count as a failure in Counts?
+8 Does Execute count requests whose panics were re-raised toward TotalFailures/ConsecutiveFailures?
+9 When state changes, is OnStateChange called before or after Counts is cleared?
+10 What states exist exactly (closed, open, half-open) and what are the allowed transitions? Source implies but does not enumerate them.
+11 In half-open state, after MaxRequests successes, does the state become closed? Source does not specify.
+12 In half-open state, does a single failure cause transition to open? Source does not specify.
+13 What happens if Interval is set and the state is not closed — are Counts cleared periodically then too?
+14 Is the default ReadyToTrip threshold 'more than 5' meaning 6 or more consecutive failures?
+15 If IsSuccessful is non-nil, does it also apply to panics that are re-raised?
+16 If ReadyToTrip is nil and IsSuccessful is nil, does default ReadyToTrip operate on default success classification?
+17 Does Execute return the nil error and result from a request that panic'd, or re-raise the panic and lose the result?
+18 Are requests executed concurrently and does Counts update atomically?
+19 What is the behavior of NewCircuitBreaker when given a Settings with ReadyToTrip referencing Counts — specifically does it copy Settings or store the reference?
+Claim structure: {'kind': 'claim', 'statement': 'CircuitBreaker is a state machine that prevents sending requests likely to fail.', 'line': 18, 'fragment': 'The struct `CircuitBreaker` is a state machine to prevent sending requests that are likely to fail.', 'citation_check': 'ok', 'jev': {'choice': 'supported', 'probabilities': {'supported': 1.0, 'contradicted': 0.0, 'unclear': 0.0}, 'confidence': 1.0}}
+source dict_keys(['source', 'source_sha256', 'draft', 'verification', 'claims', 'questions', 'review_required'])
+1 Line 89 says if Interval <= 0 the breaker doesn't clear Counts during closed state, but line 154 sets interval to defaultInterval (0) when Interval <= 0; combined with line 370, interval==0 yields a zero expiry. Is the documentation consistent with the behavior, and what happens with a positive Interval exactly at expiry boundary?
+2 Line 337 checks expiry.Before(now) while line 341 also checks expiry.Before(now); the behavior at expiry == now is unspecified (expiry is considered not expired). Is that intended?
+3 Line 316 transitions half-open to closed when ConsecutiveSuccesses >= maxRequests. What if maxRequests is larger than the number of requests that will ever be attempted in half-open? It is unspecified whether TotalSuccesses vs ConsecutiveSuccesses is intended, and whether requests exactly at maxRequests in half-open are counted properly.
+4 Line 285 rejects requests in half-open when Requests >= maxRequests; however, Requests includes requests counted since the transition to half-open via toNewGeneration. What if some in-flight requests started in the prior generation and complete in the half-open generation? The generation check at line 299 discards their outcome, so it is ambiguous whether their success/failure affects the half-open counters.
+5 Line 226 says Execute handles a panic as an error and causes the same panic again; line 237 passes false to afterRequest, which counts it as a failure. What if a panic occurs before req is called or during deferred recover? Also, is a panic in a half-open request always resulting in transition to open?
+6 Line 262 says Allow returns a callback that should be used to register success or failure; the behavior is unspecified if the callback is never called or called multiple times, or called after the generation changed.
+7 Line 358 invokes onStateChange while holding cb.mutex. Is it specified that the callback must not call back into the breaker (which would deadlock)? This is unspecified in the source.
+8 Line 100 says OnStateChange is called whenever the state changes; is it unspecified whether the callback is invoked for transitions triggered by currentState during a read-only State() call (which can trigger toNewGeneration or setState)?
+9 Line 44 says counts are cleared on state change or at closed-state intervals; is it specified whether clearing at the interval boundary also invokes OnStateChange (no, since toNewGeneration does not call it)? It is ambiguous whether interval-based clearing is considered a state change.
+10 defaultReadyToTrip at line 193 uses ConsecutiveFailures > 5, but documented as 'more than 5'; line 98 says the same. Is it intended to trip on the 6th consecutive failure, not the 5th? That is documented but the boundary is worth confirming.
+11 Line 95 says ReadyToTrip is called whenever a request fails in closed state; but afterRequest at line 299 returns early if generations differ, so ReadyToTrip is not called for stale outcomes. Is it specified whether stale failures should still be considered?
+12 Line 59 onSuccess and line 65 onFailure update consecutive counters; but the source does not specify what happens when a request is over the half-open maxRequests and gets rejected by beforeRequest (line 285) — rejected requests are not counted as requests or failures. Is that intended?
+13 Line 43-46 mentions Counts ignores results before clearing; combined with generation checks at line 299, the mechanism is generation-based. The source does not specify whether the generation is comparable across state changes (e.g., closed -> open -> closed increments generation each time). Behavior of stale results across multiple state changes is unspecified.
+14 Line 190 defines defaultTimeout as 60s, and line 93 says Timeout <= 0 uses 60s; but line 159 sets cb.timeout = defaultTimeout. Is there any case where timeout is 0 and expiry is computed as now+0, making the open state immediately half-open? (Only if set directly, which is not exposed.)
+15 Line 130 field expiry is time.Time; line 371 sets zero for interval==0 closed. In State() at line 211, calling currentState can mutate via toNewGeneration for closed interval expiry or setState for open. Is it specified whether State() is read-only or can transition? The source shows state transitions in currentState, but this side effect during a getter is unspecified in contract terms.
+16 Line 228 Execute returns nil, err when beforeRequest rejects (line 231); but the request function is not invoked. Is it specified what the return value is for the result in that case? It returns nil, err.
+17 Line 143-145 only assign name and onStateChange; maxRequests, interval, timeout, readyToTrip, isSuccessful are assigned conditionally. Is it guaranteed that all fields are initialized before toNewGeneration at line 177? Yes per lines 147-175, but not explicitly stated as an ordering requirement.
+18 Line 26 ErrOpenState is returned when open; line 24 ErrTooManyRequests when half-open over maxRequests. The source does not specify which error takes priority if both conditions could occur (they cannot simultaneously, but state evaluation order in beforeRequest is unspecified beyond line 283 then line 285).
+19 Line 348 setState returns early when cb.state == state; but toNewGeneration is not called, so consecutive successes in closed state with a changed generation from interval clearing are not affected. Is the early return's interaction with generation increments specified?
+20 Line 46 says Counts ignores results before clearing; the mechanism is generation. But if a stale result arrives after a new generation has started and the state is half-open, onSuccess may increment ConsecutiveSuccesses incorrectly? Line 299 prevents it via generation mismatch. However, generation is only incremented on toNewGeneration (line 364); if counts are cleared without incrementing generation somewhere, stale results could be counted. Is the only clearing path always incrementing generation? (clear at line 71 is called from toNewGeneration line 365, which increments first.) Yes, but this invariant is implicit and not stated.
+Claim structure: {'kind': 'claim', 'statement': 'The CircuitBreaker has three states: closed, half-open, and open.', 'line': 16, 'fragment': 'const (', 'citation_check': 'ok', 'jev': {'choice': 'supported', 'probabilities': {'supported': 0.71, 'contradicted': 0.0, 'unclear': 0.29}, 'confidence': 0.56}}
+C2 {'kind': 'claim', 'statement': 'ErrTooManyRequests is returned when the breaker is half open and the request count is over maxRequests.', 'line': 23, 'fragment': 'if the CB state is half open and the requests count is over the cb maxRequests', 'citation_check': 'citation fragment missing near line 23', 'jev': None}
+tests dict_keys(['source', 'source_sha256', 'draft', 'verification', 'claims', 'questions', 'review_required'])
+1 What are the exact field semantics of Counts (order and meaning of the five fields) — the tests assert tuples but the source does not define them.
+2 What ReadyToTrip default criterion causes tripping after 6 consecutive failures — the source only asserts the outcome, not the rule.
+3 What is the behavior of Allow/done when called in each state, beyond the succeed2Step/fail2Step helpers?
+4 How are counts handled for the request that trips the breaker (reset timing) versus the tripping request itself?
+5 Is Execute's panic-recovery behavior specified — does it re-panic after counting the failure, and is there any recovery if done is not called?
+6 What is the interaction between Interval-based count clearing and a request that began before the interval boundary (generation semantics) in general, not just the tested case?
+7 What happens for a TwoStepCircuitBreaker when Allow is called in StateOpen/StateHalfOpen at/over MaxRequests — is it the same error as single-step Execute?
+8 Is OnStateChange invoked synchronously and exactly once per transition; is it invoked before or after counts are reset?
+9 What is the behavior when IsSuccessful is nil or when it panics?
+10 Are negative MaxRequests values normalized, and how does MaxRequests apply in StateClosed versus StateHalfOpen?
+11 Is expiry set/reset at transition into StateClosed and StateHalfOpen precisely (tests assert IsZero in some places and non-zero in others), and what does expiry represent in StateClosed?
+12 What is the expected behavior when State() is called concurrently or when two goroutines observe a timeout boundary simultaneously?
+Claim structure: {'kind': 'claim', 'statement': 'State constants are State(0)=StateClosed, State(1)=StateHalfOpen, State(2)=StateOpen.', 'line': 116, 'fragment': 'assert.Equal(t, State(0), StateClosed)', 'citation_check': 'ok', 'jev': {'choice': 'supported', 'probabilities': {'supported': 0.77, 'contradicted': 0.0, 'unclear': 0.23}, 'confidence': 0.66}}
+C10 {'kind': 'ordering', 'statement': 'After a total of 6 consecutive failures the default breaker transitions from StateClosed to StateOpen, with counts reset to zero and a non-zero expiry.', 'line': 182, 'fragment': '// StateClosed to StateOpen', 'citation_check': 'citation fragment missing near line 182', 'jev': None}

@@ -1,0 +1,52 @@
+==================
+WARNING: DATA RACE
+Read at 0x00c00015a208 by goroutine 10:
+  runtime.convTnoptr()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/iface.go:366 +0x0
+  github.com/sony/gobreaker.TestCustomCircuitBreaker()
+      /private/tmp/stateradar-mutation-cost-matrix/selective/pool/gobreaker_test.go:258 +0xb14
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+
+Previous write at 0x00c00015a208 by goroutine 11:
+  github.com/sony/gobreaker.(*Counts).onRequest()
+      /private/tmp/stateradar-mutation-cost-matrix/selective/pool/gobreaker.go:56 +0x100
+  github.com/sony/gobreaker.(*CircuitBreaker).beforeRequest()
+      /private/tmp/stateradar-mutation-cost-matrix/selective/pool/gobreaker.go:289 +0xe8
+  github.com/sony/gobreaker.(*CircuitBreaker).Execute()
+      /private/tmp/stateradar-mutation-cost-matrix/selective/pool/gobreaker.go:229 +0x38
+  github.com/sony/gobreaker.succeedLater.func1()
+      /private/tmp/stateradar-mutation-cost-matrix/selective/pool/gobreaker_test.go:37 +0x68
+
+Goroutine 10 (running) created at:
+  testing.(*T).Run()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x7bc
+  testing.runTests.func1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2744 +0x74
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.runTests()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2742 +0x7a0
+  testing.(*M).Run()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2602 +0xb38
+  main.main()
+      _testmain.go:76 +0x100
+
+Goroutine 11 (running) created at:
+  github.com/sony/gobreaker.succeedLater()
+      /private/tmp/stateradar-mutation-cost-matrix/selective/pool/gobreaker_test.go:36 +0xe4
+  github.com/sony/gobreaker.TestCustomCircuitBreaker()
+      /private/tmp/stateradar-mutation-cost-matrix/selective/pool/gobreaker_test.go:256 +0xadc
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+==================
+--- FAIL: TestCustomCircuitBreaker (0.10s)
+    testing.go:1867: race detected during execution of test
+FAIL
+FAIL	github.com/sony/gobreaker	2.313s
+?   	github.com/sony/gobreaker/example	[no test files]
+FAIL

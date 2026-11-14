@@ -1,0 +1,1458 @@
+{
+  "abstraction": "Constructed breaker modes. StateHalfOpenSaturated means admitted count at budget with no further admissions until an outcome causes transition. Stored Open may be due for lazy reconciliation. Outstanding work and synchronization are orthogonal. Admission and completion columns show the post-reconciliation decision; ReconcileTime carries the refresh transition.",
+  "states": [
+    "StateClosed",
+    "StateOpen",
+    "StateHalfOpen",
+    "StateHalfOpenSaturated"
+  ],
+  "events": [
+    "Execute",
+    "Allow",
+    "StateRead",
+    "CountsRead",
+    "NameRead",
+    "Report",
+    "RequestReturn",
+    "Classify",
+    "TripPolicy",
+    "Notify",
+    "ReconcileTime",
+    "UV-01",
+    "UV-02",
+    "UV-03",
+    "UV-04",
+    "UV-05",
+    "UV-06",
+    "UV-07",
+    "UV-08",
+    "UV-09",
+    "UV-10",
+    "UV-11",
+    "UV-12",
+    "UV-13",
+    "UV-14",
+    "UV-15",
+    "UV-16",
+    "UV-17",
+    "UV-18",
+    "UV-19"
+  ],
+  "guard_notes": [
+    "G-01 proven: admission mode and requests versus max, gobreaker.go:283-290. At equality reject in half-open; one below admits final slot.",
+    "G-02 proven: generation equal applies and unequal discards, gobreaker.go:298-306. This proof begins after time reconciliation.",
+    "G-03 proven: half-open successes after increment versus maximum, gobreaker.go:315-318. At maximum close. Both half-open cells model failure as their representative target; success-close edges are modeled and traced separately.",
+    "G-04 proven: default trip threshold, gobreaker.go:193. Five stays and six trips.",
+    "G-05 not-formalizable: clock: time.Time.Before samples runtime time; before deadline or equality stays and strictly later refreshes, gobreaker.go:337-342.",
+    "G-06 not-formalizable: external-call: policy callback may panic or stall before returning either Boolean value, gobreaker.go:326-327.",
+    "G-07 proven: constructor zero and sign defaults, gobreaker.go:147-175.",
+    "G-08 proven: success Boolean dispatch, gobreaker.go:303-306.",
+    "G-09 proven: callback presence and duplicate-state fast path, gobreaker.go:349-359.",
+    "G-10 proven: post-admission saturation guard for positive budget, gobreaker.go:285-290.",
+    "G-11 proven: constructor callback presence and default classifier nil-error check, gobreaker.go:165-175 and gobreaker.go:197.",
+    "G-12 proven: state dispatch and zero closed interval expiry sentinel, gobreaker.go:310-345 and gobreaker.go:367-378.",
+    "G-13 proven: request budget default at zero, gobreaker.go:147-151.",
+    "G-14 proven: same-state suppression, gobreaker.go:349-350.",
+    "G-15 proven: mode dispatch, gobreaker.go:310-345.",
+    "G-16 proven: default error-nil decision, gobreaker.go:197."
+  ],
+  "cells": [
+    {
+      "state": "StateClosed",
+      "event": "Execute",
+      "disposition": "handle",
+      "note": "Reconcile expired interval and count admission. Execute invokes request outside lock; Allow returns a report function.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "Allow",
+      "disposition": "handle",
+      "note": "Reconcile expired interval and count admission. Execute invokes request outside lock; Allow returns a report function.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "StateRead",
+      "disposition": "handle",
+      "note": "Expired interval reconciles on State, admission or completion. No read or a pure snapshot leaves stored counts as is.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 338,
+        "fragment": "cb.toNewGeneration(now)"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "CountsRead",
+      "disposition": "handle",
+      "note": "Return stored snapshot without checking time.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 220,
+        "fragment": "return cb.counts"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "NameRead",
+      "disposition": "handle",
+      "note": "Return configured name.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 202,
+        "fragment": "return cb.name"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "Report",
+      "disposition": "transition",
+      "note": "Current failure and true trip policy open the breaker. Success and false policy stay; stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 327,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateClosed",
+      "event": "RequestReturn",
+      "disposition": "transition",
+      "note": "Current failure and true trip policy open the breaker. Success and false policy stay; stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 327,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateClosed",
+      "event": "Classify",
+      "disposition": "transition",
+      "note": "Current failure and true trip policy open the breaker. Success and false policy stay; stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 327,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateClosed",
+      "event": "TripPolicy",
+      "disposition": "transition",
+      "note": "A true result for current failure opens, false stays.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 327,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateClosed",
+      "event": "Notify",
+      "disposition": "handle",
+      "note": "During entry from another mode, callback observes supplied transition arguments. Callback runs under the lock after generation reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "ReconcileTime",
+      "disposition": "handle",
+      "note": "Expired interval reconciles on State, admission or completion. No read or a pure snapshot leaves stored counts as is.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 338,
+        "fragment": "cb.toNewGeneration(now)"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-01",
+      "disposition": "UNSPECIFIED",
+      "note": "An omitted call provides no signal; active work and registration have no teardown entry point.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 229,
+        "fragment": "generation, err := cb.beforeRequest()"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-02",
+      "disposition": "handle",
+      "note": "Reconcile expired interval and count admission. Execute invokes request outside lock; Allow returns a report function.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-03",
+      "disposition": "handle",
+      "note": "Reconcile expired interval and count admission. Execute invokes request outside lock; Allow returns a report function.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-04",
+      "disposition": "handle",
+      "note": "Reconcile expired interval and count admission. Execute invokes request outside lock; Allow returns a report function.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-05",
+      "disposition": "handle",
+      "note": "Reconcile expired interval and count admission. Execute invokes request outside lock; Allow returns a report function.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-06",
+      "disposition": "handle",
+      "note": "Reconcile expired interval and count admission. Execute invokes request outside lock; Allow returns a report function.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-07",
+      "disposition": "handle",
+      "note": "On admission nil request panics. An unexpired or saturated admission rejects first. Wrong live receiver is used as selected; see Q-08.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 242,
+        "fragment": "result, err := req()"
+      },
+      "q": "Q-08",
+      "crash": true
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-08",
+      "disposition": "handle",
+      "note": "Expired interval reconciles on State, admission or completion. No read or a pure snapshot leaves stored counts as is.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 338,
+        "fragment": "cb.toNewGeneration(now)"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-09",
+      "disposition": "UNSPECIFIED",
+      "note": "No completion is synthesized. An unmatched admission remains counted until generation reset; saturated half-open has no timer.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "return func(success bool) {"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-10",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after lazily reconciling time; caller result or policy still runs outside that guard.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-11",
+      "disposition": "transition",
+      "note": "Current failure and true trip policy open the breaker. Success and false policy stay; stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 327,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-12",
+      "disposition": "transition",
+      "note": "Current failure and true trip policy open the breaker. Success and false policy stay; stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 327,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-13",
+      "disposition": "UNSPECIFIED",
+      "note": "Manual report requires possession of returned closure; no independent policy delivery seam. Nil callback invocation is a caller panic.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "return func(success bool) {"
+      },
+      "q": "Q-13"
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-14",
+      "disposition": "transition",
+      "note": "Current failure and true trip policy open the breaker. Success and false policy stay; stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 327,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-15",
+      "disposition": "UNSPECIFIED",
+      "note": "Work may stall while other callers run. No deadline, interruption or synthetic reporting at this seam.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 242,
+        "fragment": "result, err := req()"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-16",
+      "disposition": "handle",
+      "note": "Execute accounts a recoverable request or classifier panic as failure, then rethrows if accounting returns. Stalled calls have no timeout.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 238,
+        "fragment": "panic(e)"
+      },
+      "q": "Q-10",
+      "crash": true
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-17",
+      "disposition": "handle",
+      "note": "A custom locking callback can panic or stall. Trip policy uses the same locked pattern on closed failure; synchronous reentry blocks.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      },
+      "q": "Q-09",
+      "crash": true
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-18",
+      "disposition": "UNSPECIFIED",
+      "note": "Notification side effect has no explicit acknowledgment or compensation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      },
+      "q": "Q-12"
+    },
+    {
+      "state": "StateClosed",
+      "event": "UV-19",
+      "disposition": "handle",
+      "note": "Expired interval reconciles on State, admission or completion. No read or a pure snapshot leaves stored counts as is.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 338,
+        "fragment": "cb.toNewGeneration(now)"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "Execute",
+      "disposition": "reject",
+      "note": "While unexpired. Once expired reconcile before evaluating the refreshed half-open admission budget.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 284,
+        "fragment": "return generation, ErrOpenState"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "Allow",
+      "disposition": "reject",
+      "note": "While unexpired. Once expired reconcile before evaluating the refreshed half-open admission budget.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 284,
+        "fragment": "return generation, ErrOpenState"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "StateRead",
+      "disposition": "transition",
+      "note": "First expiry-check after strict deadline enters half-open. Unexpired check stays. Counts and Name samples leave stored state as is.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 342,
+        "fragment": "cb.setState(StateHalfOpen, now)"
+      },
+      "target": "StateHalfOpen"
+    },
+    {
+      "state": "StateOpen",
+      "event": "CountsRead",
+      "disposition": "handle",
+      "note": "Return stored snapshot without checking time.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 220,
+        "fragment": "return cb.counts"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "NameRead",
+      "disposition": "handle",
+      "note": "Return configured name.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 202,
+        "fragment": "return cb.name"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "Report",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after reconciliation, which can itself enter half-open. No current report originated in open.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "RequestReturn",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after reconciliation, which can itself enter half-open. No current report originated in open.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "Classify",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after reconciliation, which can itself enter half-open. No current report originated in open.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "TripPolicy",
+      "disposition": "UNSPECIFIED",
+      "note": "There is no public injection seam for an independent trip-policy result in this mode. An earlier policy is serialized by the mutex.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 326,
+        "fragment": "if cb.readyToTrip(cb.counts) {"
+      },
+      "q": "Q-13"
+    },
+    {
+      "state": "StateOpen",
+      "event": "Notify",
+      "disposition": "handle",
+      "note": "During entry from another mode, callback observes supplied transition arguments. Callback runs under the lock after generation reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "ReconcileTime",
+      "disposition": "transition",
+      "note": "First expiry-check after strict deadline enters half-open. Unexpired check stays. Counts and Name samples leave stored state as is.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 342,
+        "fragment": "cb.setState(StateHalfOpen, now)"
+      },
+      "target": "StateHalfOpen"
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-01",
+      "disposition": "UNSPECIFIED",
+      "note": "An omitted call provides no signal; active work and registration have no teardown entry point.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 229,
+        "fragment": "generation, err := cb.beforeRequest()"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-02",
+      "disposition": "reject",
+      "note": "While unexpired. Once expired reconcile before evaluating the refreshed half-open admission budget.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 284,
+        "fragment": "return generation, ErrOpenState"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-03",
+      "disposition": "reject",
+      "note": "While unexpired. Once expired reconcile before evaluating the refreshed half-open admission budget.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 284,
+        "fragment": "return generation, ErrOpenState"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-04",
+      "disposition": "reject",
+      "note": "While unexpired. Once expired reconcile before evaluating the refreshed half-open admission budget.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 284,
+        "fragment": "return generation, ErrOpenState"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-05",
+      "disposition": "reject",
+      "note": "While unexpired. Once expired reconcile before evaluating the refreshed half-open admission budget.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 284,
+        "fragment": "return generation, ErrOpenState"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-06",
+      "disposition": "reject",
+      "note": "While unexpired. Once expired reconcile before evaluating the refreshed half-open admission budget.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 284,
+        "fragment": "return generation, ErrOpenState"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-07",
+      "disposition": "handle",
+      "note": "On admission nil request panics. An unexpired or saturated admission rejects first. Wrong live receiver is used as selected; see Q-08.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 242,
+        "fragment": "result, err := req()"
+      },
+      "q": "Q-08",
+      "crash": true
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-08",
+      "disposition": "transition",
+      "note": "First expiry-check after strict deadline enters half-open. Unexpired check stays. Counts and Name samples leave stored state as is.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 342,
+        "fragment": "cb.setState(StateHalfOpen, now)"
+      },
+      "target": "StateHalfOpen"
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-09",
+      "disposition": "UNSPECIFIED",
+      "note": "No completion is synthesized. An unmatched admission remains counted until generation reset; saturated half-open has no timer.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "return func(success bool) {"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-10",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after lazily reconciling time; caller result or policy still runs outside that guard.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-11",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after reconciliation, which can itself enter half-open. No current report originated in open.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-12",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after reconciliation, which can itself enter half-open. No current report originated in open.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-13",
+      "disposition": "UNSPECIFIED",
+      "note": "Manual report requires possession of returned closure; no independent policy delivery seam. Nil callback invocation is a caller panic.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "return func(success bool) {"
+      },
+      "q": "Q-13"
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-14",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after reconciliation, which can itself enter half-open. No current report originated in open.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-15",
+      "disposition": "UNSPECIFIED",
+      "note": "Work may stall while other callers run. No deadline, interruption or synthetic reporting at this seam.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 242,
+        "fragment": "result, err := req()"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-16",
+      "disposition": "handle",
+      "note": "Execute accounts a recoverable request or classifier panic as failure, then rethrows if accounting returns. Stalled calls have no timeout.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 238,
+        "fragment": "panic(e)"
+      },
+      "q": "Q-10",
+      "crash": true
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-17",
+      "disposition": "handle",
+      "note": "A custom locking callback can panic or stall. Trip policy uses the same locked pattern on closed failure; synchronous reentry blocks.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      },
+      "q": "Q-09",
+      "crash": true
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-18",
+      "disposition": "UNSPECIFIED",
+      "note": "Notification side effect has no explicit acknowledgment or compensation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      },
+      "q": "Q-12"
+    },
+    {
+      "state": "StateOpen",
+      "event": "UV-19",
+      "disposition": "transition",
+      "note": "First expiry-check after strict deadline enters half-open. Unexpired check stays. Counts and Name samples leave stored state as is.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 342,
+        "fragment": "cb.setState(StateHalfOpen, now)"
+      },
+      "target": "StateHalfOpen"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "Execute",
+      "disposition": "transition",
+      "note": "On final slot, admit and saturate. Below the final slot, admit and stay. No caller identity is checked.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      },
+      "target": "StateHalfOpenSaturated"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "Allow",
+      "disposition": "transition",
+      "note": "On final slot, admit and saturate. Below the final slot, admit and stay. No caller identity is checked.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      },
+      "target": "StateHalfOpenSaturated"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "StateRead",
+      "disposition": "handle",
+      "note": "No half-open expiry or periodic reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 345,
+        "fragment": "return cb.state, cb.generation"
+      }
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "CountsRead",
+      "disposition": "handle",
+      "note": "Return stored snapshot without checking time.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 220,
+        "fragment": "return cb.counts"
+      }
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "NameRead",
+      "disposition": "handle",
+      "note": "Return configured name.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 202,
+        "fragment": "return cb.name"
+      }
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "Report",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "RequestReturn",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "Classify",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "TripPolicy",
+      "disposition": "UNSPECIFIED",
+      "note": "There is no public injection seam for an independent trip-policy result in this mode. An earlier policy is serialized by the mutex.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 326,
+        "fragment": "if cb.readyToTrip(cb.counts) {"
+      },
+      "q": "Q-13"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "Notify",
+      "disposition": "handle",
+      "note": "During entry from another mode, callback observes supplied transition arguments. Callback runs under the lock after generation reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      }
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "ReconcileTime",
+      "disposition": "handle",
+      "note": "No half-open expiry or periodic reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 345,
+        "fragment": "return cb.state, cb.generation"
+      }
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-01",
+      "disposition": "UNSPECIFIED",
+      "note": "An omitted call provides no signal; active work and registration have no teardown entry point.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 229,
+        "fragment": "generation, err := cb.beforeRequest()"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-02",
+      "disposition": "transition",
+      "note": "On final slot, admit and saturate. Below the final slot, admit and stay. No caller identity is checked.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      },
+      "target": "StateHalfOpenSaturated"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-03",
+      "disposition": "transition",
+      "note": "On final slot, admit and saturate. Below the final slot, admit and stay. No caller identity is checked.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      },
+      "target": "StateHalfOpenSaturated"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-04",
+      "disposition": "transition",
+      "note": "On final slot, admit and saturate. Below the final slot, admit and stay. No caller identity is checked.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      },
+      "target": "StateHalfOpenSaturated"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-05",
+      "disposition": "transition",
+      "note": "On final slot, admit and saturate. Below the final slot, admit and stay. No caller identity is checked.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      },
+      "target": "StateHalfOpenSaturated"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-06",
+      "disposition": "transition",
+      "note": "On final slot, admit and saturate. Below the final slot, admit and stay. No caller identity is checked.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 289,
+        "fragment": "cb.counts.onRequest()"
+      },
+      "target": "StateHalfOpenSaturated"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-07",
+      "disposition": "handle",
+      "note": "On admission nil request panics. An unexpired or saturated admission rejects first. Wrong live receiver is used as selected; see Q-08.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 242,
+        "fragment": "result, err := req()"
+      },
+      "q": "Q-08",
+      "crash": true
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-08",
+      "disposition": "handle",
+      "note": "No half-open expiry or periodic reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 345,
+        "fragment": "return cb.state, cb.generation"
+      }
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-09",
+      "disposition": "UNSPECIFIED",
+      "note": "No completion is synthesized. An unmatched admission remains counted until generation reset; saturated half-open has no timer.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "return func(success bool) {"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-10",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after lazily reconciling time; caller result or policy still runs outside that guard.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-11",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-12",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-13",
+      "disposition": "UNSPECIFIED",
+      "note": "Manual report requires possession of returned closure; no independent policy delivery seam. Nil callback invocation is a caller panic.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "return func(success bool) {"
+      },
+      "q": "Q-13"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-14",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-15",
+      "disposition": "UNSPECIFIED",
+      "note": "Work may stall while other callers run. No deadline, interruption or synthetic reporting at this seam.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 242,
+        "fragment": "result, err := req()"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-16",
+      "disposition": "handle",
+      "note": "Execute accounts a recoverable request or classifier panic as failure, then rethrows if accounting returns. Stalled calls have no timeout.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 238,
+        "fragment": "panic(e)"
+      },
+      "q": "Q-10",
+      "crash": true
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-17",
+      "disposition": "handle",
+      "note": "A custom locking callback can panic or stall. Trip policy uses the same locked pattern on closed failure; synchronous reentry blocks.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      },
+      "q": "Q-09",
+      "crash": true
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-18",
+      "disposition": "UNSPECIFIED",
+      "note": "Notification side effect has no explicit acknowledgment or compensation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      },
+      "q": "Q-12"
+    },
+    {
+      "state": "StateHalfOpen",
+      "event": "UV-19",
+      "disposition": "handle",
+      "note": "No half-open expiry or periodic reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 345,
+        "fragment": "return cb.state, cb.generation"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "Execute",
+      "disposition": "reject",
+      "note": "Budget includes completed as well as pending admissions in this generation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 286,
+        "fragment": "return generation, ErrTooManyRequests"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "Allow",
+      "disposition": "reject",
+      "note": "Budget includes completed as well as pending admissions in this generation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 286,
+        "fragment": "return generation, ErrTooManyRequests"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "StateRead",
+      "disposition": "handle",
+      "note": "No half-open expiry or periodic reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 345,
+        "fragment": "return cb.state, cb.generation"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "CountsRead",
+      "disposition": "handle",
+      "note": "Return stored snapshot without checking time.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 220,
+        "fragment": "return cb.counts"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "NameRead",
+      "disposition": "handle",
+      "note": "Return configured name.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 202,
+        "fragment": "return cb.name"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "Report",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "RequestReturn",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "Classify",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "TripPolicy",
+      "disposition": "UNSPECIFIED",
+      "note": "There is no public injection seam for an independent trip-policy result in this mode. An earlier policy is serialized by the mutex.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 326,
+        "fragment": "if cb.readyToTrip(cb.counts) {"
+      },
+      "q": "Q-13"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "Notify",
+      "disposition": "handle",
+      "note": "During entry from another mode, callback observes supplied transition arguments. Callback runs under the lock after generation reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "ReconcileTime",
+      "disposition": "handle",
+      "note": "No half-open expiry or periodic reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 345,
+        "fragment": "return cb.state, cb.generation"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-01",
+      "disposition": "UNSPECIFIED",
+      "note": "An omitted call provides no signal; active work and registration have no teardown entry point.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 229,
+        "fragment": "generation, err := cb.beforeRequest()"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-02",
+      "disposition": "reject",
+      "note": "Budget includes completed as well as pending admissions in this generation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 286,
+        "fragment": "return generation, ErrTooManyRequests"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-03",
+      "disposition": "reject",
+      "note": "Budget includes completed as well as pending admissions in this generation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 286,
+        "fragment": "return generation, ErrTooManyRequests"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-04",
+      "disposition": "reject",
+      "note": "Budget includes completed as well as pending admissions in this generation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 286,
+        "fragment": "return generation, ErrTooManyRequests"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-05",
+      "disposition": "reject",
+      "note": "Budget includes completed as well as pending admissions in this generation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 286,
+        "fragment": "return generation, ErrTooManyRequests"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-06",
+      "disposition": "reject",
+      "note": "Budget includes completed as well as pending admissions in this generation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 286,
+        "fragment": "return generation, ErrTooManyRequests"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-07",
+      "disposition": "handle",
+      "note": "On admission nil request panics. An unexpired or saturated admission rejects first. Wrong live receiver is used as selected; see Q-08.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 242,
+        "fragment": "result, err := req()"
+      },
+      "q": "Q-08",
+      "crash": true
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-08",
+      "disposition": "handle",
+      "note": "No half-open expiry or periodic reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 345,
+        "fragment": "return cb.state, cb.generation"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-09",
+      "disposition": "UNSPECIFIED",
+      "note": "No completion is synthesized. An unmatched admission remains counted until generation reset; saturated half-open has no timer.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "return func(success bool) {"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-10",
+      "disposition": "ignore (documented)",
+      "note": "Discard stale accounting after lazily reconciling time; caller result or policy still runs outside that guard.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "if generation != before {"
+      }
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-11",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-12",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-13",
+      "disposition": "UNSPECIFIED",
+      "note": "Manual report requires possession of returned closure; no independent policy delivery seam. Nil callback invocation is a caller panic.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 271,
+        "fragment": "return func(success bool) {"
+      },
+      "q": "Q-13"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-14",
+      "disposition": "transition",
+      "note": "Current failure opens. Current success closes when consecutive successes reach limit, otherwise stays. Stale accounting is discarded.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 330,
+        "fragment": "cb.setState(StateOpen, now)"
+      },
+      "target": "StateOpen"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-15",
+      "disposition": "UNSPECIFIED",
+      "note": "Work may stall while other callers run. No deadline, interruption or synthetic reporting at this seam.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 242,
+        "fragment": "result, err := req()"
+      },
+      "q": "Q-06"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-16",
+      "disposition": "handle",
+      "note": "Execute accounts a recoverable request or classifier panic as failure, then rethrows if accounting returns. Stalled calls have no timeout.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 238,
+        "fragment": "panic(e)"
+      },
+      "q": "Q-10",
+      "crash": true
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-17",
+      "disposition": "handle",
+      "note": "A custom locking callback can panic or stall. Trip policy uses the same locked pattern on closed failure; synchronous reentry blocks.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      },
+      "q": "Q-09",
+      "crash": true
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-18",
+      "disposition": "UNSPECIFIED",
+      "note": "Notification side effect has no explicit acknowledgment or compensation.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      },
+      "q": "Q-12"
+    },
+    {
+      "state": "StateHalfOpenSaturated",
+      "event": "UV-19",
+      "disposition": "handle",
+      "note": "No half-open expiry or periodic reset.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 345,
+        "fragment": "return cb.state, cb.generation"
+      }
+    }
+  ]
+}

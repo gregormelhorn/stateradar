@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,sys\nfrom pathlib import Path\nd=Path(sys.argv[1]); p=d/'contracts.md'; s=p.read_text(); lines=Path('gobreaker.go').read_text().splitlines()\nfor n in (23,25):\n s=s.replace(f'gobreaker.go:{n}\\n\\n',f'gobreaker.go:{n}\\n'+lines[n-1].strip()[3:]+'\\n',1)\np.write_text(s)\np=d/'catalogue-fields.json'; j=json.loads(p.read_text())\nnext(x for x in j['pairs'] if x['id']=='P-10').update(first='Classify',second='Notify',entity='Classifier and notification for different admitted calls')\nfor i, first, second, why in [(24,'Report','Notify','Competing reports and a transition notification'),(25,'RequestReturn','Notify','An in-flight request returns during notification'),(26,'Classify','TripPolicy','Classification and trip policy for different requests'),(27,'RequestReturn','TripPolicy','In-flight work returns during failure policy'),(28,'Report','TripPolicy','Another report competes with a trip policy')]:\n j['pairs'].append(dict(id=f'P-{i:02}',first=first,second=second,entity=why))\nfor e in j['events']:\n if e['id']=='Allow': e['upstream_guards']=['The HTTP example uses Execute only. Wrapper callers must check Allow error before invoking the returned function, per the Allow contract.']\n if e['id']=='UV-19': e['classification']='internal'\np.write_text(json.dumps(j,indent=2)+'\\n')",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

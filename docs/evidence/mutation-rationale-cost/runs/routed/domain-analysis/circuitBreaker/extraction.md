@@ -1,0 +1,132 @@
+# Extraction
+
+## Scope
+
+One constructed CircuitBreaker, projected through Execute or its separately constructed TwoStepCircuitBreaker wrapper. Its mutex, counts, generation, time-based admission and synchronous callbacks are inside the boundary. Actors are request callers, outcome reporters, state/count/name readers, the Go runtime clock and synchronization contracts, and the injected work, classification, trip and notification functions. The example's HTTP, response body ownership, caller cancellation and process shutdown live outside the breaker. No neighboring modeled component appears in this checkout. The HTTP seam's owning code is example/http_breaker.go:27-39 and is not a breaker transition.
+
+## State and context inventory
+
+- Observed-in-code gobreaker.go:16 ("const ("), gobreaker.go:142 ("cb := new(CircuitBreaker)"), gobreaker.go:177 ("cb.toNewGeneration(time.Now())"), gobreaker.go:364 ("cb.generation++") and gobreaker.go:365 ("cb.counts.clear()"). Constructed instance starts Closed with generation one and empty Counts. Zero-value APIs differ because constructor settings are absent, Q-08.
+- Observed-in-code gobreaker.go:153 ("if st.Interval <= 0 {"), gobreaker.go:337 ("if !cb.expiry.IsZero() && cb.expiry.Before(now) {"), gobreaker.go:370 ("if cb.interval == 0 {"), gobreaker.go:371 ("cb.expiry = zero") and gobreaker.go:373 ("cb.expiry = now.Add(cb.interval)"). Closed has either disabled expiry (zero sentinel) or a positive deadline. A clock advance can put the deadline in the past while the stored state and counts stay unchanged. On the next qualifying observation it starts one new generation from the sample, even if multiple periods elapsed. The Closed failure can trip only if the matching completion reaches the policy.
+- Observed-in-code gobreaker.go:284 ("return generation, ErrOpenState"), gobreaker.go:341 ("if cb.expiry.Before(now) {"), gobreaker.go:342 ("cb.setState(StateHalfOpen, now)") and gobreaker.go:376 ("cb.expiry = now.Add(cb.timeout)"). Open has zeroed counts and an expiry viable before/at its instant, or elapsed. Only a qualifying observation promotes it. Old outstanding work and capabilities can coexist even while Open. No admission reaches Open accounting for the current generation.
+- Observed-in-code gobreaker.go:285 ("} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"), gobreaker.go:289 ("cb.counts.onRequest()"), gobreaker.go:315 ("cb.counts.onSuccess()"), gobreaker.go:316 ("if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"), gobreaker.go:317 ("cb.setState(StateClosed, now)"), gobreaker.go:330 ("cb.setState(StateOpen, now)") and gobreaker.go:378 ("cb.expiry = zero"). HalfOpen has zero expiry and a budget from empty through below-limit to saturated. Under exactly-once and no-wrap assumptions, admitted but unresolved trials can coexist with successes below threshold. Failure moves immediately to Open. A duplicate can make success count exceed distinct admissions or reach the threshold prematurely. Saturation persists without input.
+- Observed-in-code gobreaker.go:128 ("generation uint64"), gobreaker.go:229 ("generation, err := cb.beforeRequest()"), gobreaker.go:242 ("result, err := req()"), gobreaker.go:243 ("cb.afterRequest(generation, cb.isSuccessful(err))"), gobreaker.go:271 ("return func(success bool) {"), gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)"), gobreaker.go:299 ("if generation != before {") and gobreaker.go:364 ("cb.generation++"). Any mode can coexist with stale pending work and retained callbacks. Each accepted invocation stores an epoch in its caller/closure, and no work queue or caller ID exists. Per-call phases are attempt, refusal or admission, workload and classification for Execute or callback ownership for Allow, accounting or generation skip, and return or abnormal exit. These are caller lifecycles orthogonal to the three breaker modes.
+- Observed-in-code gobreaker.go:56 ("c.Requests++"), gobreaker.go:60 ("c.TotalSuccesses++"), gobreaker.go:62 ("c.ConsecutiveFailures = 0"), gobreaker.go:66 ("c.TotalFailures++"), gobreaker.go:68 ("c.ConsecutiveSuccesses = 0"), gobreaker.go:289 ("cb.counts.onRequest()") and gobreaker.go:365 ("cb.counts.clear()"). Requests counts admissions in the generation, not outstanding calls. Counters increase and clear at the cited writes; successful work does not release a slot. Terminal half-open failure enters Open without updating TotalFailures first. Consecutive order is report commit order. Counter and generation widths bound remembered values; overflow and retained reference cost remain Q-12 and Q-16.
+
+## Event, guard and effects inventory
+
+- Construction normalizes zero limit, nonpositive duration and nil policies. Each call allocates an independent instance. Observed-in-code gobreaker.go:142 ("cb := new(CircuitBreaker)"), gobreaker.go:145 ("cb.onStateChange = st.OnStateChange"), gobreaker.go:147 ("if st.MaxRequests == 0 {"), gobreaker.go:148 ("cb.maxRequests = 1"), gobreaker.go:153 ("if st.Interval <= 0 {"), gobreaker.go:159 ("if st.Timeout <= 0 {"), gobreaker.go:165 ("if st.ReadyToTrip == nil {"), gobreaker.go:171 ("if st.IsSuccessful == nil {"), gobreaker.go:177 ("cb.toNewGeneration(time.Now())"), gobreaker.go:189 ("const defaultInterval = time.Duration(0) * time.Second"), gobreaker.go:190 ("const defaultTimeout = time.Duration(60) * time.Second"). The public Settings contract is broader for nonpositive durations than the README's zero examples, Q-17.
+- State and all admission/completion visits sample time under the mutex. Counts only reads, and Name returns immutable configuration. Observed-in-code gobreaker.go:202 ("return cb.name"), gobreaker.go:207 ("cb.mutex.Lock()"), gobreaker.go:210 ("now := time.Now()"), gobreaker.go:211 ("state, _ := cb.currentState(now)"), gobreaker.go:217 ("cb.mutex.Lock()"), gobreaker.go:220 ("return cb.counts"), gobreaker.go:277 ("cb.mutex.Lock()"), gobreaker.go:280 ("now := time.Now()"), gobreaker.go:294 ("cb.mutex.Lock()"), gobreaker.go:297 ("now := time.Now()"), gobreaker.go:298 ("state, generation := cb.currentState(now)"). No autonomous timer, request deadline, retry, cancellation, finish or shutdown mechanism is scheduled here. The user can abandon work, but must still decide how completion propagates, Q-04, Q-05, Q-09 and Q-16.
+- Admission checks state after expiry and before incrementing Requests. Open refuses, HalfOpen equality refuses, and a later call can get ahead after lock release. Observed-in-code gobreaker.go:278 ("defer cb.mutex.Unlock()"), gobreaker.go:281 ("state, generation := cb.currentState(now)"), gobreaker.go:284 ("return generation, ErrOpenState"), gobreaker.go:285 ("} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"), gobreaker.go:286 ("return generation, ErrTooManyRequests"), gobreaker.go:289 ("cb.counts.onRequest()"), gobreaker.go:290 ("return generation, nil"). The `ErrTooManyRequests` docstring says over; the code uses greater than or equal. Q-10.
+- Work returns raw result/error, then the classifier translates the error for accounting. Panics from the normal Execute path reach its defer; callback failures can interrupt or retry accounting. Allow returns a callable bound to captured epoch, and an erroneous refusal call can try to invoke nil in caller code. Observed-in-code gobreaker.go:229 ("generation, err := cb.beforeRequest()"), gobreaker.go:231 ("return nil, err"), gobreaker.go:234 ("defer func() {"), gobreaker.go:235 ("e := recover()"), gobreaker.go:237 ("cb.afterRequest(generation, false)"), gobreaker.go:238 ("panic(e)"), gobreaker.go:242 ("result, err := req()"), gobreaker.go:243 ("cb.afterRequest(generation, cb.isSuccessful(err))"), gobreaker.go:244 ("return result, err"), gobreaker.go:268 ("return nil, err"), gobreaker.go:271 ("return func(success bool) {"), gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)"). Q-03, Q-07, Q-08, Q-13, Q-18 and Q-20.
+- Current mode and generation are sampled again before outcome accounting. Valid closed failures increment and go through policy; valid closed successes increment; valid HalfOpen failure opens directly or successes close at threshold. Observed-in-code gobreaker.go:298 ("state, generation := cb.currentState(now)"), gobreaker.go:299 ("if generation != before {"), gobreaker.go:303 ("if success {"), gobreaker.go:304 ("cb.onSuccess(state, now)"), gobreaker.go:306 ("cb.onFailure(state, now)"), gobreaker.go:313 ("cb.counts.onSuccess()"), gobreaker.go:315 ("cb.counts.onSuccess()"), gobreaker.go:316 ("if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"), gobreaker.go:317 ("cb.setState(StateClosed, now)"), gobreaker.go:325 ("cb.counts.onFailure()"), gobreaker.go:326 ("if cb.readyToTrip(cb.counts) {"), gobreaker.go:327 ("cb.setState(StateOpen, now)"), gobreaker.go:330 ("cb.setState(StateOpen, now)"). Callback-free, no-wrap operation suppresses old counts. Existing tests confirm interval clear followed by late completion at gobreaker_test.go:340-342. Boundary side effects remain Q-09.
+- All state transitions commit the mode and generation, then run configured observer under the same lock. No callbacks for no-op setState or Closed interval reset. ReadyToTrip executes under completion lock after failure increment; classifier and work execute outside. Observed-in-code gobreaker.go:242 ("result, err := req()"), gobreaker.go:243 ("cb.afterRequest(generation, cb.isSuccessful(err))"), gobreaker.go:294 ("cb.mutex.Lock()"), gobreaker.go:295 ("defer cb.mutex.Unlock()"), gobreaker.go:325 ("cb.counts.onFailure()"), gobreaker.go:326 ("if cb.readyToTrip(cb.counts) {"), gobreaker.go:338 ("cb.toNewGeneration(now)"), gobreaker.go:349 ("if cb.state == state {"), gobreaker.go:354 ("cb.state = state"), gobreaker.go:356 ("cb.toNewGeneration(now)"), gobreaker.go:358 ("if cb.onStateChange != nil {"), gobreaker.go:359 ("cb.onStateChange(cb.name, prev, state)"). Q-01, Q-02, Q-06, Q-07 and Q-19.
+
+## Doctrine lines
+
+- DOC-1 — explicit-requirement README.md:6 ("[gobreaker][repo-url] implements the [Circuit Breaker pattern](https://msdn.microsoft.com/en-us/library/dn589784.aspx) in Go.")
+- DOC-2 — explicit-requirement README.md:18 ("The struct `CircuitBreaker` is a state machine to prevent sending requests that are likely to fail.")
+- DOC-3 — explicit-requirement README.md:19 ("The function `NewCircuitBreaker` creates a new `CircuitBreaker`.")
+- DOC-4 — explicit-requirement README.md:25 ("You can configure `CircuitBreaker` by the struct `Settings`:")
+- DOC-5 — explicit-requirement README.md:39 ("`Name` is the name of the `CircuitBreaker`.")
+- DOC-6 — explicit-requirement README.md:41-42 ("`MaxRequests` is the maximum number of requests allowed to pass through when the `CircuitBreaker` is half-open.")
+- DOC-7 — explicit-requirement README.md:43 (" If `MaxRequests` is 0, `CircuitBreaker` allows only 1 request.")
+- DOC-8 — explicit-requirement README.md:45-46 ("`Interval` is the cyclic period of the closed state for `CircuitBreaker` to clear the internal `Counts`, described later in this section.")
+- DOC-9 — explicit-requirement README.md:47 (" If `Interval` is 0, `CircuitBreaker` doesn't clear the internal `Counts` during the closed state.")
+- DOC-10 — explicit-requirement README.md:49-50 ("`Timeout` is the period of the open state, after which the state of `CircuitBreaker` becomes half-open.")
+- DOC-11 — explicit-requirement README.md:51 (" If `Timeout` is 0, the timeout value of `CircuitBreaker` is set to 60 seconds.")
+- DOC-12 — explicit-requirement README.md:53 ("`ReadyToTrip` is called with a copy of `Counts` whenever a request fails in the closed state.")
+- DOC-13 — explicit-requirement README.md:54 (" If `ReadyToTrip` returns true, `CircuitBreaker` will be placed into the open state.")
+- DOC-14 — explicit-requirement README.md:55 (" If `ReadyToTrip` is `nil`, default `ReadyToTrip` is used.")
+- DOC-15 — explicit-requirement README.md:56 (" Default `ReadyToTrip` returns true when the number of consecutive failures is more than 5.")
+- DOC-16 — explicit-requirement README.md:58 ("`OnStateChange` is called whenever the state of `CircuitBreaker` changes.")
+- DOC-17 — explicit-requirement README.md:60 ("`IsSuccessful` is called with the error returned from a request.")
+- DOC-18 — explicit-requirement README.md:61 (" If `IsSuccessful` returns true, the error is counted as a success.")
+- DOC-19 — explicit-requirement README.md:62 (" Otherwise the error is counted as a failure.")
+- DOC-20 — explicit-requirement README.md:63 (" If `IsSuccessful` is nil, default `IsSuccessful` is used, which returns false for all non-nil errors.")
+- DOC-21 — explicit-requirement README.md:65 ("The struct `Counts` holds the numbers of requests and their successes/failures:")
+- DOC-22 — explicit-requirement README.md:77-78 ("`CircuitBreaker` clears the internal `Counts` either on the change of the state or at the closed-state intervals.")
+- DOC-23 — explicit-requirement README.md:79 ("`Counts` ignores the results of the requests sent before clearing.")
+- DOC-24 — explicit-requirement README.md:81 ("`CircuitBreaker` can wrap any function to send a request:")
+- DOC-25 — explicit-requirement README.md:87 ("The method `Execute` runs the given request if `CircuitBreaker` accepts it.")
+- DOC-26 — explicit-requirement README.md:88 ("`Execute` returns an error instantly if `CircuitBreaker` rejects the request.")
+- DOC-27 — explicit-requirement README.md:89 ("Otherwise, `Execute` returns the result of the request.")
+- DOC-28 — explicit-requirement README.md:90-91 ("If a panic occurs in the request, `CircuitBreaker` handles it as an error and causes the same panic again.")
+
+## Seam contracts
+
+Native paths below are the original Go 1.27.3 contract files, read in the pilot. Full fragments and Jev output live in the corresponding seam checks/review files.
+
+| Check | Guarantee | Source | Jev and review |
+|---|---|---|---|
+| go S01 | ReadyToTrip receives a copy of the counters on a closed-state request failure. | gobreaker.go:95 | supported, reviewed against the contract and adjoining comment lines |
+| go S02 | A true ReadyToTrip decision means the breaker enters Open. | gobreaker.go:96 | supported, reviewed against the contract and adjoining comment lines |
+| go S03 | The registered OnStateChange callback runs for breaker state changes. | gobreaker.go:100 | supported, reviewed against the contract and adjoining comment lines |
+| go S04 | IsSuccessful takes the error returned by the request. | gobreaker.go:102 | supported, reviewed against the contract and adjoining comment lines |
+| go S05 | A true IsSuccessful classification means success accounting. | gobreaker.go:103 | supported, reviewed against the contract and adjoining comment lines |
+| go S06 | A false IsSuccessful classification means failure accounting. | gobreaker.go:104 | supported, reviewed against the contract and adjoining comment lines |
+| go S07 | An admitted Allow supplies a callback for the caller to register the outcome. | gobreaker.go:263 | supported, reviewed against the contract and adjoining comment lines |
+| mutex S01 | Mutex excludes simultaneous holders. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go:17 | supported, reviewed against the contract and adjoining comment lines |
+| mutex S02 | A Mutex must not be copied after first use. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go:20 | supported, reviewed against the contract and adjoining comment lines |
+| mutex S03 | Earlier Unlock synchronizes before later Lock. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go:23 | supported, reviewed against the contract and adjoining comment lines |
+| mutex S04 | Lock on an already held mutex blocks until available. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go:43 | supported, reviewed against the contract and adjoining comment lines |
+| mutex S05 | Unlock on a mutex that is unlocked is a runtime error. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/sync/mutex.go:59 | supported, reviewed against the contract and adjoining comment lines |
+| time S01 | Now returns the current local time. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/time/time.go:1346 | supported, reviewed against the contract and adjoining comment lines |
+| time S02 | IsZero is true for the zero time instant. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/time/time.go:260 | supported, reviewed against the contract and adjoining comment lines |
+| time S03 | Before uses strict earlier-instant comparison. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/time/time.go:280 | supported, reviewed against the contract and adjoining comment lines |
+| time S04 | Time.Add adds the duration to the time. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/time/time.go:1169 | supported, reviewed against the contract and adjoining comment lines |
+| time S05 | When both times contain monotonic readings Before uses those readings only. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/time/time.go:50 | supported, reviewed against the contract and adjoining comment lines |
+| builtin S01 | Panic stops ordinary execution and runs deferred functions. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/builtin/builtin.go:273 | supported, reviewed against the contract and adjoining comment lines |
+| builtin S02 | Direct recover inside a deferred function stops the panicking sequence and retrieves the panic value. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/builtin/builtin.go:291 | supported, reviewed against the contract and adjoining comment lines |
+| builtin S03 | Without a panic recover returns nil. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/builtin/builtin.go:296 | supported, reviewed against the contract and adjoining comment lines |
+| runtime S01 | Goexit terminates the caller goroutine. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go:672 | supported, reviewed against the contract and adjoining comment lines |
+| runtime S02 | Goexit executes deferred calls. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go:673 | supported, reviewed against the contract and adjoining comment lines |
+| runtime S03 | Deferred recover during Goexit returns nil because this is not a panic. | /opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go:674 | supported, reviewed against the contract and adjoining comment lines |
+
+- NAT candidates. Go mutex operations serialize per breaker; copying a used mutex violates its contract. The availability of the lock has no bounded guarantee. Callbacks provided in Settings have no source-defined return deadline, panic guarantee or reentry policy. The workload `func() (interface{}, error)` only defines the returned types, and Execute's comment separately defines ordinary panics. Allow's comment imposes an expectation that callers report; it gives neither exactly-once nor abandonment semantics. Go's deferred recover and Goexit contracts distinguish the failure accounting paths. Callback gaps remain Q-01, Q-02, Q-03, Q-04, Q-06, Q-07, Q-13 and Q-20.
+- The observer callback has no return value. Failure semantics must be derived from the callback and caller unwind, using gobreaker.go:295 ("defer cb.mutex.Unlock()"), gobreaker.go:354 ("cb.state = state"), gobreaker.go:356 ("cb.toNewGeneration(now)") and gobreaker.go:359 ("cb.onStateChange(cb.name, prev, state)"). A normal receiver callback cannot be independently delivered by the breaker without a transition. External invocations of the injected function do not feed back as a breaker input unless the callback explicitly calls a public method.
+- Example caller binds a specific breaker and passes the HTTP error at example/http_breaker.go:27 ("body, err := cb.Execute(func() (interface{}, error) {") and example/http_breaker.go:30 ("return nil, err"). The component does not directly control transport or response-body cleanup.
+
+## Routed draft review
+
+All 89 draft claims passed the citation window. None required citation repair to enter these artifacts. Drafts seed the extraction. The code draft's C2 summary of the error comment is narrower than the implemented equality check, so the comment and actual guard are cited separately. The extraction adds expiry observation and commit order, reentry, post-commit callback faults and panic replacement, lifetime/retained callback effects, count width, misplaced test assertion's consequence, and cross-file contract differences. Source and test replays above define scope for every retained claim.
+
+- README C2 is supported by README.md:19 and README.md:22 together. The first calls it a constructor; its signature supplies Settings. The single quoted line omits that argument.
+- Code C5/C6 use the full blocks at gobreaker.go:59-68. The individual citation lines only show one increment each. C24 uses gobreaker.go:229-243; the request invocation alone does not support the entire sequence.
+- Test C3 and C4 use the full constructor assertion groups at gobreaker_test.go:126-158. C7 uses the loop plus the counts/expiry assertions at gobreaker_test.go:178-184. C9 combines gobreaker_test.go:190-196; the pseudoSleep assertion proves an observed crossing, not exact equality. C11 uses gobreaker_test.go:204-213. C17 uses the full wrapper replay at gobreaker_test.go:267-321. These multi-part groups support the described observations, with conclusions kept within the tested scenarios.
+- The Flash result files preserve every statement, citation and model answer. The draft questions below retain code-level answers and the open intent behind them.
+
+| Draft question | Disposition |
+|---|---|
+| readme #1 | answered: gobreaker.go:16-19, 303-342. Intent of the HalfOpen exits folds into Q-10. |
+| readme #2 | answered: gobreaker.go:315-330. Intended threshold and recovery fold into Q-10. |
+| readme #3 | answered: gobreaker.go:280-290. Contention and duration wording fold into Q-06 and Q-10. |
+| readme #4 | answered: gobreaker.go:285-286. Equality and interpretation fold into Q-10. |
+| readme #5 | answered: gobreaker.go:354-359. Hook order and reentry contract fold into Q-01. |
+| readme #6 | answered: gobreaker.go:234-243. Request panic bypasses classifier; fault semantics fold into Q-07 and Q-20. |
+| readme #7 | answered: gobreaker.go:231, 284 and 286. Refusal timing folds into Q-06. |
+| readme #8 | answered: gobreaker.go:165-175. The two defaults are independent. |
+| readme #9 | answered: gobreaker.go:193. Six is the smallest count satisfying the default predicate. |
+| readme #10 | answered: gobreaker.go:55-76 and 325-330. Duplicate and wrap semantics fold into Q-03 and Q-12. |
+| readme #11 | answered: gobreaker.go:16-19. |
+| readme #12 | answered: gobreaker.go:211, 220, 280, 297 and 337-338. Idle intent folds into Q-05. |
+| code #1 | answered: gobreaker.go:16-17, 142, 177 and 364-375. First generation is Closed. |
+| code #2 | answered: gobreaker.go:153-156, 189 and 370-373. Design intent and README alignment fold into Q-17. |
+| code #3 | answered: gobreaker.go:193. Strict threshold greater than five. |
+| code #4 | answered: gobreaker.go:234-243. Fault policy folds into Q-07 and runtime edge cases into Q-20. |
+| code #5 | Folds into Q-03 for repeated calls and Q-09 for stale reports; these are separate effects of generation matching. |
+| code #6 | Folds into Q-01, Q-02, Q-07 and Q-13. Lock discipline, panic/callback effects and concurrent classification need distinct decisions. |
+| code #7 | answered: gobreaker.go:211 and 341-342. Whether mutation belongs on a read folds into Q-05 and Q-19. |
+| code #8 | answered: gobreaker.go:207, 277, 294 and 359. Reentrancy intent folds into Q-01. |
+| code #9 | Folds into Q-04. No timeout in HalfOpen and no recovery on caller departure. |
+| code #10 | answered: gobreaker.go:217-220. Read freshness folds into Q-05 and Q-19. |
+| test #1 | answered: gobreaker.go:193. Boundary supported by gobreaker_test.go:164-182. |
+| test #2 | answered: gobreaker.go:294, 315-317 and 365. Increment and clear happen under one lock; competing public Counts cannot observe the intermediate increment. Intent folds into Q-10. |
+| test #3 | answered: gobreaker.go:330, 354-359. HalfOpen to Open emits too; callback failures and identity fold into Q-07 and Q-18. |
+| test #4 | Folds into Q-14. The assertion names the other instance. |
+| test #5 | answered: gobreaker.go:177 and 370-373. Construction sets nonzero expiry for positive intervals. |
+| test #6 | answered: gobreaker.go:298-300 and 364-365. Scope and late effects fold into Q-09 and Q-22. |
+| test #7 | Folds into Q-03, Q-07 and Q-04. Allow never calls request work itself and does not recover caller panic. |
+| test #8 | answered: gobreaker.go:211, 220, 280, 297 and 341-342. Autonomous expiry intent folds into Q-05. |
+| test #9 | answered: gobreaker.go:285-289. Refusal precedes the increment; timing and cap semantics fold into Q-06 and Q-10. |
+| test #10 | Folds into Q-14, same receiver mismatch as draft test question 4. The source shows zero expiry at gobreaker.go:378. |

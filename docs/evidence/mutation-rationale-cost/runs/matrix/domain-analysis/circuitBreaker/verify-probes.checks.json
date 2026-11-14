@@ -1,0 +1,65 @@
+[
+  {
+    "id": "probe-01",
+    "kind": "claim",
+    "statement": "Two true calls on a single half-open completion can leave the breaker Closed.",
+    "line": 35,
+    "fragment": "t.Fatalf(\"duplicate success state = %v\", got)"
+  },
+  {
+    "id": "probe-02",
+    "kind": "claim",
+    "statement": "An omitted completion can leave a half-open breaker rejecting a later call with ErrTooManyRequests.",
+    "line": 43,
+    "fragment": "t.Fatalf(\"after abandonment: %v\", err)"
+  },
+  {
+    "id": "probe-03",
+    "kind": "claim",
+    "statement": "Calling a stale report can trigger a HalfOpen notification before another admission.",
+    "line": 57,
+    "fragment": "t.Fatalf(\"state notifications before any new call: %v\", changes)"
+  },
+  {
+    "id": "probe-04",
+    "kind": "claim",
+    "statement": "The second Execute can complete and count its result while the first remains pending.",
+    "line": 82,
+    "fragment": "t.Fatalf(\"counts before first returns: %+v\", got)"
+  },
+  {
+    "id": "probe-05",
+    "kind": "claim",
+    "statement": "The probe expects the callback State reentry not to return in its observation window.",
+    "line": 116,
+    "fragment": "t.Fatal(\"same-goroutine State reentry returned\")"
+  },
+  {
+    "id": "probe-06",
+    "kind": "claim",
+    "statement": "A policy panic can lead to two closed failure-accounting attempts for one admission.",
+    "line": 135,
+    "fragment": "t.Fatalf(\"counts=%+v calls=%d\", got, calls)"
+  },
+  {
+    "id": "probe-07",
+    "kind": "claim",
+    "statement": "The notification panic replaces the original request panic in this schedule.",
+    "line": 146,
+    "fragment": "if got := recover(); got != \"notification\" {"
+  },
+  {
+    "id": "probe-08",
+    "kind": "claim",
+    "statement": "State Open and zeroed counts remain committed when notification panics.",
+    "line": 153,
+    "fragment": "t.Fatal(\"transition did not commit\")"
+  },
+  {
+    "id": "probe-09",
+    "kind": "claim",
+    "statement": "The first post-expiry Allow can consume the sole half-open slot.",
+    "line": 182,
+    "fragment": "t.Fatalf(\"second admission after open expiry = %v\", err)"
+  }
+]

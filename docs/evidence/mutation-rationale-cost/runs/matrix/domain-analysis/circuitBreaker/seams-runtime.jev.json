@@ -1,0 +1,54 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "55bf157a0922d2474c4c04526eed90eec4c5a48ad92d649d0c97887760b53e11",
+  "input_tokens": 16776,
+  "cost_microdollars": 705,
+  "reservation_microdollars": 2494,
+  "checks": {
+    "seams-runtime-01": {
+      "kind": "claim",
+      "statement": "Goexit terminates the calling goroutine.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go",
+      "line": 672,
+      "fragment": "// Goexit terminates the goroutine that calls it. No other goroutine is affected.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "seams-runtime-02": {
+      "kind": "claim",
+      "statement": "Goexit runs deferred calls before terminating the goroutine.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go",
+      "line": 673,
+      "fragment": "// Goexit runs all deferred calls before terminating the goroutine. Because Goexit",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "seams-runtime-03": {
+      "kind": "claim",
+      "statement": "Recover from a defer during Goexit returns nil because Goexit is not a panic.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go",
+      "line": 674,
+      "fragment": "// is not a panic, any recover calls in those deferred functions will return nil.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    }
+  }
+}

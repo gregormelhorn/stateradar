@@ -1,0 +1,84 @@
+
+Per-project overlay (optional): <analysis-root>/sidecar-overlay.yaml
+
+  skip:
+    appliance-client: "matrix is abridged — pilot work, no grid"
+  question_aliases:
+    Q-C1: {canonical: Q-Q1, status: "RESOLVED via DR-009"}
+  extra_citations:
+    - {component: stream-tracker, state: none, event: S2,
+       file: src/escape_monitor/server/ingest/streams.py, line: 186,
+       fragment: StaleEpochError}
+  src_roots: [lib, cmd]          # directories searched for cited files
+  src_exts: [".go", ".proto"]    # with the leading dot; case-sensitive
+
+Usage: python3 tools/gen_analysis_sidecar.py [--root REPO] [component ...]
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+    # file outside the source roots, say). One line per component and file.
+    # Only tokens with a known file extension count; anything else in a cell
+    # that looks like name.ext:N (host:port, versions) is not a citation and
+    # stays quiet. Source extensions are matched as _src_index matches them,
+    # case-sensitively, so the reason names the real cause.
+    src_exts = tuple(overlay["src_exts"] or SRC_EXTS)
+    src_exts_lower = {ext.lower() for ext in src_exts}
+    for name in sorted(unresolved):
+        ext = Path(name).suffix.lower()
+        if name.endswith(src_exts):
+            reason = "the file is not under the source roots (sidecar-overlay.yaml: src_roots)"
+        elif ext in PROSE_EXTS:
+            reason = ("matrix citations resolve to source files only; cite a prose document "
+                      "through sidecar-overlay.yaml extra_citations")
+        elif ext in CONFIG_EXTS or ext in src_exts_lower:
+            reason = ("its extension is not a source extension (sidecar-overlay.yaml: src_exts, "
+                      "matched case-sensitively)")
+        else:
+            continue
+        print(f"warning: {component}: citations of {name} dropped: {reason}", file=sys.stderr)
+
+    # PA-18 terminal states: <!-- terminal: A, B, C --> auto-generates
+    # ignore (documented) cells for every event, eliminating repetitive
+    # rows (cenkalti/backoff 2026-08-06: 5 states × 14 events = 70 cells).
+    tm = re.search(r"<!--\s*terminal:\s*(.+?) -->", text)
+    terminal_states: list[str] = []
+    if tm:
+        terminal_states = [s.strip() for s in tm.group(1).split(",")]
+        for ts in terminal_states:
+            if ts not in states:
+                states.append(ts)
+        # Add cells for terminal states that don't already have rows
+        existing = {(c["state"], c["event"]) for c in cells}
+        for ts in terminal_states:
+            for ev in events:
+                if (ts, ev["id"]) not in existing:
+                    cells.append({"state": ts, "event": ev["id"],
+                                  "disposition": "ignore (documented)",
+                                  "citation": {"file": "disposition-matrix.md", "line": 0,
+                                               "fragment": "terminal state declaration"}})
+
+    # Overlay citations for cells whose matrix text carries neither.
+    for cell in cells:
+        if (
+            cell["disposition"] in {"ignore (documented)", "reject", "defer (queued)"}
+            and not cell.get("dr")
+            and not cell.get("citation")
+        ):
+            for extra in overlay["extra_citations"]:
+                if (
+                    extra.get("component") == component
+                    and extra.get("state") == cell["state"]
+                    and extra.get("event") == cell["event"]
+                ):
+                    # Overlay YAML is not validated here: a citation missing
+                    # its file or line is caught by the schema in dsc_check.
+                    cell["citation"] = cast(Citation, {
+                        k: v for k, v in extra.items() if k in ("file", "line", "fragment")
+                    })
+
+    doc_lines = _parse_doc_map(adir / "invariants-and-lints.md")

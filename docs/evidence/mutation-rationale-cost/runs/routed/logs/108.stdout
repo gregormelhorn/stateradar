@@ -1,0 +1,24 @@
+				t.Fatal(got)
+			}
+		} else {
+			if got := cb.Counts(); got != (Counts{}) {
+				t.Fatal(got)
+			}
+			if got := cb.State(); got != StateHalfOpen {
+				t.Fatal(got)
+			}
+		}
+	}
+}
+
+func TestPilotAdmissionOrdering(t *testing.T) {
+	cb := probeHalfOpen(t, 1)
+	done, err := cb.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = cb.Allow(); err != ErrTooManyRequests {
+		t.Fatal(err)
+	}
+	done(true)
+	if _, err = cb.Allow(); err != nil {

@@ -1,0 +1,494 @@
+You are the BLIND adversarial pass (Part B) of a domain-behaviour analysis. You have NO access to the implementation. Do NOT read any files, do NOT use any tools, do NOT search any repository — the inputs below are complete and are your ONLY sources. If you catch yourself wanting to look something up, label it an open point instead.
+
+TASK: Here is the event catalogue of a component, and its requirements. For every event — including undesired variants and both orderings of every interaction pair — state in which situations the component should handle, ignore, or reject it, and what should happen. Describe situations in requirement terms. Name states per PA-17 (state naming convention): prefer public API names, name sub-states by their condition, use PascalCase with `_` as separator. If you must assume a lifecycle state the requirements do not name, label it `assumed-state:` with the condition that defines it. You have no access to the implementation. Be concrete. Produce a table keyed by the catalogue's event ids and pair-ordering ids. Prefer one row per id with conditional outcomes. If you split an id into several rows, use an explicit `Situation` column with distinct, nonempty labels. Do not repeat the same situation. End with a coverage checklist: every catalogue event id, listed once, ticked. A missing row must be impossible to miss.
+
+Catalogue headings and fields labelled `observed in code` say what the implementation does, not what it should do. Base each row on the requirements, the contracts and the doctrine lines. When a row's expected behaviour rests only on observed-in-code text, start its behaviour cell with `as-is:`.
+
+<!-- generated:rules key=partb-vocab -->
+The disposition vocabulary you must use (from the methods reference): `transition → <target>` | `handle` (stays in the state, does something) | `ignore (documented)` | `ignore (accidental)` | `defer (queued)` | `reject` (a declared refusal signal: error, diagnostic, nack) | `UNSPECIFIED`. Without these definitions a blind pass applies `reject` and `handle` to identical semantics interchangeably (dobby trigger-service, 2026-08-05: four vocabulary-only "divergences").
+<!-- /generated:rules -->
+
+The catalogue's event ids are: Execute Allow StateRead CountsRead NameRead Report RequestReturn Classify TripPolicy Notify ReconcileTime UV-01 UV-02 UV-03 UV-04 UV-05 UV-06 UV-07 UV-08 UV-09 UV-10 UV-11 UV-12 UV-13 UV-14 UV-15 UV-16 UV-17 UV-18 UV-19 — plus the pair orderings P-01a P-01b P-02a P-02b P-03a P-03b P-04a P-04b P-05a P-05b P-06a P-06b P-07a P-07b P-08a P-08b P-09a P-09b P-10a P-10b P-11a P-11b P-12a P-12b P-13a P-13b P-14a P-14b P-15a P-15b P-16a P-16b P-17a P-17b P-18a P-18b P-19a P-19b P-20a P-20b P-21a P-21b P-22a P-22b P-23a P-23b P-24a P-24b P-25a P-25b P-26a P-26b P-27a P-27b P-28a P-28b.
+
+=== INPUT 1: EVENT CATALOGUE (code fragments and analysis references removed) ===
+
+# Event catalogue
+
+<!-- event-ids: Execute Allow StateRead CountsRead NameRead Report RequestReturn Classify TripPolicy Notify ReconcileTime UV-01 UV-02 UV-03 UV-04 UV-05 UV-06 UV-07 UV-08 UV-09 UV-10 UV-11 UV-12 UV-13 UV-14 UV-15 UV-16 UV-17 UV-18 UV-19 -->
+
+| id | classification | source | description, payload and evidence |
+|---|---|---|---|
+| Execute | external | request caller | Execute call carrying a request function. observed-in-code gobreaker.go. |
+| Allow | external | request caller | Two-step admission request and resulting completion callback seam. observed-in-code gobreaker.go. |
+| StateRead | external | observer | Read state through either public API. observed-in-code gobreaker.go. |
+| CountsRead | external | observer | Read counters by value through either public API. observed-in-code gobreaker.go. |
+| NameRead | external | observer | Read configured name through either public API. observed-in-code gobreaker.go. |
+| Report | external | completion reporter | Invoke the returned callback with a success boolean. observed-in-code gobreaker.go. |
+| RequestReturn | external | injected request function | Return a value and error or panic. observed-in-code gobreaker.go. |
+| Classify | external | injected classifier | Return success boolean from the request error. observed-in-code gobreaker.go. |
+| TripPolicy | external | injected trip policy | Return trip boolean after a closed-state failure. observed-in-code gobreaker.go. |
+| Notify | external | injected state-change callback | Receive name, previous and next state, then return. observed-in-code gobreaker.go. |
+| ReconcileTime | internal | runtime clock observation | Reconcile elapsed time within admission, completion or State. observed-in-code gobreaker.go. |
+| UV-01 | external | request caller | Omit requested work or cease calling the breaker. observed-in-code gobreaker.go. |
+| UV-02 | external | request caller | Delay first or subsequent admission across the configured time threshold. observed-in-code gobreaker.go. |
+| UV-03 | external | request caller | Repeat acquisition from the same caller while Execute is pending or while a returned Allow callback remains outstanding. observed-in-code gobreaker.go. |
+| UV-04 | external | request caller | Deliver admission after withdrawal of demand or replacement of the intended breaker. observed-in-code gobreaker.go. |
+| UV-05 | external | request caller | Concurrent competing acquisitions near the half-open budget boundary. observed-in-code gobreaker.go. |
+| UV-06 | external | request caller | Unsolicited acquisition without matching business demand. observed-in-code gobreaker.go. |
+| UV-07 | external | request caller or observer | Use a wrong receiver, an invalid zero-value receiver, or unexpected valid constructor settings. Separately, supply a nil Execute function. observed-in-code gobreaker.go. |
+| UV-08 | external | observer | Omit or delay reads, poll repeatedly, sample near a transition, make concurrent observations, or read without a monitoring trigger. observed-in-code gobreaker.go. |
+| UV-09 | external | completion reporter | Omit a report through abandonment, cancellation, or losing the returned callback. observed-in-code gobreaker.go. |
+| UV-10 | external | completion reporter or request producer | Deliver late success or failure after interval reset, open expiry, or another generation change. observed-in-code gobreaker.go. |
+| UV-11 | external | completion reporter | Repeat the same success or failure on one returned callback. observed-in-code gobreaker.go. |
+| UV-12 | external | completion reporter | Report success and failure on the same callback concurrently. observed-in-code gobreaker.go. |
+| UV-13 | external | completion or policy callbacks | Invoke a callback manually without its normal trigger or replay a callback-shaped operation. observed-in-code gobreaker.go. |
+| UV-14 | external | completion or policy callbacks | Supply a plausible wrong classification, a report for another request, or transfer a completion across owners. observed-in-code gobreaker.go. |
+| UV-15 | external | injected request function | Block, never return, exit the goroutine, or return only after caller demand ends. observed-in-code gobreaker.go. |
+| UV-16 | external | injected request function or classifier | Panic, stall, reenter, or produce no ordinary classifier return. observed-in-code gobreaker.go. |
+| UV-17 | external | injected trip or notification callback | Panic, stall indefinitely, or call synchronously back into a locking breaker method. observed-in-code gobreaker.go. |
+| UV-18 | external | injected notification callback | Perform an unexpected or partially completed downstream side effect during notification. observed-in-code gobreaker.go. |
+| UV-19 | internal | runtime clock observation | Omit observation, sample exactly at expiry or after many intervals, or observe the same expiry from several callers. observed-in-code gobreaker.go. |
+
+## Undesired-coverage (observed in code, not documented intent)
+
+| source | loss | delay | duplication | out-of-order | contradiction | commission | value |
+|---|---|---|---|---|---|---|---|
+| Execute: request caller | UV-01 | UV-02 | UV-03 | UV-04 | UV-05 | UV-06 | UV-07 |
+| Allow: request caller | UV-01 | UV-02 | UV-03 | UV-04 | UV-05 | UV-06 | UV-07 |
+| StateRead: observer | UV-08 | UV-08 | UV-08 | UV-08 | UV-08 | UV-08 | UV-07 |
+| CountsRead: observer | UV-08 | UV-08 | UV-08 | UV-08 | UV-08 | UV-08 | UV-07 |
+| NameRead: observer | UV-08 | UV-08 | UV-08 | UV-08 | UV-08 | UV-08 | UV-07 |
+| Report: completion reporter | UV-09 | UV-10 | UV-11 | UV-10 | UV-12 | UV-13 | UV-14 |
+| RequestReturn: injected request function | UV-15 | UV-15 | UV-13 | UV-10 | UV-15 | UV-16 | UV-14 |
+| Classify: injected classifier | UV-16 | UV-16 | UV-13 | UV-10 | UV-14 | UV-16 | UV-14 |
+| TripPolicy: injected trip policy | UV-17 | UV-17 | UV-13 | UV-13 | UV-14 | UV-17 | UV-14 |
+| Notify: injected state-change callback | UV-17 | UV-17 | UV-13 | UV-13 | UV-18 | UV-17 | UV-18 |
+| ReconcileTime: runtime clock observation | UV-19 | UV-19 | UV-19 | UV-19 | UV-19 | UV-19 | UV-19 |
+
+## Interaction pairs
+
+| id | ordering | shared entity |
+|---|---|---|
+| P-01a | Execute → Report | Admission and a previously issued report |
+| P-01b | Report → Execute | Admission and a previously issued report |
+| P-02a | Allow → Report | New admission and a previously issued report |
+| P-02b | Report → Allow | New admission and a previously issued report |
+| P-03a | StateRead → Report | Observer and pending report |
+| P-03b | Report → StateRead | Observer and pending report |
+| P-04a | CountsRead → Report | Snapshot and completion reporter |
+| P-04b | Report → CountsRead | Snapshot and completion reporter |
+| P-05a | StateRead → Execute | Observer and request caller at expiry |
+| P-05b | Execute → StateRead | Observer and request caller at expiry |
+| P-06a | StateRead → Allow | Observer and two-step caller at expiry |
+| P-06b | Allow → StateRead | Observer and two-step caller at expiry |
+| P-07a | Execute → RequestReturn | New caller and running request |
+| P-07b | RequestReturn → Execute | New caller and running request |
+| P-08a | StateRead → RequestReturn | Observer and running request |
+| P-08b | RequestReturn → StateRead | Observer and running request |
+| P-09a | CountsRead → RequestReturn | Snapshot and running request |
+| P-09b | RequestReturn → CountsRead | Snapshot and running request |
+| P-10a | Classify → Notify | Classifier and notification for different admitted calls |
+| P-10b | Notify → Classify | Classifier and notification for different admitted calls |
+| P-11a | Execute → Classify | New caller and classifier of an admitted request |
+| P-11b | Classify → Execute | New caller and classifier of an admitted request |
+| P-12a | CountsRead → Classify | Snapshot and classifier of an admitted request |
+| P-12b | Classify → CountsRead | Snapshot and classifier of an admitted request |
+| P-13a | StateRead → Classify | Observer and classifier across an expiry |
+| P-13b | Classify → StateRead | Observer and classifier across an expiry |
+| P-14a | StateRead → Notify | Observer and transition notification |
+| P-14b | Notify → StateRead | Observer and transition notification |
+| P-15a | Execute → TripPolicy | Other caller and in-progress failure policy |
+| P-15b | TripPolicy → Execute | Other caller and in-progress failure policy |
+| P-16a | Allow → Notify | New caller and transition notification |
+| P-16b | Notify → Allow | New caller and transition notification |
+| P-17a | NameRead → Notify | Unchanging name and notification |
+| P-17b | Notify → NameRead | Unchanging name and notification |
+| P-18a | CountsRead → Execute | Snapshot and new request |
+| P-18b | Execute → CountsRead | Snapshot and new request |
+| P-19a | CountsRead → Allow | Snapshot and two-step admission |
+| P-19b | Allow → CountsRead | Snapshot and two-step admission |
+| P-20a | CountsRead → Notify | Snapshot and transition notification |
+| P-20b | Notify → CountsRead | Snapshot and transition notification |
+| P-21a | StateRead → TripPolicy | Observer and failure policy |
+| P-21b | TripPolicy → StateRead | Observer and failure policy |
+| P-22a | CountsRead → TripPolicy | Snapshot and failure policy |
+| P-22b | TripPolicy → CountsRead | Snapshot and failure policy |
+| P-23a | Execute → Notify | New caller and transition notification |
+| P-23b | Notify → Execute | New caller and transition notification |
+| P-24a | Report → Notify | Competing reports and a transition notification |
+| P-24b | Notify → Report | Competing reports and a transition notification |
+| P-25a | RequestReturn → Notify | An in-flight request returns during notification |
+| P-25b | Notify → RequestReturn | An in-flight request returns during notification |
+| P-26a | Classify → TripPolicy | Classification and trip policy for different requests |
+| P-26b | TripPolicy → Classify | Classification and trip policy for different requests |
+| P-27a | RequestReturn → TripPolicy | In-flight work returns during failure policy |
+| P-27b | TripPolicy → RequestReturn | In-flight work returns during failure policy |
+| P-28a | Report → TripPolicy | Another report competes with a trip policy |
+| P-28b | TripPolicy → Report | Another report competes with a trip policy |
+
+## Remembrance semantics (observed in code, not documented intent)
+
+An outcome carries the generation captured at admission. observed-in-code gobreaker.go. A generation advance clears the five counters. observed-in-code gobreaker.go. observed-in-code gobreaker.go. No per-request registry or queue is present. observed-in-code gobreaker.go. A retained completion references its wrapper and generation, and the generation comparison happens after checking time. observed-in-code gobreaker.go. observed-in-code gobreaker.go. observed-in-code gobreaker.go. Requests measures admitted requests in the current generation, with no per-report decrement. observed-in-code gobreaker.go. Counter wrap and captured-reference lifetime require separate decisions.
+
+## Lock-discipline annotation (observed in code, not documented intent)
+
+State, Counts, admission and accounting each acquire the same mutex. observed-in-code gobreaker.go. observed-in-code gobreaker.go. observed-in-code gobreaker.go. observed-in-code gobreaker.go. ReadyToTrip and OnStateChange are synchronous calls on locked paths. observed-in-code gobreaker.go. observed-in-code gobreaker.go. Execute calls the request and IsSuccessful between the admission and accounting lock sections. observed-in-code gobreaker.go. observed-in-code gobreaker.go. Name reads the immutable configured name without acquiring the mutex. observed-in-code gobreaker.go. Callback-specific reentrancy and failure guarantees are absent from the contract.
+
+## Catalogue notes
+
+Request work, cancellation and downstream cleanup are owned by callers. There is no library shutdown API. Execute and Allow share an admission routine but are exposed through different constructed API forms.
+
+## Event annotations (observed in code, not documented intent)
+
+### Execute
+- gate (observed in code): admission state and count; function supplied by caller
+- upstream_guards (observed in code): General library has no caller validation. HTTP example constructs one breaker and checks Execute error at example/http_breaker.go.
+- coverage:
+  - loss: UV-01
+  - delay: UV-02
+  - duplication: UV-03
+  - out-of-order: UV-04
+  - contradiction: UV-05
+  - commission: UV-06
+  - value: UV-07
+
+### Allow
+- gate (observed in code): admission state and count
+- upstream_guards (observed in code): The HTTP example uses Execute only. Wrapper callers must check Allow error before invoking the returned function, per the Allow contract.
+- coverage:
+  - loss: UV-01
+  - delay: UV-02
+  - duplication: UV-03
+  - out-of-order: UV-04
+  - contradiction: UV-05
+  - commission: UV-06
+  - value: UV-07
+
+### StateRead
+- gate (observed in code): state and expiry
+- upstream_guards (observed in code): Wrapper forwards the selected receiver. No validation of intended identity. observed-in-code gobreaker.go.
+- coverage:
+  - loss: UV-08
+  - delay: UV-08
+  - duplication: UV-08
+  - out-of-order: UV-08
+  - contradiction: UV-08
+  - commission: UV-08
+  - value: UV-07
+
+### CountsRead
+- gate (observed in code): mutex acquisition and stored counts
+- upstream_guards (observed in code): Wrapper forwards the selected receiver. No validation of intended identity. observed-in-code gobreaker.go.
+- coverage:
+  - loss: UV-08
+  - delay: UV-08
+  - duplication: UV-08
+  - out-of-order: UV-08
+  - contradiction: UV-08
+  - commission: UV-08
+  - value: UV-07
+
+### NameRead
+- gate (observed in code): immutable setting
+- upstream_guards (observed in code): Wrapper forwards the selected receiver. No validation of intended identity. observed-in-code gobreaker.go.
+- coverage:
+  - loss: UV-08
+  - delay: UV-08
+  - duplication: UV-08
+  - out-of-order: UV-08
+  - contradiction: UV-08
+  - commission: UV-08
+  - value: UV-07
+
+### Report
+- gate (observed in code): captured generation and receiver, current state, outcome payload
+- upstream_guards (observed in code): Successful Allow is needed to obtain the function. No once-only or caller-identity guarantee. observed-in-code gobreaker.go.
+- coverage:
+  - loss: UV-09
+  - delay: UV-10
+  - duplication: UV-11
+  - out-of-order: UV-10
+  - contradiction: UV-12
+  - commission: UV-13
+  - value: UV-14
+
+### RequestReturn
+- gate (observed in code): generation at accounting and classifier result for normal return
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+- coverage:
+  - loss: UV-15
+  - delay: UV-15
+  - duplication: UV-13
+  - out-of-order: UV-10
+  - contradiction: UV-15
+  - commission: UV-16
+  - value: UV-14
+
+### Classify
+- gate (observed in code): payload and policy function
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+- coverage:
+  - loss: UV-16
+  - delay: UV-16
+  - duplication: UV-13
+  - out-of-order: UV-10
+  - contradiction: UV-14
+  - commission: UV-16
+  - value: UV-14
+
+### TripPolicy
+- gate (observed in code): current generation and Counts snapshot
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+- coverage:
+  - loss: UV-17
+  - delay: UV-17
+  - duplication: UV-13
+  - out-of-order: UV-13
+  - contradiction: UV-14
+  - commission: UV-17
+  - value: UV-14
+
+### Notify
+- gate (observed in code): state change and callback presence
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+- coverage:
+  - loss: UV-17
+  - delay: UV-17
+  - duplication: UV-13
+  - out-of-order: UV-13
+  - contradiction: UV-18
+  - commission: UV-17
+  - value: UV-18
+
+### ReconcileTime
+- gate (observed in code): service-side stored state, expiry and sampled time
+- upstream_guards (observed in code): Synchronous time sample during a locked operation. observed-in-code gobreaker.go.
+- coverage:
+  - loss: UV-19
+  - delay: UV-19
+  - duplication: UV-19
+  - out-of-order: UV-19
+  - contradiction: UV-19
+  - commission: UV-19
+  - value: UV-19
+
+### UV-01
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): General library has no caller validation. HTTP example constructs one breaker and checks Execute error at example/http_breaker.go.
+
+### UV-02
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): General library has no caller validation. HTTP example constructs one breaker and checks Execute error at example/http_breaker.go.
+
+### UV-03
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): General library has no caller validation. HTTP example constructs one breaker and checks Execute error at example/http_breaker.go.
+
+### UV-04
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): General library has no caller validation. HTTP example constructs one breaker and checks Execute error at example/http_breaker.go.
+
+### UV-05
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): General library has no caller validation. HTTP example constructs one breaker and checks Execute error at example/http_breaker.go.
+
+### UV-06
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): General library has no caller validation. HTTP example constructs one breaker and checks Execute error at example/http_breaker.go.
+
+### UV-07
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+
+### UV-08
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Wrapper forwards the selected receiver. No validation of intended identity. observed-in-code gobreaker.go.
+
+### UV-09
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Successful Allow is needed to obtain the function. No once-only or caller-identity guarantee. observed-in-code gobreaker.go.
+
+### UV-10
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+
+### UV-11
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Successful Allow is needed to obtain the function. No once-only or caller-identity guarantee. observed-in-code gobreaker.go.
+
+### UV-12
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Successful Allow is needed to obtain the function. No once-only or caller-identity guarantee. observed-in-code gobreaker.go.
+
+### UV-13
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+
+### UV-14
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+
+### UV-15
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+
+### UV-16
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+
+### UV-17
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+
+### UV-18
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Custom implementation governs failure and liveness. No callback contract guarantees prompt return. observed-in-code gobreaker.go.
+
+### UV-19
+- gate (observed in code): Original operation gate; variant carries the timing, receiver or outcome described
+- upstream_guards (observed in code): Synchronous time sample during a locked operation. observed-in-code gobreaker.go.
+
+
+
+=== INPUT 2: REQUIREMENTS (domain-analysis/circuitBreaker/requirements-prose.md) ===
+
+The struct `CircuitBreaker` is a state machine to prevent sending requests that are likely to fail.
+The function `NewCircuitBreaker` creates a new `CircuitBreaker`.
+
+
+You can configure `CircuitBreaker` by the struct `Settings`:
+
+
+- `Name` is the name of the `CircuitBreaker`.
+
+- `MaxRequests` is the maximum number of requests allowed to pass through
+  when the `CircuitBreaker` is half-open.
+  If `MaxRequests` is 0, `CircuitBreaker` allows only 1 request.
+
+- `Interval` is the cyclic period of the closed state
+  for `CircuitBreaker` to clear the internal `Counts`, described later in this section.
+  If `Interval` is 0, `CircuitBreaker` doesn't clear the internal `Counts` during the closed state.
+
+- `Timeout` is the period of the open state,
+  after which the state of `CircuitBreaker` becomes half-open.
+  If `Timeout` is 0, the timeout value of `CircuitBreaker` is set to 60 seconds.
+
+- `ReadyToTrip` is called with a copy of `Counts` whenever a request fails in the closed state.
+  If `ReadyToTrip` returns true, `CircuitBreaker` will be placed into the open state.
+  If `ReadyToTrip` is `nil`, default `ReadyToTrip` is used.
+  Default `ReadyToTrip` returns true when the number of consecutive failures is more than 5.
+
+- `OnStateChange` is called whenever the state of `CircuitBreaker` changes.
+
+- `IsSuccessful` is called with the error returned from a request.
+  If `IsSuccessful` returns true, the error is counted as a success.
+  Otherwise the error is counted as a failure.
+  If `IsSuccessful` is nil, default `IsSuccessful` is used, which returns false for all non-nil errors.
+
+The struct `Counts` holds the numbers of requests and their successes/failures:
+
+
+`CircuitBreaker` clears the internal `Counts` either
+on the change of the state or at the closed-state intervals.
+`Counts` ignores the results of the requests sent before clearing.
+
+`CircuitBreaker` can wrap any function to send a request:
+
+
+The method `Execute` runs the given request if `CircuitBreaker` accepts it.
+`Execute` returns an error instantly if `CircuitBreaker` rejects the request.
+Otherwise, `Execute` returns the result of the request.
+If a panic occurs in the request, `CircuitBreaker` handles it as an error
+and causes the same panic again.
+
+
+=== INPUT 3: EVENT CONTRACT TEXTS (domain-analysis/circuitBreaker/contracts.md) ===
+
+gobreaker.go:23
+ErrTooManyRequests is returned when the CB state is half open and the requests count is over the cb maxRequests
+
+gobreaker.go:25
+ErrOpenState is returned when the CB state is open
+
+gobreaker.go:43-46
+Counts holds the numbers of requests and their successes/failures.
+CircuitBreaker clears the internal Counts either
+on the change of the state or at the closed-state intervals.
+Counts ignores the results of the requests sent before clearing.
+
+gobreaker.go:79-105
+Settings configures CircuitBreaker:
+
+Name is the name of the CircuitBreaker.
+
+MaxRequests is the maximum number of requests allowed to pass through
+when the CircuitBreaker is half-open.
+If MaxRequests is 0, the CircuitBreaker allows only 1 request.
+
+Interval is the cyclic period of the closed state
+for the CircuitBreaker to clear the internal Counts.
+If Interval is less than or equal to 0, the CircuitBreaker doesn't clear internal Counts during the closed state.
+
+Timeout is the period of the open state,
+after which the state of the CircuitBreaker becomes half-open.
+If Timeout is less than or equal to 0, the timeout value of the CircuitBreaker is set to 60 seconds.
+
+ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.
+If ReadyToTrip returns true, the CircuitBreaker will be placed into the open state.
+If ReadyToTrip is nil, default ReadyToTrip is used.
+Default ReadyToTrip returns true when the number of consecutive failures is more than 5.
+
+OnStateChange is called whenever the state of the CircuitBreaker changes.
+
+IsSuccessful is called with the error returned from a request.
+If IsSuccessful returns true, the error is counted as a success.
+Otherwise the error is counted as a failure.
+If IsSuccessful is nil, default IsSuccessful is used, which returns false for all non-nil errors.
+
+gobreaker.go:116
+CircuitBreaker is a state machine to prevent sending requests that are likely to fail.
+
+gobreaker.go:133-135
+TwoStepCircuitBreaker is like CircuitBreaker but instead of surrounding a function
+with the breaker functionality, it only checks whether a request can proceed and
+expects the caller to report the outcome in a separate step using a callback.
+
+gobreaker.go:140
+NewCircuitBreaker returns a new CircuitBreaker configured with the given Settings.
+
+gobreaker.go:182
+NewTwoStepCircuitBreaker returns a new TwoStepCircuitBreaker configured with the given Settings.
+
+gobreaker.go:200
+Name returns the name of the CircuitBreaker.
+
+gobreaker.go:205
+State returns the current state of the CircuitBreaker.
+
+gobreaker.go:215
+Counts returns internal counters
+
+gobreaker.go:223-227
+Execute runs the given request if the CircuitBreaker accepts it.
+Execute returns an error instantly if the CircuitBreaker rejects the request.
+Otherwise, Execute returns the result of the request.
+If a panic occurs in the request, the CircuitBreaker handles it as an error
+and causes the same panic again.
+
+gobreaker.go:247
+Name returns the name of the TwoStepCircuitBreaker.
+
+gobreaker.go:252
+State returns the current state of the TwoStepCircuitBreaker.
+
+gobreaker.go:257
+Counts returns internal counters
+
+gobreaker.go:262-264
+Allow checks if a new request can proceed. It returns a callback that should be used to
+register the success or failure in a separate step. If the circuit breaker doesn't allow
+requests, it returns an error.
+
+
+Respond with ONLY the table and the coverage checklist: every catalogue event and pair-ordering id, listed once in the checklist, ticked. A missing row must be impossible to miss.
+The coverage checklist must use one exact line per event or pair in the form '- [x] EVENT_ID', with no other text on that line.

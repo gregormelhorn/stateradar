@@ -1,0 +1,619 @@
+{
+  "events": [
+    {
+      "id": "Configure",
+      "classification": "external",
+      "undesired": false,
+      "source": "constructor caller",
+      "description": "Settings select a new breaker and its policy, observed-in-code gobreaker.go:142 (\"cb := new(CircuitBreaker)\") and gobreaker.go:177 (\"cb.toNewGeneration(time.Now())\").",
+      "gate": "payload settings",
+      "upstream_guards": [
+        "Direct Go calls, typed assignments only. No upstream value normalization."
+      ],
+      "coverage": {
+        "loss": "UV-20",
+        "delay": "n/a: no independent delivery at this boundary, gobreaker.go:142 (\"cb := new(CircuitBreaker)\").",
+        "duplication": "UV-20",
+        "out-of-order": "n/a: no independent delivery at this boundary, gobreaker.go:142 (\"cb := new(CircuitBreaker)\").",
+        "contradiction": "n/a: no independent delivery at this boundary, gobreaker.go:142 (\"cb := new(CircuitBreaker)\").",
+        "commission": "n/a: no independent delivery at this boundary, gobreaker.go:142 (\"cb := new(CircuitBreaker)\").",
+        "value": "UV-21"
+      }
+    },
+    {
+      "id": "Execute",
+      "classification": "external",
+      "undesired": false,
+      "source": "request submitter",
+      "description": "Pass a function for admission and execution, observed-in-code gobreaker.go:229 (\"generation, err := cb.beforeRequest()\") and gobreaker.go:242 (\"result, err := req()\").",
+      "gate": "service state for admission",
+      "upstream_guards": [
+        "Direct API has no nil or instance-purpose validation. Example binds its own receiver in example/http_breaker.go:27."
+      ],
+      "coverage": {
+        "loss": "UV-01",
+        "delay": "UV-02",
+        "duplication": "UV-03",
+        "out-of-order": "UV-02",
+        "contradiction": "UV-03",
+        "commission": "UV-04",
+        "value": "UV-04"
+      }
+    },
+    {
+      "id": "Allow",
+      "classification": "external",
+      "undesired": false,
+      "source": "two-step submitter",
+      "description": "Ask for admission and an outcome callback, observed-in-code gobreaker.go:265 (\"func (tscb *TwoStepCircuitBreaker) Allow() (done func(success bool), err error) {\") and gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\").",
+      "gate": "service state for admission",
+      "upstream_guards": [
+        "Direct API supplies no caller identity or request lifecycle validation."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05",
+        "contradiction": "UV-06",
+        "commission": "UV-04",
+        "value": "UV-04"
+      }
+    },
+    {
+      "id": "ReportSuccess",
+      "classification": "external",
+      "undesired": false,
+      "source": "outcome reporter",
+      "description": "Report true through the callback returned by Allow, observed-in-code gobreaker.go:271 (\"return func(success bool) {\") and gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\").",
+      "gate": "payload Boolean and service generation and threshold",
+      "upstream_guards": [
+        "Closure binds receiver and generation. No upstream single-shot or result truth guarantee."
+      ],
+      "coverage": {
+        "loss": "UV-07",
+        "delay": "UV-08",
+        "duplication": "UV-09",
+        "out-of-order": "UV-08",
+        "contradiction": "UV-09",
+        "commission": "UV-10",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "ReportFailure",
+      "classification": "external",
+      "undesired": false,
+      "source": "outcome reporter",
+      "description": "Report false through the callback returned by Allow, observed-in-code gobreaker.go:271 (\"return func(success bool) {\") and gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\").",
+      "gate": "payload Boolean and service generation and trip policy",
+      "upstream_guards": [
+        "Same caller-side ownership as the success report."
+      ],
+      "coverage": {
+        "loss": "UV-07",
+        "delay": "UV-08",
+        "duplication": "UV-09",
+        "out-of-order": "UV-08",
+        "contradiction": "UV-09",
+        "commission": "UV-10",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "ReadState",
+      "classification": "external",
+      "undesired": false,
+      "source": "state observer",
+      "description": "Request reported state, observed-in-code gobreaker.go:211 (\"state, _ := cb.currentState(now)\").",
+      "gate": "service expiry",
+      "upstream_guards": [
+        "No upstream scheduling or receiver-purpose validation."
+      ],
+      "coverage": {
+        "loss": "UV-12",
+        "delay": "UV-12",
+        "duplication": "UV-12",
+        "out-of-order": "UV-12",
+        "contradiction": "n/a: no independent delivery at this boundary, gobreaker.go:211 (\"state, _ := cb.currentState(now)\").",
+        "commission": "n/a: no independent delivery at this boundary, gobreaker.go:211 (\"state, _ := cb.currentState(now)\").",
+        "value": "UV-04"
+      }
+    },
+    {
+      "id": "ReadCounts",
+      "classification": "external",
+      "undesired": false,
+      "source": "counts observer",
+      "description": "Request the counters, observed-in-code gobreaker.go:220 (\"return cb.counts\").",
+      "gate": "none beyond receiver and synchronization",
+      "upstream_guards": [
+        "No upstream freshness or receiver-purpose validation."
+      ],
+      "coverage": {
+        "loss": "UV-12",
+        "delay": "UV-12",
+        "duplication": "UV-12",
+        "out-of-order": "UV-12",
+        "contradiction": "n/a: no independent delivery at this boundary, gobreaker.go:220 (\"return cb.counts\").",
+        "commission": "n/a: no independent delivery at this boundary, gobreaker.go:220 (\"return cb.counts\").",
+        "value": "UV-04"
+      }
+    },
+    {
+      "id": "ReadName",
+      "classification": "external",
+      "undesired": false,
+      "source": "name observer",
+      "description": "Request the configured name, observed-in-code gobreaker.go:202 (\"return cb.name\").",
+      "gate": "none",
+      "upstream_guards": [
+        "Name has no uniqueness guarantee. Wrapper delegates at gobreaker.go:249."
+      ],
+      "coverage": {
+        "loss": "UV-12",
+        "delay": "UV-12",
+        "duplication": "UV-12",
+        "out-of-order": "UV-12",
+        "contradiction": "n/a: no independent delivery at this boundary, gobreaker.go:202 (\"return cb.name\").",
+        "commission": "n/a: no independent delivery at this boundary, gobreaker.go:202 (\"return cb.name\").",
+        "value": "UV-04"
+      }
+    },
+    {
+      "id": "RequestResult",
+      "classification": "external",
+      "undesired": false,
+      "source": "injected request",
+      "description": "Return a value/error, panic, or fail to return after admission, observed-in-code gobreaker.go:242 (\"result, err := req()\") and gobreaker.go:235 (\"e := recover()\").",
+      "gate": "payload error and request execution path",
+      "upstream_guards": [
+        "A synchronous call returns at most once normally. User function behavior is otherwise unconstrained."
+      ],
+      "coverage": {
+        "loss": "UV-01",
+        "delay": "UV-02",
+        "duplication": "n/a: no independent delivery at this boundary, gobreaker.go:242 (\"result, err := req()\").",
+        "out-of-order": "UV-08",
+        "contradiction": "n/a: no independent delivery at this boundary, gobreaker.go:242 (\"result, err := req()\").",
+        "commission": "UV-10",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "Classify",
+      "classification": "external",
+      "undesired": false,
+      "source": "injected classifier",
+      "description": "Return an error classification for Execute, observed-in-code gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\").",
+      "gate": "payload error",
+      "upstream_guards": [
+        "Configured classifier defaults if nil. No caller-side result or runtime validation."
+      ],
+      "coverage": {
+        "loss": "UV-13",
+        "delay": "UV-13",
+        "duplication": "n/a: no independent delivery at this boundary, gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\").",
+        "out-of-order": "UV-14",
+        "contradiction": "n/a: no independent delivery at this boundary, gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\").",
+        "commission": "UV-10",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "TripDecision",
+      "classification": "external",
+      "undesired": false,
+      "source": "injected trip policy",
+      "description": "Return a decision after a counted closed failure, observed-in-code gobreaker.go:325 (\"cb.counts.onFailure()\") and gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\").",
+      "gate": "payload count snapshot and policy result",
+      "upstream_guards": [
+        "Default is supplied if nil. Call and commit occur under the same breaker lock."
+      ],
+      "coverage": {
+        "loss": "UV-15",
+        "delay": "UV-15",
+        "duplication": "n/a: no independent delivery at this boundary, gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\").",
+        "out-of-order": "n/a: no independent delivery at this boundary, gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\").",
+        "contradiction": "n/a: no independent delivery at this boundary, gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\").",
+        "commission": "UV-10",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "Notify",
+      "classification": "internal",
+      "undesired": false,
+      "source": "breaker notification to injected observer",
+      "description": "Call the registered state-change observer with name and state pair, observed-in-code gobreaker.go:358 (\"if cb.onStateChange != nil {\") and gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\").",
+      "gate": "service callback presence and state change",
+      "upstream_guards": [
+        "No upstream reentrancy or runtime guarantee. Missing hook is supported."
+      ],
+      "coverage": {
+        "loss": "UV-16",
+        "delay": "UV-16",
+        "duplication": "UV-17",
+        "out-of-order": "UV-17",
+        "contradiction": "UV-17",
+        "commission": "UV-17",
+        "value": "UV-17"
+      }
+    },
+    {
+      "id": "ObserveExpiry",
+      "classification": "internal",
+      "undesired": false,
+      "source": "clock sampled by breaker",
+      "description": "Compare expiry with sampled time, observed-in-code gobreaker.go:337 (\"if !cb.expiry.IsZero() && cb.expiry.Before(now) {\") and gobreaker.go:341 (\"if cb.expiry.Before(now) {\").",
+      "gate": "service state and time",
+      "upstream_guards": [
+        "Clock provides time when invoked. The API exposes no standalone clock-event injection."
+      ],
+      "coverage": {
+        "loss": "UV-18",
+        "delay": "UV-18",
+        "duplication": "n/a: no independent delivery at this boundary, gobreaker.go:341 (\"if cb.expiry.Before(now) {\").",
+        "out-of-order": "UV-18",
+        "contradiction": "n/a: no independent delivery at this boundary, gobreaker.go:341 (\"if cb.expiry.Before(now) {\").",
+        "commission": "n/a: no independent delivery at this boundary, gobreaker.go:341 (\"if cb.expiry.Before(now) {\").",
+        "value": "UV-18"
+      }
+    },
+    {
+      "id": "ApplySuccess",
+      "classification": "internal",
+      "undesired": false,
+      "source": "breaker completion accounting",
+      "description": "Apply a successful outcome, observed-in-code gobreaker.go:299 (\"if generation != before {\") and gobreaker.go:315 (\"cb.counts.onSuccess()\").",
+      "gate": "service generation, state and threshold",
+      "upstream_guards": [
+        "Completion source and generation are captured at admission."
+      ],
+      "coverage": {
+        "loss": "n/a: no independent delivery at this boundary, gobreaker.go:304 (\"cb.onSuccess(state, now)\").",
+        "delay": "UV-08",
+        "duplication": "UV-09",
+        "out-of-order": "UV-08",
+        "contradiction": "UV-09",
+        "commission": "UV-10",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "ApplyFailure",
+      "classification": "internal",
+      "undesired": false,
+      "source": "breaker completion accounting",
+      "description": "Apply a failed outcome, observed-in-code gobreaker.go:299 (\"if generation != before {\") and gobreaker.go:325 (\"cb.counts.onFailure()\").",
+      "gate": "service generation and trip policy",
+      "upstream_guards": [
+        "Completion source and generation are captured at admission."
+      ],
+      "coverage": {
+        "loss": "n/a: no independent delivery at this boundary, gobreaker.go:306 (\"cb.onFailure(state, now)\").",
+        "delay": "UV-08",
+        "duplication": "UV-09",
+        "out-of-order": "UV-08",
+        "contradiction": "UV-09",
+        "commission": "UV-10",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "UV-01",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected request or submitter",
+      "description": "Work never returns, exits its goroutine, or panics, or submitter abandons interest.",
+      "gate": "payload execution",
+      "upstream_guards": [
+        "Request runs in caller goroutine. No context in Execute."
+      ]
+    },
+    {
+      "id": "UV-02",
+      "classification": "external",
+      "undesired": true,
+      "source": "request submitter and injected request",
+      "description": "Slow completion or submission, later overlapping request, and elapsed deadline while work remains outstanding.",
+      "gate": "service generation and admission",
+      "upstream_guards": [
+        "Direct API supplies no deadline for the workload."
+      ]
+    },
+    {
+      "id": "UV-03",
+      "classification": "external",
+      "undesired": true,
+      "source": "request submitter",
+      "description": "A second Execute from the same caller while the first is pending, or after it returns and the caller still owns its result.",
+      "gate": "service admission",
+      "upstream_guards": [
+        "No caller identity. A completed Execute returns the payload, with no release API."
+      ]
+    },
+    {
+      "id": "UV-04",
+      "classification": "external",
+      "undesired": true,
+      "source": "public caller",
+      "description": "Nil request, a call on the wrong valid breaker, or a nil or unconstructed receiver. Receiver selection differs from erroneous report payload.",
+      "gate": "receiver and function validity",
+      "upstream_guards": [
+        "Go types do not enforce instance ownership or construction."
+      ]
+    },
+    {
+      "id": "UV-05",
+      "classification": "external",
+      "undesired": true,
+      "source": "two-step submitter",
+      "description": "Attempt arrives late, or caller stops before or during submission, or after receiving the completion callback.",
+      "gate": "service admission",
+      "upstream_guards": [
+        "No context and no teardown operation are supplied."
+      ]
+    },
+    {
+      "id": "UV-06",
+      "classification": "external",
+      "undesired": true,
+      "source": "two-step submitter",
+      "description": "Same caller issues a second Allow before the first returns, or after the first returns while it still holds its callback.",
+      "gate": "service admission",
+      "upstream_guards": [
+        "No caller identity or lock fairness guarantee."
+      ]
+    },
+    {
+      "id": "UV-07",
+      "classification": "external",
+      "undesired": true,
+      "source": "outcome reporter",
+      "description": "Report omitted after an accepted trial, including logical teardown by caller.",
+      "gate": "service occupancy",
+      "upstream_guards": [
+        "Public contract expects a report and supplies no cancellation API."
+      ]
+    },
+    {
+      "id": "UV-08",
+      "classification": "external",
+      "undesired": true,
+      "source": "outcome reporter or long-running request",
+      "description": "Outcome after generation rollover, elapsed expiry, or application cancellation. Success and failure are separate outcomes.",
+      "gate": "service generation",
+      "upstream_guards": [
+        "No public API invalidates a report on application cancellation alone."
+      ]
+    },
+    {
+      "id": "UV-09",
+      "classification": "external",
+      "undesired": true,
+      "source": "outcome reporter",
+      "description": "Same completion repeated sequentially or concurrently with equal or contradictory Booleans.",
+      "gate": "payload Boolean and service generation",
+      "upstream_guards": [
+        "No public contract specifies an exactly-once guarantee."
+      ]
+    },
+    {
+      "id": "UV-10",
+      "classification": "external",
+      "undesired": true,
+      "source": "outcome reporter or injected callback",
+      "description": "Unsolicited completion without admission, including invoking a nil callback returned with rejection.",
+      "gate": "capability presence",
+      "upstream_guards": [
+        "A non-nil callback must come from successful Allow. A caller can invoke nil in Go."
+      ]
+    },
+    {
+      "id": "UV-11",
+      "classification": "external",
+      "undesired": true,
+      "source": "outcome reporter or injected classifier/policy",
+      "description": "A valid but wrong Boolean, a callback reused for another request, or trip policy using an unintentionally misleading ratio.",
+      "gate": "payload Boolean or counts",
+      "upstream_guards": [
+        "Outcome truth is not independently verified."
+      ]
+    },
+    {
+      "id": "UV-12",
+      "classification": "external",
+      "undesired": true,
+      "source": "observer",
+      "description": "Missing, late, repeated, or interleaved read of state, counts or name.",
+      "gate": "service snapshot and expiry",
+      "upstream_guards": [
+        "Public calls have no snapshot protocol spanning methods."
+      ]
+    },
+    {
+      "id": "UV-13",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected classifier",
+      "description": "Classifier panics, blocks, or exits the goroutine.",
+      "gate": "payload error and callback runtime",
+      "upstream_guards": [
+        "No failure or latency guarantee in Settings."
+      ]
+    },
+    {
+      "id": "UV-14",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected classifier",
+      "description": "Classification finishes after generation changed, or re-enters the breaker before committing its result.",
+      "gate": "service generation at completion",
+      "upstream_guards": [
+        "No reentrancy restriction in Settings."
+      ]
+    },
+    {
+      "id": "UV-15",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected trip policy",
+      "description": "Trip callback panics, blocks, exits, or re-enters mutex-taking methods.",
+      "gate": "service lock and callback execution",
+      "upstream_guards": [
+        "No failure, latency or reentrancy guarantee in Settings."
+      ]
+    },
+    {
+      "id": "UV-16",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected observer",
+      "description": "Observer absent, panics, blocks, exits, or re-enters mutex-taking methods.",
+      "gate": "service lock and hook presence",
+      "upstream_guards": [
+        "Optional hook. No failure, latency or reentrancy guarantee in Settings."
+      ]
+    },
+    {
+      "id": "UV-17",
+      "classification": "internal",
+      "undesired": true,
+      "source": "observer callback consumer",
+      "description": "Repeated same-named transitions across cycles or instances, or consumer misattributes the notification. Unsolicited callback invocation is possible outside the breaker by whoever owns the function.",
+      "gate": "payload name and state pair",
+      "upstream_guards": [
+        "No unique identifier or event sequence number."
+      ]
+    },
+    {
+      "id": "UV-18",
+      "classification": "internal",
+      "undesired": true,
+      "source": "clock observation",
+      "description": "Deadline elapses without a qualifying call, delayed observation, equality at deadline, or clock time differs from intended schedule.",
+      "gate": "service state and clock",
+      "upstream_guards": [
+        "No caller can deliver clock payload directly."
+      ]
+    },
+    {
+      "id": "UV-20",
+      "classification": "external",
+      "undesired": true,
+      "source": "constructor caller",
+      "description": "Construction omitted, or two calls create independently configured instances when one was intended.",
+      "gate": "receiver identity",
+      "upstream_guards": [
+        "Creation allocates a fresh instance."
+      ]
+    },
+    {
+      "id": "UV-21",
+      "classification": "external",
+      "undesired": true,
+      "source": "constructor caller",
+      "description": "Negative durations or valid but unintended large request limit, interval or timeout.",
+      "gate": "payload settings",
+      "upstream_guards": [
+        "Constructor receives values after Go type checking."
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "id": "P-01",
+      "first": "Execute",
+      "second": "ReadState",
+      "entity": "Execute submitter and observer on one breaker"
+    },
+    {
+      "id": "P-02",
+      "first": "Execute",
+      "second": "ReadCounts",
+      "entity": "Execute submitter and counts observer on one breaker"
+    },
+    {
+      "id": "P-03",
+      "first": "Allow",
+      "second": "ReportSuccess",
+      "entity": "new admission and outstanding successful trial callback"
+    },
+    {
+      "id": "P-04",
+      "first": "Allow",
+      "second": "ReportFailure",
+      "entity": "new admission and outstanding failed trial callback"
+    },
+    {
+      "id": "P-05",
+      "first": "ReportSuccess",
+      "second": "ReadState",
+      "entity": "outcome callback and expiry-observing reader"
+    },
+    {
+      "id": "P-06",
+      "first": "ReportFailure",
+      "second": "ReadState",
+      "entity": "outcome callback and expiry-observing reader"
+    },
+    {
+      "id": "P-07",
+      "first": "ReportSuccess",
+      "second": "ReadCounts",
+      "entity": "outcome callback and counts observer"
+    },
+    {
+      "id": "P-08",
+      "first": "ReportFailure",
+      "second": "ReadCounts",
+      "entity": "outcome callback and counts observer"
+    },
+    {
+      "id": "P-09",
+      "first": "ReadState",
+      "second": "ReadCounts",
+      "entity": "independent readers near expiry"
+    },
+    {
+      "id": "P-10",
+      "first": "RequestResult",
+      "second": "ReadState",
+      "entity": "injected workload return overlapping observer"
+    },
+    {
+      "id": "P-11",
+      "first": "Classify",
+      "second": "ReadState",
+      "entity": "injected classifier return overlapping observer"
+    },
+    {
+      "id": "P-12",
+      "first": "Allow",
+      "second": "ReadState",
+      "entity": "new trial and observer at expiry"
+    },
+    {
+      "id": "P-13",
+      "first": "Allow",
+      "second": "ReadCounts",
+      "entity": "new trial and counts observer"
+    },
+    {
+      "id": "P-14",
+      "first": "ReportSuccess",
+      "second": "ReportFailure",
+      "entity": "different actors holding independent trial callbacks"
+    },
+    {
+      "id": "P-15",
+      "first": "TripDecision",
+      "second": "ReadState",
+      "entity": "policy inside lock and competing reader"
+    }
+  ],
+  "remembrance": "Observed-in-code: admissions consume a counter until a generation reset gobreaker.go:289 (\"cb.counts.onRequest()\") and gobreaker.go:365 (\"cb.counts.clear()\"). Generation is a uint64 gobreaker.go:128 (\"generation uint64\"). Request result and returned callback are caller-owned. A retained closure keeps its receiver and generation available gobreaker.go:272 (\"tscb.cb.afterRequest(generation, success)\"). Breaker stores no per-request history; equality check at gobreaker.go:299 (\"if generation != before {\"). Lifetime and memory use depend on external references.",
+  "lock_discipline": "Observed-in-code: State gobreaker.go:207 (\"cb.mutex.Lock()\"), Counts gobreaker.go:217 (\"cb.mutex.Lock()\"), admission gobreaker.go:277 (\"cb.mutex.Lock()\"), and completion gobreaker.go:294 (\"cb.mutex.Lock()\") take the same mutex. Trip policy gobreaker.go:326 (\"if cb.readyToTrip(cb.counts) {\") and transition observer gobreaker.go:359 (\"cb.onStateChange(cb.name, prev, state)\") execute in these paths. Request and classifier execute outside the mutex gobreaker.go:242 (\"result, err := req()\") and gobreaker.go:243 (\"cb.afterRequest(generation, cb.isSuccessful(err))\"). Settings contracts README.md:53-63 specify neither reentrancy nor panic policy.",
+  "notes": "Execute and Allow are alternate public front ends on their respective constructed instances. The internal outcome events describe bookkeeping phases, and do not denote independently callable operations."
+}

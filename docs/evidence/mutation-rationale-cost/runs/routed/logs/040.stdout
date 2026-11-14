@@ -1,0 +1,177 @@
+[
+  {
+    "file": "gobreaker.go",
+    "line": 16,
+    "fragment": "const ("
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 23,
+    "fragment": "\t// ErrTooManyRequests is returned when the CB state is half open and the requests count is over the cb maxRequests"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 25,
+    "fragment": "\t// ErrOpenState is returned when the CB state is open"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 43,
+    "fragment": "// Counts holds the numbers of requests and their successes/failures."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 46,
+    "fragment": "// Counts ignores the results of the requests sent before clearing."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 48,
+    "fragment": "\tRequests             uint32"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 56,
+    "fragment": "\tc.Requests++"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 60,
+    "fragment": "\tc.TotalSuccesses++"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 61,
+    "fragment": "\tc.ConsecutiveSuccesses++"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 62,
+    "fragment": "\tc.ConsecutiveFailures = 0"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 66,
+    "fragment": "\tc.TotalFailures++"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 67,
+    "fragment": "\tc.ConsecutiveFailures++"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 68,
+    "fragment": "\tc.ConsecutiveSuccesses = 0"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 72,
+    "fragment": "\tc.Requests = 0"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 83,
+    "fragment": "// MaxRequests is the maximum number of requests allowed to pass through"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 87,
+    "fragment": "// Interval is the cyclic period of the closed state"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 89,
+    "fragment": "// If Interval is less than or equal to 0, the CircuitBreaker doesn't clear internal Counts during the closed state."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 91,
+    "fragment": "// Timeout is the period of the open state,"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 93,
+    "fragment": "// If Timeout is less than or equal to 0, the timeout value of the CircuitBreaker is set to 60 seconds."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 95,
+    "fragment": "// ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 98,
+    "fragment": "// Default ReadyToTrip returns true when the number of consecutive failures is more than 5."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 100,
+    "fragment": "// OnStateChange is called whenever the state of the CircuitBreaker changes."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 102,
+    "fragment": "// IsSuccessful is called with the error returned from a request."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 105,
+    "fragment": "// If IsSuccessful is nil, default IsSuccessful is used, which returns false for all non-nil errors."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 126,
+    "fragment": "\tmutex      sync.Mutex"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 128,
+    "fragment": "\tgeneration uint64"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 135,
+    "fragment": "// expects the caller to report the outcome in a separate step using a callback."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 142,
+    "fragment": "\tcb := new(CircuitBreaker)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 145,
+    "fragment": "\tcb.onStateChange = st.OnStateChange"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 147,
+    "fragment": "\tif st.MaxRequests == 0 {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 148,
+    "fragment": "\t\tcb.maxRequests = 1"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 153,
+    "fragment": "\tif st.Interval <= 0 {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 159,
+    "fragment": "\tif st.Timeout <= 0 {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 165,
+    "fragment": "\tif st.ReadyToTrip == nil {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 171,
+    "fragment": "\tif st.IsSuccessful == nil {"
+  }
+]

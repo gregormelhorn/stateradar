@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nfrom collections import Counter\nimport json,sys\nd=Path(sys.argv[1]); a=json.loads((d/'analysis.json').read_text()); print(Counter(x['disposition'] for x in a['cells']))\nr=json.loads((d/'verify-probes.jev.json').read_text())\nfor k,c in r['checks'].items(): print(k,c['choice'],c['line'],c['statement'])",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

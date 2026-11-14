@@ -1,0 +1,89 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "e865dbe0cc0ef4cba439b69ed3a1aa991ea9081d7f507f7ccb942680e060c1f7",
+  "input_tokens": 3315,
+  "cost_microdollars": 140,
+  "reservation_microdollars": 590,
+  "checks": {
+    "O01": {
+      "kind": "ordering",
+      "statement": "A constructed Closed breaker accepts an Execute request → caller supplies a request → Execute runs the given request.",
+      "source": "README.md",
+      "line": 87,
+      "fragment": "The method `Execute` runs the given request if `CircuitBreaker` accepts it.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.49,
+        "contradicted": 0.01,
+        "unclear": 0.5
+      },
+      "confidence": 0.25,
+      "review_required": true,
+      "ordering_scope_probability": 0.02
+    },
+    "O02": {
+      "kind": "ordering",
+      "statement": "A constructed breaker rejects the request → caller invokes Execute → Execute returns an error instantly.",
+      "source": "README.md",
+      "line": 88,
+      "fragment": "`Execute` returns an error instantly if `CircuitBreaker` rejects the request.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.54,
+        "contradicted": 0.17,
+        "unclear": 0.29
+      },
+      "confidence": 0.31,
+      "review_required": true,
+      "ordering_scope_probability": 0.33
+    },
+    "O03": {
+      "kind": "ordering",
+      "statement": "A request was sent before a count clear → it completes after the clear → its result does not affect the cleared Counts.",
+      "source": "README.md",
+      "line": 79,
+      "fragment": "Counts` ignores the results of the requests sent before clearing.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.38,
+        "contradicted": 0.02,
+        "unclear": 0.6
+      },
+      "confidence": 0.4,
+      "review_required": true,
+      "ordering_scope_probability": 0.18
+    },
+    "O04": {
+      "kind": "ordering",
+      "statement": "An idle Open breaker has no State, admission or completion calls → time is exactly at the timeout deadline → state changes autonomously and immediately to HalfOpen.",
+      "source": "README.md",
+      "line": 50,
+      "fragment": "after which the state of `CircuitBreaker` becomes half-open.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.32,
+        "contradicted": 0.0,
+        "unclear": 0.68
+      },
+      "confidence": 0.52,
+      "review_required": true,
+      "ordering_scope_probability": 0.01
+    },
+    "O05": {
+      "kind": "ordering",
+      "statement": "A breaker changes state with nonnil OnStateChange → state and counts are committed while the breaker holds its mutex → callback runs inside the same lock and returns before public calls can proceed.",
+      "source": "README.md",
+      "line": 58,
+      "fragment": "`OnStateChange` is called whenever the state of `CircuitBreaker` changes.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.0,
+        "unclear": 1.0
+      },
+      "confidence": 1.0,
+      "review_required": true,
+      "ordering_scope_probability": 0.01
+    }
+  }
+}

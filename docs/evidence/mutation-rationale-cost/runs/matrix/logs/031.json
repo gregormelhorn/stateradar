@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,sys,pathlib\nfor n in ('requirements','source','tests'):\n d=json.loads((pathlib.Path(sys.argv[1])/(n+'.review.json')).read_text())\n print(n, d.keys())\n for i,q in enumerate(d['questions'],1): print(i, q)\n print('Claim structure:',str(next(iter(d['claims'].values())))[:1400])\n for k,c in d['claims'].items():\n  if c.get('citation_check')!='ok' or (c.get('judgment') or {}).get('choice') in ('contradicted','unclear'): print(k,c)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

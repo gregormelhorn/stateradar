@@ -1,0 +1,54 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "b341426f68cc2df84aa275ea246656d31393b5f769986571024f7e0b299e50a8",
+  "input_tokens": 4165,
+  "cost_microdollars": 175,
+  "reservation_microdollars": 708,
+  "checks": {
+    "S01": {
+      "kind": "claim",
+      "statement": "Panic stops ordinary execution and runs deferred functions.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/builtin/builtin.go",
+      "line": 273,
+      "fragment": "The panic built-in function stops normal execution",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.62,
+        "contradicted": 0.0,
+        "unclear": 0.38
+      },
+      "confidence": 0.43,
+      "review_required": true
+    },
+    "S02": {
+      "kind": "claim",
+      "statement": "Direct recover inside a deferred function stops the panicking sequence and retrieves the panic value.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/builtin/builtin.go",
+      "line": 291,
+      "fragment": "stops the panicking sequence",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.89,
+        "contradicted": 0.0,
+        "unclear": 0.11
+      },
+      "confidence": 0.83,
+      "review_required": true
+    },
+    "S03": {
+      "kind": "claim",
+      "statement": "Without a panic recover returns nil.",
+      "source": "/opt/homebrew/Cellar/go/1.27.3/libexec/src/builtin/builtin.go",
+      "line": 296,
+      "fragment": "recover returns nil.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.57,
+        "contradicted": 0.06,
+        "unclear": 0.37
+      },
+      "confidence": 0.35,
+      "review_required": true
+    }
+  }
+}

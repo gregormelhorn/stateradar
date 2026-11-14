@@ -1,0 +1,258 @@
+{
+  "Configure": [
+    "C",
+    "C",
+    "A:17:Normalizes durations to defaults; phrase accepts as typed means accepted input, not retained duration",
+    "D:16:Second construction allocates a distinct instance"
+  ],
+  "Execute": [
+    "A:15:Self-target staying means handle",
+    "C",
+    "C",
+    "C",
+    "H:06:Instant wording misses mutex delay",
+    "C",
+    "A:08:Runtime fault means handle crash when applicable"
+  ],
+  "Allow": [
+    "C",
+    "C",
+    "C",
+    "C",
+    "C"
+  ],
+  "ReportSuccess": [
+    "C",
+    "C",
+    "H:09:Stale accounting alone is discarded; expiry may still run"
+  ],
+  "ReportFailure": [
+    "C",
+    "C",
+    "C",
+    "H:09:Stale accounting alone is discarded; expiry may still run"
+  ],
+  "ReadState": [
+    "C",
+    "D:05:Equality stays Open",
+    "A:08:Nil receiver crashes; zero-value CircuitBreaker.State can return Closed"
+  ],
+  "ReadCounts": [
+    "C",
+    "D:19:Independent snapshots are observed, no documented atomicity contract or ignored call"
+  ],
+  "ReadName": [
+    "C",
+    "A:08:Nil receiver crashes"
+  ],
+  "RequestResult": [
+    "C",
+    "H:09:Accounting is skipped but classifier and raw return still occur",
+    "Q:04"
+  ],
+  "Classify": [
+    "C",
+    "C",
+    "Q:07",
+    "Q:13"
+  ],
+  "TripDecision": [
+    "C",
+    "C",
+    "C",
+    "Q:02"
+  ],
+  "Notify": [
+    "C",
+    "D:18:Hook receives name plus previous and new state",
+    "Q:01",
+    "A:18:Repeated name payload maps to handle, dedup is open"
+  ],
+  "ObserveExpiry": [
+    "C",
+    "D:05:Equality does not advance",
+    "D:05:No queued event; a fresh call samples time"
+  ],
+  "ApplySuccess": [
+    "C",
+    "C"
+  ],
+  "ApplyFailure": [
+    "C",
+    "C",
+    "C"
+  ],
+  "UV-01": [
+    "Q:04",
+    "H:07:Request re-panic can be replaced during accounting",
+    "D:04:Caller departure alone has no ignore policy or slot cleanup"
+  ],
+  "UV-02": [
+    "Q:09",
+    "C"
+  ],
+  "UV-03": [
+    "C",
+    "C"
+  ],
+  "UV-04": [
+    "A:08:Nil Execute is a crash only if admitted",
+    "A:08:Valid wrong receiver uses ordinary handle or refusal",
+    "A:08:Receiver mode and method decide crash versus return"
+  ],
+  "UV-05": [
+    "C",
+    "D:04:No queue; before admission no budget is consumed",
+    "D:04:Callback omission has no documented disposal"
+  ],
+  "UV-06": [
+    "C",
+    "C"
+  ],
+  "UV-07": [
+    "Q:04"
+  ],
+  "UV-08": [
+    "H:09:Expiry may still run",
+    "H:09:Promotion can be caused by stale report",
+    "C"
+  ],
+  "UV-09": [
+    "D:03:Duplicate current-generation report can count or close early",
+    "Q:03"
+  ],
+  "UV-10": [
+    "D:18:Nil invocation panics without a refusal signal at invocation; a valid closure can report without work",
+    "A:18:Nil invocation maps to handle crash"
+  ],
+  "UV-11": [
+    "C",
+    "C",
+    "C"
+  ],
+  "UV-12": [
+    "H:19:State may mutate generation or transition while reading"
+  ],
+  "UV-13": [
+    "Q:07",
+    "Q:04"
+  ],
+  "UV-14": [
+    "C",
+    "Q:13"
+  ],
+  "UV-15": [
+    "Q:02"
+  ],
+  "UV-16": [
+    "C",
+    "Q:01"
+  ],
+  "UV-17": [
+    "A:18:Duplicate-looking notification maps to handle; ownership unresolved",
+    "H:18:External invocation is outside the breaker call path, no ignore handler"
+  ],
+  "UV-18": [
+    "D:05:Equality stays",
+    "D:05:No queued timer event",
+    "Q:05"
+  ],
+  "UV-20": [
+    "A:08:Omitting construction leads to different behavior depending on receiver and method",
+    "D:16:Second constructor allocates"
+  ],
+  "UV-21": [
+    "A:17:Normalization is a handle path",
+    "C"
+  ],
+  "P-01a": [
+    "H:05:State can run after admission but before result"
+  ],
+  "P-01b": [
+    "C"
+  ],
+  "P-02a": [
+    "C"
+  ],
+  "P-02b": [
+    "C"
+  ],
+  "P-03a": [
+    "H:10:At full capacity first Allow rejects"
+  ],
+  "P-03b": [
+    "C"
+  ],
+  "P-04a": [
+    "H:10:New Allow can fail before older trial reopens"
+  ],
+  "P-04b": [
+    "C"
+  ],
+  "P-05a": [
+    "C"
+  ],
+  "P-05b": [
+    "H:09:Expiry before report can invalidate it"
+  ],
+  "P-06a": [
+    "D:09:Old report can advance expired Open to HalfOpen; a matched failure opens"
+  ],
+  "P-06b": [
+    "C"
+  ],
+  "P-07a": [
+    "C"
+  ],
+  "P-07b": [
+    "C"
+  ],
+  "P-08a": [
+    "D:19:If failure trips, fresh Counts is cleared and omits failure"
+  ],
+  "P-08b": [
+    "C"
+  ],
+  "P-09a": [
+    "C"
+  ],
+  "P-09b": [
+    "H:19:Snapshot independence is observed"
+  ],
+  "P-10a": [
+    "D:13:Raw return can precede completion lock; reader can observe old state"
+  ],
+  "P-10b": [
+    "C"
+  ],
+  "P-11a": [
+    "D:09:Classifier return is before accounting and can race a reset"
+  ],
+  "P-11b": [
+    "C"
+  ],
+  "P-12a": [
+    "H:07:Admission hinges on hook returning after commit"
+  ],
+  "P-12b": [
+    "H:07:Reader can panic while committing half-open; later Allow can admit"
+  ],
+  "P-13a": [
+    "C"
+  ],
+  "P-13b": [
+    "C"
+  ],
+  "P-14a": [
+    "C"
+  ],
+  "P-14b": [
+    "D:10:Failure first reopens and makes earlier-generation success stale"
+  ],
+  "P-15a": [
+    "H:02:External reader waits and reentrant reader blocks"
+  ],
+  "P-15b": [
+    "C"
+  ]
+}

@@ -1,0 +1,91 @@
+group G-01 request limit default: proven
+group G-02 interval default: proven
+group G-03 timeout default: proven
+group G-04 trip policy default: proven
+group G-05 classifier default: proven
+group G-06 admission: proven
+group G-07 matching generation: proven
+group G-08 default trip: proven
+group G-09 half-open success threshold: proven
+group G-10 closed interval sentinel: proven
+group G-13 configured observer: proven
+group G-14 same target: proven
+group G-16 recover returned a value: proven
+group G-17 completion dispatch: proven
+group G-18 mode dispatch: proven
+group G-19 default classification: proven
+group G-20 admission error: proven
+group G-11 sampled expiry: not-formalizable: clock: Go Time comparison uses live sampled time and monotonic or wall representations
+  Inspection: now before or equal expiry stays, strictly after changes; zero Closed expiry disables. gobreaker.go:337 and gobreaker.go:341.
+group G-12 custom policy: not-formalizable: external-call: arbitrary callback can block or panic before yielding a Boolean
+  Inspection: true trips, false stays with incremented failure count; runtime exit uses deferred unlock. gobreaker.go:295 and gobreaker.go:325-327.
+group G-15 classifier and request: not-formalizable: external-call: workload and classifier may not return or may report arbitrary results
+  Inspection: normal error is classified, panic recovery can bypass the normal classification, and matching generation controls accounting. gobreaker.go:234-244 and gobreaker.go:299.
+
+Boundary probes and assumptions
+G-01 request limit default assumptions: [setting >= 0, setting <= 4294967295]
+  {'setting': 0} -> first
+  {'setting': 1} -> otherwise
+  {'setting': 4294967295} -> otherwise
+G-02 interval default assumptions: [duration >= -9223372036854775808, duration < 9223372036854775808]
+  {'duration': -1} -> first
+  {'duration': 0} -> first
+  {'duration': 1} -> otherwise
+G-03 timeout default assumptions: [duration >= -9223372036854775808, duration < 9223372036854775808]
+  {'duration': -1} -> first
+  {'duration': 0} -> first
+  {'duration': 1} -> otherwise
+G-04 trip policy default assumptions: typed Boolean
+  {'nil': True} -> first
+  {'nil': False} -> otherwise
+G-05 classifier default assumptions: typed Boolean
+  {'nil': True} -> first
+  {'nil': False} -> otherwise
+G-06 admission assumptions: [state >= 0, state <= 2, count >= 0, count <= 4294967295, limit >= 1, limit <= 4294967295]
+  {'state': 0, 'count': 1, 'limit': 2} -> accept
+  {'state': 0, 'count': 2, 'limit': 2} -> accept
+  {'state': 0, 'count': 3, 'limit': 2} -> accept
+  {'state': 1, 'count': 1, 'limit': 2} -> accept
+  {'state': 1, 'count': 2, 'limit': 2} -> half-open refusal
+  {'state': 1, 'count': 3, 'limit': 2} -> half-open refusal
+  {'state': 2, 'count': 1, 'limit': 2} -> open refusal
+  {'state': 2, 'count': 2, 'limit': 2} -> open refusal
+  {'state': 2, 'count': 3, 'limit': 2} -> open refusal
+G-07 matching generation assumptions: [epoch >= 0, epoch <= 18446744073709551615, before >= 0, before <= 18446744073709551615]
+  {'epoch': 1, 'before': 2} -> otherwise
+  {'epoch': 2, 'before': 2} -> first
+  {'epoch': 3, 'before': 2} -> otherwise
+G-08 default trip assumptions: [count >= 0, count <= 4294967295]
+  {'count': 4} -> otherwise
+  {'count': 5} -> otherwise
+  {'count': 6} -> first
+G-09 half-open success threshold assumptions: [count >= 0, count <= 4294967295, limit >= 1, limit <= 4294967295]
+  {'count': 1, 'limit': 2} -> otherwise
+  {'count': 2, 'limit': 2} -> first
+  {'count': 3, 'limit': 2} -> first
+G-10 closed interval sentinel assumptions: [duration >= 0, duration >= -9223372036854775808, duration < 9223372036854775808]
+  {'duration': 0} -> first
+  {'duration': 1} -> otherwise
+G-13 configured observer assumptions: typed Boolean
+  {'nil': True} -> otherwise
+  {'nil': False} -> first
+G-14 same target assumptions: [state >= 0, state <= 2, target >= 0, target <= 2]
+  {'state': 0, 'target': 1} -> otherwise
+  {'state': 1, 'target': 1} -> first
+  {'state': 2, 'target': 1} -> otherwise
+G-16 recover returned a value assumptions: typed Boolean
+  {'nil': True} -> otherwise
+  {'nil': False} -> first
+G-17 completion dispatch assumptions: typed Boolean
+  {'success': True} -> first
+  {'success': False} -> otherwise
+G-18 mode dispatch assumptions: [state >= 0, state <= 2]
+  {'state': 0} -> closed
+  {'state': 1} -> half-open
+  {'state': 2} -> open
+G-19 default classification assumptions: typed Boolean
+  {'nil': True} -> first
+  {'nil': False} -> otherwise
+G-20 admission error assumptions: typed Boolean
+  {'nil': True} -> otherwise
+  {'nil': False} -> first

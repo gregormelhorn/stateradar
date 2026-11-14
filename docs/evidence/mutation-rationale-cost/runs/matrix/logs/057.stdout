@@ -1,0 +1,20 @@
+=== RUN   TestPilotDuplicateAndAbandoned
+--- PASS: TestPilotDuplicateAndAbandoned (0.00s)
+=== RUN   TestPilotStaleReportReconcilesOpen
+--- PASS: TestPilotStaleReportReconcilesOpen (0.00s)
+=== RUN   TestPilotSameCallerWhilePending
+--- PASS: TestPilotSameCallerWhilePending (0.00s)
+=== RUN   TestPilotReentryBounded
+=== RUN   TestPilotReentryBounded/notify
+=== RUN   TestPilotReentryBounded/trip
+--- PASS: TestPilotReentryBounded (0.06s)
+    --- PASS: TestPilotReentryBounded/notify (0.03s)
+    --- PASS: TestPilotReentryBounded/trip (0.03s)
+=== RUN   TestPilotTripPanicDoubleAccounting
+--- PASS: TestPilotTripPanicDoubleAccounting (0.00s)
+=== RUN   TestPilotNotificationPanicReplacesRequestPanic
+--- PASS: TestPilotNotificationPanicReplacesRequestPanic (0.00s)
+=== RUN   TestPilotGoexitAbandonsAdmission
+--- PASS: TestPilotGoexitAbandonsAdmission (0.00s)
+PASS
+ok  	github.com/sony/gobreaker	0.488s

@@ -1,0 +1,33 @@
+17:// clock reading and a monotonic clock reading; later time-telling
+20:// monotonic clock reading.
+39:// The Time returned by time.Now contains a monotonic clock reading.
+40:// If Time t has a monotonic clock reading, t.Add adds the same duration to
+41:// both the wall clock and monotonic clock readings to compute the result.
+43:// computations, they always strip any monotonic clock reading from their results.
+45:// of the wall time, they also strip any monotonic clock reading from their results.
+46:// The canonical way to strip a monotonic clock reading is to use t = t.Round(0).
+48:// If Times t and u both contain monotonic clock readings, the operations
+50:// using the monotonic clock readings alone, ignoring the wall clock
+51:// readings. If either t or u contains no monotonic clock reading, these
+61:// Because the monotonic clock reading has no meaning outside
+68:// no monotonic clock reading.
+70:// The monotonic clock reading exists only in [Time] values. It is not
+75:// also the [Location] and the monotonic clock reading. See the
+80:// clock reading if present. If t != u because of different monotonic clock readings,
+132:// Location and the monotonic clock reading. Therefore, Time values should not
+135:// through use of the UTC or Local method, and that the monotonic clock reading
+142:	// and optional monotonic clock reading in nanoseconds.
+151:	// signed 64-bit monotonic clock reading, nanoseconds since process start.
+171:// These helpers for manipulating the wall and monotonic clock readings
+225:// stripMono strips the monotonic clock reading in t.
+233:// setMono sets the monotonic clock reading in t.
+234:// If t cannot hold a monotonic clock reading,
+248:// mono returns t's monotonic clock reading.
+252:// monotonic clock reading as well.
+260:// IsZero reports whether t represents the zero time instant,
+280:// Before reports whether the time instant t is before u.
+1169:// Add returns the time t+d.
+1320:// runtimeNow returns the current time.
+1346:// Now returns the current local time.
+1776:// If d <= 0, Truncate returns t stripped of any monotonic clock reading but otherwise unchanged.
+1793:// If d <= 0, Round returns t stripped of any monotonic clock reading but otherwise unchanged.

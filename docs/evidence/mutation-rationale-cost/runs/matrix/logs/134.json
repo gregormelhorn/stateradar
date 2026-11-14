@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport json,sys\nd=Path(sys.argv[1]); p=d/'extraction.md'\nlines=['## Executed probe checks']\nreasons={'probe-04':'Retained. The channel closes on first entry, the second Execute returns synchronously, Counts is read while release remains blocked, and a nonblocking receive checks that the first has not returned. The race-enabled overlay passed.',\n'probe-06':'Retained. The callback increments calls before throwing and the assertion separately tests Requests, TotalFailures and calls. The race-enabled overlay passed.',\n'probe-08':'Retained. The checked predicate is the branch immediately above the failure message. It reads public State and Counts after the panic is recovered. The race-enabled overlay passed.'}\nfor k,c in json.loads((d/'verify-probes.jev.json').read_text())['checks'].items():\n lines.append(f'- {k} — {c[\"statement\"]} {c[\"source\"]}:{c[\"line\"]} (\"{c[\"fragment\"]}\"). Jev {c[\"choice\"]}. '+reasons.get(k,'The assertion and its scheduling setup were reviewed against the executed result.'))\nwith p.open('a') as f:f.write('\\n'+'\\n\\n'.join(lines)+'\\n')\np=d/'adversarial-traces.md';s=p.read_text()\ns=s.replace('Pair headings describe observable order.','Pair headings describe the observed API or callback order.')\ns=s.replace('There is no library shutdown API.','The library exposes no shutdown API.')\ns=s.replace('No second slot is admitted.','No second slot is admitted. The resulting public state remains HalfOpen while the admission projection is StateHalfOpenSaturated.')\np.write_text(s)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

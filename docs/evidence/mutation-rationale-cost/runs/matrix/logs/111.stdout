@@ -1,0 +1,4 @@
+30:    r'- Reachability: (\S+) → (\S+) — ([\w./-]+):([1-9]\d*) \("(.{4,})"\)'
+44:        if not line.lstrip().startswith("- Reachability:"):
+172:                # State has no outgoing transitions — is it a documented sink?
+174:                    f"state '{s}' has no outgoing transitions and is not marked terminal"

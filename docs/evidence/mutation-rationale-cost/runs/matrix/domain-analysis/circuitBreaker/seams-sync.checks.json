@@ -1,0 +1,16 @@
+[
+  {
+    "id": "seams-sync-01",
+    "kind": "claim",
+    "statement": "A goroutine invoking Lock on an already held Mutex blocks until the mutex is available.",
+    "line": 43,
+    "fragment": "// If the lock is already in use, the calling goroutine"
+  },
+  {
+    "id": "seams-sync-02",
+    "kind": "claim",
+    "statement": "A Mutex must not be copied after first use.",
+    "line": 20,
+    "fragment": "// A Mutex must not be copied after first use."
+  }
+]

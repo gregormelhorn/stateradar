@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys\nd=Path(sys.argv[1])\np=d/'adversarial-traces.md';s=p.read_text().replace('as_is_test.go:88 (\"ordered success','as_is_test.go:104 (\"ordered success');p.write_text(s)\np=d/'as-is-validation.md';s=p.read_text()\ns += '\\nThe final full non-race overlay suite passed (133). The final probe-only race suite passed (134). The late-failure branch now asserts an Open notification directly before the next State visit, which can immediately observe elapsed expiry in this fixture. The added P-03a assertion observes StateClosed after the refused second admission and before the next admission.\\n'\np.write_text(s)\np=d/'summary.md';s=p.read_text().replace('| Go full overlay race run |','| Final full non-race overlay suite and probe-only race suite | PASS, logs 133 and 134. |\\n| Pilot artifact audit | PILOT DELIVERABLES: OK (presence and source anchor), log 129. Git emitted xcrun cache-permission warnings while successfully resolving HEAD. |\\n| Go full overlay race run |')\ns=s.replace('The model run classified 126 situational rows', 'The pairs table uses representative orderings for shared mutable effects. Immutable Name reads commute; construction has no prior instance to race; calls on alternate front ends cannot share one public receiver. Alternate same-effect callback/admission schedules are covered in UV and free traces. The displayed pairs are not the Cartesian product of public methods and every fault variant.\\n\\nThe model run classified 126 situational rows')\np.write_text(s)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

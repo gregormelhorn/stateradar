@@ -1,0 +1,9 @@
+Completed the CircuitBreaker pilot in [domain-analysis/circuitBreaker](/private/tmp/stateradar-mutation-cost-matrix/selective/pool/domain-analysis/circuitBreaker/summary.md). The analysis covers 4 states, 30 events, 56 interaction orderings, and 120 matrix cells. All [19 domain questions](/private/tmp/stateradar-mutation-cost-matrix/selective/pool/domain-analysis/circuitBreaker/open-questions.md) remain open.
+
+- A single TwoStep callback can report success twice and close a half-open breaker before two distinct trials complete. An omitted report can leave the half-open admission budget exhausted indefinitely.
+- Synchronous reentry from `ReadyToTrip` or `OnStateChange` into a locking breaker method stalls. A trip-policy panic can count one failure twice, and a notification panic can replace the original request panic after the state change commits.
+- A stale completion can trigger expiry reconciliation and notification before its outcome is discarded.
+
+The baseline Go suite and all nine isolated probes passed. The full race-detector run flagged an unlocked counter read in the existing `TestCustomCircuitBreaker`. The isolated probes passed under the race detector. Source, existing tests, and configuration were left intact.
+
+The strict sidecar, matrix, guards, reachability, blind coverage, and final audit passed. The [blind diff](/private/tmp/stateradar-mutation-cost-matrix/selective/pool/domain-analysis/circuitBreaker/part-b-diff.md) classified all 178 returned situations. All routed model calls completed.

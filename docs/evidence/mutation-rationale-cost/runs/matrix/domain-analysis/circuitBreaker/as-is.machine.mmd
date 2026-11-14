@@ -1,0 +1,24 @@
+stateDiagram-v2
+[*] --> StateClosed: constructor initializes generation
+StateClosed --> StateClosed: expired interval observed / clear counts and advance generation
+StateClosed --> StateOpen: current failure trips policy
+StateOpen --> StateHalfOpen: State or stale completion first observes expiry
+StateOpen --> StateHalfOpenSaturated: expired admission takes sole slot
+StateHalfOpen --> StateHalfOpenSaturated: admission takes final slot
+StateHalfOpen --> StateClosed: repeated success on same callback reaches threshold
+StateHalfOpen --> StateOpen: current failure
+StateHalfOpenSaturated --> StateClosed: current success reaches threshold
+StateHalfOpenSaturated --> StateOpen: current failure
+note right of StateHalfOpenSaturated
+Admission budget is per generation.
+Missing reports leave the budget consumed.
+end note
+note left of StateClosed
+The constructor establishes the initial generation.
+State, admission and accounting reconcile the clock.
+Name and Counts do not reconcile time.
+end note
+note right of StateOpen
+Work admitted in older generations can still run.
+Its accounting is discarded after time reconciliation.
+end note

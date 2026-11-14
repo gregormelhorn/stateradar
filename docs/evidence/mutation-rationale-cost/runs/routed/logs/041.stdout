@@ -1,0 +1,177 @@
+[
+  {
+    "file": "gobreaker.go",
+    "line": 177,
+    "fragment": "\tcb.toNewGeneration(time.Now())"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 185,
+    "fragment": "\t\tcb: NewCircuitBreaker(st),"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 189,
+    "fragment": "const defaultInterval = time.Duration(0) * time.Second"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 190,
+    "fragment": "const defaultTimeout = time.Duration(60) * time.Second"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 193,
+    "fragment": "\treturn counts.ConsecutiveFailures > 5"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 197,
+    "fragment": "\treturn err == nil"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 202,
+    "fragment": "\treturn cb.name"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 207,
+    "fragment": "\tcb.mutex.Lock()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 208,
+    "fragment": "\tdefer cb.mutex.Unlock()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 210,
+    "fragment": "\tnow := time.Now()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 211,
+    "fragment": "\tstate, _ := cb.currentState(now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 217,
+    "fragment": "\tcb.mutex.Lock()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 218,
+    "fragment": "\tdefer cb.mutex.Unlock()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 220,
+    "fragment": "\treturn cb.counts"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 224,
+    "fragment": "// Execute returns an error instantly if the CircuitBreaker rejects the request."
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 229,
+    "fragment": "\tgeneration, err := cb.beforeRequest()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 231,
+    "fragment": "\t\treturn nil, err"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 234,
+    "fragment": "\tdefer func() {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 235,
+    "fragment": "\t\te := recover()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 237,
+    "fragment": "\t\t\tcb.afterRequest(generation, false)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 238,
+    "fragment": "\t\t\tpanic(e)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 242,
+    "fragment": "\tresult, err := req()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 243,
+    "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 244,
+    "fragment": "\treturn result, err"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 263,
+    "fragment": "// register the success or failure in a separate step. If the circuit breaker doesn't allow"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 265,
+    "fragment": "func (tscb *TwoStepCircuitBreaker) Allow() (done func(success bool), err error) {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 266,
+    "fragment": "\tgeneration, err := tscb.cb.beforeRequest()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 268,
+    "fragment": "\t\treturn nil, err"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 271,
+    "fragment": "\treturn func(success bool) {"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 272,
+    "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 277,
+    "fragment": "\tcb.mutex.Lock()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 278,
+    "fragment": "\tdefer cb.mutex.Unlock()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 280,
+    "fragment": "\tnow := time.Now()"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 281,
+    "fragment": "\tstate, generation := cb.currentState(now)"
+  },
+  {
+    "file": "gobreaker.go",
+    "line": 284,
+    "fragment": "\t\treturn generation, ErrOpenState"
+  }
+]

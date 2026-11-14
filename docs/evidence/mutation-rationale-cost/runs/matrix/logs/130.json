@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport json,sys\nd=Path(sys.argv[1]); p=d/'_probe/pilot_test.go'; l=p.read_text().splitlines()\nvalues={\n'duplicate success state':'Two true calls on a single half-open completion can leave the breaker Closed.',\n'after abandonment:':'An omitted completion can leave a half-open breaker rejecting a later call with ErrTooManyRequests.',\n'state notifications before':'Calling a stale report can trigger a HalfOpen notification before another admission.',\n'counts before first returns':'The second Execute can complete and count its result while the first remains pending.',\n'same-goroutine State reentry returned':'The probe expects the callback State reentry not to return in its observation window.',\n'counts=%+v calls':'A policy panic can lead to two closed failure-accounting attempts for one admission.',\n'got != \"notification\"':'The notification panic replaces the original request panic in this schedule.',\n'transition did not commit':'State Open and zeroed counts remain committed when notification panics.',\n'second admission after open expiry':'The first post-expiry Allow can consume the sole half-open slot.'\n}\na=[]\nfor i,(k,v) in enumerate(values.items(),1):\n n=next(i for i,s in enumerate(l,1) if k in s)\n a.append(dict(id=f'probe-{i:02}',kind='claim',statement=v,line=n,fragment=l[n-1].strip()))\n(d/'verify-probes.checks.json').write_text(json.dumps(a,indent=2)+'\\n')\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

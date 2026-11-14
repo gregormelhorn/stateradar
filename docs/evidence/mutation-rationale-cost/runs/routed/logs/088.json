@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,sys\nj=json.load(open(sys.argv[1]))\nfor k,v in j['checks'].items():print(k,v['choice'],v.get('ordering_scope_probability'))",
+    "domain-analysis/circuitBreaker/ordering-review.json"
+  ],
+  "exit_code": 0
+}

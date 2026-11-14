@@ -1,0 +1,72 @@
+[
+  {
+    "id": "seams-01",
+    "kind": "claim",
+    "statement": "ReadyToTrip receives a copy when a request fails in closed state.",
+    "line": 95,
+    "fragment": "// ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state."
+  },
+  {
+    "id": "seams-02",
+    "kind": "claim",
+    "statement": "A true return from ReadyToTrip leads to Open.",
+    "line": 96,
+    "fragment": "// If ReadyToTrip returns true, the CircuitBreaker will be placed into the open state."
+  },
+  {
+    "id": "seams-03",
+    "kind": "claim",
+    "statement": "OnStateChange is called when the breaker state changes.",
+    "line": 100,
+    "fragment": "// OnStateChange is called whenever the state of the CircuitBreaker changes."
+  },
+  {
+    "id": "seams-04",
+    "kind": "claim",
+    "statement": "IsSuccessful receives the error from an ordinary request return.",
+    "line": 102,
+    "fragment": "// IsSuccessful is called with the error returned from a request."
+  },
+  {
+    "id": "seams-05",
+    "kind": "claim",
+    "statement": "A true IsSuccessful result is counted as success.",
+    "line": 103,
+    "fragment": "// If IsSuccessful returns true, the error is counted as a success."
+  },
+  {
+    "id": "seams-06",
+    "kind": "claim",
+    "statement": "A false IsSuccessful result is counted as failure.",
+    "line": 104,
+    "fragment": "// Otherwise the error is counted as a failure."
+  },
+  {
+    "id": "seams-07",
+    "kind": "claim",
+    "statement": "Allow exposes a callback for the caller to register success or failure separately.",
+    "line": 262,
+    "fragment": "// Allow checks if a new request can proceed. It returns a callback that should be used to"
+  },
+  {
+    "id": "seams-08",
+    "kind": "claim",
+    "statement": "Disallowed Allow returns an error.",
+    "line": 264,
+    "fragment": "// requests, it returns an error."
+  },
+  {
+    "id": "seams-09",
+    "kind": "claim",
+    "statement": "The default classifier returns true exactly when the error is nil.",
+    "line": 197,
+    "fragment": "return err == nil"
+  },
+  {
+    "id": "seams-10",
+    "kind": "claim",
+    "statement": "The default trip policy returns true above five consecutive failures.",
+    "line": 193,
+    "fragment": "return counts.ConsecutiveFailures > 5"
+  }
+]

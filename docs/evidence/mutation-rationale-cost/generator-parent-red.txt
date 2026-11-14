@@ -1,0 +1,15 @@
+Baseline: 0e7ff1c; current regression test copied into isolated archive after implementation.
+E
+======================================================================
+ERROR: test_generator_preserves_bindings_and_refuses_silent_loss_or_drift (__main__.RationaleTests.test_generator_preserves_bindings_and_refuses_silent_loss_or_drift)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/stateradar-rationale-parent-probe/tools/selftest/test_cell_rationale.py", line 34, in test_generator_preserves_bindings_and_refuses_silent_loss_or_drift
+    self.assertEqual(refreshed['rationaleVersion'],1)
+                     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'rationaleVersion'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.111s
+
+FAILED (errors=1)

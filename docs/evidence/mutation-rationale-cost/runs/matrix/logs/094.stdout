@@ -1,0 +1,27 @@
+def _parse_guard_results(path: Path) -> list[GuardGroup]:
+    """guard-results.txt as tools/guard_proofs.render writes it ('group G-01
+    name: proven', findings indented), plus the run's own
+    'not-formalizable: <category>: <reason>' lines."""
+    if not path.is_file():
+        return []
+    groups: list[GuardGroup] = []
+    for line in path.read_text(encoding="utf-8").split("\n"):
+        if not line.startswith("group"):
+            continue
+        # The outcome is the first outcome word after a colon; the group
+        # name before it may itself contain colons ("Get: dispose").
+        m = re.match(r"^group[ \t]+(G-[\w.-]+)\b.*?:[ \t]*(proven|violation|not-formalizable)\b"
+                     r"(?:[ \t]*:[ \t]*(.*?))?[ \t]*$", line)
+        if not m:
+            _note(f"{path.name}: group line without an outcome (proven, violation, "
+                  f"not-formalizable): {line.strip()[:80]!r}")
+            continue
+        group: GuardGroup = {"id": m.group(1), "outcome": cast(GuardOutcome, m.group(2))}
+        if m.group(3) and m.group(3).strip():
+            group["reason"] = m.group(3).strip()
+        groups.append(group)
+    return groups
+
+
+def _load_overlay(analysis_root: Path) -> Overlay:
+    """sidecar-overlay.yaml — skip list, question aliases, citations."""

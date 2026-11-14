@@ -1,0 +1,23 @@
+[
+  {
+    "id": "S01",
+    "kind": "claim",
+    "statement": "Panic stops ordinary execution and runs deferred functions.",
+    "line": 273,
+    "fragment": "The panic built-in function stops normal execution"
+  },
+  {
+    "id": "S02",
+    "kind": "claim",
+    "statement": "Direct recover inside a deferred function stops the panicking sequence and retrieves the panic value.",
+    "line": 291,
+    "fragment": "stops the panicking sequence"
+  },
+  {
+    "id": "S03",
+    "kind": "claim",
+    "statement": "Without a panic recover returns nil.",
+    "line": 296,
+    "fragment": "recover returns nil."
+  }
+]

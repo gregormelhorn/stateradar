@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,sys,collections\nfrom pathlib import Path\nj=json.loads((Path(sys.argv[1])/'analysis.json').read_text())\nfor k,v in j.items():\n if isinstance(v,list): print(k,len(v))\nprint(collections.Counter(c['disposition'] for c in j['cells']))\nprint([x for x in j['pairs'] if 'P-03' in str(x)])\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

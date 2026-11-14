@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import re,sys\nfrom pathlib import Path\np=Path(sys.argv[1])\ngroups={}\nfor l in p.read_text().splitlines():\n c=[x.strip() for x in l.split('|')[1:-1]]\n if len(c)==4 and c[0] not in ('id','---'):\n  groups.setdefault(c[0],[]).append(c[1:])\nfor k,v in groups.items():print(k,len(v),'/'.join(x[1] for x in v))\n",
+    "domain-analysis/circuitBreaker/part-b-blind.md"
+  ],
+  "exit_code": 0
+}

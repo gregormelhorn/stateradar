@@ -1,0 +1,15 @@
+usage: gen_analysis_sidecar.py [-h] [--root ROOT]
+                               [--analysis-dir ANALYSIS_DIR] [--strict]
+                               [components ...]
+
+positional arguments:
+  components
+
+options:
+  -h, --help            show this help message and exit
+  --root ROOT
+  --analysis-dir ANALYSIS_DIR
+                        analysis root relative to --root (default: domain-
+                        analysis)
+  --strict              exit 1 when the run printed a note (a dropped table, a
+                        declared state without a row)

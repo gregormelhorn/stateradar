@@ -1,0 +1,66 @@
+     1	// Copyright 2009 The Go Authors. All rights reserved.
+     2	// Use of this source code is governed by a BSD-style
+     3	// license that can be found in the LICENSE file.
+     4	
+     5	// Package sync provides basic synchronization primitives such as mutual
+     6	// exclusion locks. Other than the [Once] and [WaitGroup] types, most are intended
+     7	// for use by low-level library routines. Higher-level synchronization is
+     8	// better done via channels and communication.
+     9	//
+    10	// Values containing the types defined in this package should not be copied.
+    11	package sync
+    12	
+    13	import (
+    14		isync "internal/sync"
+    15	)
+    16	
+    17	// A Mutex is a mutual exclusion lock.
+    18	// The zero value for a Mutex is an unlocked mutex.
+    19	//
+    20	// A Mutex must not be copied after first use.
+    21	//
+    22	// In the terminology of [the Go memory model],
+    23	// the n'th call to [Mutex.Unlock] “synchronizes before” the m'th call to [Mutex.Lock]
+    24	// for any n < m.
+    25	// A successful call to [Mutex.TryLock] is equivalent to a call to Lock.
+    26	// A failed call to TryLock does not establish any “synchronizes before”
+    27	// relation at all.
+    28	//
+    29	// [the Go memory model]: https://go.dev/ref/mem
+    30	type Mutex struct {
+    31		_ noCopy
+    32	
+    33		mu isync.Mutex
+    34	}
+    35	
+    36	// A Locker represents an object that can be locked and unlocked.
+    37	type Locker interface {
+    38		Lock()
+    39		Unlock()
+    40	}
+    41	
+    42	// Lock locks m.
+    43	// If the lock is already in use, the calling goroutine
+    44	// blocks until the mutex is available.
+    45	func (m *Mutex) Lock() {
+    46		m.mu.Lock()
+    47	}
+    48	
+    49	// TryLock tries to lock m and reports whether it succeeded.
+    50	//
+    51	// Note that while correct uses of TryLock do exist, they are rare,
+    52	// and use of TryLock is often a sign of a deeper problem
+    53	// in a particular use of mutexes.
+    54	func (m *Mutex) TryLock() bool {
+    55		return m.mu.TryLock()
+    56	}
+    57	
+    58	// Unlock unlocks m.
+    59	// It is a run-time error if m is not locked on entry to Unlock.
+    60	//
+    61	// A locked [Mutex] is not associated with a particular goroutine.
+    62	// It is allowed for one goroutine to lock a Mutex and then
+    63	// arrange for another goroutine to unlock it.
+    64	func (m *Mutex) Unlock() {
+    65		m.mu.Unlock()
+    66	}

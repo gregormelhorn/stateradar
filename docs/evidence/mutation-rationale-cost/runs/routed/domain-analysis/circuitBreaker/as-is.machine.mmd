@@ -1,0 +1,13 @@
+stateDiagram-v2
+    [*] --> Closed: Configure / start generation
+    Closed --> Closed: Admit, count matched outcomes, or observe interval expiry
+    Closed --> Open: Matched failure and ReadyToTrip returns true
+    Open --> Open: Reject if expiry is at or after sampled time
+    Open --> HalfOpen: Qualifying call samples strictly after expiry
+    HalfOpen --> HalfOpen: Admit below limit, reject at limit, or count subthreshold success
+    HalfOpen --> Closed: Matched success meets threshold
+    HalfOpen --> Open: Matched failure
+    note right of HalfOpen
+      Expiry is zero. Admission count saturates.
+      Outstanding work lives in callers, separately from breaker state.
+    end note

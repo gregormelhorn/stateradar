@@ -1,0 +1,392 @@
+{
+  "source": "gobreaker_test.go",
+  "source_sha256": "ad355380e1cb2d25de87ac8b66e7d12fc25d75d8e6b18bee38f3bbb1e1c35758",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 5035,
+    "output_tokens": 2126,
+    "cost_microdollars": 4062,
+    "reservation_microdollars": 19048
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 9576,
+    "cost_microdollars": 403,
+    "reservation_microdollars": 1504,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "State constants are defined as StateClosed=0, StateHalfOpen=1, StateOpen=2.",
+      "line": 116,
+      "fragment": "assert.Equal(t, State(0), StateClosed)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.85,
+          "contradicted": 0.0,
+          "unclear": 0.15
+        },
+        "confidence": 0.77
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "State.String returns 'closed', 'half-open', 'open' for the three states, and 'unknown state: 100' for State(100).",
+      "line": 120,
+      "fragment": "assert.Equal(t, StateClosed.String(), \"closed\")",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.5,
+          "contradicted": 0.0,
+          "unclear": 0.5
+        },
+        "confidence": 0.25
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "A CircuitBreaker created with empty Settings has empty name, maxRequests 1, interval 0, timeout 60s, non-nil readyToTrip, nil onStateChange, state StateClosed, zero Counts, and zero expiry.",
+      "line": 131,
+      "fragment": "assert.Equal(t, time.Duration(60)*time.Second, defaultCB.timeout)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.34,
+          "contradicted": 0.0,
+          "unclear": 0.66
+        },
+        "confidence": 0.49
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "A CircuitBreaker created from custom settings retains the configured name, MaxRequests, Interval, Timeout, and a non-nil OnStateChange, starting in StateClosed with zero Counts and non-zero expiry.",
+      "line": 147,
+      "fragment": "assert.False(t, customCB.expiry.IsZero())",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.46,
+          "contradicted": 0.01,
+          "unclear": 0.53
+        },
+        "confidence": 0.3
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "Negative Interval and Timeout settings are treated as defaults: interval becomes 0 and timeout becomes 60s.",
+      "line": 153,
+      "fragment": "assert.Equal(t, time.Duration(60)*time.Second, negativeDurationCB.timeout)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.76,
+          "contradicted": 0.01,
+          "unclear": 0.23
+        },
+        "confidence": 0.64
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "In StateClosed, consecutive failures accumulate in Counts (Requests, TotalFailures, ConsecutiveFailures) and a following success resets ConsecutiveFailures to 0 while incrementing Successes.",
+      "line": 172,
+      "fragment": "Counts{6, 1, 5, 1, 0}",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.73,
+          "contradicted": 0.08,
+          "unclear": 0.19
+        },
+        "confidence": 0.6
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "In StateClosed, reaching 6 consecutive failures trips the breaker to StateOpen and clears Counts to zero, with expiry set non-zero.",
+      "line": 182,
+      "fragment": "assert.Equal(t, StateOpen, defaultCB.State())",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.4,
+          "contradicted": 0.0,
+          "unclear": 0.6
+        },
+        "confidence": 0.4
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "Requests made in StateOpen return an error and do not change Counts.",
+      "line": 186,
+      "fragment": "assert.Error(t, succeed(defaultCB))",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.53,
+          "contradicted": 0.0,
+          "unclear": 0.47
+        },
+        "confidence": 0.3
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "While StateOpen, after 59s of pseudoSleep the state remains StateOpen; after an additional 1s (over Timeout) the state transitions to StateHalfOpen and expiry is zeroed.",
+      "line": 195,
+      "fragment": "assert.Equal(t, StateHalfOpen, defaultCB.State())",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.41,
+          "contradicted": 0.0,
+          "unclear": 0.59
+        },
+        "confidence": 0.38
+      }
+    },
+    "C10": {
+      "kind": "ordering",
+      "statement": "Sequence: from StateHalfOpen, a single failed request returns the breaker to StateOpen, clears Counts, and sets a non-zero expiry.",
+      "line": 199,
+      "fragment": "assert.Nil(t, fail(defaultCB))",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.51,
+          "contradicted": 0.01,
+          "unclear": 0.48
+        },
+        "confidence": 0.26,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C11": {
+      "kind": "ordering",
+      "statement": "Sequence: after another 60s of pseudoSleep, StateOpen transitions to StateHalfOpen with expiry zeroed; then a success transitions StateHalfOpen to StateClosed with cleared Counts and zero expiry.",
+      "line": 210,
+      "fragment": "assert.Nil(t, succeed(defaultCB))",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.4,
+          "contradicted": 0.0,
+          "unclear": 0.6
+        },
+        "confidence": 0.4,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "In the custom breaker, after 29s pseudoSleep a success is counted (Counts{11,6,5,1,0}); after 1 more second (over Interval) a failure resets Counts to {1,0,1,0,1}.",
+      "line": 234,
+      "fragment": "Counts{1, 0, 1, 0, 1}",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.86,
+          "contradicted": 0.01,
+          "unclear": 0.13
+        },
+        "confidence": 0.79
+      }
+    },
+    "C13": {
+      "kind": "ordering",
+      "statement": "Sequence in custom breaker: a success then a failure yielding failure ratio 2/3 >= 0.6 trips the breaker from StateClosed to StateOpen, clearing Counts, and invokes OnStateChange with \"cb\", StateClosed→StateOpen.",
+      "line": 242,
+      "fragment": "assert.Equal(t, StateChange{\"cb\", StateClosed, StateOpen}, stateChange)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.75,
+          "contradicted": 0.0,
+          "unclear": 0.25
+        },
+        "confidence": 0.62,
+        "ordering_scope_probability": 0.04
+      }
+    },
+    "C14": {
+      "kind": "ordering",
+      "statement": "Sequence: pseudoSleeping custom breaker by 90s transitions StateOpen to StateHalfOpen, and OnStateChange is invoked for StateOpen→StateHalfOpen.",
+      "line": 248,
+      "fragment": "assert.Equal(t, StateChange{\"cb\", StateOpen, StateHalfOpen}, stateChange)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92,
+        "ordering_scope_probability": 0.05
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "In StateHalfOpen, successes increment Counts up to MaxRequests; when MaxRequests (3) is reached, an additional request returns an error while Counts shows {3,2,0,2,0}.",
+      "line": 259,
+      "fragment": "assert.Error(t, succeed(customCB)) // over MaxRequests",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.01,
+          "unclear": 0.02
+        },
+        "confidence": 0.96
+      }
+    },
+    "C16": {
+      "kind": "ordering",
+      "statement": "Sequence: after the third consecutive success completes in StateHalfOpen, the breaker transitions to StateClosed, Counts cleared, expiry non-zero, and OnStateChange invoked StateHalfOpen→StateClosed.",
+      "line": 264,
+      "fragment": "assert.Equal(t, StateChange{\"cb\", StateHalfOpen, StateClosed}, stateChange)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.77,
+          "contradicted": 0.01,
+          "unclear": 0.22
+        },
+        "confidence": 0.66,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "TwoStepCircuitBreaker mirrors CircuitBreaker state transitions for failure/success flows: counting failures, tripping at 6 consecutive failures, open-to-halfopen after timeout, halfopen-to-open on failure, and halfopen-to-closed on success.",
+      "line": 290,
+      "fragment": "assert.Equal(t, StateOpen, tscb.State())",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.17,
+          "contradicted": 0.0,
+          "unclear": 0.83
+        },
+        "confidence": 0.74
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "A panic in the requested function propagates as a panic, and Counts records it as a failure ({1,0,1,0,1}).",
+      "line": 326,
+      "fragment": "Counts{1, 0, 1, 0, 1}",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92
+      }
+    },
+    "C19": {
+      "kind": "claim",
+      "statement": "A request spanning an Interval boundary (previous generation) does not affect Counts after the new generation starts counting.",
+      "line": 340,
+      "fragment": "the request from the previous generation has no effect on customCB.counts",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C20": {
+      "kind": "claim",
+      "statement": "With a custom IsSuccessful returning true, failures are recorded as successes (Counts{5,5,0,5,0}).",
+      "line": 355,
+      "fragment": "Counts{5, 5, 0, 5, 0}",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C21": {
+      "kind": "ordering",
+      "statement": "Sequence: after replacing IsSuccessful to require err==nil, 6 consecutive failures trip the breaker to StateOpen.",
+      "line": 365,
+      "fragment": "assert.Equal(t, StateOpen, cb.State())",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.81,
+          "contradicted": 0.0,
+          "unclear": 0.19
+        },
+        "confidence": 0.72,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C22": {
+      "kind": "claim",
+      "statement": "Under 10 goroutines each doing 10000 requests concurrently, all succeed and total Counts record {100000, 100000, 0, 100000, 0}.",
+      "line": 391,
+      "fragment": "Counts{total, total, 0, total, 0}",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.9,
+          "contradicted": 0.02,
+          "unclear": 0.08
+        },
+        "confidence": 0.85
+      }
+    }
+  },
+  "questions": [
+    "What is the default readyToTrip criterion that causes StateClosed to StateOpen after 6 consecutive failures in the default breaker? The source only shows this behaviour, not the default function's definition.",
+    "What happens in StateHalfOpen to the Counts after the breaking success that transitions to StateClosed — does any per-request counter observe the third success before counts clear?",
+    "The custom breaker's OnStateChange is invoked for Closed→Open, Open→HalfOpen, and HalfOpen→Closed; is it ever invoked for other transitions (e.g., HalfOpen→Open or Open-from-tripped-after-timeout) and for what values?",
+    "In TestCustomCircuitBreaker line 247, assert.True(t, defaultCB.expiry.IsZero()) is asserted on defaultCB, not customCB — is this a test bug or does it reflect intended behaviour?",
+    "How does expiry behave at creation time: custom settings produce non-zero expiry at line 147, yet no explicit setting of expiry is shown; what initializes expiry?",
+    "What is the exact semantics of the generation mechanism such that a request from a previous generation has 'no effect' on Counts (line 340)?",
+    "For TwoStepCircuitBreaker, does done(true)/done(false) get invoked exactly once and what happens on double-done or on panic within the wrapped function?",
+    "Does StateOpen ever automatically transition to StateHalfOpen without State()/request being called, or is expiry only examined lazily? The pseudoSleep-based tests only observe via State().",
+    "When StateHalfOpen has already exhausted MaxRequests, what error does the extra request return, and does that error affect Counts?",
+    "Why does line 247 check defaultCB.expiry instead of customCB.expiry — is the ordering claim about Open→HalfOpen expiry-zeroing for customCB established by any line?"
+  ],
+  "review_required": true
+}

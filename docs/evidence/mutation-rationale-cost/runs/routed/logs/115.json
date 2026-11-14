@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys\nd=Path(sys.argv[1])\np=d/'adversarial-traces.md';s=p.read_text().replace('as_is_test.go:77 (\"done(true)\")','as_is_test.go:88 (\"ordered success left state %v\")')\np.write_text(s)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,73 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "e865dbe0cc0ef4cba439b69ed3a1aa991ea9081d7f507f7ccb942680e060c1f7",
+  "input_tokens": 2921,
+  "cost_microdollars": 123,
+  "reservation_microdollars": 518,
+  "checks": {
+    "orderings-01": {
+      "kind": "ordering",
+      "statement": "Closed breaker uses the default ReadyToTrip → policy is presented counts whose consecutive failures are six → default policy returns true.",
+      "source": "README.md",
+      "line": 56,
+      "fragment": "Default `ReadyToTrip` returns true when the number of consecutive failures is more than 5.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.87,
+        "contradicted": 0.0,
+        "unclear": 0.13
+      },
+      "confidence": 0.8,
+      "review_required": true,
+      "ordering_scope_probability": 0.06
+    },
+    "orderings-02": {
+      "kind": "ordering",
+      "statement": "Open breaker reaches exactly Timeout with no API activity → clock reaches equality → the stored state autonomously becomes half-open and synchronously calls any installed handler.",
+      "source": "README.md",
+      "line": 50,
+      "fragment": "after which the state of `CircuitBreaker` becomes half-open.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.17,
+        "contradicted": 0.0,
+        "unclear": 0.83
+      },
+      "confidence": 0.74,
+      "review_required": true,
+      "ordering_scope_probability": 0.01
+    },
+    "orderings-03": {
+      "kind": "ordering",
+      "statement": "A request was sent before Counts cleared → its result arrives after clearing → Counts ignores that result.",
+      "source": "README.md",
+      "line": 79,
+      "fragment": "`Counts` ignores the results of the requests sent before clearing.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.68,
+        "contradicted": 0.01,
+        "unclear": 0.31
+      },
+      "confidence": 0.52,
+      "review_required": true,
+      "ordering_scope_probability": 0.19
+    },
+    "orderings-04": {
+      "kind": "ordering",
+      "statement": "Open breaker has an unrelated callback holding its mutex → another actor calls Execute before expiry → caller receives a rejection immediately despite contention.",
+      "source": "README.md",
+      "line": 88,
+      "fragment": "`Execute` returns an error instantly if `CircuitBreaker` rejects the request.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.04,
+        "contradicted": 0.0,
+        "unclear": 0.96
+      },
+      "confidence": 0.94,
+      "review_required": true,
+      "ordering_scope_probability": 0.01
+    }
+  }
+}

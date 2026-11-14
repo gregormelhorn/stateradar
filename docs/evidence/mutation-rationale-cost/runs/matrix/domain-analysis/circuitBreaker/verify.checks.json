@@ -1,0 +1,219 @@
+[
+  {
+    "id": "verify-01",
+    "kind": "claim",
+    "statement": "Admission acquires the mutex before it samples time or evaluates the rejection gate.",
+    "line": 277,
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "verify-02",
+    "kind": "claim",
+    "statement": "Outcome accounting acquires the mutex before reconciling time.",
+    "line": 294,
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "verify-03",
+    "kind": "claim",
+    "statement": "State invokes reconciliation and can mutate breaker state or generation.",
+    "line": 211,
+    "fragment": "state, _ := cb.currentState(now)"
+  },
+  {
+    "id": "verify-04",
+    "kind": "claim",
+    "statement": "Counts returns stored counts without checking expiry.",
+    "line": 220,
+    "fragment": "return cb.counts"
+  },
+  {
+    "id": "verify-05",
+    "kind": "claim",
+    "statement": "Half-open admission rejects at equality with its configured maximum.",
+    "line": 285,
+    "fragment": "} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+  },
+  {
+    "id": "verify-06",
+    "kind": "claim",
+    "statement": "Admission increments Requests before delivering a completion callback.",
+    "line": 289,
+    "fragment": "cb.counts.onRequest()"
+  },
+  {
+    "id": "verify-07",
+    "kind": "claim",
+    "statement": "Every invocation of the returned callback attempts accounting with the same captured generation.",
+    "line": 272,
+    "fragment": "tscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "verify-08",
+    "kind": "claim",
+    "statement": "Outcome handling reconciles time before checking generation mismatch.",
+    "line": 298,
+    "fragment": "state, generation := cb.currentState(now)"
+  },
+  {
+    "id": "verify-09",
+    "kind": "claim",
+    "statement": "A stale generation causes the outcome write to be skipped.",
+    "line": 299,
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "verify-10",
+    "kind": "claim",
+    "statement": "The classifier runs before the generation check applied by afterRequest.",
+    "line": 243,
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+  },
+  {
+    "id": "verify-11",
+    "kind": "claim",
+    "statement": "Current half-open success increments success counters.",
+    "line": 315,
+    "fragment": "cb.counts.onSuccess()"
+  },
+  {
+    "id": "verify-12",
+    "kind": "claim",
+    "statement": "Current half-open success at threshold enters Closed.",
+    "line": 316,
+    "fragment": "if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+  },
+  {
+    "id": "verify-13",
+    "kind": "claim",
+    "statement": "Current half-open failure enters Open.",
+    "line": 330,
+    "fragment": "cb.setState(StateOpen, now)"
+  },
+  {
+    "id": "verify-14",
+    "kind": "claim",
+    "statement": "A current closed-state failure increments failure counters before trip policy runs.",
+    "line": 325,
+    "fragment": "cb.counts.onFailure()"
+  },
+  {
+    "id": "verify-15",
+    "kind": "claim",
+    "statement": "Trip policy runs in the same locked call as failure accounting.",
+    "line": 326,
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+  },
+  {
+    "id": "verify-16",
+    "kind": "claim",
+    "statement": "Notification executes synchronously while the transition caller holds the lock.",
+    "line": 359,
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+  },
+  {
+    "id": "verify-17",
+    "kind": "claim",
+    "statement": "State is assigned before notification runs.",
+    "line": 354,
+    "fragment": "cb.state = state"
+  },
+  {
+    "id": "verify-18",
+    "kind": "claim",
+    "statement": "Generation and counters are reset before notification.",
+    "line": 356,
+    "fragment": "cb.toNewGeneration(now)"
+  },
+  {
+    "id": "verify-19",
+    "kind": "claim",
+    "statement": "The Execute recover path invokes failure accounting again when outcome handling panics.",
+    "line": 237,
+    "fragment": "cb.afterRequest(generation, false)"
+  },
+  {
+    "id": "verify-20",
+    "kind": "claim",
+    "statement": "Execute reraises its recovered panic value only if failure accounting returns.",
+    "line": 238,
+    "fragment": "panic(e)"
+  },
+  {
+    "id": "verify-21",
+    "kind": "claim",
+    "statement": "Admission occurs before Execute installs its recovery defer.",
+    "line": 229,
+    "fragment": "generation, err := cb.beforeRequest()"
+  },
+  {
+    "id": "verify-22",
+    "kind": "claim",
+    "statement": "A nil request will be invoked if admission succeeded.",
+    "line": 242,
+    "fragment": "result, err := req()"
+  },
+  {
+    "id": "verify-23",
+    "kind": "claim",
+    "statement": "Execute returns the original result and error regardless of successful classification.",
+    "line": 244,
+    "fragment": "return result, err"
+  },
+  {
+    "id": "verify-24",
+    "kind": "claim",
+    "statement": "Generation increments on reset as a uint64 field.",
+    "line": 364,
+    "fragment": "cb.generation++"
+  },
+  {
+    "id": "verify-25",
+    "kind": "claim",
+    "statement": "Requests increments on admission, with no decrement in this method.",
+    "line": 56,
+    "fragment": "c.Requests++"
+  },
+  {
+    "id": "verify-26",
+    "kind": "claim",
+    "statement": "The returned callback closes over its wrapper and captured generation.",
+    "line": 271,
+    "fragment": "return func(success bool) {"
+  },
+  {
+    "id": "verify-27",
+    "kind": "claim",
+    "statement": "Each instance sets fixed expiry from a sampled instant plus timeout.",
+    "line": 376,
+    "fragment": "cb.expiry = now.Add(cb.timeout)"
+  },
+  {
+    "id": "verify-28",
+    "kind": "claim",
+    "statement": "Name reads the configured name without acquiring a mutex.",
+    "line": 202,
+    "fragment": "return cb.name"
+  },
+  {
+    "id": "verify-29",
+    "kind": "claim",
+    "statement": "Open reconciliation waits for a strict Before comparison.",
+    "line": 341,
+    "fragment": "if cb.expiry.Before(now) {"
+  },
+  {
+    "id": "verify-30",
+    "kind": "claim",
+    "statement": "Periodic closed expiry is reanchored to the time of reconciliation.",
+    "line": 373,
+    "fragment": "cb.expiry = now.Add(cb.interval)"
+  },
+  {
+    "id": "verify-31",
+    "kind": "claim",
+    "statement": "The TwoStep constructor allocates its own inner breaker.",
+    "line": 185,
+    "fragment": "cb: NewCircuitBreaker(st),"
+  }
+]

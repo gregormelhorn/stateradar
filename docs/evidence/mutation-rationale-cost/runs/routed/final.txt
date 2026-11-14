@@ -1,0 +1,10 @@
+Completed the CircuitBreaker pilot with **22 open domain questions**. The model covers 3 states, 35 events, 105 matrix cells, and 30 representative interaction orderings. The blind pass produced 126 situations, including 19 divergences linked to open questions. [Summary](/private/tmp/stateradar-mutation-cost-routed/selective/pool/domain-analysis/circuitBreaker/summary.md) · [Open questions](/private/tmp/stateradar-mutation-cost-routed/selective/pool/domain-analysis/circuitBreaker/open-questions.md)
+
+- `OnStateChange` and `ReadyToTrip` can deadlock when they re-enter a method that takes the same breaker mutex.
+- Calling one two-step completion callback twice can close HalfOpen after only one admitted trial. An abandoned trial can leave a saturated HalfOpen breaker refusing further requests indefinitely.
+- A stale completion can advance an expired Open breaker to HalfOpen before its accounting is discarded. `Counts()` alone leaves expiry unobserved.
+- A callback panic can replace the original request panic. A panicking trip policy can also cause a failure to be counted twice. [Traces](/private/tmp/stateradar-mutation-cost-routed/selective/pool/domain-analysis/circuitBreaker/adversarial-traces.md)
+
+The catalogue, matrix, strict sidecar, reachability, blind coverage, and artifact audit passed. Z3 proved 17 guard groups. Three groups involving clock or callback behavior were reviewed by inspection. The baseline suite and all ten overlay probes passed, including the probe-only race run. The full race run failed on an unsynchronized counter read in the existing `TestCustomCircuitBreaker`. [Validation](/private/tmp/stateradar-mutation-cost-routed/selective/pool/domain-analysis/circuitBreaker/as-is-validation.md)
+
+Flash and Jev completed with no provider failures. The run records the corrected citation rejection and an ordering assertion that supplied the function after acceptance. Source, existing tests, and configuration were untouched.

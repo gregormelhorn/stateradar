@@ -1,0 +1,159 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc",
+  "input_tokens": 4618,
+  "cost_microdollars": 194,
+  "reservation_microdollars": 749,
+  "checks": {
+    "seams-01": {
+      "kind": "claim",
+      "statement": "ReadyToTrip receives a copy when a request fails in closed state.",
+      "source": "gobreaker.go",
+      "line": 95,
+      "fragment": "// ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "seams-02": {
+      "kind": "claim",
+      "statement": "A true return from ReadyToTrip leads to Open.",
+      "source": "gobreaker.go",
+      "line": 96,
+      "fragment": "// If ReadyToTrip returns true, the CircuitBreaker will be placed into the open state.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "seams-03": {
+      "kind": "claim",
+      "statement": "OnStateChange is called when the breaker state changes.",
+      "source": "gobreaker.go",
+      "line": 100,
+      "fragment": "// OnStateChange is called whenever the state of the CircuitBreaker changes.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "seams-04": {
+      "kind": "claim",
+      "statement": "IsSuccessful receives the error from an ordinary request return.",
+      "source": "gobreaker.go",
+      "line": 102,
+      "fragment": "// IsSuccessful is called with the error returned from a request.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.0,
+        "unclear": 0.04
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "seams-05": {
+      "kind": "claim",
+      "statement": "A true IsSuccessful result is counted as success.",
+      "source": "gobreaker.go",
+      "line": 103,
+      "fragment": "// If IsSuccessful returns true, the error is counted as a success.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "seams-06": {
+      "kind": "claim",
+      "statement": "A false IsSuccessful result is counted as failure.",
+      "source": "gobreaker.go",
+      "line": 104,
+      "fragment": "// Otherwise the error is counted as a failure.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "seams-07": {
+      "kind": "claim",
+      "statement": "Allow exposes a callback for the caller to register success or failure separately.",
+      "source": "gobreaker.go",
+      "line": 262,
+      "fragment": "// Allow checks if a new request can proceed. It returns a callback that should be used to",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "seams-08": {
+      "kind": "claim",
+      "statement": "Disallowed Allow returns an error.",
+      "source": "gobreaker.go",
+      "line": 264,
+      "fragment": "// requests, it returns an error.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "seams-09": {
+      "kind": "claim",
+      "statement": "The default classifier returns true exactly when the error is nil.",
+      "source": "gobreaker.go",
+      "line": 197,
+      "fragment": "return err == nil",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "seams-10": {
+      "kind": "claim",
+      "statement": "The default trip policy returns true above five consecutive failures.",
+      "source": "gobreaker.go",
+      "line": 193,
+      "fragment": "return counts.ConsecutiveFailures > 5",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.01,
+        "unclear": 0.0
+      },
+      "confidence": 0.98,
+      "review_required": true
+    }
+  }
+}

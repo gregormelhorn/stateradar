@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys\np=Path(sys.argv[1])/'_probe/pilot_test.go'\ns=p.read_text()\ns+=\"\"\"\nfunc TestPilotAllowThenStateAtOpenExpiry(t *testing.T) {\n cb := NewTwoStepCircuitBreaker(Settings{Timeout: time.Second, ReadyToTrip: func(Counts) bool { return true }})\n pilotAllow(t, cb)(false)\n // Advance only the stored expiry to schedule the next public observation.\n cb.cb.mutex.Lock()\n cb.cb.expiry = time.Now().Add(-time.Second)\n cb.cb.mutex.Unlock()\n first := pilotAllow(t, cb)\n if got := cb.State(); got != StateHalfOpen {\n  t.Fatalf(\"state = %v\", got)\n }\n if _, err := cb.Allow(); err != ErrTooManyRequests {\n  t.Fatalf(\"second admission after open expiry = %v\", err)\n }\n first(true)\n if cb.State() != StateClosed {\n  t.Fatal(\"admitted trial success did not close\")\n }\n}\n\nfunc TestPilotSameOwnerOutstandingBelowBudget(t *testing.T) {\n cb := pilotHalfOpen(t, 2)\n first := pilotAllow(t, cb)\n second := pilotAllow(t, cb)\n first(true)\n if got := cb.Counts(); got.Requests != 2 || got.TotalSuccesses != 1 {\n  t.Fatalf(\"first report accounted as %+v\", got)\n }\n if _, err := cb.Allow(); err != ErrTooManyRequests {\n  t.Fatalf(\"reported slot was refunded: %v\", err)\n }\n second(true)\n if cb.State() != StateClosed {\n  t.Fatal(\"second distinct success did not close\")\n }\n}\n\"\"\"\np.write_text(s)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

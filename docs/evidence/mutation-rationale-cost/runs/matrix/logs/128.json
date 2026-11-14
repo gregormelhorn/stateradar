@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys\nd=Path(sys.argv[1]); p=d/'check_guards.py'; s=p.read_text().replace('from z3 import And, Bool, Int, Not','from z3 import And, Bool, Int, Not, Solver, sat')\ns=s.replace(\"Path(__file__).with_name('guard-results.txt').write_text(report)\",\"\"\"witness = Solver()\nwitness.add(requests == 1, successes == 2, limit == 2)\nwitness.add(successes > requests, successes >= limit)\nstatus = witness.check()\nassert status == sat, 'expected duplicate-completion witness'\nreport += f'SYS-6 distinct admission accounting counterexample: {witness.model()}\\\\n'\nPath(__file__).with_name('guard-results.txt').write_text(report)\"\"\")\np.write_text(s)\np=d/'as-is-validation.md';p.write_text(p.read_text()+'\\nFinal probe-only run with -race passed all nine cases in log 117. The stale-report probe observed the HalfOpen notification before making a new API call.\\n')\np=d/'invariants-and-lints.md';p.write_text(p.read_text()+'\\nThe distinct-admission predicate has a Z3 witness Requests=1, successes=2, limit=2. TestPilotDuplicateAndAbandoned confirms that two such reports from one real callback reach Closed. The guard proof itself still passes because its comparison branches partition the domain.\\n')\np=d/'as-is.machine.mmd';s=p.read_text()\ns += \"\"\"note left of StateClosed\nThe constructor establishes the initial generation.\nState, admission and accounting reconcile the clock.\nName and Counts do not reconcile time.\nend note\nnote right of StateOpen\nWork admitted in older generations can still run.\nIts accounting is discarded after time reconciliation.\nend note\n\"\"\"\np.write_text(s)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

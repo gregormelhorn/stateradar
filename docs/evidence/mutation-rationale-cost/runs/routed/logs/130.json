@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys,re\nd=Path(sys.argv[1])\np=d/'_probe/as_is_test.go';s=p.read_text()\ns=s.replace('cb := probeHalfOpen(t, 1)\\n\\t\\tdone, err := cb.Allow()', '''var transitions []State\n\t\tcb := NewTwoStepCircuitBreaker(Settings{\n\t\t\tTimeout: time.Nanosecond,\n\t\t\tReadyToTrip: func(Counts) bool { return true },\n\t\t\tOnStateChange: func(_ string, _, to State) { transitions = append(transitions, to) },\n\t\t})\n\t\ttrip, err := cb.Allow()\n\t\tif err != nil { t.Fatal(err) }\n\t\ttrip(false)\n\t\tif got := cb.State(); got != StateHalfOpen { t.Fatal(got) }\n\t\tdone, err := cb.Allow()''',1)\ns=s.replace('''\t\t} else {\n\t\t\tif got := cb.Counts(); got != (Counts{}) {''','''\t\t} else {\n\t\t\tif len(transitions) != 3 || transitions[2] != StateOpen { t.Fatalf(\"late failure transitions: %v\", transitions) }\n\t\t\tif got := cb.Counts(); got != (Counts{}) {''',1)\np.write_text(s)\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

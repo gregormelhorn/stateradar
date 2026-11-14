@@ -1,0 +1,114 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc",
+  "input_tokens": 4174,
+  "cost_microdollars": 176,
+  "reservation_microdollars": 672,
+  "checks": {
+    "S01": {
+      "kind": "claim",
+      "statement": "ReadyToTrip receives a copy of the counters on a closed-state request failure.",
+      "source": "gobreaker.go",
+      "line": 95,
+      "fragment": "// ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "S02": {
+      "kind": "claim",
+      "statement": "A true ReadyToTrip decision means the breaker enters Open.",
+      "source": "gobreaker.go",
+      "line": 96,
+      "fragment": "// If ReadyToTrip returns true, the CircuitBreaker will be placed into the open state.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "S03": {
+      "kind": "claim",
+      "statement": "The registered OnStateChange callback runs for breaker state changes.",
+      "source": "gobreaker.go",
+      "line": 100,
+      "fragment": "// OnStateChange is called whenever the state of the CircuitBreaker changes.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "S04": {
+      "kind": "claim",
+      "statement": "IsSuccessful takes the error returned by the request.",
+      "source": "gobreaker.go",
+      "line": 102,
+      "fragment": "// IsSuccessful is called with the error returned from a request.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "S05": {
+      "kind": "claim",
+      "statement": "A true IsSuccessful classification means success accounting.",
+      "source": "gobreaker.go",
+      "line": 103,
+      "fragment": "If IsSuccessful returns true, the error is counted as a success.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "S06": {
+      "kind": "claim",
+      "statement": "A false IsSuccessful classification means failure accounting.",
+      "source": "gobreaker.go",
+      "line": 104,
+      "fragment": "// Otherwise the error is counted as a failure.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "S07": {
+      "kind": "claim",
+      "statement": "An admitted Allow supplies a callback for the caller to register the outcome.",
+      "source": "gobreaker.go",
+      "line": 263,
+      "fragment": "// register the success or failure in a separate step.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    }
+  }
+}

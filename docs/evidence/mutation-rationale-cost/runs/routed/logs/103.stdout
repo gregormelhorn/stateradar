@@ -1,0 +1,65 @@
+Configure 4 handle/handle/as-is:/ignore (documented)
+Execute 7 transition → Closed (stays)/reject/transition → HalfOpen/handle/reject/handle/as-is:
+Allow 5 handle/reject/transition → HalfOpen/handle/reject
+ReportSuccess 3 handle/transition → Closed/ignore (documented)
+ReportFailure 4 handle/transition → Open/transition → Open/ignore (documented)
+ReadState 3 handle/transition → HalfOpen/as-is:
+ReadCounts 2 handle/ignore (documented)
+ReadName 2 handle/as-is:
+RequestResult 3 handle/ignore (documented)/UNSPECIFIED
+Classify 4 handle/handle/UNSPECIFIED/UNSPECIFIED
+TripDecision 4 handle/transition → Open/handle/UNSPECIFIED
+Notify 4 ignore (documented)/handle/UNSPECIFIED/as-is:
+ObserveExpiry 3 handle/transition → HalfOpen/defer (queued)
+ApplySuccess 2 transition → Closed/ignore (documented)
+ApplyFailure 3 transition → Open/transition → Open/ignore (documented)
+UV-01 3 UNSPECIFIED/handle/ignore (documented)
+UV-02 2 handle/handle
+UV-03 2 handle/handle
+UV-04 3 as-is:/as-is:/as-is:
+UV-05 3 handle/defer (queued)/ignore (documented)
+UV-06 2 handle/handle
+UV-07 1 UNSPECIFIED
+UV-08 3 ignore (documented)/ignore (documented)/handle
+UV-09 2 ignore (documented)/UNSPECIFIED
+UV-10 2 reject/as-is:
+UV-11 3 handle/handle/handle
+UV-12 1 handle
+UV-13 2 UNSPECIFIED/UNSPECIFIED
+UV-14 2 ignore (documented)/UNSPECIFIED
+UV-15 1 UNSPECIFIED
+UV-16 2 ignore (documented)/UNSPECIFIED
+UV-17 2 as-is:/ignore (documented)
+UV-18 3 transition → HalfOpen/defer (queued)/UNSPECIFIED
+UV-20 2 as-is:/ignore (documented)
+UV-21 2 as-is:/handle
+P-01a 1 handle
+P-01b 1 handle
+P-02a 1 handle
+P-02b 1 handle
+P-03a 1 handle
+P-03b 1 handle
+P-04a 1 handle
+P-04b 1 handle
+P-05a 1 handle
+P-05b 1 handle
+P-06a 1 handle
+P-06b 1 handle
+P-07a 1 handle
+P-07b 1 handle
+P-08a 1 handle
+P-08b 1 handle
+P-09a 1 handle
+P-09b 1 handle
+P-10a 1 handle
+P-10b 1 handle
+P-11a 1 handle
+P-11b 1 handle
+P-12a 1 handle
+P-12b 1 handle
+P-13a 1 handle
+P-13b 1 handle
+P-14a 1 handle
+P-14b 1 handle
+P-15a 1 handle
+P-15b 1 handle

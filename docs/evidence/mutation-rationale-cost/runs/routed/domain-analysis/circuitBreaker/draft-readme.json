@@ -1,0 +1,470 @@
+{
+  "source": "README.md",
+  "source_sha256": "e865dbe0cc0ef4cba439b69ed3a1aa991ea9081d7f507f7ccb942680e060c1f7",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 1549,
+    "output_tokens": 2006,
+    "cost_microdollars": 2872,
+    "reservation_microdollars": 16305
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 6243,
+    "cost_microdollars": 263,
+    "reservation_microdollars": 1069,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "CircuitBreaker is a state machine intended to prevent sending requests that are likely to fail.",
+      "line": 18,
+      "fragment": "The struct `CircuitBreaker` is a state machine to prevent sending requests that are likely to fail.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "NewCircuitBreaker creates a new CircuitBreaker from Settings.",
+      "line": 19,
+      "fragment": "The function `NewCircuitBreaker` creates a new `CircuitBreaker`.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.48,
+          "contradicted": 0.01,
+          "unclear": 0.51
+        },
+        "confidence": 0.26
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "MaxRequests limits the maximum number of requests allowed to pass through when the CircuitBreaker is half-open.",
+      "line": 41,
+      "fragment": "`MaxRequests` is the maximum number of requests allowed to pass through",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.91,
+          "contradicted": 0.0,
+          "unclear": 0.09
+        },
+        "confidence": 0.86
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "If MaxRequests is 0, the CircuitBreaker allows only 1 request.",
+      "line": 43,
+      "fragment": "If `MaxRequests` is 0, `CircuitBreaker` allows only 1 request.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "Interval is the cyclic period of the closed state for clearing the internal Counts.",
+      "line": 45,
+      "fragment": "`Interval` is the cyclic period of the closed state",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.9,
+          "contradicted": 0.0,
+          "unclear": 0.1
+        },
+        "confidence": 0.85
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "If Interval is 0, the CircuitBreaker does not clear the internal Counts during the closed state.",
+      "line": 47,
+      "fragment": "If `Interval` is 0, `CircuitBreaker` doesn't clear the internal `Counts` during the closed state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "Timeout is the period of the open state after which the state becomes half-open.",
+      "line": 49,
+      "fragment": "`Timeout` is the period of the open state,",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.71,
+          "contradicted": 0.0,
+          "unclear": 0.29
+        },
+        "confidence": 0.56
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "If Timeout is 0, the timeout value is set to 60 seconds.",
+      "line": 51,
+      "fragment": "If `Timeout` is 0, the timeout value of `CircuitBreaker` is set to 60 seconds.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.",
+      "line": 53,
+      "fragment": "`ReadyToTrip` is called with a copy of `Counts` whenever a request fails in the closed state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "If ReadyToTrip returns true, the CircuitBreaker is placed into the open state.",
+      "line": 54,
+      "fragment": "If `ReadyToTrip` returns true, `CircuitBreaker` will be placed into the open state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "If ReadyToTrip is nil, a default ReadyToTrip is used.",
+      "line": 55,
+      "fragment": "If `ReadyToTrip` is `nil`, default `ReadyToTrip` is used.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "The default ReadyToTrip returns true when the number of consecutive failures is more than 5.",
+      "line": 56,
+      "fragment": "Default `ReadyToTrip` returns true when the number of consecutive failures is more than 5.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "OnStateChange is called whenever the state of the CircuitBreaker changes.",
+      "line": 58,
+      "fragment": "`OnStateChange` is called whenever the state of `CircuitBreaker` changes.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "IsSuccessful is called with the error returned from a request.",
+      "line": 60,
+      "fragment": "`IsSuccessful` is called with the error returned from a request.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "If IsSuccessful returns true, the error is counted as a success.",
+      "line": 61,
+      "fragment": "If `IsSuccessful` returns true, the error is counted as a success.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "If IsSuccessful returns otherwise, the error is counted as a failure.",
+      "line": 62,
+      "fragment": "Otherwise the error is counted as a failure.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.92,
+          "contradicted": 0.01,
+          "unclear": 0.07
+        },
+        "confidence": 0.88
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "If IsSuccessful is nil, the default IsSuccessful returns false for all non-nil errors.",
+      "line": 63,
+      "fragment": "If `IsSuccessful` is nil, default `IsSuccessful` is used, which returns false for all non-nil errors.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "Counts holds the numbers of requests and their successes/failures.",
+      "line": 65,
+      "fragment": "The struct `Counts` holds the numbers of requests and their successes/failures:",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C19": {
+      "kind": "claim",
+      "statement": "CircuitBreaker clears the internal Counts either on the change of state or at the closed-state intervals.",
+      "line": 77,
+      "fragment": "`CircuitBreaker` clears the internal `Counts` either",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.84,
+          "contradicted": 0.0,
+          "unclear": 0.16
+        },
+        "confidence": 0.76
+      }
+    },
+    "C20": {
+      "kind": "claim",
+      "statement": "Counts ignores the results of requests sent before clearing.",
+      "line": 79,
+      "fragment": "`Counts` ignores the results of the requests sent before clearing.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C21": {
+      "kind": "claim",
+      "statement": "CircuitBreaker can wrap any function to send a request via Execute.",
+      "line": 81,
+      "fragment": "`CircuitBreaker` can wrap any function to send a request:",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C22": {
+      "kind": "claim",
+      "statement": "Execute runs the given request if the CircuitBreaker accepts it.",
+      "line": 87,
+      "fragment": "The method `Execute` runs the given request if `CircuitBreaker` accepts it.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C23": {
+      "kind": "claim",
+      "statement": "Execute returns an error instantly if the CircuitBreaker rejects the request.",
+      "line": 88,
+      "fragment": "`Execute` returns an error instantly if `CircuitBreaker` rejects the request.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C24": {
+      "kind": "claim",
+      "statement": "If accepted, Execute returns the result of the request.",
+      "line": 89,
+      "fragment": "Otherwise, `Execute` returns the result of the request.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C25": {
+      "kind": "claim",
+      "statement": "If a panic occurs in the request, CircuitBreaker handles it as an error and causes the same panic again.",
+      "line": 90,
+      "fragment": "If a panic occurs in the request, `CircuitBreaker` handles it as an error",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.64,
+          "contradicted": 0.0,
+          "unclear": 0.36
+        },
+        "confidence": 0.46
+      }
+    },
+    "C26": {
+      "kind": "ordering",
+      "statement": "A request failing in the closed state causes ReadyToTrip to be called; if it returns true, the CircuitBreaker is placed into the open state.",
+      "line": 54,
+      "fragment": "`CircuitBreaker` will be placed into the open state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.78,
+          "contradicted": 0.0,
+          "unclear": 0.22
+        },
+        "confidence": 0.67,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C27": {
+      "kind": "ordering",
+      "statement": "After the open-state Timeout elapses, the state of CircuitBreaker becomes half-open.",
+      "line": 50,
+      "fragment": "after which the state of `CircuitBreaker` becomes half-open.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0,
+        "ordering_scope_probability": 0.66
+      }
+    }
+  },
+  "questions": [
+    "What are the full set of states and the exact allowed transitions beyond closed, open, and half-open (e.g., half-open to closed, half-open to open)?",
+    "What happens when a request succeeds or fails while in the half-open state?",
+    "How does the CircuitBreaker decide whether to accept or reject a request in each state, beyond the MaxRequests limit for half-open?",
+    "Is the MaxRequests limit applied exactly as a count of requests, and what is the behavior for additional requests beyond that limit in half-open?",
+    "What order are OnStateChange and Counts clearing performed in when a state change occurs?",
+    "Do IsSuccessful and the panic-handling in line 90 interact (is a recovered panic passed to IsSuccessful)?",
+    "What error does Execute return when the CircuitBreaker rejects the request?",
+    "What happens if ReadyToTrip is nil and IsSuccessful is nil simultaneously—are defaults independently applied?",
+    "What exactly constitutes 'more than 5' consecutive failures for the default ReadyToTrip (i.e., is the trip threshold 6)?",
+    "How are Counts fields (Requests, TotalSuccesses, TotalFailures, ConsecutiveSuccesses, ConsecutiveFailures) updated on each request outcome?",
+    "What are the states represented by the `State` type referenced in Settings?",
+    "Is there unspecified behaviour when Interval is nonzero but no requests occur—does clearing still happen cyclically?"
+  ],
+  "review_required": true
+}

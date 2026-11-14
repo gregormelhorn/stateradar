@@ -1,0 +1,249 @@
+{"Time":"2026-11-14T21:37:50.721826+01:00","Action":"start","Package":"github.com/sony/gobreaker"}
+{"Time":"2026-11-14T21:37:51.059222+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone"}
+{"Time":"2026-11-14T21:37:51.059301+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"=== RUN   TestPilotDuplicateDone\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.059355+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"--- PASS: TestPilotDuplicateDone (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.059358+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.059362+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport"}
+{"Time":"2026-11-14T21:37:51.059363+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"=== RUN   TestPilotAbandonAndLateReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.059397+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"--- PASS: TestPilotAbandonAndLateReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.059409+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.059418+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering"}
+{"Time":"2026-11-14T21:37:51.059419+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"=== RUN   TestPilotAdmissionOrdering\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.059457+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"--- PASS: TestPilotAdmissionOrdering (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.059463+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.059483+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes"}
+{"Time":"2026-11-14T21:37:51.059489+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"=== RUN   TestPilotExecuteOvertakes\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.059579+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"--- PASS: TestPilotExecuteOvertakes (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.059618+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.059629+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport"}
+{"Time":"2026-11-14T21:37:51.059631+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"=== RUN   TestPilotExpiryAndStaleReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.061097+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"    pilot_as_is_test.go:165: stale callback observation: [open half-open closed]\n","OutputType":"error"}
+{"Time":"2026-11-14T21:37:51.061107+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"--- FAIL: TestPilotExpiryAndStaleReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.061109+01:00","Action":"fail","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.061111+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn"}
+{"Time":"2026-11-14T21:37:51.061112+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"=== RUN   TestPilotStaleClassifierAndReturn\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.061216+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"--- PASS: TestPilotStaleClassifierAndReturn (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.061229+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.061232+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry"}
+{"Time":"2026-11-14T21:37:51.061233+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"=== RUN   TestPilotCallbackReentry\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.061265+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification"}
+{"Time":"2026-11-14T21:37:51.06127+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"=== RUN   TestPilotCallbackReentry/notification\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.088387+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"--- PASS: TestPilotCallbackReentry/notification (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.088395+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.088402+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy"}
+{"Time":"2026-11-14T21:37:51.088403+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"=== RUN   TestPilotCallbackReentry/policy\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.114725+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"--- PASS: TestPilotCallbackReentry/policy (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.114738+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.114746+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"--- PASS: TestPilotCallbackReentry (0.05s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.11476+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Elapsed":0.05}
+{"Time":"2026-11-14T21:37:51.114766+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics"}
+{"Time":"2026-11-14T21:37:51.114768+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"=== RUN   TestPilotCallbackPanics\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.114918+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"--- PASS: TestPilotCallbackPanics (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.114931+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.114951+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit"}
+{"Time":"2026-11-14T21:37:51.114955+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"=== RUN   TestPilotGoexit\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115018+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"--- PASS: TestPilotGoexit (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115038+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.115044+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves"}
+{"Time":"2026-11-14T21:37:51.115046+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"=== RUN   TestPilotSharedRecoveryWaves\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115366+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"--- PASS: TestPilotSharedRecoveryWaves (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.11538+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.115462+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone"}
+{"Time":"2026-11-14T21:37:51.11547+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"=== RUN   TestPilotDuplicateDone\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115518+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"--- PASS: TestPilotDuplicateDone (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115527+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.115533+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport"}
+{"Time":"2026-11-14T21:37:51.115535+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"=== RUN   TestPilotAbandonAndLateReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115581+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"--- PASS: TestPilotAbandonAndLateReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.11559+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.115616+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering"}
+{"Time":"2026-11-14T21:37:51.115622+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"=== RUN   TestPilotAdmissionOrdering\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115637+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"--- PASS: TestPilotAdmissionOrdering (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115643+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.115653+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes"}
+{"Time":"2026-11-14T21:37:51.115655+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"=== RUN   TestPilotExecuteOvertakes\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115708+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"--- PASS: TestPilotExecuteOvertakes (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.115717+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.115721+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport"}
+{"Time":"2026-11-14T21:37:51.115722+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"=== RUN   TestPilotExpiryAndStaleReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.11704+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"    pilot_as_is_test.go:165: stale callback observation: [open half-open closed]\n","OutputType":"error"}
+{"Time":"2026-11-14T21:37:51.117049+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"--- FAIL: TestPilotExpiryAndStaleReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.117072+01:00","Action":"fail","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.117076+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn"}
+{"Time":"2026-11-14T21:37:51.117077+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"=== RUN   TestPilotStaleClassifierAndReturn\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.117117+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"--- PASS: TestPilotStaleClassifierAndReturn (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.117123+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.117158+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry"}
+{"Time":"2026-11-14T21:37:51.11717+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"=== RUN   TestPilotCallbackReentry\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.117177+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification"}
+{"Time":"2026-11-14T21:37:51.117179+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"=== RUN   TestPilotCallbackReentry/notification\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.14424+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"--- PASS: TestPilotCallbackReentry/notification (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.144248+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.144263+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy"}
+{"Time":"2026-11-14T21:37:51.144266+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"=== RUN   TestPilotCallbackReentry/policy\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.17133+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"--- PASS: TestPilotCallbackReentry/policy (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171351+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.171371+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"--- PASS: TestPilotCallbackReentry (0.05s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171387+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Elapsed":0.05}
+{"Time":"2026-11-14T21:37:51.171391+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics"}
+{"Time":"2026-11-14T21:37:51.171392+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"=== RUN   TestPilotCallbackPanics\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171444+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"--- PASS: TestPilotCallbackPanics (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171451+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.171455+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit"}
+{"Time":"2026-11-14T21:37:51.171456+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"=== RUN   TestPilotGoexit\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171507+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"--- PASS: TestPilotGoexit (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171516+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.171519+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves"}
+{"Time":"2026-11-14T21:37:51.17152+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"=== RUN   TestPilotSharedRecoveryWaves\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171688+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"--- PASS: TestPilotSharedRecoveryWaves (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171694+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.17175+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone"}
+{"Time":"2026-11-14T21:37:51.171755+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"=== RUN   TestPilotDuplicateDone\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171771+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"--- PASS: TestPilotDuplicateDone (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171778+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.17178+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport"}
+{"Time":"2026-11-14T21:37:51.171782+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"=== RUN   TestPilotAbandonAndLateReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171832+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"--- PASS: TestPilotAbandonAndLateReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171837+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.171839+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering"}
+{"Time":"2026-11-14T21:37:51.17184+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"=== RUN   TestPilotAdmissionOrdering\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171877+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"--- PASS: TestPilotAdmissionOrdering (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171883+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.171894+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes"}
+{"Time":"2026-11-14T21:37:51.171897+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"=== RUN   TestPilotExecuteOvertakes\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171945+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"--- PASS: TestPilotExecuteOvertakes (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.171953+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.171956+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport"}
+{"Time":"2026-11-14T21:37:51.171957+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"=== RUN   TestPilotExpiryAndStaleReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.173373+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"    pilot_as_is_test.go:165: stale callback observation: [open half-open closed]\n","OutputType":"error"}
+{"Time":"2026-11-14T21:37:51.173378+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"--- FAIL: TestPilotExpiryAndStaleReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.17338+01:00","Action":"fail","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.173382+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn"}
+{"Time":"2026-11-14T21:37:51.173383+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"=== RUN   TestPilotStaleClassifierAndReturn\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.173447+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"--- PASS: TestPilotStaleClassifierAndReturn (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.173451+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.173454+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry"}
+{"Time":"2026-11-14T21:37:51.173455+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"=== RUN   TestPilotCallbackReentry\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.173483+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification"}
+{"Time":"2026-11-14T21:37:51.173486+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"=== RUN   TestPilotCallbackReentry/notification\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.200579+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"--- PASS: TestPilotCallbackReentry/notification (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.200586+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.200589+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy"}
+{"Time":"2026-11-14T21:37:51.20059+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"=== RUN   TestPilotCallbackReentry/policy\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.228099+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"--- PASS: TestPilotCallbackReentry/policy (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.228199+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.22827+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"--- PASS: TestPilotCallbackReentry (0.05s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.228318+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Elapsed":0.05}
+{"Time":"2026-11-14T21:37:51.228326+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics"}
+{"Time":"2026-11-14T21:37:51.228331+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"=== RUN   TestPilotCallbackPanics\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.228344+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"--- PASS: TestPilotCallbackPanics (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.228391+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.228402+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit"}
+{"Time":"2026-11-14T21:37:51.228407+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"=== RUN   TestPilotGoexit\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.228509+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"--- PASS: TestPilotGoexit (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.228519+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.229247+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves"}
+{"Time":"2026-11-14T21:37:51.229257+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"=== RUN   TestPilotSharedRecoveryWaves\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.229263+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"--- PASS: TestPilotSharedRecoveryWaves (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.229311+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.229316+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone"}
+{"Time":"2026-11-14T21:37:51.22932+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"=== RUN   TestPilotDuplicateDone\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.229329+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"--- PASS: TestPilotDuplicateDone (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.229334+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.229338+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport"}
+{"Time":"2026-11-14T21:37:51.22939+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"=== RUN   TestPilotAbandonAndLateReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.22962+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"--- PASS: TestPilotAbandonAndLateReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.229635+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.229642+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering"}
+{"Time":"2026-11-14T21:37:51.229645+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"=== RUN   TestPilotAdmissionOrdering\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.229775+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"--- PASS: TestPilotAdmissionOrdering (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.229786+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.229835+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes"}
+{"Time":"2026-11-14T21:37:51.22984+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"=== RUN   TestPilotExecuteOvertakes\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.229973+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"--- PASS: TestPilotExecuteOvertakes (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.229984+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.229991+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport"}
+{"Time":"2026-11-14T21:37:51.229997+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"=== RUN   TestPilotExpiryAndStaleReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.231984+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"    pilot_as_is_test.go:165: stale callback observation: [open half-open closed]\n","OutputType":"error"}
+{"Time":"2026-11-14T21:37:51.232104+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"--- FAIL: TestPilotExpiryAndStaleReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.232114+01:00","Action":"fail","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.232121+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn"}
+{"Time":"2026-11-14T21:37:51.232126+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"=== RUN   TestPilotStaleClassifierAndReturn\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.233105+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"--- PASS: TestPilotStaleClassifierAndReturn (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.233117+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.233122+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry"}
+{"Time":"2026-11-14T21:37:51.233126+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"=== RUN   TestPilotCallbackReentry\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.23313+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification"}
+{"Time":"2026-11-14T21:37:51.233141+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"=== RUN   TestPilotCallbackReentry/notification\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.259122+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"--- PASS: TestPilotCallbackReentry/notification (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.259359+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.259372+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy"}
+{"Time":"2026-11-14T21:37:51.259377+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"=== RUN   TestPilotCallbackReentry/policy\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.286067+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"--- PASS: TestPilotCallbackReentry/policy (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.286194+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.286266+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"--- PASS: TestPilotCallbackReentry (0.05s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.286273+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Elapsed":0.05}
+{"Time":"2026-11-14T21:37:51.286276+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics"}
+{"Time":"2026-11-14T21:37:51.286281+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"=== RUN   TestPilotCallbackPanics\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.28707+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"--- PASS: TestPilotCallbackPanics (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.287083+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.287092+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit"}
+{"Time":"2026-11-14T21:37:51.287096+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"=== RUN   TestPilotGoexit\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.287103+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"--- PASS: TestPilotGoexit (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.287108+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.287112+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves"}
+{"Time":"2026-11-14T21:37:51.287115+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"=== RUN   TestPilotSharedRecoveryWaves\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.287551+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"--- PASS: TestPilotSharedRecoveryWaves (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.287592+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.287681+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone"}
+{"Time":"2026-11-14T21:37:51.28772+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"=== RUN   TestPilotDuplicateDone\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.287729+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Output":"--- PASS: TestPilotDuplicateDone (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.287733+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotDuplicateDone","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.287814+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport"}
+{"Time":"2026-11-14T21:37:51.287821+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"=== RUN   TestPilotAbandonAndLateReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.287936+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Output":"--- PASS: TestPilotAbandonAndLateReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.287945+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAbandonAndLateReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.287949+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering"}
+{"Time":"2026-11-14T21:37:51.287952+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"=== RUN   TestPilotAdmissionOrdering\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.28808+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Output":"--- PASS: TestPilotAdmissionOrdering (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.28809+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotAdmissionOrdering","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.288096+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes"}
+{"Time":"2026-11-14T21:37:51.288098+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"=== RUN   TestPilotExecuteOvertakes\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.288213+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Output":"--- PASS: TestPilotExecuteOvertakes (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.288221+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotExecuteOvertakes","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.288225+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport"}
+{"Time":"2026-11-14T21:37:51.288228+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"=== RUN   TestPilotExpiryAndStaleReport\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.291321+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"    pilot_as_is_test.go:165: stale callback observation: [open half-open closed]\n","OutputType":"error"}
+{"Time":"2026-11-14T21:37:51.291397+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Output":"--- FAIL: TestPilotExpiryAndStaleReport (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.291402+01:00","Action":"fail","Package":"github.com/sony/gobreaker","Test":"TestPilotExpiryAndStaleReport","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.291442+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn"}
+{"Time":"2026-11-14T21:37:51.291446+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"=== RUN   TestPilotStaleClassifierAndReturn\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.291455+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Output":"--- PASS: TestPilotStaleClassifierAndReturn (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.291577+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotStaleClassifierAndReturn","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.291584+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry"}
+{"Time":"2026-11-14T21:37:51.291587+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"=== RUN   TestPilotCallbackReentry\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.291592+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification"}
+{"Time":"2026-11-14T21:37:51.291595+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"=== RUN   TestPilotCallbackReentry/notification\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.318298+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Output":"--- PASS: TestPilotCallbackReentry/notification (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.318403+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/notification","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.318422+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy"}
+{"Time":"2026-11-14T21:37:51.318426+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"=== RUN   TestPilotCallbackReentry/policy\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.345963+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Output":"--- PASS: TestPilotCallbackReentry/policy (0.03s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.345997+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry/policy","Elapsed":0.03}
+{"Time":"2026-11-14T21:37:51.346005+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Output":"--- PASS: TestPilotCallbackReentry (0.05s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.346012+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackReentry","Elapsed":0.05}
+{"Time":"2026-11-14T21:37:51.346018+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics"}
+{"Time":"2026-11-14T21:37:51.346021+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"=== RUN   TestPilotCallbackPanics\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.346174+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Output":"--- PASS: TestPilotCallbackPanics (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.346182+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotCallbackPanics","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.346186+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit"}
+{"Time":"2026-11-14T21:37:51.346189+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"=== RUN   TestPilotGoexit\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.346328+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Output":"--- PASS: TestPilotGoexit (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.346336+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotGoexit","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.346339+01:00","Action":"run","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves"}
+{"Time":"2026-11-14T21:37:51.346342+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"=== RUN   TestPilotSharedRecoveryWaves\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.346582+01:00","Action":"output","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Output":"--- PASS: TestPilotSharedRecoveryWaves (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.34659+01:00","Action":"pass","Package":"github.com/sony/gobreaker","Test":"TestPilotSharedRecoveryWaves","Elapsed":0}
+{"Time":"2026-11-14T21:37:51.346593+01:00","Action":"output","Package":"github.com/sony/gobreaker","Output":"FAIL\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.349759+01:00","Action":"output","Package":"github.com/sony/gobreaker","Output":"FAIL\tgithub.com/sony/gobreaker\t0.628s\n","OutputType":"frame"}
+{"Time":"2026-11-14T21:37:51.3498+01:00","Action":"fail","Package":"github.com/sony/gobreaker","Elapsed":0.628}

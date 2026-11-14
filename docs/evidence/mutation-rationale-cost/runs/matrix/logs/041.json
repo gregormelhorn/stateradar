@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys\nd=Path(sys.argv[1]); read=Path('README.md').read_text().splitlines()\nranges=[(18,20),(25,26),(39,66),(77,82),(87,91)]\n(d/'requirements-prose.md').write_text('\\n\\n'.join('\\n'.join(read[a-1:b]) for a,b in ranges)+'\\n')\nsrc=Path('gobreaker.go').read_text().splitlines()\nranges=[(23,23),(25,25),(43,46),(79,105),(116,116),(133,135),(140,140),(182,182),(200,200),(205,205),(215,215),(223,227),(247,247),(252,252),(257,257),(262,264)]\n(d/'contracts.md').write_text('\\n\\n'.join(f'gobreaker.go:{a}'+(f'-{b}' if a!=b else '')+'\\n'+'\\n'.join(s[3:] if s.startswith('// ') else '' for s in src[a-1:b]) for a,b in ranges)+'\\n')\np=d/'as-is.machine.mmd'\np.write_text(p.read_text().replace('StateHalfOpen_Saturated','StateHalfOpenSaturated'))\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

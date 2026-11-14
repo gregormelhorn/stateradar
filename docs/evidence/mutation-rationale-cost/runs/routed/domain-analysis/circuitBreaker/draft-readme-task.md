@@ -1,0 +1,1 @@
+Step 1. Extract normative sentences, states, events, guards, transitions, lifecycle, counters, callback contracts and ambiguities.

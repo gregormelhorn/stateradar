@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import sys,json,collections\nfrom pathlib import Path\nd=Path(sys.argv[1])\nm=json.loads((d/'_probe/diff-review.json').read_text())\nseen=collections.Counter()\nclasses={'C':'convergent','A':'convergent','D':'divergence','Q':'convergent-hole','H':'pass-B-blind-spot'}\nout=[]\nfor row in (d/'part-b-blind.md').read_text().splitlines():\n cells=[s.strip() for s in row.split('|')[1:-1]]\n if len(cells)!=4 or cells[0] in ['id','---']:continue\n k,s,b,_=cells\n cls,*args=m[k][seen[k]].split(':',2)\n seen[k]+=1\n note=args[1] if len(args)>1 else (\"The blind pass flags the same intent gap.\" if cls=='Q' else \"Agrees for the named condition; scope and citations are in the corresponding matrix cell or pair trace.\")\n if cls=='A':note=\"vocabulary-drift. \"+note\n if args:note+=\" (Q-\"+args[0]+\").\"\n out.append('| '+' | '.join([k,s,b,classes[cls],note])+' |')\nassert dict(seen)=={k:len(v) for k,v in m.items()}\nwith (d/'part-b-diff.md').open('a') as f:\n f.write('\\n'.join(out)+'\\n')\nprint(len(out),dict(collections.Counter(row.split(' | ')[3] for row in out)))\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

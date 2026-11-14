@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import sys,json\nfrom pathlib import Path\nd=Path(sys.argv[1]); p=d/'check_guards.py'; s=p.read_text()\nfor a,b in [('G-07 request budget','G-13 request budget'),('G-09 same-state','G-14 same-state'),(\"('G-11','errorNil')\",\"('G-16','errorNil')\"),('G-12 mode dispatch','G-15 mode dispatch')]:s=s.replace(a,b)\np.write_text(s)\np=d/'matrix-fields.json'; data=json.loads(p.read_text())\ndata['guard_notes'] += ['G-13 proven: request budget default at zero, gobreaker.go:147-151.','G-14 proven: same-state suppression, gobreaker.go:349-350.','G-15 proven: mode dispatch, gobreaker.go:310-345.','G-16 proven: default error-nil decision, gobreaker.go:197.']\np.write_text(json.dumps(data,indent=2)+'\\n')",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

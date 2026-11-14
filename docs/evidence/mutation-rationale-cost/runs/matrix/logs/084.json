@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,sys,pathlib\nfor n in ('requirements','source','tests'):\n d=json.loads((pathlib.Path(sys.argv[1])/(n+'.review.json')).read_text())\n print(n)\n for k,c in d['claims'].items():print(k,c['line'],(c.get('jev') or {}).get('choice'),c['statement'])\n",
+    "domain-analysis/circuitBreaker"
+  ],
+  "exit_code": 0
+}

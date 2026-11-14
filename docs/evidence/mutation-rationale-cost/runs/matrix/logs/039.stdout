@@ -1,0 +1,170 @@
+"""Render reviewed matrix fields and check source citations in proposed schedules."""
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+import re
+import sys
+from typing import Any
+
+from draft_cells import DISPOSITIONS, EVENTS_PER_TABLE, HOLES
+from gen_analysis_sidecar import _parse_cell
+from local_models import _citation_error
+
+
+WINDOW_PROMPT = """Propose source-grounded concurrency schedules for this component.
+Use only the supplied source. Domain intent stays open. Return a JSON object
+with one key candidates, a list of up to 8 concise schedule objects. Each object has
+observation, mutator, branch, caller_outcomes, inventory, pending, later_effect
+(nonempty strings), and steps (2 to 10 ordered objects, each with actor,
+action, integer line and verbatim fragment from that numbered source line).
+Keep every string under 180 characters. Use at most 7 steps per candidate.
+Each fragment is a short verbatim substring of one line; use no line ranges.
+
+Enumerate observes, locks, commits, waits and returns within each operation.
+An observation includes failed nonblocking receive/send, readiness and empty
+queues, not just assignments or explicit boolean expressions. Distinguish a
+pointer being present from the readiness or contents of the object it names.
+For each observation before a lock or commit, choose specific other operations
+that can change it in the gap. Cross each changed observation with each
+feasible branch after the gap. For capacity guards check equality and room
+below separately. State whether the earlier observation is repeated. Show
+which caller now returns or waits, what is buffered and what is pending.
+Follow a third caller or later matching input where this distinguishes
+outcomes. Include generation changes, repeated completions, and callbacks
+that may hold or reacquire a lock where applicable. Separate impossible
+orders, or omit them with no claim. Prefer concrete changed outcomes over
+ordinary serial calls. Do not prescribe fixes or claim tests ran.
+"""
+
+
+def review_windows(text: str, source: str) -> list[dict[str, Any]]:
+    """Retain candidates with deterministic problems marked for review."""
+    fence = re.fullmatch(r'\s*```(?:json)?\s*(.*?)\s*```\s*', text, re.S)
+    raw = json.loads(fence[1] if fence else text)
+    candidates = raw.get('candidates') if isinstance(raw, dict) else None
+    if not isinstance(candidates, list) or not 1 <= len(candidates) <= 12:
+        raise ValueError('expected 1 to 12 candidates')
+    result = []
+    fields = ('observation', 'mutator', 'branch', 'caller_outcomes', 'inventory', 'pending', 'later_effect')
+    lines = source.splitlines()
+    for number, item in enumerate(candidates, 1):
+        if not isinstance(item, dict):
+            raise ValueError(f'candidate {number} must be an object')
+        problems = [f'missing or empty {name}' for name in fields
+                    if not isinstance(item.get(name), str) or not item[name].strip()]
+        steps = item.get('steps')
+        if not isinstance(steps, list) or not 2 <= len(steps) <= 10:
+            problems.append('expected 2 to 10 ordered steps')
+        else:
+            for idx, step in enumerate(steps, 1):
+                if not isinstance(step, dict) or not all(
+                        isinstance(step.get(key), str) and step[key].strip()
+                        for key in ('actor', 'action')):
+                    problems.append(f'step {idx}: actor and action required')
+                    continue
+                error = _citation_error(lines, step.get('line'), step.get('fragment'))
+                if error:
+                    problems.append(f'step {idx}: {error}')
+        result.append({**item, 'id': f'W-{number:02}', 'problems': problems, 'review_required': True})
+    return result
+
+
+def identifiers(data: dict, field: str, pattern: str, *, optional: bool = False) -> list[str]:
+    values = data.get(field, [] if optional else None)
+    if (not isinstance(values, list) or (not values and not optional)
+            or not all(isinstance(value, str) and re.fullmatch(pattern, value) for value in values)
+            or len(set(values)) != len(values)):
+        raise ValueError(f'{field} must contain distinct valid identifiers')
+    return values
+
+
+def render_matrix(data: object, repo: Path) -> str:
+    if not isinstance(data, dict):
+        raise ValueError('expected a matrix object')
+    states = identifiers(data, 'states', r'[A-Z][A-Za-z0-9_.]*')
+    events = identifiers(data, 'events', r'[A-Za-z][A-Za-z0-9_-]*')
+    terminal = identifiers(data, 'terminal', r'[A-Z][A-Za-z0-9_.]*', optional=True)
+    if not set(terminal) <= set(states):
+        raise ValueError('terminal names must be declared states')
+    abstraction = data.get('abstraction')
+    if not isinstance(abstraction, str) or not abstraction.strip() or '\n' in abstraction:
+        raise ValueError('abstraction must be a nonempty single line')
+    cells = data.get('cells')
+    if not isinstance(cells, list):
+        raise ValueError('cells must be an array')
+    grid = {}
+    sources: dict[str, list[str]] = {}
+    repo = repo.resolve()
+    errors = []
+    for cell in cells:
+        if not isinstance(cell, dict):
+            raise ValueError('each cell must be an object')
+        state, event = cell.get('state'), cell.get('event')
+        if state not in states or event not in events:
+            errors.append(f'{state} x {event}: unknown state or event')
+            continue
+        pair = state, event
+        if pair in grid:
+            errors.append(f'{state} x {event}: duplicate cell')
+            continue
+        try:
+            grid[pair] = render_cell(cell, states, repo, sources)
+        except ValueError as error:
+            errors.append(f'{state} x {event}: {error}')
+    missing = [(state, event) for state in states for event in events if (state, event) not in grid]
+    if missing and not errors:
+        errors.append(f'{len(missing)} missing cells: ' + ', '.join(f'{s} x {e}' for s, e in missing[:12]))
+    if errors:
+        raise ValueError('\n'.join(errors))
+    output = ['# Disposition matrix', '', f'Abstraction: {abstraction}', '',
+              f'<!-- states: {", ".join(states)} -->', '']
+    if terminal:
+        output += [f'<!-- terminal: {", ".join(terminal)} -->', '']
+    for start in range(0, len(events), EVENTS_PER_TABLE):
+        cols = events[start:start + EVENTS_PER_TABLE]
+        output += ['| State | ' + ' | '.join(cols) + ' |', '|---|' + '---|' * len(cols)]
+        for state in states:
+            output.append(f'| **{state}** | ' + ' | '.join(grid[state, event] for event in cols) + ' |')
+        output.append('')
+    notes = data.get('guard_notes', [])
+    if not isinstance(notes, list) or not all(
+            isinstance(note, str) and note.strip() and '\n' not in note for note in notes):
+        raise ValueError('guard_notes must be a list of nonempty single lines')
+    if notes:
+        output += ['## Guard notes', '', *[f'- {note}' for note in notes], '']
+    return '\n'.join(output)
+
+
+def render_cell(cell: dict, states: list[str], repo: Path, sources: dict[str, list[str]]) -> str:
+    disposition, target = cell.get('disposition'), cell.get('target')
+    if not isinstance(disposition, str) or disposition not in DISPOSITIONS:
+        raise ValueError('invalid disposition')
+    if (disposition == 'transition' and target not in states) or (disposition != 'transition' and target is not None):
+        raise ValueError('only a transition has a declared target')
+    crash = cell.get('crash', False)
+    question, decision = cell.get('q'), cell.get('dr')
+    if type(crash) is not bool or (crash and disposition != 'handle'):
+        raise ValueError('crash must be a boolean and requires handle')
+    if question is not None and (not isinstance(question, str) or not re.fullmatch(r'Q-\d+', question)):
+        raise ValueError('question must be Q-nn')
+    if (disposition in HOLES or crash) and not question:
+        raise ValueError('hole or crash needs a question')
+    if decision is not None and (not isinstance(decision, str) or not re.fullmatch(r'DR-\d+', decision)):
+        raise ValueError('decision must be DR-nnn')
+    note = cell.get('note', '')
+    if not isinstance(note, str) or any(marker in note for marker in ('\n', '\r', '|')):
+        raise ValueError('note must be a single line without a table bar')
+    if crash and not note.strip():
+        raise ValueError('crash needs a note')
+    citation = cell.get('citation')
+    excerpt = ''
+    src_index = {}
+    if citation is not None:
+        if not isinstance(citation, dict) or not isinstance(citation.get('file'), str):
+            raise ValueError('citation needs a repository-relative file')
+        name, line, fragment = citation['file'], citation.get('line'), citation.get('fragment')
+        path = (repo / name).resolve()
+        if not re.fullmatch(r'[\w./-]+\.[A-Za-z]{1,4}', name) or Path(name).is_absolute() or not path.is_relative_to(repo):
+            raise ValueError('citation needs a repository-relative file')

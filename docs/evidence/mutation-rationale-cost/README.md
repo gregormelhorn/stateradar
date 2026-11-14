@@ -56,3 +56,23 @@ Source/test commit: `9b3723e`. Its staleness signal is retained in
 full model, decision and pack acceptance in `reconciled-*.txt`, all exit 0.
 The current model checker verifies 232 structured citation occurrences.
 The live comparison follows the predeclared [protocol](protocol.md).
+
+
+## Completed matched comparison
+
+Both live gobreaker arms used pack `89a4798`, signed-in Sol/medium and the same
+source/settings. Routed: seven gates, $1.1220648 combined conservative equivalent,
+11 rereads. Matrix: nine gates, $1.1681280, 14 rereads. Complete controller usage
+and settled provider accounting exist for both. Both cover all four primary
+controls and kill the supplemental stale-generation mutant in five repetitions.
+Both miss the concrete wrapper-reassignment outcome. Keep routed as the default.
+See [comparison](comparison.md), [coverage review](coverage.md) and
+[machine-readable measurements](measurements.json) for cost assumptions,
+unmetered review boundaries, grouping differences, test depth and raw evidence.
+The old Pool cost gap remains unknown.
+
+`generator-parent-red.txt` is an additional post-implementation regression
+check against isolated parent `0e7ff1c`: its generator drops adopted rationale.
+It is not presented as a pre-implementation run. The final generator preservation
+and refusal tests pass. `final-pack.txt`, `final-rationale.txt` and
+`final-mutation-binding.txt` record the closing repository checks.

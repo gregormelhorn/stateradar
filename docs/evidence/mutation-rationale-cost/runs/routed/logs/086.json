@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "go",
+    "test",
+    "-timeout",
+    "15s",
+    "-count=1",
+    "-overlay",
+    "domain-analysis/circuitBreaker/_probe/overlay.json",
+    "-run",
+    "^TestPilot",
+    "-v",
+    "."
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,331 @@
+[
+  {
+    "id": "V01",
+    "kind": "claim",
+    "line": 207,
+    "statement": "The State method acquires the breaker mutex before observing state.",
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "V02",
+    "kind": "claim",
+    "line": 217,
+    "statement": "Counts takes the breaker mutex before reading counters.",
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "V03",
+    "kind": "claim",
+    "line": 277,
+    "statement": "Admission acquires the breaker mutex before expiry processing or checking capacity.",
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "V04",
+    "kind": "claim",
+    "line": 294,
+    "statement": "Completion takes the same breaker mutex before consulting current state.",
+    "fragment": "cb.mutex.Lock()"
+  },
+  {
+    "id": "V05",
+    "kind": "claim",
+    "line": 359,
+    "statement": "setState invokes the configured notification hook inline.",
+    "fragment": "cb.onStateChange(cb.name, prev, state)"
+  },
+  {
+    "id": "V06",
+    "kind": "claim",
+    "line": 356,
+    "statement": "The transition initializes the next generation before calling the observer.",
+    "fragment": "cb.toNewGeneration(now)"
+  },
+  {
+    "id": "V07",
+    "kind": "claim",
+    "line": 354,
+    "statement": "The new stored mode is assigned before generation initialization.",
+    "fragment": "cb.state = state"
+  },
+  {
+    "id": "V08",
+    "kind": "claim",
+    "line": 326,
+    "statement": "After counting a closed failure the code calls the configured trip policy inline.",
+    "fragment": "if cb.readyToTrip(cb.counts) {"
+  },
+  {
+    "id": "V09",
+    "kind": "claim",
+    "line": 325,
+    "statement": "A closed failure increments the counter before evaluating trip policy.",
+    "fragment": "cb.counts.onFailure()"
+  },
+  {
+    "id": "V10",
+    "kind": "claim",
+    "line": 295,
+    "statement": "Completion registers deferred unlocking before observing current state.",
+    "fragment": "defer cb.mutex.Unlock()"
+  },
+  {
+    "id": "V11",
+    "kind": "claim",
+    "line": 272,
+    "statement": "Each invocation of the returned Allow closure calls afterRequest with the same captured generation and its supplied Boolean.",
+    "fragment": "tscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "V12",
+    "kind": "claim",
+    "line": 299,
+    "statement": "Completion returns when the current generation differs from the captured generation.",
+    "fragment": "if generation != before {"
+  },
+  {
+    "id": "V13",
+    "kind": "claim",
+    "line": 316,
+    "statement": "Half-open success closes the breaker when consecutive successes reach the configured limit.",
+    "fragment": "if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+  },
+  {
+    "id": "V14",
+    "kind": "claim",
+    "line": 315,
+    "statement": "A half-open success increments success counts before the threshold check.",
+    "fragment": "cb.counts.onSuccess()"
+  },
+  {
+    "id": "V15",
+    "kind": "claim",
+    "line": 285,
+    "statement": "Half-open admission tests request count greater than or equal to the configured maximum.",
+    "fragment": "} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {"
+  },
+  {
+    "id": "V16",
+    "kind": "claim",
+    "line": 286,
+    "statement": "The half-open capacity branch returns ErrTooManyRequests.",
+    "fragment": "return generation, ErrTooManyRequests"
+  },
+  {
+    "id": "V17",
+    "kind": "claim",
+    "line": 378,
+    "statement": "A half-open generation stores the zero expiry.",
+    "fragment": "cb.expiry = zero"
+  },
+  {
+    "id": "V18",
+    "kind": "claim",
+    "line": 220,
+    "statement": "Counts returns the stored counters without calling currentState.",
+    "fragment": "return cb.counts"
+  },
+  {
+    "id": "V19",
+    "kind": "claim",
+    "line": 211,
+    "statement": "State invokes currentState before returning the mode.",
+    "fragment": "state, _ := cb.currentState(now)"
+  },
+  {
+    "id": "V20",
+    "kind": "claim",
+    "line": 337,
+    "statement": "Closed-state rollover requires nonzero expiry strictly before sampled time.",
+    "fragment": "if !cb.expiry.IsZero() && cb.expiry.Before(now) {"
+  },
+  {
+    "id": "V21",
+    "kind": "claim",
+    "line": 341,
+    "statement": "Open-state promotion requires expiry strictly before sampled time.",
+    "fragment": "if cb.expiry.Before(now) {"
+  },
+  {
+    "id": "V22",
+    "kind": "claim",
+    "line": 342,
+    "statement": "The open expiry branch sets HalfOpen.",
+    "fragment": "cb.setState(StateHalfOpen, now)"
+  },
+  {
+    "id": "V23",
+    "kind": "claim",
+    "line": 298,
+    "statement": "Completion calls currentState before checking whether its saved generation is stale.",
+    "fragment": "state, generation := cb.currentState(now)"
+  },
+  {
+    "id": "V24",
+    "kind": "claim",
+    "line": 242,
+    "statement": "Execute invokes the accepted request after admission returned.",
+    "fragment": "result, err := req()"
+  },
+  {
+    "id": "V25",
+    "kind": "claim",
+    "line": 243,
+    "statement": "Execute calls isSuccessful on the raw error before afterRequest is entered.",
+    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+  },
+  {
+    "id": "V26",
+    "kind": "claim",
+    "line": 244,
+    "statement": "Execute returns the original result and error.",
+    "fragment": "return result, err"
+  },
+  {
+    "id": "V27",
+    "kind": "claim",
+    "line": 237,
+    "statement": "Execute's panic handler calls afterRequest with false before re-panicking.",
+    "fragment": "cb.afterRequest(generation, false)"
+  },
+  {
+    "id": "V28",
+    "kind": "claim",
+    "line": 238,
+    "statement": "Execute attempts to re-panic with the recovered value after the completion call returns.",
+    "fragment": "panic(e)"
+  },
+  {
+    "id": "V29",
+    "kind": "claim",
+    "line": 234,
+    "statement": "Execute registers its recovery before invoking accepted work.",
+    "fragment": "defer func() {"
+  },
+  {
+    "id": "V30",
+    "kind": "claim",
+    "line": 236,
+    "statement": "Only non-nil recover values enter panic failure accounting.",
+    "fragment": "if e != nil {"
+  },
+  {
+    "id": "V31",
+    "kind": "claim",
+    "line": 268,
+    "statement": "Allow refusal returns nil as its callback.",
+    "fragment": "return nil, err"
+  },
+  {
+    "id": "V32",
+    "kind": "claim",
+    "line": 271,
+    "statement": "An accepted Allow returns a closure taking a Boolean.",
+    "fragment": "return func(success bool) {"
+  },
+  {
+    "id": "V33",
+    "kind": "claim",
+    "line": 289,
+    "statement": "Admission increments Requests before returning a generation.",
+    "fragment": "cb.counts.onRequest()"
+  },
+  {
+    "id": "V34",
+    "kind": "claim",
+    "line": 330,
+    "statement": "A matching half-open failure moves the breaker to Open.",
+    "fragment": "cb.setState(StateOpen, now)"
+  },
+  {
+    "id": "V35",
+    "kind": "claim",
+    "line": 376,
+    "statement": "The open generation sets expiry to sampled time plus configured timeout.",
+    "fragment": "cb.expiry = now.Add(cb.timeout)"
+  },
+  {
+    "id": "V36",
+    "kind": "claim",
+    "line": 128,
+    "statement": "The breaker stores generation as uint64.",
+    "fragment": "generation uint64"
+  },
+  {
+    "id": "V37",
+    "kind": "claim",
+    "line": 48,
+    "statement": "Request count is uint32.",
+    "fragment": "Requests             uint32"
+  },
+  {
+    "id": "V38",
+    "kind": "claim",
+    "line": 364,
+    "statement": "A generation reset increments generation.",
+    "fragment": "cb.generation++"
+  },
+  {
+    "id": "V39",
+    "kind": "claim",
+    "line": 365,
+    "statement": "A generation reset clears counters.",
+    "fragment": "cb.counts.clear()"
+  },
+  {
+    "id": "V40",
+    "kind": "claim",
+    "line": 153,
+    "statement": "Nonpositive interval selects the interval default.",
+    "fragment": "if st.Interval <= 0 {"
+  },
+  {
+    "id": "V41",
+    "kind": "claim",
+    "line": 159,
+    "statement": "Nonpositive timeout selects the timeout default.",
+    "fragment": "if st.Timeout <= 0 {"
+  },
+  {
+    "id": "V42",
+    "kind": "claim",
+    "line": 142,
+    "statement": "Each constructor call allocates a fresh CircuitBreaker.",
+    "fragment": "cb := new(CircuitBreaker)"
+  },
+  {
+    "id": "V43",
+    "kind": "claim",
+    "line": 202,
+    "statement": "Name returns the configured field without acquiring a mutex.",
+    "fragment": "return cb.name"
+  },
+  {
+    "id": "V44",
+    "kind": "claim",
+    "line": 197,
+    "statement": "Default IsSuccessful reports success only for nil error.",
+    "fragment": "return err == nil"
+  },
+  {
+    "id": "V45",
+    "kind": "claim",
+    "line": 280,
+    "statement": "Admission samples time after taking the mutex.",
+    "fragment": "now := time.Now()"
+  },
+  {
+    "id": "V46",
+    "kind": "claim",
+    "line": 297,
+    "statement": "Completion samples time after taking the mutex.",
+    "fragment": "now := time.Now()"
+  },
+  {
+    "id": "V47",
+    "kind": "claim",
+    "line": 231,
+    "statement": "Execute returns the admission error without running the request.",
+    "fragment": "return nil, err"
+  }
+]

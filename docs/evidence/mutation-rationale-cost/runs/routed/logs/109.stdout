@@ -1,0 +1,17 @@
+usage: check_reachability.py [-h] [--repo REPO] analysis_dir
+
+Reachability and completeness checker for StateRadar analysis.json. Reads the
+sidecar produced by gen_analysis_sidecar.py and verifies: 1. Non-terminal
+states are reachable from the initial state through matrix transitions or
+cited interaction-pair sequences. 2. No state is a sink unless marked as
+terminal. The analysis.json schema already carries all the data needed; this
+checker adds a semantic layer on top of the structural checks that
+dsc_check.py already performs. Usage: python3 tools/check_reachability.py
+<analysis-dir> [--repo ROOT]
+
+positional arguments:
+  analysis_dir
+
+options:
+  -h, --help    show this help message and exit
+  --repo REPO   root for pair evidence paths

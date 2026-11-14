@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import pathlib,sys; p=pathlib.Path(sys.argv[1]); [(p/(name+'.task.md')).write_text(task+'\\n') for name,task in zip(sys.argv[2::2],sys.argv[3::2])]",
+    "domain-analysis/circuitBreaker",
+    "requirements",
+    "Step 1: Extract normative sentences, event contracts, states, transitions, guards, effects, timing and open questions.",
+    "source",
+    "Step 1: Extract states, events, transition guards, counters, synchronization, timing, cancellation, external calls and their contracts, and open questions.",
+    "tests",
+    "Step 1: Extract scenarios, ordered actions, assertions, and open questions about test coverage."
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,45 @@
+usage: part_b_pack.py [-h] [--repo REPO] [--requirements REQUIREMENTS]
+                      [--contracts CONTRACTS] [--out OUT]
+                      [--check BLIND_OUTPUT.md] [--for-dispatch]
+                      analysis_dir
+
+Part-B input assembler — build the blind-pass input package, and validate the
+blind output's coverage mechanically. The blind pass (02-pilot, PART B) needs
+exactly three inputs: the event catalogue, the prose requirements, and the
+normative contract text of every event type. Assembling them by hand is how
+placeholder payloads get dispatched (dobby trigger-service, 2026-08-05: the
+first blind dispatch went out with the literal words CATALOGUE / REQUIREMENTS
+/ CONTRACTS and was correctly refused). This tool assembles the package with
+length guards and checks the returned table against the catalogue's id
+declaration. Assemble: python3 tools/part_b_pack.py <analysis-dir>
+--requirements DECISIONS.md --requirements docs/ARCHITECTURE_CONTEXT.md:M8.3
+--contracts src/contracts/transport.py:TriggerWindowEnvelope --contracts
+src/contracts/events.py:TriggerEvent,TriggerAckEvent [--repo .] [--out
+part_b_input.md] --requirements FILE whole file --requirements FILE:PATTERN
+only lines from the first PATTERN match to the next markdown heading of the
+same or higher level (or EOF) --contracts FILE.py:A,B class blocks (docstring
+and fields) only --contracts FILE.md a prepared contract-text file, whole
+Validate a blind output: python3 tools/part_b_pack.py <analysis-dir> --check
+blind_output.md Every catalogue event id and every interaction-pair ordering
+must appear in the blind table. Repeated IDs need distinct explicit situations
+(legacy ID qualifiers also count); the checklist ticks each ID exactly once.
+Missing or duplicate situations fail. The instruction block is extracted live
+from prompts/02-pilot.md so the assembled prompt never drifts from the
+canonical text.
+
+positional arguments:
+  analysis_dir          e.g. domain-analysis/trigger-service
+
+options:
+  -h, --help            show this help message and exit
+  --repo REPO
+  --requirements REQUIREMENTS
+                        FILE or FILE:PATTERN (repeatable)
+  --contracts CONTRACTS
+                        FILE:Class1,Class2 (repeatable)
+  --out OUT             write the package here (default: stdout)
+  --check BLIND_OUTPUT.md
+                        validate a blind table's coverage instead of
+                        assembling
+  --for-dispatch        print the package with a dispatch header that warns
+                        against placeholder dispatches

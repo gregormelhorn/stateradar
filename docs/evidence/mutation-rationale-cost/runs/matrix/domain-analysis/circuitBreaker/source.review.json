@@ -1,0 +1,1097 @@
+{
+  "source": "gobreaker.go",
+  "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 3788,
+    "output_tokens": 4972,
+    "cost_microdollars": 7103,
+    "reservation_microdollars": 18412
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 14241,
+    "cost_microdollars": 599,
+    "reservation_microdollars": 2453,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The CircuitBreaker has three states: closed, half-open, and open.",
+      "line": 16,
+      "fragment": "const (",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.71,
+          "contradicted": 0.0,
+          "unclear": 0.29
+        },
+        "confidence": 0.56
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "ErrTooManyRequests is returned when the breaker is half open and the request count is over maxRequests.",
+      "line": 23,
+      "fragment": "if the CB state is half open and the requests count is over the cb maxRequests",
+      "citation_check": "citation fragment missing near line 23",
+      "jev": null
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "ErrOpenState is returned when the breaker is open.",
+      "line": 25,
+      "fragment": "// ErrOpenState is returned when the CB state is open",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "Counts includes Requests, TotalSuccesses, TotalFailures, ConsecutiveSuccesses, and ConsecutiveFailures.",
+      "line": 48,
+      "fragment": "Requests             uint32",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.23,
+          "contradicted": 0.0,
+          "unclear": 0.77
+        },
+        "confidence": 0.66
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "The internal Counts are cleared on a change of state or at the closed-state intervals.",
+      "line": 44,
+      "fragment": "CircuitBreaker clears the internal Counts either",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.0,
+          "unclear": 0.04
+        },
+        "confidence": 0.94
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "Counts ignores results of requests sent before clearing.",
+      "line": 46,
+      "fragment": "Counts ignores the results of the requests sent before clearing.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "onRequest increments Requests.",
+      "line": 56,
+      "fragment": "c.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "onSuccess increments TotalSuccesses and ConsecutiveSuccesses and resets ConsecutiveFailures to zero.",
+      "line": 60,
+      "fragment": "c.TotalSuccesses++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.34,
+          "contradicted": 0.0,
+          "unclear": 0.66
+        },
+        "confidence": 0.49
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "onFailure increments TotalFailures and ConsecutiveFailures and resets ConsecutiveSuccesses to zero.",
+      "line": 66,
+      "fragment": "c.TotalFailures++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.46,
+          "contradicted": 0.0,
+          "unclear": 0.54
+        },
+        "confidence": 0.31
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "clear resets all five counters to zero.",
+      "line": 72,
+      "fragment": "c.Requests = 0",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.29,
+          "contradicted": 0.01,
+          "unclear": 0.7
+        },
+        "confidence": 0.55
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "MaxRequests is the maximum number of requests allowed to pass through when the breaker is half-open.",
+      "line": 83,
+      "fragment": "MaxRequests is the maximum number of requests allowed to pass through",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.69,
+          "contradicted": 0.0,
+          "unclear": 0.31
+        },
+        "confidence": 0.53
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "If MaxRequests is 0, the breaker allows only 1 request.",
+      "line": 85,
+      "fragment": "If MaxRequests is 0, the CircuitBreaker allows only 1 request.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "Interval is the cyclic period of the closed state for clearing the internal Counts.",
+      "line": 87,
+      "fragment": "Interval is the cyclic period of the closed state",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.0,
+          "unclear": 0.13
+        },
+        "confidence": 0.8
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "If Interval is less than or equal to 0, Counts are not cleared during the closed state.",
+      "line": 89,
+      "fragment": "If Interval is less than or equal to 0, the CircuitBreaker doesn't clear internal Counts during the closed state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.01,
+          "unclear": 0.0
+        },
+        "confidence": 0.98
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "Timeout is the period of the open state, after which the state becomes half-open.",
+      "line": 91,
+      "fragment": "Timeout is the period of the open state",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.71,
+          "contradicted": 0.0,
+          "unclear": 0.29
+        },
+        "confidence": 0.56
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "If Timeout is less than or equal to 0, the timeout value is set to 60 seconds.",
+      "line": 93,
+      "fragment": "If Timeout is less than or equal to 0, the timeout value of the CircuitBreaker is set to 60 seconds.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.",
+      "line": 95,
+      "fragment": "ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "If ReadyToTrip returns true, the breaker is placed into the open state.",
+      "line": 96,
+      "fragment": "If ReadyToTrip returns true, the CircuitBreaker will be placed into the open state.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C19": {
+      "kind": "claim",
+      "statement": "The default ReadyToTrip returns true when the number of consecutive failures is more than 5.",
+      "line": 98,
+      "fragment": "Default ReadyToTrip returns true when the number of consecutive failures is more than 5.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C20": {
+      "kind": "claim",
+      "statement": "OnStateChange is called whenever the state changes.",
+      "line": 100,
+      "fragment": "OnStateChange is called whenever the state of the CircuitBreaker changes.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C21": {
+      "kind": "claim",
+      "statement": "IsSuccessful is called with the error returned from a request; if it returns true, the error is counted as a success, otherwise as a failure.",
+      "line": 102,
+      "fragment": "IsSuccessful is called with the error returned from a request.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.68,
+          "contradicted": 0.0,
+          "unclear": 0.32
+        },
+        "confidence": 0.52
+      }
+    },
+    "C22": {
+      "kind": "claim",
+      "statement": "The default IsSuccessful returns false for all non-nil errors.",
+      "line": 105,
+      "fragment": "default IsSuccessful is used, which returns false for all non-nil errors.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C23": {
+      "kind": "claim",
+      "statement": "NewCircuitBreaker sets maxRequests to 1 when Settings.MaxRequests is 0, otherwise uses the given value.",
+      "line": 147,
+      "fragment": "if st.MaxRequests == 0 {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92
+      }
+    },
+    "C24": {
+      "kind": "claim",
+      "statement": "NewCircuitBreaker sets interval to defaultInterval when Settings.Interval <= 0.",
+      "line": 153,
+      "fragment": "if st.Interval <= 0 {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C25": {
+      "kind": "claim",
+      "statement": "NewCircuitBreaker sets timeout to defaultTimeout when Settings.Timeout <= 0.",
+      "line": 159,
+      "fragment": "if st.Timeout <= 0 {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C26": {
+      "kind": "claim",
+      "statement": "NewCircuitBreaker uses defaultReadyToTrip when Settings.ReadyToTrip is nil.",
+      "line": 165,
+      "fragment": "if st.ReadyToTrip == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C27": {
+      "kind": "claim",
+      "statement": "NewCircuitBreaker uses defaultIsSuccessful when Settings.IsSuccessful is nil.",
+      "line": 171,
+      "fragment": "if st.IsSuccessful == nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.0,
+          "unclear": 0.07
+        },
+        "confidence": 0.89
+      }
+    },
+    "C28": {
+      "kind": "claim",
+      "statement": "NewCircuitBreaker calls toNewGeneration at construction time.",
+      "line": 177,
+      "fragment": "cb.toNewGeneration(time.Now())",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C29": {
+      "kind": "claim",
+      "statement": "defaultInterval is zero seconds and defaultTimeout is 60 seconds.",
+      "line": 189,
+      "fragment": "const defaultInterval = time.Duration(0) * time.Second",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.55,
+          "contradicted": 0.0,
+          "unclear": 0.45
+        },
+        "confidence": 0.33
+      }
+    },
+    "C30": {
+      "kind": "claim",
+      "statement": "defaultTimeout is 60 seconds.",
+      "line": 190,
+      "fragment": "const defaultTimeout = time.Duration(60) * time.Second",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C31": {
+      "kind": "claim",
+      "statement": "defaultReadyToTrip returns true when ConsecutiveFailures > 5.",
+      "line": 193,
+      "fragment": "return counts.ConsecutiveFailures > 5",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C32": {
+      "kind": "claim",
+      "statement": "defaultIsSuccessful returns true only when err is nil.",
+      "line": 197,
+      "fragment": "return err == nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C33": {
+      "kind": "claim",
+      "statement": "State() acquires the mutex, calls currentState, and returns the resulting state.",
+      "line": 211,
+      "fragment": "state, _ := cb.currentState(now)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.82,
+          "contradicted": 0.0,
+          "unclear": 0.18
+        },
+        "confidence": 0.73
+      }
+    },
+    "C34": {
+      "kind": "claim",
+      "statement": "Counts() acquires the mutex and returns the internal counts.",
+      "line": 220,
+      "fragment": "return cb.counts",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.64,
+          "contradicted": 0.01,
+          "unclear": 0.35
+        },
+        "confidence": 0.46
+      }
+    },
+    "C35": {
+      "kind": "claim",
+      "statement": "Execute returns an error instantly if the breaker rejects the request.",
+      "line": 224,
+      "fragment": "Execute returns an error instantly if the CircuitBreaker rejects the request.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C36": {
+      "kind": "claim",
+      "statement": "If a panic occurs in the request, Execute handles it as an error and causes the same panic again.",
+      "line": 226,
+      "fragment": "If a panic occurs in the request, the CircuitBreaker handles it as an error",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.79,
+          "contradicted": 0.0,
+          "unclear": 0.21
+        },
+        "confidence": 0.68
+      }
+    },
+    "C37": {
+      "kind": "claim",
+      "statement": "Execute calls beforeRequest and returns its error without running the request if error occurs.",
+      "line": 229,
+      "fragment": "generation, err := cb.beforeRequest()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.62,
+          "contradicted": 0.01,
+          "unclear": 0.37
+        },
+        "confidence": 0.43
+      }
+    },
+    "C38": {
+      "kind": "claim",
+      "statement": "Execute's deferred recover records the panic as a failure via afterRequest(false) and re-panics.",
+      "line": 237,
+      "fragment": "cb.afterRequest(generation, false)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C39": {
+      "kind": "claim",
+      "statement": "Execute records the request outcome via afterRequest using isSuccessful(err).",
+      "line": 243,
+      "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C40": {
+      "kind": "claim",
+      "statement": "TwoStepCircuitBreaker.Allow checks whether a request can proceed and returns a callback for reporting success or failure separately.",
+      "line": 262,
+      "fragment": "Allow checks if a new request can proceed.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.83,
+          "contradicted": 0.0,
+          "unclear": 0.17
+        },
+        "confidence": 0.74
+      }
+    },
+    "C41": {
+      "kind": "claim",
+      "statement": "Allow calls beforeRequest and returns its error if not allowed.",
+      "line": 266,
+      "fragment": "generation, err := tscb.cb.beforeRequest()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C42": {
+      "kind": "claim",
+      "statement": "The callback returned by Allow calls afterRequest with the recorded generation and the boolean success value.",
+      "line": 272,
+      "fragment": "tscb.cb.afterRequest(generation, success)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C43": {
+      "kind": "claim",
+      "statement": "beforeRequest acquires the mutex, calls currentState, and rejects with ErrOpenState when the state is open.",
+      "line": 283,
+      "fragment": "if state == StateOpen {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.89,
+          "contradicted": 0.0,
+          "unclear": 0.11
+        },
+        "confidence": 0.83
+      }
+    },
+    "C44": {
+      "kind": "claim",
+      "statement": "beforeRequest rejects with ErrTooManyRequests when state is half-open and Requests >= maxRequests.",
+      "line": 285,
+      "fragment": "state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C45": {
+      "kind": "claim",
+      "statement": "beforeRequest increments Requests via onRequest when the request is accepted.",
+      "line": 289,
+      "fragment": "cb.counts.onRequest()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C46": {
+      "kind": "claim",
+      "statement": "afterRequest ignores the outcome if the current generation differs from the generation captured before the request.",
+      "line": 299,
+      "fragment": "if generation != before {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C47": {
+      "kind": "claim",
+      "statement": "afterRequest dispatches to onSuccess or onFailure based on the success flag.",
+      "line": 303,
+      "fragment": "if success {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C48": {
+      "kind": "claim",
+      "statement": "In closed state, onSuccess calls counts.onSuccess.",
+      "line": 313,
+      "fragment": "cb.counts.onSuccess()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.92,
+          "contradicted": 0.0,
+          "unclear": 0.08
+        },
+        "confidence": 0.88
+      }
+    },
+    "C49": {
+      "kind": "claim",
+      "statement": "In half-open state, onSuccess calls counts.onSuccess and transitions to closed when ConsecutiveSuccesses >= maxRequests.",
+      "line": 316,
+      "fragment": "if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C50": {
+      "kind": "claim",
+      "statement": "In closed state, onFailure calls counts.onFailure and transitions to open when readyToTrip returns true.",
+      "line": 326,
+      "fragment": "if cb.readyToTrip(cb.counts) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.88,
+          "contradicted": 0.0,
+          "unclear": 0.12
+        },
+        "confidence": 0.82
+      }
+    },
+    "C51": {
+      "kind": "claim",
+      "statement": "In half-open state, onFailure transitions to open.",
+      "line": 330,
+      "fragment": "cb.setState(StateOpen, now)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C52": {
+      "kind": "claim",
+      "statement": "currentState in closed state calls toNewGeneration when expiry is nonzero and has passed.",
+      "line": 337,
+      "fragment": "if !cb.expiry.IsZero() && cb.expiry.Before(now) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C53": {
+      "kind": "claim",
+      "statement": "currentState in open state transitions to half-open when expiry has passed.",
+      "line": 341,
+      "fragment": "if cb.expiry.Before(now) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C54": {
+      "kind": "claim",
+      "statement": "currentState returns the current state and generation.",
+      "line": 345,
+      "fragment": "return cb.state, cb.generation",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C55": {
+      "kind": "claim",
+      "statement": "setState returns without change if the target state equals the current state.",
+      "line": 349,
+      "fragment": "if cb.state == state {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C56": {
+      "kind": "claim",
+      "statement": "setState records the previous state, assigns the new state, and calls toNewGeneration.",
+      "line": 353,
+      "fragment": "prev := cb.state",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.6,
+          "contradicted": 0.01,
+          "unclear": 0.39
+        },
+        "confidence": 0.4
+      }
+    },
+    "C57": {
+      "kind": "claim",
+      "statement": "setState calls onStateChange with name, previous state, and new state if the callback is non-nil.",
+      "line": 358,
+      "fragment": "if cb.onStateChange != nil {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.86,
+          "contradicted": 0.0,
+          "unclear": 0.14
+        },
+        "confidence": 0.79
+      }
+    },
+    "C58": {
+      "kind": "claim",
+      "statement": "toNewGeneration increments the generation and clears counts.",
+      "line": 364,
+      "fragment": "cb.generation++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.52,
+          "contradicted": 0.01,
+          "unclear": 0.47
+        },
+        "confidence": 0.28
+      }
+    },
+    "C59": {
+      "kind": "claim",
+      "statement": "In toNewGeneration for closed state, expiry is zero when interval is 0, otherwise now+interval.",
+      "line": 370,
+      "fragment": "if cb.interval == 0 {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C60": {
+      "kind": "claim",
+      "statement": "In toNewGeneration for open state, expiry is now+timeout.",
+      "line": 376,
+      "fragment": "cb.expiry = now.Add(cb.timeout)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C61": {
+      "kind": "claim",
+      "statement": "In toNewGeneration for half-open state (default), expiry is zero.",
+      "line": 378,
+      "fragment": "cb.expiry = zero",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C62": {
+      "kind": "ordering",
+      "statement": "Execute acquires a generation via beforeRequest before invoking req, and then calls afterRequest with that generation.",
+      "line": 242,
+      "fragment": "result, err := req()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.28,
+          "contradicted": 0.0,
+          "unclear": 0.72
+        },
+        "confidence": 0.58,
+        "ordering_scope_probability": 0.02
+      }
+    },
+    "C63": {
+      "kind": "ordering",
+      "statement": "On Execute, a panic in req triggers the deferred recover to call afterRequest(false) before re-panicking.",
+      "line": 238,
+      "fragment": "panic(e)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.0,
+          "unclear": 0.13
+        },
+        "confidence": 0.8,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C64": {
+      "kind": "ordering",
+      "statement": "On Allow, beforeRequest runs first and the returned callback later calls afterRequest.",
+      "line": 271,
+      "fragment": "return func(success bool) {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.66,
+          "contradicted": 0.0,
+          "unclear": 0.34
+        },
+        "confidence": 0.49,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C65": {
+      "kind": "ordering",
+      "statement": "In setState, generation update and counts clearing via toNewGeneration occur before onStateChange is invoked.",
+      "line": 356,
+      "fragment": "cb.toNewGeneration(now)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91,
+        "ordering_scope_probability": 0.04
+      }
+    },
+    "C66": {
+      "kind": "ordering",
+      "statement": "In new-generation processing for closed state, the interval is checked before expiry is set or zeroed.",
+      "line": 369,
+      "fragment": "case StateClosed:",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.7,
+          "contradicted": 0.01,
+          "unclear": 0.29
+        },
+        "confidence": 0.55,
+        "ordering_scope_probability": 0.04
+      }
+    }
+  },
+  "questions": [
+    "Line 89 says if Interval <= 0 the breaker doesn't clear Counts during closed state, but line 154 sets interval to defaultInterval (0) when Interval <= 0; combined with line 370, interval==0 yields a zero expiry. Is the documentation consistent with the behavior, and what happens with a positive Interval exactly at expiry boundary?",
+    "Line 337 checks expiry.Before(now) while line 341 also checks expiry.Before(now); the behavior at expiry == now is unspecified (expiry is considered not expired). Is that intended?",
+    "Line 316 transitions half-open to closed when ConsecutiveSuccesses >= maxRequests. What if maxRequests is larger than the number of requests that will ever be attempted in half-open? It is unspecified whether TotalSuccesses vs ConsecutiveSuccesses is intended, and whether requests exactly at maxRequests in half-open are counted properly.",
+    "Line 285 rejects requests in half-open when Requests >= maxRequests; however, Requests includes requests counted since the transition to half-open via toNewGeneration. What if some in-flight requests started in the prior generation and complete in the half-open generation? The generation check at line 299 discards their outcome, so it is ambiguous whether their success/failure affects the half-open counters.",
+    "Line 226 says Execute handles a panic as an error and causes the same panic again; line 237 passes false to afterRequest, which counts it as a failure. What if a panic occurs before req is called or during deferred recover? Also, is a panic in a half-open request always resulting in transition to open?",
+    "Line 262 says Allow returns a callback that should be used to register success or failure; the behavior is unspecified if the callback is never called or called multiple times, or called after the generation changed.",
+    "Line 358 invokes onStateChange while holding cb.mutex. Is it specified that the callback must not call back into the breaker (which would deadlock)? This is unspecified in the source.",
+    "Line 100 says OnStateChange is called whenever the state changes; is it unspecified whether the callback is invoked for transitions triggered by currentState during a read-only State() call (which can trigger toNewGeneration or setState)?",
+    "Line 44 says counts are cleared on state change or at closed-state intervals; is it specified whether clearing at the interval boundary also invokes OnStateChange (no, since toNewGeneration does not call it)? It is ambiguous whether interval-based clearing is considered a state change.",
+    "defaultReadyToTrip at line 193 uses ConsecutiveFailures > 5, but documented as 'more than 5'; line 98 says the same. Is it intended to trip on the 6th consecutive failure, not the 5th? That is documented but the boundary is worth confirming.",
+    "Line 95 says ReadyToTrip is called whenever a request fails in closed state; but afterRequest at line 299 returns early if generations differ, so ReadyToTrip is not called for stale outcomes. Is it specified whether stale failures should still be considered?",
+    "Line 59 onSuccess and line 65 onFailure update consecutive counters; but the source does not specify what happens when a request is over the half-open maxRequests and gets rejected by beforeRequest (line 285) — rejected requests are not counted as requests or failures. Is that intended?",
+    "Line 43-46 mentions Counts ignores results before clearing; combined with generation checks at line 299, the mechanism is generation-based. The source does not specify whether the generation is comparable across state changes (e.g., closed -> open -> closed increments generation each time). Behavior of stale results across multiple state changes is unspecified.",
+    "Line 190 defines defaultTimeout as 60s, and line 93 says Timeout <= 0 uses 60s; but line 159 sets cb.timeout = defaultTimeout. Is there any case where timeout is 0 and expiry is computed as now+0, making the open state immediately half-open? (Only if set directly, which is not exposed.)",
+    "Line 130 field expiry is time.Time; line 371 sets zero for interval==0 closed. In State() at line 211, calling currentState can mutate via toNewGeneration for closed interval expiry or setState for open. Is it specified whether State() is read-only or can transition? The source shows state transitions in currentState, but this side effect during a getter is unspecified in contract terms.",
+    "Line 228 Execute returns nil, err when beforeRequest rejects (line 231); but the request function is not invoked. Is it specified what the return value is for the result in that case? It returns nil, err.",
+    "Line 143-145 only assign name and onStateChange; maxRequests, interval, timeout, readyToTrip, isSuccessful are assigned conditionally. Is it guaranteed that all fields are initialized before toNewGeneration at line 177? Yes per lines 147-175, but not explicitly stated as an ordering requirement.",
+    "Line 26 ErrOpenState is returned when open; line 24 ErrTooManyRequests when half-open over maxRequests. The source does not specify which error takes priority if both conditions could occur (they cannot simultaneously, but state evaluation order in beforeRequest is unspecified beyond line 283 then line 285).",
+    "Line 348 setState returns early when cb.state == state; but toNewGeneration is not called, so consecutive successes in closed state with a changed generation from interval clearing are not affected. Is the early return's interaction with generation increments specified?",
+    "Line 46 says Counts ignores results before clearing; the mechanism is generation. But if a stale result arrives after a new generation has started and the state is half-open, onSuccess may increment ConsecutiveSuccesses incorrectly? Line 299 prevents it via generation mismatch. However, generation is only incremented on toNewGeneration (line 364); if counts are cleared without incrementing generation somewhere, stale results could be counted. Is the only clearing path always incrementing generation? (clear at line 71 is called from toNewGeneration line 365, which increments first.) Yes, but this invariant is implicit and not stated."
+  ],
+  "review_required": true
+}

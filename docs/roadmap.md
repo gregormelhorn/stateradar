@@ -31,6 +31,14 @@ entries and separates the new model-routing plan from shipped capabilities.
    now retains child-specific usage snapshots, marks missing costs explicitly,
    stops timed-out descendants and audits artifacts after failures. A new
    completion gate requires a source-pinned manifest and matching sidecar.
+   Completed follow-up: [matched gobreaker routed/matrix comparison](evidence/mutation-rationale-cost/comparison.md)
+   has complete controller accounting and passing gates in both arms. Matrix
+   costs 4.1% more in this single fixed-order pair and needs 14 versus 11 rereads;
+   both cover the four primary controls and detect the stale-generation mutant.
+   Both miss serialized wrapper reassignment. Keep routed as the standard;
+   strengthen the explicit behavior benchmark before another optimization claim.
+   The earlier missing Pool Codex cost remains unknown. These figures are model
+   cost equivalents and exclude the supervising implementation/review chat.
 2. **Broaden mutation coverage and validate on real components.** Continue
    [fault-class mutants](#8-ach-style-fault-class-mutants-testgen-upgrade):
    add supported classes and component bindings with observed red probes and

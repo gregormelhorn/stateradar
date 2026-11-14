@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import re,sys\nfrom pathlib import Path\np=Path(sys.argv[1]);s=p.read_text()\nprint('Quote-parenthesis matches outside prose doctrine:',[x for x in s.splitlines() if re.search(r'\\(\\s*[\"\\u2018\\u2019\\u201c\\u201d\\x27]',x) and not x.startswith('- DOC-')])\n",
+    "domain-analysis/circuitBreaker/part-b-blind.package.md"
+  ],
+  "exit_code": 0
+}

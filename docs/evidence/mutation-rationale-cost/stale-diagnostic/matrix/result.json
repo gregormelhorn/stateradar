@@ -1,0 +1,70 @@
+{
+  "baseline": {
+    "exit": 0,
+    "started": {
+      "TestPilotDuplicateAndAbandoned": 5,
+      "TestPilotStaleReportReconcilesOpen": 5,
+      "TestPilotSameCallerWhilePending": 5,
+      "TestPilotReentryBounded": 5,
+      "TestPilotReentryBounded/notify": 5,
+      "TestPilotReentryBounded/trip": 5,
+      "TestPilotTripPanicDoubleAccounting": 5,
+      "TestPilotNotificationPanicReplacesRequestPanic": 5,
+      "TestPilotGoexitAbandonsAdmission": 5,
+      "TestPilotAllowThenStateAtOpenExpiry": 5,
+      "TestPilotSameOwnerOutstandingBelowBudget": 5
+    },
+    "passed": {
+      "TestPilotDuplicateAndAbandoned": 5,
+      "TestPilotStaleReportReconcilesOpen": 5,
+      "TestPilotSameCallerWhilePending": 5,
+      "TestPilotReentryBounded/notify": 5,
+      "TestPilotReentryBounded/trip": 5,
+      "TestPilotReentryBounded": 5,
+      "TestPilotTripPanicDoubleAccounting": 5,
+      "TestPilotNotificationPanicReplacesRequestPanic": 5,
+      "TestPilotGoexitAbandonsAdmission": 5,
+      "TestPilotAllowThenStateAtOpenExpiry": 5,
+      "TestPilotSameOwnerOutstandingBelowBudget": 5
+    },
+    "failed": {}
+  },
+  "generation-guard-disabled": {
+    "exit": 1,
+    "started": {
+      "TestPilotDuplicateAndAbandoned": 5,
+      "TestPilotStaleReportReconcilesOpen": 5,
+      "TestPilotSameCallerWhilePending": 5,
+      "TestPilotReentryBounded": 5,
+      "TestPilotReentryBounded/notify": 5,
+      "TestPilotReentryBounded/trip": 5,
+      "TestPilotTripPanicDoubleAccounting": 5,
+      "TestPilotNotificationPanicReplacesRequestPanic": 5,
+      "TestPilotGoexitAbandonsAdmission": 5,
+      "TestPilotAllowThenStateAtOpenExpiry": 5,
+      "TestPilotSameOwnerOutstandingBelowBudget": 5
+    },
+    "passed": {
+      "TestPilotDuplicateAndAbandoned": 5,
+      "TestPilotSameCallerWhilePending": 5,
+      "TestPilotReentryBounded/notify": 5,
+      "TestPilotReentryBounded/trip": 5,
+      "TestPilotReentryBounded": 5,
+      "TestPilotTripPanicDoubleAccounting": 5,
+      "TestPilotNotificationPanicReplacesRequestPanic": 5,
+      "TestPilotGoexitAbandonsAdmission": 5,
+      "TestPilotAllowThenStateAtOpenExpiry": 5,
+      "TestPilotSameOwnerOutstandingBelowBudget": 5
+    },
+    "failed": {
+      "TestPilotStaleReportReconcilesOpen": 5
+    }
+  },
+  "diagnostic": "KILLED",
+  "mutation": {
+    "source": "gobreaker.go",
+    "old": "if generation != before {",
+    "new": "if false && generation != before {"
+  },
+  "scope": "Post-run diagnostic only; not a predeclared primary control. No pilot artifact was repaired."
+}

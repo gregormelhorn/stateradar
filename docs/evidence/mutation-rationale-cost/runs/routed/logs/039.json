@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,sys\nfrom pathlib import Path\nfor p in sys.argv[1:]:\n j=json.loads(Path(p).read_text())\n print(p)\n for n,q in enumerate(j['questions'],1):print(n,q)\n for i,x in j['claims'].items():print(i,x.get('line'),x.get('statement'),str(x.get('jev',{}).get('choice')))",
+    "domain-analysis/circuitBreaker/draft-readme.json",
+    "domain-analysis/circuitBreaker/draft-code.json",
+    "domain-analysis/circuitBreaker/draft-test.json"
+  ],
+  "exit_code": 0
+}
