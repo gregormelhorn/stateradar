@@ -218,7 +218,7 @@ def run_arm(root, arm, prompt, codex, python, timeout, *, replay_server=None, mo
         '-c', 'mcp_servers.pilot.tools.command.approval_mode="approve"',
         '-c', 'mcp_servers.pilot.tools.command.output_token_limit=60000',
         *([] if replay_server else ['-c', 'mcp_servers.pilot.env_vars=["DEEPSEEK_API_KEY","TYPESAFE_API_KEY"]']),
-        '--model', model, '--json', '--sandbox', 'read-only',
+        '--model', model, '--json', '--sandbox', 'workspace-write',
         '-C', str(root / 'pool'), '-o', str(root / 'final.txt'), '-',
     ]
     start = time.monotonic()
@@ -428,6 +428,7 @@ def main():
                            else {'component': args.component, 'component_sha': source_sha})
         save(root / 'experiment.json', {'pack_sha': sha, **source_identity,
                                          'model': args.model, 'effort': 'medium', 'auth': 'chatgpt',
+                                         'sandbox': 'workspace-write',
                                          'timeout_seconds': args.timeout, 'smoke': args.smoke,
                                          'arm_order': arm_order,
                                          'routing_variant': args.routing_variant,

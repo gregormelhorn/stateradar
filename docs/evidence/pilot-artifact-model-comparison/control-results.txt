@@ -1,0 +1,41 @@
+Pool original: exit 0
+ok  	github.com/silenceper/pool	1.847s
+
+Pool negative control: exit 1
+panic: listen tcp 127.0.0.1:7777: bind: address already in use
+
+goroutine 7 [running]:
+github.com/silenceper/pool.rpcServer()
+	/private/var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpp7f2fb3d/channel_rpc_test.go:269 +0x160
+created by github.com/silenceper/pool.init.0 in goroutine 1
+	/private/var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpp7f2fb3d/channel_rpc_test.go:31 +0x2c
+FAIL	github.com/silenceper/pool	0.421s
+FAIL
+
+Gobreaker controls: exit 0
+=== RUN   TestPilotStaleDone
+--- PASS: TestPilotStaleDone (0.00s)
+=== RUN   TestPilotDuplicateDone
+--- PASS: TestPilotDuplicateDone (0.00s)
+=== RUN   TestPilotMissingHalfOpenDone
+--- PASS: TestPilotMissingHalfOpenDone (0.01s)
+=== RUN   TestPilotStateChangeReentry
+--- PASS: TestPilotStateChangeReentry (0.52s)
+=== RUN   TestPilotStaleDone
+--- PASS: TestPilotStaleDone (0.00s)
+=== RUN   TestPilotDuplicateDone
+--- PASS: TestPilotDuplicateDone (0.00s)
+=== RUN   TestPilotMissingHalfOpenDone
+--- PASS: TestPilotMissingHalfOpenDone (0.01s)
+=== RUN   TestPilotStateChangeReentry
+--- PASS: TestPilotStateChangeReentry (0.55s)
+=== RUN   TestPilotStaleDone
+--- PASS: TestPilotStaleDone (0.00s)
+=== RUN   TestPilotDuplicateDone
+--- PASS: TestPilotDuplicateDone (0.00s)
+=== RUN   TestPilotMissingHalfOpenDone
+--- PASS: TestPilotMissingHalfOpenDone (0.01s)
+=== RUN   TestPilotStateChangeReentry
+--- PASS: TestPilotStateChangeReentry (0.52s)
+PASS
+ok  	github.com/sony/gobreaker	2.993s

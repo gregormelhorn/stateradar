@@ -1,0 +1,17 @@
+....F.
+======================================================================
+FAIL: test_model_selection_reaches_codex_command (__main__.PilotArtifactsTest.test_model_selection_reaches_codex_command)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_artifacts.py", line 100, in test_model_selection_reaches_codex_command
+    self.assertEqual(argv[argv.index('--sandbox') + 1], 'workspace-write')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'read-only' != 'workspace-write'
+- read-only
++ workspace-write
+
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.047s
+
+FAILED (failures=1)

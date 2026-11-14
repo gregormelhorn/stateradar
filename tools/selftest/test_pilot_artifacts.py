@@ -97,6 +97,7 @@ class PilotArtifactsTest(unittest.TestCase):
                                       model='gpt-6.1-terra')
                 argv = run.call_args.args[0]
                 self.assertEqual(argv[argv.index('--model') + 1], 'gpt-6.1-terra')
+                self.assertEqual(argv[argv.index('--sandbox') + 1], 'workspace-write')
 
     def test_catalogue_gate_cannot_skip_missing_fields(self):
         with tempfile.TemporaryDirectory() as directory:

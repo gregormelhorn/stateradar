@@ -41,3 +41,17 @@ The earlier three-way runs used a different pack and are historical
 context, not matched evidence for the model change or artifact savings.
 One run per model/component is a screening experiment, not a reliability
 rate estimate.
+
+
+## Execution correction
+
+The first Terra/gobreaker pilot stopped after eight successful commands:
+the controller's read-only sandbox declaration contradicted the requested
+artifact writes. It explicitly declined to write analysis. This is a
+configuration failure, not evidence of missing analysis capability.
+Retain the initial `8b8e854` runs as diagnostic work, including their costs.
+The matched comparison restarts on a single corrected pack using Codex
+`workspace-write` inside each disposable checkout. The command server's
+macOS sandbox and credential restrictions remain in force. Existing
+processes finish so their completed usage can be retained; no partial
+usage is silently treated as free. No safety refusal is being bypassed.

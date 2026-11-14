@@ -444,3 +444,9 @@ Blind coverage accepts distinct situations for the same event, with an
 explicit Situation column; duplicate or missing situation labels fail.
 The checklist still ticks each event and pair ordering exactly once.
 A Part-A controller never edits a blind response to make it pass.
+
+The controller runs with `--sandbox workspace-write` in the disposable
+component checkout, matching its artifact-writing task. The pilot command
+server still applies its macOS sandbox and restricts credentials to routing
+commands. A read-only controller setting conflicts with authorized artifact
+creation even when the external command server can perform writes.
