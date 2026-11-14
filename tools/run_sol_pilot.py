@@ -38,7 +38,7 @@ def save(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 
-def brief(pack, component='pool'):
+def brief(pack, component='pool', routing_variant='flash-writes'):
     _, _, output_name, scope, tests = COMPONENTS[component]
     return (pack / 'prompts/02-pilot.md').read_text(encoding='utf-8') + f'''
 
@@ -46,7 +46,7 @@ Run brief for the benchmark:
 - Component: {scope}.
 - Requirements: README.md. Existing tests: {tests}.
 - Output directory: domain-analysis/{output_name}. Use the complete pilot above.
-- routing variant: flash-writes
+- routing variant: {routing_variant}
 - Use ../pack for the pack, python3 for its tools, and ../routing.sqlite for
   the one model ledger. Pin jev-1.14.0. Execute all gates and preserve failures.
 - Model routing is configured through the pilot command tool. Credentials are
@@ -334,7 +334,7 @@ def verify_artifacts(root, python, output_name='channelPool'):
         'matrix': [f'{base}/check_matrix.py'],
         'guards': [f'{base}/check_guards.py'],
         'sidecar': ['../pack/tools/dsc_check.py', base, '--repo', '.', '--model', 'as-is.machine.mmd'],
-        'reachability': ['../pack/tools/check_reachability.py', base],
+        'reachability': ['../pack/tools/check_reachability.py', base, '--repo', '.'],
         'blind-coverage': ['../pack/tools/part_b_pack.py', base, '--repo', '.',
                            '--check', f'{base}/part-b-blind.md'],
     }
@@ -364,6 +364,8 @@ def main():
     parser.add_argument('--timeout', type=int, default=2400, help='wall-clock seconds per arm')
     parser.add_argument('--output-mode', choices=('selective', 'standard', 'compact', 'compare'),
                         help='selective (default), full standard, compact, or compare standard and compact')
+    parser.add_argument('--routing-variant', choices=('flash-writes', 'routed'), default='flash-writes',
+                        help='delegate bulk drafting to Flash (default) or use standard model routing')
     parser.add_argument('--compact-first', action='store_true', help='compare with compact before standard')
     parser.add_argument('--smoke', action='store_true', help='verify selected output modes with a small live command')
     args = parser.parse_args()
@@ -410,6 +412,7 @@ def main():
                                          'model': MODEL, 'effort': 'medium', 'auth': 'chatgpt',
                                          'timeout_seconds': args.timeout, 'smoke': args.smoke,
                                          'arm_order': arm_order,
+                                         'routing_variant': args.routing_variant,
                                          'output_mode': output_mode})
         for arm in arm_order:
             folder = root / arm
@@ -438,7 +441,7 @@ def main():
 ["python3","../pack/tools/local_models.py","--ledger","../routing.sqlite","jev",
 "go.mod","Does the source name a Go module?","--model","jev-1.14.0"].
 Report the module name and whether the Jev call succeeded.'''
-                      if args.smoke else brief(folder / 'pack', args.component))
+                      if args.smoke else brief(folder / 'pack', args.component, args.routing_variant))
             try:
                 run_arm(folder, arm, prompt, codex, python, args.timeout)
             finally:

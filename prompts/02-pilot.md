@@ -1,8 +1,10 @@
 # Domain Behaviour Analysis — Pilot Prompt (manual Pass 1, 2, 4)
 
-**Version 1.24.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
+**Version 1.25.** Changelog (feedback loop from real Part-B diffs: divergence *classes* go back into rules; divergence *content* is the mechanism at work):
 
 <!-- vale off -->
+* v1.25 — account for a state reached through a cited interaction-pair
+  ordering, with the starting and resulting states recorded in its trace.
 * v1.24 — trace a second acquisition from the same caller while its
   first request is pending or its first resource is still held.
 * v1.23 — preserve source-specific fault cases, storage and counter
@@ -324,7 +326,7 @@ citation to the state's entry condition. This eliminates repetitive cells
 
 Stage 2 (after Step 7, re-run): every hole cell (`UNSPECIFIED` or `ignore (accidental)`) carries a `→ Q-nn` back-reference that exists in `open-questions.md`. Every interaction pair `P-nn` appears in at least one trace in `adversarial-traces.md`. Every guard group has an outcome from `check_guards.py`. Every control-trace verdict that cites a requirement or decision carries the scope line ("cited text contemplates this ordering: yes/no").
 
-Also emit the machine-readable sidecar `analysis.json` (schema: pack `formats/analysis.schema.json`). Contents: states, events, cells with dispositions and links, pairs with traces, guard outcomes, the coverage table, questions, behavioural DRs. Generate it with the pack's `tools/gen_analysis_sidecar.py`, never by hand: it reads the matrix, the pair ids in `event-catalogue.md` with their `### P-01a — …` headings in `adversarial-traces.md`, the `group G-nn …: <outcome>` lines of `guard-results.txt` and the first `**Fault:**` / `**Trigger:**` line (or `- fault:` list item) of each question, so no per-run merge script is needed; `--strict` fails the run on any note it prints. Run the pack checker `tools/dsc_check.py <output-dir> --repo . --model as-is.machine.mmd` in addition to the two per-run scripts. Then run the pack's `tools/check_reachability.py <output-dir>`: it follows `transition` cells only, one sidecar `target` per cell, and takes the first declared state as the initial state. It fails on a non-terminal state that is unreachable from the initial state and on a non-terminal state with no outgoing transition; a state declared terminal (`<!-- terminal: S1, S2 -->` in the matrix) is exempt from both. Write a guarded state change as `transition → <target>` and keep the staying branch in the cell text. A cell with two targets carries only one in the sidecar, so a state reached only through the second one is reported unreachable: split the cell by guard where the catalogue allows it, otherwise record the state as a known limit of the check in `summary.md`; never reorder targets to satisfy the checker. Include all outputs in `summary.md`. Deliver checks as executed code, never as claims.
+Also emit the machine-readable sidecar `analysis.json` (schema: pack `formats/analysis.schema.json`). Contents: states, events, cells with dispositions and links, pairs with traces, guard outcomes, the coverage table, questions, behavioural DRs. Generate it with the pack's `tools/gen_analysis_sidecar.py`, never by hand: it reads the matrix, the pair ids in `event-catalogue.md` with their `### P-01a — …` headings in `adversarial-traces.md`, the `group G-nn …: <outcome>` lines of `guard-results.txt` and the first `**Fault:**` / `**Trigger:**` line (or `- fault:` list item) of each question, so no per-run merge script is needed; `--strict` fails the run on any note it prints. Run the pack checker `tools/dsc_check.py <output-dir> --repo . --model as-is.machine.mmd` in addition to the two per-run scripts. Then run the pack's `tools/check_reachability.py <output-dir>`: it follows `transition` cells and the verified reachability entries in Step 6, and takes the first declared state as the initial state. The checker reads pair evidence relative to the component repository (override with `--repo`). It fails on a non-terminal state that is unreachable from the initial state and on a non-terminal state with no outgoing transition; a state declared terminal (`<!-- terminal: S1, S2 -->` in the matrix) is exempt from both. Write a guarded state change as `transition → <target>` and keep the staying branch in the cell text. A cell with two targets carries only one in the sidecar, so a state reached only through the second one is reported unreachable: split the cell by guard where the catalogue allows it, otherwise use a verified pair ordering if the state requires that sequence, or record the limit in `summary.md`; never reorder targets to satisfy the checker. Include all outputs in `summary.md`. Deliver checks as executed code, never as claims.
 
 **Assert every absence.** An empty `pairs`, `guardGroups`, or `coverage` section is a claim, not a silence: it says this component has no interaction pairs, no formalizable guard groups, or no external sources. State it in the `completeness` block with a reason, or the checker fails the sidecar:
 
@@ -432,6 +434,20 @@ Produce concrete, numbered event sequences of these kinds:
    * **Shared-fate reset.** All N instances reset internal state on the same external signal (for example connection opened). Does this create a synchronization cascade? Trace the aggregate load on the external resource over 3 failure/recovery cycles.
    * **Backoff dispersion.** If backoff windows share the same random seed, the same min/max bounds, and the same reset trigger — do they converge or diverge over time?
    * **Degraded-recovery herd.** The external resource recovers partially. Instance A connects, resets its state, then the resource fails again. Instance B connects, resets, fails. Do they amplify the degradation?
+
+When an interaction ordering reaches a modeled state and no single event
+cell represents that sequence, write the starting state, ordered steps and
+observable result in the trace. After a behavior probe confirms the result,
+add this line under the matching pair heading in `adversarial-traces.md`:
+
+```text
+- Reachability: StartingState → ResultingState — test_file.go:42 ("verbatim assertion fragment")
+```
+
+Regenerate the sidecar after Step 6 or after adding the probe. The checker
+validates the states, ordering link and citation, and follows the edge from
+the stated starting state. Record the executed probe in `as-is-validation.md`.
+If the order or resulting state remains uncertain, keep the question open.
 
 For a second acquisition, state how the caller can issue it and trace
 both calls to their outcomes. Check whether the boundary can associate

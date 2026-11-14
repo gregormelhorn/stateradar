@@ -42,6 +42,7 @@ import sys
 from pathlib import Path
 from typing import Any, TypedDict, cast
 
+from check_reachability import pair_reachability
 from sidecar_types import (Cell, CellBody, Citation, Completeness, Disposition, DocLine, Event,
                            GuardGroup, GuardOutcome, Pair, Question, Sidecar)
 
@@ -405,12 +406,16 @@ def _parse_pairs(catalogue: Path, traces: Path) -> list[Pair]:
     ids = sorted(set(re.findall(r"\bP-\d+[a-z]\b", catalogue.read_text(encoding="utf-8"))),
                  key=lambda pid: (int(re.findall(r"\d+", pid)[0]), pid))
     text = traces.read_text(encoding="utf-8") if traces.is_file() else ""
+    reachability = pair_reachability(traces)
     pairs: list[Pair] = []
     for pid in ids:
         m = re.search(r"^#{1,6}[ \t]+" + re.escape(pid) + r"\b[ \t]*(?:[\u2014:.-]+[ \t]*)?(.*)$",
                       text, re.M)
         trace = f"{traces.name}#{pid}: {m.group(1).strip()}".rstrip(": ") if m else ""
-        pairs.append({"id": pid, "trace": trace})
+        pair: Pair = {"id": pid, "trace": trace}
+        if pid in reachability:
+            pair["reachability"] = reachability[pid]
+        pairs.append(pair)
     return pairs
 
 

@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from run_sol_pilot import command_result, codex_environment, read_log, read_usage, serve_tools
+from run_sol_pilot import brief, command_result, codex_environment, read_log, read_usage, serve_tools
 
 
 class SolPilotTest(unittest.TestCase):
@@ -129,6 +129,18 @@ class SolPilotTest(unittest.TestCase):
                 followup = response['next']
             self.assertIsNone(followup)
             self.assertEqual(''.join(pages), full)
+
+    def test_matched_routing_briefs_differ_only_in_who_writes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'prompts').mkdir()
+            (root / 'prompts/02-pilot.md').write_text('Same English pilot.')
+            routed = brief(root, routing_variant='routed')
+            flash = brief(root, routing_variant='flash-writes')
+            self.assertIn('routing variant: flash-writes', flash)
+            self.assertIn('routing variant: routed', routed)
+            self.assertEqual(routed.replace('routing variant: routed',
+                                            'routing variant: flash-writes'), flash)
 
     def test_usage_preserves_codex_counters_and_requires_completed_turn(self):
         with tempfile.TemporaryDirectory() as directory:
