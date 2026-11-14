@@ -30,3 +30,22 @@ process group alone leaves a command running in its own group. The finalizer
 now stops the controller's live descendant tree before artifact audits; the
 behavioral test checks the detached child is no longer running. This prevents
 a timed-out command from continuing to mutate evidence during verification.
+
+Format hardening was tested separately after the live pilot was frozen at
+`a00ea12`: `format-red.txt` demonstrates an invalid cache/input relationship
+being accepted and an unknown local JSON shape crashing accounting.
+`format-green.txt` records nine passing tests after validating final counters
+before writing `usage.json` and converting local-format mismatches into an
+explicit diagnostic. This does not change pilot prompts or domain artifacts.
+
+The third-component review exposed a completion hole in the existing six
+artifact gates: all passed without a manifest, leaving the sidecar at WORKTREE
+with empty watchPaths. `live-completion-red.txt` is the new audit's observed
+rejection of those original live artifacts. `completion-red.txt` and
+`completion-green.txt` exercise absent manifests, unpinned source identity,
+sidecar drift and missing phase reports. `live-completion-green.txt` verifies
+the repaired, source-pinned manifest plus regenerated sidecar. The runner now
+requires this additional deliverables/source-anchor gate, and its English
+brief asks for that artifact explicitly. Presence is not semantic verification;
+the existing six gates still run independently. The original paid pilot used
+the original six-gate runner; this extra gate is post-run remediation.

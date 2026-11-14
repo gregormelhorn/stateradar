@@ -1,0 +1,29 @@
+FE
+======================================================================
+ERROR: test_unknown_local_record_shape_is_diagnostic_not_controller_failure (__main__.AccountingTest.test_unknown_local_record_shape_is_diagnostic_not_controller_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_accounting.py", line 109, in test_unknown_local_record_shape_is_diagnostic_not_controller_failure
+    checkpoint.finish()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/pilot_accounting.py", line 107, in finish
+    self.poll()
+    ~~~~~~~~~^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/pilot_accounting.py", line 78, in poll
+    payload = record.get('payload', {})
+              ^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'get'
+
+======================================================================
+FAIL: test_final_counters_cannot_claim_more_cached_than_total_input (__main__.AccountingTest.test_final_counters_cannot_claim_more_cached_than_total_input)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_accounting.py", line 97, in test_final_counters_cannot_claim_more_cached_than_total_input
+    with self.assertRaisesRegex(ValueError, 'cached'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.004s
+
+FAILED (failures=1, errors=1)

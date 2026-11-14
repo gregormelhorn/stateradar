@@ -1,0 +1,14 @@
+E
+======================================================================
+ERROR: test_completion_requires_pinned_manifest_and_matching_sidecar (__main__.PilotArtifactsTest.test_completion_requires_pinned_manifest_and_matching_sidecar)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_pilot_artifacts.py", line 111, in test_completion_requires_pinned_manifest_and_matching_sidecar
+    artifacts.audit_pilot(adir, repo)
+    ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'pilot_artifacts' has no attribute 'audit_pilot'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.089s
+
+FAILED (errors=1)

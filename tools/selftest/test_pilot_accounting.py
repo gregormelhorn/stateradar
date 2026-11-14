@@ -89,6 +89,29 @@ sys.exit(1)
                 runner.run_arm(root, 'selective', 'task', codex, Path(sys.executable), 6)
             self.assertTrue((root / 'observed-live').exists(), 'usage must be saved while controller is running')
 
+    def test_final_counters_cannot_claim_more_cached_than_total_input(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'events.jsonl'
+            usage = {**USAGE, 'cached_input_tokens': 1001}
+            path.write_text(json.dumps({'type': 'turn.completed', 'usage': usage}) + '\n')
+            with self.assertRaisesRegex(ValueError, 'cached'):
+                runner.read_usage(path)
+
+    def test_unknown_local_record_shape_is_diagnostic_not_controller_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sessions = root / 'sessions/2026/11/14'
+            sessions.mkdir(parents=True)
+            (root / 'events.jsonl').write_text(json.dumps({'type': 'thread.started', 'thread_id': THREAD}) + '\n')
+            (sessions / f'rollout-{THREAD}.jsonl').write_text('null\n')
+            with patch.dict(os.environ, {'CODEX_HOME': str(root)}):
+                checkpoint = UsageCheckpoint(root)
+                checkpoint.finish()
+            result = json.loads((root / 'usage-checkpoint.json').read_text())
+            self.assertEqual(result['status'], 'unavailable')
+            self.assertIsNone(result['usage'])
+            self.assertTrue(result['diagnostic'])
+
     def test_costs_subtract_cached_input_and_never_complete_partial_usage(self):
         routing = {'charged_microdollars': 12000, 'reserved_microdollars': 0}
         checkpoint = {'usage': USAGE, 'complete': False}

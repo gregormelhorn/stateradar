@@ -64,7 +64,7 @@ class SolPilotTest(unittest.TestCase):
             (root / 'logs').mkdir()
             with patch('run_sol_pilot.execute', return_value=(0, 'OK', '')) as execute:
                 self.assertTrue(verify_artifacts(root, Path(sys.executable), structured=True))
-            self.assertEqual(execute.call_count, 7)
+            self.assertEqual(execute.call_count, 8)
             args = [call.args[1] for call in execute.call_args_list]
             self.assertIn('../pack/tools/hybrid_pilot.py', args[0])
             self.assertIn('--strict', args[1])

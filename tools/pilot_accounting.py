@@ -42,7 +42,10 @@ class JsonlTail:
                 if not line.endswith(b'\n'):
                     break  # A concurrent writer has not finished this record.
                 self.offset = stream.tell()
-                yield json.loads(line)
+                record = json.loads(line)
+                if not isinstance(record, dict):
+                    raise ValueError('local JSONL record is not an object')
+                yield record
 
 
 class UsageCheckpoint:
@@ -76,11 +79,15 @@ class UsageCheckpoint:
             if self.rollout:
                 for record in self.records.read(self.rollout):
                     payload = record.get('payload', {})
+                    if not isinstance(payload, dict):
+                        raise ValueError('local event payload is not an object')
                     if record.get('type') != 'event_msg' or payload.get('type') != 'token_count':
                         continue
                     info = payload.get('info')
                     if not info:
                         continue
+                    if not isinstance(info, dict):
+                        raise ValueError('local usage info is not an object')
                     usage = valid_usage(info.get('total_token_usage'))
                     if self.usage and any(usage[k] < self.usage[k] for k in
                                           ('input_tokens', 'cached_input_tokens', 'output_tokens')):

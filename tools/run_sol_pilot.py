@@ -14,7 +14,7 @@ import sys
 import time
 
 from local_budget import Budget
-from pilot_accounting import UsageCheckpoint, atomic_json, cost_report
+from pilot_accounting import UsageCheckpoint, atomic_json, cost_report, valid_usage
 from pilot_output import compact_output, document_page, selective_output, select_lines
 
 MODEL = 'gpt-6.1-sol'
@@ -73,6 +73,9 @@ Run brief for the benchmark:
 - Keep Go probe sources under an underscore-prefixed directory such as _probe
   and use a Go overlay to inject them into the original package. This keeps
   recursive upstream test discovery from compiling the probes as a separate package.
+- Before completion, write manifest.json with component, nonempty source/test watchPaths,
+  analyzedSha equal to the source checkout HEAD, pack_version and date. Regenerate
+  analysis.json with --strict, then run pilot_artifacts.py audit on the analysis directory.
 - Stop with a summary of findings and executed checks. Domain questions stay open.
 '''
 
@@ -199,11 +202,7 @@ def read_usage(events):
             completed.append(event['usage'])
     if len(completed) != 1:
         raise ValueError('expected exactly one completed Codex turn')
-    usage = completed[0]
-    for key in ('input_tokens', 'cached_input_tokens', 'output_tokens'):
-        if type(usage.get(key)) is not int or usage[key] < 0:
-            raise ValueError(f'missing or invalid Codex usage field: {key}')
-    return usage
+    return valid_usage(completed[0])
 
 
 def stop_controller(proc):
@@ -426,6 +425,7 @@ runpy.run_path(script, run_name='__main__')
 def verify_artifacts(root, python, output_name='channelPool', *, structured=False, catalogue=False):
     base = f'domain-analysis/{output_name}'
     commands = {
+        'deliverables': ['../pack/tools/pilot_artifacts.py', 'audit', base, '--repo', '.'],
         'matrix': [f'{base}/check_matrix.py'],
         'guards': [f'{base}/check_guards.py'],
         'sidecar': ['../pack/tools/dsc_check.py', base, '--repo', '.', '--model', 'as-is.machine.mmd'],
@@ -442,7 +442,7 @@ def verify_artifacts(root, python, output_name='channelPool', *, structured=Fals
                                        f'{base}/catalogue-fields.json', f'{base}/event-catalogue.md', '--check']
     outcomes = {}
     for name in (('catalogue-fields',) if catalogue else ()) + (('matrix-fields', 'sidecar-regeneration') if structured else ()) + (
-            'matrix', 'guards', 'sidecar', 'reachability', 'blind-coverage'):
+            'matrix', 'guards', 'sidecar', 'reachability', 'blind-coverage', 'deliverables'):
         arguments = commands[name]
         code, stdout, stderr = execute(root, ['python3', *arguments], 0, python)
         (root / 'logs' / f'acceptance-{name}.stdout').write_text(stdout, encoding='utf-8')

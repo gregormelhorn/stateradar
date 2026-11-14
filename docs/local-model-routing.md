@@ -492,3 +492,10 @@ a service refusal, resume a paid run, or approve domain semantics.
 A third pinned fixture is available as `--component semaphore` using the
 `golang.org/x/sync` v0.17.0 checkout. The boundary is one weighted semaphore;
 public API comments supplement the repository README as contract evidence.
+
+Completion also requires `pilot_artifacts.py audit ANALYSIS --repo REPO`:
+all pilot phase deliverables must be nonempty; manifest component and source
+HEAD must match; watch paths must exist inside the repository; and the sidecar
+must repeat that identity. `WORKTREE`, missing manifests and stale sidecars
+cannot satisfy a finished pilot. These checks supplement the six existing
+semantic/catalogue gates rather than replacing them.

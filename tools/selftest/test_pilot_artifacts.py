@@ -88,6 +88,40 @@ class PilotArtifactsTest(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0, result.stdout)
             self.assertIn('missing state row: Idle', result.stdout)
 
+    def test_completion_requires_pinned_manifest_and_matching_sidecar(self):
+        import pilot_artifacts as artifacts
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+            subprocess.run(['git', 'init', '-q', str(repo)], check=True)
+            (repo / 'source.go').write_text('package fixture\n')
+            subprocess.run(['git', '-C', str(repo), 'add', 'source.go'], check=True)
+            subprocess.run(['git', '-C', str(repo), '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+                            'commit', '-qm', 'fixture'], check=True)
+            sha = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
+            adir = repo / 'domain-analysis/fixture'
+            adir.mkdir(parents=True)
+            for name in ('extraction.md', 'as-is.machine.mmd', 'as-is-validation.md', 'catalogue-fields.json',
+                         'event-catalogue.md', 'disposition-matrix.md', 'check_matrix.py', 'check_guards.py',
+                         'guard-results.txt', 'invariants-and-lints.md', 'adversarial-traces.md',
+                         'open-questions.md', 'summary.md', 'part-b-blind.md', 'part-b-diff.md'):
+                (adir / name).write_text('fixture')
+            manifest = {'component': 'fixture', 'watchPaths': ['source.go'], 'analyzedSha': sha}
+            (adir / 'analysis.json').write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, 'manifest'):
+                artifacts.audit_pilot(adir, repo)
+            (adir / 'manifest.json').write_text(json.dumps({**manifest, 'analyzedSha': 'WORKTREE'}))
+            with self.assertRaisesRegex(ValueError, 'HEAD'):
+                artifacts.audit_pilot(adir, repo)
+            (adir / 'manifest.json').write_text(json.dumps(manifest))
+            artifacts.audit_pilot(adir, repo)
+            (adir / 'analysis.json').write_text(json.dumps({**manifest, 'analyzedSha': 'WORKTREE'}))
+            with self.assertRaisesRegex(ValueError, 'sidecar'):
+                artifacts.audit_pilot(adir, repo)
+            (adir / 'analysis.json').write_text(json.dumps(manifest))
+            (adir / 'summary.md').unlink()
+            with self.assertRaisesRegex(ValueError, 'summary'):
+                artifacts.audit_pilot(adir, repo)
+
     def test_model_selection_reaches_codex_command(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

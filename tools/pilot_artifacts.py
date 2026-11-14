@@ -10,6 +10,9 @@ import json
 from pathlib import Path
 import re
 import sys
+import subprocess
+
+import jsonschema
 import tomllib
 
 CATEGORIES = tuple(item['key'] for item in tomllib.loads(
@@ -119,6 +122,42 @@ def citations(source, lines):
     return result
 
 
+def audit_pilot(adir, repo):
+    """Require phase deliverables and a source-anchored, sidecar-matched manifest.
+
+    Report presence separately from the existing semantic/citation gates.
+    This check cannot establish that prose conclusions are correct.
+    """
+    names = ('manifest.json', 'analysis.json', 'extraction.md', 'as-is.machine.mmd',
+             'as-is-validation.md', 'catalogue-fields.json', 'event-catalogue.md',
+             'disposition-matrix.md', 'check_matrix.py', 'check_guards.py', 'guard-results.txt',
+             'invariants-and-lints.md', 'adversarial-traces.md', 'open-questions.md',
+             'summary.md', 'part-b-blind.md', 'part-b-diff.md')
+    for name in names:
+        path = adir / name
+        if not path.is_file() or not path.read_text(encoding='utf-8').strip():
+            raise ValueError(f'missing or empty pilot deliverable: {name}')
+    manifest = json.loads((adir / 'manifest.json').read_text())
+    schema = json.loads((Path(__file__).resolve().parents[1] / 'formats/manifest.schema.json').read_text())
+    try:
+        jsonschema.validate(manifest, schema)
+    except jsonschema.ValidationError as exc:
+        raise ValueError(f'manifest: {exc.message}') from exc
+    head = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
+    if manifest['analyzedSha'] != head:
+        raise ValueError('pilot manifest must pin the analyzed source HEAD, not WORKTREE or another revision')
+    if manifest['component'] != adir.name:
+        raise ValueError('manifest component differs from analysis directory')
+    for path in manifest['watchPaths']:
+        target = (repo / path).resolve()
+        if not path or not target.is_relative_to(repo.resolve()) or not target.exists():
+            raise ValueError(f'manifest watch path is missing or outside repository: {path}')
+    sidecar = json.loads((adir / 'analysis.json').read_text())
+    for key in ('component', 'analyzedSha', 'watchPaths'):
+        if sidecar.get(key) != manifest[key]:
+            raise ValueError(f'sidecar and manifest disagree on {key}; regenerate the sidecar')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
@@ -129,9 +168,15 @@ def main():
     cite = commands.add_parser('citations', help='copy exact source lines as JSON; no claim judgment')
     cite.add_argument('source', type=Path)
     cite.add_argument('lines', nargs='+', type=int)
+    audit = commands.add_parser('audit', help='check pilot deliverables and source-pinned manifest before completion')
+    audit.add_argument('analysis', type=Path)
+    audit.add_argument('--repo', type=Path, default=Path('.'))
     args = parser.parse_args()
     try:
-        if args.command == 'citations':
+        if args.command == 'audit':
+            audit_pilot(args.analysis, args.repo)
+            print('PILOT DELIVERABLES: OK (presence and source anchor; run semantic gates separately)')
+        elif args.command == 'citations':
             print(json.dumps(citations(args.source, args.lines), ensure_ascii=False, indent=2))
         else:
             rendered = render_catalogue(json.loads(args.fields.read_text(encoding='utf-8')))
@@ -141,7 +186,7 @@ def main():
             else:
                 args.output.write_text(rendered, encoding='utf-8')
             print('PILOT CATALOGUE: OK')
-    except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, subprocess.SubprocessError) as error:
         print(f'PILOT ARTIFACTS: {error}', file=sys.stderr)
         return 1
     return 0
