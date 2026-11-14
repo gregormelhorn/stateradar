@@ -1,0 +1,24 @@
+id: DR-008
+date: 2026-11-14
+source_question: Q-08
+question: Who selects the correct semaphore instance and Context?
+options: [caller-responsibility, diagnostics-and-attribution]
+decision: caller-responsibility
+rationale: proposal rationale adopted (owner-confirmed)
+owner: Gregor Melhorn
+owner_response: "Gut, übernehmen wir Q-08 so."
+scope: >-
+  Evaluation copy only. The caller selects the intended semaphore instance and
+  Context. Operations affect the supplied receiver and follow the supplied
+  Context; the component does not detect a semantically mistaken but otherwise
+  valid selection. Release responsibility may transfer under DR-007, but the
+  acquired capacity does not transfer between semaphore instances. Releasing
+  on another instance leaves the original holding intact and may debit that
+  other instance or trigger DR-003 aggregate over-release rejection. No caller,
+  goroutine or Context identity heuristic is introduced. Invalid custom Context
+  implementations remain Q-09. Acquisition handles are not introduced here.
+links:
+  - "guarded matrix branch: UV-WrongReceiver"
+  - "guarded matrix branch: UV-ForeignContext"
+status: accepted
+implementation_status: pending-contract-and-conformance-follow-up

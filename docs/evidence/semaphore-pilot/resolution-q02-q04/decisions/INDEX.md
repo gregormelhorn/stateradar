@@ -15,6 +15,9 @@ DR-001 / Q-01 remains in ../.. / resolution-q01/decisions.
 - DR-007: Q-07 — Transferable release responsibility; aggregate accounting only.
   Accepted during the continuing interview; contract/conformance follow-up pending.
 
-Q-08 through Q-13 remain OPEN. This implements the explicitly selected next
+- DR-008: Q-08 — Caller selects the instance and Context; no semantic-mismatch detection.
+  Accepted during the continuing interview; contract/conformance follow-up pending.
+
+Q-09 through Q-13 remain OPEN. This implements the explicitly selected next
 numeric-contract changes; prior recommendations for the other questions are
 not silently promoted to decisions. Q-13 still needs post-fix investigation.

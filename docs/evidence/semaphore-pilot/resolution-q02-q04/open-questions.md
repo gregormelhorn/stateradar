@@ -1,4 +1,4 @@
-# Domain question register after Q-01 through Q-07
+# Domain question register after Q-01 through Q-08
 
 Behavior descriptions and citations below refer to the frozen upstream baseline
 `04914c200cb38d4ea960ee6a4c314a028c632991`. DR-001 through DR-004 subsequently change the
@@ -167,7 +167,16 @@ Options: document caller responsibility | expose diagnostics or attribution requ
 
 Proposed: Document caller responsibility — the supplied receiver and Context are authoritative; wrong intent is not detectable at this boundary.
 
-Status: OPEN — human decision required
+Decision: Instance and Context selection are caller responsibilities. Operations
+use the supplied receiver and Context without a guarantee of detecting semantic
+misselection. Release responsibility may transfer; capacity does not transfer
+between instances. Invalid Context implementations remain separately in Q-09.
+Rationale: proposal rationale adopted (owner-confirmed).
+Owner response: "Gut, übernehmen wir Q-08 so."
+Decided-via: chat acceptance, Gregor Melhorn, 2026-11-14.
+Status: RESOLVED — DR-008
+Follow-up: contract documentation and focused conformance acceptance pending;
+this interview answer does not claim implementation/test completion.
 
 ## Q-09 — What does Weighted guarantee for nil, blocking, panicking, reentrant or inconsistent custom Context methods?
 
