@@ -1,0 +1,357 @@
+{
+  "source": "component.go",
+  "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 674,
+    "output_tokens": 1586,
+    "cost_microdollars": 2106,
+    "reservation_microdollars": 15477
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 4073,
+    "cost_microdollars": 172,
+    "reservation_microdollars": 732,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "Port.A increments the current target's Requests at admission time before capturing the epoch.",
+      "line": 8,
+      "fragment": "p.Target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "Port.A captures a numeric epoch value from p.Target.Epoch at admission into a local variable.",
+      "line": 9,
+      "fragment": "epoch := p.Target.Epoch",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "Port.A's returned closure re-reads p.Target at delivery and only increments Successes when the current target's Epoch equals the captured epoch.",
+      "line": 10,
+      "fragment": "if p.Target.Epoch == epoch { p.Target.Successes++ }",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "Port.B copies the current target pointer into a local variable at admission.",
+      "line": 13,
+      "fragment": "target := p.Target",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "Port.B increments Requests through the copied local target pointer at admission.",
+      "line": 14,
+      "fragment": "target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.81,
+          "contradicted": 0.02,
+          "unclear": 0.17
+        },
+        "confidence": 0.72
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "Port.B's returned closure increments Successes through the admission-time target copy, not through p.Target.",
+      "line": 15,
+      "fragment": "target.Successes++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.01,
+          "unclear": 0.12
+        },
+        "confidence": 0.8
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "Port.C captures both the target pointer and the numeric epoch at admission into locals.",
+      "line": 18,
+      "fragment": "target, epoch := p.Target, p.Target.Epoch",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "Port.C increments Requests through the admission-time local target pointer.",
+      "line": 19,
+      "fragment": "target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.88,
+          "contradicted": 0.02,
+          "unclear": 0.1
+        },
+        "confidence": 0.82
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "Port.C's returned closure requires identity match between p.Target and the captured target pointer as well as numeric epoch equality before incrementing Successes.",
+      "line": 20,
+      "fragment": "if p.Target == target && target.Epoch == epoch { target.Successes++ }",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.01,
+          "unclear": 0.05
+        },
+        "confidence": 0.91
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "Registry.D performs admission by indexing r.Entries[key] and incrementing Requests on the entry found at that moment.",
+      "line": 23,
+      "fragment": "r.Entries[key].Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.82,
+          "contradicted": 0.0,
+          "unclear": 0.18
+        },
+        "confidence": 0.73
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "Registry.D's returned closure re-reads r.Entries[key] at delivery, checking only for nil before incrementing Successes.",
+      "line": 24,
+      "fragment": "if target := r.Entries[key]; target != nil { target.Successes++ }",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "Port.E has a value receiver, so p is a copy of the receiver; mutation occurs through the shared Target pointer.",
+      "line": 26,
+      "fragment": "func (p Port) E() func()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.83,
+          "contradicted": 0.02,
+          "unclear": 0.15
+        },
+        "confidence": 0.74
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "Port.E increments Requests through the receiver copy's Target pointer at admission; note the copy itself is captured by the returned closure.",
+      "line": 27,
+      "fragment": "p.Target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.68,
+          "contradicted": 0.04,
+          "unclear": 0.28
+        },
+        "confidence": 0.52
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "Port.E's returned closure increments Successes through p.Target where p is the captured receiver copy.",
+      "line": 28,
+      "fragment": "p.Target.Successes++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.01,
+          "unclear": 0.04
+        },
+        "confidence": 0.92
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "F is a free function taking a *Port; it copies p.Target into a local at admission.",
+      "line": 31,
+      "fragment": "target := p.Target",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.88,
+          "contradicted": 0.0,
+          "unclear": 0.12
+        },
+        "confidence": 0.82
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "F increments Requests through the local target pointer at admission.",
+      "line": 32,
+      "fragment": "target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.84,
+          "contradicted": 0.01,
+          "unclear": 0.15
+        },
+        "confidence": 0.76
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "F's returned closure increments Successes through the admission-time target pointer copy.",
+      "line": 33,
+      "fragment": "target.Successes++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.6,
+          "contradicted": 0.01,
+          "unclear": 0.39
+        },
+        "confidence": 0.4
+      }
+    },
+    "C18": {
+      "kind": "ordering",
+      "statement": "For Port.A, Requests is incremented first, then the epoch is read into the local, then the closure is returned; the epoch comparison uses the value read after the increment.",
+      "line": 9,
+      "fragment": "epoch := p.Target.Epoch",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.33,
+          "contradicted": 0.03,
+          "unclear": 0.64
+        },
+        "confidence": 0.46,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C19": {
+      "kind": "ordering",
+      "statement": "For Registry.D, the key lookup and Requests increment happen before the closure is constructed; the closure re-looks-up the key later.",
+      "line": 23,
+      "fragment": "r.Entries[key].Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.55,
+          "contradicted": 0.01,
+          "unclear": 0.44
+        },
+        "confidence": 0.33,
+        "ordering_scope_probability": 0.03
+      }
+    },
+    "C20": {
+      "kind": "claim",
+      "statement": "Registry.D's delivery gate is only a nil check on the current entry; it does not compare identity or epoch to an admission-time entry.",
+      "line": 24,
+      "fragment": "target != nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92
+      }
+    }
+  },
+  "questions": [
+    "If Port.A's p.Target is rebound or replaced after admission but before delivery, does the Epoch comparison read the new target, and is that the intended attribution for the Successes increment?",
+    "Port.A compares only the numeric epoch from possibly different target lineages; if Epoch is restored to a prior value on the same or a different target, is a stale closure authorized to increment Successes?",
+    "Port.C requires pointer identity and epoch equality but uses the captured local target for the Successes increment; if the wrapper's Target is replaced by a distinct but equal-epoch account, is the intended behavior that no Successes increment occurs?",
+    "For Registry.D, if the map entry under key is replaced by a different non-nil account between admission and delivery, is incrementing the new entry's Successes intended without any identity or epoch comparison?",
+    "For Registry.D, if the map entry under key is deleted and a different entry inserted under the same key, is the delivery authorized solely by non-nilness?",
+    "For Port.E, the value receiver's p is captured by the closure; if the caller rebinds the original *Port's Target after E returns, does the closure continue to use the receiver copy's original Target pointer?",
+    "For F, the admission-time target pointer is captured; if the caller later replaces p.Target, is F's delivery intentionally unaffected by that replacement?",
+    "Are numeric generation restoration cases (Epoch moving backwards or repeating) intended to be treated equivalently to forward increments for A and C, or is there a retirement rule not expressed in source?",
+    "Is there any cleanup or retirement expectation for closures that fail their gates (A epoch mismatch, C identity or epoch mismatch, D nil entry), or are they simply inert with no further effect?",
+    "Is the nil state of r.Entries[key] at admission in Registry.D handled, or is nil-dereference an unspecified case?",
+    "Are concurrent calls to these operations out of scope such that serialization assumptions make the map reads and account mutations race-free?"
+  ],
+  "review_required": true
+}

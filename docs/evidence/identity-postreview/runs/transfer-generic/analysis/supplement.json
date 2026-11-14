@@ -1,0 +1,436 @@
+{
+  "qualifications": [
+    {
+      "id": "F07",
+      "status": "qualified",
+      "rationale": "For A, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F08",
+      "status": "qualified",
+      "rationale": "For B, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F09",
+      "status": "qualified",
+      "rationale": "For C, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F10",
+      "status": "qualified",
+      "rationale": "For D, the tested replacement changes the admission key in Entries on the same Registry. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F11",
+      "status": "qualified",
+      "rationale": "For E, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F12",
+      "status": "qualified",
+      "rationale": "For F, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F13",
+      "status": "qualified",
+      "rationale": "For A, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F14",
+      "status": "qualified",
+      "rationale": "For B, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F15",
+      "status": "qualified",
+      "rationale": "For C, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F16",
+      "status": "qualified",
+      "rationale": "For D, the tested replacement changes the admission key in Entries on the same Registry. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F17",
+      "status": "qualified",
+      "rationale": "For E, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F18",
+      "status": "qualified",
+      "rationale": "For F, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row’s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F32",
+      "status": "qualified",
+      "rationale": "The detached invocation for this operation uses the direct call in identity_test.go:151. The cited panic assertion at line 149 applies to A alone. Lines 153, 155 and 157 cover the counter observations.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F33",
+      "status": "qualified",
+      "rationale": "The detached invocation for this operation uses the direct call in identity_test.go:151. The cited panic assertion at line 149 applies to A alone. Lines 153, 155 and 157 cover the counter observations.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F34",
+      "status": "qualified",
+      "rationale": "The detached invocation for this operation uses the direct call in identity_test.go:151. The cited panic assertion at line 149 applies to A alone. Lines 153, 155 and 157 cover the counter observations.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F35",
+      "status": "qualified",
+      "rationale": "The detached invocation for this operation uses the direct call in identity_test.go:151. The cited panic assertion at line 149 applies to A alone. Lines 153, 155 and 157 cover the counter observations.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F47",
+      "status": "qualified",
+      "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F48",
+      "status": "qualified",
+      "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F49",
+      "status": "qualified",
+      "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F50",
+      "status": "qualified",
+      "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F51",
+      "status": "qualified",
+      "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F52",
+      "status": "qualified",
+      "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F53",
+      "status": "qualified",
+      "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F54",
+      "status": "qualified",
+      "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F55",
+      "status": "qualified",
+      "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F56",
+      "status": "qualified",
+      "rationale": "Both admissions use the same Registry and key, with replacement of the admission key in Entries on the same Registry between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F57",
+      "status": "qualified",
+      "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F58",
+      "status": "qualified",
+      "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F59",
+      "status": "qualified",
+      "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302–303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+      "citation": {
+        "file": "component.go",
+        "line": 8,
+        "fragment": " p.Target.Requests++"
+      }
+    },
+    {
+      "id": "F60",
+      "status": "qualified",
+      "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302–303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+      "citation": {
+        "file": "component.go",
+        "line": 14,
+        "fragment": " target.Requests++"
+      }
+    },
+    {
+      "id": "F61",
+      "status": "qualified",
+      "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302–303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+      "citation": {
+        "file": "component.go",
+        "line": 18,
+        "fragment": " target, epoch := p.Target, p.Target.Epoch"
+      }
+    },
+    {
+      "id": "F62",
+      "status": "qualified",
+      "rationale": "The probe uses a non-nil Registry with a missing key, nil entry, or nil map at identity_test.go:287–299. The cited line 303 is the Port branch. The helper checks for a panic, while the exact panic site follows from source.",
+      "citation": {
+        "file": "component.go",
+        "line": 23,
+        "fragment": " r.Entries[key].Requests++"
+      }
+    },
+    {
+      "id": "F63",
+      "status": "qualified",
+      "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302–303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+      "citation": {
+        "file": "component.go",
+        "line": 27,
+        "fragment": " p.Target.Requests++"
+      }
+    },
+    {
+      "id": "F64",
+      "status": "qualified",
+      "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302–303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+      "citation": {
+        "file": "component.go",
+        "line": 32,
+        "fragment": " target.Requests++"
+      }
+    },
+    {
+      "id": "F66",
+      "status": "qualified",
+      "rationale": "The probe sets Requests to zero and writes Successes directly to 10. Successes was already zero following admission. The test has no intermediate assignment of zero to Successes and covers B specifically.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F67",
+      "status": "qualified",
+      "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F68",
+      "status": "qualified",
+      "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F69",
+      "status": "qualified",
+      "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F70",
+      "status": "qualified",
+      "rationale": "The test changes the admission key in Entries on the same Registry and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F71",
+      "status": "qualified",
+      "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F72",
+      "status": "qualified",
+      "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F73",
+      "status": "qualified",
+      "rationale": "The exact counter values in TestIdentityMatchingAfterMismatch/A start from zero counters on both accounts. The source gives a delta of one request on the original and, only on the matching invocation, one success on the replacement.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    }
+  ],
+  "test_bindings": [
+    {
+      "id": "N01",
+      "test": "TestIdentityCallerVariableRebinding",
+      "scope": "After F admits using a local *Port, reassigning only that local to a distinct Port leaves the original alias pointing to a Port with its original Target. Before one explicit delivery the original has (1 request, 0 successes) and the replacement (0, 0). After delivery those are (1, 1) and (0, 0), with both Target fields and epochs stable across the observations."
+    },
+    {
+      "id": "N02",
+      "test": "TestIdentityRegistryOtherKeyAlias",
+      "scope": "After D admits work, delete work while other continues to alias the admitted account, then invoke once for zero success. Restore the account at work, see zero success before delivery, and invoke the same callback again for one success with Requests still one."
+    }
+  ]
+}

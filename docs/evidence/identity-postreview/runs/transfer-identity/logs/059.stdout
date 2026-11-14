@@ -1,0 +1,123 @@
+     1	package identityfixture_test
+     2	
+     3	import (
+     4		"testing"
+     5	
+     6		fixture "identityfixture"
+     7	)
+     8	
+     9	func TestIdentityCallerVariableRebinding(t *testing.T) {
+    10		original := &fixture.Account{Epoch: 7}
+    11		replacement := &fixture.Account{Epoch: 7}
+    12		port := &fixture.Port{Target: original}
+    13		originalPort := port
+    14		replacementPort := &fixture.Port{Target: replacement}
+    15	
+    16		counters(t, original, 0, 0)
+    17		counters(t, replacement, 0, 0)
+    18		complete := fixture.F(port)
+    19		counters(t, original, 1, 0)
+    20		counters(t, replacement, 0, 0)
+    21		port = replacementPort
+    22	
+    23		if originalPort == port || originalPort.Target != original || port.Target != replacement {
+    24			t.Fatal("caller reassignment did not leave two distinct Ports with their original targets")
+    25		}
+    26		counters(t, original, 1, 0)
+    27		counters(t, replacement, 0, 0)
+    28	
+    29		complete()
+    30	
+    31		if originalPort.Target != original || port.Target != replacement {
+    32			t.Fatal("completion changed a Port target")
+    33		}
+    34		counters(t, original, 1, 1)
+    35		counters(t, replacement, 0, 0)
+    36	}
+    37	
+    38	func TestIdentityRetainedPort(t *testing.T) {
+    39		for _, op := range []struct {
+    40			name              string
+    41			admit             func(*fixture.Port) func()
+    42			incomingSuccesses int
+    43		}{
+    44			{"A", (*fixture.Port).A, 1},
+    45			{"C", (*fixture.Port).C, 0},
+    46		} {
+    47			t.Run(op.name, func(t *testing.T) {
+    48				original := &fixture.Account{Epoch: 7}
+    49				separate := &fixture.Account{Epoch: 7}
+    50				incoming := &fixture.Account{Epoch: 7}
+    51				port := &fixture.Port{Target: original}
+    52				originalPort := port
+    53				complete := op.admit(port)
+    54				port = &fixture.Port{Target: separate}
+    55	
+    56				if originalPort.Target != original || port.Target != separate {
+    57					t.Fatal("caller reassignment changed a target")
+    58				}
+    59				counters(t, original, 1, 0)
+    60				complete()
+    61				counters(t, original, 1, 1)
+    62				counters(t, separate, 0, 0)
+    63	
+    64				originalPort.Target = incoming
+    65				complete()
+    66				counters(t, original, 1, 1)
+    67				counters(t, separate, 0, 0)
+    68				counters(t, incoming, 0, op.incomingSuccesses)
+    69			})
+    70		}
+    71	}
+    72	
+    73	func TestIdentityRetainedRegistryAndKey(t *testing.T) {
+    74		original := &fixture.Account{Epoch: 7}
+    75		otherKey := &fixture.Account{Epoch: 7}
+    76		otherRegistry := &fixture.Account{Epoch: 7}
+    77		newOccupant := &fixture.Account{Epoch: 8}
+    78		callerKey := "old"
+    79		registry := &fixture.Registry{Entries: map[string]*fixture.Account{
+    80			callerKey: original, "new": otherKey,
+    81		}}
+    82		originalRegistry := registry
+    83		complete := registry.D(callerKey)
+    84	
+    85		callerKey = "new"
+    86		counters(t, registry.Entries[callerKey], 0, 0)
+    87		counters(t, original, 1, 0)
+    88		complete()
+    89		counters(t, original, 1, 1)
+    90		counters(t, otherKey, 0, 0)
+    91	
+    92		registry = &fixture.Registry{Entries: map[string]*fixture.Account{"old": otherRegistry}}
+    93		counters(t, registry.Entries["old"], 0, 0)
+    94		complete()
+    95		counters(t, original, 1, 2)
+    96		counters(t, otherKey, 0, 0)
+    97		counters(t, otherRegistry, 0, 0)
+    98	
+    99		originalRegistry.Entries["old"] = newOccupant
+   100		complete()
+   101		counters(t, original, 1, 2)
+   102		counters(t, otherKey, 0, 0)
+   103		counters(t, otherRegistry, 0, 0)
+   104		counters(t, newOccupant, 0, 1)
+   105	}
+   106	
+   107	func TestIdentityAccountCopyAndOverwrite(t *testing.T) {
+   108		original := &fixture.Account{Epoch: 7}
+   109		port := &fixture.Port{Target: original}
+   110		complete := port.C()
+   111		copied := *original
+   112		port.Target = &copied
+   113		complete()
+   114		counters(t, original, 1, 0)
+   115		counters(t, &copied, 1, 0)
+   116	
+   117		port.Target = original
+   118		*original = fixture.Account{Successes: 10, Epoch: 7}
+   119		counters(t, original, 0, 10)
+   120		complete()
+   121		counters(t, original, 0, 11)
+   122		counters(t, &copied, 1, 0)
+   123	}

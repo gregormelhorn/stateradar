@@ -1,0 +1,57 @@
+$ .venv/bin/python tools/finding_benchmark.py docs/evidence/identity-benchmark/benchmark.json docs/evidence/identity-postreview/gobreaker-generic-review.json --require-complete
+{
+  "refuted_claims": 0,
+  "cases": 8,
+  "found": 8,
+  "correct": 8,
+  "tested_full": 7,
+  "tested_partial": 0,
+  "missing": [],
+  "incorrect": [],
+  "limitation": "Semantic verdicts are attributed review judgments; anchors do not prove entailment."
+}
+
+exit=0
+$ .venv/bin/python tools/finding_benchmark.py docs/evidence/identity-benchmark/benchmark.json docs/evidence/identity-postreview/gobreaker-identity-review.json --require-complete
+{
+  "refuted_claims": 0,
+  "cases": 8,
+  "found": 8,
+  "correct": 8,
+  "tested_full": 7,
+  "tested_partial": 0,
+  "missing": [],
+  "incorrect": [],
+  "limitation": "Semantic verdicts are attributed review judgments; anchors do not prove entailment."
+}
+
+exit=0
+$ .venv/bin/python tools/finding_benchmark.py docs/evidence/identity-benchmark/transfer-benchmark.json docs/evidence/identity-postreview/transfer-generic-review.json --require-complete
+{
+  "refuted_claims": 0,
+  "cases": 6,
+  "found": 6,
+  "correct": 6,
+  "tested_full": 6,
+  "tested_partial": 0,
+  "missing": [],
+  "incorrect": [],
+  "limitation": "Semantic verdicts are attributed review judgments; anchors do not prove entailment."
+}
+
+exit=0
+$ .venv/bin/python tools/finding_benchmark.py docs/evidence/identity-benchmark/transfer-benchmark.json docs/evidence/identity-postreview/transfer-identity-review.json --require-complete
+{
+  "refuted_claims": 0,
+  "cases": 6,
+  "found": 6,
+  "correct": 6,
+  "tested_full": 6,
+  "tested_partial": 0,
+  "missing": [],
+  "incorrect": [],
+  "limitation": "Semantic verdicts are attributed review judgments; anchors do not prove entailment."
+}
+
+exit=0
+Retained hashes: 741 PASS; frozen prompts/protocol/validators unchanged; four independent replays complete.

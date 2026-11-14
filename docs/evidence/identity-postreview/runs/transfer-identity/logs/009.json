@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "python3",
+    "../pack/tools/local_models.py",
+    "--ledger",
+    "../routing.sqlite",
+    "draft-verify",
+    "component.go",
+    "analysis/draft-task.md",
+    "--output",
+    "analysis/draft-verify.json",
+    "--max-tokens",
+    "12000",
+    "--model",
+    "jev-1.14.0"
+  ],
+  "exit_code": 0
+}

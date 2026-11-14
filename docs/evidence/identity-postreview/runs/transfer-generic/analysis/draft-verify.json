@@ -1,0 +1,307 @@
+{
+  "source": "component.go",
+  "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 636,
+    "output_tokens": 1428,
+    "cost_microdollars": 1905,
+    "reservation_microdollars": 15412
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 3166,
+    "cost_microdollars": 133,
+    "reservation_microdollars": 558,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "Method A increments the Requests field of the Account pointed to by p.Target at invocation time of A.",
+      "line": 8,
+      "fragment": "p.Target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "Method A captures the current Epoch of p.Target into a local variable before returning a closure.",
+      "line": 9,
+      "fragment": "epoch := p.Target.Epoch",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "The closure returned by A increments Successes only if p.Target.Epoch still equals the captured epoch, re-reading p.Target at closure call time.",
+      "line": 10,
+      "fragment": "if p.Target.Epoch == epoch",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "Method B captures the Account pointer from p.Target into a local variable target.",
+      "line": 13,
+      "fragment": "target := p.Target",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "Method B increments Requests on the captured target pointer at invocation time of B.",
+      "line": 14,
+      "fragment": "target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "The closure returned by B unconditionally increments Successes on the captured target pointer.",
+      "line": 15,
+      "fragment": "target.Successes++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "Method C captures both p.Target and p.Target.Epoch into local variables target and epoch.",
+      "line": 18,
+      "fragment": "target, epoch := p.Target, p.Target.Epoch",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "Method C increments Requests on the captured target pointer at invocation time of C.",
+      "line": 19,
+      "fragment": "target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "The closure returned by C increments target.Successes only if p.Target still equals the captured target and the captured target's Epoch still equals the captured epoch.",
+      "line": 20,
+      "fragment": "if p.Target == target && target.Epoch == epoch",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "Method D increments Requests on the Account currently found at r.Entries[key] at invocation time of D.",
+      "line": 23,
+      "fragment": "r.Entries[key].Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "The closure returned by D re-looks-up r.Entries[key] and increments Successes on the non-nil result.",
+      "line": 24,
+      "fragment": "if target := r.Entries[key]; target != nil",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "Method E has a value receiver, so p is a copy of the Port; the closure captures that copy.",
+      "line": 26,
+      "fragment": "func (p Port) E() func() {",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.03,
+          "unclear": 0.04
+        },
+        "confidence": 0.89
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "Method E increments Requests on the Account pointed to by the copied p.Target at invocation time of E.",
+      "line": 27,
+      "fragment": "p.Target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.81,
+          "contradicted": 0.07,
+          "unclear": 0.12
+        },
+        "confidence": 0.72
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "The closure returned by E increments Successes on the Account pointed to by the captured copy's Target field.",
+      "line": 28,
+      "fragment": "p.Target.Successes++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.9,
+          "contradicted": 0.05,
+          "unclear": 0.05
+        },
+        "confidence": 0.85
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "Function F captures p.Target into a local variable target before incrementing.",
+      "line": 31,
+      "fragment": "target := p.Target",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.91,
+          "contradicted": 0.01,
+          "unclear": 0.08
+        },
+        "confidence": 0.86
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "Function F increments Requests on the captured target pointer at invocation time of F.",
+      "line": 32,
+      "fragment": "target.Requests++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "The closure returned by F unconditionally increments Successes on the captured target pointer, independent of any subsequent reassignment of the caller's local pointer variable p.",
+      "line": 33,
+      "fragment": "target.Successes++",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.82,
+          "contradicted": 0.0,
+          "unclear": 0.18
+        },
+        "confidence": 0.73
+      }
+    }
+  },
+  "questions": [
+    "Does the source establish whether A, B, C, D, E, or F were invoked in any particular order in any caller, or whether the returned closures were invoked at all?",
+    "Does the source specify what happens if p.Target is nil when A, B, C, E, or F is invoked, or if r.Entries[key] is nil or missing when D is invoked or its closure runs?",
+    "Does the source specify whether Requests and Successes are meant to be compared, summed, or asserted in any test, or what a 'serialized admission and completion' outcome should be?",
+    "When only the caller's local pointer variable p (the *Port argument to F) is reassigned after F returns, does the source establish any effect on F's closure beyond the code-level fact that F captured target at line 31?",
+    "Does the source specify what happens to A's and C's epoch-conditional Successes increment if the Account's Epoch changes after A or C but before the closure runs?",
+    "Does the source specify what happens to D's closure if the map entry for key is replaced with a different *Account, or if a new entry is inserted at the same key, between D and closure invocation?",
+    "Does the source establish whether a non-nil but different *Account at r.Entries[key] in D's closure would still cause a Successes increment, beyond the code-level nil check on line 24?",
+    "Does the source establish whether counte effects are expected to be atomic, serialized, or free of race under concurrent use of these functions or closures?",
+    "Does the source establish intended lifecycle semantics for the Account's Epoch field, such as who sets it or what transitions it represents?",
+    "Does the source establish whether F's unconditional Successes increment at line 33 is intended to be paired with F's Requests increment at line 32 across any reorganization of the caller's Port or Account, or whether such pairing is left unspecified?",
+    "Does the source establish whether the value receiver of E (a copy of the Port) is intended to preserve identity of the Target pointer across any reassignment of the caller's Port variable, beyond the code-level copy on line 26?"
+  ],
+  "review_required": true
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "id": "C1",
+    "kind": "claim",
+    "statement": "After F returns, assigning the caller's local *Port to a distinct Port cannot redirect success away from the account identified by F's saved target.",
+    "line": 33,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "C2",
+    "kind": "claim",
+    "statement": "F copies the original Port's Target pointer during admission.",
+    "line": 31,
+    "fragment": " target := p.Target"
+  },
+  {
+    "id": "C3",
+    "kind": "claim",
+    "statement": "F attributes the request to the account whose pointer was saved at admission.",
+    "line": 32,
+    "fragment": " target.Requests++"
+  },
+  {
+    "id": "C4",
+    "kind": "claim",
+    "statement": "Reassigning the caller's local *Port after A returns leaves A's callback reading Target on the original Port.",
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "C5",
+    "kind": "claim",
+    "statement": "With two distinct accounts at the saved epoch, changing Target on the retained Port redirects A's success to the new target.",
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "C6",
+    "kind": "claim",
+    "statement": "Reassigning the caller's local *Port after C returns leaves C's guard reading Target on the original Port.",
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "C7",
+    "kind": "claim",
+    "statement": "C skips success when Target on the retained Port is changed to a distinct Account with equal Epoch.",
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "C8",
+    "kind": "claim",
+    "statement": "Changing the caller's string variable after D returns leaves the saved callback using the original key string.",
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "C9",
+    "kind": "claim",
+    "statement": "Reassigning the caller's *Registry variable to a distinct Registry with a separate map leaves D reading Entries on the original Registry.",
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "C10",
+    "kind": "claim",
+    "statement": "Changing the original Registry's current entry for the saved key redirects D to the new non-nil occupant regardless of Epoch.",
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "C11",
+    "kind": "claim",
+    "statement": "C skips success if the retained Port targets a separate value copy of the admitted Account even if all fields were copied unchanged.",
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "C12",
+    "kind": "claim",
+    "statement": "With the admitted account pointer restored in Target, overwriting that Account at the same address with the saved Epoch still permits C to increment its current Successes.",
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "C13",
+    "kind": "claim",
+    "statement": "E's value receiver is a shallow Port copy whose Target pointer still identifies the same Account object at admission.",
+    "line": 26,
+    "fragment": "func (p Port) E() func() {"
+  },
+  {
+    "id": "C14",
+    "kind": "claim",
+    "statement": "B increments the current Successes value on the captured Account even after a caller resets that Account's Requests field.",
+    "line": 15,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "C15",
+    "kind": "claim",
+    "statement": "With a non-nil Registry, a missing key, nil-valued entry, or nil map leads D to panic on the admission Requests increment.",
+    "line": 23,
+    "fragment": " r.Entries[key].Requests++"
+  },
+  {
+    "id": "C16",
+    "kind": "claim",
+    "statement": "C evaluates its pointer identity guard at each invocation of the returned callback.",
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  }
+]

@@ -1,0 +1,249 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1",
+  "input_tokens": 3217,
+  "cost_microdollars": 136,
+  "reservation_microdollars": 562,
+  "checks": {
+    "C1": {
+      "kind": "claim",
+      "statement": "After F returns, assigning the caller's local *Port to a distinct Port cannot redirect success away from the account identified by F's saved target.",
+      "source": "component.go",
+      "line": 33,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.85,
+        "contradicted": 0.02,
+        "unclear": 0.13
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "F copies the original Port's Target pointer during admission.",
+      "source": "component.go",
+      "line": 31,
+      "fragment": " target := p.Target",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.87,
+        "contradicted": 0.01,
+        "unclear": 0.12
+      },
+      "confidence": 0.8,
+      "review_required": true
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "F attributes the request to the account whose pointer was saved at admission.",
+      "source": "component.go",
+      "line": 32,
+      "fragment": " target.Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.73,
+        "contradicted": 0.01,
+        "unclear": 0.26
+      },
+      "confidence": 0.6,
+      "review_required": true
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "Reassigning the caller's local *Port after A returns leaves A's callback reading Target on the original Port.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.43,
+        "contradicted": 0.24,
+        "unclear": 0.33
+      },
+      "confidence": 0.14,
+      "review_required": true
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "With two distinct accounts at the saved epoch, changing Target on the retained Port redirects A's success to the new target.",
+      "source": "component.go",
+      "line": 10,
+      "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.4,
+        "contradicted": 0.41,
+        "unclear": 0.19
+      },
+      "confidence": 0.11,
+      "review_required": true
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "Reassigning the caller's local *Port after C returns leaves C's guard reading Target on the original Port.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.39,
+        "contradicted": 0.25,
+        "unclear": 0.36
+      },
+      "confidence": 0.09,
+      "review_required": true
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "C skips success when Target on the retained Port is changed to a distinct Account with equal Epoch.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.01,
+        "unclear": 0.01
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "Changing the caller's string variable after D returns leaves the saved callback using the original key string.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.44,
+        "contradicted": 0.11,
+        "unclear": 0.45
+      },
+      "confidence": 0.18,
+      "review_required": true
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "Reassigning the caller's *Registry variable to a distinct Registry with a separate map leaves D reading Entries on the original Registry.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.19,
+        "contradicted": 0.07,
+        "unclear": 0.74
+      },
+      "confidence": 0.61,
+      "review_required": true
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "Changing the original Registry's current entry for the saved key redirects D to the new non-nil occupant regardless of Epoch.",
+      "source": "component.go",
+      "line": 24,
+      "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.85,
+        "contradicted": 0.02,
+        "unclear": 0.13
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "C skips success if the retained Port targets a separate value copy of the admitted Account even if all fields were copied unchanged.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.78,
+        "contradicted": 0.14,
+        "unclear": 0.08
+      },
+      "confidence": 0.67,
+      "review_required": true
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "With the admitted account pointer restored in Target, overwriting that Account at the same address with the saved Epoch still permits C to increment its current Successes.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.77,
+        "contradicted": 0.15,
+        "unclear": 0.08
+      },
+      "confidence": 0.66,
+      "review_required": true
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "E's value receiver is a shallow Port copy whose Target pointer still identifies the same Account object at admission.",
+      "source": "component.go",
+      "line": 26,
+      "fragment": "func (p Port) E() func() {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.71,
+        "contradicted": 0.02,
+        "unclear": 0.27
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "B increments the current Successes value on the captured Account even after a caller resets that Account's Requests field.",
+      "source": "component.go",
+      "line": 15,
+      "fragment": " return func() { target.Successes++ }",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.47,
+        "contradicted": 0.01,
+        "unclear": 0.52
+      },
+      "confidence": 0.28,
+      "review_required": true
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "With a non-nil Registry, a missing key, nil-valued entry, or nil map leads D to panic on the admission Requests increment.",
+      "source": "component.go",
+      "line": 23,
+      "fragment": " r.Entries[key].Requests++",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.86,
+        "contradicted": 0.02,
+        "unclear": 0.12
+      },
+      "confidence": 0.79,
+      "review_required": true
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "C evaluates its pointer identity guard at each invocation of the returned callback.",
+      "source": "component.go",
+      "line": 20,
+      "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    }
+  }
+}

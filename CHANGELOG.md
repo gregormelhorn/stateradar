@@ -4,6 +4,13 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Finding preservation during final review.** An additive review must retain
+  every original finding, ordered step and open question. Corrections and
+  supplementary probe bindings are separate and explicit. Observed red cases
+  reject deleted/rephrased findings and changed inputs; CI runs the preservation
+  selftests. See `docs/evidence/identity-postreview/README.md` for the matched
+  generic/identity final-review experiment and direct caller-variable test.
+
 - **Reviewed finding benchmark.** Eight explicit gobreaker cases separate
   finding presence, correctness and executed test depth. Exact report anchors
   and completed-test evidence are checked; semantic judgments stay attributed

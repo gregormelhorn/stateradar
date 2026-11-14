@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nd=json.load(open(\"analysis/initial.json\"))\nprint(d.keys())\nfor r in d[\"findings\"]:\n print(r[\"id\"],r[\"initial\"],\" / \".join(r[\"steps\"]),r[\"outcome\"].split(\" [\")[0],r[\"test\"],r[\"question\"],sep=\" | \")"
+  ],
+  "exit_code": 0
+}

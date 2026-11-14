@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nfrom pathlib import Path\nx=json.loads(Path('analysis/initial.json').read_text())\nfor f in x['findings']:\n print(f\"{f['id']} L{f['citation']['line']} {f['test']}: {f['initial']} {' → '.join(f['steps'])} => {f['outcome'].split(' component.go:')[0]}\")\nprint('TOP LEVEL', list(x))"
+  ],
+  "exit_code": 0
+}

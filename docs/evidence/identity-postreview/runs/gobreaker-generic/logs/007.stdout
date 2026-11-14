@@ -1,0 +1,813 @@
+     1	package gobreaker
+     2	
+     3	import (
+     4		"errors"
+     5		"runtime"
+     6		"testing"
+     7		"time"
+     8	)
+     9	
+    10	const identityWait = 35 * time.Millisecond
+    11	
+    12	func identityDone(t *testing.T, cb *TwoStepCircuitBreaker) func(bool) {
+    13		t.Helper()
+    14		done, err := cb.Allow()
+    15		if err != nil || done == nil {
+    16			t.Fatalf("Allow: callback present=%v err=%v", done != nil, err)
+    17		}
+    18		return done
+    19	}
+    20	
+    21	func identityRejected(t *testing.T, cb *TwoStepCircuitBreaker, want error) {
+    22		t.Helper()
+    23		done, err := cb.Allow()
+    24		if done != nil || err != want {
+    25			t.Fatalf("Allow: callback present=%v err=%v want %v", done != nil, err, want)
+    26		}
+    27	}
+    28	
+    29	func identityCounts(t *testing.T, cb interface{ Counts() Counts }, want Counts) {
+    30		t.Helper()
+    31		if got := cb.Counts(); got != want {
+    32			t.Fatalf("counts %+v want %+v", got, want)
+    33		}
+    34	}
+    35	
+    36	func identityState(t *testing.T, cb interface{ State() State }, want State) {
+    37		t.Helper()
+    38		if got := cb.State(); got != want {
+    39			t.Fatalf("state %v want %v", got, want)
+    40		}
+    41	}
+    42	
+    43	func identityPanic(t *testing.T, fn func(), want interface{}) {
+    44		t.Helper()
+    45		var got interface{}
+    46		func() { defer func() { got = recover() }(); fn() }()
+    47		if got != want {
+    48			t.Fatalf("panic %v want %v", got, want)
+    49		}
+    50	}
+    51	
+    52	func identityTrip(Counts) bool { return true }
+    53	
+    54	func identityHalfOpen(t *testing.T, max uint32) *TwoStepCircuitBreaker {
+    55		t.Helper()
+    56		cb := NewTwoStepCircuitBreaker(Settings{Timeout: identityWait, MaxRequests: max, ReadyToTrip: identityTrip})
+    57		identityDone(t, cb)(false)
+    58		time.Sleep(identityWait)
+    59		identityState(t, cb, StateHalfOpen)
+    60		return cb
+    61	}
+    62	
+    63	func TestIdentityRepeatedClosedCompletion(t *testing.T) {
+    64		var samples []Counts
+    65		cb := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(c Counts) bool { samples = append(samples, c); return false }})
+    66		done := identityDone(t, cb)
+    67		identityCounts(t, cb, Counts{Requests: 1})
+    68		done(true)
+    69		done(true)
+    70		identityCounts(t, cb, Counts{Requests: 1, TotalSuccesses: 2, ConsecutiveSuccesses: 2})
+    71		done(false)
+    72		done(false)
+    73		identityCounts(t, cb, Counts{Requests: 1, TotalSuccesses: 2, TotalFailures: 2, ConsecutiveFailures: 2})
+    74		if len(samples) != 2 || samples[0].TotalFailures != 1 || samples[1].TotalFailures != 2 {
+    75			t.Fatal(samples)
+    76		}
+    77		identityState(t, cb, StateClosed)
+    78	}
+    79	
+    80	func TestIdentityRepeatedHalfOpenSuccess(t *testing.T) {
+    81		cb := identityHalfOpen(t, 2)
+    82		done := identityDone(t, cb)
+    83		done(true)
+    84		identityState(t, cb, StateHalfOpen)
+    85		identityCounts(t, cb, Counts{Requests: 1, TotalSuccesses: 1, ConsecutiveSuccesses: 1})
+    86		done(true)
+    87		identityState(t, cb, StateClosed)
+    88		done(true)
+    89		done(false)
+    90		identityCounts(t, cb, Counts{})
+    91	}
+    92	
+    93	func TestIdentityAbandonedHalfOpen(t *testing.T) {
+    94		for _, order := range []string{"no report", "late success", "late failure"} {
+    95			t.Run(order, func(t *testing.T) {
+    96				cb := identityHalfOpen(t, 1)
+    97				producer := make(chan func(bool), 1)
+    98				departed := make(chan struct{})
+    99				done := identityDone(t, cb)
+   100				go func() { defer close(departed); producer <- done }()
+   101				<-departed
+   102				time.Sleep(2 * identityWait)
+   103				identityState(t, cb, StateHalfOpen)
+   104				identityRejected(t, cb, ErrTooManyRequests)
+   105				identityCounts(t, cb, Counts{Requests: 1})
+   106				switch order {
+   107				case "no report":
+   108					identityRejected(t, cb, ErrTooManyRequests)
+   109				case "late success":
+   110					(<-producer)(true)
+   111					identityState(t, cb, StateClosed)
+   112					identityCounts(t, cb, Counts{})
+   113					identityDone(t, cb)
+   114				case "late failure":
+   115					(<-producer)(false)
+   116					identityRejected(t, cb, ErrOpenState)
+   117					identityCounts(t, cb, Counts{})
+   118					time.Sleep(identityWait)
+   119					identityDone(t, cb)
+   120					identityState(t, cb, StateHalfOpen)
+   121				}
+   122			})
+   123		}
+   124	}
+   125	
+   126	func TestIdentityHalfOpenBudget(t *testing.T) {
+   127		cb := identityHalfOpen(t, 2)
+   128		first, second := identityDone(t, cb), identityDone(t, cb)
+   129		first(true)
+   130		identityCounts(t, cb, Counts{Requests: 2, TotalSuccesses: 1, ConsecutiveSuccesses: 1})
+   131		identityRejected(t, cb, ErrTooManyRequests)
+   132		second(true)
+   133		identityState(t, cb, StateClosed)
+   134		identityCounts(t, cb, Counts{})
+   135	}
+   136	
+   137	func TestIdentityStaleOpenCompletion(t *testing.T) {
+   138		for _, order := range []string{"during open", "completion first", "state first"} {
+   139			for _, success := range []bool{true, false} {
+   140				label := "/failure"
+   141				if success {
+   142					label = "/success"
+   143				}
+   144				t.Run(order+label, func(t *testing.T) {
+   145					var changes []State
+   146					trips := 0
+   147					timeout := identityWait
+   148					if order == "during open" {
+   149						timeout = time.Hour
+   150					}
+   151					cb := NewTwoStepCircuitBreaker(Settings{Timeout: timeout, ReadyToTrip: func(Counts) bool { trips++; return true },
+   152						OnStateChange: func(_ string, _ State, to State) { changes = append(changes, to) }})
+   153					old := identityDone(t, cb)
+   154					identityDone(t, cb)(false)
+   155					if order != "during open" {
+   156						time.Sleep(timeout)
+   157					}
+   158					identityCounts(t, cb, Counts{})
+   159					if len(changes) != 1 {
+   160						t.Fatal(changes)
+   161					}
+   162					if order == "state first" {
+   163						identityState(t, cb, StateHalfOpen)
+   164					}
+   165					old(success)
+   166					want := StateHalfOpen
+   167					if order == "during open" {
+   168						want = StateOpen
+   169						if len(changes) != 1 {
+   170							t.Fatal(changes)
+   171						}
+   172					} else if len(changes) != 2 || changes[1] != StateHalfOpen {
+   173						t.Fatal(changes)
+   174					}
+   175					identityState(t, cb, want)
+   176					identityCounts(t, cb, Counts{})
+   177					if trips != 1 {
+   178						t.Fatal(trips)
+   179					}
+   180				})
+   181			}
+   182		}
+   183	}
+   184	
+   185	func TestIdentityClosedIntervalCompletion(t *testing.T) {
+   186		for _, order := range []string{"completion first", "state first"} {
+   187			for _, success := range []bool{true, false} {
+   188				label := "/failure"
+   189				if success {
+   190					label = "/success"
+   191				}
+   192				t.Run(order+label, func(t *testing.T) {
+   193					notifications, trips := 0, 0
+   194					cb := NewTwoStepCircuitBreaker(Settings{Interval: identityWait, ReadyToTrip: func(Counts) bool { trips++; return false }, OnStateChange: func(string, State, State) { notifications++ }})
+   195					old := identityDone(t, cb)
+   196					time.Sleep(identityWait)
+   197					identityCounts(t, cb, Counts{Requests: 1})
+   198					if order == "state first" {
+   199						identityState(t, cb, StateClosed)
+   200					}
+   201					old(success)
+   202					identityCounts(t, cb, Counts{})
+   203					if notifications != 0 || trips != 0 {
+   204						t.Fatal(notifications, trips)
+   205					}
+   206				})
+   207			}
+   208		}
+   209	}
+   210	
+   211	func TestIdentityClassifierAcrossTransition(t *testing.T) {
+   212		for _, order := range []string{"fresh", "request blocked", "classifier blocked"} {
+   213			for _, success := range []bool{true, false} {
+   214				label := "/failure"
+   215				if success {
+   216					label = "/success"
+   217				}
+   218				t.Run(order+label, func(t *testing.T) {
+   219					original, trip := errors.New("original"), errors.New("trip")
+   220					started, release := make(chan struct{}), make(chan struct{})
+   221					calls, classified := 0, 0
+   222					cb := NewCircuitBreaker(Settings{Timeout: time.Hour, ReadyToTrip: func(c Counts) bool { calls++; return order != "fresh" },
+   223						IsSuccessful: func(err error) bool {
+   224							if err == trip {
+   225								return false
+   226							}
+   227							if err != original {
+   228								panic(err)
+   229							}
+   230							classified++
+   231							if order == "classifier blocked" {
+   232								close(started)
+   233								<-release
+   234							}
+   235							return success
+   236						}})
+   237					request := func() (interface{}, error) {
+   238						if order == "request blocked" {
+   239							close(started)
+   240							<-release
+   241						}
+   242						return "result", original
+   243					}
+   244					type pair struct {
+   245						v interface{}
+   246						e error
+   247					}
+   248					var result pair
+   249					if order == "fresh" {
+   250						result.v, result.e = cb.Execute(request)
+   251					} else {
+   252						finished := make(chan pair, 1)
+   253						go func() { v, e := cb.Execute(request); finished <- pair{v, e} }()
+   254						<-started
+   255						cb.Execute(func() (interface{}, error) { return nil, trip })
+   256						close(release)
+   257						result = <-finished
+   258					}
+   259					if result.v != "result" || result.e != original || classified != 1 {
+   260						t.Fatal(result, classified)
+   261					}
+   262					if order != "fresh" {
+   263						identityState(t, cb, StateOpen)
+   264						identityCounts(t, cb, Counts{})
+   265						if calls != 1 {
+   266							t.Fatal(calls)
+   267						}
+   268					} else if success {
+   269						identityCounts(t, cb, Counts{Requests: 1, TotalSuccesses: 1, ConsecutiveSuccesses: 1})
+   270						if calls != 0 {
+   271							t.Fatal(calls)
+   272						}
+   273					} else {
+   274						identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1})
+   275						if calls != 1 {
+   276							t.Fatal(calls)
+   277						}
+   278					}
+   279				})
+   280			}
+   281		}
+   282	}
+   283	
+   284	func identityPanicBoundary(t *testing.T, classifier bool) {
+   285		t.Helper()
+   286		for _, order := range []string{"fresh", "stale"} {
+   287			t.Run(order, func(t *testing.T) {
+   288				original, trip := errors.New("original"), errors.New("trip")
+   289				started, release := make(chan struct{}), make(chan struct{})
+   290				calls, classified := 0, 0
+   291				block := func() {
+   292					if order == "stale" {
+   293						close(started)
+   294						<-release
+   295					}
+   296				}
+   297				cb := NewCircuitBreaker(Settings{Timeout: time.Hour,
+   298					ReadyToTrip: func(Counts) bool { calls++; return order == "stale" },
+   299					IsSuccessful: func(err error) bool {
+   300						if err == trip {
+   301							return false
+   302						}
+   303						classified++
+   304						block()
+   305						panic(original)
+   306					}})
+   307				execute := func() {
+   308					cb.Execute(func() (interface{}, error) {
+   309						if classifier {
+   310							return "value", nil
+   311						}
+   312						block()
+   313						panic(original)
+   314					})
+   315				}
+   316				if order == "fresh" {
+   317					identityPanic(t, execute, original)
+   318					identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1})
+   319				} else {
+   320					recovered := make(chan interface{}, 1)
+   321					go func() { defer func() { recovered <- recover() }(); execute() }()
+   322					<-started
+   323					cb.Execute(func() (interface{}, error) { return nil, trip })
+   324					close(release)
+   325					if got := <-recovered; got != original {
+   326						t.Fatal(got)
+   327					}
+   328					identityState(t, cb, StateOpen)
+   329					identityCounts(t, cb, Counts{})
+   330				}
+   331				if calls != 1 || (classifier && classified != 1) || (!classifier && classified != 0) {
+   332					t.Fatal(calls, classified)
+   333				}
+   334			})
+   335		}
+   336	}
+   337	
+   338	func TestIdentityRequestPanicBoundary(t *testing.T)    { identityPanicBoundary(t, false) }
+   339	func TestIdentityClassifierPanicBoundary(t *testing.T) { identityPanicBoundary(t, true) }
+   340	
+   341	func TestIdentityTripPanicRetry(t *testing.T) {
+   342		first := errors.New("hook")
+   343		var samples []Counts
+   344		class := 0
+   345		cb := NewCircuitBreaker(Settings{ReadyToTrip: func(c Counts) bool {
+   346			samples = append(samples, c)
+   347			if len(samples) == 1 {
+   348				panic(first)
+   349			}
+   350			return false
+   351		},
+   352			IsSuccessful: func(error) bool { class++; return false }})
+   353		identityPanic(t, func() { cb.Execute(func() (interface{}, error) { return nil, errors.New("request") }) }, first)
+   354		identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 2, ConsecutiveFailures: 2})
+   355		if class != 1 || len(samples) != 2 || samples[0].TotalFailures != 1 || samples[1].TotalFailures != 2 {
+   356			t.Fatal(class, samples)
+   357		}
+   358	}
+   359	
+   360	func TestIdentityPanicReplacement(t *testing.T) {
+   361		for _, order := range []string{"request", "classifier", "retry"} {
+   362			t.Run(order, func(t *testing.T) {
+   363				first, replacement := errors.New("first"), errors.New("replacement")
+   364				calls := 0
+   365				cb := NewCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool {
+   366					calls++
+   367					if order == "retry" && calls == 1 {
+   368						panic(first)
+   369					}
+   370					panic(replacement)
+   371				},
+   372					IsSuccessful: func(error) bool {
+   373						if order == "classifier" {
+   374							panic(first)
+   375						}
+   376						return false
+   377					}})
+   378				identityPanic(t, func() {
+   379					cb.Execute(func() (interface{}, error) {
+   380						if order == "request" {
+   381							panic(first)
+   382						}
+   383						return nil, nil
+   384					})
+   385				}, replacement)
+   386				want := uint32(1)
+   387				if order == "retry" {
+   388					want = 2
+   389				}
+   390				identityCounts(t, cb, Counts{Requests: 1, TotalFailures: want, ConsecutiveFailures: want})
+   391				if calls != int(want) {
+   392					t.Fatal(calls)
+   393				}
+   394			})
+   395		}
+   396	}
+   397	
+   398	func TestIdentityTwoStepTripPanic(t *testing.T) {
+   399		hook := errors.New("hook")
+   400		calls := 0
+   401		cb := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: func(Counts) bool {
+   402			calls++
+   403			if calls == 1 {
+   404				panic(hook)
+   405			}
+   406			return false
+   407		}})
+   408		done := identityDone(t, cb)
+   409		identityPanic(t, func() { done(false) }, hook)
+   410		identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1})
+   411		if calls != 1 {
+   412			t.Fatal(calls)
+   413		}
+   414		done(false)
+   415		identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 2, ConsecutiveFailures: 2})
+   416		if calls != 2 {
+   417			t.Fatal(calls)
+   418		}
+   419	}
+   420	
+   421	func TestIdentityStateHookPanicAfterCommit(t *testing.T) {
+   422		for _, entry := range []string{"Execute", "Allow"} {
+   423			t.Run(entry, func(t *testing.T) {
+   424				hook := errors.New("hook")
+   425				trips, notifications := 0, 0
+   426				s := Settings{Timeout: time.Hour, ReadyToTrip: func(Counts) bool { trips++; return true }, OnStateChange: func(string, State, State) { notifications++; panic(hook) }}
+   427				if entry == "Execute" {
+   428					cb := NewCircuitBreaker(s)
+   429					identityPanic(t, func() { cb.Execute(func() (interface{}, error) { return nil, errors.New("result") }) }, hook)
+   430					identityState(t, cb, StateOpen)
+   431					identityCounts(t, cb, Counts{})
+   432				} else {
+   433					cb := NewTwoStepCircuitBreaker(s)
+   434					done := identityDone(t, cb)
+   435					identityPanic(t, func() { done(false) }, hook)
+   436					identityState(t, cb, StateOpen)
+   437					done(false)
+   438					done(true)
+   439					identityCounts(t, cb, Counts{})
+   440				}
+   441				if trips != 1 || notifications != 1 {
+   442					t.Fatal(trips, notifications)
+   443				}
+   444			})
+   445		}
+   446	}
+   447	
+   448	func TestIdentityStateHookPanicExpires(t *testing.T) {
+   449		for _, secondPanics := range []bool{false, true} {
+   450			label := "second returns"
+   451			if secondPanics {
+   452				label = "second panics"
+   453			}
+   454			t.Run(label, func(t *testing.T) {
+   455				first, second := errors.New("open hook"), errors.New("half-open hook")
+   456				want := first
+   457				if secondPanics {
+   458					want = second
+   459				}
+   460				var notifications []State
+   461				cb := NewCircuitBreaker(Settings{Timeout: identityWait, ReadyToTrip: identityTrip, OnStateChange: func(_ string, _ State, to State) {
+   462					notifications = append(notifications, to)
+   463					if to == StateOpen {
+   464						time.Sleep(identityWait)
+   465						panic(first)
+   466					}
+   467					if secondPanics {
+   468						panic(second)
+   469					}
+   470				}})
+   471				identityPanic(t, func() { cb.Execute(func() (interface{}, error) { return nil, errors.New("result") }) }, want)
+   472				if len(notifications) != 2 || notifications[0] != StateOpen || notifications[1] != StateHalfOpen {
+   473					t.Fatal(notifications)
+   474				}
+   475				identityState(t, cb, StateHalfOpen)
+   476				identityCounts(t, cb, Counts{})
+   477			})
+   478		}
+   479	}
+   480	
+   481	func TestIdentityAdmissionHookPanic(t *testing.T) {
+   482		for _, entry := range []string{"Execute", "Allow"} {
+   483			t.Run(entry, func(t *testing.T) {
+   484				hook := errors.New("hook")
+   485				calls, class := 0, 0
+   486				s := Settings{Timeout: identityWait, ReadyToTrip: identityTrip, IsSuccessful: func(err error) bool { class++; return err == nil }, OnStateChange: func(_ string, _ State, to State) {
+   487					if to == StateHalfOpen {
+   488						panic(hook)
+   489					}
+   490				}}
+   491				if entry == "Execute" {
+   492					cb := NewCircuitBreaker(s)
+   493					cb.Execute(func() (interface{}, error) { return nil, errors.New("trip") })
+   494					time.Sleep(identityWait)
+   495					req := func() (interface{}, error) { calls++; return 17, nil }
+   496					identityPanic(t, func() { cb.Execute(req) }, hook)
+   497					identityCounts(t, cb, Counts{})
+   498					if calls != 0 || class != 1 {
+   499						t.Fatal(calls, class)
+   500					}
+   501					v, e := cb.Execute(req)
+   502					if v != 17 || e != nil || calls != 1 || class != 2 {
+   503						t.Fatal(v, e, calls, class)
+   504					}
+   505					identityState(t, cb, StateClosed)
+   506				} else {
+   507					cb := NewTwoStepCircuitBreaker(s)
+   508					identityDone(t, cb)(false)
+   509					time.Sleep(identityWait)
+   510					identityPanic(t, func() { cb.Allow() }, hook)
+   511					identityCounts(t, cb, Counts{})
+   512					identityDone(t, cb)(true)
+   513					identityState(t, cb, StateClosed)
+   514				}
+   515			})
+   516		}
+   517	}
+   518	
+   519	func TestIdentityStaleOpenHookPanic(t *testing.T) {
+   520		for _, success := range []bool{true, false} {
+   521			label := "failure"
+   522			if success {
+   523				label = "success"
+   524			}
+   525			t.Run(label, func(t *testing.T) {
+   526				hook := errors.New("hook")
+   527				notifications := 0
+   528				cb := NewTwoStepCircuitBreaker(Settings{Timeout: identityWait, ReadyToTrip: identityTrip, OnStateChange: func(_ string, _ State, to State) {
+   529					if to == StateHalfOpen {
+   530						notifications++
+   531						panic(hook)
+   532					}
+   533				}})
+   534				stale := identityDone(t, cb)
+   535				identityDone(t, cb)(false)
+   536				time.Sleep(identityWait)
+   537				identityPanic(t, func() { stale(success) }, hook)
+   538				identityState(t, cb, StateHalfOpen)
+   539				stale(success)
+   540				identityCounts(t, cb, Counts{})
+   541				if notifications != 1 {
+   542					t.Fatal(notifications)
+   543				}
+   544				identityDone(t, cb)(true)
+   545				identityState(t, cb, StateClosed)
+   546			})
+   547		}
+   548	}
+   549	
+   550	func TestIdentityExecuteGoexit(t *testing.T) {
+   551		for _, order := range []string{"request", "classifier"} {
+   552			t.Run(order, func(t *testing.T) {
+   553				trip := errors.New("trip")
+   554				cb := NewCircuitBreaker(Settings{Timeout: identityWait, ReadyToTrip: identityTrip, IsSuccessful: func(err error) bool {
+   555					if err == trip {
+   556						return false
+   557					}
+   558					runtime.Goexit()
+   559					return false
+   560				}})
+   561				cb.Execute(func() (interface{}, error) { return nil, trip })
+   562				time.Sleep(identityWait)
+   563				finished := make(chan struct{})
+   564				returned := make(chan struct{}, 1)
+   565				go func() {
+   566					defer close(finished)
+   567					cb.Execute(func() (interface{}, error) {
+   568						if order == "request" {
+   569							runtime.Goexit()
+   570						}
+   571						return "value", nil
+   572					})
+   573					returned <- struct{}{}
+   574				}()
+   575				<-finished
+   576				if len(returned) != 0 {
+   577					t.Fatal("Execute returned")
+   578				}
+   579				identityState(t, cb, StateHalfOpen)
+   580				identityCounts(t, cb, Counts{Requests: 1})
+   581				_, err := cb.Execute(func() (interface{}, error) { t.Error("rejected request ran"); return nil, nil })
+   582				if err != ErrTooManyRequests {
+   583					t.Fatal(err)
+   584				}
+   585			})
+   586		}
+   587	}
+   588	
+   589	func TestIdentityReassignedReceiver(t *testing.T) {
+   590		for _, order := range []string{"equal", "different"} {
+   591			t.Run(order, func(t *testing.T) {
+   592				cb := NewTwoStepCircuitBreaker(Settings{})
+   593				oldValue := *cb
+   594				old := identityDone(t, cb)
+   595				target := NewTwoStepCircuitBreaker(Settings{ReadyToTrip: identityTrip, Timeout: time.Hour})
+   596				if order == "different" {
+   597					identityDone(t, target)(false)
+   598				}
+   599				*cb = *target
+   600				old(true)
+   601				if order == "equal" {
+   602					identityCounts(t, target, Counts{TotalSuccesses: 1, ConsecutiveSuccesses: 1})
+   603				} else {
+   604					identityState(t, target, StateOpen)
+   605					identityCounts(t, target, Counts{})
+   606				}
+   607				identityCounts(t, &oldValue, Counts{Requests: 1})
+   608			})
+   609		}
+   610	}
+   611	
+   612	func TestIdentityTripHookAcrossExpiry(t *testing.T) {
+   613		for _, opens := range []bool{false, true} {
+   614			label := "false"
+   615			if opens {
+   616				label = "true"
+   617			}
+   618			t.Run(label, func(t *testing.T) {
+   619				cb := NewCircuitBreaker(Settings{Interval: identityWait, Timeout: identityWait,
+   620					ReadyToTrip: func(c Counts) bool {
+   621						if c.TotalFailures != 1 {
+   622							t.Errorf("hook counts %+v", c)
+   623						}
+   624						time.Sleep(2 * identityWait)
+   625						return opens
+   626					}})
+   627				cb.Execute(func() (interface{}, error) { return nil, errors.New("failure") })
+   628				if opens {
+   629					identityCounts(t, cb, Counts{})
+   630					identityState(t, cb, StateHalfOpen)
+   631				} else {
+   632					identityCounts(t, cb, Counts{Requests: 1, TotalFailures: 1, ConsecutiveFailures: 1})
+   633					identityState(t, cb, StateClosed)
+   634					identityCounts(t, cb, Counts{})
+   635				}
+   636			})
+   637		}
+   638	}
+   639	
+   640	func TestIdentityTripPanicAfterInterval(t *testing.T) {
+   641		hook := errors.New("trip")
+   642		calls := 0
+   643		cb := NewCircuitBreaker(Settings{Interval: 100 * time.Millisecond, ReadyToTrip: func(c Counts) bool {
+   644			calls++
+   645			if c.TotalFailures != 1 {
+   646				t.Errorf("counts %+v", c)
+   647			}
+   648			time.Sleep(100 * time.Millisecond)
+   649			panic(hook)
+   650		}})
+   651		identityPanic(t, func() { cb.Execute(func() (interface{}, error) { return nil, errors.New("request") }) }, hook)
+   652		if calls != 1 {
+   653			t.Fatal(calls)
+   654		}
+   655		identityCounts(t, cb, Counts{})
+   656		identityState(t, cb, StateClosed)
+   657	}
+   658	
+   659	func TestIdentityHalfOpenNotificationPanic(t *testing.T) {
+   660		for _, success := range []bool{true, false} {
+   661			for _, mode := range []string{"Execute", "Allow"} {
+   662				label := mode + "/failure"
+   663				if success {
+   664					label = mode + "/success"
+   665				}
+   666				t.Run(label, func(t *testing.T) {
+   667					open, hook := errors.New("open"), errors.New("hook")
+   668					var transitions []State
+   669					var tripCalls int
+   670					s := Settings{Timeout: identityWait, ReadyToTrip: func(Counts) bool { tripCalls++; return true },
+   671						OnStateChange: func(_ string, from, to State) {
+   672							transitions = append(transitions, to)
+   673							if from == StateHalfOpen {
+   674								panic(hook)
+   675							}
+   676						}}
+   677					want := StateOpen
+   678					if success {
+   679						want = StateClosed
+   680					}
+   681					if mode == "Execute" {
+   682						cb := NewCircuitBreaker(s)
+   683						cb.Execute(func() (interface{}, error) { return nil, open })
+   684						time.Sleep(identityWait)
+   685						identityState(t, cb, StateHalfOpen)
+   686						identityPanic(t, func() {
+   687							cb.Execute(func() (interface{}, error) {
+   688								if success {
+   689									return 1, nil
+   690								}
+   691								return 1, open
+   692							})
+   693						}, hook)
+   694						if len(transitions) != 3 || transitions[2] != want {
+   695							t.Fatal(transitions)
+   696						}
+   697						identityCounts(t, cb, Counts{})
+   698					} else {
+   699						cb := NewTwoStepCircuitBreaker(s)
+   700						identityDone(t, cb)(false)
+   701						time.Sleep(identityWait)
+   702						identityState(t, cb, StateHalfOpen)
+   703						done := identityDone(t, cb)
+   704						identityPanic(t, func() { done(success) }, hook)
+   705						if len(transitions) != 3 || transitions[2] != want {
+   706							t.Fatal(transitions)
+   707						}
+   708						if success {
+   709							done(false)
+   710							done(true)
+   711						}
+   712						identityCounts(t, cb, Counts{})
+   713					}
+   714					if tripCalls != 1 {
+   715						t.Fatal(tripCalls)
+   716					}
+   717				})
+   718			}
+   719		}
+   720	}
+   721	
+   722	func TestIdentityExecuteDepartedWaiter(t *testing.T) {
+   723		for _, order := range []string{"no result", "success", "failure", "stale success", "stale failure"} {
+   724			t.Run(order, func(t *testing.T) {
+   725				closedFailure, lateFailure := errors.New("open"), errors.New("late")
+   726				cb := NewCircuitBreaker(Settings{Timeout: identityWait, ReadyToTrip: identityTrip})
+   727				cb.Execute(func() (interface{}, error) { return nil, closedFailure })
+   728				time.Sleep(identityWait)
+   729				identityState(t, cb, StateHalfOpen)
+   730				started := make(chan struct{})
+   731				type pair struct {
+   732					value interface{}
+   733					err   error
+   734				}
+   735				producer := make(chan pair, 1)
+   736				delivered := make(chan pair, 1)
+   737				cancelWait := make(chan struct{})
+   738				waiterGone := make(chan bool, 1)
+   739				workerGone := make(chan struct{})
+   740				var worker *CircuitBreaker = cb
+   741				stale := order == "stale success" || order == "stale failure"
+   742				if stale {
+   743					worker = NewCircuitBreaker(Settings{Timeout: time.Hour, ReadyToTrip: identityTrip})
+   744				}
+   745				go func() {
+   746					defer close(workerGone)
+   747					v, e := worker.Execute(func() (interface{}, error) {
+   748						close(started)
+   749						reply, ok := <-producer
+   750						if !ok {
+   751							runtime.Goexit()
+   752						}
+   753						return reply.value, reply.err
+   754					})
+   755					delivered <- pair{v, e}
+   756				}()
+   757				<-started
+   758				go func() {
+   759					select {
+   760					case <-delivered:
+   761						waiterGone <- false
+   762					case <-cancelWait:
+   763						waiterGone <- true
+   764					}
+   765				}()
+   766				close(cancelWait)
+   767				if !<-waiterGone {
+   768					t.Fatal("waiter consumed result before cancellation")
+   769				}
+   770				if order == "no result" {
+   771					time.Sleep(2 * identityWait)
+   772					identityState(t, cb, StateHalfOpen)
+   773					identityCounts(t, cb, Counts{Requests: 1})
+   774					_, err := cb.Execute(func() (interface{}, error) { t.Error("rejected body ran"); return nil, nil })
+   775					if err != ErrTooManyRequests {
+   776						t.Fatal(err)
+   777					}
+   778					close(producer)
+   779					<-workerGone
+   780					if len(delivered) != 0 {
+   781						t.Fatal("unexpected result")
+   782					}
+   783					return
+   784				}
+   785				if stale {
+   786					worker.Execute(func() (interface{}, error) { return nil, closedFailure })
+   787				}
+   788				reply := pair{value: "late"}
+   789				if order == "failure" || order == "stale failure" {
+   790					reply.err = lateFailure
+   791				}
+   792				producer <- reply
+   793				<-workerGone
+   794				if len(delivered) != 1 {
+   795					t.Fatal("missing buffered result")
+   796				}
+   797				if got := <-delivered; got != reply {
+   798					t.Fatal(got, reply)
+   799				}
+   800				identityCounts(t, worker, Counts{})
+   801				if stale {
+   802					identityState(t, worker, StateOpen)
+   803				} else if order == "success" {
+   804					identityState(t, worker, StateClosed)
+   805				} else {
+   806					_, err := worker.Execute(func() (interface{}, error) { t.Error("rejected body ran"); return nil, nil })
+   807					if err != ErrOpenState {
+   808						t.Fatal(err)
+   809					}
+   810				}
+   811			})
+   812		}
+   813	}

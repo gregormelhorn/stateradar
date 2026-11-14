@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,re\nfrom pathlib import Path\nd=json.loads(Path(\"analysis/initial.json\").read_text())\nfor x in d[\"findings\"]:\n out=x[\"outcome\"]\n if x[\"id\"] in (\"F31\",\"F42\",\"F47\",\"F62\",\"F65\",\"F66\",\"F67\",\"F70\",\"F73\",\"F74\"):print(x[\"id\"],out)\n for p,n,frag in re.findall(r'([\\w/.-]+\\.(?:go|md)):(\\d+) \\(\"(.*?)\"\\)',out):\n  lines=Path(p).read_text().splitlines()\n  if not(1<=int(n)<=len(lines)) or frag not in lines[int(n)-1]:print(\"MISMATCH\",x[\"id\"],p,n,frag)\n"
+  ],
+  "exit_code": 0
+}

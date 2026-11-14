@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\np=Path('analysis/final.json')\ns=p.read_text()\nbefore='Two independent TwoStep breakers each have MaxRequests=1 and have advanced from initial closed through open to half-open, with one pending trial on each.'\nafter='Two independent TwoStep breakers each have MaxRequests=1 and no closed interval. Each has advanced directly from initial closed through open to half-open, with one pending trial.'\nassert s.count(before)==1\np.write_text(s.replace(before,after))\n"
+  ],
+  "exit_code": 0
+}

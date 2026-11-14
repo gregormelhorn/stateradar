@@ -1,0 +1,831 @@
+     1	#!/usr/bin/env python3
+     2	"""Run a bounded text task through DeepSeek Flash or a Jev judgment.
+     3	
+     4	Inputs are explicit files. Each request uses an independent session and sends
+     5	only the supplied material. Costs are reserved in a local SQLite ledger.
+     6	"""
+     7	
+     8	import argparse
+     9	import contextlib
+    10	import hashlib
+    11	import http.client
+    12	import json
+    13	import math
+    14	import os
+    15	import sqlite3
+    16	import sys
+    17	import tempfile
+    18	import urllib.error
+    19	from pathlib import Path
+    20	from collections.abc import Mapping
+    21	from typing import Any, Literal, NotRequired, TypedDict
+    22	
+    23	from jev_local import post_json
+    24	from local_budget import Budget, BudgetExceeded
+    25	import part_b_pack
+    26	
+    27	FLASH_URL = "https://api.deepseek.com/chat/completions"
+    28	JEV_URL = "https://api.typesafe.ai/v1/systemone"
+    29	
+    30	# Provider responses are parsed JSON and arrive as Any. Each function below
+    31	# validates the fields it computes with (token usage, answers, probabilities);
+    32	# model names and finish reasons are passed through as received and typed
+    33	# object. The TypedDicts describe what this module returns and writes.
+    34	
+    35	CheckKind = Literal["claim", "ordering"]
+    36	Choice = Literal["supported", "contradicted", "unclear"]
+    37	
+    38	
+    39	class FlashResult(TypedDict):
+    40	    model: object  # as the provider sent it
+    41	    text: str
+    42	    finish_reason: object  # "stop" on success; anything else is kept as sent
+    43	    input_tokens: int
+    44	    output_tokens: int
+    45	    cost_microdollars: int
+    46	    reservation_microdollars: int
+    47	
+    48	
+    49	class DraftMeta(TypedDict):
+    50	    """A FlashResult without its text, as draft-verify records it."""
+    51	    model: object
+    52	    finish_reason: object
+    53	    input_tokens: int
+    54	    output_tokens: int
+    55	    cost_microdollars: int
+    56	    reservation_microdollars: int
+    57	
+    58	
+    59	class JevResult(TypedDict):
+    60	    model: object  # as the provider sent it
+    61	    probability: float
+    62	    input_tokens: int
+    63	    cost_microdollars: int
+    64	    reservation_microdollars: int
+    65	
+    66	
+    67	class Check(TypedDict):
+    68	    """One jev-batch check as validated from the caller's JSON."""
+    69	    id: str
+    70	    kind: CheckKind
+    71	    statement: str
+    72	    line: int
+    73	    fragment: str
+    74	
+    75	
+    76	class CheckResult(TypedDict):
+    77	    kind: CheckKind
+    78	    statement: str
+    79	    source: str
+    80	    line: int
+    81	    fragment: str
+    82	    choice: Choice
+    83	    probabilities: dict[str, float]
+    84	    confidence: float
+    85	    review_required: bool
+    86	    ordering_scope_probability: NotRequired[float]
+    87	
+    88	
+    89	class JevBatchResult(TypedDict):
+    90	    model: str
+    91	    source_sha256: str
+    92	    input_tokens: int
+    93	    cost_microdollars: int
+    94	    reservation_microdollars: int
+    95	    checks: dict[str, CheckResult]
+    96	
+    97	
+    98	class Judgment(TypedDict, total=False):
+    99	    """The judged part of a CheckResult, copied onto a draft claim."""
+   100	    choice: Choice
+   101	    probabilities: dict[str, float]
+   102	    confidence: float
+   103	    ordering_scope_probability: float
+   104	
+   105	
+   106	class ClaimEntry(TypedDict):
+   107	    kind: CheckKind
+   108	    statement: str
+   109	    line: object  # as drafted; _citation_error reports a non-integer line
+   110	    fragment: str
+   111	    citation_check: str
+   112	    jev: Judgment | None
+   113	
+   114	
+   115	class VerificationTotals(TypedDict):
+   116	    """Jev answered and its answer was recorded."""
+   117	    model: str
+   118	    input_tokens: int
+   119	    cost_microdollars: int
+   120	    reservation_microdollars: int
+   121	    error: None
+   122	
+   123	
+   124	class VerificationFailed(TypedDict):
+   125	    """The batch failed; usage is present when Jev answered and was charged."""
+   126	    error: str
+   127	    input_tokens: NotRequired[int]
+   128	    cost_microdollars: NotRequired[int]
+   129	
+   130	
+   131	class VerificationUnrecorded(TypedDict):
+   132	    """Jev answered and was paid, but the ledger could not record it."""
+   133	    error: str
+   134	    unrecorded_response: Any
+   135	    question_claims: dict[str, str]
+   136	
+   137	
+   138	Verification = VerificationTotals | VerificationFailed | VerificationUnrecorded
+   139	
+   140	
+   141	class DraftVerifyResult(TypedDict):
+   142	    source: str
+   143	    source_sha256: str
+   144	    draft: DraftMeta
+   145	    verification: Verification | None
+   146	    claims: dict[str, ClaimEntry]
+   147	    questions: list[str]
+   148	    review_required: bool
+   149	
+   150	
+   151	class ProviderError(ValueError):
+   152	    """A request failed after its cost was reserved; the reservation stays until settled."""
+   153	
+   154	    def __init__(self, ticket: int, error: object) -> None:
+   155	        super().__init__(f"request failed ({error}); reservation {ticket} kept: check the provider's "
+   156	                         f"usage, then run 'settle {ticket} <actual microdollars>'")
+   157	
+   158	
+   159	def _post(ticket: int, url: str, payload: dict[str, Any], key: str) -> Any:
+   160	    try:
+   161	        return post_json(url, payload, key)
+   162	    except urllib.error.HTTPError as error:
+   163	        # The body carries the provider's reason (e.g. max_tokens_exceeded).
+   164	        try:
+   165	            body = error.read(500).decode("utf-8", "replace").strip()
+   166	        except Exception:  # the body is diagnostic only
+   167	            body = ""
+   168	        raise ProviderError(ticket, f"{error}{': ' + body if body else ''}") from error
+   169	    except (OSError, ValueError, http.client.HTTPException) as error:  # URLError is an OSError
+   170	        raise ProviderError(ticket, error) from error
+   171	
+   172	
+   173	class LedgerError(ValueError):
+   174	    """The provider answered and was paid, but the ledger could not record it."""
+   175	
+   176	    def __init__(self, ticket: int, cost: int, response: Any, error: object) -> None:
+   177	        self.response = response
+   178	        super().__init__(f"ledger update failed ({error}); the paid answer is reported with this error; "
+   179	                         f"run 'settle {ticket} {cost}' once the ledger is free")
+   180	
+   181	
+   182	def _settle(budget: Budget, ticket: int, cost: int, response: Any) -> None:
+   183	    try:
+   184	        budget.settle(ticket, cost)
+   185	    except sqlite3.Error as error:
+   186	        raise LedgerError(ticket, cost, response, error) from error
+   187	
+   188	
+   189	class JevAnswerError(ValueError):
+   190	    """Jev answered and was charged, but the answer failed validation."""
+   191	
+   192	    def __init__(self, message: str, input_tokens: int, cost: int) -> None:
+   193	        self.input_tokens, self.cost = input_tokens, cost
+   194	        super().__init__(message)
+   195	
+   196	
+   197	class IncompleteResponse(ValueError):
+   198	    def __init__(self, result: FlashResult) -> None:
+   199	        self.result = result
+   200	        # Set by a caller that kept the truncated text on disk.
+   201	        self.saved_to: str | None = None
+   202	        super().__init__(f"DeepSeek response incomplete (finish_reason={result['finish_reason']}); usage was recorded")
+   203	
+   204	
+   205	def _tokens(value: object) -> int:
+   206	    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+   207	        raise ValueError("provider returned invalid token usage")
+   208	    return value
+   209	
+   210	
+   211	def _usage(response: Any) -> dict[str, Any]:
+   212	    if not isinstance(response, dict) or not isinstance(response.get("usage"), dict):
+   213	        raise ValueError("provider response lacks token usage; reservation retained")
+   214	    usage: dict[str, Any] = response["usage"]
+   215	    return usage
+   216	
+   217	
+   218	def flash(budget: Budget, prompt: str, key: str | None, max_tokens: int = 4096) -> FlashResult:
+   219	    if not prompt or not key or not 1 <= max_tokens <= 16384:
+   220	        raise ValueError("prompt, key, and max_tokens in 1..16384 are required")
+   221	    # A deliberately conservative estimate, not a provider-enforced ceiling.
+   222	    estimated_input = len(prompt.encode("utf-8")) + 1000
+   223	    reserved = math.ceil(estimated_input * 0.3 + max_tokens * 1.2)
+   224	    ticket = budget.reserve("deepseek-flash", reserved)
+   225	    payload = {"model": "deepseek-flash", "messages": [{"role": "user", "content": prompt}],
+   226	               "max_tokens": max_tokens, "thinking": {"type": "disabled"}}
+   227	    response = _post(ticket, FLASH_URL, payload, key)
+   228	    usage = _usage(response)
+   229	    prompt_tokens = _tokens(usage.get("prompt_tokens"))
+   230	    output_tokens = _tokens(usage.get("completion_tokens"))
+   231	    cost = math.ceil(prompt_tokens * 0.3 + output_tokens * 1.2)
+   232	    _settle(budget, ticket, cost, response)
+   233	    try:
+   234	        choice = response["choices"][0]
+   235	        content = choice["message"]["content"]
+   236	        model = response["model"]
+   237	        finish = choice["finish_reason"]
+   238	    except (KeyError, IndexError, TypeError) as error:
+   239	        raise ValueError("DeepSeek response lacks an answer") from error
+   240	    if not isinstance(content, str) or not content:
+   241	        raise ValueError("DeepSeek returned an empty answer")
+   242	    result: FlashResult = {"model": model, "text": content, "finish_reason": finish,
+   243	              "input_tokens": prompt_tokens, "output_tokens": output_tokens,
+   244	              "cost_microdollars": cost, "reservation_microdollars": reserved}
+   245	    if finish != "stop":
+   246	        raise IncompleteResponse(result)
+   247	    return result
+   248	
+   249	
+   250	def jev(budget: Budget, source: str, question: str, key: str | None, model: str = "jev-latest") -> JevResult:
+   251	    if not source or not question or not key:
+   252	        raise ValueError("source, question, and key are required")
+   253	    payload = {"model": model, "state": {"source": source},
+   254	               "questions": {"judgment": {"type": "noul", "instructions": question}}}
+   255	    response, input_tokens, cost, reserved = _jev_request(budget, payload, key)
+   256	    try:
+   257	        probability = response["answers"]["judgment"]["noul"]
+   258	        model = response["model"]
+   259	    except (KeyError, TypeError) as error:
+   260	        raise ValueError("Jev response lacks an answer") from error
+   261	    if isinstance(probability, bool) or not isinstance(probability, (int, float)) or not 0 <= probability <= 1:
+   262	        raise ValueError("Jev returned an invalid probability")
+   263	    return {"model": model, "probability": probability, "input_tokens": input_tokens,
+   264	            "cost_microdollars": cost, "reservation_microdollars": reserved}
+   265	
+   266	
+   267	def _jev_request(budget: Budget, payload: dict[str, Any], key: str) -> tuple[Any, int, int, int]:
+   268	    estimated_input = len(json.dumps(payload, ensure_ascii=False).encode("utf-8")) + 1000
+   269	    reserved = max(1, math.ceil(estimated_input * 0.042))
+   270	    ticket = budget.reserve("jev", reserved)
+   271	    response = _post(ticket, JEV_URL, payload, key)
+   272	    input_tokens = _tokens(_usage(response).get("input_tokens"))
+   273	    cost = math.ceil(input_tokens * 0.042)
+   274	    _settle(budget, ticket, cost, response)
+   275	    return response, input_tokens, cost, reserved
+   276	
+   277	
+   278	MIN_FRAGMENT = 4
+   279	
+   280	
+   281	def _citation_error(source_lines: list[str], line: object, fragment: object) -> str | None:
+   282	    """Return why a line/fragment citation fails against the source, or None.
+   283	
+   284	    The fragment must be one line of at least MIN_FRAGMENT non-space characters,
+   285	    found within the pack-wide window of three lines around the cited line.
+   286	    """
+   287	    if isinstance(line, bool) or not isinstance(line, int):
+   288	        return "citation line is not an integer"
+   289	    if not 1 <= line <= len(source_lines):
+   290	        return "citation line is outside source"
+   291	    if not isinstance(fragment, str) or "\n" in fragment or len("".join(fragment.split())) < MIN_FRAGMENT:
+   292	        return f"citation fragment must be a single line of at least {MIN_FRAGMENT} non-space characters"
+   293	    if not any(fragment in text for text in source_lines[max(0, line - 4):min(len(source_lines), line + 3)]):
+   294	        return f"citation fragment missing near line {line}"
+   295	    return None
+   296	
+   297	
+   298	def jev_batch(budget: Budget, source: str, source_ref: str, checks: object, key: str | None,
+   299	              model: str = "jev-latest") -> JevBatchResult:
+   300	    """Evaluate independent cited claims or ordering checks against one source."""
+   301	    if not all(isinstance(x, str) and x.strip() for x in (source, source_ref, key, model)):
+   302	        raise ValueError("source, source reference, key, and model are required")
+   303	    assert key is not None  # checked above; all() does not narrow the type
+   304	    if not isinstance(checks, list) or not checks:
+   305	        raise ValueError("checks must be a nonempty list")
+   306	    questions: dict[str, dict[str, Any]] = {}
+   307	    seen_ids: set[str] = set()
+   308	    validated: list[Check] = []
+   309	    source_lines = source.splitlines()
+   310	    for index, check in enumerate(checks):
+   311	        if not isinstance(check, dict):
+   312	            raise ValueError("each check must be an object")
+   313	        ident, kind = check.get("id"), check.get("kind")
+   314	        statement, fragment, line = check.get("statement"), check.get("fragment"), check.get("line")
+   315	        if not (isinstance(ident, str) and ident.strip() and isinstance(statement, str) and statement.strip()
+   316	                and isinstance(fragment, str) and fragment.strip()):
+   317	            raise ValueError("each check requires a nonempty id, statement, and fragment")
+   318	        if ident in seen_ids:
+   319	            raise ValueError(f"duplicate check id: {ident}")
+   320	        seen_ids.add(ident)
+   321	        if kind not in ("claim", "ordering"):
+   322	            raise ValueError(f"unknown check kind: {kind}")
+   323	        error = _citation_error(source_lines, line, fragment)
+   324	        if error:
+   325	            raise ValueError(f"{ident}: {error}")
+   326	        assert isinstance(line, int)  # _citation_error rejected anything else
+   327	        validated.append({"id": ident, "kind": kind, "statement": statement, "line": line,
+   328	                          "fragment": fragment})
+   329	        if kind == "ordering":
+   330	            instruction = ("Does the cited fragment itself explicitly contemplate this specific event ordering? "
+   331	                           "Use the surrounding source only to interpret the fragment. "
+   332	                           "A general requirement does not establish an unmentioned ordering. ")
+   333	        else:
+   334	            instruction = ("Does the cited fragment support this specific claim? "
+   335	                           "Use the surrounding source only to interpret the fragment. ")
+   336	        questions[f"choice_{index}"] = {
+   337	            "type": "choice",
+   338	            "instructions": instruction + f"Claim or ordering: {statement}\nCited fragment: {fragment}",
+   339	            "criteria": {
+   340	                "supported": "The cited fragment explicitly supports the claim or contemplates the specific ordering.",
+   341	                "contradicted": "The cited fragment explicitly contradicts the claim or rules out the specific ordering.",
+   342	                "unclear": "The cited fragment does not establish either conclusion, or the evidence is insufficient.",
+   343	            },
+   344	        }
+   345	        if kind == "ordering":
+   346	            questions[f"scope_{index}"] = {
+   347	                "type": "noul",
+   348	                "instructions": {
+   349	                    "question": "Can a reader establish the entire asserted ordering from the quoted fragment alone?",
+   350	                    "fragment": fragment,
+   351	                    "sequence": statement,
+   352	                    "scope": (
+   353	                        "Check the starting condition, who acts, each event, their order, and the stated outcome or exclusion. "
+   354	                        "Treat each material detail as required. Accept paraphrases that preserve meaning. "
+   355	                        "Reject a plausible inference if the quote leaves any material detail open. "
+   356	                        "An explicit reversal fails. A different sentence cannot supply missing evidence."
+   357	                    ),
+   358	                },
+   359	                "criteria": {
+   360	                    "true": "The quote establishes every material condition, event, order and outcome in the assertion.",
+   361	                    "false": "The quote leaves at least one material detail open or conflicts with it.",
+   362	                },
+   363	            }
+   364	    payload = {"model": model, "state": {"source": source}, "questions": questions}
+   365	    response, input_tokens, cost, reserved = _jev_request(budget, payload, key)
+   366	    try:
+   367	        answers = response.get("answers")
+   368	        if not isinstance(answers, dict) or set(answers) != set(questions):
+   369	            raise ValueError("Jev response has missing or unexpected answers; usage was recorded")
+   370	        model = response.get("model")
+   371	        if not isinstance(model, str) or not model:
+   372	            raise ValueError("Jev response lacks a model; usage was recorded")
+   373	        results: dict[str, CheckResult] = {}
+   374	        for index, check in enumerate(validated):
+   375	            answer = answers[f"choice_{index}"]
+   376	            if not isinstance(answer, dict):
+   377	                raise ValueError("Jev response has an invalid answer; usage was recorded")
+   378	            choice = answer.get("choice")
+   379	            probabilities = answer.get("probabilities")
+   380	            confidence = answer.get("confidence")
+   381	            if (answer.get("type") != "choice" or choice not in ("supported", "contradicted", "unclear")
+   382	                    or not isinstance(probabilities, dict) or set(probabilities) != {"supported", "contradicted", "unclear"}
+   383	                    or any(isinstance(p, bool) or not isinstance(p, (int, float)) or not 0 <= p <= 1
+   384	                           for p in probabilities.values())
+   385	                    or isinstance(confidence, bool) or not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1):
+   386	                raise ValueError("Jev response has an invalid choice answer; usage was recorded")
+   387	            if abs(sum(probabilities.values()) - 1) > 0.03 or probabilities[choice] < max(probabilities.values()):
+   388	                raise ValueError("Jev response has an inconsistent probability distribution; usage was recorded")
+   389	            result: CheckResult = {"kind": check["kind"], "statement": check["statement"],
+   390	                                   "source": source_ref, "line": check["line"], "fragment": check["fragment"],
+   391	                                   "choice": choice, "probabilities": probabilities,
+   392	                                   "confidence": confidence, "review_required": True}
+   393	            results[check["id"]] = result
+   394	            if check["kind"] == "ordering":
+   395	                scope = answers[f"scope_{index}"]
+   396	                if not isinstance(scope, dict) or scope.get("type") != "noul":
+   397	                    raise ValueError("Jev response has an invalid ordering scope answer; usage was recorded")
+   398	                probability = scope.get("noul")
+   399	                if (isinstance(probability, bool) or not isinstance(probability, (int, float))
+   400	                        or not 0 <= probability <= 1):
+   401	                    raise ValueError("Jev response has an invalid ordering scope probability; usage was recorded")
+   402	                result["ordering_scope_probability"] = probability
+   403	    except ValueError as error:
+   404	        raise JevAnswerError(str(error), input_tokens, cost) from error
+   405	    return {"model": model, "source_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
+   406	            "input_tokens": input_tokens, "cost_microdollars": cost,
+   407	            "reservation_microdollars": reserved, "checks": results}
+   408	
+   409	
+   410	class InvalidDraft(ValueError):
+   411	    """A Flash draft that is not the required JSON structure. Keeps the raw text."""
+   412	
+   413	    def __init__(self, message: str, text: str) -> None:
+   414	        self.text = text
+   415	        super().__init__(f"Flash draft rejected: {message}; usage was recorded")
+   416	
+   417	
+   418	DRAFT_INSTRUCTIONS = """You draft source-grounded claims for a StateRadar analysis. You propose; you do not decide.
+   419	
+   420	Task:
+   421	{task}
+   422	
+   423	Rules:
+   424	- Use only the numbered source below. Do not use outside knowledge.
+   425	- Each claim cites ONE source line number and a short fragment copied verbatim from that line.
+   426	- kind is "claim" for a statement of behaviour or requirement, "ordering" for a specific sequence of events.
+   427	- A general requirement does not establish an ordering it does not mention: put such cases into questions.
+   428	- Put every gap, contradiction, ambiguity, or unspecified behaviour into questions. Do not resolve it.
+   429	- Answer with JSON only, no prose, exactly in this shape:
+   430	{{"claims": [{{"id": "C1", "kind": "claim", "statement": "...", "line": 1, "fragment": "..."}}], "questions": ["..."]}}
+   431	
+   432	Source ({source_ref}), one line per number:
+   433	{numbered}
+   434	"""
+   435	
+   436	
+   437	PLACEHOLDER = "..."
+   438	
+   439	
+   440	def _parse_draft(text: str) -> tuple[list[dict[str, Any]], list[str]]:
+   441	    body = text.strip()
+   442	    try:
+   443	        draft = json.loads(body)
+   444	    except json.JSONDecodeError as error:
+   445	        # Tolerate prose or a code fence around exactly one draft object. Every
+   446	        # decodable object with a claims list and a questions list is a candidate;
+   447	        # more than one (for example an echoed template) is ambiguous.
+   448	        candidates, covered = [], 0
+   449	        decoder = json.JSONDecoder()
+   450	        for start in (i for i, char in enumerate(body) if char == "{"):
+   451	            if start < covered:  # inside an object that already decoded
+   452	                continue
+   453	            try:
+   454	                candidate, covered = decoder.raw_decode(body, start)
+   455	            except json.JSONDecodeError:
+   456	                continue
+   457	            if (isinstance(candidate, dict) and isinstance(candidate.get("claims"), list)
+   458	                    and isinstance(candidate.get("questions"), list)):
+   459	                candidates.append(candidate)
+   460	        if len(candidates) > 1:
+   461	            raise InvalidDraft(f"{len(candidates)} draft objects found; exactly one is required", text) from error
+   462	        if not candidates:
+   463	            raise InvalidDraft(f"not JSON ({error.msg})", text) from error
+   464	        draft = candidates[0]
+   465	    if not isinstance(draft, dict) or not isinstance(draft.get("claims"), list):
+   466	        raise InvalidDraft("a claims list is required", text)
+   467	    questions = draft.get("questions")
+   468	    if not isinstance(questions, list) or not all(isinstance(q, str) and q.strip() for q in questions):
+   469	        raise InvalidDraft("a questions list of nonempty strings is required", text)
+   470	    if any(q.strip() == PLACEHOLDER for q in questions):
+   471	        raise InvalidDraft("a question repeats the template placeholder", text)
+   472	    seen = set()
+   473	    for claim in draft["claims"]:
+   474	        if not isinstance(claim, dict):
+   475	            raise InvalidDraft("each claim must be an object", text)
+   476	        ident = claim.get("id")
+   477	        if not all(isinstance(claim.get(k), str) and claim[k].strip() for k in ("id", "statement", "fragment")):
+   478	            raise InvalidDraft("each claim requires a nonempty id, statement, and fragment", text)
+   479	        if PLACEHOLDER in (claim["statement"].strip(), claim["fragment"].strip()):
+   480	            raise InvalidDraft(f"{ident}: repeats the template placeholder", text)
+   481	        if ident in seen:
+   482	            raise InvalidDraft(f"duplicate claim id {ident}", text)
+   483	        seen.add(ident)
+   484	        if claim.get("kind") not in ("claim", "ordering"):
+   485	            raise InvalidDraft(f"{ident}: unknown kind {claim.get('kind')!r}", text)
+   486	    return draft["claims"], questions
+   487	
+   488	
+   489	def draft_verify(budget: Budget, source: str, source_ref: str, task: str, flash_key: str, jev_key: str,
+   490	                 model: str = "jev-latest", max_tokens: int = 12000) -> DraftVerifyResult:
+   491	    """Flash drafts cited claims, code checks the citations, Jev judges the citable ones.
+   492	
+   493	    Nothing is accepted automatically. Claims with failed citations are kept with the
+   494	    reason and never sent to Jev; every draft question is carried forward.
+   495	    """
+   496	    if not all(isinstance(x, str) and x.strip() for x in (source, source_ref, task, flash_key, jev_key)):
+   497	        raise ValueError("source, source reference, task, and both API keys are required")
+   498	    source_lines = source.splitlines()
+   499	    numbered = "\n".join(f"{number}: {text}" for number, text in enumerate(source_lines, 1))
+   500	    prompt = DRAFT_INSTRUCTIONS.format(task=task.strip(), source_ref=source_ref, numbered=numbered)
+   501	    drafted = flash(budget, prompt, flash_key, max_tokens)
+   502	    claims, questions = _parse_draft(drafted["text"])
+   503	    results: dict[str, ClaimEntry] = {}
+   504	    citable: list[Check] = []
+   505	    for claim in claims:
+   506	        error = _citation_error(source_lines, claim.get("line"), claim["fragment"])
+   507	        results[claim["id"]] = {"kind": claim["kind"], "statement": claim["statement"],
+   508	                                "line": claim.get("line"), "fragment": claim["fragment"],
+   509	                                "citation_check": error or "ok", "jev": None}
+   510	        if not error:
+   511	            citable.append({"id": claim["id"], "kind": claim["kind"], "statement": claim["statement"],
+   512	                            "line": claim["line"], "fragment": claim["fragment"]})
+   513	    verification: Verification | None = None
+   514	    if citable:
+   515	        try:
+   516	            batch = jev_batch(budget, source, source_ref, citable, jev_key, model)
+   517	        except LedgerError as error:
+   518	            # Jev answered and was paid, but the ledger is unavailable: keep the answer.
+   519	            verification = {"error": str(error), "unrecorded_response": error.response,
+   520	                            "question_claims": {f"{prefix}_{index}": check["id"]
+   521	                                                for index, check in enumerate(citable)
+   522	                                                for prefix in ("choice", "scope")
+   523	                                                if prefix == "choice" or check["kind"] == "ordering"}}
+   524	        except (ValueError, OSError, BudgetExceeded, sqlite3.Error) as error:
+   525	            # The Flash draft is paid for: keep it and its citation checks.
+   526	            failed: VerificationFailed = {"error": str(error)}
+   527	            if isinstance(error, JevAnswerError):
+   528	                failed["input_tokens"] = error.input_tokens
+   529	                failed["cost_microdollars"] = error.cost
+   530	            verification = failed
+   531	        else:
+   532	            for ident, judged in batch["checks"].items():
+   533	                judgment: Judgment = {"choice": judged["choice"], "probabilities": judged["probabilities"],
+   534	                                      "confidence": judged["confidence"]}
+   535	                if "ordering_scope_probability" in judged:
+   536	                    judgment["ordering_scope_probability"] = judged["ordering_scope_probability"]
+   537	                results[ident]["jev"] = judgment
+   538	            verification = {"model": batch["model"], "input_tokens": batch["input_tokens"],
+   539	                            "cost_microdollars": batch["cost_microdollars"],
+   540	                            "reservation_microdollars": batch["reservation_microdollars"], "error": None}
+   541	    draft_meta: DraftMeta = {"model": drafted["model"], "finish_reason": drafted["finish_reason"],
+   542	                             "input_tokens": drafted["input_tokens"], "output_tokens": drafted["output_tokens"],
+   543	                             "cost_microdollars": drafted["cost_microdollars"],
+   544	                             "reservation_microdollars": drafted["reservation_microdollars"]}
+   545	    return {"source": source_ref, "source_sha256": hashlib.sha256(source.encode("utf-8")).hexdigest(),
+   546	            "draft": draft_meta, "verification": verification, "claims": results,
+   547	            "questions": questions, "review_required": True}
+   548	
+   549	
+   550	TEXT_SUFFIXES = (".md", ".txt", ".rst")
+   551	
+   552	
+   553	def blind(budget: Budget, args: argparse.Namespace, key: str | None) -> int:
+   554	    if not args.requirements or not args.contracts:
+   555	        raise ValueError("blind pass requires requirements and event contracts")
+   556	    for spec in args.requirements + args.contracts:
+   557	        # Flash gets prepared prose only: no source file, no class blocks.
+   558	        name = spec.split(":", 1)[0]
+   559	        if Path(name).suffix.lower() not in TEXT_SUFFIXES or (spec in args.contracts and ":" in spec):
+   560	            raise ValueError(f"blind takes only prepared text files ({', '.join(TEXT_SUFFIXES)}): "
+   561	                             f"requirements as FILE or FILE:PATTERN, contracts as a whole FILE: {spec!r}")
+   562	    pack_root = Path(__file__).resolve().parent.parent
+   563	    # Keep the exact dispatched package next to the output: it is the record of
+   564	    # what the blind pass saw, and a temporary path would be gone after the run.
+   565	    package_path = args.output.with_suffix(".package.md")
+   566	    package_only = getattr(args, "package_only", False)
+   567	    if not package_only and not package_path.is_file():
+   568	        raise ValueError(f"run blind with --package-only first and read {package_path}")
+   569	    with tempfile.TemporaryDirectory() as scratch:
+   570	        assembled = Path(scratch) / "package.md"
+   571	        package_args = argparse.Namespace(
+   572	            repo=args.repo, analysis_dir=args.analysis,
+   573	            requirements=args.requirements, contracts=args.contracts,
+   574	            out=str(assembled), for_dispatch=False,
+   575	        )
+   576	        # assemble reports on stdout and names the temporary file: keep stdout
+   577	        # for blind's own JSON and pass the report to stderr.
+   578	        with contextlib.redirect_stdout(sys.stderr):
+   579	            assembled_ok = part_b_pack.assemble(package_args, pack_root) == 0
+   580	        if not assembled_ok:
+   581	            raise ValueError("blind input package failed validation")
+   582	        package = assembled.read_text(encoding="utf-8")
+   583	    package += ("\nThe coverage checklist must use one exact line per event or pair "
+   584	                "in the form '- [x] EVENT_ID', with no other text on that line.\n")
+   585	    if package_only:
+   586	        package_path.write_text(package, encoding="utf-8")
+   587	        print(json.dumps({"package": str(package_path), "characters": len(package)}, indent=2))
+   588	        return 0
+   589	    if package_path.read_text(encoding="utf-8") != package:
+   590	        # Send only what the agent inspected.
+   591	        raise ValueError(f"the inputs changed: the package differs from the inspected {package_path}; "
+   592	                         "run --package-only again and read it")
+   593	    try:
+   594	        result = flash(budget, package, key, args.max_tokens)
+   595	    except IncompleteResponse as error:
+   596	        # Never leave a truncated table where a finished one is expected.
+   597	        partial = args.output.with_suffix(".partial.md")
+   598	        partial.write_text(error.result["text"], encoding="utf-8")
+   599	        error.saved_to = str(partial)
+   600	        raise
+   601	    args.output.write_text(result["text"], encoding="utf-8")
+   602	    print(json.dumps({k: v for k, v in result.items() if k != "text"}, indent=2))
+   603	    check_args = argparse.Namespace(repo=args.repo, analysis_dir=args.analysis, check=str(args.output))
+   604	    # stdout stays one JSON document; the coverage report goes to stderr.
+   605	    with contextlib.redirect_stdout(sys.stderr):
+   606	        return part_b_pack.check(check_args)
+   607	
+   608	
+   609	def main() -> int:
+   610	    parser = argparse.ArgumentParser(description=__doc__)
+   611	    parser.add_argument("--ledger", type=Path, required=True)
+   612	    parser.add_argument("--limit-microdollars", type=int, help="initial limit for a new ledger")
+   613	    commands = parser.add_subparsers(dest="command", required=True)
+   614	    commands.add_parser("status")
+   615	    limit_parser = commands.add_parser("set-limit")
+   616	    limit_parser.add_argument("amount_microdollars", type=int)
+   617	    settle_parser = commands.add_parser("settle")
+   618	    settle_parser.add_argument("reservation", type=int)
+   619	    settle_parser.add_argument("actual_microdollars", type=int)
+   620	    flash_parser = commands.add_parser("flash")
+   621	    flash_parser.add_argument("input", type=Path)
+   622	    flash_parser.add_argument("--max-tokens", type=int, default=4096)
+   623	    flash_parser.add_argument("--output", type=Path, help="save the full JSON and print usage only")
+   624	    jev_parser = commands.add_parser("jev")
+   625	    jev_parser.add_argument("input", type=Path)
+   626	    jev_parser.add_argument("question")
+   627	    jev_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+   628	    batch_parser = commands.add_parser("jev-batch")
+   629	    batch_parser.add_argument("input", type=Path, help="UTF-8 source shared by the checks")
+   630	    batch_parser.add_argument("checks", type=Path, help="JSON array of checks")
+   631	    batch_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+   632	    batch_parser.add_argument("--output", type=Path, help="also write the result JSON to this file")
+   633	    batch_parser.add_argument("--summary", action="store_true",
+   634	                              help="print counts instead of all checks (requires --output)")
+   635	    draft_parser = commands.add_parser("draft-verify", help="Flash drafts cited claims; Jev judges them")
+   636	    draft_parser.add_argument("input", type=Path, help="UTF-8 source the claims must cite")
+   637	    draft_parser.add_argument("task", type=Path, help="UTF-8 file with the bounded drafting task")
+   638	    draft_parser.add_argument("--output", type=Path, required=True, help="JSON result file")
+   639	    draft_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+   640	    draft_parser.add_argument("--max-tokens", type=int, default=12000,
+   641	                              help="Flash output budget (a 248-line source needed about 5,200; 4096 truncated it)")
+   642	    cells_parser = commands.add_parser("draft-cells",
+   643	                                       help="Flash drafts matrix cells for given states and events; Jev judges each")
+   644	    cells_parser.add_argument("input", type=Path, help="UTF-8 source the cells must cite")
+   645	    cells_parser.add_argument("task", type=Path, help="JSON file: states (name, condition), events (id, gist), notes")
+   646	    cells_parser.add_argument("--output", type=Path, required=True,
+   647	                              help="JSON result file; the matrix block is written next to it as .md")
+   648	    cells_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+   649	    cells_parser.add_argument("--max-tokens", type=int, default=16384, help="Flash output budget")
+   650	    windows = commands.add_parser("flash-windows", help="draft and cite bounded concurrent schedules")
+   651	    windows.add_argument("input", type=Path)
+   652	    windows.add_argument("--max-tokens", type=int, default=16384)
+   653	    windows.add_argument("--output", type=Path, required=True)
+   654	    blind_parser = commands.add_parser("blind")
+   655	    blind_parser.add_argument("analysis")
+   656	    blind_parser.add_argument("--repo", default=".")
+   657	    blind_parser.add_argument("--requirements", action="append", required=True)
+   658	    blind_parser.add_argument("--contracts", action="append", required=True)
+   659	    blind_parser.add_argument("--output", type=Path, required=True)
+   660	    blind_parser.add_argument("--max-tokens", type=int, default=8192)
+   661	    blind_parser.add_argument("--package-only", action="store_true",
+   662	                              help="write <output stem>.package.md for inspection; make no call")
+   663	    args = parser.parse_args()
+   664	    if args.command == "jev-batch" and args.summary and args.output is None:
+   665	        batch_parser.error("--summary requires --output to retain all judgments")
+   666	    for path in [getattr(args, "output", None)]:
+   667	        # Fail before anything is paid for if the result cannot be written.
+   668	        if path is not None and (path.is_dir() or not path.parent.is_dir() or not os.access(path.parent, os.W_OK)):
+   669	            print(f"LOCAL MODELS: output {path} is a directory, or {path.parent} does not exist or is not writable",
+   670	                  file=sys.stderr)
+   671	            return 1
+   672	    result: Mapping[str, object]  # printed as JSON; each command has its own shape
+   673	    try:
+   674	        budget = Budget(args.ledger, args.limit_microdollars)
+   675	        if args.command == "status":
+   676	            result = {"committed_or_reserved_microdollars": budget.total(), "limit_microdollars": budget.limit,
+   677	                      "calls": budget.calls()}
+   678	        elif args.command == "set-limit":
+   679	            budget.set_limit(args.amount_microdollars)
+   680	            result = {"limit_microdollars": budget.limit}
+   681	        elif args.command == "settle":
+   682	            budget.settle(args.reservation, args.actual_microdollars)
+   683	            result = {"committed_or_reserved_microdollars": budget.total()}
+   684	        elif args.command == "flash":
+   685	            try:
+   686	                drafted = flash(budget, args.input.read_text(encoding="utf-8"),
+   687	                                os.environ.get("DEEPSEEK_API_KEY"), args.max_tokens)
+   688	            except IncompleteResponse as error:
+   689	                if args.output:
+   690	                    saved = args.output.with_name(args.output.name + ".partial.json")
+   691	                    saved.write_text(json.dumps(error.result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+   692	                    error.saved_to = str(saved)
+   693	                raise
+   694	            result = drafted
+   695	            if args.output:
+   696	                args.output.write_text(json.dumps(drafted, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+   697	                result = {key: value for key, value in drafted.items() if key != "text"}
+   698	                result = {**result, "output": str(args.output)}
+   699	        elif args.command == "flash-windows":
+   700	            from hybrid_pilot import WINDOW_PROMPT, review_windows
+   701	
+   702	            source = args.input.read_text(encoding="utf-8")
+   703	            numbered = "\n".join(f"{i}: {line}" for i, line in enumerate(source.splitlines(), 1))
+   704	            prompt = f"{WINDOW_PROMPT}\nSOURCE {args.input.name}\n{numbered}"
+   705	            raw = args.output.with_suffix(".raw.json")
+   706	            try:
+   707	                draft = flash(budget, prompt, os.environ.get("DEEPSEEK_API_KEY"), args.max_tokens)
+   708	            except IncompleteResponse as error:
+   709	                raw.write_text(json.dumps(error.result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+   710	                error.saved_to = str(raw)
+   711	                raise
+   712	            raw.write_text(json.dumps(draft, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+   713	            candidates = review_windows(draft["text"], source)
+   714	            metadata = {key: value for key, value in draft.items() if key != "text"}
+   715	            output = {"source": str(args.input), "source_sha256": hashlib.sha256(source.encode()).hexdigest(),
+   716	                      "draft": metadata, "candidates": candidates, "review_required": True}
+   717	            args.output.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+   718	            result = {"output": str(args.output), "draft": metadata, "candidates": len(candidates),
+   719	                      "candidates_with_problems": sum(bool(item["problems"]) for item in candidates)}
+   720	        elif args.command == "blind":
+   721	            return blind(budget, args, os.environ.get("DEEPSEEK_API_KEY"))
+   722	        elif args.command == "draft-verify":
+   723	            flash_key, jev_key = os.environ.get("DEEPSEEK_API_KEY"), os.environ.get("TYPESAFE_API_KEY")
+   724	            missing = [name for name, value in (("DEEPSEEK_API_KEY", flash_key), ("TYPESAFE_API_KEY", jev_key)) if not value]
+   725	            if missing or not flash_key or not jev_key:
+   726	                raise ValueError(f"draft-verify needs {' and '.join(missing)}")
+   727	            try:
+   728	                verified = draft_verify(budget, args.input.read_text(encoding="utf-8"), str(args.input),
+   729	                                      args.task.read_text(encoding="utf-8"), flash_key, jev_key,
+   730	                                      args.model, args.max_tokens)
+   731	            except InvalidDraft as error:
+   732	                args.output.with_suffix(".draft.txt").write_text(error.text, encoding="utf-8")
+   733	                raise
+   734	            except IncompleteResponse as error:
+   735	                # A truncated draft is paid for: keep it on disk, not on stdout.
+   736	                saved = args.output.with_suffix(".draft.txt")
+   737	                saved.write_text(error.result["text"], encoding="utf-8")
+   738	                error.saved_to = str(saved)
+   739	                raise
+   740	            args.output.write_text(json.dumps(verified, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+   741	            failed = verified["verification"] is not None and verified["verification"].get("error")
+   742	            claims = verified["claims"].values()
+   743	            choices: dict[str, int] = {}
+   744	            for claim in claims:
+   745	                judgment = claim["jev"]
+   746	                if judgment and "choice" in judgment:
+   747	                    choices[judgment["choice"]] = choices.get(judgment["choice"], 0) + 1
+   748	            result = {"output": str(args.output), "claims_total": len(verified["claims"]),
+   749	                      "citation_failures": sum(claim["citation_check"] != "ok" for claim in claims),
+   750	                      "jev_choices": choices, "questions": len(verified["questions"]),
+   751	                      "draft": verified["draft"], "verification": verified["verification"]}
+   752	            if failed:
+   753	                print(json.dumps(result, ensure_ascii=False, indent=2))
+   754	                print(f"LOCAL MODELS: Jev verification failed; draft kept in {args.output}: {failed}", file=sys.stderr)
+   755	                return 1
+   756	        elif args.command == "draft-cells":
+   757	            import draft_cells  # imports this module; loaded only for this command
+   758	            flash_key, jev_key = os.environ.get("DEEPSEEK_API_KEY"), os.environ.get("TYPESAFE_API_KEY")
+   759	            if not flash_key or not jev_key:
+   760	                raise ValueError("draft-cells needs DEEPSEEK_API_KEY and TYPESAFE_API_KEY")
+   761	            try:
+   762	                cells = draft_cells.draft_cells(budget, args.input.read_text(encoding="utf-8"), str(args.input),
+   763	                                                args.task.read_text(encoding="utf-8"), flash_key, jev_key,
+   764	                                                args.model, args.max_tokens)
+   765	            except (InvalidDraft, draft_cells.local_models.InvalidDraft) as error:
+   766	                args.output.with_suffix(".draft.txt").write_text(error.text, encoding="utf-8")
+   767	                raise
+   768	            except (IncompleteResponse, draft_cells.local_models.IncompleteResponse) as error:
+   769	                saved = args.output.with_suffix(".draft.txt")
+   770	                saved.write_text(error.result["text"], encoding="utf-8")
+   771	                print(f"LOCAL MODELS: {error}; draft kept in {saved}", file=sys.stderr)
+   772	                return 1
+   773	            args.output.write_text(json.dumps(cells, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+   774	            args.output.with_suffix(".md").write_text(cells["matrix"], encoding="utf-8")
+   775	            cell_choices: dict[str, int] = {}
+   776	            for cell in cells["cells"]:
+   777	                if "jev" in cell:
+   778	                    cell_choices[cell["jev"]["choice"]] = cell_choices.get(cell["jev"]["choice"], 0) + 1
+   779	            result = {"output": str(args.output), "matrix": str(args.output.with_suffix(".md")),
+   780	                      "cells_total": len(cells["cells"]),
+   781	                      "cells_with_problems": sum(bool(c["problems"]) for c in cells["cells"]),
+   782	                      "missing": len(cells["missing"]), "jev_choices": cell_choices,
+   783	                      "questions": len(cells["questions"]), "draft": cells["draft"],
+   784	                      "verification": cells["verification"]}
+   785	            if cells["verification"] and cells["verification"].get("error"):
+   786	                print(json.dumps(result, ensure_ascii=False, indent=2))
+   787	                print(f"LOCAL MODELS: Jev verification failed; draft kept in {args.output}", file=sys.stderr)
+   788	                return 1
+   789	        elif args.command == "jev-batch":
+   790	            batch = jev_batch(budget, args.input.read_text(encoding="utf-8"), str(args.input),
+   791	                              json.loads(args.checks.read_text(encoding="utf-8")), os.environ.get("TYPESAFE_API_KEY"), args.model)
+   792	            result = batch
+   793	            if args.output:
+   794	                args.output.write_text(json.dumps(batch, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+   795	            if args.summary:
+   796	                batch_choices: dict[str, int] = {}
+   797	                for check in batch["checks"].values():
+   798	                    choice = check["choice"]
+   799	                    batch_choices[choice] = batch_choices.get(choice, 0) + 1
+   800	                result = {"output": str(args.output), "model": batch["model"],
+   801	                          "source_sha256": batch["source_sha256"],
+   802	                          "input_tokens": batch["input_tokens"], "cost_microdollars": batch["cost_microdollars"],
+   803	                          "checks_total": len(batch["checks"]), "jev_choices": batch_choices,
+   804	                          "ordering_checks": sum(c["kind"] == "ordering" for c in batch["checks"].values()),
+   805	                          "review_required": True}
+   806	        else:
+   807	            result = jev(budget, args.input.read_text(encoding="utf-8"), args.question,
+   808	                         os.environ.get("TYPESAFE_API_KEY"), args.model)
+   809	        print(json.dumps(result, ensure_ascii=False, indent=2))
+   810	        return 0
+   811	    except LedgerError as error:
+   812	        print(json.dumps(error.response, ensure_ascii=False, indent=2))
+   813	        print(f"LOCAL MODELS: {error}", file=sys.stderr)
+   814	        return 1
+   815	    except IncompleteResponse as error:
+   816	        shown: Mapping[str, object]
+   817	        if error.saved_to:
+   818	            shown = {key: value for key, value in error.result.items() if key != "text"}
+   819	            shown = {**shown, "text_saved_to": error.saved_to}
+   820	        else:
+   821	            shown = error.result
+   822	        print(json.dumps(shown, ensure_ascii=False, indent=2))
+   823	        print(f"LOCAL MODELS: {error}", file=sys.stderr)
+   824	        return 1
+   825	    except (OSError, ValueError, BudgetExceeded, urllib.error.URLError, sqlite3.Error) as error:
+   826	        print(f"LOCAL MODELS: {error}", file=sys.stderr)
+   827	        return 1
+   828	
+   829	
+   830	if __name__ == "__main__":
+   831	    sys.exit(main())

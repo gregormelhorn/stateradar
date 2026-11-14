@@ -1,0 +1,2902 @@
+{
+  "gobreaker-generic": {
+    "settings": {
+      "component": "gobreaker",
+      "variant": "generic",
+      "pack": "f76591e06757a4520f49871e092c6e702861887c",
+      "source_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+      "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc",
+      "baseline_sha256": "6c3741d85d7283315569e640d841b4cd7fd4dfbde8b23627901112f16281bd28",
+      "immutable_sha256": "d5eadf3926b04993d85657f5c40345a0e4aef8eabf68bb9ac4b41dd025180cc0",
+      "prompt_sha256": "f5812781d4e929fe7f7c71e512c15ec6ce95de14c0dabb422afeabeec18775c4",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "output": "selective",
+      "timeout": 900
+    },
+    "cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 13.36788,
+      "reported_codex_usd_estimate": 0.5347152,
+      "settled_routing_usd": 0.007276,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.5419912,
+      "total_usd_estimate": 0.5419912,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "result": {
+      "elapsed_seconds": 443.346,
+      "tool_calls": 84
+    },
+    "controller_complete": true,
+    "probe_gate": true,
+    "bounded_acceptance": true,
+    "structure_gate": {
+      "exit": 0,
+      "stdout": "analysis/initial.json: 29 structurally valid findings; semantics not graded\nanalysis/final.json: 34 structurally valid findings; semantics not graded\n",
+      "stderr": ""
+    },
+    "source_unchanged": true,
+    "validator_sha256": "9bfc55146e42e3abc2c4c621e62ce443f32a7ed1ee98cc826de621904aa9ca6d",
+    "tool_calls": 84,
+    "commands": 29,
+    "log_rereads": 55,
+    "nonzero_commands": [
+      {
+        "log": "036",
+        "argv": [
+          "rg",
+          "--files",
+          "-g",
+          "AGENTS.md",
+          "-g",
+          "!analysis"
+        ],
+        "exit_code": 1
+      }
+    ],
+    "mcp_errors": [],
+    "report_edits": {
+      "initial": 29,
+      "final": 34,
+      "added": [
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05"
+      ],
+      "removed": [],
+      "changed_fields": {}
+    },
+    "model_review": {
+      "draft-verify.json": {
+        "keys": [
+          "source",
+          "source_sha256",
+          "draft",
+          "verification",
+          "claims",
+          "questions",
+          "review_required"
+        ],
+        "counts": {},
+        "draft_judgments": {
+          "supported": 54,
+          "unclear": 4
+        },
+        "questions": 18,
+        "claims": 58
+      },
+      "final-jev.json": {
+        "keys": [
+          "model",
+          "source_sha256",
+          "input_tokens",
+          "cost_microdollars",
+          "reservation_microdollars",
+          "checks"
+        ],
+        "counts": {
+          "unclear": 14,
+          "supported": 3,
+          "contradicted": 1
+        },
+        "draft_judgments": {},
+        "questions": 0,
+        "claims": 0
+      }
+    },
+    "probe_runs": [
+      {
+        "file": "logs/039.stdout",
+        "exit": 0,
+        "started": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityTripHookAcrossExpiry": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3,
+          "TestIdentityTripPanicAfterInterval": 3,
+          "TestIdentityHalfOpenNotificationPanic": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/failure": 3,
+          "TestIdentityExecuteDepartedWaiter": 3,
+          "TestIdentityExecuteDepartedWaiter/no_result": 3,
+          "TestIdentityExecuteDepartedWaiter/success": 3,
+          "TestIdentityExecuteDepartedWaiter/failure": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_success": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_failure": 3,
+          "TestIdentityReassignedClosedFailure": 3,
+          "TestIdentityReassignedClosedFailure/same_generation": 3,
+          "TestIdentityReassignedClosedFailure/different_generation": 3,
+          "TestIdentityReassignedHalfOpenTrial": 3,
+          "TestIdentityLateHalfOpenSuccessBelowThreshold": 3,
+          "TestIdentityStateObserverNotificationPanic": 3,
+          "TestIdentityReadyToTripGoexit": 3,
+          "TestIdentityNilPanicBoundary": 3,
+          "TestIdentityNilPanicBoundary/nil_interface/request": 3,
+          "TestIdentityNilPanicBoundary/nil_interface/classifier": 3,
+          "TestIdentityNilPanicBoundary/typed_nil/request": 3,
+          "TestIdentityNilPanicBoundary/typed_nil/classifier": 3
+        },
+        "passed": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3,
+          "TestIdentityTripHookAcrossExpiry": 3,
+          "TestIdentityTripPanicAfterInterval": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic": 3,
+          "TestIdentityExecuteDepartedWaiter/no_result": 3,
+          "TestIdentityExecuteDepartedWaiter/success": 3,
+          "TestIdentityExecuteDepartedWaiter/failure": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_success": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_failure": 3,
+          "TestIdentityExecuteDepartedWaiter": 3,
+          "TestIdentityReassignedClosedFailure/same_generation": 3,
+          "TestIdentityReassignedClosedFailure/different_generation": 3,
+          "TestIdentityReassignedClosedFailure": 3,
+          "TestIdentityReassignedHalfOpenTrial": 3,
+          "TestIdentityLateHalfOpenSuccessBelowThreshold": 3,
+          "TestIdentityStateObserverNotificationPanic": 3,
+          "TestIdentityReadyToTripGoexit": 3,
+          "TestIdentityNilPanicBoundary/nil_interface/request": 3,
+          "TestIdentityNilPanicBoundary/nil_interface/classifier": 3,
+          "TestIdentityNilPanicBoundary/typed_nil/request": 3,
+          "TestIdentityNilPanicBoundary/typed_nil/classifier": 3,
+          "TestIdentityNilPanicBoundary": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "passing_three_repetitions": true
+      }
+    ],
+    "postreview_validation": {
+      "exit": 0,
+      "stdout": "PRESERVATION CHECK: {\"added\": 5, \"qualified\": 10, \"retained\": 29, \"test_bindings\": 9}\n",
+      "stderr": ""
+    },
+    "preservation": {
+      "retained": 29,
+      "added": 5,
+      "qualified": 10,
+      "test_bindings": 9
+    },
+    "baseline_cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 12.45965,
+      "reported_codex_usd_estimate": 0.498386,
+      "settled_routing_usd": 0.005859,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.504245,
+      "total_usd_estimate": 0.504245,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "strategy_total_usd_estimate": 1.0462362,
+    "new_findings": [
+      {
+        "id": "N01",
+        "initial": "A retained completion from a newly constructed TwoStep breaker, and an independent closed target with empty counts and a ReadyToTrip hook that returns true.",
+        "steps": [
+          "Leave the target in its initial generation or first cycle it through open and half-open back to closed.",
+          "Sequentially assign the target wrapper value into the original receiver and report false through the retained completion."
+        ],
+        "outcome": "With equal generations the target's hook receives one consecutive failure and zero admissions, then the target opens and clears counts. With the closed target at a different generation the report reaches neither target hook and counts stay empty. The original breaker remains at one pending admission in both schedules.",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 272,
+          "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+        },
+        "test": "TestIdentityReassignedClosedFailure",
+        "question": "Should a retained completion be able to trip a replacement breaker that admitted no request?"
+      },
+      {
+        "id": "N02",
+        "initial": "Two independent TwoStep breakers each have MaxRequests=1 and no closed interval. Each has advanced directly from initial closed through open to half-open, with one pending trial.",
+        "steps": [
+          "Save an alias of the original underlying breaker through a wrapper value copy, then overwrite the retained completion's receiver with the target wrapper.",
+          "Report true through the original completion, then report false through the target's own trial completion.",
+          "Restore the original wrapper value and report true again through the original completion."
+        ],
+        "outcome": "The first report closes and clears the target with a target notification. The target's own pending failure then contributes nothing. The original remains half-open with one admitted trial until restoration, after which the same callback closes and clears the original too.",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 272,
+          "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+        },
+        "test": "TestIdentityReassignedHalfOpenTrial",
+        "question": "Should a completion retain its origin even across sequential wrapper reassignment, and can a report on another instance ever invalidate the target's own trial?"
+      },
+      {
+        "id": "N03",
+        "initial": "A TwoStep breaker has opened, its deadline has passed, and its Open-to-HalfOpen notification panics.",
+        "steps": [
+          "Read Counts without resolving state.",
+          "Use State as the first state-resolving call and recover the hook panic.",
+          "Read Counts, retry State, and admit and complete the half-open trial."
+        ],
+        "outcome": "Counts alone emits no notification. The first State call propagates the hook panic without returning a state. The retry sees the committed half-open state and does not replay the hook. Counts are clear and the half-open slot remains available.",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 211,
+          "fragment": "\tstate, _ := cb.currentState(now)"
+        },
+        "test": "TestIdentityStateObserverNotificationPanic",
+        "question": "Should State expose a notification panic after committing the transition, and should a retry replay delivery?"
+      },
+      {
+        "id": "N04",
+        "initial": "An admitted Execute returns a failure while closed, and ReadyToTrip calls runtime.Goexit.",
+        "steps": [
+          "Run Execute in its own goroutine and wait for that goroutine to finish.",
+          "Read State and Counts, then execute a successful request."
+        ],
+        "outcome": "ReadyToTrip sees the first failure already counted, and Execute terminates without returning or retrying the report. The breaker stays closed and retains that failure. A subsequent successful Execute can acquire the mutex and records a success.",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 325,
+          "fragment": "\t\tcb.counts.onFailure()"
+        },
+        "test": "TestIdentityReadyToTripGoexit",
+        "question": "Should termination inside ReadyToTrip retain the already incremented failure when no trip verdict was returned?"
+      },
+      {
+        "id": "N05",
+        "initial": "An admitted Execute in the initial closed generation panics in its request or classifier with a nil interface or an interface holding a typed nil. ReadyToTrip returns false if invoked.",
+        "steps": [
+          "Use a standalone recovery control for each panic form to identify what recover returns in this runtime.",
+          "Trigger that form of panic inside Execute and inspect return, panic, hook calls and counts."
+        ],
+        "outcome": "When recover returns nil, Execute returns its zero value and error pair without reporting a failure. When recover returns a non-nil interface, Execute reports a failure and rethrows the recovered value if reporting returns normally. An interface containing a typed nil takes the non-nil branch.",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 236,
+          "fragment": "\t\tif e != nil {"
+        },
+        "test": "TestIdentityNilPanicBoundary",
+        "question": "What should Execute promise for nil-valued panics in runtime modes where recover returns nil, given the request-panic wording in README.md:90\u201391?"
+      }
+    ],
+    "supplement": {
+      "qualifications": [
+        {
+          "id": "F04",
+          "status": "qualified",
+          "rationale": "An active generation alone is insufficient to close on late success. The success is first counted, and closing requires consecutive successes to reach MaxRequests. The preserved probe tests MaxRequests=1; the additional MaxRequests=2 probe leaves the breaker half-open after the late success and then closes it on a second distinct success.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 316,
+            "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+          }
+        },
+        {
+          "id": "F07",
+          "status": "qualified",
+          "rationale": "The open case requires the time sampled after acquiring the mutex to precede or equal expiry. Invocation before the deadline by itself does not establish that condition. If completion first resolves an expired open state, F08 and F19 describe the transition or notification panic before the stale outcome can be dropped.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 298,
+            "fragment": "\tstate, generation := cb.currentState(now)"
+          }
+        },
+        {
+          "id": "F08",
+          "status": "qualified",
+          "rationale": "The stale outcome is dropped after notification only when a configured OnStateChange returns normally. If the hook panics, half-open is already committed and the panic exits before the generation comparison. F19 preserves both outcome variants of that ordering.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 359,
+            "fragment": "\t\tcb.onStateChange(cb.name, prev, state)"
+          }
+        },
+        {
+          "id": "F11",
+          "status": "qualified",
+          "rationale": "Failure reporting and explicit rethrow require recover to return a non-nil interface. With a runtime mode where panic(nil) yields nil from recover, Execute instead returns a zero pair and performs no outcome accounting. The historical probe uses a non-nil error panic; a typed-nil pointer in an interface also reaches the non-nil branch.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 236,
+            "fragment": "\t\tif e != nil {"
+          }
+        },
+        {
+          "id": "F12",
+          "status": "qualified",
+          "rationale": "Fresh or stale reporting and propagation require recover to return a non-nil interface. A classifier panic with a nil interface in a runtime mode with nil recovery can instead return a zero pair with only admission recorded. The preserved probe uses a non-nil error panic.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 236,
+            "fragment": "\t\tif e != nil {"
+          }
+        },
+        {
+          "id": "F13",
+          "status": "qualified",
+          "rationale": "A second charge requires the fallback's generation to still match after currentState resolves expiry. The preserved probe tests this case without a competing transition or positive interval. The expired interval in F24 or a competing generation change in F28 can remove that second charge.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 299,
+            "fragment": "\tif generation != before {"
+          }
+        },
+        {
+          "id": "F16",
+          "status": "qualified",
+          "rationale": "Propagation of the first notification panic and the no-notification manual retry observations are scoped to the preserved unexpired-open schedules. If open expiry resolves during Execute fallback or a later TwoStep retry, the half-open hook runs before generation comparison and may itself panic, as in F17 and F19.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 298,
+            "fragment": "\tstate, generation := cb.currentState(now)"
+          }
+        },
+        {
+          "id": "F22",
+          "status": "qualified",
+          "rationale": "The preserved unequal-generation control has an unexpired open target. Matching a success to StateOpen would also leave its counts unchanged because onSuccess has no open branch, so that control alone cannot isolate the generation guard. The added closed failure control is sensitive to the mismatch. Wrapper assignment in all these probes is sequential.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 310,
+            "fragment": "func (cb *CircuitBreaker) onSuccess(state State, now time.Time) {"
+          }
+        },
+        {
+          "id": "F25",
+          "status": "qualified",
+          "rationale": "The close case requires success to reach MaxRequests. The preserved Execute reopening case has a prompt panic and unexpired new open deadline. If a reopening notification consumes that timeout, Execute fallback can advance again and a second notification panic can replace the first. TwoStep completion has no Execute fallback.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 342,
+            "fragment": "\t\t\tcb.setState(StateHalfOpen, now)"
+          }
+        },
+        {
+          "id": "F27",
+          "status": "qualified",
+          "rationale": "The matching success closes only when it reaches MaxRequests, as it does for the preserved probe's default limit of one. The preserved stale cases finish while another request's opening is unexpired, and the original pair is delivered to the worker only when classification and reporting return normally. The buffered channel belongs to the application harness.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 316,
+            "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+          }
+        }
+      ],
+      "test_bindings": [
+        {
+          "id": "F04",
+          "test": "TestIdentityLateHalfOpenSuccessBelowThreshold",
+          "scope": "With MaxRequests=2, leave the first admitted trial pending beyond Timeout, report success, observe one counted success and continued half-open state, then admit a distinct success and observe closing."
+        },
+        {
+          "id": "F11",
+          "test": "TestIdentityNilPanicBoundary",
+          "scope": "A standalone runtime control identifies nil versus non-nil recovery; the request cases check the matching return or panic path, classifier bypass and counts for nil-interface and typed-nil panics."
+        },
+        {
+          "id": "F12",
+          "test": "TestIdentityNilPanicBoundary",
+          "scope": "After a normal request return, the classifier cases check one classification and the runtime-dependent recovered panic or zero Execute pair, with the corresponding counts."
+        },
+        {
+          "id": "F22",
+          "test": "TestIdentityReassignedClosedFailure",
+          "scope": "Keep both replacement targets closed at reporting time; after wrapper reassignment, an equal-generation failure reaches ReadyToTrip and opens, while the higher-generation target receives no count or hook update."
+        },
+        {
+          "id": "N01",
+          "test": "TestIdentityReassignedClosedFailure",
+          "scope": "After sequential receiver replacement, compare a newly constructed closed target with a closed target returned from a full lifecycle. Confirm target hook counts and transition only for the equal generation and one pending admission still on the original."
+        },
+        {
+          "id": "N02",
+          "test": "TestIdentityReassignedHalfOpenTrial",
+          "scope": "A matching foreign success closes the target, then the target's own false report leaves it closed and empty. The original trial remains pending and the same foreign callback closes the original only after restoring the wrapper."
+        },
+        {
+          "id": "N03",
+          "test": "TestIdentityStateObserverNotificationPanic",
+          "scope": "After open expiry, Counts does not notify, first State propagates the exact hook panic, retry returns HalfOpen without replay, and a fresh trial is accepted and can close the breaker."
+        },
+        {
+          "id": "N04",
+          "test": "TestIdentityReadyToTripGoexit",
+          "scope": "ReadyToTrip terminates the executing goroutine after one counted closed failure. Execute never returns, the hook ran once, the breaker stays closed and a subsequent successful Execute records an outcome."
+        },
+        {
+          "id": "N05",
+          "test": "TestIdentityNilPanicBoundary",
+          "scope": "Compare standalone recovery to Execute for nil-interface and typed-nil panics at the request and classifier seams. Assert recovered or returned values, exact counts and hook calls. Only the configured runtime branch for nil-interface panic is exercised."
+        }
+      ]
+    }
+  },
+  "gobreaker-identity": {
+    "settings": {
+      "component": "gobreaker",
+      "variant": "identity",
+      "pack": "f76591e06757a4520f49871e092c6e702861887c",
+      "source_sha": "27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+      "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc",
+      "baseline_sha256": "6c3741d85d7283315569e640d841b4cd7fd4dfbde8b23627901112f16281bd28",
+      "immutable_sha256": "d5eadf3926b04993d85657f5c40345a0e4aef8eabf68bb9ac4b41dd025180cc0",
+      "prompt_sha256": "f2a6225acb126b3a577d208f3360e21811c3633757ae50e603c4556a5c504c46",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "output": "selective",
+      "timeout": 900
+    },
+    "cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 13.03418,
+      "reported_codex_usd_estimate": 0.5213672,
+      "settled_routing_usd": 0.003992,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.5253592,
+      "total_usd_estimate": 0.5253592,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "result": {
+      "elapsed_seconds": 466.285,
+      "tool_calls": 131
+    },
+    "controller_complete": true,
+    "probe_gate": true,
+    "bounded_acceptance": true,
+    "structure_gate": {
+      "exit": 0,
+      "stdout": "analysis/initial.json: 29 structurally valid findings; semantics not graded\nanalysis/final.json: 36 structurally valid findings; semantics not graded\n",
+      "stderr": ""
+    },
+    "source_unchanged": true,
+    "validator_sha256": "9bfc55146e42e3abc2c4c621e62ce443f32a7ed1ee98cc826de621904aa9ca6d",
+    "tool_calls": 132,
+    "commands": 34,
+    "log_rereads": 98,
+    "nonzero_commands": [],
+    "mcp_errors": [
+      "item_133"
+    ],
+    "report_edits": {
+      "initial": 29,
+      "final": 36,
+      "added": [
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "removed": [],
+      "changed_fields": {}
+    },
+    "model_review": {
+      "draft-verify.json": {
+        "keys": [
+          "source",
+          "source_sha256",
+          "draft",
+          "verification",
+          "claims",
+          "questions",
+          "review_required"
+        ],
+        "counts": {},
+        "draft_judgments": {
+          "supported": 21
+        },
+        "questions": 12,
+        "claims": 21
+      },
+      "final-jev.json": {
+        "keys": [
+          "model",
+          "source_sha256",
+          "input_tokens",
+          "cost_microdollars",
+          "reservation_microdollars",
+          "checks"
+        ],
+        "counts": {
+          "unclear": 12,
+          "contradicted": 1,
+          "supported": 1
+        },
+        "draft_judgments": {},
+        "questions": 0,
+        "claims": 0
+      }
+    },
+    "probe_runs": [
+      {
+        "file": "logs/033.stdout",
+        "exit": 0,
+        "started": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityTripHookAcrossExpiry": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3,
+          "TestIdentityTripPanicAfterInterval": 3,
+          "TestIdentityHalfOpenNotificationPanic": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/failure": 3,
+          "TestIdentityExecuteDepartedWaiter": 3,
+          "TestIdentityExecuteDepartedWaiter/no_result": 3,
+          "TestIdentityExecuteDepartedWaiter/success": 3,
+          "TestIdentityExecuteDepartedWaiter/failure": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_success": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_failure": 3,
+          "TestIdentityWrapperCopyAndLocalRebinding": 3,
+          "TestIdentityOverwriteDuringAdmissionAndRestore": 3,
+          "TestIdentityReplacementExpiryBeforeMismatch": 3,
+          "TestIdentityExecuteBoundReceiver": 3,
+          "TestIdentityExecuteBoundReceiver/return": 3,
+          "TestIdentityExecuteBoundReceiver/panic": 3,
+          "TestIdentityStoredSettingsFunction": 3,
+          "TestIdentityZeroWrapperAndRestore": 3
+        },
+        "passed": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3,
+          "TestIdentityTripHookAcrossExpiry": 3,
+          "TestIdentityTripPanicAfterInterval": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic": 3,
+          "TestIdentityExecuteDepartedWaiter/no_result": 3,
+          "TestIdentityExecuteDepartedWaiter/success": 3,
+          "TestIdentityExecuteDepartedWaiter/failure": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_success": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_failure": 3,
+          "TestIdentityExecuteDepartedWaiter": 3,
+          "TestIdentityWrapperCopyAndLocalRebinding": 3,
+          "TestIdentityOverwriteDuringAdmissionAndRestore": 3,
+          "TestIdentityReplacementExpiryBeforeMismatch": 3,
+          "TestIdentityExecuteBoundReceiver/return": 3,
+          "TestIdentityExecuteBoundReceiver/panic": 3,
+          "TestIdentityExecuteBoundReceiver": 3,
+          "TestIdentityStoredSettingsFunction": 3,
+          "TestIdentityZeroWrapperAndRestore": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "passing_three_repetitions": true
+      },
+      {
+        "file": "logs/088.stdout",
+        "exit": 0,
+        "started": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityTripHookAcrossExpiry": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3,
+          "TestIdentityTripPanicAfterInterval": 3,
+          "TestIdentityHalfOpenNotificationPanic": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/failure": 3,
+          "TestIdentityExecuteDepartedWaiter": 3,
+          "TestIdentityExecuteDepartedWaiter/no_result": 3,
+          "TestIdentityExecuteDepartedWaiter/success": 3,
+          "TestIdentityExecuteDepartedWaiter/failure": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_success": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_failure": 3,
+          "TestIdentityWrapperCopyAndLocalRebinding": 3,
+          "TestIdentityOverwriteDuringAdmissionAndRestore": 3,
+          "TestIdentityReplacementExpiryBeforeMismatch": 3,
+          "TestIdentityExecuteBoundReceiver": 3,
+          "TestIdentityExecuteBoundReceiver/return": 3,
+          "TestIdentityExecuteBoundReceiver/panic": 3,
+          "TestIdentityStoredSettingsFunction": 3,
+          "TestIdentityZeroWrapperAndRestore": 3,
+          "TestIdentityReportingHookOverwriteAndRetry": 3
+        },
+        "passed": {
+          "TestIdentityRepeatedClosedCompletion": 3,
+          "TestIdentityRepeatedHalfOpenSuccess": 3,
+          "TestIdentityAbandonedHalfOpen/no_report": 3,
+          "TestIdentityAbandonedHalfOpen/late_success": 3,
+          "TestIdentityAbandonedHalfOpen/late_failure": 3,
+          "TestIdentityAbandonedHalfOpen": 3,
+          "TestIdentityHalfOpenBudget": 3,
+          "TestIdentityStaleOpenCompletion/during_open/success": 3,
+          "TestIdentityStaleOpenCompletion/during_open/failure": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/success": 3,
+          "TestIdentityStaleOpenCompletion/completion_first/failure": 3,
+          "TestIdentityStaleOpenCompletion/state_first/success": 3,
+          "TestIdentityStaleOpenCompletion/state_first/failure": 3,
+          "TestIdentityStaleOpenCompletion": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/completion_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/success": 3,
+          "TestIdentityClosedIntervalCompletion/state_first/failure": 3,
+          "TestIdentityClosedIntervalCompletion": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/success": 3,
+          "TestIdentityClassifierAcrossTransition/fresh/failure": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/request_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/success": 3,
+          "TestIdentityClassifierAcrossTransition/classifier_blocked/failure": 3,
+          "TestIdentityClassifierAcrossTransition": 3,
+          "TestIdentityRequestPanicBoundary/fresh": 3,
+          "TestIdentityRequestPanicBoundary/stale": 3,
+          "TestIdentityRequestPanicBoundary": 3,
+          "TestIdentityClassifierPanicBoundary/fresh": 3,
+          "TestIdentityClassifierPanicBoundary/stale": 3,
+          "TestIdentityClassifierPanicBoundary": 3,
+          "TestIdentityTripPanicRetry": 3,
+          "TestIdentityPanicReplacement/request": 3,
+          "TestIdentityPanicReplacement/classifier": 3,
+          "TestIdentityPanicReplacement/retry": 3,
+          "TestIdentityPanicReplacement": 3,
+          "TestIdentityTwoStepTripPanic": 3,
+          "TestIdentityStateHookPanicAfterCommit/Execute": 3,
+          "TestIdentityStateHookPanicAfterCommit/Allow": 3,
+          "TestIdentityStateHookPanicAfterCommit": 3,
+          "TestIdentityStateHookPanicExpires/second_returns": 3,
+          "TestIdentityStateHookPanicExpires/second_panics": 3,
+          "TestIdentityStateHookPanicExpires": 3,
+          "TestIdentityAdmissionHookPanic/Execute": 3,
+          "TestIdentityAdmissionHookPanic/Allow": 3,
+          "TestIdentityAdmissionHookPanic": 3,
+          "TestIdentityStaleOpenHookPanic/success": 3,
+          "TestIdentityStaleOpenHookPanic/failure": 3,
+          "TestIdentityStaleOpenHookPanic": 3,
+          "TestIdentityExecuteGoexit/request": 3,
+          "TestIdentityExecuteGoexit/classifier": 3,
+          "TestIdentityExecuteGoexit": 3,
+          "TestIdentityReassignedReceiver/equal": 3,
+          "TestIdentityReassignedReceiver/different": 3,
+          "TestIdentityReassignedReceiver": 3,
+          "TestIdentityTripHookAcrossExpiry/false": 3,
+          "TestIdentityTripHookAcrossExpiry/true": 3,
+          "TestIdentityTripHookAcrossExpiry": 3,
+          "TestIdentityTripPanicAfterInterval": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/success": 3,
+          "TestIdentityHalfOpenNotificationPanic/Execute/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic/Allow/failure": 3,
+          "TestIdentityHalfOpenNotificationPanic": 3,
+          "TestIdentityExecuteDepartedWaiter/no_result": 3,
+          "TestIdentityExecuteDepartedWaiter/success": 3,
+          "TestIdentityExecuteDepartedWaiter/failure": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_success": 3,
+          "TestIdentityExecuteDepartedWaiter/stale_failure": 3,
+          "TestIdentityExecuteDepartedWaiter": 3,
+          "TestIdentityWrapperCopyAndLocalRebinding": 3,
+          "TestIdentityOverwriteDuringAdmissionAndRestore": 3,
+          "TestIdentityReplacementExpiryBeforeMismatch": 3,
+          "TestIdentityExecuteBoundReceiver/return": 3,
+          "TestIdentityExecuteBoundReceiver/panic": 3,
+          "TestIdentityExecuteBoundReceiver": 3,
+          "TestIdentityStoredSettingsFunction": 3,
+          "TestIdentityZeroWrapperAndRestore": 3,
+          "TestIdentityReportingHookOverwriteAndRetry": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "passing_three_repetitions": true
+      }
+    ],
+    "postreview_validation": {
+      "exit": 0,
+      "stdout": "PRESERVATION CHECK: {\"added\": 7, \"qualified\": 9, \"retained\": 29, \"test_bindings\": 11}\n",
+      "stderr": ""
+    },
+    "preservation": {
+      "retained": 29,
+      "added": 7,
+      "qualified": 9,
+      "test_bindings": 11
+    },
+    "baseline_cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 12.45965,
+      "reported_codex_usd_estimate": 0.498386,
+      "settled_routing_usd": 0.005859,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.504245,
+      "total_usd_estimate": 0.504245,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "strategy_total_usd_estimate": 1.0296042,
+    "new_findings": [
+      {
+        "id": "N01",
+        "initial": "A constructed closed wrapper W points to breaker A, a value copy V initially points to A too, and local points to W.",
+        "steps": [
+          "Admit through local and retain done. Overwrite the independent value V with a wrapper for fresh breaker B, then rebind local to B's wrapper without changing W.",
+          "Call done(true), inspect A and B, then copy W into V again and make a new admission through V."
+        ],
+        "outcome": "The retained completion credits A; B remains untouched. The new admission through the restored copy increments A's Requests. Copying a wrapper shares its inner pointer at the time of the copy, while later writes to the copy and local pointer rebinding leave W's field intact (gobreaker.go:136\u2013137, 266, 271\u2013273, 289).",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 272,
+          "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+        },
+        "test": "TestIdentityWrapperCopyAndLocalRebinding",
+        "question": "What wrapper-copy and retained-callback lifetimes are supported?"
+      },
+      {
+        "id": "N02",
+        "initial": "Two independently constructed breakers A and B have each opened. B has entered half-open with MaxRequests=1 and zero admissions. Wrapper W still points to A.",
+        "steps": [
+          "Let A's open timeout elapse. During Allow on W, A enters half-open and its OnStateChange overwrites W with a copy of B's wrapper.",
+          "Finish Allow, inspect A through a saved wrapper copy, and call done(true) with W still pointing to B.",
+          "Restore W from the saved A wrapper and call the same done(true) again."
+        ],
+        "outcome": "A receives the admission and initially stays half-open with its only slot occupied. B closes on the first success despite having zero admissions. Restoring W lets the same callback close A because A's generation still matches. Admission uses the pre-hook receiver of beforeRequest, while each done call chooses its target through W (gobreaker.go:266, 271\u2013273, 276\u2013290, 298\u2013304, 314\u2013318, 354\u2013359).",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 266,
+          "fragment": "\tgeneration, err := tscb.cb.beforeRequest()"
+        },
+        "test": "TestIdentityOverwriteDuringAdmissionAndRestore",
+        "question": "Should replacement during an admission hook be supported, and which breaker should the returned completion belong to if the wrapper changed before Allow returned?"
+      },
+      {
+        "id": "N03",
+        "initial": "A retained completion comes from a closed admission on A. Distinct breaker B is still stored open with its deadline elapsed, and its generation differs from A's captured value.",
+        "steps": [
+          "Overwrite A's original wrapper with a copy of B's wrapper. Read B's Counts without calling State.",
+          "Invoke the retained completion with false as the first state-resolving operation on B since the deadline."
+        ],
+        "outcome": "The call transitions B to half-open and invokes B's OnStateChange with B's name before discarding the failure. B finishes half-open with empty Counts. A's saved alias still shows one unresolved admission. The mismatch guard runs after currentState on the selected B receiver (gobreaker.go:266, 272, 293\u2013306, 340\u2013345, 354\u2013359).",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 298,
+          "fragment": "\tstate, generation := cb.currentState(now)"
+        },
+        "test": "TestIdentityReplacementExpiryBeforeMismatch",
+        "question": "Should a report originating on A be able to advance B's timeout and emit B's notification when its outcome is stale on B?"
+      },
+      {
+        "id": "N04",
+        "initial": "Independent closed CircuitBreakers A and B use distinguishable settings callbacks. A caller saves the bound Execute method from a local pointer to A.",
+        "steps": [
+          "On the normal path, rebind the local pointer to B before calling the stored method. Return a non-nil request error that A's classifier accepts.",
+          "In a separate call on fresh objects, rebind the local pointer inside the request and panic with a marker."
+        ],
+        "outcome": "The stored method uses A for admission in both cases. On return A's classifier sees the error, A records success, and Execute returns the original pair. On panic A's deferred report records failure, A's trip hook runs, classification is bypassed, and the original marker reaches the caller. B's counters and hooks are untouched (gobreaker.go:228\u2013243, 293\u2013307, 325\u2013327).",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 237,
+          "fragment": "\t\t\tcb.afterRequest(generation, false)"
+        },
+        "test": "TestIdentityExecuteBoundReceiver",
+        "question": "Go binds a method value's receiver when the value is formed. Execute uses that receiver and the generation from its admission for its ordinary and recoverable panic paths (gobreaker.go:228\u2013244)."
+      },
+      {
+        "id": "N05",
+        "initial": "A Settings value contains an IsSuccessful function that closes over a mutable local flag. A CircuitBreaker is constructed from that value.",
+        "steps": [
+          "Assign a different function to the caller's Settings.IsSuccessful field.",
+          "Inside Execute's request, change the original closure's flag and return a non-nil error. Observe which classifier runs and how the request is counted."
+        ],
+        "outcome": "The stored original function sees the changed flag and records a success. The substitute function is never called, and Execute returns the request error. The constructor stores function values in the breaker, and the stored closure still refers to its own captured environment (gobreaker.go:141, 145, 168, 174, 242\u2013244).",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 174,
+          "fragment": "\t\tcb.isSuccessful = st.IsSuccessful"
+        },
+        "test": "TestIdentityStoredSettingsFunction",
+        "question": "Settings configures a new breaker by value (gobreaker.go:140\u2013145). What synchronization contract, if any, applies to mutable state shared by callbacks across requests or breakers?"
+      },
+      {
+        "id": "N06",
+        "initial": "A constructed wrapper W points to A. An alias copy retains A and a successful Allow on W returns done.",
+        "steps": [
+          "Overwrite W with a zero-valued TwoStepCircuitBreaker and recover from invoking done(true).",
+          "Restore W using the saved alias and invoke the same done(true) again."
+        ],
+        "outcome": "The first call panics when afterRequest dereferences the nil inner receiver to lock it, before comparing generation. A still has one admission and no result. The restored call records success on A (gobreaker.go:136\u2013137, 266, 271\u2013273, 293\u2013299).",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 294,
+          "fragment": "\tcb.mutex.Lock()"
+        },
+        "test": "TestIdentityZeroWrapperAndRestore",
+        "question": "The API documents construction with NewTwoStepCircuitBreaker (gobreaker.go:182\u2013186). Does that constructor precondition need an explicit lifetime statement for retained completions?"
+      },
+      {
+        "id": "N07",
+        "initial": "Closed breakers A and B have the same generation; A's ReadyToTrip is configured to overwrite wrapper W with B and panic. A admits through W and returns done.",
+        "steps": [
+          "Invoke done(false) and recover A's hook panic. Read A through a saved alias and B through its own wrapper.",
+          "Manually retry done(false) without restoring W."
+        ],
+        "outcome": "The first invocation charges A and unlocks A when unwinding; B is still untouched. The retry reads W again, charges a failure to B with zero admissions on B, and invokes B's trip hook. A remains charged exactly once (gobreaker.go:266, 271\u2013273, 293\u2013306, 325\u2013327).",
+        "citation": {
+          "file": "gobreaker.go",
+          "line": 295,
+          "fragment": "\tdefer cb.mutex.Unlock()"
+        },
+        "test": "TestIdentityReportingHookOverwriteAndRetry",
+        "question": "When a hook changes the wrapper and panics, should a caller have a way to identify which breaker committed the first report before deciding whether to retry?"
+      }
+    ],
+    "supplement": {
+      "qualifications": [
+        {
+          "id": "F04",
+          "status": "qualified",
+          "rationale": "The historical probe uses MaxRequests=1 and the same underlying breaker. A matching late success closes only when its increment brings ConsecutiveSuccesses to at least MaxRequests. Below that threshold it records a success and retains half-open admission accounting.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 316,
+            "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+          }
+        },
+        {
+          "id": "F07",
+          "status": "qualified",
+          "rationale": "The stale outcome contributes no success or failure on the tested unchanged inner receiver. The report can still resolve expiry before the mismatch check if the open deadline has elapsed at the sampled time. The unexpired-open and State-first cases in the preserved probe specifically avoid the callback-first expiry side effect, which F08 covers.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 298,
+            "fragment": "\tstate, generation := cb.currentState(now)"
+          }
+        },
+        {
+          "id": "F08",
+          "status": "qualified",
+          "rationale": "The transition and reset precede the mismatch check. Notification is conditional on a non-nil OnStateChange. The report reaches the mismatch return only if notification returns normally; F19 covers a notification panic. The preserved probe keeps the same inner breaker.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 358,
+            "fragment": "\tif cb.onStateChange != nil {"
+          }
+        },
+        {
+          "id": "F10",
+          "status": "qualified",
+          "rationale": "Original-pair delivery requires the classifier and afterRequest to return normally, including any expiry notification before the mismatch check. The preserved schedules use an unexpired open timeout and returning hooks. F12 and F17 illustrate panic boundaries.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 244,
+            "fragment": "\treturn result, err"
+          }
+        },
+        {
+          "id": "F15",
+          "status": "qualified",
+          "rationale": "The tested manual retry still selects the same closed inner breaker in the same generation. A repeated call re-reads the wrapper and may instead report on another matching-generation breaker after an overwrite. The first call's lock cleanup still belongs to its originally selected inner receiver (see N07).",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 272,
+            "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+          }
+        },
+        {
+          "id": "F16",
+          "status": "qualified",
+          "rationale": "The manually retried TwoStep calls use the same inner receiver and the test keeps it open with an hour-long timeout. A wrapper overwrite can change which receiver sees a retry; an expired selected receiver may perform a lifecycle transition before discarding the result.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 272,
+            "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+          }
+        },
+        {
+          "id": "F19",
+          "status": "qualified",
+          "rationale": "The historical retry uses the same inner breaker, with the committed half-open state and no intervening admission or overwrite. A new invocation resolves currentState on the inner pointer then stored in the captured wrapper; an overwrite or additional transition changes the retry's starting conditions.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 298,
+            "fragment": "\tstate, generation := cb.currentState(now)"
+          }
+        },
+        {
+          "id": "F20",
+          "status": "qualified",
+          "rationale": "Lock identity is the inner CircuitBreaker. A shallow copy of a TwoStep wrapper that still points to the locked breaker re-enters that same mutex through State, Counts, or Allow. An independent inner receiver uses a different mutex. Execute applies to a CircuitBreaker receiver. IsSuccessful is evaluated outside afterRequest's lock.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 294,
+            "fragment": "\tcb.mutex.Lock()"
+          }
+        },
+        {
+          "id": "F22",
+          "status": "qualified",
+          "rationale": "The mismatched target stayed open in the preserved test because its open deadline was kept unexpired. The comparison guards outcome dispatch, after currentState on the replacement. An elapsed replacement deadline can advance the replacement and notify before the result is discarded. The test's overwrite changes the original wrapper value; a caller-local pointer rebind or independent value-copy overwrite leaves that wrapper intact.",
+          "citation": {
+            "file": "gobreaker.go",
+            "line": 298,
+            "fragment": "\tstate, generation := cb.currentState(now)"
+          }
+        }
+      ],
+      "test_bindings": [
+        {
+          "id": "N01",
+          "test": "TestIdentityWrapperCopyAndLocalRebinding",
+          "scope": "Admit through the original wrapper, overwrite an independent copy and rebind the local pointer, then show success on the original and no count on the other breaker. A new Allow through a fresh copy increments the original's admission count."
+        },
+        {
+          "id": "N02",
+          "test": "TestIdentityOverwriteDuringAdmissionAndRestore",
+          "scope": "During A's expired-open admission notification, overwrite W with B. A gains the only admission, B closes on redirected success with zero admissions, A remains full, and restoring W lets the same callback close A."
+        },
+        {
+          "id": "N03",
+          "test": "TestIdentityReplacementExpiryBeforeMismatch",
+          "scope": "Overwrite the admitting wrapper with an already-open expired target and use Counts before done(false). The target's named half-open notification happens before the stale result is discarded, and A stays pending."
+        },
+        {
+          "id": "N04",
+          "test": "TestIdentityExecuteBoundReceiver",
+          "scope": "Bind Execute on A. Rebind the caller pointer before the normal invocation or from the panicking request. Verify original result or panic, A-only accounting and hook calls, and untouched B."
+        },
+        {
+          "id": "N05",
+          "test": "TestIdentityStoredSettingsFunction",
+          "scope": "Reassign Settings.IsSuccessful after construction, then mutate the flag visible to the stored closure in the request. Verify original classification, success counters and unchanged request error."
+        },
+        {
+          "id": "N06",
+          "test": "TestIdentityZeroWrapperAndRestore",
+          "scope": "Overwrite the captured wrapper with its zero value after admission. Recover from the callback panic, confirm A is untouched by the report, restore the wrapper and observe A record the success."
+        },
+        {
+          "id": "N07",
+          "test": "TestIdentityReportingHookOverwriteAndRetry",
+          "scope": "A's failure hook overwrites W and panics. Public Counts on A returns with the original partial charge, B remains untouched until a manual retry, and the retry calls B's hook and charges B without an admission."
+        },
+        {
+          "id": "F15",
+          "test": "TestIdentityReportingHookOverwriteAndRetry",
+          "scope": "Extends the preserved same-target retry with an overwrite from A's panicking hook. A's charge survives and its mutex is released; a manual retry charges B instead."
+        },
+        {
+          "id": "F22",
+          "test": "TestIdentityReplacementExpiryBeforeMismatch",
+          "scope": "Extends the unexpired mismatch control to an expired target. Rejected accounting still permits B's half-open transition and notification."
+        },
+        {
+          "id": "F22",
+          "test": "TestIdentityWrapperCopyAndLocalRebinding",
+          "scope": "A separate wrapper copy and caller-local pointer can be changed with W untouched. A retained completion still credits A, the inner breaker held by W."
+        },
+        {
+          "id": "F22",
+          "test": "TestIdentityOverwriteDuringAdmissionAndRestore",
+          "scope": "Extends replacement to the admission hook, then shows redirected success on B and restoration to A through the same retained callback."
+        }
+      ]
+    }
+  },
+  "transfer-generic": {
+    "settings": {
+      "component": "transfer",
+      "variant": "generic",
+      "pack": "f76591e06757a4520f49871e092c6e702861887c",
+      "source_sha": "5a83872007cb21d0be1cd53429c6b7a481b451ca",
+      "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1",
+      "baseline_sha256": "a4bbe8565781c2e142520b0d1432c724da3c96dd2a51076aaa9437d6e400f9df",
+      "immutable_sha256": "1d8e173141526eb8d3eb80bd7cc6b88b6d5b35cd4b18d5f75338c7e209bfc348",
+      "prompt_sha256": "24c724dca7523eea56f3852f0436e121ac77fc701c23b7f03ad2aa723b0195e3",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "output": "selective",
+      "timeout": 900
+    },
+    "cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 8.88876,
+      "reported_codex_usd_estimate": 0.3555504,
+      "settled_routing_usd": 0.00215,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.3577004,
+      "total_usd_estimate": 0.3577004,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "result": {
+      "elapsed_seconds": 293.383,
+      "tool_calls": 65
+    },
+    "controller_complete": true,
+    "probe_gate": true,
+    "bounded_acceptance": true,
+    "structure_gate": {
+      "exit": 0,
+      "stdout": "analysis/initial.json: 74 structurally valid findings; semantics not graded\nanalysis/final.json: 78 structurally valid findings; semantics not graded\n",
+      "stderr": ""
+    },
+    "source_unchanged": true,
+    "validator_sha256": "9bfc55146e42e3abc2c4c621e62ce443f32a7ed1ee98cc826de621904aa9ca6d",
+    "tool_calls": 65,
+    "commands": 32,
+    "log_rereads": 33,
+    "nonzero_commands": [],
+    "mcp_errors": [],
+    "report_edits": {
+      "initial": 74,
+      "final": 78,
+      "added": [
+        "N01",
+        "N02",
+        "N03",
+        "N04"
+      ],
+      "removed": [],
+      "changed_fields": {}
+    },
+    "model_review": {
+      "draft-verify.json": {
+        "keys": [
+          "source",
+          "source_sha256",
+          "draft",
+          "verification",
+          "claims",
+          "questions",
+          "review_required"
+        ],
+        "counts": {},
+        "draft_judgments": {
+          "supported": 17
+        },
+        "questions": 11,
+        "claims": 17
+      },
+      "final-jev.json": {
+        "keys": [
+          "model",
+          "source_sha256",
+          "input_tokens",
+          "cost_microdollars",
+          "reservation_microdollars",
+          "checks"
+        ],
+        "counts": {
+          "supported": 10,
+          "unclear": 3
+        },
+        "draft_judgments": {},
+        "questions": 0,
+        "claims": 0
+      }
+    },
+    "probe_runs": [
+      {
+        "file": "logs/026.stdout",
+        "exit": 0,
+        "started": {
+          "TestIdentityBaseline": 3,
+          "TestIdentityBaseline/A": 3,
+          "TestIdentityBaseline/B": 3,
+          "TestIdentityBaseline/C": 3,
+          "TestIdentityBaseline/D": 3,
+          "TestIdentityBaseline/E": 3,
+          "TestIdentityBaseline/F": 3,
+          "TestIdentitySameEpochReplacement": 3,
+          "TestIdentitySameEpochReplacement/A": 3,
+          "TestIdentitySameEpochReplacement/B": 3,
+          "TestIdentitySameEpochReplacement/C": 3,
+          "TestIdentitySameEpochReplacement/D": 3,
+          "TestIdentitySameEpochReplacement/E": 3,
+          "TestIdentitySameEpochReplacement/F": 3,
+          "TestIdentityDifferentEpochReplacement": 3,
+          "TestIdentityDifferentEpochReplacement/A": 3,
+          "TestIdentityDifferentEpochReplacement/B": 3,
+          "TestIdentityDifferentEpochReplacement/C": 3,
+          "TestIdentityDifferentEpochReplacement/D": 3,
+          "TestIdentityDifferentEpochReplacement/E": 3,
+          "TestIdentityDifferentEpochReplacement/F": 3,
+          "TestIdentityEpochChange": 3,
+          "TestIdentityEpochChange/A": 3,
+          "TestIdentityEpochChange/B": 3,
+          "TestIdentityEpochChange/C": 3,
+          "TestIdentityEpochChange/D": 3,
+          "TestIdentityEpochChange/E": 3,
+          "TestIdentityEpochChange/F": 3,
+          "TestIdentityCompletionBeforeBoundary": 3,
+          "TestIdentityCompletionBeforeBoundary/A": 3,
+          "TestIdentityCompletionBeforeBoundary/B": 3,
+          "TestIdentityCompletionBeforeBoundary/C": 3,
+          "TestIdentityCompletionBeforeBoundary/D": 3,
+          "TestIdentityCompletionBeforeBoundary/E": 3,
+          "TestIdentityCompletionBeforeBoundary/F": 3,
+          "TestIdentityDetachedPort": 3,
+          "TestIdentityDetachedPort/A": 3,
+          "TestIdentityDetachedPort/B": 3,
+          "TestIdentityDetachedPort/C": 3,
+          "TestIdentityDetachedPort/E": 3,
+          "TestIdentityDetachedPort/F": 3,
+          "TestIdentityRegistryAbsent": 3,
+          "TestIdentityRegistryAbsent/no_later_input": 3,
+          "TestIdentityRegistryAbsent/later_matching_key": 3,
+          "TestIdentityRegistryNilEntry": 3,
+          "TestIdentityRegistryNilEntry/no_later_input": 3,
+          "TestIdentityRegistryNilEntry/later_matching_key": 3,
+          "TestIdentityRegistryNilMap": 3,
+          "TestIdentityRegistryNilMap/no_later_input": 3,
+          "TestIdentityRegistryNilMap/later_matching_key": 3,
+          "TestIdentityRegistryMapReplacement": 3,
+          "TestIdentityEpochRestoration": 3,
+          "TestIdentityEpochRestoration/A": 3,
+          "TestIdentityEpochRestoration/C": 3,
+          "TestIdentityTargetRestoration": 3,
+          "TestIdentityTargetRestoration/A": 3,
+          "TestIdentityTargetRestoration/C": 3,
+          "TestIdentityAbandonedAndRepeated": 3,
+          "TestIdentityAbandonedAndRepeated/A": 3,
+          "TestIdentityAbandonedAndRepeated/B": 3,
+          "TestIdentityAbandonedAndRepeated/C": 3,
+          "TestIdentityAbandonedAndRepeated/D": 3,
+          "TestIdentityAbandonedAndRepeated/E": 3,
+          "TestIdentityAbandonedAndRepeated/F": 3,
+          "TestIdentityOverlappingAdmissions": 3,
+          "TestIdentityOverlappingAdmissions/A": 3,
+          "TestIdentityOverlappingAdmissions/B": 3,
+          "TestIdentityOverlappingAdmissions/C": 3,
+          "TestIdentityOverlappingAdmissions/D": 3,
+          "TestIdentityOverlappingAdmissions/E": 3,
+          "TestIdentityOverlappingAdmissions/F": 3,
+          "TestIdentityInvalidAdmission": 3,
+          "TestIdentityInvalidAdmission/A": 3,
+          "TestIdentityInvalidAdmission/B": 3,
+          "TestIdentityInvalidAdmission/C": 3,
+          "TestIdentityInvalidAdmission/D": 3,
+          "TestIdentityInvalidAdmission/D/missing": 3,
+          "TestIdentityInvalidAdmission/D/nil_entry": 3,
+          "TestIdentityInvalidAdmission/D/nil_map": 3,
+          "TestIdentityInvalidAdmission/E": 3,
+          "TestIdentityInvalidAdmission/F": 3,
+          "TestIdentityValueCopy": 3,
+          "TestIdentityCapturedObjectAfterReset": 3,
+          "TestIdentityCallerDeparture": 3,
+          "TestIdentityCallerDeparture/A": 3,
+          "TestIdentityCallerDeparture/A/no_later_input": 3,
+          "TestIdentityCallerDeparture/A/later_completion": 3,
+          "TestIdentityCallerDeparture/B": 3,
+          "TestIdentityCallerDeparture/B/no_later_input": 3,
+          "TestIdentityCallerDeparture/B/later_completion": 3,
+          "TestIdentityCallerDeparture/C": 3,
+          "TestIdentityCallerDeparture/C/no_later_input": 3,
+          "TestIdentityCallerDeparture/C/later_completion": 3,
+          "TestIdentityCallerDeparture/D": 3,
+          "TestIdentityCallerDeparture/D/no_later_input": 3,
+          "TestIdentityCallerDeparture/D/later_completion": 3,
+          "TestIdentityCallerDeparture/E": 3,
+          "TestIdentityCallerDeparture/E/no_later_input": 3,
+          "TestIdentityCallerDeparture/E/later_completion": 3,
+          "TestIdentityCallerDeparture/F": 3,
+          "TestIdentityCallerDeparture/F/no_later_input": 3,
+          "TestIdentityCallerDeparture/F/later_completion": 3,
+          "TestIdentityMatchingAfterMismatch": 3,
+          "TestIdentityMatchingAfterMismatch/A": 3,
+          "TestIdentityMatchingAfterMismatch/C": 3,
+          "TestIdentityCallerVariableRebinding": 3,
+          "TestIdentityRegistryOtherKeyAlias": 3
+        },
+        "passed": {
+          "TestIdentityBaseline/A": 3,
+          "TestIdentityBaseline/B": 3,
+          "TestIdentityBaseline/C": 3,
+          "TestIdentityBaseline/D": 3,
+          "TestIdentityBaseline/E": 3,
+          "TestIdentityBaseline/F": 3,
+          "TestIdentityBaseline": 3,
+          "TestIdentitySameEpochReplacement/A": 3,
+          "TestIdentitySameEpochReplacement/B": 3,
+          "TestIdentitySameEpochReplacement/C": 3,
+          "TestIdentitySameEpochReplacement/D": 3,
+          "TestIdentitySameEpochReplacement/E": 3,
+          "TestIdentitySameEpochReplacement/F": 3,
+          "TestIdentitySameEpochReplacement": 3,
+          "TestIdentityDifferentEpochReplacement/A": 3,
+          "TestIdentityDifferentEpochReplacement/B": 3,
+          "TestIdentityDifferentEpochReplacement/C": 3,
+          "TestIdentityDifferentEpochReplacement/D": 3,
+          "TestIdentityDifferentEpochReplacement/E": 3,
+          "TestIdentityDifferentEpochReplacement/F": 3,
+          "TestIdentityDifferentEpochReplacement": 3,
+          "TestIdentityEpochChange/A": 3,
+          "TestIdentityEpochChange/B": 3,
+          "TestIdentityEpochChange/C": 3,
+          "TestIdentityEpochChange/D": 3,
+          "TestIdentityEpochChange/E": 3,
+          "TestIdentityEpochChange/F": 3,
+          "TestIdentityEpochChange": 3,
+          "TestIdentityCompletionBeforeBoundary/A": 3,
+          "TestIdentityCompletionBeforeBoundary/B": 3,
+          "TestIdentityCompletionBeforeBoundary/C": 3,
+          "TestIdentityCompletionBeforeBoundary/D": 3,
+          "TestIdentityCompletionBeforeBoundary/E": 3,
+          "TestIdentityCompletionBeforeBoundary/F": 3,
+          "TestIdentityCompletionBeforeBoundary": 3,
+          "TestIdentityDetachedPort/A": 3,
+          "TestIdentityDetachedPort/B": 3,
+          "TestIdentityDetachedPort/C": 3,
+          "TestIdentityDetachedPort/E": 3,
+          "TestIdentityDetachedPort/F": 3,
+          "TestIdentityDetachedPort": 3,
+          "TestIdentityRegistryAbsent/no_later_input": 3,
+          "TestIdentityRegistryAbsent/later_matching_key": 3,
+          "TestIdentityRegistryAbsent": 3,
+          "TestIdentityRegistryNilEntry/no_later_input": 3,
+          "TestIdentityRegistryNilEntry/later_matching_key": 3,
+          "TestIdentityRegistryNilEntry": 3,
+          "TestIdentityRegistryNilMap/no_later_input": 3,
+          "TestIdentityRegistryNilMap/later_matching_key": 3,
+          "TestIdentityRegistryNilMap": 3,
+          "TestIdentityRegistryMapReplacement": 3,
+          "TestIdentityEpochRestoration/A": 3,
+          "TestIdentityEpochRestoration/C": 3,
+          "TestIdentityEpochRestoration": 3,
+          "TestIdentityTargetRestoration/A": 3,
+          "TestIdentityTargetRestoration/C": 3,
+          "TestIdentityTargetRestoration": 3,
+          "TestIdentityAbandonedAndRepeated/A": 3,
+          "TestIdentityAbandonedAndRepeated/B": 3,
+          "TestIdentityAbandonedAndRepeated/C": 3,
+          "TestIdentityAbandonedAndRepeated/D": 3,
+          "TestIdentityAbandonedAndRepeated/E": 3,
+          "TestIdentityAbandonedAndRepeated/F": 3,
+          "TestIdentityAbandonedAndRepeated": 3,
+          "TestIdentityOverlappingAdmissions/A": 3,
+          "TestIdentityOverlappingAdmissions/B": 3,
+          "TestIdentityOverlappingAdmissions/C": 3,
+          "TestIdentityOverlappingAdmissions/D": 3,
+          "TestIdentityOverlappingAdmissions/E": 3,
+          "TestIdentityOverlappingAdmissions/F": 3,
+          "TestIdentityOverlappingAdmissions": 3,
+          "TestIdentityInvalidAdmission/A": 3,
+          "TestIdentityInvalidAdmission/B": 3,
+          "TestIdentityInvalidAdmission/C": 3,
+          "TestIdentityInvalidAdmission/D/missing": 3,
+          "TestIdentityInvalidAdmission/D/nil_entry": 3,
+          "TestIdentityInvalidAdmission/D/nil_map": 3,
+          "TestIdentityInvalidAdmission/D": 3,
+          "TestIdentityInvalidAdmission/E": 3,
+          "TestIdentityInvalidAdmission/F": 3,
+          "TestIdentityInvalidAdmission": 3,
+          "TestIdentityValueCopy": 3,
+          "TestIdentityCapturedObjectAfterReset": 3,
+          "TestIdentityCallerDeparture/A/no_later_input": 3,
+          "TestIdentityCallerDeparture/A/later_completion": 3,
+          "TestIdentityCallerDeparture/A": 3,
+          "TestIdentityCallerDeparture/B/no_later_input": 3,
+          "TestIdentityCallerDeparture/B/later_completion": 3,
+          "TestIdentityCallerDeparture/B": 3,
+          "TestIdentityCallerDeparture/C/no_later_input": 3,
+          "TestIdentityCallerDeparture/C/later_completion": 3,
+          "TestIdentityCallerDeparture/C": 3,
+          "TestIdentityCallerDeparture/D/no_later_input": 3,
+          "TestIdentityCallerDeparture/D/later_completion": 3,
+          "TestIdentityCallerDeparture/D": 3,
+          "TestIdentityCallerDeparture/E/no_later_input": 3,
+          "TestIdentityCallerDeparture/E/later_completion": 3,
+          "TestIdentityCallerDeparture/E": 3,
+          "TestIdentityCallerDeparture/F/no_later_input": 3,
+          "TestIdentityCallerDeparture/F/later_completion": 3,
+          "TestIdentityCallerDeparture/F": 3,
+          "TestIdentityCallerDeparture": 3,
+          "TestIdentityMatchingAfterMismatch/A": 3,
+          "TestIdentityMatchingAfterMismatch/C": 3,
+          "TestIdentityMatchingAfterMismatch": 3,
+          "TestIdentityCallerVariableRebinding": 3,
+          "TestIdentityRegistryOtherKeyAlias": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "passing_three_repetitions": true
+      }
+    ],
+    "postreview_validation": {
+      "exit": 0,
+      "stdout": "PRESERVATION CHECK: {\"added\": 4, \"qualified\": 42, \"retained\": 74, \"test_bindings\": 2}\n",
+      "stderr": ""
+    },
+    "preservation": {
+      "retained": 74,
+      "added": 4,
+      "qualified": 42,
+      "test_bindings": 2
+    },
+    "baseline_cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 12.55074,
+      "reported_codex_usd_estimate": 0.5020296,
+      "settled_routing_usd": 0.002671,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.5047006,
+      "total_usd_estimate": 0.5047006,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "strategy_total_usd_estimate": 0.862401,
+    "new_findings": [
+      {
+        "id": "N01",
+        "initial": "Two distinct Port objects each point to a distinct account with zero counters. The original account has Epoch=7 and the incoming account has Epoch=8. A caller-local *Port variable and a separate alias point to the original Port.",
+        "steps": [
+          "Call F with the caller variable and retain the returned callback.",
+          "Reassign only the caller variable to the incoming Port. Inspect both Port targets, account epochs, and account counters.",
+          "Invoke the saved callback once and inspect the same fields again."
+        ],
+        "outcome": "Before delivery, the original account has one request and zero successes, and the incoming account has zero requests and zero successes. After delivery the original has one request and one success and the incoming account still has zero counters. Both Port targets and both account epochs retain their prior values. F saves the admitted account pointer at component.go:31 and uses it for the increment at line 33.",
+        "citation": {
+          "file": "component.go",
+          "line": 33,
+          "fragment": " return func() { target.Successes++ }"
+        },
+        "test": "TestIdentityCallerVariableRebinding",
+        "question": "Should a completion held across a caller-local Port switch still credit the admitted account when the original Port and its Target have stayed in place?"
+      },
+      {
+        "id": "N02",
+        "initial": "A non-nil Registry has two different keys, work and other, both pointing to the same account with zero counters.",
+        "steps": [
+          "Admit via D using work and keep the callback.",
+          "Delete work while leaving other bound to the admitted account, then invoke the callback.",
+          "Reinsert the same account at work and inspect its counters before another invocation.",
+          "Invoke the same callback again."
+        ],
+        "outcome": "Admission records one request. The first invocation returns normally without incrementing Successes even though other still aliases the account. Reinsertion alone leaves it at one request and zero successes. The later invocation increments Successes to one and leaves Requests at one.",
+        "citation": {
+          "file": "component.go",
+          "line": 24,
+          "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+        },
+        "test": "TestIdentityRegistryOtherKeyAlias",
+        "question": "Should a surviving alias under a different key make a D completion eligible while the admission key is absent, and should restoring the same account under the admission key allow a later invocation after the skip?"
+      },
+      {
+        "id": "N03",
+        "initial": "The caller has a nil *Port value.",
+        "steps": [
+          "Call F with that nil pointer."
+        ],
+        "outcome": "Admission panics evaluating p.Target before incrementing any request or returning a callback. F64 covers a non-nil Port whose Target is nil, which reaches the next source line before panicking.",
+        "citation": {
+          "file": "component.go",
+          "line": 31,
+          "fragment": " target := p.Target"
+        },
+        "test": "untested",
+        "question": "Should the F admission contract treat a nil Port argument and a valid Port with a nil Target alike?"
+      },
+      {
+        "id": "N04",
+        "initial": "The caller has a nil *Registry receiver and a string key.",
+        "steps": [
+          "Call D on that nil receiver with the key."
+        ],
+        "outcome": "Admission panics evaluating r.Entries before looking up the key, incrementing a request, or returning a callback. F62 covers entry unavailability on a non-nil Registry.",
+        "citation": {
+          "file": "component.go",
+          "line": 23,
+          "fragment": " r.Entries[key].Requests++"
+        },
+        "test": "untested",
+        "question": "Should the D admission contract distinguish an absent Registry from unavailable entries in an existing Registry?"
+      }
+    ],
+    "supplement": {
+      "qualifications": [
+        {
+          "id": "F07",
+          "status": "qualified",
+          "rationale": "For A, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F08",
+          "status": "qualified",
+          "rationale": "For B, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F09",
+          "status": "qualified",
+          "rationale": "For C, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F10",
+          "status": "qualified",
+          "rationale": "For D, the tested replacement changes the admission key in Entries on the same Registry. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 24,
+            "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F11",
+          "status": "qualified",
+          "rationale": "For E, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F12",
+          "status": "qualified",
+          "rationale": "For F, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F13",
+          "status": "qualified",
+          "rationale": "For A, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F14",
+          "status": "qualified",
+          "rationale": "For B, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F15",
+          "status": "qualified",
+          "rationale": "For C, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F16",
+          "status": "qualified",
+          "rationale": "For D, the tested replacement changes the admission key in Entries on the same Registry. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 24,
+            "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F17",
+          "status": "qualified",
+          "rationale": "For E, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F18",
+          "status": "qualified",
+          "rationale": "For F, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F32",
+          "status": "qualified",
+          "rationale": "The detached invocation for this operation uses the direct call in identity_test.go:151. The cited panic assertion at line 149 applies to A alone. Lines 153, 155 and 157 cover the counter observations.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F33",
+          "status": "qualified",
+          "rationale": "The detached invocation for this operation uses the direct call in identity_test.go:151. The cited panic assertion at line 149 applies to A alone. Lines 153, 155 and 157 cover the counter observations.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F34",
+          "status": "qualified",
+          "rationale": "The detached invocation for this operation uses the direct call in identity_test.go:151. The cited panic assertion at line 149 applies to A alone. Lines 153, 155 and 157 cover the counter observations.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F35",
+          "status": "qualified",
+          "rationale": "The detached invocation for this operation uses the direct call in identity_test.go:151. The cited panic assertion at line 149 applies to A alone. Lines 153, 155 and 157 cover the counter observations.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F47",
+          "status": "qualified",
+          "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F48",
+          "status": "qualified",
+          "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F49",
+          "status": "qualified",
+          "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F50",
+          "status": "qualified",
+          "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+          "citation": {
+            "file": "component.go",
+            "line": 24,
+            "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F51",
+          "status": "qualified",
+          "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F52",
+          "status": "qualified",
+          "rationale": "The first result is discarded at the first admission and counters are checked before the second admission. Only the second result is retained and called twice. The test observes no rollback within that exact schedule.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F53",
+          "status": "qualified",
+          "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F54",
+          "status": "qualified",
+          "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F55",
+          "status": "qualified",
+          "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F56",
+          "status": "qualified",
+          "rationale": "Both admissions use the same Registry and key, with replacement of the admission key in Entries on the same Registry between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+          "citation": {
+            "file": "component.go",
+            "line": 24,
+            "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F57",
+          "status": "qualified",
+          "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F58",
+          "status": "qualified",
+          "rationale": "Both admissions use the same Port, with replacement of Target on the same Port used for admission between them. The stated absolute totals use a replacement with zero initial counters. The probe uses serialized delivery, newer before older.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F59",
+          "status": "qualified",
+          "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302\u2013303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+          "citation": {
+            "file": "component.go",
+            "line": 8,
+            "fragment": " p.Target.Requests++"
+          }
+        },
+        {
+          "id": "F60",
+          "status": "qualified",
+          "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302\u2013303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+          "citation": {
+            "file": "component.go",
+            "line": 14,
+            "fragment": " target.Requests++"
+          }
+        },
+        {
+          "id": "F61",
+          "status": "qualified",
+          "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302\u2013303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+          "citation": {
+            "file": "component.go",
+            "line": 18,
+            "fragment": " target, epoch := p.Target, p.Target.Epoch"
+          }
+        },
+        {
+          "id": "F62",
+          "status": "qualified",
+          "rationale": "The probe uses a non-nil Registry with a missing key, nil entry, or nil map at identity_test.go:287\u2013299. The cited line 303 is the Port branch. The helper checks for a panic, while the exact panic site follows from source.",
+          "citation": {
+            "file": "component.go",
+            "line": 23,
+            "fragment": " r.Entries[key].Requests++"
+          }
+        },
+        {
+          "id": "F63",
+          "status": "qualified",
+          "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302\u2013303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+          "citation": {
+            "file": "component.go",
+            "line": 27,
+            "fragment": " p.Target.Requests++"
+          }
+        },
+        {
+          "id": "F64",
+          "status": "qualified",
+          "rationale": "The probe uses a non-nil Port with a nil Target and exercises identity_test.go:302\u2013303. Line 298 is for D. The helper checks for a panic, while the exact panic site follows from source.",
+          "citation": {
+            "file": "component.go",
+            "line": 32,
+            "fragment": " target.Requests++"
+          }
+        },
+        {
+          "id": "F66",
+          "status": "qualified",
+          "rationale": "The probe sets Requests to zero and writes Successes directly to 10. Successes was already zero following admission. The test has no intermediate assignment of zero to Successes and covers B specifically.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F67",
+          "status": "qualified",
+          "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F68",
+          "status": "qualified",
+          "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F69",
+          "status": "qualified",
+          "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F70",
+          "status": "qualified",
+          "rationale": "The test changes the admission key in Entries on the same Registry and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+          "citation": {
+            "file": "component.go",
+            "line": 24,
+            "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F71",
+          "status": "qualified",
+          "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F72",
+          "status": "qualified",
+          "rationale": "The test changes Target on the same Port used for admission and compares omitting the call with explicitly calling the retained callback. Caller departure is represented by that choice in the same test flow. The fixture exposes no wait, cancellation, or executor action to observe here.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F73",
+          "status": "qualified",
+          "rationale": "The exact counter values in TestIdentityMatchingAfterMismatch/A start from zero counters on both accounts. The source gives a delta of one request on the original and, only on the matching invocation, one success on the replacement.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        }
+      ],
+      "test_bindings": [
+        {
+          "id": "N01",
+          "test": "TestIdentityCallerVariableRebinding",
+          "scope": "After F admits using a local *Port, reassigning only that local to a distinct Port leaves the original alias pointing to a Port with its original Target. Before one explicit delivery the original has (1 request, 0 successes) and the replacement (0, 0). After delivery those are (1, 1) and (0, 0), with both Target fields and epochs stable across the observations."
+        },
+        {
+          "id": "N02",
+          "test": "TestIdentityRegistryOtherKeyAlias",
+          "scope": "After D admits work, delete work while other continues to alias the admitted account, then invoke once for zero success. Restore the account at work, see zero success before delivery, and invoke the same callback again for one success with Requests still one."
+        }
+      ]
+    }
+  },
+  "transfer-identity": {
+    "settings": {
+      "component": "transfer",
+      "variant": "identity",
+      "pack": "f76591e06757a4520f49871e092c6e702861887c",
+      "source_sha": "5a83872007cb21d0be1cd53429c6b7a481b451ca",
+      "source_sha256": "ba84f0c6f80d488371cba44f100c10906a937423f754d5db24053ce52e13c4e1",
+      "baseline_sha256": "a4bbe8565781c2e142520b0d1432c724da3c96dd2a51076aaa9437d6e400f9df",
+      "immutable_sha256": "1d8e173141526eb8d3eb80bd7cc6b88b6d5b35cd4b18d5f75338c7e209bfc348",
+      "prompt_sha256": "31e401d727e88705044cf9953a652295b2d16960774f4430cf965ce0d7150520",
+      "model": "gpt-6.1-sol",
+      "effort": "medium",
+      "output": "selective",
+      "timeout": 900
+    },
+    "cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 9.02836,
+      "reported_codex_usd_estimate": 0.36113439999999997,
+      "settled_routing_usd": 0.002414,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.3635484,
+      "total_usd_estimate": 0.3635484,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "result": {
+      "elapsed_seconds": 344.612,
+      "tool_calls": 63
+    },
+    "controller_complete": true,
+    "probe_gate": true,
+    "bounded_acceptance": true,
+    "structure_gate": {
+      "exit": 0,
+      "stdout": "analysis/initial.json: 74 structurally valid findings; semantics not graded\nanalysis/final.json: 79 structurally valid findings; semantics not graded\n",
+      "stderr": ""
+    },
+    "source_unchanged": true,
+    "validator_sha256": "9bfc55146e42e3abc2c4c621e62ce443f32a7ed1ee98cc826de621904aa9ca6d",
+    "tool_calls": 63,
+    "commands": 31,
+    "log_rereads": 32,
+    "nonzero_commands": [],
+    "mcp_errors": [],
+    "report_edits": {
+      "initial": 74,
+      "final": 79,
+      "added": [
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05"
+      ],
+      "removed": [],
+      "changed_fields": {}
+    },
+    "model_review": {
+      "draft-verify.json": {
+        "keys": [
+          "source",
+          "source_sha256",
+          "draft",
+          "verification",
+          "claims",
+          "questions",
+          "review_required"
+        ],
+        "counts": {},
+        "draft_judgments": {
+          "supported": 19,
+          "unclear": 1
+        },
+        "questions": 11,
+        "claims": 20
+      },
+      "final-jev.json": {
+        "keys": [
+          "model",
+          "source_sha256",
+          "input_tokens",
+          "cost_microdollars",
+          "reservation_microdollars",
+          "checks"
+        ],
+        "counts": {
+          "supported": 12,
+          "contradicted": 1,
+          "unclear": 3
+        },
+        "draft_judgments": {},
+        "questions": 0,
+        "claims": 0
+      }
+    },
+    "probe_runs": [
+      {
+        "file": "logs/026.stdout",
+        "exit": 0,
+        "started": {
+          "TestIdentityBaseline": 3,
+          "TestIdentityBaseline/A": 3,
+          "TestIdentityBaseline/B": 3,
+          "TestIdentityBaseline/C": 3,
+          "TestIdentityBaseline/D": 3,
+          "TestIdentityBaseline/E": 3,
+          "TestIdentityBaseline/F": 3,
+          "TestIdentitySameEpochReplacement": 3,
+          "TestIdentitySameEpochReplacement/A": 3,
+          "TestIdentitySameEpochReplacement/B": 3,
+          "TestIdentitySameEpochReplacement/C": 3,
+          "TestIdentitySameEpochReplacement/D": 3,
+          "TestIdentitySameEpochReplacement/E": 3,
+          "TestIdentitySameEpochReplacement/F": 3,
+          "TestIdentityDifferentEpochReplacement": 3,
+          "TestIdentityDifferentEpochReplacement/A": 3,
+          "TestIdentityDifferentEpochReplacement/B": 3,
+          "TestIdentityDifferentEpochReplacement/C": 3,
+          "TestIdentityDifferentEpochReplacement/D": 3,
+          "TestIdentityDifferentEpochReplacement/E": 3,
+          "TestIdentityDifferentEpochReplacement/F": 3,
+          "TestIdentityEpochChange": 3,
+          "TestIdentityEpochChange/A": 3,
+          "TestIdentityEpochChange/B": 3,
+          "TestIdentityEpochChange/C": 3,
+          "TestIdentityEpochChange/D": 3,
+          "TestIdentityEpochChange/E": 3,
+          "TestIdentityEpochChange/F": 3,
+          "TestIdentityCompletionBeforeBoundary": 3,
+          "TestIdentityCompletionBeforeBoundary/A": 3,
+          "TestIdentityCompletionBeforeBoundary/B": 3,
+          "TestIdentityCompletionBeforeBoundary/C": 3,
+          "TestIdentityCompletionBeforeBoundary/D": 3,
+          "TestIdentityCompletionBeforeBoundary/E": 3,
+          "TestIdentityCompletionBeforeBoundary/F": 3,
+          "TestIdentityDetachedPort": 3,
+          "TestIdentityDetachedPort/A": 3,
+          "TestIdentityDetachedPort/B": 3,
+          "TestIdentityDetachedPort/C": 3,
+          "TestIdentityDetachedPort/E": 3,
+          "TestIdentityDetachedPort/F": 3,
+          "TestIdentityRegistryAbsent": 3,
+          "TestIdentityRegistryAbsent/no_later_input": 3,
+          "TestIdentityRegistryAbsent/later_matching_key": 3,
+          "TestIdentityRegistryNilEntry": 3,
+          "TestIdentityRegistryNilEntry/no_later_input": 3,
+          "TestIdentityRegistryNilEntry/later_matching_key": 3,
+          "TestIdentityRegistryNilMap": 3,
+          "TestIdentityRegistryNilMap/no_later_input": 3,
+          "TestIdentityRegistryNilMap/later_matching_key": 3,
+          "TestIdentityRegistryMapReplacement": 3,
+          "TestIdentityEpochRestoration": 3,
+          "TestIdentityEpochRestoration/A": 3,
+          "TestIdentityEpochRestoration/C": 3,
+          "TestIdentityTargetRestoration": 3,
+          "TestIdentityTargetRestoration/A": 3,
+          "TestIdentityTargetRestoration/C": 3,
+          "TestIdentityAbandonedAndRepeated": 3,
+          "TestIdentityAbandonedAndRepeated/A": 3,
+          "TestIdentityAbandonedAndRepeated/B": 3,
+          "TestIdentityAbandonedAndRepeated/C": 3,
+          "TestIdentityAbandonedAndRepeated/D": 3,
+          "TestIdentityAbandonedAndRepeated/E": 3,
+          "TestIdentityAbandonedAndRepeated/F": 3,
+          "TestIdentityOverlappingAdmissions": 3,
+          "TestIdentityOverlappingAdmissions/A": 3,
+          "TestIdentityOverlappingAdmissions/B": 3,
+          "TestIdentityOverlappingAdmissions/C": 3,
+          "TestIdentityOverlappingAdmissions/D": 3,
+          "TestIdentityOverlappingAdmissions/E": 3,
+          "TestIdentityOverlappingAdmissions/F": 3,
+          "TestIdentityInvalidAdmission": 3,
+          "TestIdentityInvalidAdmission/A": 3,
+          "TestIdentityInvalidAdmission/B": 3,
+          "TestIdentityInvalidAdmission/C": 3,
+          "TestIdentityInvalidAdmission/D": 3,
+          "TestIdentityInvalidAdmission/D/missing": 3,
+          "TestIdentityInvalidAdmission/D/nil_entry": 3,
+          "TestIdentityInvalidAdmission/D/nil_map": 3,
+          "TestIdentityInvalidAdmission/E": 3,
+          "TestIdentityInvalidAdmission/F": 3,
+          "TestIdentityValueCopy": 3,
+          "TestIdentityCapturedObjectAfterReset": 3,
+          "TestIdentityCallerDeparture": 3,
+          "TestIdentityCallerDeparture/A": 3,
+          "TestIdentityCallerDeparture/A/no_later_input": 3,
+          "TestIdentityCallerDeparture/A/later_completion": 3,
+          "TestIdentityCallerDeparture/B": 3,
+          "TestIdentityCallerDeparture/B/no_later_input": 3,
+          "TestIdentityCallerDeparture/B/later_completion": 3,
+          "TestIdentityCallerDeparture/C": 3,
+          "TestIdentityCallerDeparture/C/no_later_input": 3,
+          "TestIdentityCallerDeparture/C/later_completion": 3,
+          "TestIdentityCallerDeparture/D": 3,
+          "TestIdentityCallerDeparture/D/no_later_input": 3,
+          "TestIdentityCallerDeparture/D/later_completion": 3,
+          "TestIdentityCallerDeparture/E": 3,
+          "TestIdentityCallerDeparture/E/no_later_input": 3,
+          "TestIdentityCallerDeparture/E/later_completion": 3,
+          "TestIdentityCallerDeparture/F": 3,
+          "TestIdentityCallerDeparture/F/no_later_input": 3,
+          "TestIdentityCallerDeparture/F/later_completion": 3,
+          "TestIdentityMatchingAfterMismatch": 3,
+          "TestIdentityMatchingAfterMismatch/A": 3,
+          "TestIdentityMatchingAfterMismatch/C": 3,
+          "TestIdentityCallerVariableRebinding": 3,
+          "TestIdentityRetainedPort": 3,
+          "TestIdentityRetainedPort/A": 3,
+          "TestIdentityRetainedPort/C": 3,
+          "TestIdentityRetainedRegistryAndKey": 3,
+          "TestIdentityAccountCopyAndOverwrite": 3
+        },
+        "passed": {
+          "TestIdentityBaseline/A": 3,
+          "TestIdentityBaseline/B": 3,
+          "TestIdentityBaseline/C": 3,
+          "TestIdentityBaseline/D": 3,
+          "TestIdentityBaseline/E": 3,
+          "TestIdentityBaseline/F": 3,
+          "TestIdentityBaseline": 3,
+          "TestIdentitySameEpochReplacement/A": 3,
+          "TestIdentitySameEpochReplacement/B": 3,
+          "TestIdentitySameEpochReplacement/C": 3,
+          "TestIdentitySameEpochReplacement/D": 3,
+          "TestIdentitySameEpochReplacement/E": 3,
+          "TestIdentitySameEpochReplacement/F": 3,
+          "TestIdentitySameEpochReplacement": 3,
+          "TestIdentityDifferentEpochReplacement/A": 3,
+          "TestIdentityDifferentEpochReplacement/B": 3,
+          "TestIdentityDifferentEpochReplacement/C": 3,
+          "TestIdentityDifferentEpochReplacement/D": 3,
+          "TestIdentityDifferentEpochReplacement/E": 3,
+          "TestIdentityDifferentEpochReplacement/F": 3,
+          "TestIdentityDifferentEpochReplacement": 3,
+          "TestIdentityEpochChange/A": 3,
+          "TestIdentityEpochChange/B": 3,
+          "TestIdentityEpochChange/C": 3,
+          "TestIdentityEpochChange/D": 3,
+          "TestIdentityEpochChange/E": 3,
+          "TestIdentityEpochChange/F": 3,
+          "TestIdentityEpochChange": 3,
+          "TestIdentityCompletionBeforeBoundary/A": 3,
+          "TestIdentityCompletionBeforeBoundary/B": 3,
+          "TestIdentityCompletionBeforeBoundary/C": 3,
+          "TestIdentityCompletionBeforeBoundary/D": 3,
+          "TestIdentityCompletionBeforeBoundary/E": 3,
+          "TestIdentityCompletionBeforeBoundary/F": 3,
+          "TestIdentityCompletionBeforeBoundary": 3,
+          "TestIdentityDetachedPort/A": 3,
+          "TestIdentityDetachedPort/B": 3,
+          "TestIdentityDetachedPort/C": 3,
+          "TestIdentityDetachedPort/E": 3,
+          "TestIdentityDetachedPort/F": 3,
+          "TestIdentityDetachedPort": 3,
+          "TestIdentityRegistryAbsent/no_later_input": 3,
+          "TestIdentityRegistryAbsent/later_matching_key": 3,
+          "TestIdentityRegistryAbsent": 3,
+          "TestIdentityRegistryNilEntry/no_later_input": 3,
+          "TestIdentityRegistryNilEntry/later_matching_key": 3,
+          "TestIdentityRegistryNilEntry": 3,
+          "TestIdentityRegistryNilMap/no_later_input": 3,
+          "TestIdentityRegistryNilMap/later_matching_key": 3,
+          "TestIdentityRegistryNilMap": 3,
+          "TestIdentityRegistryMapReplacement": 3,
+          "TestIdentityEpochRestoration/A": 3,
+          "TestIdentityEpochRestoration/C": 3,
+          "TestIdentityEpochRestoration": 3,
+          "TestIdentityTargetRestoration/A": 3,
+          "TestIdentityTargetRestoration/C": 3,
+          "TestIdentityTargetRestoration": 3,
+          "TestIdentityAbandonedAndRepeated/A": 3,
+          "TestIdentityAbandonedAndRepeated/B": 3,
+          "TestIdentityAbandonedAndRepeated/C": 3,
+          "TestIdentityAbandonedAndRepeated/D": 3,
+          "TestIdentityAbandonedAndRepeated/E": 3,
+          "TestIdentityAbandonedAndRepeated/F": 3,
+          "TestIdentityAbandonedAndRepeated": 3,
+          "TestIdentityOverlappingAdmissions/A": 3,
+          "TestIdentityOverlappingAdmissions/B": 3,
+          "TestIdentityOverlappingAdmissions/C": 3,
+          "TestIdentityOverlappingAdmissions/D": 3,
+          "TestIdentityOverlappingAdmissions/E": 3,
+          "TestIdentityOverlappingAdmissions/F": 3,
+          "TestIdentityOverlappingAdmissions": 3,
+          "TestIdentityInvalidAdmission/A": 3,
+          "TestIdentityInvalidAdmission/B": 3,
+          "TestIdentityInvalidAdmission/C": 3,
+          "TestIdentityInvalidAdmission/D/missing": 3,
+          "TestIdentityInvalidAdmission/D/nil_entry": 3,
+          "TestIdentityInvalidAdmission/D/nil_map": 3,
+          "TestIdentityInvalidAdmission/D": 3,
+          "TestIdentityInvalidAdmission/E": 3,
+          "TestIdentityInvalidAdmission/F": 3,
+          "TestIdentityInvalidAdmission": 3,
+          "TestIdentityValueCopy": 3,
+          "TestIdentityCapturedObjectAfterReset": 3,
+          "TestIdentityCallerDeparture/A/no_later_input": 3,
+          "TestIdentityCallerDeparture/A/later_completion": 3,
+          "TestIdentityCallerDeparture/A": 3,
+          "TestIdentityCallerDeparture/B/no_later_input": 3,
+          "TestIdentityCallerDeparture/B/later_completion": 3,
+          "TestIdentityCallerDeparture/B": 3,
+          "TestIdentityCallerDeparture/C/no_later_input": 3,
+          "TestIdentityCallerDeparture/C/later_completion": 3,
+          "TestIdentityCallerDeparture/C": 3,
+          "TestIdentityCallerDeparture/D/no_later_input": 3,
+          "TestIdentityCallerDeparture/D/later_completion": 3,
+          "TestIdentityCallerDeparture/D": 3,
+          "TestIdentityCallerDeparture/E/no_later_input": 3,
+          "TestIdentityCallerDeparture/E/later_completion": 3,
+          "TestIdentityCallerDeparture/E": 3,
+          "TestIdentityCallerDeparture/F/no_later_input": 3,
+          "TestIdentityCallerDeparture/F/later_completion": 3,
+          "TestIdentityCallerDeparture/F": 3,
+          "TestIdentityCallerDeparture": 3,
+          "TestIdentityMatchingAfterMismatch/A": 3,
+          "TestIdentityMatchingAfterMismatch/C": 3,
+          "TestIdentityMatchingAfterMismatch": 3,
+          "TestIdentityCallerVariableRebinding": 3,
+          "TestIdentityRetainedPort/A": 3,
+          "TestIdentityRetainedPort/C": 3,
+          "TestIdentityRetainedPort": 3,
+          "TestIdentityRetainedRegistryAndKey": 3,
+          "TestIdentityAccountCopyAndOverwrite": 3
+        },
+        "failed": {},
+        "skipped": [],
+        "passing_three_repetitions": true
+      }
+    ],
+    "postreview_validation": {
+      "exit": 0,
+      "stdout": "PRESERVATION CHECK: {\"added\": 5, \"qualified\": 28, \"retained\": 74, \"test_bindings\": 5}\n",
+      "stderr": ""
+    },
+    "preservation": {
+      "retained": 74,
+      "added": 5,
+      "qualified": 28,
+      "test_bindings": 5
+    },
+    "baseline_cost": {
+      "model": "gpt-6.1-sol",
+      "reported_codex_credits": 12.55074,
+      "reported_codex_usd_estimate": 0.5020296,
+      "settled_routing_usd": 0.002671,
+      "unsettled_routing_microdollars": 0,
+      "known_subtotal_usd_estimate": 0.5047006,
+      "total_usd_estimate": 0.5047006,
+      "complete": true,
+      "usd_per_credit_assumption": 0.04,
+      "rate_basis": "2026-11-14 standard speed, https://learn.chatgpt.com/docs/pricing#token-rates",
+      "limitation": "Rate-based estimate, not account debit. Supervising chat and human rework are not metered. Incomplete calls may incur additional unreported cost; never price them as zero."
+    },
+    "strategy_total_usd_estimate": 0.868249,
+    "new_findings": [
+      {
+        "id": "N01",
+        "initial": "A caller's local *Port and an alias point to the original Port. A distinct Port points to a distinct Account. Both accounts start at Epoch=7 with zero counters.",
+        "steps": [
+          "Call F with the local variable and save the callback. Observe both accounts.",
+          "Assign only the caller's local variable to the distinct Port. Observe both Port targets and both accounts before delivery.",
+          "Invoke the saved callback once. Observe both Port targets and both accounts again."
+        ],
+        "outcome": "F reads the original Target pointer at component.go:31 and increments that Account's Requests at :32. After caller reassignment and before delivery, the original is at (1 request, 0 successes) and the replacement is at (0, 0). The delivery at :33 brings the original to (1, 1) and leaves the replacement at (0, 0). Both Port targets retain their original pointers throughout.",
+        "citation": {
+          "file": "component.go",
+          "line": 33,
+          "fragment": " return func() { target.Successes++ }"
+        },
+        "test": "TestIdentityCallerVariableRebinding",
+        "question": "Should a completion retained across caller handoff continue crediting the admitted account when the caller now uses a different Port? README.md:7\u20138 leaves lifecycle intent open."
+      },
+      {
+        "id": "N02",
+        "initial": "A caller's local *Port and a retained alias point to the same Port. Its original Account and two distinct alternate Accounts all start with Epoch=7 and zero counters.",
+        "steps": [
+          "Admit via A through the caller's local *Port and save the callback.",
+          "Assign the caller's variable to a different Port pointing to the second Account. Leave the originally passed Port unchanged.",
+          "Invoke the saved callback.",
+          "Via the retained alias, set Target on the originally passed Port to the third Account.",
+          "Invoke the same callback again."
+        ],
+        "outcome": "The pointer receiver identifies the original Port at component.go:7. Its original Account receives the request at :8 and supplies the saved Epoch at :9. The first delivery reads that same Port and credits the original (1, 1). The second delivery checks the third Account's Epoch and credits it (0, 1). The original stays at (1, 1) and the Account on the separate Port stays at (0, 0).",
+        "citation": {
+          "file": "component.go",
+          "line": 10,
+          "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+        },
+        "test": "TestIdentityRetainedPort/A",
+        "question": "Should a completion stay associated with the Port used for admission while success follows later matching targets on that Port? See Q1."
+      },
+      {
+        "id": "N03",
+        "initial": "A caller's local *Port and a retained alias point to the same Port. Its original Account and two distinct alternate Accounts all start with Epoch=7 and zero counters.",
+        "steps": [
+          "Admit via C through the caller's local *Port and save the callback.",
+          "Assign the caller's variable to a different Port pointing to the second Account. Leave the originally passed Port unchanged.",
+          "Invoke the saved callback.",
+          "Via the retained alias, set Target on the originally passed Port to the third Account.",
+          "Invoke the same callback again."
+        ],
+        "outcome": "The pointer receiver identifies the original Port at component.go:17. C saves the original Account pointer and its Epoch at :18 and records that Account's request at :19. At first delivery both guards pass and the original reaches (1, 1). At second delivery the same Port holds a distinct pointer, so the identity guard fails despite equal Epoch. The original stays at (1, 1) and both alternate accounts stay at (0, 0).",
+        "citation": {
+          "file": "component.go",
+          "line": 20,
+          "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+        },
+        "test": "TestIdentityRetainedPort/C",
+        "question": "Should the originally passed Port remain the wrapper whose current target determines completion eligibility after a caller switches Ports? See Q3."
+      },
+      {
+        "id": "N04",
+        "initial": "A caller's local *Registry and an alias point to the original Registry. Its map has different zero-counter Accounts at keys old and new. The caller's local key string is old. A separate Registry has its own zero-counter Account under old in a distinct map.",
+        "steps": [
+          "Admit via D using the caller's Registry and key variables and save the callback.",
+          "Reassign only the caller's key variable to new and invoke the saved callback.",
+          "Reassign only the caller's Registry variable to the separate Registry and invoke again.",
+          "Via the alias, replace the old entry on the original Registry with a distinct zero-counter Account of Epoch=8 and invoke again."
+        ],
+        "outcome": "D receives the original receiver pointer and key value at component.go:22 and records one request at old in that Registry at :23. The first two deliveries credit its original old occupant, bringing it to (1, 2). The third credits the new occupant at old in the original Registry (0, 1), leaving the original account at (1, 2). The new key and separate Registry accounts stay at (0, 0).",
+        "citation": {
+          "file": "component.go",
+          "line": 24,
+          "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+        },
+        "test": "TestIdentityRetainedRegistryAndKey",
+        "question": "Should an existing completion stay tied to the original Registry and admitted key if caller configuration switches either variable? See Q5."
+      },
+      {
+        "id": "N05",
+        "initial": "A Port targets a zero-counter Account at Epoch=7.",
+        "steps": [
+          "Admit via C and save the callback. Copy the admitted Account value after admission into a separate variable.",
+          "Assign Target to the separate copy and invoke the callback.",
+          "Restore Target to the original pointer and assign an Account value with Requests=0, Successes=10, and Epoch=7 into the original object in place.",
+          "Invoke the same callback again."
+        ],
+        "outcome": "C saves the Account pointer and numeric Epoch at component.go:18 and increments that object's Requests at :19. The first delivery leaves both accounts at (1, 0), even though the copy has identical fields. After the in-place overwrite, the second delivery passes both checks and increments the original's current Successes, reaching (0, 11). The separate copy stays at (1, 0).",
+        "citation": {
+          "file": "component.go",
+          "line": 20,
+          "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+        },
+        "test": "TestIdentityAccountCopyAndOverwrite",
+        "question": "Should overwriting an admitted Account in place with a matching Epoch start a new accounting period from which an older callback is excluded? See Q2, Q3 and Q9."
+      }
+    ],
+    "supplement": {
+      "qualifications": [
+        {
+          "id": "F07",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to A; A reads that Port at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F08",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to B; B uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F09",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to C; C checks that Port against the saved Account pointer at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F10",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to the value at the saved key in the original Registry's map; D performs that lookup at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 24,
+            "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F11",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the caller's Port used to invoke E; E uses the value receiver's copied Target pointer. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F12",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to F; F uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F13",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to A; A reads that Port at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F14",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to B; B uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F15",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to C; C checks that Port against the saved Account pointer at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F16",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to the value at the saved key in the original Registry's map; D performs that lookup at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 24,
+            "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F17",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the caller's Port used to invoke E; E uses the value receiver's copied Target pointer. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F18",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to F; F uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F53",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to A; A reads that Port at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F54",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to B; B uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F55",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to C; C checks that Port against the saved Account pointer at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F56",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to the value at the saved key in the original Registry's map; D performs that lookup at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+          "citation": {
+            "file": "component.go",
+            "line": 24,
+            "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F57",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the caller's Port used to invoke E; E uses the value receiver's copied Target pointer. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F58",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to F; F uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F67",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to A; A reads that Port at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+          "citation": {
+            "file": "component.go",
+            "line": 10,
+            "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F68",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to B; B uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F69",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to C; C checks that Port against the saved Account pointer at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F70",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to the value at the saved key in the original Registry's map; D performs that lookup at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+          "citation": {
+            "file": "component.go",
+            "line": 24,
+            "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+          }
+        },
+        {
+          "id": "F71",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the caller's Port used to invoke E; E uses the value receiver's copied Target pointer. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+          "citation": {
+            "file": "component.go",
+            "line": 28,
+            "fragment": " return func() { p.Target.Successes++ }"
+          }
+        },
+        {
+          "id": "F72",
+          "status": "qualified",
+          "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to F; F uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+          "citation": {
+            "file": "component.go",
+            "line": 33,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F62",
+          "status": "qualified",
+          "rationale": "For D the Registry is non-nil and the three applicable input cases run at identity_test.go:285\u2013299, with recovery at :62\u201369. The extra reference to :303 belongs to the Port branch. The probe checks that a panic occurs and that the original counters stay zero. The source identifies the faulting dereference and the absence of a returned callback.",
+          "citation": {
+            "file": "component.go",
+            "line": 23,
+            "fragment": " r.Entries[key].Requests++"
+          }
+        },
+        {
+          "id": "F65",
+          "status": "qualified",
+          "rationale": "The explicit caller copy at identity_test.go:311 is a separate Port value. E is called through the original Port at :313, and its own value-receiver copy is what the closure uses at component.go:28. The test mutates both caller-visible Port values and checks counters afterward. Both copies initially share the Account pointer.",
+          "citation": {
+            "file": "component.go",
+            "line": 26,
+            "fragment": "func (p Port) E() func() {"
+          }
+        },
+        {
+          "id": "F66",
+          "status": "qualified",
+          "rationale": "The probe explicitly resets Requests to zero and assigns Successes=10 at identity_test.go:327\u2013328. Successes was already zero; the probe contains no separate Successes-to-zero write. The observed transition on the captured Account remains (0, 10) immediately before delivery by setup to (0, 11) afterward.",
+          "citation": {
+            "file": "component.go",
+            "line": 15,
+            "fragment": " return func() { target.Successes++ }"
+          }
+        },
+        {
+          "id": "F74",
+          "status": "qualified",
+          "rationale": "The two conditions are delivery-time guards using values saved at admission. The pointer equality is evaluated first, and only when it passes is the original Account's current Epoch tested. Restoring just the original pointer leaves the callback ineligible while that Account's Epoch differs.",
+          "citation": {
+            "file": "component.go",
+            "line": 20,
+            "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+          }
+        }
+      ],
+      "test_bindings": [
+        {
+          "id": "N01",
+          "test": "TestIdentityCallerVariableRebinding",
+          "scope": "Admit using a local *Port, change only that local pointer to a distinct Port, then deliver once. The original account changes from (1, 0) to (1, 1), the replacement remains (0, 0), and both Port targets keep their pointers."
+        },
+        {
+          "id": "N02",
+          "test": "TestIdentityRetainedPort/A",
+          "scope": "After A admission, caller-only Port reassignment is followed by one credit on the original account. Assign a matching-epoch target through the original Port alias and invoke again; the new target alone gains a success."
+        },
+        {
+          "id": "N03",
+          "test": "TestIdentityRetainedPort/C",
+          "scope": "After C admission, caller-only Port reassignment is followed by one credit on the original account. Assign a distinct matching-epoch target through the original Port alias and invoke again; neither alternate gains success and the original gets no further credit."
+        },
+        {
+          "id": "N04",
+          "test": "TestIdentityRetainedRegistryAndKey",
+          "scope": "After D admission, reassign the caller key and deliver, then reassign the Registry pointer and deliver; both credit the original occupant. Mutate the original Registry's entry at the saved key and deliver a third time; that occupant gains the only new success."
+        },
+        {
+          "id": "N05",
+          "test": "TestIdentityAccountCopyAndOverwrite",
+          "scope": "After C admission, a separate equal-valued Account copy receives no credit through the same Port. Restore the original Target pointer and overwrite that Account's fields in place with the saved Epoch; the next delivery increments the original's current Successes."
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "output": "analysis/draft-verify.json",
+  "claims_total": 20,
+  "citation_failures": 0,
+  "jev_choices": {
+    "supported": 19,
+    "unclear": 1
+  },
+  "questions": 11,
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 674,
+    "output_tokens": 1586,
+    "cost_microdollars": 2106,
+    "reservation_microdollars": 15477
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 4073,
+    "cost_microdollars": 172,
+    "reservation_microdollars": 732,
+    "error": null
+  }
+}

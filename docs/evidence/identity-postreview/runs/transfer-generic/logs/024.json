@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nfrom pathlib import Path\nx=json.loads(Path('analysis/initial.json').read_text())\nfor f in x['findings']:\n if f['id'] in (\"F31\",\"F32\",\"F33\",\"F59\",\"F61\",\"F62\",\"F66\",\"F73\",\"F74\"):\n  print(f['id'],f['outcome'])\n"
+  ],
+  "exit_code": 0
+}

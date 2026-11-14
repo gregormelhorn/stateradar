@@ -1,0 +1,22 @@
+GREEN unchanged baseline: exit=0
+PRESERVATION CHECK: {"added": 0, "qualified": 0, "retained": 74, "test_bindings": 0}
+
+RED changed ordered finding: exit=1
+Traceback (most recent call last):
+  File "/private/var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/postreview-preflight-nadu9ate/pool/validate_postreview.py", line 42, in <module>
+    check()
+    ~~~~~^^
+  File "/private/var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/postreview-preflight-nadu9ate/pool/validate_postreview.py", line 18, in check
+    result = audit(baseline, final, supplement)
+  File "/private/var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/postreview-preflight-nadu9ate/pool/finding_preservation.py", line 17, in audit
+    raise ValueError(f'changed baseline finding: {row["id"]}')
+ValueError: changed baseline finding: F01
+
+RED changed immutable source: exit=1
+Traceback (most recent call last):
+  File "/private/var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/postreview-preflight-nadu9ate/pool/validate_postreview.py", line 42, in <module>
+    check()
+    ~~~~~^^
+  File "/private/var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/postreview-preflight-nadu9ate/pool/validate_postreview.py", line 12, in check
+    raise ValueError('immutable input changed: ' + name)
+ValueError: immutable input changed: component.go

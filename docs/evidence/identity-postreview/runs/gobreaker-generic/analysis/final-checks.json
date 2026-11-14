@@ -1,0 +1,128 @@
+[
+  {
+    "id": "C1",
+    "kind": "claim",
+    "statement": "Independently constructed breakers that each transition from closed to open to half-open reach the same numeric generation.",
+    "line": 364,
+    "fragment": "\tcb.generation++"
+  },
+  {
+    "id": "C2",
+    "kind": "claim",
+    "statement": "After sequential replacement of a TwoStep receiver with a separate closed breaker in the same numeric generation, a retained false report can call the replacement's ReadyToTrip with one failure and no admissions.",
+    "line": 326,
+    "fragment": "\t\tif cb.readyToTrip(cb.counts) {"
+  },
+  {
+    "id": "C3",
+    "kind": "claim",
+    "statement": "After sequential replacement with a closed breaker in a different numeric generation, a retained false report does not reach that breaker's ReadyToTrip.",
+    "line": 299,
+    "fragment": "\tif generation != before {"
+  },
+  {
+    "id": "C4",
+    "kind": "claim",
+    "statement": "An old TwoStep callback can close a replacement half-open breaker with MaxRequests=1 when the two breaker generation numbers match.",
+    "line": 272,
+    "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "C5",
+    "kind": "claim",
+    "statement": "After a foreign callback closes the target, the target's previously admitted half-open failure is ignored as stale.",
+    "line": 356,
+    "fragment": "\tcb.toNewGeneration(now)"
+  },
+  {
+    "id": "C6",
+    "kind": "claim",
+    "statement": "A retained TwoStep callback that already reported to a replacement can report to its original breaker after the receiver is restored, if the original generation is still current.",
+    "line": 272,
+    "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "C7",
+    "kind": "claim",
+    "statement": "One late half-open success with a matching generation and zero prior successes leaves a breaker with MaxRequests=2 half-open.",
+    "line": 316,
+    "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+  },
+  {
+    "id": "C8",
+    "kind": "claim",
+    "statement": "A State caller can propagate an Open-to-HalfOpen notification panic even though the transition is already committed.",
+    "line": 211,
+    "fragment": "\tstate, _ := cb.currentState(now)"
+  },
+  {
+    "id": "C9",
+    "kind": "claim",
+    "statement": "Retrying State after an Open-to-HalfOpen notification panic does not replay that transition's notification.",
+    "line": 354,
+    "fragment": "\tcb.state = state"
+  },
+  {
+    "id": "C10",
+    "kind": "claim",
+    "statement": "ReadyToTrip calling runtime.Goexit during a closed Execute leaves its first counted failure in place without a fallback charge.",
+    "line": 325,
+    "fragment": "\t\tcb.counts.onFailure()"
+  },
+  {
+    "id": "C11",
+    "kind": "claim",
+    "statement": "If recover returns nil for panic(nil) raised by an admitted request, Execute returns its zero result pair without submitting an outcome.",
+    "line": 236,
+    "fragment": "\t\tif e != nil {"
+  },
+  {
+    "id": "C12",
+    "kind": "claim",
+    "statement": "If recover returns nil for panic(nil) raised by the classifier, Execute returns its zero result pair without submitting an outcome.",
+    "line": 236,
+    "fragment": "\t\tif e != nil {"
+  },
+  {
+    "id": "C13",
+    "kind": "claim",
+    "statement": "A matching Execute fallback following a ReadyToTrip panic only charges a second failure if its generation still matches after state resolution.",
+    "line": 299,
+    "fragment": "\tif generation != before {"
+  },
+  {
+    "id": "C14",
+    "kind": "claim",
+    "statement": "A stale completion can invoke an expiry notification whose panic prevents the generation comparison from running.",
+    "line": 298,
+    "fragment": "\tstate, generation := cb.currentState(now)"
+  },
+  {
+    "id": "C15",
+    "kind": "claim",
+    "statement": "If a half-open failure's reopening notification panics after the new timeout expires, Execute fallback can advance the breaker to half-open again.",
+    "line": 342,
+    "fragment": "\t\t\tcb.setState(StateHalfOpen, now)"
+  },
+  {
+    "id": "C16",
+    "kind": "claim",
+    "statement": "For an old success aimed at an open replacement, unchanged counts alone cannot establish that the generation guard dropped the result because onSuccess has no open arm.",
+    "line": 311,
+    "fragment": "\tswitch state {"
+  },
+  {
+    "id": "C17",
+    "kind": "claim",
+    "statement": "Time for deciding open expiry in a completion is sampled after acquiring the breaker mutex.",
+    "line": 297,
+    "fragment": "\tnow := time.Now()"
+  },
+  {
+    "id": "C18",
+    "kind": "claim",
+    "statement": "A half-open Execute worker whose waiter departed may report a matching success without closing if that report falls short of the threshold.",
+    "line": 316,
+    "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+  }
+]

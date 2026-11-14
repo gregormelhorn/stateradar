@@ -91,12 +91,17 @@ entries and separates the new model-routing plan from shipped capabilities.
    Keep this separate from assuming that a more stable model answer is correct.
    The first [English reference/identity candidate](evidence/identity-benchmark/prompts/candidate.md)
    has now been measured without retuning between runs. Its mixed result does
-   not justify promotion. Next proposed increment: evaluate identity tracing
-   as a final review of an existing findings list, retaining every earlier
-   ordered case, and require a direct caller-variable-rebinding probe. Fix the
-   experiment task's documented Jev schema hint before new calls. Use
-   independently reviewed transfer cases and matched repeated runs before
-   claiming reliable coverage or total-cost improvement.
+   not justify promotion. Completed follow-up:
+   [identity tracing as a final review](evidence/identity-postreview/comparison.md)
+   preserves all 29/74 starting findings, retains gobreaker's 8/8 cases and closes
+   the direct caller-variable test gap in both transfer review variants. The
+   shared Jev schema hint is corrected. Costs including the baseline are 1.6%
+   lower on gobreaker and 0.7% higher on transfer than generic final review; an
+   extra identity review costs 104%/72% above the original analysis alone.
+   Preserve findings deterministically and keep identity review selective; do
+   not enable an unconditional paid final phase. Next proposed increment: a
+   smaller identity pass on an independently reviewed component, compared with
+   no extra review, using repeated matched runs and complete continuation cost.
 5. **Expand semantic reachability when needed.** The existing checker covers
    the minimal model; hierarchy and parallel regions remain a possible
    follow-up, described under [semantic analysis](#3-xstate--semantic-analysis).

@@ -1,0 +1,70 @@
+FFFFFFF
+======================================================================
+FAIL: test_addition_and_separate_qualification_preserve_original (__main__.PreservationTests.test_addition_and_separate_qualification_preserve_original)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_finding_preservation.py", line 44, in test_addition_and_separate_qualification_preserve_original
+    self.assertEqual(result, {'retained': 1, 'added': 1, 'qualified': 1, 'test_bindings': 1})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'retained': 1} != {'retained': 1, 'added': 1, 'qualified': 1, 'test_bindings': 1}
+- {'retained': 1}
++ {'added': 1, 'qualified': 1, 'retained': 1, 'test_bindings': 1}
+
+======================================================================
+FAIL: test_changed_order_is_rejected (__main__.PreservationTests.test_changed_order_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_finding_preservation.py", line 19, in test_changed_order_is_rejected
+    with self.assertRaisesRegex(ValueError, 'changed baseline finding'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_changed_question_is_rejected (__main__.PreservationTests.test_changed_question_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_finding_preservation.py", line 29, in test_changed_question_is_rejected
+    with self.assertRaisesRegex(ValueError, 'changed baseline finding'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deleted_finding_is_rejected (__main__.PreservationTests.test_deleted_finding_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_finding_preservation.py", line 24, in test_deleted_finding_is_rejected
+    with self.assertRaisesRegex(ValueError, 'missing baseline finding'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_duplicate_cannot_hide_loss (__main__.PreservationTests.test_duplicate_cannot_hide_loss)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_finding_preservation.py", line 34, in test_duplicate_cannot_hide_loss
+    with self.assertRaisesRegex(ValueError, 'distinct'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_empty_baseline_is_rejected (__main__.PreservationTests.test_empty_baseline_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_finding_preservation.py", line 52, in test_empty_baseline_is_rejected
+    with self.assertRaisesRegex(ValueError, 'nonempty baseline'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_unknown_supplement_target_is_rejected (__main__.PreservationTests.test_unknown_supplement_target_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_finding_preservation.py", line 48, in test_unknown_supplement_target_is_rejected
+    with self.assertRaisesRegex(ValueError, 'unknown finding'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.002s
+
+FAILED (failures=7)

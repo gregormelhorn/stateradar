@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nd=json.load(open(\"analysis/draft-verify.json\"))\nfor k,v in d.items():\n print(k, type(v).__name__, list(v) if isinstance(v,dict) else len(v) if isinstance(v,(list,str)) else v)\n"
+  ],
+  "exit_code": 0
+}

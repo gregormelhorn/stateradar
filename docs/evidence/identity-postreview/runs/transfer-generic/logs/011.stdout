@@ -1,0 +1,74 @@
+     1	package identityfixture_test
+     2	
+     3	import (
+     4		"testing"
+     5	
+     6		fixture "identityfixture"
+     7	)
+     8	
+     9	func TestIdentityCallerDeparture(t *testing.T) {
+    10		eachOperation(t, func(t *testing.T, op operation, _ binding) {
+    11			for _, deliver := range []bool{false, true} {
+    12				name := "no_later_input"
+    13				if deliver {
+    14					name = "later_completion"
+    15				}
+    16				t.Run(name, func(t *testing.T) {
+    17					b := newBinding()
+    18					// The delivery side retains the callback after admission returns.
+    19					deliverySide := op.admit(b)
+    20					incoming := &fixture.Account{Epoch: 7}
+    21					b.replace(op, incoming)
+    22					counters(t, b.original, 1, 0)
+    23					counters(t, incoming, 0, 0)
+    24					if deliver {
+    25						deliverySide()
+    26					}
+    27					wantOriginal := map[string]int{"B": 1, "E": 1, "F": 1}
+    28					wantIncoming := map[string]int{"A": 1, "D": 1}
+    29					if !deliver {
+    30						counters(t, b.original, 1, 0)
+    31						counters(t, incoming, 0, 0)
+    32						return
+    33					}
+    34					counters(t, b.original, 1, wantOriginal[op.name])
+    35					counters(t, incoming, 0, wantIncoming[op.name])
+    36				})
+    37			}
+    38		})
+    39	}
+    40	
+    41	func TestIdentityMatchingAfterMismatch(t *testing.T) {
+    42		t.Run("A", func(t *testing.T) {
+    43			b := newBinding()
+    44			incoming := &fixture.Account{Epoch: 8}
+    45			complete := b.port.A()
+    46			b.port.Target = incoming
+    47			complete()
+    48			counters(t, b.original, 1, 0)
+    49			counters(t, incoming, 0, 0)
+    50			incoming.Epoch = b.original.Epoch
+    51			counters(t, incoming, 0, 0)
+    52			complete()
+    53			counters(t, b.original, 1, 0)
+    54			counters(t, incoming, 0, 1)
+    55		})
+    56		t.Run("C", func(t *testing.T) {
+    57			b := newBinding()
+    58			incoming := &fixture.Account{Epoch: 7}
+    59			complete := b.port.C()
+    60			b.original.Epoch = 8
+    61			b.port.Target = incoming
+    62			complete()
+    63			counters(t, b.original, 1, 0)
+    64			counters(t, incoming, 0, 0)
+    65			b.port.Target = b.original
+    66			complete()
+    67			counters(t, b.original, 1, 0)
+    68			b.original.Epoch = 7
+    69			counters(t, b.original, 1, 0)
+    70			complete()
+    71			counters(t, b.original, 1, 1)
+    72			counters(t, incoming, 0, 0)
+    73		})
+    74	}

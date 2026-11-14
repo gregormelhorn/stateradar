@@ -1,0 +1,219 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc",
+  "input_tokens": 5484,
+  "cost_microdollars": 231,
+  "reservation_microdollars": 906,
+  "checks": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The callback returned by Allow retains the pointer to the specific TwoStepCircuitBreaker receiver, so rebinding the caller's local pointer to a different wrapper cannot retarget it.",
+      "source": "gobreaker.go",
+      "line": 271,
+      "fragment": "\treturn func(success bool) {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.31,
+        "contradicted": 0.01,
+        "unclear": 0.68
+      },
+      "confidence": 0.52,
+      "review_required": true
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "A shallow value copy of a TwoStepCircuitBreaker initially aliases the same inner CircuitBreaker pointer without aliasing the original wrapper's pointer field.",
+      "source": "gobreaker.go",
+      "line": 137,
+      "fragment": "\tcb *CircuitBreaker",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.22,
+        "contradicted": 0.05,
+        "unclear": 0.73
+      },
+      "confidence": 0.6,
+      "review_required": true
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "If the original breaker's OnStateChange hook overwrites the outer wrapper during beforeRequest, that in-progress beforeRequest still records the admission on the original breaker.",
+      "source": "gobreaker.go",
+      "line": 266,
+      "fragment": "\tgeneration, err := tscb.cb.beforeRequest()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.05,
+        "contradicted": 0.02,
+        "unclear": 0.93
+      },
+      "confidence": 0.89,
+      "review_required": true
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "A replacement half-open breaker with matching generation and MaxRequests=1 can close on a redirected success even if it has admitted zero requests.",
+      "source": "gobreaker.go",
+      "line": 316,
+      "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.2,
+        "contradicted": 0.47,
+        "unclear": 0.33
+      },
+      "confidence": 0.2,
+      "review_required": true
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "Restoring the saved wrapper value can make a previously redirected completion report to the original inner breaker if the original generation still matches.",
+      "source": "gobreaker.go",
+      "line": 272,
+      "fragment": "\t\ttscb.cb.afterRequest(generation, success)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.16,
+        "contradicted": 0.03,
+        "unclear": 0.81
+      },
+      "confidence": 0.72,
+      "review_required": true
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "A redirected callback can resolve the replacement's open timeout and deliver its half-open notification before discarding the outcome on a generation mismatch.",
+      "source": "gobreaker.go",
+      "line": 298,
+      "fragment": "\tstate, generation := cb.currentState(now)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.04,
+        "contradicted": 0.12,
+        "unclear": 0.84
+      },
+      "confidence": 0.76,
+      "review_required": true
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "When the request rebinds the caller's local CircuitBreaker pointer, ordinary Execute completion calls the original receiver's classifier and accounts on that receiver.",
+      "source": "gobreaker.go",
+      "line": 243,
+      "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.39,
+        "contradicted": 0.2,
+        "unclear": 0.41
+      },
+      "confidence": 0.11,
+      "review_required": true
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "When an admitted request rebinds the caller's local CircuitBreaker pointer and panics, Execute's deferred failure report still targets the original receiver.",
+      "source": "gobreaker.go",
+      "line": 237,
+      "fragment": "\t\t\tcb.afterRequest(generation, false)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.25,
+        "contradicted": 0.11,
+        "unclear": 0.64
+      },
+      "confidence": 0.46,
+      "review_required": true
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "Replacing the caller's Settings.IsSuccessful field after construction does not replace the function stored in the existing breaker.",
+      "source": "gobreaker.go",
+      "line": 174,
+      "fragment": "\t\tcb.isSuccessful = st.IsSuccessful",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.25,
+        "contradicted": 0.02,
+        "unclear": 0.73
+      },
+      "confidence": 0.6,
+      "review_required": true
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "A stored IsSuccessful closure can observe a change to a variable it captures by reference after breaker construction.",
+      "source": "gobreaker.go",
+      "line": 243,
+      "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.04,
+        "contradicted": 0.01,
+        "unclear": 0.95
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "Invoking a retained Allow callback after overwriting its receiver with a zero-valued TwoStepCircuitBreaker panics when afterRequest attempts to lock the nil inner receiver's mutex.",
+      "source": "gobreaker.go",
+      "line": 294,
+      "fragment": "\tcb.mutex.Lock()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.25,
+        "contradicted": 0.03,
+        "unclear": 0.72
+      },
+      "confidence": 0.58,
+      "review_required": true
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "A late matching half-open success after a caller stopped waiting closes the breaker only if it brings consecutive successes to at least MaxRequests.",
+      "source": "gobreaker.go",
+      "line": 316,
+      "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.58,
+        "contradicted": 0.04,
+        "unclear": 0.38
+      },
+      "confidence": 0.37,
+      "review_required": true
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "For a ReadyToTrip invocation, lock identity follows the inner CircuitBreaker, so a shallow TwoStep wrapper copy that still points to that inner breaker re-enters the same mutex through Counts.",
+      "source": "gobreaker.go",
+      "line": 326,
+      "fragment": "\t\tif cb.readyToTrip(cb.counts) {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.15,
+        "contradicted": 0.02,
+        "unclear": 0.83
+      },
+      "confidence": 0.74,
+      "review_required": true
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "A manual retry of an Allow completion after a hook panic can resolve a different inner breaker if the captured wrapper is overwritten between invocations.",
+      "source": "gobreaker.go",
+      "line": 272,
+      "fragment": "\t\ttscb.cb.afterRequest(generation, success)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.07,
+        "unclear": 0.93
+      },
+      "confidence": 0.89,
+      "review_required": true
+    }
+  }
+}

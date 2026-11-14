@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nd=json.load(open(\"analysis/final-jev.json\"))\nprint(list(d))\nfor k,c in d[\"checks\"].items():\n print(k,c[\"choice\"],c[\"confidence\"],c[\"probabilities\"])\n"
+  ],
+  "exit_code": 0
+}

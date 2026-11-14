@@ -1,0 +1,151 @@
+{
+  "qualifications": [
+    {
+      "id": "F04",
+      "status": "qualified",
+      "rationale": "The historical probe uses MaxRequests=1 and the same underlying breaker. A matching late success closes only when its increment brings ConsecutiveSuccesses to at least MaxRequests. Below that threshold it records a success and retains half-open admission accounting.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 316,
+        "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+      }
+    },
+    {
+      "id": "F07",
+      "status": "qualified",
+      "rationale": "The stale outcome contributes no success or failure on the tested unchanged inner receiver. The report can still resolve expiry before the mismatch check if the open deadline has elapsed at the sampled time. The unexpired-open and State-first cases in the preserved probe specifically avoid the callback-first expiry side effect, which F08 covers.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 298,
+        "fragment": "\tstate, generation := cb.currentState(now)"
+      }
+    },
+    {
+      "id": "F08",
+      "status": "qualified",
+      "rationale": "The transition and reset precede the mismatch check. Notification is conditional on a non-nil OnStateChange. The report reaches the mismatch return only if notification returns normally; F19 covers a notification panic. The preserved probe keeps the same inner breaker.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 358,
+        "fragment": "\tif cb.onStateChange != nil {"
+      }
+    },
+    {
+      "id": "F10",
+      "status": "qualified",
+      "rationale": "Original-pair delivery requires the classifier and afterRequest to return normally, including any expiry notification before the mismatch check. The preserved schedules use an unexpired open timeout and returning hooks. F12 and F17 illustrate panic boundaries.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 244,
+        "fragment": "\treturn result, err"
+      }
+    },
+    {
+      "id": "F15",
+      "status": "qualified",
+      "rationale": "The tested manual retry still selects the same closed inner breaker in the same generation. A repeated call re-reads the wrapper and may instead report on another matching-generation breaker after an overwrite. The first call's lock cleanup still belongs to its originally selected inner receiver (see N07).",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      }
+    },
+    {
+      "id": "F16",
+      "status": "qualified",
+      "rationale": "The manually retried TwoStep calls use the same inner receiver and the test keeps it open with an hour-long timeout. A wrapper overwrite can change which receiver sees a retry; an expired selected receiver may perform a lifecycle transition before discarding the result.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 272,
+        "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+      }
+    },
+    {
+      "id": "F19",
+      "status": "qualified",
+      "rationale": "The historical retry uses the same inner breaker, with the committed half-open state and no intervening admission or overwrite. A new invocation resolves currentState on the inner pointer then stored in the captured wrapper; an overwrite or additional transition changes the retry's starting conditions.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 298,
+        "fragment": "\tstate, generation := cb.currentState(now)"
+      }
+    },
+    {
+      "id": "F20",
+      "status": "qualified",
+      "rationale": "Lock identity is the inner CircuitBreaker. A shallow copy of a TwoStep wrapper that still points to the locked breaker re-enters that same mutex through State, Counts, or Allow. An independent inner receiver uses a different mutex. Execute applies to a CircuitBreaker receiver. IsSuccessful is evaluated outside afterRequest's lock.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 294,
+        "fragment": "\tcb.mutex.Lock()"
+      }
+    },
+    {
+      "id": "F22",
+      "status": "qualified",
+      "rationale": "The mismatched target stayed open in the preserved test because its open deadline was kept unexpired. The comparison guards outcome dispatch, after currentState on the replacement. An elapsed replacement deadline can advance the replacement and notify before the result is discarded. The test's overwrite changes the original wrapper value; a caller-local pointer rebind or independent value-copy overwrite leaves that wrapper intact.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 298,
+        "fragment": "\tstate, generation := cb.currentState(now)"
+      }
+    }
+  ],
+  "test_bindings": [
+    {
+      "id": "N01",
+      "test": "TestIdentityWrapperCopyAndLocalRebinding",
+      "scope": "Admit through the original wrapper, overwrite an independent copy and rebind the local pointer, then show success on the original and no count on the other breaker. A new Allow through a fresh copy increments the original's admission count."
+    },
+    {
+      "id": "N02",
+      "test": "TestIdentityOverwriteDuringAdmissionAndRestore",
+      "scope": "During A's expired-open admission notification, overwrite W with B. A gains the only admission, B closes on redirected success with zero admissions, A remains full, and restoring W lets the same callback close A."
+    },
+    {
+      "id": "N03",
+      "test": "TestIdentityReplacementExpiryBeforeMismatch",
+      "scope": "Overwrite the admitting wrapper with an already-open expired target and use Counts before done(false). The target's named half-open notification happens before the stale result is discarded, and A stays pending."
+    },
+    {
+      "id": "N04",
+      "test": "TestIdentityExecuteBoundReceiver",
+      "scope": "Bind Execute on A. Rebind the caller pointer before the normal invocation or from the panicking request. Verify original result or panic, A-only accounting and hook calls, and untouched B."
+    },
+    {
+      "id": "N05",
+      "test": "TestIdentityStoredSettingsFunction",
+      "scope": "Reassign Settings.IsSuccessful after construction, then mutate the flag visible to the stored closure in the request. Verify original classification, success counters and unchanged request error."
+    },
+    {
+      "id": "N06",
+      "test": "TestIdentityZeroWrapperAndRestore",
+      "scope": "Overwrite the captured wrapper with its zero value after admission. Recover from the callback panic, confirm A is untouched by the report, restore the wrapper and observe A record the success."
+    },
+    {
+      "id": "N07",
+      "test": "TestIdentityReportingHookOverwriteAndRetry",
+      "scope": "A's failure hook overwrites W and panics. Public Counts on A returns with the original partial charge, B remains untouched until a manual retry, and the retry calls B's hook and charges B without an admission."
+    },
+    {
+      "id": "F15",
+      "test": "TestIdentityReportingHookOverwriteAndRetry",
+      "scope": "Extends the preserved same-target retry with an overwrite from A's panicking hook. A's charge survives and its mutex is released; a manual retry charges B instead."
+    },
+    {
+      "id": "F22",
+      "test": "TestIdentityReplacementExpiryBeforeMismatch",
+      "scope": "Extends the unexpired mismatch control to an expired target. Rejected accounting still permits B's half-open transition and notification."
+    },
+    {
+      "id": "F22",
+      "test": "TestIdentityWrapperCopyAndLocalRebinding",
+      "scope": "A separate wrapper copy and caller-local pointer can be changed with W untouched. A retained completion still credits A, the inner breaker held by W."
+    },
+    {
+      "id": "F22",
+      "test": "TestIdentityOverwriteDuringAdmissionAndRestore",
+      "scope": "Extends replacement to the admission hook, then shows redirected success on B and restoration to A through the same retained callback."
+    }
+  ]
+}

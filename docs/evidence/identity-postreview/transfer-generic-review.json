@@ -1,0 +1,229 @@
+{
+  "reviewer": "Codex supervising agent; source, supplement and public-seam probe bodies reviewed",
+  "scope": "Preserved baseline benchmark cases plus direct caller-variable test evidence. Semantic judgments are attributed review, not inferred by the checker. Raw row retention is not endorsement of an unqualified generalization. Full-pilot gates are out of scope.",
+  "rows": [
+    {
+      "id": "T-A",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/A",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/final.json",
+          "sha256": "0133d80538ffb926fcf97e05c35467ba361c147573fee804dcf4d538b1dced0c",
+          "line": 113,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The replacement gets one Successes increment. The original has one Requests increment and zero Successes. Replacement Requests stay at zero. component.go:10 (\\\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\\\") and component.go:8 (\\\"p.Target.Requests++\\\") and component.go:9 (\\\"epoch := p.Target.Epoch\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        },
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/supplement.json",
+          "sha256": "aa2068bd6de655de36d3d0c7c1300ba0bd7bbf87344de4c2b8819355651cc2ad",
+          "line": 6,
+          "quote": "      \"rationale\": \"For A, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.\","
+        }
+      ],
+      "rationale": "The original ordered case and its probe are preserved exactly. Added qualifications were reviewed and do not negate this bounded case. This score does not certify every sentence in the full report.",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-postreview/results/transfer-generic-final.jsonl",
+          "sha256": "5841bdf465808c12ededa1c819eff2e2ec38eef5f6a5c02267e49d852ff043d7",
+          "line": 35,
+          "quote": "{\"Time\":\"2026-11-14T23:29:22.857129+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/A\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-B",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/B",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/final.json",
+          "sha256": "0133d80538ffb926fcf97e05c35467ba361c147573fee804dcf4d538b1dced0c",
+          "line": 130,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The original gets one Successes increment. The replacement counters remain zero. Replacement Requests stay at zero. component.go:15 (\\\"return func() { target.Successes++ }\\\") and component.go:14 (\\\"target.Requests++\\\") and component.go:13 (\\\"target := p.Target\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        },
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/supplement.json",
+          "sha256": "aa2068bd6de655de36d3d0c7c1300ba0bd7bbf87344de4c2b8819355651cc2ad",
+          "line": 16,
+          "quote": "      \"rationale\": \"For B, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.\","
+        }
+      ],
+      "rationale": "The original ordered case and its probe are preserved exactly. Added qualifications were reviewed and do not negate this bounded case. This score does not certify every sentence in the full report.",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-postreview/results/transfer-generic-final.jsonl",
+          "sha256": "5841bdf465808c12ededa1c819eff2e2ec38eef5f6a5c02267e49d852ff043d7",
+          "line": 39,
+          "quote": "{\"Time\":\"2026-11-14T23:29:22.857277+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/B\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-C",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/C",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/final.json",
+          "sha256": "0133d80538ffb926fcf97e05c35467ba361c147573fee804dcf4d538b1dced0c",
+          "line": 147,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 Both Successes counters stay zero. The original retains the request. Replacement Requests stay at zero. component.go:20 (\\\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\\\") and component.go:19 (\\\"target.Requests++\\\") and component.go:18 (\\\"target, epoch := p.Target, p.Target.Epoch\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        },
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/supplement.json",
+          "sha256": "aa2068bd6de655de36d3d0c7c1300ba0bd7bbf87344de4c2b8819355651cc2ad",
+          "line": 26,
+          "quote": "      \"rationale\": \"For C, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.\","
+        }
+      ],
+      "rationale": "The original ordered case and its probe are preserved exactly. Added qualifications were reviewed and do not negate this bounded case. This score does not certify every sentence in the full report.",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-postreview/results/transfer-generic-final.jsonl",
+          "sha256": "5841bdf465808c12ededa1c819eff2e2ec38eef5f6a5c02267e49d852ff043d7",
+          "line": 43,
+          "quote": "{\"Time\":\"2026-11-14T23:29:22.85737+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/C\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-D",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/D",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/final.json",
+          "sha256": "0133d80538ffb926fcf97e05c35467ba361c147573fee804dcf4d538b1dced0c",
+          "line": 164,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The replacement gets one Successes increment. The original has one Requests increment and zero Successes. Replacement Requests stay at zero. component.go:24 (\\\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\\\") and component.go:23 (\\\"r.Entries[key].Requests++\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        },
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/supplement.json",
+          "sha256": "aa2068bd6de655de36d3d0c7c1300ba0bd7bbf87344de4c2b8819355651cc2ad",
+          "line": 36,
+          "quote": "      \"rationale\": \"For D, the tested replacement changes the admission key in Entries on the same Registry. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.\","
+        }
+      ],
+      "rationale": "The original ordered case and its probe are preserved exactly. Added qualifications were reviewed and do not negate this bounded case. This score does not certify every sentence in the full report.",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-postreview/results/transfer-generic-final.jsonl",
+          "sha256": "5841bdf465808c12ededa1c819eff2e2ec38eef5f6a5c02267e49d852ff043d7",
+          "line": 47,
+          "quote": "{\"Time\":\"2026-11-14T23:29:22.857447+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/D\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-E",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentitySameEpochReplacement/E",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/final.json",
+          "sha256": "0133d80538ffb926fcf97e05c35467ba361c147573fee804dcf4d538b1dced0c",
+          "line": 181,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The original gets one Successes increment. The replacement counters remain zero. Replacement Requests stay at zero. component.go:28 (\\\"return func() { p.Target.Successes++ }\\\") and component.go:27 (\\\"p.Target.Requests++\\\") and component.go:26 (\\\"func (p Port) E() func() {\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        },
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/supplement.json",
+          "sha256": "aa2068bd6de655de36d3d0c7c1300ba0bd7bbf87344de4c2b8819355651cc2ad",
+          "line": 46,
+          "quote": "      \"rationale\": \"For E, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.\","
+        }
+      ],
+      "rationale": "The original ordered case and its probe are preserved exactly. Added qualifications were reviewed and do not negate this bounded case. This score does not certify every sentence in the full report.",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/_probe/identity_test.go",
+          "sha256": "4635a3c18bad10d1530a45ac0aba0a80b31f22ec920e7efa071b506b4b98e442",
+          "line": 95,
+          "quote": "func TestIdentitySameEpochReplacement(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-postreview/results/transfer-generic-final.jsonl",
+          "sha256": "5841bdf465808c12ededa1c819eff2e2ec38eef5f6a5c02267e49d852ff043d7",
+          "line": 51,
+          "quote": "{\"Time\":\"2026-11-14T23:29:22.857491+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentitySameEpochReplacement/E\",\"Elapsed\":0}"
+        }
+      ]
+    },
+    {
+      "id": "T-F",
+      "found": true,
+      "correct": true,
+      "tested": "full",
+      "test_name": "TestIdentityCallerVariableRebinding",
+      "evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/final.json",
+          "sha256": "0133d80538ffb926fcf97e05c35467ba361c147573fee804dcf4d538b1dced0c",
+          "line": 198,
+          "quote": "      \"outcome\": \"observed-in-code \u2014 The original gets one Successes increment. The replacement counters remain zero. Replacement Requests stay at zero. component.go:33 (\\\"return func() { target.Successes++ }\\\") and component.go:32 (\\\"target.Requests++\\\") and component.go:31 (\\\"target := p.Target\\\"). observed-in-tests \u2014 analysis/_probe/identity_test.go:97 (\\\"\\\"A\\\": {0, 1}, \\\"B\\\": {1, 0}, \\\"C\\\": {0, 0}, \\\"D\\\": {0, 1}, \\\"E\\\": {1, 0}, \\\"F\\\": {1, 0},\\\") and analysis/_probe/identity_test.go:90 (\\\"counters(t, b.original, 1, expected[op.name][0])\\\") and analysis/_probe/identity_test.go:91 (\\\"counters(t, incoming, 0, expected[op.name][1])\\\").\","
+        },
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/supplement.json",
+          "sha256": "aa2068bd6de655de36d3d0c7c1300ba0bd7bbf87344de4c2b8819355651cc2ad",
+          "line": 56,
+          "quote": "      \"rationale\": \"For F, the tested replacement changes Target on the same Port used for admission. The alternative binding in the shared step wording is outside this row\u2019s tested sequence. The absolute replacement counter values assume zero initial counters, as used in the probe.\","
+        },
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/supplement.json",
+          "sha256": "aa2068bd6de655de36d3d0c7c1300ba0bd7bbf87344de4c2b8819355651cc2ad",
+          "line": 428,
+          "quote": "      \"scope\": \"After F admits using a local *Port, reassigning only that local to a distinct Port leaves the original alias pointing to a Port with its original Target. Before one explicit delivery the original has (1 request, 0 successes) and the replacement (0, 0). After delivery those are (1, 1) and (0, 0), with both Target fields and epochs stable across the observations.\""
+        }
+      ],
+      "rationale": "Direct test body reviewed: callback creation precedes reassignment of only the caller local pointer to a distinct Port. Both account counters and the old Port alias are asserted before/after delivery. This closes the earlier exact-sequence test gap; the old target-mutation case remains intact. Epoch values differ from the canonical zero example without changing a guard.",
+      "test_evidence": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/transfer-generic/analysis/_postprobe/postreview_test.go",
+          "sha256": "7dc4f71e954df6dc1370980385d0c722d4a5f42f038bb405ba7bb1245d8e0163",
+          "line": 9,
+          "quote": "func TestIdentityCallerVariableRebinding(t *testing.T) {"
+        },
+        {
+          "file": "docs/evidence/identity-postreview/results/transfer-generic-final.jsonl",
+          "sha256": "5841bdf465808c12ededa1c819eff2e2ec38eef5f6a5c02267e49d852ff043d7",
+          "line": 425,
+          "quote": "{\"Time\":\"2026-11-14T23:29:22.862452+01:00\",\"Action\":\"pass\",\"Package\":\"identityfixture\",\"Test\":\"TestIdentityCallerVariableRebinding\",\"Elapsed\":0}"
+        }
+      ]
+    }
+  ],
+  "refuted_claims": []
+}

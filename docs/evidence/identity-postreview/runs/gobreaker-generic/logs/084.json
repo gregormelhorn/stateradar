@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,re\nfrom pathlib import Path\ninitial=Path('analysis/initial.json').read_bytes()\nfinal=Path('analysis/final.json').read_bytes()\nprefix=initial[:initial.rindex(b'\\n  ]\\n}')]\nassert final.startswith(prefix+b',\\n')\nlines=Path('gobreaker.go').read_text().splitlines()\na=json.loads(final); s=json.loads(Path('analysis/supplement.json').read_text())\nprobe=Path('analysis/_postprobe/identity_test.go').read_text()\nnames=set(re.findall(r'^func (TestIdentity\\w+)\\(',probe,re.M))\nnew=[f for f in a['findings'] if f['id'].startswith('N')]\nassert [f['id'] for f in new]==[f'N{i:02}' for i in range(1,6)]\nfor row in new+s['qualifications']:\n c=row['citation']; assert c['fragment']==lines[c['line']-1]\nassert {row['test'] for row in s['test_bindings']}==names\nfor file in ('draft-verify.json','final-jev.json','final-checks.json','overlay-final.json','review.md','summary.md'):\n assert Path('analysis',file).stat().st_size>0\nprint('Original row bytes, full-line anchors, probe bindings and deliverables verified.')"
+  ],
+  "exit_code": 0
+}

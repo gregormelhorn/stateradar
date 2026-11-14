@@ -1,0 +1,31 @@
+package identityfixture_test
+
+import (
+    "testing"
+    fixture "identityfixture"
+)
+
+func TestIdentityCallerVariableRebinding(t *testing.T) {
+    admitted := &fixture.Account{Epoch: 7}
+    replacement := &fixture.Account{Epoch: 7}
+    caller := &fixture.Port{Target: admitted}
+    originalPort := caller
+    complete := fixture.F(caller)
+    if admitted.Requests != 1 || admitted.Successes != 0 ||
+        replacement.Requests != 0 || replacement.Successes != 0 {
+        t.Fatalf("admission: original=%+v replacement=%+v", admitted, replacement)
+    }
+    caller = &fixture.Port{Target: replacement}
+    if caller == originalPort || originalPort.Target != admitted || caller.Target != replacement {
+        t.Fatal("rebinding must change only the caller's local pointer")
+    }
+    if admitted.Successes != 0 || replacement.Successes != 0 {
+        t.Fatal("rebinding itself must not deliver completion")
+    }
+    complete()
+    if admitted.Requests != 1 || admitted.Successes != 1 ||
+        replacement.Requests != 0 || replacement.Successes != 0 ||
+        originalPort.Target != admitted || caller.Target != replacement {
+        t.Fatalf("delivery: original=%+v replacement=%+v", admitted, replacement)
+    }
+}

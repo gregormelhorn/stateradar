@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nfrom pathlib import Path\nd=json.loads(Path(\"analysis/initial.json\").read_text())\ns=Path(\"component.go\").read_text().splitlines()\nprint(d.keys())\nfor x in d[\"findings\"]:\n c=x[\"citation\"]\n print(x[\"id\"],c[\"line\"],\"exact\" if s[c[\"line\"]-1]==c[\"fragment\"] else repr(c[\"fragment\"]),x[\"question\"])"
+  ],
+  "exit_code": 0
+}

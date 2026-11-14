@@ -1,0 +1,93 @@
+[
+  {
+    "id": "C1",
+    "kind": "claim",
+    "statement": "F saves the account pointer from the supplied Port's Target in a local variable during admission.",
+    "line": 31,
+    "fragment": " target := p.Target"
+  },
+  {
+    "id": "C2",
+    "kind": "claim",
+    "statement": "Reassigning only the caller's *Port variable after F returns cannot redirect its saved callback to the new Port's account.",
+    "line": 33,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "C3",
+    "kind": "claim",
+    "statement": "Invoking F's saved callback once after caller-variable reassignment increments Successes on the original admitted account.",
+    "line": 33,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "C4",
+    "kind": "claim",
+    "statement": "After D admits a key, deleting that key makes the saved callback skip success even if another key still points to the admitted account.",
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "C5",
+    "kind": "claim",
+    "statement": "Reinserting the admitted account at D's saved key after a skipped invocation allows the next invocation of that same callback to increment its Successes.",
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "C6",
+    "kind": "claim",
+    "statement": "Calling F with a nil *Port panics at the Target field access, before any request increment.",
+    "line": 31,
+    "fragment": " target := p.Target"
+  },
+  {
+    "id": "C7",
+    "kind": "claim",
+    "statement": "Calling D on a nil *Registry panics while accessing Entries, before an account lookup or request increment.",
+    "line": 23,
+    "fragment": " r.Entries[key].Requests++"
+  },
+  {
+    "id": "C8",
+    "kind": "claim",
+    "statement": "A's saved callback reads the Target of the Port used at admission when the callback is invoked.",
+    "line": 10,
+    "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+  },
+  {
+    "id": "C9",
+    "kind": "claim",
+    "statement": "B's saved callback increments the captured account's current Successes field after an external write to that field.",
+    "line": 15,
+    "fragment": " return func() { target.Successes++ }"
+  },
+  {
+    "id": "C10",
+    "kind": "claim",
+    "statement": "C's saved callback checks pointer identity on the original Port's current Target before comparing the saved epoch.",
+    "line": 20,
+    "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+  },
+  {
+    "id": "C11",
+    "kind": "claim",
+    "statement": "D's saved callback uses the admission key in the original Registry's current Entries field.",
+    "line": 24,
+    "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+  },
+  {
+    "id": "C12",
+    "kind": "claim",
+    "statement": "E's saved callback reads Target from the value receiver copied at admission.",
+    "line": 28,
+    "fragment": " return func() { p.Target.Successes++ }"
+  },
+  {
+    "id": "C13",
+    "kind": "claim",
+    "statement": "F's saved callback performs its success increment only when invoked.",
+    "line": 33,
+    "fragment": " return func() { target.Successes++ }"
+  }
+]

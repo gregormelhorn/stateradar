@@ -1,0 +1,54 @@
+     1	package identityfixture_test
+     2	
+     3	import (
+     4		"testing"
+     5	
+     6		fixture "identityfixture"
+     7	)
+     8	
+     9	func TestIdentityCallerVariableRebinding(t *testing.T) {
+    10		original := &fixture.Account{Epoch: 7}
+    11		incoming := &fixture.Account{Epoch: 8}
+    12		var callerPort *fixture.Port = &fixture.Port{Target: original}
+    13		originalPort := callerPort
+    14		incomingPort := &fixture.Port{Target: incoming}
+    15		complete := fixture.F(callerPort)
+    16	
+    17		callerPort = incomingPort
+    18		checkState := func(wantSuccesses int) {
+    19			t.Helper()
+    20			if callerPort == originalPort || callerPort != incomingPort {
+    21				t.Fatal("caller variable does not point to the distinct replacement port")
+    22			}
+    23			if originalPort.Target != original || incomingPort.Target != incoming {
+    24				t.Fatal("a port target changed")
+    25			}
+    26			if original.Epoch != 7 || incoming.Epoch != 8 {
+    27				t.Fatal("an account epoch changed")
+    28			}
+    29			counters(t, original, 1, wantSuccesses)
+    30			counters(t, incoming, 0, 0)
+    31		}
+    32		checkState(0)
+    33		complete()
+    34		checkState(1)
+    35	}
+    36	
+    37	func TestIdentityRegistryOtherKeyAlias(t *testing.T) {
+    38		b := newBinding()
+    39		b.registry.Entries["other"] = b.original
+    40		complete := b.registry.D(key)
+    41		counters(t, b.original, 1, 0)
+    42	
+    43		delete(b.registry.Entries, key)
+    44		complete()
+    45		counters(t, b.original, 1, 0)
+    46		if b.registry.Entries["other"] != b.original {
+    47			t.Fatal("the other key no longer points to the admitted account")
+    48		}
+    49	
+    50		b.registry.Entries[key] = b.original
+    51		counters(t, b.original, 1, 0)
+    52		complete()
+    53		counters(t, b.original, 1, 1)
+    54	}

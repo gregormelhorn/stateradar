@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nfrom pathlib import Path\nx=json.loads(Path('analysis/initial.json').read_text())\nfor f in x['findings']:\n print(f\"{f['id']} {f['question']}\")\n"
+  ],
+  "exit_code": 0
+}

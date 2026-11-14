@@ -1,0 +1,6 @@
+# Final review summary
+
+- Retained all 74 baseline findings, including their wording, order and open questions. Added four findings and recorded 42 qualifications covering test scope, setup conditions, exact ordering and citation precision. [Findings](./final.json) · [Supplement](./supplement.json)
+- F’s saved callback credited the original account after only the caller’s local `*Port` variable was reassigned. Both Port targets and account epochs stayed as expected, and the new account’s counters stayed at zero. D skipped credit while its saved key was absent even though another key still pointed to the account. It credited the account on explicit delivery after key restoration. [New probes](./_postprobe/postreview_test.go)
+- The race-enabled overlay run passed all 21 top-level tests and their subtests on each of three repetitions, with zero skips or failures. The preservation validator passed. [Go log](../../logs/026.stdout) · [Validator log](../../logs/057.stdout)
+- The nil `*Port` and nil `*Registry` admission findings are source observations. The review explains why those two claims and B’s observed counter-reset behavior stand despite unclear Jev verdicts. All lifecycle intent questions remain open. [Review](./review.md) · [Original questions](../baseline/open-questions.md)

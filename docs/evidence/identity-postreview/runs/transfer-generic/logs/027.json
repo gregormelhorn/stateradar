@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json, sys\nfrom pathlib import Path\nlines = Path('component.go').read_text().splitlines()\nchecks = [dict(id=f'C{i}', kind='claim', statement=statement, line=line, fragment=lines[line-1]) for i, (line, statement) in enumerate(json.loads(sys.argv[1]),1)]\nPath('analysis/final-checks.json').write_text(json.dumps(checks, indent=2) + '\\n')\n",
+    "[[31,\"F saves the account pointer from the supplied Port's Target in a local variable during admission.\"],[33,\"Reassigning only the caller's *Port variable after F returns cannot redirect its saved callback to the new Port's account.\"],[33,\"Invoking F's saved callback once after caller-variable reassignment increments Successes on the original admitted account.\"],[24,\"After D admits a key, deleting that key makes the saved callback skip success even if another key still points to the admitted account.\"],[24,\"Reinserting the admitted account at D's saved key after a skipped invocation allows the next invocation of that same callback to increment its Successes.\"],[31,\"Calling F with a nil *Port panics at the Target field access, before any request increment.\"],[23,\"Calling D on a nil *Registry panics while accessing Entries, before an account lookup or request increment.\"],[10,\"A's saved callback reads the Target of the Port used at admission when the callback is invoked.\"],[15,\"B's saved callback increments the captured account's current Successes field after an external write to that field.\"],[20,\"C's saved callback checks pointer identity on the original Port's current Target before comparing the saved epoch.\"],[24,\"D's saved callback uses the admission key in the original Registry's current Entries field.\"],[28,\"E's saved callback reads Target from the value receiver copied at admission.\"],[33,\"F's saved callback performs its success increment only when invoked.\"]]"
+  ],
+  "exit_code": 0
+}

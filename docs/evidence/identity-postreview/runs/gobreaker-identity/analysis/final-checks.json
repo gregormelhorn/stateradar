@@ -1,0 +1,100 @@
+[
+  {
+    "id": "C1",
+    "kind": "claim",
+    "statement": "The callback returned by Allow retains the pointer to the specific TwoStepCircuitBreaker receiver, so rebinding the caller's local pointer to a different wrapper cannot retarget it.",
+    "line": 271,
+    "fragment": "\treturn func(success bool) {"
+  },
+  {
+    "id": "C2",
+    "kind": "claim",
+    "statement": "A shallow value copy of a TwoStepCircuitBreaker initially aliases the same inner CircuitBreaker pointer without aliasing the original wrapper's pointer field.",
+    "line": 137,
+    "fragment": "\tcb *CircuitBreaker"
+  },
+  {
+    "id": "C3",
+    "kind": "claim",
+    "statement": "If the original breaker's OnStateChange hook overwrites the outer wrapper during beforeRequest, that in-progress beforeRequest still records the admission on the original breaker.",
+    "line": 266,
+    "fragment": "\tgeneration, err := tscb.cb.beforeRequest()"
+  },
+  {
+    "id": "C4",
+    "kind": "claim",
+    "statement": "A replacement half-open breaker with matching generation and MaxRequests=1 can close on a redirected success even if it has admitted zero requests.",
+    "line": 316,
+    "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+  },
+  {
+    "id": "C5",
+    "kind": "claim",
+    "statement": "Restoring the saved wrapper value can make a previously redirected completion report to the original inner breaker if the original generation still matches.",
+    "line": 272,
+    "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+  },
+  {
+    "id": "C6",
+    "kind": "claim",
+    "statement": "A redirected callback can resolve the replacement's open timeout and deliver its half-open notification before discarding the outcome on a generation mismatch.",
+    "line": 298,
+    "fragment": "\tstate, generation := cb.currentState(now)"
+  },
+  {
+    "id": "C7",
+    "kind": "claim",
+    "statement": "When the request rebinds the caller's local CircuitBreaker pointer, ordinary Execute completion calls the original receiver's classifier and accounts on that receiver.",
+    "line": 243,
+    "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))"
+  },
+  {
+    "id": "C8",
+    "kind": "claim",
+    "statement": "When an admitted request rebinds the caller's local CircuitBreaker pointer and panics, Execute's deferred failure report still targets the original receiver.",
+    "line": 237,
+    "fragment": "\t\t\tcb.afterRequest(generation, false)"
+  },
+  {
+    "id": "C9",
+    "kind": "claim",
+    "statement": "Replacing the caller's Settings.IsSuccessful field after construction does not replace the function stored in the existing breaker.",
+    "line": 174,
+    "fragment": "\t\tcb.isSuccessful = st.IsSuccessful"
+  },
+  {
+    "id": "C10",
+    "kind": "claim",
+    "statement": "A stored IsSuccessful closure can observe a change to a variable it captures by reference after breaker construction.",
+    "line": 243,
+    "fragment": "\tcb.afterRequest(generation, cb.isSuccessful(err))"
+  },
+  {
+    "id": "C11",
+    "kind": "claim",
+    "statement": "Invoking a retained Allow callback after overwriting its receiver with a zero-valued TwoStepCircuitBreaker panics when afterRequest attempts to lock the nil inner receiver's mutex.",
+    "line": 294,
+    "fragment": "\tcb.mutex.Lock()"
+  },
+  {
+    "id": "C12",
+    "kind": "claim",
+    "statement": "A late matching half-open success after a caller stopped waiting closes the breaker only if it brings consecutive successes to at least MaxRequests.",
+    "line": 316,
+    "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+  },
+  {
+    "id": "C13",
+    "kind": "claim",
+    "statement": "For a ReadyToTrip invocation, lock identity follows the inner CircuitBreaker, so a shallow TwoStep wrapper copy that still points to that inner breaker re-enters the same mutex through Counts.",
+    "line": 326,
+    "fragment": "\t\tif cb.readyToTrip(cb.counts) {"
+  },
+  {
+    "id": "C14",
+    "kind": "claim",
+    "statement": "A manual retry of an Allow completion after a hook panic can resolve a different inner breaker if the captured wrapper is overwritten between invocations.",
+    "line": 272,
+    "fragment": "\t\ttscb.cb.afterRequest(generation, success)"
+  }
+]

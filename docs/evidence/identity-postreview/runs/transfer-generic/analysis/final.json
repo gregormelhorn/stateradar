@@ -1,0 +1,1350 @@
+{
+  "findings": [
+    {
+      "id": "F01",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Call A with the original binding.",
+        "Inspect counters before invoking the callback.",
+        "Invoke the callback once with the same binding and epoch."
+      ],
+      "outcome": "observed-in-code — Admission alone increments original Requests to 1. The callback increments original Successes to 1 and leaves Requests at 1. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:75 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:77 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityBaseline/A",
+      "question": "explicit-requirement — README.md:3–6 describes admission and completed-success counters for A through F. The source determines the timing and attribution in this unchanged-binding control."
+    },
+    {
+      "id": "F02",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Call B with the original binding.",
+        "Inspect counters before invoking the callback.",
+        "Invoke the callback once with the same binding and epoch."
+      ],
+      "outcome": "observed-in-code — Admission alone increments original Requests to 1. The callback increments original Successes to 1 and leaves Requests at 1. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:75 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:77 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityBaseline/B",
+      "question": "explicit-requirement — README.md:3–6 describes admission and completed-success counters for A through F. The source determines the timing and attribution in this unchanged-binding control."
+    },
+    {
+      "id": "F03",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Call C with the original binding.",
+        "Inspect counters before invoking the callback.",
+        "Invoke the callback once with the same binding and epoch."
+      ],
+      "outcome": "observed-in-code — Admission alone increments original Requests to 1. The callback increments original Successes to 1 and leaves Requests at 1. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:75 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:77 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityBaseline/C",
+      "question": "explicit-requirement — README.md:3–6 describes admission and completed-success counters for A through F. The source determines the timing and attribution in this unchanged-binding control."
+    },
+    {
+      "id": "F04",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Call D with the original binding.",
+        "Inspect counters before invoking the callback.",
+        "Invoke the callback once with the same binding and epoch."
+      ],
+      "outcome": "observed-in-code — Admission alone increments original Requests to 1. The callback increments original Successes to 1 and leaves Requests at 1. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:75 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:77 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityBaseline/D",
+      "question": "explicit-requirement — README.md:3–6 describes admission and completed-success counters for A through F. The source determines the timing and attribution in this unchanged-binding control."
+    },
+    {
+      "id": "F05",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Call E with the original binding.",
+        "Inspect counters before invoking the callback.",
+        "Invoke the callback once with the same binding and epoch."
+      ],
+      "outcome": "observed-in-code — Admission alone increments original Requests to 1. The callback increments original Successes to 1 and leaves Requests at 1. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/identity_test.go:75 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:77 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityBaseline/E",
+      "question": "explicit-requirement — README.md:3–6 describes admission and completed-success counters for A through F. The source determines the timing and attribution in this unchanged-binding control."
+    },
+    {
+      "id": "F06",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Call F with the original binding.",
+        "Inspect counters before invoking the callback.",
+        "Invoke the callback once with the same binding and epoch."
+      ],
+      "outcome": "observed-in-code — Admission alone increments original Requests to 1. The callback increments original Successes to 1 and leaves Requests at 1. component.go:33 (\"return func() { target.Successes++ }\") and component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:75 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:77 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityBaseline/F",
+      "question": "explicit-requirement — README.md:3–6 describes admission and completed-success counters for A through F. The source determines the timing and attribution in this unchanged-binding control."
+    },
+    {
+      "id": "F07",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account also has Epoch=7.",
+      "steps": [
+        "Admit via A.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — The replacement gets one Successes increment. The original has one Requests increment and zero Successes. Replacement Requests stay at zero. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:97 (\"\"A\": {0, 1}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentitySameEpochReplacement/A",
+      "question": "Q1 Should A credit the account currently bound with a matching epoch after replacement, and how should the request and success be attributed?"
+    },
+    {
+      "id": "F08",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account also has Epoch=7.",
+      "steps": [
+        "Admit via B.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — The original gets one Successes increment. The replacement counters remain zero. Replacement Requests stay at zero. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:97 (\"\"A\": {0, 1}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentitySameEpochReplacement/B",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F09",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account also has Epoch=7.",
+      "steps": [
+        "Admit via C.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — Both Successes counters stay zero. The original retains the request. Replacement Requests stay at zero. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:97 (\"\"A\": {0, 1}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentitySameEpochReplacement/C",
+      "question": "Q3 Should C skip a completion after rebinding to a different account with the same epoch, and should restoring the original pointer make it eligible again?"
+    },
+    {
+      "id": "F10",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account also has Epoch=7.",
+      "steps": [
+        "Admit via D.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — The replacement gets one Successes increment. The original has one Requests increment and zero Successes. Replacement Requests stay at zero. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:97 (\"\"A\": {0, 1}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentitySameEpochReplacement/D",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect?"
+    },
+    {
+      "id": "F11",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account also has Epoch=7.",
+      "steps": [
+        "Admit via E.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — The original gets one Successes increment. The replacement counters remain zero. Replacement Requests stay at zero. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/identity_test.go:97 (\"\"A\": {0, 1}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentitySameEpochReplacement/E",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F12",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account also has Epoch=7.",
+      "steps": [
+        "Admit via F.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — The original gets one Successes increment. The replacement counters remain zero. Replacement Requests stay at zero. component.go:33 (\"return func() { target.Successes++ }\") and component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:97 (\"\"A\": {0, 1}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentitySameEpochReplacement/F",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F13",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account has Epoch=8.",
+      "steps": [
+        "Admit via A.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — Neither account gets a Successes increment. Requests remain 1 on the original and 0 on the replacement. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:103 (\"\"A\": {0, 0}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityDifferentEpochReplacement/A",
+      "question": "Q1 Should A credit the account currently bound with a matching epoch after replacement, and how should the request and success be attributed?"
+    },
+    {
+      "id": "F14",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account has Epoch=8.",
+      "steps": [
+        "Admit via B.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — The original gets one Successes increment. Requests remain 1 on the original and 0 on the replacement. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:103 (\"\"A\": {0, 0}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityDifferentEpochReplacement/B",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F15",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account has Epoch=8.",
+      "steps": [
+        "Admit via C.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — Neither account gets a Successes increment. Requests remain 1 on the original and 0 on the replacement. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:103 (\"\"A\": {0, 0}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityDifferentEpochReplacement/C",
+      "question": "Q3 Should C skip a completion after rebinding to a different account with the same epoch, and should restoring the original pointer make it eligible again?"
+    },
+    {
+      "id": "F16",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account has Epoch=8.",
+      "steps": [
+        "Admit via D.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — The replacement gets one Successes increment. Requests remain 1 on the original and 0 on the replacement. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:103 (\"\"A\": {0, 0}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityDifferentEpochReplacement/D",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect?"
+    },
+    {
+      "id": "F17",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account has Epoch=8.",
+      "steps": [
+        "Admit via E.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — The original gets one Successes increment. Requests remain 1 on the original and 0 on the replacement. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/identity_test.go:103 (\"\"A\": {0, 0}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityDifferentEpochReplacement/E",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F18",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A different account has Epoch=8.",
+      "steps": [
+        "Admit via F.",
+        "Rebind the Port target or registry key to the replacement account.",
+        "Invoke the outstanding callback."
+      ],
+      "outcome": "observed-in-code — The original gets one Successes increment. Requests remain 1 on the original and 0 on the replacement. component.go:33 (\"return func() { target.Successes++ }\") and component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:103 (\"\"A\": {0, 0}, \"B\": {1, 0}, \"C\": {0, 0}, \"D\": {0, 1}, \"E\": {1, 0}, \"F\": {1, 0},\") and analysis/_probe/identity_test.go:90 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:91 (\"counters(t, incoming, 0, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityDifferentEpochReplacement/F",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F19",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via A.",
+        "Change only the original account's Epoch to 8.",
+        "Invoke the callback while Epoch remains 8."
+      ],
+      "outcome": "observed-in-code — Original Requests remain 1 and original Successes remain 0. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:108 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"D\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:114 (\"counters(t, b.original, 1, expected[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityEpochChange/A",
+      "question": "Q2 What should A and C do with an outstanding completion after an epoch change, including when the original numeric epoch is restored?"
+    },
+    {
+      "id": "F20",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via B.",
+        "Change only the original account's Epoch to 8.",
+        "Invoke the callback while Epoch remains 8."
+      ],
+      "outcome": "observed-in-code — Original Requests remain 1 and original Successes increase to 1. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:108 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"D\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:114 (\"counters(t, b.original, 1, expected[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityEpochChange/B",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F21",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via C.",
+        "Change only the original account's Epoch to 8.",
+        "Invoke the callback while Epoch remains 8."
+      ],
+      "outcome": "observed-in-code — Original Requests remain 1 and original Successes remain 0. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:108 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"D\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:114 (\"counters(t, b.original, 1, expected[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityEpochChange/C",
+      "question": "Q2 What should A and C do with an outstanding completion after an epoch change, including when the original numeric epoch is restored?"
+    },
+    {
+      "id": "F22",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via D.",
+        "Change only the original account's Epoch to 8.",
+        "Invoke the callback while Epoch remains 8."
+      ],
+      "outcome": "observed-in-code — Original Requests remain 1 and original Successes increase to 1. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:108 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"D\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:114 (\"counters(t, b.original, 1, expected[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityEpochChange/D",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect?"
+    },
+    {
+      "id": "F23",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via E.",
+        "Change only the original account's Epoch to 8.",
+        "Invoke the callback while Epoch remains 8."
+      ],
+      "outcome": "observed-in-code — Original Requests remain 1 and original Successes increase to 1. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/identity_test.go:108 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"D\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:114 (\"counters(t, b.original, 1, expected[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityEpochChange/E",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F24",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via F.",
+        "Change only the original account's Epoch to 8.",
+        "Invoke the callback while Epoch remains 8."
+      ],
+      "outcome": "observed-in-code — Original Requests remain 1 and original Successes increase to 1. component.go:33 (\"return func() { target.Successes++ }\") and component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:108 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"D\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:114 (\"counters(t, b.original, 1, expected[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityEpochChange/F",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F25",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account starts with zero counters.",
+      "steps": [
+        "Admit via A.",
+        "Invoke the callback and inspect the original counters.",
+        "Change the original epoch to 8, set Port.Target to nil, then bind the replacement. Make no later callback invocation."
+      ],
+      "outcome": "observed-in-code — The original already has Requests=1 and Successes=1 before the changes and retains both afterward. The replacement remains at zero. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:123 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:133 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:134 (\"counters(t, incoming, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityCompletionBeforeBoundary/A",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled?"
+    },
+    {
+      "id": "F26",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account starts with zero counters.",
+      "steps": [
+        "Admit via B.",
+        "Invoke the callback and inspect the original counters.",
+        "Change the original epoch to 8, set Port.Target to nil, then bind the replacement. Make no later callback invocation."
+      ],
+      "outcome": "observed-in-code — The original already has Requests=1 and Successes=1 before the changes and retains both afterward. The replacement remains at zero. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:123 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:133 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:134 (\"counters(t, incoming, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCompletionBeforeBoundary/B",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled?"
+    },
+    {
+      "id": "F27",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account starts with zero counters.",
+      "steps": [
+        "Admit via C.",
+        "Invoke the callback and inspect the original counters.",
+        "Change the original epoch to 8, set Port.Target to nil, then bind the replacement. Make no later callback invocation."
+      ],
+      "outcome": "observed-in-code — The original already has Requests=1 and Successes=1 before the changes and retains both afterward. The replacement remains at zero. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:123 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:133 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:134 (\"counters(t, incoming, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityCompletionBeforeBoundary/C",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled?"
+    },
+    {
+      "id": "F28",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account starts with zero counters.",
+      "steps": [
+        "Admit via D.",
+        "Invoke the callback and inspect the original counters.",
+        "Change the original epoch to 8, delete the admitted key, then bind the replacement. Make no later callback invocation."
+      ],
+      "outcome": "observed-in-code — The original already has Requests=1 and Successes=1 before the changes and retains both afterward. The replacement remains at zero. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:123 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:133 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:134 (\"counters(t, incoming, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityCompletionBeforeBoundary/D",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled?"
+    },
+    {
+      "id": "F29",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account starts with zero counters.",
+      "steps": [
+        "Admit via E.",
+        "Invoke the callback and inspect the original counters.",
+        "Change the original epoch to 8, set Port.Target to nil, then bind the replacement. Make no later callback invocation."
+      ],
+      "outcome": "observed-in-code — The original already has Requests=1 and Successes=1 before the changes and retains both afterward. The replacement remains at zero. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/identity_test.go:123 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:133 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:134 (\"counters(t, incoming, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityCompletionBeforeBoundary/E",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled?"
+    },
+    {
+      "id": "F30",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account starts with zero counters.",
+      "steps": [
+        "Admit via F.",
+        "Invoke the callback and inspect the original counters.",
+        "Change the original epoch to 8, set Port.Target to nil, then bind the replacement. Make no later callback invocation."
+      ],
+      "outcome": "observed-in-code — The original already has Requests=1 and Successes=1 before the changes and retains both afterward. The replacement remains at zero. component.go:33 (\"return func() { target.Successes++ }\") and component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:123 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:133 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:134 (\"counters(t, incoming, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCompletionBeforeBoundary/F",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled?"
+    },
+    {
+      "id": "F31",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via A.",
+        "Set Port.Target to nil.",
+        "Invoke and recover the callback panic.",
+        "Restore the original and invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The first invocation panics while reading the nil target's Epoch and does not credit success. Restoring the binding alone does not credit success. The later invocation credits the original once. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:139 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:149 (\"mustPanic(t, complete)\") and analysis/_probe/identity_test.go:153 (\"counters(t, b.original, 1, expected[op.name])\") and analysis/_probe/identity_test.go:157 (\"counters(t, b.original, 1, expected[op.name]+1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityDetachedPort/A",
+      "question": "Q8 What is the public contract for nil or missing admission inputs and for detaching a Port before completion? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F32",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via B.",
+        "Set Port.Target to nil.",
+        "Invoke the callback.",
+        "Restore the original and invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The detached callback credits the original once. The later invocation credits the original again. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:139 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:149 (\"mustPanic(t, complete)\") and analysis/_probe/identity_test.go:153 (\"counters(t, b.original, 1, expected[op.name])\") and analysis/_probe/identity_test.go:157 (\"counters(t, b.original, 1, expected[op.name]+1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityDetachedPort/B",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F33",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via C.",
+        "Set Port.Target to nil.",
+        "Invoke the callback.",
+        "Restore the original and invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The first invocation returns normally and the original remains at Requests=1, Successes=0. Restoring its binding alone leaves the counters unchanged. The later invocation credits the original once. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:139 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:149 (\"mustPanic(t, complete)\") and analysis/_probe/identity_test.go:153 (\"counters(t, b.original, 1, expected[op.name])\") and analysis/_probe/identity_test.go:157 (\"counters(t, b.original, 1, expected[op.name]+1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityDetachedPort/C",
+      "question": "Q3 Should C skip a completion after rebinding to a different account with the same epoch, and should restoring the original pointer make it eligible again? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F34",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via E.",
+        "Set Port.Target to nil.",
+        "Invoke the callback.",
+        "Restore the original and invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The detached callback credits the original once. The later invocation credits the original again. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/identity_test.go:139 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:149 (\"mustPanic(t, complete)\") and analysis/_probe/identity_test.go:153 (\"counters(t, b.original, 1, expected[op.name])\") and analysis/_probe/identity_test.go:157 (\"counters(t, b.original, 1, expected[op.name]+1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityDetachedPort/E",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F35",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via F.",
+        "Set Port.Target to nil.",
+        "Invoke the callback.",
+        "Restore the original and invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The detached callback credits the original once. The later invocation credits the original again. component.go:33 (\"return func() { target.Successes++ }\") and component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:139 (\"expected := map[string]int{\"A\": 0, \"B\": 1, \"C\": 0, \"E\": 1, \"F\": 1}\") and analysis/_probe/identity_test.go:149 (\"mustPanic(t, complete)\") and analysis/_probe/identity_test.go:153 (\"counters(t, b.original, 1, expected[op.name])\") and analysis/_probe/identity_test.go:157 (\"counters(t, b.original, 1, expected[op.name]+1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityDetachedPort/F",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F36",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. The key maps to the original.",
+      "steps": [
+        "Admit via D.",
+        "Delete the key.",
+        "Invoke while the entry is unavailable.",
+        "Leave the entry unavailable and make no later invocation."
+      ],
+      "outcome": "observed-in-code — The callback returns normally and the original remains at Requests=1, Successes=0. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:189 (\"delete(b.registry.Entries, key)\") and analysis/_probe/identity_test.go:170 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:171 (\"if later == \"no_later_input\" {\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityRegistryAbsent/no_later_input",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect? Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled?"
+    },
+    {
+      "id": "F37",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. The key maps to the original.",
+      "steps": [
+        "Admit via D.",
+        "Delete the key.",
+        "Invoke while the entry is unavailable.",
+        "Bind a replacement at the same key, creating a map if needed. Inspect counters before invoking.",
+        "Invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The unavailable invocation and binding alone leave Successes unchanged. The later invocation credits the replacement once, leaving the original request in place. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:189 (\"delete(b.registry.Entries, key)\") and analysis/_probe/identity_test.go:170 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:180 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/identity_test.go:183 (\"counters(t, incoming, 0, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityRegistryAbsent/later_matching_key",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F38",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. The key maps to the original.",
+      "steps": [
+        "Admit via D.",
+        "Store nil under the key.",
+        "Invoke while the entry is unavailable.",
+        "Leave the entry unavailable and make no later invocation."
+      ],
+      "outcome": "observed-in-code — The callback returns normally and the original remains at Requests=1, Successes=0. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:193 (\"b.registry.Entries[key] = nil\") and analysis/_probe/identity_test.go:170 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:171 (\"if later == \"no_later_input\" {\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityRegistryNilEntry/no_later_input",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect? Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled?"
+    },
+    {
+      "id": "F39",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. The key maps to the original.",
+      "steps": [
+        "Admit via D.",
+        "Store nil under the key.",
+        "Invoke while the entry is unavailable.",
+        "Bind a replacement at the same key, creating a map if needed. Inspect counters before invoking.",
+        "Invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The unavailable invocation and binding alone leave Successes unchanged. The later invocation credits the replacement once, leaving the original request in place. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:193 (\"b.registry.Entries[key] = nil\") and analysis/_probe/identity_test.go:170 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:180 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/identity_test.go:183 (\"counters(t, incoming, 0, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityRegistryNilEntry/later_matching_key",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F40",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. The key maps to the original.",
+      "steps": [
+        "Admit via D.",
+        "Set Registry.Entries to nil.",
+        "Invoke while the entry is unavailable.",
+        "Leave the entry unavailable and make no later invocation."
+      ],
+      "outcome": "observed-in-code — The callback returns normally and the original remains at Requests=1, Successes=0. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:197 (\"b.registry.Entries = nil\") and analysis/_probe/identity_test.go:170 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:171 (\"if later == \"no_later_input\" {\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityRegistryNilMap/no_later_input",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect? Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled?"
+    },
+    {
+      "id": "F41",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. The key maps to the original.",
+      "steps": [
+        "Admit via D.",
+        "Set Registry.Entries to nil.",
+        "Invoke while the entry is unavailable.",
+        "Bind a replacement at the same key, creating a map if needed. Inspect counters before invoking.",
+        "Invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The unavailable invocation and binding alone leave Successes unchanged. The later invocation credits the replacement once, leaving the original request in place. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:197 (\"b.registry.Entries = nil\") and analysis/_probe/identity_test.go:170 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:180 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/identity_test.go:183 (\"counters(t, incoming, 0, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityRegistryNilMap/later_matching_key",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F42",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account has Epoch=8.",
+      "steps": [
+        "Admit via D.",
+        "Assign a fresh map containing the same key with the replacement and a distinct other key.",
+        "Invoke the callback."
+      ],
+      "outcome": "observed-in-code — The replacement receives one success. The old map's account retains its request and has no success. The other key's account remains untouched. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:208 (\"counters(t, retired[key], 1, 0)\") and analysis/_probe/identity_test.go:209 (\"counters(t, incoming, 0, 1)\") and analysis/_probe/identity_test.go:210 (\"counters(t, unrelated, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityRegistryMapReplacement",
+      "question": "Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect?"
+    },
+    {
+      "id": "F43",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via A.",
+        "Change the original epoch to 8.",
+        "Invoke and inspect counters.",
+        "Restore epoch 7 and inspect counters again.",
+        "Invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The first call and the epoch restoration alone leave original Successes at zero. The later matching invocation credits one success. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:227 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:229 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:231 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityEpochRestoration/A",
+      "question": "Q2 What should A and C do with an outstanding completion after an epoch change, including when the original numeric epoch is restored? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F44",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via C.",
+        "Change the original epoch to 8.",
+        "Invoke and inspect counters.",
+        "Restore epoch 7 and inspect counters again.",
+        "Invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The first call and the epoch restoration alone leave original Successes at zero. The later matching invocation credits one success. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:227 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:229 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:231 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityEpochRestoration/C",
+      "question": "Q2 What should A and C do with an outstanding completion after an epoch change, including when the original numeric epoch is restored? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F45",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement has Epoch=7.",
+      "steps": [
+        "Admit via A.",
+        "Bind the replacement.",
+        "Invoke and inspect both accounts.",
+        "Restore the original and invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The first invocation credits the replacement once. The later invocation credits the original once. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:236 (\"redirected := map[string]int{\"A\": 1, \"C\": 0}\") and analysis/_probe/identity_test.go:243 (\"counters(t, incoming, 0, redirected[op.name])\") and analysis/_probe/identity_test.go:247 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityTargetRestoration/A",
+      "question": "Q1 Should A credit the account currently bound with a matching epoch after replacement, and how should the request and success be attributed? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F46",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement has Epoch=7.",
+      "steps": [
+        "Admit via C.",
+        "Bind the replacement.",
+        "Invoke and inspect both accounts.",
+        "Restore the original and invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The first invocation credits neither account. The later invocation credits the original once. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:236 (\"redirected := map[string]int{\"A\": 1, \"C\": 0}\") and analysis/_probe/identity_test.go:243 (\"counters(t, incoming, 0, redirected[op.name])\") and analysis/_probe/identity_test.go:247 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityTargetRestoration/C",
+      "question": "Q3 Should C skip a completion after rebinding to a different account with the same epoch, and should restoring the original pointer make it eligible again? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F47",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit two operations via A through the same binding.",
+        "Discard one returned callback and retain the other. Inspect counters with no completion yet.",
+        "Invoke the retained callback twice under the original binding, with a counter check after each call.",
+        "Make no invocation of the discarded callback."
+      ],
+      "outcome": "observed-in-code — Two requests are recorded and zero successes exist before any callback. The retained callback credits one success on each invocation. There is no additional credit or rollback attributable to the discarded callback in this sequence. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:255 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:257 (\"counters(t, b.original, 2, 0)\") and analysis/_probe/identity_test.go:259 (\"counters(t, b.original, 2, 1)\") and analysis/_probe/identity_test.go:261 (\"counters(t, b.original, 2, 2)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityAbandonedAndRepeated/A",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F48",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit two operations via B through the same binding.",
+        "Discard one returned callback and retain the other. Inspect counters with no completion yet.",
+        "Invoke the retained callback twice under the original binding, with a counter check after each call.",
+        "Make no invocation of the discarded callback."
+      ],
+      "outcome": "observed-in-code — Two requests are recorded and zero successes exist before any callback. The retained callback credits one success on each invocation. There is no additional credit or rollback attributable to the discarded callback in this sequence. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:255 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:257 (\"counters(t, b.original, 2, 0)\") and analysis/_probe/identity_test.go:259 (\"counters(t, b.original, 2, 1)\") and analysis/_probe/identity_test.go:261 (\"counters(t, b.original, 2, 2)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityAbandonedAndRepeated/B",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F49",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit two operations via C through the same binding.",
+        "Discard one returned callback and retain the other. Inspect counters with no completion yet.",
+        "Invoke the retained callback twice under the original binding, with a counter check after each call.",
+        "Make no invocation of the discarded callback."
+      ],
+      "outcome": "observed-in-code — Two requests are recorded and zero successes exist before any callback. The retained callback credits one success on each invocation. There is no additional credit or rollback attributable to the discarded callback in this sequence. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:255 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:257 (\"counters(t, b.original, 2, 0)\") and analysis/_probe/identity_test.go:259 (\"counters(t, b.original, 2, 1)\") and analysis/_probe/identity_test.go:261 (\"counters(t, b.original, 2, 2)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityAbandonedAndRepeated/C",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F50",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit two operations via D through the same binding.",
+        "Discard one returned callback and retain the other. Inspect counters with no completion yet.",
+        "Invoke the retained callback twice under the original binding, with a counter check after each call.",
+        "Make no invocation of the discarded callback."
+      ],
+      "outcome": "observed-in-code — Two requests are recorded and zero successes exist before any callback. The retained callback credits one success on each invocation. There is no additional credit or rollback attributable to the discarded callback in this sequence. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:255 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:257 (\"counters(t, b.original, 2, 0)\") and analysis/_probe/identity_test.go:259 (\"counters(t, b.original, 2, 1)\") and analysis/_probe/identity_test.go:261 (\"counters(t, b.original, 2, 2)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityAbandonedAndRepeated/D",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F51",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit two operations via E through the same binding.",
+        "Discard one returned callback and retain the other. Inspect counters with no completion yet.",
+        "Invoke the retained callback twice under the original binding, with a counter check after each call.",
+        "Make no invocation of the discarded callback."
+      ],
+      "outcome": "observed-in-code — Two requests are recorded and zero successes exist before any callback. The retained callback credits one success on each invocation. There is no additional credit or rollback attributable to the discarded callback in this sequence. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/identity_test.go:255 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:257 (\"counters(t, b.original, 2, 0)\") and analysis/_probe/identity_test.go:259 (\"counters(t, b.original, 2, 1)\") and analysis/_probe/identity_test.go:261 (\"counters(t, b.original, 2, 2)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityAbandonedAndRepeated/E",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F52",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit two operations via F through the same binding.",
+        "Discard one returned callback and retain the other. Inspect counters with no completion yet.",
+        "Invoke the retained callback twice under the original binding, with a counter check after each call.",
+        "Make no invocation of the discarded callback."
+      ],
+      "outcome": "observed-in-code — Two requests are recorded and zero successes exist before any callback. The retained callback credits one success on each invocation. There is no additional credit or rollback attributable to the discarded callback in this sequence. component.go:33 (\"return func() { target.Successes++ }\") and component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:255 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/identity_test.go:257 (\"counters(t, b.original, 2, 0)\") and analysis/_probe/identity_test.go:259 (\"counters(t, b.original, 2, 1)\") and analysis/_probe/identity_test.go:261 (\"counters(t, b.original, 2, 2)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityAbandonedAndRepeated/F",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F53",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account also has Epoch=7.",
+      "steps": [
+        "Admit via A on the original.",
+        "Rebind to the replacement and admit another operation through the same Port or Registry.",
+        "Invoke the newer callback first.",
+        "Invoke the older callback last."
+      ],
+      "outcome": "observed-in-code — Each account has one request. The newer callback credits the replacement once. The older callback credits the replacement again. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:267 (\"\"A\": {0, 2}, \"B\": {1, 1}, \"C\": {0, 1}, \"D\": {0, 2}, \"E\": {1, 1}, \"F\": {1, 1},\") and analysis/_probe/identity_test.go:278 (\"counters(t, incoming, 1, 1)\") and analysis/_probe/identity_test.go:280 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:281 (\"counters(t, incoming, 1, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityOverlappingAdmissions/A",
+      "question": "Q9 How should counter resets or overlapping admissions be attributed when an older completion arrives later? Q1 Should A credit the account currently bound with a matching epoch after replacement, and how should the request and success be attributed?"
+    },
+    {
+      "id": "F54",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account also has Epoch=7.",
+      "steps": [
+        "Admit via B on the original.",
+        "Rebind to the replacement and admit another operation through the same Port or Registry.",
+        "Invoke the newer callback first.",
+        "Invoke the older callback last."
+      ],
+      "outcome": "observed-in-code — Each account has one request. The newer callback credits the replacement once. The older callback credits the original once. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:267 (\"\"A\": {0, 2}, \"B\": {1, 1}, \"C\": {0, 1}, \"D\": {0, 2}, \"E\": {1, 1}, \"F\": {1, 1},\") and analysis/_probe/identity_test.go:278 (\"counters(t, incoming, 1, 1)\") and analysis/_probe/identity_test.go:280 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:281 (\"counters(t, incoming, 1, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityOverlappingAdmissions/B",
+      "question": "Q9 How should counter resets or overlapping admissions be attributed when an older completion arrives later? Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F55",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account also has Epoch=7.",
+      "steps": [
+        "Admit via C on the original.",
+        "Rebind to the replacement and admit another operation through the same Port or Registry.",
+        "Invoke the newer callback first.",
+        "Invoke the older callback last."
+      ],
+      "outcome": "observed-in-code — Each account has one request. The newer callback credits the replacement once. The older callback adds no credit. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/identity_test.go:267 (\"\"A\": {0, 2}, \"B\": {1, 1}, \"C\": {0, 1}, \"D\": {0, 2}, \"E\": {1, 1}, \"F\": {1, 1},\") and analysis/_probe/identity_test.go:278 (\"counters(t, incoming, 1, 1)\") and analysis/_probe/identity_test.go:280 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:281 (\"counters(t, incoming, 1, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityOverlappingAdmissions/C",
+      "question": "Q9 How should counter resets or overlapping admissions be attributed when an older completion arrives later? Q3 Should C skip a completion after rebinding to a different account with the same epoch, and should restoring the original pointer make it eligible again?"
+    },
+    {
+      "id": "F56",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account also has Epoch=7.",
+      "steps": [
+        "Admit via D on the original.",
+        "Rebind to the replacement and admit another operation through the same Port or Registry.",
+        "Invoke the newer callback first.",
+        "Invoke the older callback last."
+      ],
+      "outcome": "observed-in-code — Each account has one request. The newer callback credits the replacement once. The older callback credits the replacement again. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:267 (\"\"A\": {0, 2}, \"B\": {1, 1}, \"C\": {0, 1}, \"D\": {0, 2}, \"E\": {1, 1}, \"F\": {1, 1},\") and analysis/_probe/identity_test.go:278 (\"counters(t, incoming, 1, 1)\") and analysis/_probe/identity_test.go:280 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:281 (\"counters(t, incoming, 1, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityOverlappingAdmissions/D",
+      "question": "Q9 How should counter resets or overlapping admissions be attributed when an older completion arrives later? Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect?"
+    },
+    {
+      "id": "F57",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account also has Epoch=7.",
+      "steps": [
+        "Admit via E on the original.",
+        "Rebind to the replacement and admit another operation through the same Port or Registry.",
+        "Invoke the newer callback first.",
+        "Invoke the older callback last."
+      ],
+      "outcome": "observed-in-code — Each account has one request. The newer callback credits the replacement once. The older callback credits the original once. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/identity_test.go:267 (\"\"A\": {0, 2}, \"B\": {1, 1}, \"C\": {0, 1}, \"D\": {0, 2}, \"E\": {1, 1}, \"F\": {1, 1},\") and analysis/_probe/identity_test.go:278 (\"counters(t, incoming, 1, 1)\") and analysis/_probe/identity_test.go:280 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:281 (\"counters(t, incoming, 1, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityOverlappingAdmissions/E",
+      "question": "Q9 How should counter resets or overlapping admissions be attributed when an older completion arrives later? Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F58",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement account also has Epoch=7.",
+      "steps": [
+        "Admit via F on the original.",
+        "Rebind to the replacement and admit another operation through the same Port or Registry.",
+        "Invoke the newer callback first.",
+        "Invoke the older callback last."
+      ],
+      "outcome": "observed-in-code — Each account has one request. The newer callback credits the replacement once. The older callback credits the original once. component.go:33 (\"return func() { target.Successes++ }\") and component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:267 (\"\"A\": {0, 2}, \"B\": {1, 1}, \"C\": {0, 1}, \"D\": {0, 2}, \"E\": {1, 1}, \"F\": {1, 1},\") and analysis/_probe/identity_test.go:278 (\"counters(t, incoming, 1, 1)\") and analysis/_probe/identity_test.go:280 (\"counters(t, b.original, 1, expected[op.name][0])\") and analysis/_probe/identity_test.go:281 (\"counters(t, incoming, 1, expected[op.name][1])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityOverlappingAdmissions/F",
+      "question": "Q9 How should counter resets or overlapping admissions be attributed when an older completion arrives later? Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F59",
+      "initial": "A non-nil Port has a nil Target.",
+      "steps": [
+        "Call A for each applicable invalid input and recover."
+      ],
+      "outcome": "observed-in-code — Admission panics at the request increment and does not return a callback. component.go:8 (\"p.Target.Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:298 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:303 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:65 (\"if recover() == nil {\") and analysis/_probe/identity_test.go:305 (\"counters(t, b.original, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 8,
+        "fragment": " p.Target.Requests++"
+      },
+      "test": "TestIdentityInvalidAdmission/A",
+      "question": "Q8 What is the public contract for nil or missing admission inputs and for detaching a Port before completion?"
+    },
+    {
+      "id": "F60",
+      "initial": "A non-nil Port has a nil Target.",
+      "steps": [
+        "Call B for each applicable invalid input and recover."
+      ],
+      "outcome": "observed-in-code — Admission panics at the request increment and does not return a callback. component.go:14 (\"target.Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:298 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:303 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:65 (\"if recover() == nil {\") and analysis/_probe/identity_test.go:305 (\"counters(t, b.original, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 14,
+        "fragment": " target.Requests++"
+      },
+      "test": "TestIdentityInvalidAdmission/B",
+      "question": "Q8 What is the public contract for nil or missing admission inputs and for detaching a Port before completion?"
+    },
+    {
+      "id": "F61",
+      "initial": "A non-nil Port has a nil Target.",
+      "steps": [
+        "Call C for each applicable invalid input and recover."
+      ],
+      "outcome": "observed-in-code — Admission panics while evaluating p.Target.Epoch, before the Requests increment. No callback is returned. component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\") and component.go:19 (\"target.Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:298 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:303 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:65 (\"if recover() == nil {\") and analysis/_probe/identity_test.go:305 (\"counters(t, b.original, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 18,
+        "fragment": " target, epoch := p.Target, p.Target.Epoch"
+      },
+      "test": "TestIdentityInvalidAdmission/C",
+      "question": "Q8 What is the public contract for nil or missing admission inputs and for detaching a Port before completion?"
+    },
+    {
+      "id": "F62",
+      "initial": "The Registry has an absent key, a nil-valued key, or a nil map.",
+      "steps": [
+        "Call D for each applicable invalid input and recover."
+      ],
+      "outcome": "observed-in-code — A missing key, a nil entry, and a nil map each yield a nil account at the lookup. The unguarded Requests dereference panics and no callback is returned. component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:298 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:303 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:65 (\"if recover() == nil {\") and analysis/_probe/identity_test.go:305 (\"counters(t, b.original, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 23,
+        "fragment": " r.Entries[key].Requests++"
+      },
+      "test": "TestIdentityInvalidAdmission/D",
+      "question": "Q8 What is the public contract for nil or missing admission inputs and for detaching a Port before completion?"
+    },
+    {
+      "id": "F63",
+      "initial": "A non-nil Port has a nil Target.",
+      "steps": [
+        "Call E for each applicable invalid input and recover."
+      ],
+      "outcome": "observed-in-code — Admission panics at the request increment and does not return a callback. component.go:27 (\"p.Target.Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:298 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:303 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:65 (\"if recover() == nil {\") and analysis/_probe/identity_test.go:305 (\"counters(t, b.original, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 27,
+        "fragment": " p.Target.Requests++"
+      },
+      "test": "TestIdentityInvalidAdmission/E",
+      "question": "Q8 What is the public contract for nil or missing admission inputs and for detaching a Port before completion?"
+    },
+    {
+      "id": "F64",
+      "initial": "A non-nil Port has a nil Target.",
+      "steps": [
+        "Call F for each applicable invalid input and recover."
+      ],
+      "outcome": "observed-in-code — Admission panics at the request increment and does not return a callback. component.go:32 (\"target.Requests++\"). observed-in-tests — analysis/_probe/identity_test.go:298 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:303 (\"mustPanic(t, func() { op.admit(b) })\") and analysis/_probe/identity_test.go:65 (\"if recover() == nil {\") and analysis/_probe/identity_test.go:305 (\"counters(t, b.original, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 32,
+        "fragment": " target.Requests++"
+      },
+      "test": "TestIdentityInvalidAdmission/F",
+      "question": "Q8 What is the public contract for nil or missing admission inputs and for detaching a Port before completion?"
+    },
+    {
+      "id": "F65",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7. A replacement has Epoch=8.",
+      "steps": [
+        "Copy the Port value into another caller variable.",
+        "Admit via E using the first Port.",
+        "Set the first Port's Target to the replacement and the other Port's Target to nil.",
+        "Invoke the callback."
+      ],
+      "outcome": "observed-in-code — The original shared Account gets one request and one success. The replacement remains untouched. The copied receiver retains the admitted account pointer. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/identity_test.go:315 (\"otherPort.Target = nil\") and analysis/_probe/identity_test.go:320 (\"counters(t, b.original, 1, 1)\") and analysis/_probe/identity_test.go:321 (\"counters(t, incoming, 0, 0)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityValueCopy",
+      "question": "Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F66",
+      "initial": "The original account has Requests=0, Successes=0, and Epoch=7.",
+      "steps": [
+        "Admit via B.",
+        "Reset original Requests and Successes to zero, then set Successes to 10.",
+        "Invoke the callback."
+      ],
+      "outcome": "observed-in-code — The admitted account ends at Requests=0 and Successes=11. The callback increments the existing field on the captured object. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/identity_test.go:328 (\"b.original.Successes = 10\") and analysis/_probe/identity_test.go:330 (\"counters(t, b.original, 0, 11)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCapturedObjectAfterReset",
+      "question": "Q9 How should counter resets or overlapping admissions be attributed when an older completion arrives later?"
+    },
+    {
+      "id": "F67",
+      "initial": "The original and a distinct replacement both have Epoch=7 and zero counters.",
+      "steps": [
+        "Admit via A on the original and retain the callback on the delivery side after the initiating call returns.",
+        "Rebind the same Port or Registry key to the replacement while the initiating side no longer waits.",
+        "Compare two schedules. End without any invocation, or invoke the retained callback once after the rebind."
+      ],
+      "outcome": "observed-in-code — Without an invocation the original remains at Requests=1 and Successes=0, and the replacement counters stay zero. With a later invocation, the replacement gains one success while the original retains the request and has zero successes. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/lifecycle_test.go:22 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/lifecycle_test.go:23 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/lifecycle_test.go:25 (\"deliverySide()\") and analysis/_probe/lifecycle_test.go:27 (\"wantOriginal := map[string]int{\"B\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/lifecycle_test.go:28 (\"wantIncoming := map[string]int{\"A\": 1, \"D\": 1}\") and analysis/_probe/lifecycle_test.go:34 (\"counters(t, b.original, 1, wantOriginal[op.name])\") and analysis/_probe/lifecycle_test.go:35 (\"counters(t, incoming, 0, wantIncoming[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityCallerDeparture/A",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q1 Should A credit the account currently bound with a matching epoch after replacement, and how should the request and success be attributed?"
+    },
+    {
+      "id": "F68",
+      "initial": "The original and a distinct replacement both have Epoch=7 and zero counters.",
+      "steps": [
+        "Admit via B on the original and retain the callback on the delivery side after the initiating call returns.",
+        "Rebind the same Port or Registry key to the replacement while the initiating side no longer waits.",
+        "Compare two schedules. End without any invocation, or invoke the retained callback once after the rebind."
+      ],
+      "outcome": "observed-in-code — Without an invocation the original remains at Requests=1 and Successes=0, and the replacement counters stay zero. With a later invocation, the original gains one success, retaining its request, and both replacement counters stay zero. component.go:15 (\"return func() { target.Successes++ }\") and component.go:14 (\"target.Requests++\") and component.go:13 (\"target := p.Target\"). observed-in-tests — analysis/_probe/lifecycle_test.go:22 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/lifecycle_test.go:23 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/lifecycle_test.go:25 (\"deliverySide()\") and analysis/_probe/lifecycle_test.go:27 (\"wantOriginal := map[string]int{\"B\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/lifecycle_test.go:28 (\"wantIncoming := map[string]int{\"A\": 1, \"D\": 1}\") and analysis/_probe/lifecycle_test.go:34 (\"counters(t, b.original, 1, wantOriginal[op.name])\") and analysis/_probe/lifecycle_test.go:35 (\"counters(t, incoming, 0, wantIncoming[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCallerDeparture/B",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F69",
+      "initial": "The original and a distinct replacement both have Epoch=7 and zero counters.",
+      "steps": [
+        "Admit via C on the original and retain the callback on the delivery side after the initiating call returns.",
+        "Rebind the same Port or Registry key to the replacement while the initiating side no longer waits.",
+        "Compare two schedules. End without any invocation, or invoke the retained callback once after the rebind."
+      ],
+      "outcome": "observed-in-code — Without an invocation the original remains at Requests=1 and Successes=0, and the replacement counters stay zero. With a later invocation, neither account gains a success and the original retains the request. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/lifecycle_test.go:22 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/lifecycle_test.go:23 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/lifecycle_test.go:25 (\"deliverySide()\") and analysis/_probe/lifecycle_test.go:27 (\"wantOriginal := map[string]int{\"B\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/lifecycle_test.go:28 (\"wantIncoming := map[string]int{\"A\": 1, \"D\": 1}\") and analysis/_probe/lifecycle_test.go:34 (\"counters(t, b.original, 1, wantOriginal[op.name])\") and analysis/_probe/lifecycle_test.go:35 (\"counters(t, incoming, 0, wantIncoming[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityCallerDeparture/C",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q3 Should C skip a completion after rebinding to a different account with the same epoch, and should restoring the original pointer make it eligible again?"
+    },
+    {
+      "id": "F70",
+      "initial": "The original and a distinct replacement both have Epoch=7 and zero counters.",
+      "steps": [
+        "Admit via D on the original and retain the callback on the delivery side after the initiating call returns.",
+        "Rebind the same Port or Registry key to the replacement while the initiating side no longer waits.",
+        "Compare two schedules. End without any invocation, or invoke the retained callback once after the rebind."
+      ],
+      "outcome": "observed-in-code — Without an invocation the original remains at Requests=1 and Successes=0, and the replacement counters stay zero. With a later invocation, the replacement gains one success while the original retains the request and has zero successes. component.go:24 (\"return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }\") and component.go:23 (\"r.Entries[key].Requests++\"). observed-in-tests — analysis/_probe/lifecycle_test.go:22 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/lifecycle_test.go:23 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/lifecycle_test.go:25 (\"deliverySide()\") and analysis/_probe/lifecycle_test.go:27 (\"wantOriginal := map[string]int{\"B\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/lifecycle_test.go:28 (\"wantIncoming := map[string]int{\"A\": 1, \"D\": 1}\") and analysis/_probe/lifecycle_test.go:34 (\"counters(t, b.original, 1, wantOriginal[op.name])\") and analysis/_probe/lifecycle_test.go:35 (\"counters(t, incoming, 0, wantIncoming[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityCallerDeparture/D",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q5 Should D credit the present key occupant after entry replacement, key reuse, or replacement of the whole map, and should a missing or nil entry skip the effect?"
+    },
+    {
+      "id": "F71",
+      "initial": "The original and a distinct replacement both have Epoch=7 and zero counters.",
+      "steps": [
+        "Admit via E on the original and retain the callback on the delivery side after the initiating call returns.",
+        "Rebind the same Port or Registry key to the replacement while the initiating side no longer waits.",
+        "Compare two schedules. End without any invocation, or invoke the retained callback once after the rebind."
+      ],
+      "outcome": "observed-in-code — Without an invocation the original remains at Requests=1 and Successes=0, and the replacement counters stay zero. With a later invocation, the original gains one success, retaining its request, and both replacement counters stay zero. component.go:28 (\"return func() { p.Target.Successes++ }\") and component.go:27 (\"p.Target.Requests++\") and component.go:26 (\"func (p Port) E() func() {\"). observed-in-tests — analysis/_probe/lifecycle_test.go:22 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/lifecycle_test.go:23 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/lifecycle_test.go:25 (\"deliverySide()\") and analysis/_probe/lifecycle_test.go:27 (\"wantOriginal := map[string]int{\"B\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/lifecycle_test.go:28 (\"wantIncoming := map[string]int{\"A\": 1, \"D\": 1}\") and analysis/_probe/lifecycle_test.go:34 (\"counters(t, b.original, 1, wantOriginal[op.name])\") and analysis/_probe/lifecycle_test.go:35 (\"counters(t, incoming, 0, wantIncoming[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      },
+      "test": "TestIdentityCallerDeparture/E",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F72",
+      "initial": "The original and a distinct replacement both have Epoch=7 and zero counters.",
+      "steps": [
+        "Admit via F on the original and retain the callback on the delivery side after the initiating call returns.",
+        "Rebind the same Port or Registry key to the replacement while the initiating side no longer waits.",
+        "Compare two schedules. End without any invocation, or invoke the retained callback once after the rebind."
+      ],
+      "outcome": "observed-in-code — Without an invocation the original remains at Requests=1 and Successes=0, and the replacement counters stay zero. With a later invocation, the original gains one success, retaining its request, and both replacement counters stay zero. component.go:33 (\"return func() { target.Successes++ }\") and component.go:32 (\"target.Requests++\") and component.go:31 (\"target := p.Target\"). observed-in-tests — analysis/_probe/lifecycle_test.go:22 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/lifecycle_test.go:23 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/lifecycle_test.go:25 (\"deliverySide()\") and analysis/_probe/lifecycle_test.go:27 (\"wantOriginal := map[string]int{\"B\": 1, \"E\": 1, \"F\": 1}\") and analysis/_probe/lifecycle_test.go:28 (\"wantIncoming := map[string]int{\"A\": 1, \"D\": 1}\") and analysis/_probe/lifecycle_test.go:34 (\"counters(t, b.original, 1, wantOriginal[op.name])\") and analysis/_probe/lifecycle_test.go:35 (\"counters(t, incoming, 0, wantIncoming[op.name])\").",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCallerDeparture/F",
+      "question": "Q7 If the caller stops waiting, should the recorded request remain, and how should a later invocation of the returned completion be handled? Q4 Should B, E, and F credit the admitted account after rebinding, detaching, or changing that account's epoch?"
+    },
+    {
+      "id": "F73",
+      "initial": "The original account has Epoch=7 and a different account has Epoch=8.",
+      "steps": [
+        "Admit via A on the original.",
+        "Bind the replacement and invoke the callback.",
+        "Set the replacement's Epoch to 7 and inspect counters without calling again.",
+        "Invoke the same callback again."
+      ],
+      "outcome": "observed-in-code — The first invocation and epoch edit leave both Successes counters unchanged. The later invocation credits the replacement once. The original retains the single request. component.go:10 (\"return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }\") and component.go:8 (\"p.Target.Requests++\") and component.go:9 (\"epoch := p.Target.Epoch\"). observed-in-tests — analysis/_probe/lifecycle_test.go:49 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/lifecycle_test.go:51 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/lifecycle_test.go:54 (\"counters(t, incoming, 0, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      },
+      "test": "TestIdentityMatchingAfterMismatch/A",
+      "question": "Q1 Should A credit the account currently bound with a matching epoch after replacement, and how should the request and success be attributed? Q2 What should A and C do with an outstanding completion after an epoch change, including when the original numeric epoch is restored? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "F74",
+      "initial": "The original and a different account both start at Epoch=7.",
+      "steps": [
+        "Admit via C on the original.",
+        "Change the original Epoch to 8 and bind the replacement.",
+        "Invoke with just the replacement's epoch matching, then restore only the original pointer and invoke again.",
+        "Restore the original epoch to 7. Inspect the counters, then invoke again."
+      ],
+      "outcome": "observed-in-code — Neither a different matching-epoch account nor the original account at a different epoch is credited. The epoch restoration alone also leaves successes unchanged. Once both admission conditions hold, invoking the same callback credits the original once. component.go:20 (\"return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }\") and component.go:19 (\"target.Requests++\") and component.go:18 (\"target, epoch := p.Target, p.Target.Epoch\"). observed-in-tests — analysis/_probe/lifecycle_test.go:64 (\"counters(t, incoming, 0, 0)\") and analysis/_probe/lifecycle_test.go:67 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/lifecycle_test.go:69 (\"counters(t, b.original, 1, 0)\") and analysis/_probe/lifecycle_test.go:71 (\"counters(t, b.original, 1, 1)\").",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      },
+      "test": "TestIdentityMatchingAfterMismatch/C",
+      "question": "Q2 What should A and C do with an outstanding completion after an epoch change, including when the original numeric epoch is restored? Q3 Should C skip a completion after rebinding to a different account with the same epoch, and should restoring the original pointer make it eligible again? Q6 Should a completion be consumed after its first call, after an ineligible call, or after a panic, and who owns retirement or retry?"
+    },
+    {
+      "id": "N01",
+      "initial": "Two distinct Port objects each point to a distinct account with zero counters. The original account has Epoch=7 and the incoming account has Epoch=8. A caller-local *Port variable and a separate alias point to the original Port.",
+      "steps": [
+        "Call F with the caller variable and retain the returned callback.",
+        "Reassign only the caller variable to the incoming Port. Inspect both Port targets, account epochs, and account counters.",
+        "Invoke the saved callback once and inspect the same fields again."
+      ],
+      "outcome": "Before delivery, the original account has one request and zero successes, and the incoming account has zero requests and zero successes. After delivery the original has one request and one success and the incoming account still has zero counters. Both Port targets and both account epochs retain their prior values. F saves the admitted account pointer at component.go:31 and uses it for the increment at line 33.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      },
+      "test": "TestIdentityCallerVariableRebinding",
+      "question": "Should a completion held across a caller-local Port switch still credit the admitted account when the original Port and its Target have stayed in place?"
+    },
+    {
+      "id": "N02",
+      "initial": "A non-nil Registry has two different keys, work and other, both pointing to the same account with zero counters.",
+      "steps": [
+        "Admit via D using work and keep the callback.",
+        "Delete work while leaving other bound to the admitted account, then invoke the callback.",
+        "Reinsert the same account at work and inspect its counters before another invocation.",
+        "Invoke the same callback again."
+      ],
+      "outcome": "Admission records one request. The first invocation returns normally without incrementing Successes even though other still aliases the account. Reinsertion alone leaves it at one request and zero successes. The later invocation increments Successes to one and leaves Requests at one.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      },
+      "test": "TestIdentityRegistryOtherKeyAlias",
+      "question": "Should a surviving alias under a different key make a D completion eligible while the admission key is absent, and should restoring the same account under the admission key allow a later invocation after the skip?"
+    },
+    {
+      "id": "N03",
+      "initial": "The caller has a nil *Port value.",
+      "steps": [
+        "Call F with that nil pointer."
+      ],
+      "outcome": "Admission panics evaluating p.Target before incrementing any request or returning a callback. F64 covers a non-nil Port whose Target is nil, which reaches the next source line before panicking.",
+      "citation": {
+        "file": "component.go",
+        "line": 31,
+        "fragment": " target := p.Target"
+      },
+      "test": "untested",
+      "question": "Should the F admission contract treat a nil Port argument and a valid Port with a nil Target alike?"
+    },
+    {
+      "id": "N04",
+      "initial": "The caller has a nil *Registry receiver and a string key.",
+      "steps": [
+        "Call D on that nil receiver with the key."
+      ],
+      "outcome": "Admission panics evaluating r.Entries before looking up the key, incrementing a request, or returning a callback. F62 covers entry unavailability on a non-nil Registry.",
+      "citation": {
+        "file": "component.go",
+        "line": 23,
+        "fragment": " r.Entries[key].Requests++"
+      },
+      "test": "untested",
+      "question": "Should the D admission contract distinguish an absent Registry from unavailable entries in an existing Registry?"
+    }
+  ]
+}

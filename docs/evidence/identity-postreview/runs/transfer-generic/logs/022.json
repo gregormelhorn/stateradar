@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nfrom pathlib import Path\nx=json.loads(Path('analysis/draft-verify.json').read_text())\nfor k,v in x['claims'].items(): print(k,json.dumps(v,ensure_ascii=False))\nfor i,v in enumerate(x['questions'],1): print('Q'+str(i),json.dumps(v,ensure_ascii=False))\n"
+  ],
+  "exit_code": 0
+}

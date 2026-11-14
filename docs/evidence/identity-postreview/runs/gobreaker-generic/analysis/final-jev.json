@@ -1,0 +1,279 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc",
+  "input_tokens": 5993,
+  "cost_microdollars": 252,
+  "reservation_microdollars": 1004,
+  "checks": {
+    "C1": {
+      "kind": "claim",
+      "statement": "Independently constructed breakers that each transition from closed to open to half-open reach the same numeric generation.",
+      "source": "gobreaker.go",
+      "line": 364,
+      "fragment": "\tcb.generation++",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.01,
+        "contradicted": 0.06,
+        "unclear": 0.93
+      },
+      "confidence": 0.89,
+      "review_required": true
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "After sequential replacement of a TwoStep receiver with a separate closed breaker in the same numeric generation, a retained false report can call the replacement's ReadyToTrip with one failure and no admissions.",
+      "source": "gobreaker.go",
+      "line": 326,
+      "fragment": "\t\tif cb.readyToTrip(cb.counts) {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.04,
+        "contradicted": 0.22,
+        "unclear": 0.74
+      },
+      "confidence": 0.61,
+      "review_required": true
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "After sequential replacement with a closed breaker in a different numeric generation, a retained false report does not reach that breaker's ReadyToTrip.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "\tif generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.93,
+        "contradicted": 0.01,
+        "unclear": 0.06
+      },
+      "confidence": 0.89,
+      "review_required": true
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "An old TwoStep callback can close a replacement half-open breaker with MaxRequests=1 when the two breaker generation numbers match.",
+      "source": "gobreaker.go",
+      "line": 272,
+      "fragment": "\t\ttscb.cb.afterRequest(generation, success)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.06,
+        "contradicted": 0.09,
+        "unclear": 0.85
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "After a foreign callback closes the target, the target's previously admitted half-open failure is ignored as stale.",
+      "source": "gobreaker.go",
+      "line": 356,
+      "fragment": "\tcb.toNewGeneration(now)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.31,
+        "contradicted": 0.05,
+        "unclear": 0.64
+      },
+      "confidence": 0.46,
+      "review_required": true
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "A retained TwoStep callback that already reported to a replacement can report to its original breaker after the receiver is restored, if the original generation is still current.",
+      "source": "gobreaker.go",
+      "line": 272,
+      "fragment": "\t\ttscb.cb.afterRequest(generation, success)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.14,
+        "contradicted": 0.13,
+        "unclear": 0.73
+      },
+      "confidence": 0.6,
+      "review_required": true
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "One late half-open success with a matching generation and zero prior successes leaves a breaker with MaxRequests=2 half-open.",
+      "source": "gobreaker.go",
+      "line": 316,
+      "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.11,
+        "contradicted": 0.64,
+        "unclear": 0.25
+      },
+      "confidence": 0.46,
+      "review_required": true
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "A State caller can propagate an Open-to-HalfOpen notification panic even though the transition is already committed.",
+      "source": "gobreaker.go",
+      "line": 211,
+      "fragment": "\tstate, _ := cb.currentState(now)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.01,
+        "contradicted": 0.07,
+        "unclear": 0.92
+      },
+      "confidence": 0.88,
+      "review_required": true
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "Retrying State after an Open-to-HalfOpen notification panic does not replay that transition's notification.",
+      "source": "gobreaker.go",
+      "line": 354,
+      "fragment": "\tcb.state = state",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.02,
+        "contradicted": 0.02,
+        "unclear": 0.96
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "ReadyToTrip calling runtime.Goexit during a closed Execute leaves its first counted failure in place without a fallback charge.",
+      "source": "gobreaker.go",
+      "line": 325,
+      "fragment": "\t\tcb.counts.onFailure()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.02,
+        "contradicted": 0.05,
+        "unclear": 0.93
+      },
+      "confidence": 0.89,
+      "review_required": true
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "If recover returns nil for panic(nil) raised by an admitted request, Execute returns its zero result pair without submitting an outcome.",
+      "source": "gobreaker.go",
+      "line": 236,
+      "fragment": "\t\tif e != nil {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.12,
+        "contradicted": 0.33,
+        "unclear": 0.55
+      },
+      "confidence": 0.33,
+      "review_required": true
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "If recover returns nil for panic(nil) raised by the classifier, Execute returns its zero result pair without submitting an outcome.",
+      "source": "gobreaker.go",
+      "line": 236,
+      "fragment": "\t\tif e != nil {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.16,
+        "contradicted": 0.25,
+        "unclear": 0.59
+      },
+      "confidence": 0.38,
+      "review_required": true
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "A matching Execute fallback following a ReadyToTrip panic only charges a second failure if its generation still matches after state resolution.",
+      "source": "gobreaker.go",
+      "line": 299,
+      "fragment": "\tif generation != before {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.53,
+        "contradicted": 0.15,
+        "unclear": 0.32
+      },
+      "confidence": 0.3,
+      "review_required": true
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "A stale completion can invoke an expiry notification whose panic prevents the generation comparison from running.",
+      "source": "gobreaker.go",
+      "line": 298,
+      "fragment": "\tstate, generation := cb.currentState(now)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.1,
+        "unclear": 0.9
+      },
+      "confidence": 0.85,
+      "review_required": true
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "If a half-open failure's reopening notification panics after the new timeout expires, Execute fallback can advance the breaker to half-open again.",
+      "source": "gobreaker.go",
+      "line": 342,
+      "fragment": "\t\t\tcb.setState(StateHalfOpen, now)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.18,
+        "contradicted": 0.08,
+        "unclear": 0.74
+      },
+      "confidence": 0.61,
+      "review_required": true
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "For an old success aimed at an open replacement, unchanged counts alone cannot establish that the generation guard dropped the result because onSuccess has no open arm.",
+      "source": "gobreaker.go",
+      "line": 311,
+      "fragment": "\tswitch state {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.12,
+        "contradicted": 0.07,
+        "unclear": 0.81
+      },
+      "confidence": 0.72,
+      "review_required": true
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "Time for deciding open expiry in a completion is sampled after acquiring the breaker mutex.",
+      "source": "gobreaker.go",
+      "line": 297,
+      "fragment": "\tnow := time.Now()",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.38,
+        "contradicted": 0.01,
+        "unclear": 0.61
+      },
+      "confidence": 0.42,
+      "review_required": true
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "A half-open Execute worker whose waiter departed may report a matching success without closing if that report falls short of the threshold.",
+      "source": "gobreaker.go",
+      "line": 316,
+      "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.68,
+        "contradicted": 0.13,
+        "unclear": 0.19
+      },
+      "confidence": 0.52,
+      "review_required": true
+    }
+  }
+}

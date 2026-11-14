@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import collections,json,re\nfrom pathlib import Path\na=Path(\"analysis\")\nold=(a/\"initial.json\").read_bytes()\nnew=(a/\"final.json\").read_bytes()\nprefix=old[:old.rfind(b\"]\")].rstrip()\nassert new.startswith(prefix+b\",\\n\")\nfor report in (a/\"review.md\",a/\"summary.md\"):\n assert report.stat().st_size\n for link in re.findall(r\"\\]\\(([^)]+)\\)\",report.read_text()):\n  assert (report.parent/link.split(\"#\")[0]).is_file(), link\nd=json.loads((a/\"draft-verify.json\").read_bytes())\nj=json.loads((a/\"final-jev.json\").read_bytes())\nprint(\"Historical rows are an unchanged byte prefix. All review and summary file links resolve.\")\nprint(\"Draft:\", len(d[\"claims\"]), \"claims and\", len(d[\"questions\"]), \"questions.\")\nprint(\"Final batch:\", dict(collections.Counter(x[\"choice\"] for x in j[\"checks\"].values())))"
+  ],
+  "exit_code": 0
+}

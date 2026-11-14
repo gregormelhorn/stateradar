@@ -1,0 +1,151 @@
+{
+  "qualifications": [
+    {
+      "id": "F04",
+      "status": "qualified",
+      "rationale": "An active generation alone is insufficient to close on late success. The success is first counted, and closing requires consecutive successes to reach MaxRequests. The preserved probe tests MaxRequests=1; the additional MaxRequests=2 probe leaves the breaker half-open after the late success and then closes it on a second distinct success.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 316,
+        "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+      }
+    },
+    {
+      "id": "F07",
+      "status": "qualified",
+      "rationale": "The open case requires the time sampled after acquiring the mutex to precede or equal expiry. Invocation before the deadline by itself does not establish that condition. If completion first resolves an expired open state, F08 and F19 describe the transition or notification panic before the stale outcome can be dropped.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 298,
+        "fragment": "\tstate, generation := cb.currentState(now)"
+      }
+    },
+    {
+      "id": "F08",
+      "status": "qualified",
+      "rationale": "The stale outcome is dropped after notification only when a configured OnStateChange returns normally. If the hook panics, half-open is already committed and the panic exits before the generation comparison. F19 preserves both outcome variants of that ordering.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 359,
+        "fragment": "\t\tcb.onStateChange(cb.name, prev, state)"
+      }
+    },
+    {
+      "id": "F11",
+      "status": "qualified",
+      "rationale": "Failure reporting and explicit rethrow require recover to return a non-nil interface. With a runtime mode where panic(nil) yields nil from recover, Execute instead returns a zero pair and performs no outcome accounting. The historical probe uses a non-nil error panic; a typed-nil pointer in an interface also reaches the non-nil branch.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 236,
+        "fragment": "\t\tif e != nil {"
+      }
+    },
+    {
+      "id": "F12",
+      "status": "qualified",
+      "rationale": "Fresh or stale reporting and propagation require recover to return a non-nil interface. A classifier panic with a nil interface in a runtime mode with nil recovery can instead return a zero pair with only admission recorded. The preserved probe uses a non-nil error panic.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 236,
+        "fragment": "\t\tif e != nil {"
+      }
+    },
+    {
+      "id": "F13",
+      "status": "qualified",
+      "rationale": "A second charge requires the fallback's generation to still match after currentState resolves expiry. The preserved probe tests this case without a competing transition or positive interval. The expired interval in F24 or a competing generation change in F28 can remove that second charge.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 299,
+        "fragment": "\tif generation != before {"
+      }
+    },
+    {
+      "id": "F16",
+      "status": "qualified",
+      "rationale": "Propagation of the first notification panic and the no-notification manual retry observations are scoped to the preserved unexpired-open schedules. If open expiry resolves during Execute fallback or a later TwoStep retry, the half-open hook runs before generation comparison and may itself panic, as in F17 and F19.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 298,
+        "fragment": "\tstate, generation := cb.currentState(now)"
+      }
+    },
+    {
+      "id": "F22",
+      "status": "qualified",
+      "rationale": "The preserved unequal-generation control has an unexpired open target. Matching a success to StateOpen would also leave its counts unchanged because onSuccess has no open branch, so that control alone cannot isolate the generation guard. The added closed failure control is sensitive to the mismatch. Wrapper assignment in all these probes is sequential.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 310,
+        "fragment": "func (cb *CircuitBreaker) onSuccess(state State, now time.Time) {"
+      }
+    },
+    {
+      "id": "F25",
+      "status": "qualified",
+      "rationale": "The close case requires success to reach MaxRequests. The preserved Execute reopening case has a prompt panic and unexpired new open deadline. If a reopening notification consumes that timeout, Execute fallback can advance again and a second notification panic can replace the first. TwoStep completion has no Execute fallback.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 342,
+        "fragment": "\t\t\tcb.setState(StateHalfOpen, now)"
+      }
+    },
+    {
+      "id": "F27",
+      "status": "qualified",
+      "rationale": "The matching success closes only when it reaches MaxRequests, as it does for the preserved probe's default limit of one. The preserved stale cases finish while another request's opening is unexpired, and the original pair is delivered to the worker only when classification and reporting return normally. The buffered channel belongs to the application harness.",
+      "citation": {
+        "file": "gobreaker.go",
+        "line": 316,
+        "fragment": "\t\tif cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+      }
+    }
+  ],
+  "test_bindings": [
+    {
+      "id": "F04",
+      "test": "TestIdentityLateHalfOpenSuccessBelowThreshold",
+      "scope": "With MaxRequests=2, leave the first admitted trial pending beyond Timeout, report success, observe one counted success and continued half-open state, then admit a distinct success and observe closing."
+    },
+    {
+      "id": "F11",
+      "test": "TestIdentityNilPanicBoundary",
+      "scope": "A standalone runtime control identifies nil versus non-nil recovery; the request cases check the matching return or panic path, classifier bypass and counts for nil-interface and typed-nil panics."
+    },
+    {
+      "id": "F12",
+      "test": "TestIdentityNilPanicBoundary",
+      "scope": "After a normal request return, the classifier cases check one classification and the runtime-dependent recovered panic or zero Execute pair, with the corresponding counts."
+    },
+    {
+      "id": "F22",
+      "test": "TestIdentityReassignedClosedFailure",
+      "scope": "Keep both replacement targets closed at reporting time; after wrapper reassignment, an equal-generation failure reaches ReadyToTrip and opens, while the higher-generation target receives no count or hook update."
+    },
+    {
+      "id": "N01",
+      "test": "TestIdentityReassignedClosedFailure",
+      "scope": "After sequential receiver replacement, compare a newly constructed closed target with a closed target returned from a full lifecycle. Confirm target hook counts and transition only for the equal generation and one pending admission still on the original."
+    },
+    {
+      "id": "N02",
+      "test": "TestIdentityReassignedHalfOpenTrial",
+      "scope": "A matching foreign success closes the target, then the target's own false report leaves it closed and empty. The original trial remains pending and the same foreign callback closes the original only after restoring the wrapper."
+    },
+    {
+      "id": "N03",
+      "test": "TestIdentityStateObserverNotificationPanic",
+      "scope": "After open expiry, Counts does not notify, first State propagates the exact hook panic, retry returns HalfOpen without replay, and a fresh trial is accepted and can close the breaker."
+    },
+    {
+      "id": "N04",
+      "test": "TestIdentityReadyToTripGoexit",
+      "scope": "ReadyToTrip terminates the executing goroutine after one counted closed failure. Execute never returns, the hook ran once, the breaker stays closed and a subsequent successful Execute records an outcome."
+    },
+    {
+      "id": "N05",
+      "test": "TestIdentityNilPanicBoundary",
+      "scope": "Compare standalone recovery to Execute for nil-interface and typed-nil panics at the request and classifier seams. Assert recovered or returned values, exact counts and hook calls. Only the configured runtime branch for nil-interface panic is exercised."
+    }
+  ]
+}

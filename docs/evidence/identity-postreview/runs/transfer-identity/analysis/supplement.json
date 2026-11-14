@@ -1,0 +1,311 @@
+{
+  "qualifications": [
+    {
+      "id": "F07",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to A; A reads that Port at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F08",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to B; B uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F09",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to C; C checks that Port against the saved Account pointer at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F10",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to the value at the saved key in the original Registry's map; D performs that lookup at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F11",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the caller's Port used to invoke E; E uses the value receiver's copied Target pointer. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F12",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to F; F uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F13",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to A; A reads that Port at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F14",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to B; B uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F15",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to C; C checks that Port against the saved Account pointer at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F16",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to the value at the saved key in the original Registry's map; D performs that lookup at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F17",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the caller's Port used to invoke E; E uses the value receiver's copied Target pointer. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F18",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to F; F uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F53",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to A; A reads that Port at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F54",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to B; B uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F55",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to C; C checks that Port against the saved Account pointer at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F56",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to the value at the saved key in the original Registry's map; D performs that lookup at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F57",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the caller's Port used to invoke E; E uses the value receiver's copied Target pointer. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F58",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to F; F uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two admissions overlap only in the lifetime of the saved callbacks and all operations are serialized.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F67",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to A; A reads that Port at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+      "citation": {
+        "file": "component.go",
+        "line": 10,
+        "fragment": " return func() { if p.Target.Epoch == epoch { p.Target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F68",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to B; B uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F69",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to C; C checks that Port against the saved Account pointer at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F70",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to the value at the saved key in the original Registry's map; D performs that lookup at delivery. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+      "citation": {
+        "file": "component.go",
+        "line": 24,
+        "fragment": " return func() { if target := r.Entries[key]; target != nil { target.Successes++ } }"
+      }
+    },
+    {
+      "id": "F71",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the caller's Port used to invoke E; E uses the value receiver's copied Target pointer. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+      "citation": {
+        "file": "component.go",
+        "line": 28,
+        "fragment": " return func() { p.Target.Successes++ }"
+      }
+    },
+    {
+      "id": "F72",
+      "status": "qualified",
+      "rationale": "The applicable historical step and probe use assignment to Target on the same Port passed to F; F uses the Account pointer saved at admission. The generic Port-or-Registry wording does not establish an effect for the other seam, replacement of the wrapper object, or caller-variable reassignment. The two schedules model departure with no later delivery or a manual later invocation. They exercise neither a waiting client nor an explicit cancellation signal.",
+      "citation": {
+        "file": "component.go",
+        "line": 33,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F62",
+      "status": "qualified",
+      "rationale": "For D the Registry is non-nil and the three applicable input cases run at identity_test.go:285–299, with recovery at :62–69. The extra reference to :303 belongs to the Port branch. The probe checks that a panic occurs and that the original counters stay zero. The source identifies the faulting dereference and the absence of a returned callback.",
+      "citation": {
+        "file": "component.go",
+        "line": 23,
+        "fragment": " r.Entries[key].Requests++"
+      }
+    },
+    {
+      "id": "F65",
+      "status": "qualified",
+      "rationale": "The explicit caller copy at identity_test.go:311 is a separate Port value. E is called through the original Port at :313, and its own value-receiver copy is what the closure uses at component.go:28. The test mutates both caller-visible Port values and checks counters afterward. Both copies initially share the Account pointer.",
+      "citation": {
+        "file": "component.go",
+        "line": 26,
+        "fragment": "func (p Port) E() func() {"
+      }
+    },
+    {
+      "id": "F66",
+      "status": "qualified",
+      "rationale": "The probe explicitly resets Requests to zero and assigns Successes=10 at identity_test.go:327–328. Successes was already zero; the probe contains no separate Successes-to-zero write. The observed transition on the captured Account remains (0, 10) immediately before delivery by setup to (0, 11) afterward.",
+      "citation": {
+        "file": "component.go",
+        "line": 15,
+        "fragment": " return func() { target.Successes++ }"
+      }
+    },
+    {
+      "id": "F74",
+      "status": "qualified",
+      "rationale": "The two conditions are delivery-time guards using values saved at admission. The pointer equality is evaluated first, and only when it passes is the original Account's current Epoch tested. Restoring just the original pointer leaves the callback ineligible while that Account's Epoch differs.",
+      "citation": {
+        "file": "component.go",
+        "line": 20,
+        "fragment": " return func() { if p.Target == target && target.Epoch == epoch { target.Successes++ } }"
+      }
+    }
+  ],
+  "test_bindings": [
+    {
+      "id": "N01",
+      "test": "TestIdentityCallerVariableRebinding",
+      "scope": "Admit using a local *Port, change only that local pointer to a distinct Port, then deliver once. The original account changes from (1, 0) to (1, 1), the replacement remains (0, 0), and both Port targets keep their pointers."
+    },
+    {
+      "id": "N02",
+      "test": "TestIdentityRetainedPort/A",
+      "scope": "After A admission, caller-only Port reassignment is followed by one credit on the original account. Assign a matching-epoch target through the original Port alias and invoke again; the new target alone gains a success."
+    },
+    {
+      "id": "N03",
+      "test": "TestIdentityRetainedPort/C",
+      "scope": "After C admission, caller-only Port reassignment is followed by one credit on the original account. Assign a distinct matching-epoch target through the original Port alias and invoke again; neither alternate gains success and the original gets no further credit."
+    },
+    {
+      "id": "N04",
+      "test": "TestIdentityRetainedRegistryAndKey",
+      "scope": "After D admission, reassign the caller key and deliver, then reassign the Registry pointer and deliver; both credit the original occupant. Mutate the original Registry's entry at the saved key and deliver a third time; that occupant gains the only new success."
+    },
+    {
+      "id": "N05",
+      "test": "TestIdentityAccountCopyAndOverwrite",
+      "scope": "After C admission, a separate equal-valued Account copy receives no credit through the same Port. Restore the original Target pointer and overwrite that Account's fields in place with the saved Epoch; the next delivery increments the original's current Successes."
+    }
+  ]
+}

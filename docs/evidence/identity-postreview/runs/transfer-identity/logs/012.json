@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json\nfor x in json.load(open(\"analysis/initial.json\"))[\"findings\"]:\n print(x[\"id\"], x[\"test\"], x[\"initial\"], \"|\", \" \".join(x[\"steps\"]), \"|\", x[\"outcome\"].split(\"component.go:\")[0])"
+  ],
+  "exit_code": 0
+}

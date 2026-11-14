@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,re\nfrom pathlib import Path\nfiles={}\nfor row in json.loads(Path(\"analysis/initial.json\").read_text())[\"findings\"]:\n for file,line,fragment in re.findall(r'(gobreaker\\.go|analysis/_probe/identity_test\\.go):(\\d+) \\(\"([^\"\\n]*(?:\\\\\"[^\"\\n]*)*)\"\\)',row[\"outcome\"]):\n  if file not in files:\n   files[file]=Path(file).read_text().splitlines()\n  actual=files[file][int(line)-1]\n  if fragment.replace(r'\\\"','\"') not in actual:\n   print(row[\"id\"],file,line,repr(fragment),repr(actual))\nprint(\"checked\",list(files))\n"
+  ],
+  "exit_code": 0
+}

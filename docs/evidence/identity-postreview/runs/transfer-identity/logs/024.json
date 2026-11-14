@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\np=Path(\"analysis/_postprobe/binding_test.go\")\ns=p.read_text().replace(\"complete := fixture.F(port)\\n\\tport\", \"complete := fixture.F(port)\\n\\tcounters(t, original, 1, 0)\\n\\tcounters(t, replacement, 0, 0)\\n\\tport\").replace(\"*original = fixture.Account{Successes: 10, Epoch: 7}\\n\\tcomplete()\", \"*original = fixture.Account{Successes: 10, Epoch: 7}\\n\\tcounters(t, original, 0, 10)\\n\\tcomplete()\")\np.write_text(s)\n"
+  ],
+  "exit_code": 0
+}

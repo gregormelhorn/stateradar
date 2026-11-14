@@ -1,0 +1,9 @@
+# Final review summary
+
+All 29 original findings and questions were preserved verbatim by field. Seven findings were appended, and nine historical claims received qualifications in the supplement. The structural and immutable-input checks passed. [Final findings](final.json) · [Supplement](supplement.json)
+
+- `Allow` captures the admitting generation and the outer wrapper pointer. Each invocation looks up the inner breaker again. A separate wrapper copy or caller-local pointer rebind leaves the callback's lookup intact. Overwriting the captured wrapper can redirect the report, including when the overwrite occurs inside the admission hook. [Review and evidence](review.md#identity-and-ordered-effects)
+- A redirected success closed a different half-open breaker that had admitted zero requests. A redirected report with a generation mismatch still advanced the selected breaker's elapsed open timeout and delivered its notification before discarding the outcome. A hook that overwrote the wrapper and panicked left its partial charge and unlocked the original receiver, then a manual retry charged the replacement. [Public-seam probes](_postprobe/identity_post_test.go)
+- `Execute` retained the originally bound receiver for admission, classification, ordinary accounting and deferred panic reporting across caller-local pointer rebinding. Constructor-stored callbacks also retained their function values while observing changes to their own captured environment. [Source](../gobreaker.go#L140-L175) · [Execute](../gobreaker.go#L228-L245)
+
+The final race run passed 29 top-level probes and 51 subtest names three times each, with zero skips and empty stderr. Both attempts are retained in pilot logs `033` and `088`. Jev's contradiction of the redirected half-open success is recorded alongside the test and source evidence. Wrapper replacement support and every original intent question remain open. [Detailed review](review.md)

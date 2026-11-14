@@ -1,0 +1,22 @@
+50:    """A FlashResult without its text, as draft-verify records it."""
+68:    """One jev-batch check as validated from the caller's JSON."""
+250:def jev(budget: Budget, source: str, question: str, key: str | None, model: str = "jev-latest") -> JevResult:
+267:def _jev_request(budget: Budget, payload: dict[str, Any], key: str) -> tuple[Any, int, int, int]:
+298:def jev_batch(budget: Budget, source: str, source_ref: str, checks: object, key: str | None,
+411:    """A Flash draft that is not the required JSON structure. Keeps the raw text."""
+440:def _parse_draft(text: str) -> tuple[list[dict[str, Any]], list[str]]:
+454:                candidate, covered = decoder.raw_decode(body, start)
+489:def draft_verify(budget: Budget, source: str, source_ref: str, task: str, flash_key: str, jev_key: str,
+516:            batch = jev_batch(budget, source, source_ref, citable, jev_key, model)
+628:    batch_parser = commands.add_parser("jev-batch")
+635:    draft_parser = commands.add_parser("draft-verify", help="Flash drafts cited claims; Jev judges them")
+664:    if args.command == "jev-batch" and args.summary and args.output is None:
+705:            raw = args.output.with_suffix(".raw.json")
+709:                raw.write_text(json.dumps(error.result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+710:                error.saved_to = str(raw)
+712:            raw.write_text(json.dumps(draft, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+722:        elif args.command == "draft-verify":
+726:                raise ValueError(f"draft-verify needs {' and '.join(missing)}")
+728:                verified = draft_verify(budget, args.input.read_text(encoding="utf-8"), str(args.input),
+789:        elif args.command == "jev-batch":
+790:            batch = jev_batch(budget, args.input.read_text(encoding="utf-8"), str(args.input),

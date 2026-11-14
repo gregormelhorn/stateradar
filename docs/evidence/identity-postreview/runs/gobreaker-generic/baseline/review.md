@@ -1,0 +1,202 @@
+# Review
+
+The draft route used DeepSeek Flash for extraction and Jev jev-1.14.0 for verification, as implemented by draft-verify. It returned 34 claims and 20 questions. The separate final Jev batch returned 78 supported and 15 unclear parts. Each verdict below was reviewed against the cited file. Evidence from a different part is identified where a single line was insufficient. The probe overlay was injected only after saving the initial report.
+
+## Draft claims
+
+- **C1** (Jev supported). Keep rejection short-circuit. The beforeRequest return values themselves are covered separately by C6–C8. (observed-in-code: gobreaker.go:230 ("if err != nil {")).
+- **C2** (Jev supported). Narrow to a non-nil recovered panic and a normally returning deferred report. F11 and F14 cover stale accounting and replacement panic. (observed-in-code: gobreaker.go:237 ("cb.afterRequest(generation, false)")).
+- **C3** (Jev supported). Keep classification before reporting. F10 and F12 separate stale accounting, original return pair, and classifier panic. (observed-in-code: gobreaker.go:243 ("cb.afterRequest(generation, cb.isSuccessful(err))")).
+- **C4** (Jev supported). Keep captured generation and boolean. F22 adds that the closure reads the receiver’s breaker pointer on invocation. (observed-in-code: gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)")).
+- **C5** (Jev supported). Keep both public return values for failed admission, distinguished from a panic during admission (F18). (observed-in-code: gobreaker.go:268 ("return nil, err")).
+- **C6** (Jev supported). Keep the open rejection during the unexpired open state. State refresh runs first. (observed-in-code: gobreaker.go:283 ("if state == StateOpen {")).
+- **C7** (Jev supported). Keep the half-open cap, including the equality boundary. F03 and F06 cover unresolved and completed trials. (observed-in-code: gobreaker.go:285 ("} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {")).
+- **C8** (Jev supported). Correct misleading scope. Rejected beforeRequest paths also return generation (284 and 286). Only admission increments Requests and returns nil error. (observed-in-code: gobreaker.go:289 ("cb.counts.onRequest()")).
+- **C9** (Jev supported). Keep no result accounting after a mismatch. F08 and F19 distinguish earlier state-refresh effects. (observed-in-code: gobreaker.go:299 ("if generation != before {")).
+- **C10** (Jev supported). Keep state refresh before accounting and before its guard. F08, F09 and F19. (observed-in-code: gobreaker.go:298 ("state, generation := cb.currentState(now)")).
+- **C11** (Jev supported). Keep via the closed dispatch at 313 plus success counter updates at 60–62. F01 is the repeat control. (observed-in-code: gobreaker.go:62 ("c.ConsecutiveFailures = 0")).
+- **C12** (Jev supported). Keep via closed dispatch at 325 and counter updates at 66–68. F01 and F13. (observed-in-code: gobreaker.go:68 ("c.ConsecutiveSuccesses = 0")).
+- **C13** (Jev supported). Keep for matching closed failures whose hook returns normally. F13–F15 and F23 qualify panic and timing. (observed-in-code: gobreaker.go:326 ("if cb.readyToTrip(cb.counts) {")).
+- **C14** (Jev supported). Keep threshold based on the actual success counter. F02 and F06 contrast duplicate and distinct trials. (observed-in-code: gobreaker.go:316 ("if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {")).
+- **C15** (Jev supported). Keep for a matching half-open result. F05 and F25 add expiry and notification behavior. (observed-in-code: gobreaker.go:330 ("cb.setState(StateOpen, now)")).
+- **C16** (Jev supported). Keep strict observation-time comparison. F08 covers lazy transition and Q20 covers equality. (observed-in-code: gobreaker.go:341 ("if cb.expiry.Before(now) {")).
+- **C17** (Jev supported). Keep strict nonzero comparison and closed rollover. F09 covers both orders. (observed-in-code: gobreaker.go:337 ("if !cb.expiry.IsZero() && cb.expiry.Before(now) {")).
+- **C18** (Jev supported). Keep the no-op guard as a source-backed limit. Guard is before notification and clearing. (observed-in-code: gobreaker.go:349 ("if cb.state == state {")).
+- **C19** (Jev supported). Keep reset before notification, local to actual state changes. F16, F19 and F25 cover committed effects. (observed-in-code: gobreaker.go:356 ("cb.toNewGeneration(now)")).
+- **C20** (Jev supported). Keep nil guard and actual state-change requirement, qualified by C18 and C17. (observed-in-code: gobreaker.go:358 ("if cb.onStateChange != nil {")).
+- **C21** (Jev supported). Keep generation increment and clear; F29 records theoretical width limit. (observed-in-code: gobreaker.go:365 ("cb.counts.clear()")).
+- **C22** (Jev supported). Keep literal zero vs sampled time plus configured interval. (observed-in-code: gobreaker.go:370 ("if cb.interval == 0 {")).
+- **C23** (Jev supported). Keep sampled time plus timeout. F17 and F23 distinguish sampling from hook return time. (observed-in-code: gobreaker.go:376 ("cb.expiry = now.Add(cb.timeout)")).
+- **C24** (Jev supported). Keep literal zero; F03 uses this limit for a missing completion. (observed-in-code: gobreaker.go:378 ("cb.expiry = zero")).
+- **C25** (Jev supported). Keep lock and refresh for State. F09 contrasts Counts. (observed-in-code: gobreaker.go:211 ("state, _ := cb.currentState(now)")).
+- **C26** (Jev supported). Keep initial generation. Closed is the zero State; initialization itself does not call setState. (observed-in-code: gobreaker.go:177 ("cb.toNewGeneration(time.Now())")).
+- **C27** (Jev unclear). Resolve manually. 229–234 covers admission then defer only on acceptance, 242–244 establishes the normal suffix, and 235–239 covers exceptional retry. F10–F14 preserve the distinct paths. (observed-in-code: gobreaker.go:229 ("generation, err := cb.beforeRequest()")).
+- **C28** (Jev supported). Keep assignment before expiry selection and publication to the notification. (observed-in-code: gobreaker.go:354 ("cb.state = state")).
+- **C29** (Jev supported). Duplicate of C19. Retain one source assertion in final review. (observed-in-code: gobreaker.go:356 ("cb.toNewGeneration(now)")).
+- **C30** (Jev supported). Keep constructor default. README.md:41–43 explicitly covers zero. (observed-in-code: gobreaker.go:147 ("if st.MaxRequests == 0 {")).
+- **C31** (Jev supported). Keep source/comment agreement. Construction normalizes nonpositive intervals; README.md:45–47 describes zero. (observed-in-code: gobreaker.go:153 ("if st.Interval <= 0 {")).
+- **C32** (Jev supported). Keep source/comment agreement. Construction normalizes nonpositive timeouts; README.md:49–51 describes zero. (observed-in-code: gobreaker.go:159 ("if st.Timeout <= 0 {")).
+- **C33** (Jev supported). Keep default branch only. No default threshold inference for custom hooks. (observed-in-code: gobreaker.go:193 ("return counts.ConsecutiveFailures > 5")).
+- **C34** (Jev supported). Keep default branch only. A custom classifier's verdict does not change the returned error (F10). (observed-in-code: gobreaker.go:197 ("return err == nil")).
+
+## Draft questions
+
+- **Q1** Keep F07; documented count discard and missing acknowledgement are separate.
+- **Q2** Keep F01–F02 and F15; repeated reporting changes effects before and after a generation cut.
+- **Q3** Keep F03–F05 and F26–F27; compare continued absence with a retained producer's later report.
+- **Q4** Keep F08 and F19; separate normally returning and panicking notification before stale rejection.
+- **Q5** Keep F20; mutex-bearing reentry cannot return while the outer callback holds the lock. Revise the proposed observation of post-transition counts to commit ordering only.
+- **Q6** Keep F16/F20; post-commit ordering and supported callback behavior are separate questions.
+- **Q7** Keep F14/F17; split replacement panic from accounting already committed.
+- **Q8** Keep F11; README.md:90–91 covers ordinary request panic, and the classifier and stale-observer ordering is an open extension.
+- **Q9** Keep F29 as theoretical source-derived boundary.
+- **Q10** Keep F09; State can roll over while Counts reads stored data.
+- **Q11** Merge with Q10 into F09 without dropping the Counts freshness question.
+- **Q12** Merge with Q3 into F03–F05. The cap persists with no report; later success/failure has a different effect.
+- **Q13** Keep F02/F04/F05/F06; correct the premise that a half-open failure resets a streak and stays in half-open. It directly reopens and clears the generation.
+- **Q14** Keep F08; remove Counts from the proposed state-evaluating paths. Counts observes stored data; notification requires a resolving entry.
+- **Q15** Resolve Settings-copy premise from the value argument and field assignments, including 141, 145 and 159–162. No dynamic configuration path in the component; callback closure state remains external.
+- **Q16** Resolve against the Settings comment at 89 and normalization at 153–156; README's example only names zero.
+- **Q17** Keep F07 and F09. General closed failure wording at README.md:53–54 does not settle a stale failure or the eligibility of its hook.
+- **Q18** Retain wrap in F29; separate refresh-before-check in F08/F09, where a newly advanced generation prevents old accounting.
+- **Q19** Resolve no-op premise using the actual state-change guard and README.md:58, which describes changes.
+- **Q20** Keep exact equality question. Drop simultaneous closed/open expiry premise within this component: one stored state and a single expiry are read under lock; distinct switch arms and per-state expiry replace prior deadlines.
+
+## Verified finding dispositions
+
+- **F01** Retained. Classified as a documentation gap about callback cardinality. The mutex serializes updates, and no single-use guard appears in the closure. (observed-in-code: gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)")).
+- **F02** Retained. This is a potential contract issue only if closure is meant to require distinct trials. The distinct-trial control is F06. (observed-in-code: gobreaker.go:316 ("if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {")).
+- **F03** Retained. Classified as a lifecycle contract gap. The no-report branch is bounded by the probe duration, and persistence beyond it follows from the half-open code. (observed-in-code: gobreaker.go:285 ("} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {")).
+- **F04** Retained. Late matching success closes while the original waiter is absent. The retained callback's return type has no outcome delivery to that waiter. (observed-in-code: gobreaker.go:317 ("cb.setState(StateClosed, now)")).
+- **F05** Retained. Late matching failure reopens, and admission after the new timeout is a separate observation. (observed-in-code: gobreaker.go:330 ("cb.setState(StateOpen, now)")).
+- **F06** Retained as a negative control for slot reuse and distinct approvals. (observed-in-code: gobreaker.go:285 ("} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {")).
+- **F07** Retained. Count discard is documented. Absence of acknowledgement and ReadyToTrip suppression stay open. When the stale report itself resolves expiry use F08/F19. (observed-in-code: gobreaker.go:299 ("if generation != before {")).
+- **F08** Retained. First resolving call and already-resolved orders were both tested. Counts was used to observe the absence of notification before the resolving call. (observed-in-code: gobreaker.go:342 ("cb.setState(StateHalfOpen, now)")).
+- **F09** Retained. The probe covers both booleans with either State or completion observing expiry first. (observed-in-code: gobreaker.go:338 ("cb.toNewGeneration(now)")).
+- **F10** Retained. Fresh, stale before classification, and stale while classification is blocked are distinct. Hook execution, count skip, and caller return pair were independently checked. (observed-in-code: gobreaker.go:243 ("cb.afterRequest(generation, cb.isSuccessful(err))")).
+- **F11** Retained with the reporting-returns-normally condition. Reporting panic replacement is separated into F14. (observed-in-code: gobreaker.go:237 ("cb.afterRequest(generation, false)")).
+- **F12** Retained. The original request's normal result is bypassed after the classifier panics. Fresh and stale accounting are distinct. (observed-in-code: gobreaker.go:237 ("cb.afterRequest(generation, false)")).
+- **F13** Retained under a matching closed generation. Duplicate accounting is confirmed. The later callback verdict was false in this probe. Elapsed interval is F24 and competing lock acquisition is F28. (observed-in-code: gobreaker.go:325 ("cb.counts.onFailure()")).
+- **F14** Retained. The original request panic being displaced is a potential API contract mismatch with README.md:90–91. That text does not specify simultaneous request and reporting failure. Classifier and retry-specific panic replacement are independent cases. (observed-in-code: gobreaker.go:238 ("panic(e)")).
+- **F15** Retained. One failure remains after the initial done panic. The second visible charge comes from an explicit manual retry. (observed-in-code: gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)")).
+- **F16** Narrowed the Execute retry claim to the tested unexpired-open path and added both manually retried TwoStep results. A slow throwing hook is covered in F17. (observed-in-code: gobreaker.go:356 ("cb.toNewGeneration(now)")).
+- **F17** Retained. Tested both a returning second notification and a panicking second notification. No rollback occurred when either notification panicked in those schedules. (observed-in-code: gobreaker.go:376 ("cb.expiry = now.Add(cb.timeout)")).
+- **F18** Expanded from Execute to Allow because both call admission before returning anything to the user. Only Execute has a request and classifier to skip. (observed-in-code: gobreaker.go:229 ("generation, err := cb.beforeRequest()")).
+- **F19** Retained. The first panic and retry are separate. The generation comparison is reached only on the retry in this schedule. (observed-in-code: gobreaker.go:359 ("cb.onStateChange(cb.name, prev, state)")).
+- **F20** Refined the observation to distinguish inference about a blocking nested lock from the direct Name implementation. Source-only. A test deliberately deadlocking the same breaker was omitted. (observed-in-code: gobreaker.go:294 ("cb.mutex.Lock()")).
+- **F21** Retained as a runtime-dependent but tested Goexit edge. The claim concerns the exercised Go version and half-open generation. No claim about panic(nil) or broader runtime versions. (observed-in-code: gobreaker.go:235 ("e := recover()")).
+- **F22** Narrowed the runtime claim to sequential public receiver replacement with a success report. The original admission remaining was verified. After replacement a matching false report takes the usual failure branch by inference. Concurrent receiver assignment was outside scope. (observed-in-code: gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)")).
+- **F23** Retained. False verdict leaves observable old counts until the next resolution, while a true verdict opens with the earlier time sample. (observed-in-code: gobreaker.go:325 ("cb.counts.onFailure()")).
+- **F24** New, after the initial report. Added interval-expiry control for automatic fallback. Unlike F13's still-matching case, the retry clears and skips. (observed-in-code: gobreaker.go:237 ("cb.afterRequest(generation, false)")).
+- **F25** New, after the initial report. Added throwing state observer on both matching half-open outcomes through both entry points. F17 is the separate case where fallback can advance an open deadline. (observed-in-code: gobreaker.go:356 ("cb.toNewGeneration(now)")).
+- **F26** New, after the initial report. Added application waiter departure with no producer result. Cleanup with Goexit happened only after rejection was checked. (observed-in-code: gobreaker.go:242 ("result, err := req()")).
+- **F27** New, after the initial report. Added actual application waiter departure, both matching and stale outcomes, and verification of the buffered destination. The application harness chose buffered handoff. (observed-in-code: gobreaker.go:244 ("return result, err")).
+- **F28** New, after the initial report. Source review identified the unlock and reacquire gap. Inferred scheduling consequence, with no assertion that a race detector failure or lost update exists. (observed-in-code: gobreaker.go:295 ("defer cb.mutex.Unlock()")).
+- **F29** New, after the initial report. Retained draft Q9/Q18 as the mathematical wrap boundary. No wrap was attempted. (observed-in-code: gobreaker.go:364 ("cb.generation++")).
+
+## Final claim parts
+
+- **F01.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:56 ("c.Requests++")).
+- **F01.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)")).
+- **F01.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:60 ("c.TotalSuccesses++")).
+- **F01.04** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:66 ("c.TotalFailures++")).
+- **F01.05** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:68 ("c.ConsecutiveSuccesses = 0")).
+- **F02.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:316 ("if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {")).
+- **F02.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:317 ("cb.setState(StateClosed, now)")).
+- **F02.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:299 ("if generation != before {")).
+- **F03.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:285 ("} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {")).
+- **F03.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:378 ("cb.expiry = zero")).
+- **F03.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:289 ("cb.counts.onRequest()")).
+- **F04.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:317 ("cb.setState(StateClosed, now)")).
+- **F05.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:330 ("cb.setState(StateOpen, now)")).
+- **F05.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:376 ("cb.expiry = now.Add(cb.timeout)")).
+- **F06.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:315 ("cb.counts.onSuccess()")).
+- **F06.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:286 ("return generation, ErrTooManyRequests")).
+- **F07.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:299 ("if generation != before {")).
+- **F07.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:306 ("cb.onFailure(state, now)")).
+- **F08.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:298 ("state, generation := cb.currentState(now)")).
+- **F08.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:342 ("cb.setState(StateHalfOpen, now)")).
+- **F08.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:359 ("cb.onStateChange(cb.name, prev, state)")).
+- **F08.04** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:220 ("return cb.counts")).
+- **F09.01** Jev unclear. Keep as a traced effect using 337–338 and 363–379, where rollover has no state hook, plus the interval probe. (observed-in-code anchor: gobreaker.go:338 ("cb.toNewGeneration(now)")).
+- **F09.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:365 ("cb.counts.clear()")).
+- **F09.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:211 ("state, _ := cb.currentState(now)")).
+- **F09.04** Jev unclear. Keep with the 298–306 guard order and the interval probe, rather than relying on the bare return line. (observed-in-code anchor: gobreaker.go:300 ("return")).
+- **F10.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:243 ("cb.afterRequest(generation, cb.isSuccessful(err))")).
+- **F10.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:244 ("return result, err")).
+- **F11.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:237 ("cb.afterRequest(generation, false)")).
+- **F11.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:238 ("panic(e)")).
+- **F11.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:299 ("if generation != before {")).
+- **F12.01** Jev unclear. Keep via the installed defer at 234–240 and classifier evaluation at 243, corroborated by fresh/stale classifier-panic traces. (observed-in-code anchor: gobreaker.go:235 ("e := recover()")).
+- **F12.02** Jev unclear. Keep via 236–238 and 243. Probe verifies classifier executes once and checks failure/skip independently. (observed-in-code anchor: gobreaker.go:237 ("cb.afterRequest(generation, false)")).
+- **F12.03** Jev unclear. Keep as control flow: a panicking classifier prevents reaching 244. Probe observes the outgoing panic. (observed-in-code anchor: gobreaker.go:244 ("return result, err")).
+- **F13.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:325 ("cb.counts.onFailure()")).
+- **F13.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:237 ("cb.afterRequest(generation, false)")).
+- **F13.03** Jev unclear. Keep under the matching closed precondition. 299–306 and 324–327 enter the policy hook on each false report. The probe observes two hook snapshots. (observed-in-code anchor: gobreaker.go:326 ("if cb.readyToTrip(cb.counts) {")).
+- **F14.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:238 ("panic(e)")).
+- **F14.02** Jev unclear. Keep as the ordered sequence at 325–326. Probe independently checks residual counts. (observed-in-code anchor: gobreaker.go:325 ("cb.counts.onFailure()")).
+- **F15.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)")).
+- **F15.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:325 ("cb.counts.onFailure()")).
+- **F16.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:354 ("cb.state = state")).
+- **F16.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:356 ("cb.toNewGeneration(now)")).
+- **F16.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:299 ("if generation != before {")).
+- **F17.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:376 ("cb.expiry = now.Add(cb.timeout)")).
+- **F17.02** Jev unclear. Keep by composing the fallback call at 237 with the local time sample at 297. The probe checks that fallback sees expiry. (observed-in-code anchor: gobreaker.go:297 ("now := time.Now()")).
+- **F17.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:342 ("cb.setState(StateHalfOpen, now)")).
+- **F17.04** Jev unclear. Keep via 237–238 control flow and the second-notification-panic control. (observed-in-code anchor: gobreaker.go:238 ("panic(e)")).
+- **F18.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:229 ("generation, err := cb.beforeRequest()")).
+- **F18.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:281 ("state, generation := cb.currentState(now)")).
+- **F18.03** Jev unclear. Keep from admission order 281–289 and the probe confirming zero admissions plus successful retry. (observed-in-code anchor: gobreaker.go:289 ("cb.counts.onRequest()")).
+- **F18.04** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:242 ("result, err := req()")).
+- **F19.01** Jev unclear. Keep via 298–299, 341–342 and 354–359. Probe observes panic and fresh half-open retry without stale accounting. (observed-in-code anchor: gobreaker.go:298 ("state, generation := cb.currentState(now)")).
+- **F19.02** Jev unclear. Keep via 354–359. Probe confirms committed half-open and single callback after retry. (observed-in-code anchor: gobreaker.go:354 ("cb.state = state")).
+- **F19.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:299 ("if generation != before {")).
+- **F20.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:294 ("cb.mutex.Lock()")).
+- **F20.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:277 ("cb.mutex.Lock()")).
+- **F20.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:207 ("cb.mutex.Lock()")).
+- **F20.04** Jev unclear. Keep directly from 216–220. The exact mutex acquisition is on 217. (observed-in-code anchor: gobreaker.go:217 ("cb.mutex.Lock()")).
+- **F20.05** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:202 ("return cb.name")).
+- **F20.06** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:326 ("if cb.readyToTrip(cb.counts) {")).
+- **F20.07** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:359 ("cb.onStateChange(cb.name, prev, state)")).
+- **F21.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:236 ("if e != nil {")).
+- **F21.02** Jev unclear. Keep within unchanged half-open generation from 285–290, 334–345 and 378. Probe confirms a retry is rejected after worker exit. (observed-in-code anchor: gobreaker.go:285 ("} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {")).
+- **F22.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)")).
+- **F22.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:299 ("if generation != before {")).
+- **F23.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:325 ("cb.counts.onFailure()")).
+- **F23.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:327 ("cb.setState(StateOpen, now)")).
+- **F23.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:298 ("state, generation := cb.currentState(now)")).
+- **F24.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:337 ("if !cb.expiry.IsZero() && cb.expiry.Before(now) {")).
+- **F24.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:365 ("cb.counts.clear()")).
+- **F24.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:299 ("if generation != before {")).
+- **F25.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:317 ("cb.setState(StateClosed, now)")).
+- **F25.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:330 ("cb.setState(StateOpen, now)")).
+- **F25.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:356 ("cb.toNewGeneration(now)")).
+- **F26.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:242 ("result, err := req()")).
+- **F26.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:285 ("} else if state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests {")).
+- **F27.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:244 ("return result, err")).
+- **F27.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:317 ("cb.setState(StateClosed, now)")).
+- **F27.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:330 ("cb.setState(StateOpen, now)")).
+- **F27.04** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:299 ("if generation != before {")).
+- **F28.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:295 ("defer cb.mutex.Unlock()")).
+- **F28.02** Jev unclear. Keep directly from 237 calling afterRequest and 293–295 locking/unlocking. Which acquisition occurs first remains an untested scheduling inference. (observed-in-code anchor: gobreaker.go:294 ("cb.mutex.Lock()")).
+- **F28.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:237 ("cb.afterRequest(generation, false)")).
+- **F29.01** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:128 ("generation uint64")).
+- **F29.02** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:364 ("cb.generation++")).
+- **F29.03** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:299 ("if generation != before {")).
+- **Q-expiry-closed** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:337 ("if !cb.expiry.IsZero() && cb.expiry.Before(now) {")).
+- **Q-expiry-open** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:341 ("if cb.expiry.Before(now) {")).
+- **S-state-unlock** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:208 ("defer cb.mutex.Unlock()")).
+- **S-admission-unlock** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:278 ("defer cb.mutex.Unlock()")).
+- **S-closed-zero** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:371 ("cb.expiry = zero")).
+- **S-wrap-closed** Jev supported. Retained with the stated scope after source review. (observed-in-code anchor: gobreaker.go:48 ("Requests             uint32")).
+
+## Synchronization, limits, and severity
+
+- Admission, state observation, and reporting each take the same non-reentrant mutex. The report holds it through the generation comparison, counts mutation, policy call, and synchronous state observer. A competing lifecycle change cannot interleave between the comparison and the same report’s accounting or while one of these locked hooks runs. Ordinary request code and classification run outside those critical sections. A panic fallback takes a new lock after deferred unlock, which permits another operation to win the lock between attempts. The race runs covered selected channel-ordered schedules. (observed-in-code: gobreaker.go:126 ("mutex      sync.Mutex"); gobreaker.go:207 ("cb.mutex.Lock()"); gobreaker.go:208 ("defer cb.mutex.Unlock()"); gobreaker.go:242 ("result, err := req()"); gobreaker.go:243 ("cb.afterRequest(generation, cb.isSuccessful(err))"); gobreaker.go:277 ("cb.mutex.Lock()"); gobreaker.go:278 ("defer cb.mutex.Unlock()"); gobreaker.go:294 ("cb.mutex.Lock()"); gobreaker.go:295 ("defer cb.mutex.Unlock()"); gobreaker.go:299 ("if generation != before {"); gobreaker.go:325 ("cb.counts.onFailure()"); gobreaker.go:326 ("if cb.readyToTrip(cb.counts) {"); gobreaker.go:359 ("cb.onStateChange(cb.name, prev, state)")).
+- Closed rollover changes generation without a state notification. Half-open has zero expiry. The sentinel is the Go zero value assigned from a zero-initialized local. Calculated open and interval deadlines are separate values. Exact timestamp equality was checked at the branch level only. (observed-in-code: gobreaker.go:337 ("if !cb.expiry.IsZero() && cb.expiry.Before(now) {"); gobreaker.go:338 ("cb.toNewGeneration(now)"); gobreaker.go:341 ("if cb.expiry.Before(now) {"); gobreaker.go:367 ("var zero time.Time"); gobreaker.go:371 ("cb.expiry = zero"); gobreaker.go:373 ("cb.expiry = now.Add(cb.interval)"); gobreaker.go:376 ("cb.expiry = now.Add(cb.timeout)"); gobreaker.go:378 ("cb.expiry = zero")).
+- The duplicate charge, displaced panic, stale-triggered transition, and equal-generation receiver reassignment are externally observable. Intent for the edge orderings is open. No unsynchronized breaker accounting or silent race was asserted. F14 is a potential API contract issue, F20 is a documented analysis question about required reentrancy, and F29 is a theoretical runtime limit. (observed-in-code: gobreaker.go:128 ("generation uint64"); gobreaker.go:237 ("cb.afterRequest(generation, false)"); gobreaker.go:238 ("panic(e)"); gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)"); gobreaker.go:294 ("cb.mutex.Lock()"); gobreaker.go:299 ("if generation != before {"); gobreaker.go:325 ("cb.counts.onFailure()"); gobreaker.go:342 ("cb.setState(StateHalfOpen, now)")).
+- The component exposes no cancellation method or background expiry loop. Execute’s panic defer can retry reporting, and the TwoStep callback has no automatic retry. F26/F27 exercise an application wait protocol and explicitly trace the pair to its worker-owned buffer. F03–F05 exercise the TwoStep retained callback instead. The worker’s Goexit shutdown in the no-result test is harness cleanup. (inferred from component API and call paths, observed-in-code anchors: gobreaker.go:228 ("func (cb *CircuitBreaker) Execute(req func() (interface{}, error)) (interface{}, error) {"); gobreaker.go:242 ("result, err := req()"); gobreaker.go:244 ("return result, err"); gobreaker.go:265 ("func (tscb *TwoStepCircuitBreaker) Allow() (done func(success bool), err error) {"); gobreaker.go:272 ("tscb.cb.afterRequest(generation, success)"); gobreaker.go:334 ("func (cb *CircuitBreaker) currentState(now time.Time) (State, uint64) {")).
+- Closed Requests and result counters are uint32. Arithmetic wrap is theoretically possible under sufficiently many operations without a reset, including repeated callbacks for results. The default trip comparison is against the stored consecutive failure count. This capacity limit was not exercised. (observed-in-code: gobreaker.go:48 ("Requests             uint32"); gobreaker.go:49 ("TotalSuccesses       uint32"); gobreaker.go:50 ("TotalFailures        uint32"); gobreaker.go:51 ("ConsecutiveSuccesses uint32"); gobreaker.go:52 ("ConsecutiveFailures  uint32"); gobreaker.go:56 ("c.Requests++"); gobreaker.go:60 ("c.TotalSuccesses++"); gobreaker.go:66 ("c.TotalFailures++"); gobreaker.go:193 ("return counts.ConsecutiveFailures > 5")).
+
+- Source-backed scheduling limit for F13 and F28. If the second policy call returns true while the generation still matches, the callback sees both charges and opens the breaker, clearing the live counters. If another operation advances the lifecycle before the fallback takes the lock, the stale retry instead skips the policy call. In the first order the original panic is rethrown only if the new state notification also returns normally. These alternatives follow from the source and were not independently forced by a competing goroutine. (observed-in-code: gobreaker.go:237 ("cb.afterRequest(generation, false)"), gobreaker.go:238 ("panic(e)"), gobreaker.go:294 ("cb.mutex.Lock()"), gobreaker.go:295 ("defer cb.mutex.Unlock()"), gobreaker.go:299 ("if generation != before {"), gobreaker.go:326 ("if cb.readyToTrip(cb.counts) {"), gobreaker.go:327 ("cb.setState(StateOpen, now)"), gobreaker.go:359 ("cb.onStateChange(cb.name, prev, state)"), gobreaker.go:365 ("cb.counts.clear()")).
+- Source-backed entry-point limit for F08, F18, and F19. At first observation of an expired open deadline, State returns half-open if the notification returns, and otherwise State propagates the notification panic with half-open committed. In both orders it releases its lock. The observing admission proceeds to capacity checks only if the notification returns. A stale completion reaches its drop check only if the notification returns. State-specific notification panic was source-reviewed; the admission and stale completion panic paths were probed. (observed-in-code: gobreaker.go:208 ("defer cb.mutex.Unlock()"), gobreaker.go:211 ("state, _ := cb.currentState(now)"), gobreaker.go:278 ("defer cb.mutex.Unlock()"), gobreaker.go:281 ("state, generation := cb.currentState(now)"), gobreaker.go:295 ("defer cb.mutex.Unlock()"), gobreaker.go:298 ("state, generation := cb.currentState(now)"), gobreaker.go:342 ("cb.setState(StateHalfOpen, now)"), gobreaker.go:354 ("cb.state = state"), gobreaker.go:359 ("cb.onStateChange(cb.name, prev, state)")).

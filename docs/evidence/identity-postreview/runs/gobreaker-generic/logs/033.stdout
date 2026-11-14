@@ -1,0 +1,76 @@
+C1 supported 33 State.String maps StateClosed to "closed". ANCHOR: return "closed"
+C2 supported 35 State.String maps StateHalfOpen to "half-open". ANCHOR: return "half-open"
+C3 supported 37 State.String maps StateOpen to "open". ANCHOR: return "open"
+C4 supported 39 For an unrecognized State value, State.String returns a formatted unknown-state string. ANCHOR: return fmt.Sprintf("unknown state: %d", s)
+C5 unclear 48 Counts holds Requests, TotalSuccesses, TotalFailures, ConsecutiveSuccesses, and ConsecutiveFailures counters. ANCHOR: Requests             uint32
+C6 supported 56 onRequest increments the Requests counter. ANCHOR: c.Requests++
+C7 unclear 61 onSuccess increments TotalSuccesses and ConsecutiveSuccesses and resets ConsecutiveFailures to zero. ANCHOR: c.ConsecutiveSuccesses++
+C8 unclear 67 onFailure increments TotalFailures and ConsecutiveFailures and resets ConsecutiveSuccesses to zero. ANCHOR: c.ConsecutiveFailures++
+C9 unclear 72 Counts.clear sets all five counters to zero. ANCHOR: c.Requests = 0
+C10 supported 148 If Settings.MaxRequests is 0, the constructed breaker uses maxRequests 1. ANCHOR: cb.maxRequests = 1
+C11 supported 154 If Settings.Interval is less than or equal to 0, the constructed breaker uses defaultInterval. ANCHOR: cb.interval = defaultInterval
+C12 supported 160 If Settings.Timeout is less than or equal to 0, the constructed breaker uses defaultTimeout. ANCHOR: cb.timeout = defaultTimeout
+C13 supported 166 If Settings.ReadyToTrip is nil, the constructed breaker uses defaultReadyToTrip. ANCHOR: cb.readyToTrip = defaultReadyToTrip
+C14 supported 172 If Settings.IsSuccessful is nil, the constructed breaker uses defaultIsSuccessful. ANCHOR: cb.isSuccessful = defaultIsSuccessful
+C15 supported 177 NewCircuitBreaker calls toNewGeneration with the current time before returning. ANCHOR: cb.toNewGeneration(time.Now())
+C16 supported 185 NewTwoStepCircuitBreaker constructs a TwoStepCircuitBreaker wrapping a new CircuitBreaker from the same Settings. ANCHOR: cb: NewCircuitBreaker(st),
+C17 supported 193 defaultReadyToTrip returns true when ConsecutiveFailures is greater than 5. ANCHOR: return counts.ConsecutiveFailures > 5
+C18 supported 197 defaultIsSuccessful returns true exactly when err is nil. ANCHOR: return err == nil
+C19 supported 202 CircuitBreaker.Name returns the configured name. ANCHOR: return cb.name
+C20 supported 211 CircuitBreaker.State locks the mutex, calls currentState with the current time, and returns the resulting state. ANCHOR: state, _ := cb.currentState(now)
+C21 supported 220 CircuitBreaker.Counts locks the mutex and returns the internal counts value. ANCHOR: return cb.counts
+C22 supported 229 Execute calls beforeRequest and returns instantly with its error if admission is rejected. ANCHOR: generation, err := cb.beforeRequest()
+C23 supported 237 Execute's deferred recover reports the request as unsuccessful via afterRequest before re-panicking if a panic occurred. ANCHOR: cb.afterRequest(generation, false)
+C24 supported 243 After a non-panicking request returns, Execute reports the outcome using isSuccessful(err) and returns the result and error. ANCHOR: cb.afterRequest(generation, cb.isSuccessful(err))
+C25 supported 266 TwoStepCircuitBreaker.Allow calls beforeRequest and returns a nil callback with the error if admission is rejected. ANCHOR: generation, err := tscb.cb.beforeRequest()
+C26 supported 272 The callback returned by Allow invokes afterRequest with the generation captured at Allow time and the supplied success boolean. ANCHOR: tscb.cb.afterRequest(generation, success)
+C27 supported 284 beforeRequest returns ErrOpenState when the current state is StateOpen. ANCHOR: return generation, ErrOpenState
+C28 supported 286 beforeRequest returns ErrTooManyRequests when the state is half-open and counts.Requests is at least maxRequests. ANCHOR: return generation, ErrTooManyRequests
+C29 supported 289 On an admitted request, beforeRequest increments counts.Requests and returns the current generation. ANCHOR: cb.counts.onRequest()
+C30 supported 299 afterRequest ignores the outcome when the current generation differs from the generation captured before the request. ANCHOR: if generation != before {
+C31 supported 304 afterRequest dispatches to onSuccess or onFailure based on the success boolean after the generation check. ANCHOR: cb.onSuccess(state, now)
+C32 supported 313 In closed state, onSuccess records a success in counts. ANCHOR: cb.counts.onSuccess()
+C33 supported 316 In half-open state, onSuccess records the success and transitions to closed when ConsecutiveSuccesses is at least maxRequests. ANCHOR: if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {
+C34 supported 326 In closed state, onFailure records the failure and transitions to open when readyToTrip returns true. ANCHOR: if cb.readyToTrip(cb.counts) {
+C35 supported 330 In half-open state, any recorded failure transitions the breaker to open. ANCHOR: cb.setState(StateOpen, now)
+C36 supported 337 In closed state, currentState starts a new generation when expiry is nonzero and before the current time. ANCHOR: if !cb.expiry.IsZero() && cb.expiry.Before(now) {
+C37 supported 341 In open state, currentState transitions to half-open when expiry is before the current time. ANCHOR: if cb.expiry.Before(now) {
+C38 supported 349 setState returns without changing state or firing the hook when the requested state equals the current state. ANCHOR: if cb.state == state {
+C39 supported 356 setState calls toNewGeneration before invoking onStateChange. ANCHOR: cb.toNewGeneration(now)
+C40 supported 358 setState invokes onStateChange with the breaker name, previous state, and new state only when the hook is non-nil. ANCHOR: if cb.onStateChange != nil {
+C41 supported 364 toNewGeneration increments the generation counter and clears counts. ANCHOR: cb.generation++
+C42 supported 371 In closed state with zero interval, toNewGeneration sets expiry to the zero time. ANCHOR: cb.expiry = zero
+C43 supported 373 In closed state with nonzero interval, toNewGeneration sets expiry to now plus the interval. ANCHOR: cb.expiry = now.Add(cb.interval)
+C44 supported 376 In open state, toNewGeneration sets expiry to now plus the timeout. ANCHOR: cb.expiry = now.Add(cb.timeout)
+C45 supported 378 In half-open state, toNewGeneration sets expiry to the zero time. ANCHOR: cb.expiry = zero
+C46 supported 229 Execute first calls beforeRequest; if that returns an error, Execute returns nil and the error without installing the panic-recovery defer or invoking the request. ANCHOR: generation, err := cb.beforeRequest()
+C47 supported 237 In Execute's deferred recovery, afterRequest is called with success=false before the panic is re-raised. ANCHOR: cb.afterRequest(generation, false)
+C48 supported 242 For a normal Execute request, the request function runs first and then afterRequest is invoked with the isSuccessful verdict. ANCHOR: result, err := req()
+C49 supported 271 Allow captures the generation from beforeRequest and returns a callback that later calls afterRequest with that captured generation. ANCHOR: return func(success bool) {
+C50 supported 300 If afterRequest observes a different generation than the captured one, it returns before onSuccess or onFailure can be called. ANCHOR: return
+C51 supported 356 Within setState, toNewGeneration runs before any onStateChange hook invocation. ANCHOR: cb.toNewGeneration(now)
+C52 supported 365 Within toNewGeneration, the generation is incremented and counts are cleared before the expiry is recalculated. ANCHOR: cb.counts.clear()
+C53 supported 46 Counts ignores results of requests sent before clearing, per the Counts documentation. ANCHOR: // Counts ignores the results of the requests sent before clearing.
+C54 supported 89 If Interval is less than or equal to 0, the breaker does not clear internal counts during the closed state, per Settings documentation. ANCHOR: // If Interval is less than or equal to 0, the CircuitBreaker doesn't clear internal Counts during the closed state.
+C55 supported 93 If Timeout is less than or equal to 0, the breaker's timeout is set to 60 seconds, per Settings documentation. ANCHOR: // If Timeout is less than or equal to 0, the timeout value of the CircuitBreaker is set to 60 seconds.
+C56 supported 95 ReadyToTrip is documented as called with a copy of Counts whenever a request fails in the closed state. ANCHOR: // ReadyToTrip is called with a copy of Counts whenever a request fails in the closed state.
+C57 supported 100 OnStateChange is documented as called whenever the state of the breaker changes. ANCHOR: // OnStateChange is called whenever the state of the CircuitBreaker changes.
+C58 supported 226 A panic in the request function is documented to be handled as an error and re-raised. ANCHOR: // and causes the same panic again.
+Q1 Is the TwoStep completion identity intended to be tied only to the numeric generation value returned by beforeRequest, given that generation is per-instance and two instances may both be at the same generation number?
+Q2 What is intended when a callback from Allow is invoked more than once, given that afterRequest has no one-shot guard and would apply each call whose generation still matches?
+Q3 What is intended when a callback from Allow is invoked after the breaker has changed state back to the same generation number on the same instance, such as after a full generation wrap?
+Q4 Should same-number generations on two distinct instances be treated as equivalent by any consumer, or is the generation intended to be meaningful only within one breaker instance?
+Q5 When State() or Counts() is called after expiry has passed but before any admission call, is the returned state/counts intended to reflect the time-based transition or the stored state?
+Q6 Is the documented 'Counts ignores the results of the requests sent before clearing' meant to cover generation changes caused by interval expiry, state change, and explicit clears uniformly?
+Q7 What is intended if onStateChange panics or blocks: should the breaker's state already reflect the transition, and should the mutex remain held?
+Q8 What is intended if ReadyToTrip panics or blocks during afterRequest, given that it is called while the breaker mutex is held?
+Q9 What is intended if IsSuccessful panics in Execute, given that it is called outside the mutex and before afterRequest?
+Q10 Is a panic in the request function intended to be reported to afterRequest as a failure even when the panic value is nil-like, and does re-panicking preserve the original value exactly?
+Q11 Should a nil done callback ever be returned by Allow without an error, or is nil-with-error the only rejection outcome?
+Q12 Should ErrOpenState be returned based only on stored state, or also when expiry has elapsed but currentState has not yet been consulted?
+Q13 Is the half-open admission check intended to count requests that later fail generation checks, given that counts.Requests is incremented in beforeRequest before completion?
+Q14 What is intended for the boundary where expiry equals now: closed-state renewal uses Before(now) and open-state transition uses Before(now); are both boundaries intended to be exclusive?
+Q15 Should the documented default interval of zero (never clear counts in closed state) be distinguishable from an unset interval in any public accessor, given that neither is exposed?
+Q16 Is the ordering of toNewGeneration before onStateChange intended to be observable, such that a hook can read the new counts and generation via public accessors without deadlock?
+Q17 What is intended when a TwoStep callback is invoked after the enclosing TwoStepCircuitBreaker or its underlying CircuitBreaker is otherwise no longer referenced: is the callback expected to remain valid?
+Q18 Are negative limits such as maxRequests behavior under MaxRequests 0 documented only for half-open admission, or also intended to constrain any other phase?

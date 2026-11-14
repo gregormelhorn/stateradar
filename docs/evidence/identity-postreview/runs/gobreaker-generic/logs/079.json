@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,re\nfrom pathlib import Path\nfiles={k:Path(k).read_text().splitlines() for k in ['gobreaker.go','analysis/_probe/identity_test.go']}\nrows=json.loads(Path('analysis/initial.json').read_text())['findings']\ncount=0\nfor row in rows:\n s=row['outcome'].replace(r'\\\"','\"')\n for file,n,quote in re.findall(r'(gobreaker\\.go|analysis/_probe/identity_test\\.go):(\\d+) \\(\"(.*?)\"\\)(?:;|\\])',s):\n  count+=1\n  if quote not in files[file][int(n)-1]:\n   print(row['id'],file,n,repr(quote),repr(files[file][int(n)-1]))\nprint('historical outcome anchors inspected:',count)\nq=Path('baseline/open-questions.md').read_text()\nfor row in rows:\n assert f\"**{row['id']}** {row['question']}\" in q, row['id']\nprint('baseline questions match:',len(rows))\na=Path('analysis/initial.json').read_bytes()\nb=Path('analysis/final.json').read_bytes()\ni=a.rindex(b'\\n  ]\\n}')\nprint('historical JSON rows byte-identical:',a[:i]==b[:i])"
+  ],
+  "exit_code": 0
+}

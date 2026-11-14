@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import json,re\nfrom pathlib import Path\nx=json.loads(Path('analysis/initial.json').read_text())\nfor f in x['findings']:\n o=f['outcome'].replace(chr(92)+chr(34),chr(34))\n print(f['id'], ' '.join(m.group(0).split(' (')[0] for m in re.finditer(r'(?:component\\.go|analysis/_probe/\\w+\\.go):\\d+', o)))\n for m in re.finditer(r'((?:component\\.go|analysis/_probe/\\w+\\.go)):(\\d+) \\(\"(.*?)\"\\)', o):\n  p,n,s=m.groups(); line=Path(p).read_text().splitlines()[int(n)-1]\n  if s not in line:\n   print('MISMATCH',f['id'],p,n,repr(s),repr(line))\n"
+  ],
+  "exit_code": 0
+}
