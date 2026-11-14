@@ -82,3 +82,8 @@ and fixture selftests to all previous generic-canary, semaphore, mutation,
 model, pack, model-routing, finding and accounting gates. The complete logs
 are retained with the implementation and harness-anchor reconciliation commits.
 No new model API calls or cost comparison are involved.
+
+The harness anchor is reconciled to implementation commit `ff2263aa`.
+`harness-staleness-red.txt` retains the real stale-anchor rejection after the
+implementation commit. `reconciled-gates.txt` records the complete successful
+rerun after updating the anchor; no behavior or cell expectations changed.

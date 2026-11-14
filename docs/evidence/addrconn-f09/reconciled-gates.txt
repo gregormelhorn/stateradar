@@ -1,0 +1,573 @@
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.233s
+
+OK
+HARNESS ANCHOR: committed watched paths unchanged since ff2263aa
+DECISIONS: 16 ANSWERED with delegated attribution; implementation pending
+DECISIONS: 16 ANSWERED with delegated attribution; implementation pending
+GUARD RED: duplicate dispatch guard produces overlap and uncovered states
+GUARD GREEN: shutdown dispatch disjoint and exhaustive over all 3 scoped states
+QUESTION RED: actual validator rejects omitted Q-16
+SCOPED MODEL PASS: 16 attributed answers; 3 projected states; no broad conformance claim
+DSC CHECK: OK (3 states x 2 events, 6 cells, 2 guard groups)
+REACHABILITY CHECK: OK (3/3 states reachable from 'BackoffWaiting', 1 terminal)
+GENERATED F-09 omit-backoff-stop -> stateradar/mutants/omit-backoff-stop.go.txt
+GENERATED F-09 wait-for-parent -> stateradar/mutants/wait-for-parent.go.txt
+GENERATED F-09 omit-local-cancel -> stateradar/mutants/omit-local-cancel.go.txt
+MUTANT GENERATION: OK (generated=3 drift=0 blocked=0 errors=0)
+OK F-09 omit-backoff-stop
+OK F-09 wait-for-parent
+OK F-09 omit-local-cancel
+MUTANT GENERATION: OK (checked=3 drift=0 blocked=0 errors=0)
+BASELINE: OK (cells=6)
+MUT-001 KILLED fault=F-09 cell=BackoffWaiting x TearDown id=omit-backoff-stop target=clientconn.go exit=1 duration=2.370s
+CANARY id=omit-backoff-stop: KILLED
+MUT-002 KILLED fault=F-09 cell=BackoffWaiting x TearDown id=wait-for-parent target=clientconn.go exit=1 duration=12.252s
+CANARY id=wait-for-parent: KILLED
+MUT-003 KILLED fault=F-09 cell=BackoffWaiting x TearDown id=omit-local-cancel target=clientconn.go exit=1 duration=12.770s
+FAULT MUTANTS: OK (killed=3 survived=0 errors=0 blocked=0)
+WEAK omit-backoff-stop: SURVIVED (10 repeats)
+WEAK wait-for-parent: SURVIVED (10 repeats)
+WEAK omit-local-cancel: SURVIVED (10 repeats)
+ADDRCONN F-09 PASS: 6 cells x 10 baseline repetitions; 3/3 generic mutants killed; weak controls survive
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.379s
+
+OK
+BASELINE: OK (cells=1)
+MUT-001 SURVIVED fault=F-05 cell=Acquire_NoWaiters x Release id=zero-charges target=semaphore/semaphore.go exit=0 duration=1.814s
+CANARY id=zero-charges: SURVIVED
+MUT-002 BLOCKED id=omit-cancel-unlink fault=F-09 cell=Acquire_WaitersPending x ContextDone canary=zero-charges verdict=SURVIVED; not executed
+FAULT MUTANTS: FAIL (killed=0 survived=1 errors=0 blocked=1)
+EXPECTED GENERIC CONTROL: unobservable capacity blocks F-09 without execution
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK
+full-baseline: SURVIVED (expected SURVIVED)
+weak-baseline: SURVIVED (expected SURVIVED)
+capacity-canary: KILLED (expected KILLED)
+weak-canary-control: SURVIVED (expected SURVIVED)
+EXPECTED CONTROL BLOCKED: capacity canary SURVIVED; dependent F-09 not executed
+weak-f09: SURVIVED (expected SURVIVED)
+full-f09: KILLED (expected KILLED)
+F-09 PASS: canary killed; weak mutant survived; full mutant killed at Acquire_WaitersPending x ContextDone
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.000s
+
+OK
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.004s
+
+OK
+group G-Q01 cancellation rescan: proven
+{'size': 2, 'cur': 3, 'front': False} ['skip'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 3, 'front': True} ['notify'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 2, 'front': False} ['skip']
+{'size': 2, 'cur': 2, 'front': True} ['notify']
+{'size': 2, 'cur': 1, 'front': False} ['skip']
+{'size': 2, 'cur': 1, 'front': True} ['notify']
+DR-001 eligible-zero progress: unsat (unsat required)
+DR-001 positive-head fit at full capacity: unsat (unsat required)
+Source form: DR-001
+COVERAGE: 57 historical cells accounted for; numeric refinements have tests and accepted DRs
+group numeric sign: proven
+group release bound: proven
+group acquire bound: proven
+ARITHMETIC grant: unsat (unsat required)
+ARITHMETIC release/rollback: unsat (unsat required)
+ARITHMETIC rejected operation: unsat (unsat required)
+ARITHMETIC free capacity: unsat (unsat required)
+NUMERIC CHECK: PASS; no whole-model or scheduler proof claimed
+CONTRACT CHECK: 9 decisions, 27 normative clauses, 17 ordinary + 6 scheduled tests; all 13 questions decided
+?   	golang.org/x/sync/errgroup	[no test files]
+ok  	golang.org/x/sync/semaphore	4.361s
+baseline: exit=0; started={'TestScheduleDR010FastLateCancel': 50, 'TestScheduleDR010GrantedRollback': 50, 'TestScheduleDR010CancelSelectedRollback': 50, 'TestScheduleDR010QueuedLateCancel': 50, 'TestScheduleDR011CancelBeforeMutex': 50, 'TestScheduleDR012ReturnOrder': 50}; passed={'TestScheduleDR010FastLateCancel': 50, 'TestScheduleDR010GrantedRollback': 50, 'TestScheduleDR010CancelSelectedRollback': 50, 'TestScheduleDR010QueuedLateCancel': 50, 'TestScheduleDR011CancelBeforeMutex': 50, 'TestScheduleDR012ReturnOrder': 50}; failed={}
+SCHEDULE PASS
+omit-grant-rollback: exit=1; started={'TestScheduleDR010GrantedRollback': 1}; passed={}; failed={'TestScheduleDR010GrantedRollback': 1}
+EXPECTED BEHAVIOR RED OBSERVED
+omit-selected-rollback: exit=1; started={'TestScheduleDR010CancelSelectedRollback': 1}; passed={}; failed={'TestScheduleDR010CancelSelectedRollback': 1}
+EXPECTED BEHAVIOR RED OBSERVED
+try-bypass: exit=1; started={'TestDR012HeadOfLineFIFO': 1}; passed={}; failed={'TestDR012HeadOfLineFIFO': 1}
+EXPECTED BEHAVIOR RED OBSERVED
+zero-charges: exit=1; started={'TestDR013ZeroRelease': 1}; passed={}; failed={'TestDR013ZeroRelease': 1}
+EXPECTED BEHAVIOR RED OBSERVED
+RED-PROBE: empty discovery rejected
+DR-001..013: 32 test groups x 50 = 1600 group passes; all 66 test/subtest names verified; no empty discovery
+All 13 decision contracts, ordinary/scheduled race suites, upstream regressions and four fault probes passed.
+$ python /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore/check_matrix.py --selftest
+EXPECTED ARTIFACT RED: missing DR evidence => missing per-decision implementation evidence
+EXPECTED ARTIFACT RED: missing cell => 38-cell totality/coverage
+EXPECTED ARTIFACT RED: missing coverage => 38-cell totality/coverage
+EXPECTED ARTIFACT RED: broken fragment => broken fragment: {'file': 'examples/weighted-semaphore/semaphore/semaphore.go', 'line': 29, 'fragment': 'NONEXISTENT_SOURCE_ANCHOR'}
+EXPECTED ARTIFACT RED: false exclusion => missing/misnamed executable cell
+EXPECTED ARTIFACT RED: lost trace => trace consolidation dropped or duplicated an identity
+EXPECTED ARTIFACT RED: text drift => matrix text differs from sidecar
+ARTIFACT PASS: 38 cells; 34 executable; 4 contract limits; 30 traces; 13 resolved DRs; 232 verified fragment citations
+$ python tools/check_matrix.py /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore
+CHECK MATRIX: OK (2 rows x 19 events)
+$ python /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore/check_guards.py
+G-01 {'n': -1} => ['panic']
+G-01 {'n': 0} => ['continue']
+G-01 {'n': 1} => ['continue']
+G-02 {'done': False} => ['continue']
+G-02 {'done': True} => ['reject']
+G-03 {'size': 3, 'cur': 1, 'n': 0, 'length': 0} => ['fast']
+G-03 {'size': 3, 'cur': 1, 'n': 0, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 1, 'length': 0} => ['fast']
+G-03 {'size': 3, 'cur': 1, 'n': 1, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 2, 'length': 0} => ['fast']
+G-03 {'size': 3, 'cur': 1, 'n': 2, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 3, 'length': 0} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 3, 'length': 1} => ['enqueue']
+G-03 {'size': 3, 'cur': 1, 'n': 4, 'length': 0} => ['oversized']
+G-03 {'size': 3, 'cur': 1, 'n': 4, 'length': 1} => ['oversized']
+G-04 {'size': 3, 'cur': 1, 'n': 1, 'length': 0} => ['admit']
+G-04 {'size': 3, 'cur': 1, 'n': 1, 'length': 1} => ['false']
+G-04 {'size': 3, 'cur': 1, 'n': 2, 'length': 0} => ['admit']
+G-04 {'size': 3, 'cur': 1, 'n': 2, 'length': 1} => ['false']
+G-04 {'size': 3, 'cur': 1, 'n': 3, 'length': 0} => ['false']
+G-04 {'size': 3, 'cur': 1, 'n': 3, 'length': 1} => ['false']
+G-05 {'cur': 2, 'n': 0} => ['release']
+G-05 {'cur': 2, 'n': 1} => ['release']
+G-05 {'cur': 2, 'n': 2} => ['release']
+G-05 {'cur': 2, 'n': 3} => ['panic']
+G-06 {'size': 3, 'cur': 1, 'head': 1, 'length': 0} => ['empty']
+G-06 {'size': 3, 'cur': 1, 'head': 1, 'length': 1} => ['grant']
+G-06 {'size': 3, 'cur': 1, 'head': 2, 'length': 0} => ['empty']
+G-06 {'size': 3, 'cur': 1, 'head': 2, 'length': 1} => ['grant']
+G-06 {'size': 3, 'cur': 1, 'head': 3, 'length': 0} => ['empty']
+G-06 {'size': 3, 'cur': 1, 'head': 3, 'length': 1} => ['stop']
+G-07 {'ready': False} => ['unlink']
+G-07 {'ready': True} => ['rollback']
+G-08 {'front': False, 'cur': 1, 'size': 2} => ['skip']
+G-08 {'front': False, 'cur': 2, 'size': 2} => ['skip']
+G-08 {'front': True, 'cur': 1, 'size': 2} => ['notify']
+G-08 {'front': True, 'cur': 2, 'size': 2} => ['notify']
+G-09 {'done': False} => ['success']
+G-09 {'done': True} => ['rollback']
+G-10 admit preserves count unsat (unsat required)
+G-10 release preserves count unsat (unsat required)
+G-10 grant preserves count unsat (unsat required)
+G-10 first enqueue is blocked unsat (unsat required)
+G-10 notifier stop is blocked unsat (unsat required)
+G-10 head removal cannot skip notification unsat (unsat required)
+G-10 retained blocked head cannot fit unsat (unsat required)
+group G-01: proven
+group G-02: proven
+group G-03: proven
+group G-04: proven
+group G-05: proven
+group G-06: proven
+group G-07: proven
+group G-08: proven
+group G-09: proven
+group G-10 queue-boundary preservation: proven (listed inductive obligations; source digest pinned)
+group G-11 queued select: not-formalizable: dynamic-state; both ready channels permit either selection; G-07/09 prove sampled cleanup branches
+GUARDS PASS: 10 proven groups; 1 explicitly non-formalizable group
+$ python docs/evidence/semaphore-pilot/resolution-q01/check_guards.py --source /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/semaphore-guard-red-uh68uo5c/old.go
+group G-Q01 cancellation rescan: proven
+{'size': 2, 'cur': 3, 'front': False} ['skip'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 3, 'front': True} ['skip'] (cur=3 outside NAT; diagnostic only)
+{'size': 2, 'cur': 2, 'front': False} ['skip']
+{'size': 2, 'cur': 2, 'front': True} ['skip']
+{'size': 2, 'cur': 1, 'front': False} ['skip']
+{'size': 2, 'cur': 1, 'front': True} ['notify']
+DR-001 eligible-zero progress: sat (unsat required)
+Counterexample: [size = 1, cur = 1, head = 0, front = True]
+DR-001 positive-head fit at full capacity: unsat (unsat required)
+Source form: upstream
+$ python /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore/check_guards.py --source /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/semaphore-guard-red-uh68uo5c/old.go
+GUARD FAIL: reviewed source digest changed; re-extract guard expressions
+$ python examples/weighted-semaphore/cells/run.py --red-probe --count 1
+CELL RED PROBE: exit=1; executable=34; contract-limits=4; repeats=1; completed=True; failures={'TestStateCells/Acquire_NoWaiters/TryAcquire': 1, 'TestStateCells': 1}
+EXPECTED CELL RED OBSERVED
+$ python examples/weighted-semaphore/cells/run.py
+CELL BASELINE: exit=0; executable=34; contract-limits=4; repeats=10; completed=True; failures={}
+CELL PASS: 340 cell and 160 pair-ordering executions
+$ python tools/dsc_check.py /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore --repo . --model as-is.machine.mmd
+DSC CHECK: OK (2 states x 19 events, 38 cells, 11 guard groups)
+$ python tools/check_reachability.py /Users/gregormelhorn/workspace/domain-statechart/examples/weighted-semaphore/domain-analysis/weightedSemaphore
+REACHABILITY CHECK: OK (2/2 states reachable from 'Acquire_NoWaiters', 0 terminal)
+HISTORY PASS: 52 retained artifacts unchanged
+CURRENT MODEL PASS: full matrix; explicit limits; guards; red probes; cells; pair scenarios; sidecar; reachability
+OK F-05 omit-grant-rollback
+OK F-05 omit-selected-rollback
+OK F-04 try-bypass
+OK F-05 zero-charges
+OK F-09 omit-cancel-unlink
+MUTANT GENERATION: OK (checked=5 drift=0 blocked=0 errors=0)
+NOT APPLICABLE: Acquire_NoWaiters x UV-ContextFault: DR-009 excludes faulty Contexts from the guaranteed-outcome domain; no finite verdict can assert an unconstrained response.
+NOT APPLICABLE: Acquire_NoWaiters x UV-Delay: DR-011 intentionally promises no finite latency bound. Finite timing tests cannot establish a universal bound or its absence; event-specific cancellation/order cases remain tested.
+NOT APPLICABLE: Acquire_WaitersPending x UV-ContextFault: DR-009 excludes faulty Contexts from the guaranteed-outcome domain; no finite verdict can assert an unconstrained response.
+NOT APPLICABLE: Acquire_WaitersPending x UV-Delay: DR-011 intentionally promises no finite latency bound. Finite timing tests cannot establish a universal bound or its absence; event-specific cancellation/order cases remain tested.
+NOT APPLICABLE: Acquire_WaitersPending x Acquire: no supported operator for defer (queued)
+NOT APPLICABLE: Acquire_WaitersPending x UV-RepeatAcquire: no supported operator for defer (queued)
+BASELINE: OK
+MUT-001 KILLED state=Acquire_NoWaiters event=Acquire kind=transition-target-swap old='transition →Acquire_WaitersPending' new='transition →Acquire_NoWaiters' exit=1 duration=0.507s
+MUT-002 KILLED state=Acquire_NoWaiters event=Acquire kind=transition-to-ignore old='transition →Acquire_WaitersPending' new='ignore (documented)' exit=1 duration=0.507s
+MUT-003 KILLED state=Acquire_NoWaiters event=ContextDone kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.498s
+MUT-004 KILLED state=Acquire_NoWaiters event=Grant kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.502s
+MUT-005 KILLED state=Acquire_NoWaiters event=NewWeighted kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.501s
+MUT-006 KILLED state=Acquire_NoWaiters event=Release kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.498s
+MUT-007 KILLED state=Acquire_NoWaiters event=TryAcquire kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.503s
+MUT-008 KILLED state=Acquire_NoWaiters event=UV-Abandon kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=0.497s
+MUT-009 KILLED state=Acquire_NoWaiters event=UV-ContextOrder kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.502s
+MUT-010 KILLED state=Acquire_NoWaiters event=UV-ForeignContext kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.508s
+MUT-011 KILLED state=Acquire_NoWaiters event=UV-Recreate kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.501s
+MUT-012 KILLED state=Acquire_NoWaiters event=UV-RepeatAcquire kind=transition-target-swap old='transition →Acquire_WaitersPending' new='transition →Acquire_NoWaiters' exit=1 duration=0.554s
+MUT-013 KILLED state=Acquire_NoWaiters event=UV-RepeatAcquire kind=transition-to-ignore old='transition →Acquire_WaitersPending' new='ignore (documented)' exit=1 duration=0.535s
+MUT-014 KILLED state=Acquire_NoWaiters event=UV-RepeatRelease kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.501s
+MUT-015 KILLED state=Acquire_NoWaiters event=UV-RepeatTry kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.501s
+MUT-016 KILLED state=Acquire_NoWaiters event=UV-RepeatedDone kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=0.493s
+MUT-017 KILLED state=Acquire_NoWaiters event=UV-UnownedRelease kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.520s
+MUT-018 KILLED state=Acquire_NoWaiters event=UV-Weight kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.512s
+MUT-019 KILLED state=Acquire_NoWaiters event=UV-WrongReceiver kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=0.535s
+MUT-020 KILLED state=Acquire_WaitersPending event=ContextDone kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.502s
+MUT-021 KILLED state=Acquire_WaitersPending event=ContextDone kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.511s
+MUT-022 KILLED state=Acquire_WaitersPending event=Grant kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.510s
+MUT-023 KILLED state=Acquire_WaitersPending event=Grant kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.514s
+MUT-024 KILLED state=Acquire_WaitersPending event=NewWeighted kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.506s
+MUT-025 KILLED state=Acquire_WaitersPending event=Release kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.504s
+MUT-026 KILLED state=Acquire_WaitersPending event=Release kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.580s
+MUT-027 KILLED state=Acquire_WaitersPending event=TryAcquire kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.644s
+MUT-028 KILLED state=Acquire_WaitersPending event=UV-Abandon kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=1.021s
+MUT-029 KILLED state=Acquire_WaitersPending event=UV-ContextOrder kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.528s
+MUT-030 KILLED state=Acquire_WaitersPending event=UV-ContextOrder kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.517s
+MUT-031 KILLED state=Acquire_WaitersPending event=UV-ForeignContext kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.526s
+MUT-032 KILLED state=Acquire_WaitersPending event=UV-Recreate kind=handle-to-ignore old='handle' new='ignore (documented)' exit=1 duration=0.502s
+MUT-033 KILLED state=Acquire_WaitersPending event=UV-RepeatRelease kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.512s
+MUT-034 KILLED state=Acquire_WaitersPending event=UV-RepeatRelease kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.492s
+MUT-035 KILLED state=Acquire_WaitersPending event=UV-RepeatTry kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.637s
+MUT-036 KILLED state=Acquire_WaitersPending event=UV-RepeatedDone kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.525s
+MUT-037 KILLED state=Acquire_WaitersPending event=UV-RepeatedDone kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.534s
+MUT-038 KILLED state=Acquire_WaitersPending event=UV-UnownedRelease kind=transition-target-swap old='transition →Acquire_NoWaiters' new='transition →Acquire_WaitersPending' exit=1 duration=0.534s
+MUT-039 KILLED state=Acquire_WaitersPending event=UV-UnownedRelease kind=transition-to-ignore old='transition →Acquire_NoWaiters' new='ignore (documented)' exit=1 duration=0.578s
+MUT-040 KILLED state=Acquire_WaitersPending event=UV-Weight kind=ignore-to-handle old='reject' new='handle' exit=1 duration=0.493s
+MUT-041 KILLED state=Acquire_WaitersPending event=UV-WrongReceiver kind=ignore-to-handle old='ignore (documented)' new='handle' exit=1 duration=0.486s
+MUTATION CHECK: OK (killed=41 survived=0 errors=0 blocked=0)
+BASELINE: OK (cells=34)
+MUT-004 KILLED fault=F-05 cell=Acquire_NoWaiters x Release id=zero-charges target=semaphore/semaphore.go exit=1 duration=0.805s
+CANARY id=zero-charges: KILLED
+MUT-001 KILLED fault=F-05 cell=Acquire_WaitersPending x UV-ContextOrder id=omit-grant-rollback target=semaphore/semaphore.go exit=1 duration=0.821s
+MUT-002 KILLED fault=F-05 cell=Acquire_WaitersPending x UV-ContextOrder id=omit-selected-rollback target=semaphore/semaphore.go exit=1 duration=0.886s
+MUT-003 KILLED fault=F-04 cell=Acquire_WaitersPending x TryAcquire id=try-bypass target=semaphore/semaphore.go exit=1 duration=0.838s
+MUT-005 KILLED fault=F-09 cell=Acquire_WaitersPending x ContextDone id=omit-cancel-unlink target=semaphore/semaphore.go exit=1 duration=12.821s
+FAULT MUTANTS: OK (killed=5 survived=0 errors=0 blocked=0)
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.151s
+
+OK
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 1.224s
+
+OK
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.147s
+
+OK
+Success: no issues found in 61 source files
+RULES REGISTRY: OK (73 rules, 22 fault classes, 0 warnings)
+ODC table: OK
+PACK CONSISTENCY: OK (20 artifacts, registry, version 1.53)
+  ok  checker without selftest_ref (fails as required)
+  ok  unknown fault id in detects (fails as required)
+  ok  fault-model without detects (fails as required)
+  ok  drifted block (fails as required)
+  ok  working tree (passes)
+  ok  implementation without precondition (fails as required)
+  ok  implementation with n/a observability (fails as required)
+  ok  matrix class with observability high (fails as required)
+  ok  none class without none_reason (fails as required)
+  ok  bad level value (fails as required)
+  ok  bad observability value (fails as required)
+  ok  matrix class carrying precondition (fails as required)
+  ok  matrix class carrying none_reason (fails as required)
+GEN_RULES SELFTEST: OK
+baseline
+  ok  flat fixture (passes)
+  ok  generator parses multi-table matrix with compound rows
+  ok  compound fixture (passes)
+  ok  TypeScript citations survive the generator
+  ok  citation fragments survive the generator
+  ok  quoted, typographic and backticked fragments are captured
+  ok  a file:line inside a fragment is never the citation
+  ok  punctuated question ids parse; Q-words do not
+  ok  '## Q-nn' question headings are parsed
+  ok  a prose table headed 'State' adds no events
+  ok  unbolded matrix rows are named; a prose table is not
+  ok  --strict fails on a note and passes a clean matrix
+  ok  pairs, guard groups and ODC fields come from their sources
+  ok  a crash cell is handle and needs a question
+  ok  doctrine map stops at the next heading of any level
+  ok  crash cell naming an undeclared question (fails as required)
+  ok  generated sidecar with a wrong fragment (fails as required)
+sidecar schema on generator output (fragment required on code citations)
+  ok  generator output on compound is schema-valid (passes)
+  ok  generator output on golden-mini is schema-valid (passes)
+  ok  generated code citation without a fragment (fails as required)
+  ok  dsc_check on a code citation without a fragment (fails as required)
+  ok  generator warns per component
+  ok  generator warnings stay with their component
+  ok  generator warns about an unresolved test-file citation
+  ok  generator points a prose citation to the overlay
+  ok  generator warns about a cited config file
+  ok  generator names the case of a source extension
+  ok  generator warns about a second citation next to a resolved one
+  ok  generator stays quiet on a file:line inside a fragment
+  ok  generator stays quiet on host:port text
+  ok  generator keeps a citation after host:port text
+  ok  requirements citation without a fragment (passes)
+  ok  upper-case prose extension without a fragment (passes)
+  ok  code citation without a fragment (fails as required)
+  ok  code file whose name contains .md, without a fragment (fails as required)
+  ok  code citation with an empty fragment (fails as required)
+sidecar types match the schema (tools/sidecar_types.py)
+  ok  sidecar TypedDicts agree with analysis.schema.json (passes)
+  ok  type drift: schema gains a cell property the type lacks (fails as required)
+  ok  type drift: schema gains a cell property CellBody lacks (fails as required)
+  ok  type drift: schema makes a question key required (fails as required)
+  ok  type drift: schema adds a disposition (fails as required)
+silent omission (v1.20: absence must be asserted)
+  ok  omitted sections (fails as required)
+  ok  asserted absence (passes)
+  ok  unreasoned absence (fails as required)
+model sync (compound states used to disable this check)
+  ok  state missing from diagram (fails as required)
+citation drift
+  ok  drifted fragment (fails as required)
+manifest discipline
+  ok  snake_case watchPaths (fails as required)
+registry-backed dsc red cases
+  ok  unknown disposition (fails as required)
+  ok  missing grid cell (fails as required)
+  ok  hole without Q (fails as required)
+  ok  guard outcome invalid (fails as required)
+  ok  not-formalizable without category (fails as required)
+  ok  pair without trace (fails as required)
+  ok  uncited behavioural DR (fails as required)
+  ok  cited DR file missing (fails as required)
+  ok  schema violation (fails as required)
+  ok  missing UV coverage entry (fails as required)
+  ok  unmapped doctrine line (fails as required)
+  ok  doctrine mapped to missing cell (fails as required)
+  ok  doctrine rejected without reason (fails as required)
+  ok  unknown ODC fault class (fails as required)
+  ok  missing gate-type annotation (fails as required)
+  ok  missing upstream-guard annotation (fails as required)
+  ok  UV binding permits prose and known variants (passes)
+  ok  phantom UV coverage binding (fails as required)
+  ok  UV coverage without assertions (fails as required)
+  ok  UV coverage with assertions (passes)
+matrix checker (markdown side)
+  ok  wrapper template, pack sibling stateradar (passes)
+  ok  wrapper template, wrong STATERADAR_PACK beside a sibling (fails as required)
+  ok  wrapper template, pack sibling pack (passes)
+  ok  wrapper template, pack sibling absent (fails as required)
+  ok  wrapper template, STATERADAR_PACK (passes)
+  ok  check_matrix green on golden-mini (passes)
+  ok  scope line missing under a '###' trace header (fails as required)
+  ok  scope line missing under a bold trace header (fails as required)
+  ok  scope lines present under '###' trace headers (passes)
+  ok  scope line missing under a 'T-F01' trace header (fails as required)
+  ok  mutation checker rejects missing configuration (fails as required)
+  ok  mutation checker reports weak suite survivors (fails as required)
+  ok  weak suite survives an ignore-to-handle mutant on a UV cell (fails as required)
+  ok  mutation checker leaves hole cells unmutated (passes)
+  ok  hole cell produces no ignore-to-handle mutant (passes)
+  ok  mutation checker golden-mini kills supported mutants (passes)
+  ok  matrix mutation count killed=28 (passes)
+  ok  matrix mutation family has 18 ignore-to-handle mutants (passes)
+  ok  UV matrix mutation has three KILLED UV-M1-lost mutants (passes)
+  ok  UV matrix mutation has three KILLED UV-M2-conflict mutants (passes)
+  ok  UV matrix mutation has three KILLED UV-M1-spurious mutants (passes)
+  ok  UV coverage binding M1/duplication=UV-M1-dup (passes)
+  ok  UV coverage binding M1/loss=UV-M1-lost (passes)
+  ok  UV coverage binding M2/contradiction=UV-M2-conflict (passes)
+  ok  UV coverage binding M1/commission=UV-M1-spurious (passes)
+  ok  ignore-to-handle replacement drops the (documented) annotation (passes)
+  ok  ignore-to-handle strips a DR annotation, keeps the citation (passes)
+  ok  mutation checker rejects missing placeholder (fails as required)
+  ok  mutation checker rejects repeated placeholder (fails as required)
+  ok  mutation checker rejects non-array command (fails as required)
+  ok  mutation checker blocks failed baseline (fails as required)
+  ok  mutation checker blocks timed-out baseline (fails as required)
+fault mutant checker
+  ok  fault mutant baseline kills all four fixture mutants (passes)
+  ok  fault mutant count killed=6 (passes)
+  ok  fault mutant kill proof (passes)
+  ok  mini.F-01-missing-transition.py single-region diff (passes)
+  ok  mini.F-02-transfer-fault.py single-region diff (passes)
+  ok  mini.F-04-sneak-path.py single-region diff (passes)
+  ok  mini.F-05-corrupt-state.py single-region diff (passes)
+  ok  mini.F-14-duplication.py single-region diff (passes)
+  ok  mini.F-05-corrupt-state-ignore.py single-region diff (passes)
+  ok  empty suite is blocked even with exit zero (fails as required)
+  ok  mirroring suite survives F-04 and blocks projection dependents (fails as required)
+  ok  fault mutant rejects missing config (fails as required)
+  ok  fault mutant rejects formatVersion 2 (fails as required)
+  ok  fault mutant rejects missing variant file (fails as required)
+  ok  fault mutant rejects missing placeholder (fails as required)
+  ok  fault mutant blocks failed baseline (fails as required)
+  ok  fault mutant blocks a crashing suite instead of counting a kill (fails as required)
+  ok  fault mutant blocks an undeclared-cell failure (fails as required)
+  ok  fault mutant blocks a suite that ignores the cell-failure contract (fails as required)
+binder-driven mutant generation
+  ok  generator check mode green on golden-mini (passes)
+  ok  generator green case checked=6 without DRIFT/BLOCKED/UNBOUND (passes)
+  ok  generator detects drift in a tracked variant (fails as required)
+  ok  generator drift case drift=1 (fails as required)
+  ok  generator blocks F-05 on an undeclared projection (fails as required)
+  ok  generator blocked case blocked=3 (fails as required)
+  ok  generator rejects a binding that matches no source block (fails as required)
+  ok  generator bad-match case errors=1 (fails as required)
+  ok  generator rejects a duplicate binding id (fails as required)
+  ok  empty coverage cell (fails as required)
+  ok  PA-17 naming violation (fails as required)
+  ok  missing abstraction statement (PA-10) (fails as required)
+  ok  unclassified event (PA-4) (fails as required)
+  ok  citing control trace without scope line (fails as required)
+  ok  scope line satisfied (wrapped across lines) (passes)
+part-B row coverage
+  ok  blind table complete (passes)
+  ok  blind table finer than one row per id (passes)
+  ok  blind table missing row (fails as required)
+  ok  blind partial fails only for missing row UV-M1-dup (passes)
+  ok  duplicated checklist tick (fails as required)
+  ok  blind dup fails only for duplicated checklist M2 (passes)
+  ok  blind table grows with catalogue (passes)
+  ok  blind fine table grows with catalogue (passes)
+  ok  blind partial grows with catalogue (fails as required)
+  ok  blind partial grows and still fails only for UV-M1-dup (passes)
+  ok  blind dup grows with catalogue (fails as required)
+  ok  blind dup grows and still fails only for M2 (passes)
+guard proofs (z3, PA-1/PA-2)
+  ok  disjoint covering group (passes)
+  ok  overlapping guards (PA-1) (fails as required)
+  ok  coverage gap (PA-2) (fails as required)
+  ok  has_else keeps disjointness red (fails as required)
+  ok  boundary probes assign below/at/above correctly
+reachability
+  ok  unreachable state must fail (fails as required)
+  ok  pair ordering reaches a state without a cell targeting it (passes)
+  ok  stale pair reachability metadata fails (fails as required)
+  ok  pair heading alone does not make a state reachable (fails as required)
+  ok  drifted pair evidence fails (fails as required)
+  ok  pair edge needs a reachable starting state (fails as required)
+  ok  pair target must be a declared state (fails as required)
+ensemble convergence
+  ok  ensemble convergent (identical) (passes)
+  ok  ensemble divergent (2 runs) (fails as required)
+  ok  ensemble divergent (3 runs) (fails as required)
+  ok  ensemble baseline: exit 1 + needle (fails as required)
+  ok  ensemble baseline: aligned grid 4×8 @ 93.8%
+  ok  ensemble deterministic output (byte-identical on repeat)
+  ok  ensemble input-order invariance (shuffled states/events/cells)
+  ok  ensemble zero-alignment (fails as required)
+  ok  ensemble collision guard (fails as required)
+  ok  ensemble baseline: exit 1 + structural >= 3
+  ok  ensemble baseline: aligned cells = 32
+benchmark dating protocol
+  ok  benchmark dating classification correct
+  ok  ignore-to-handle keeps fragment citations in every generator form
+  ok  check_fault_mutants reports a timeout with its partial output
+  ok  check_matrix_mutation reports a timeout with its partial output
+
+SELFTEST: OK
+Suite: local_budget
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.016s
+
+OK
+Suite: local_models
+.........PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpj1erxs05/package.md (4463 chars, 1 events, 0 pair orderings)
+.PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpl38nmev0/package.md (4239 chars, 1 events, 0 pair orderings)
+......PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpdx13jclx/package.md (4475 chars, 1 events, 0 pair orderings)
+...PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmp3a3el5c5/package.md (4903 chars, 2 events, 0 pair orderings)
+.PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpbz9j6qh7/package.md (4185 chars, 1 events, 0 pair orderings)
+PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmp8601wqlu/package.md (4185 chars, 1 events, 0 pair orderings)
+PART-B COVERAGE: FAIL
+ - missing row: E01 (no table row keyed by it)
+ - missing checklist tick: E01
+.PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpcdl0tbx5/package.md (4185 chars, 1 events, 0 pair orderings)
+.....PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmphuqwaaja/package.md (4230 chars, 1 events, 0 pair orderings)
+.PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmps0882bs4/package.md (4185 chars, 1 events, 0 pair orderings)
+PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpqx2ajwyg/package.md (4425 chars, 1 events, 0 pair orderings)
+..PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmpf0ao33n6/package.md (4185 chars, 1 events, 0 pair orderings)
+...PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmplxhkrpcx/package.md (4185 chars, 1 events, 0 pair orderings)
+.................
+----------------------------------------------------------------------
+Ran 49 tests in 0.297s
+
+OK
+{
+  "finish_reason": "stop"
+}
+Suite: jev_local
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK
+Suite: jev_eval
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.231s
+
+OK
+Suite: draft_verify
+....................
+----------------------------------------------------------------------
+Ran 20 tests in 0.102s
+
+OK
+Suite: draft_cells
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.237s
+
+OK
+Suite: pilot_artifacts
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.243s
+
+OK
+Suite: run_sol_pilot
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.026s
+
+OK
+Suite: run_flash_pilot
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK
+Suite: hybrid_pilot
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.003s
+
+OK
+BENCH golden-mini: OK
+BENCH red-mini: OK
+2/2 cases pass
+OK mini: 3 states x 8 events = 24 cells, 0 questions, DRs []
+DSC CHECK: OK (3 states x 8 events, 24 cells, 0 guard groups)
+REACHABILITY CHECK: OK (3/3 states reachable from 'Idle', 1 terminal)
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 3.203s
+
+OK
