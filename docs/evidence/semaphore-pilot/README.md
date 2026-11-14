@@ -133,7 +133,10 @@ verbatim indentation of the public Go contract example unchanged;
 the semantic and catalogue checks remain enabled.
 
 All original questions have accepted decisions and focused contract/conformance
-acceptance; see the [current report](contracts-q05-q13/README.md). Next reconcile
-the evaluation model and manifest at its current source revision. The historical
-baseline, original observations and Part-B evidence remain immutable; these
-tests do not claim whole-model promotion or generic mutation coverage.
+acceptance; see the [current report](contracts-q05-q13/README.md). The executed
+[reconcile preflight](reconcile-preflight/README.md) is BLOCKED: a full approved
+matrix with cell-level acceptance and current candidate sidecar is still missing.
+Complete these Stage-03/04 prerequisites before Stage-06 promotion and stamping.
+Existing runtime/contract suites and all historical gates pass. The historical
+baseline, original observations, Part-B evidence and manifest remain unchanged;
+no whole-model promotion or generic mutation coverage is claimed.

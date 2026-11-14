@@ -50,9 +50,12 @@ entries and separates the new model-routing plan from shipped capabilities.
    [completed contract/focused conformance acceptance](evidence/semaphore-pilot/contracts-q05-q13/README.md):
    27 normative clauses, 32 ordinary plus 6 scheduled groups x 50 with race
    detection, upstream regressions and four faulty-overlay probes. All thirteen
-   questions are decided. Next reconcile the evaluation model/manifest at the
-   current source; full model promotion and generic mutation support remain
-   separate. Historical pilot artifacts stay immutable.
+   questions are decided. The [reconcile preflight](evidence/semaphore-pilot/reconcile-preflight/README.md)
+   is BLOCKED: the complete approved matrix, cell-level acceptance and current
+   candidate sidecar are not yet present. Complete those Stage-03/04 artifacts
+   and proofs before promoting/stamping in Stage 06. Existing runtime/contract
+   tests and the historical seven gates pass. Historical pilot artifacts stay
+   immutable; no current-model promotion or generic mutation coverage is claimed.
 3. **Make disposition rationale machine-readable.** Design and validate a
    representation for cell rationale before building checks that depend on it.
    See [machine-readable cell rationale](#10-machine-readable-cell-rationale).

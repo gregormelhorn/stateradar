@@ -1,0 +1,59 @@
+DSC CHECK: FAIL
+ - citation: fragment 'w := &Weighted{size: n}' not near semaphore/semaphore.go:22
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 'success := s.size-s.cur >= n && s.waiters.Len() == 0' not near semaphore/semaphore.go:113
+ - citation: fragment 's.cur -= n' not near semaphore/semaphore.go:124
+ - citation: fragment 'return ctx.Err()' not near semaphore/semaphore.go:49
+ - citation: fragment 'case <-ready:' not near semaphore/semaphore.go:94
+ - citation: fragment 'done := ctx.Done()' not near semaphore/semaphore.go:39
+ - citation: fragment 'w := &Weighted{size: n}' not near semaphore/semaphore.go:22
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 'success := s.size-s.cur >= n && s.waiters.Len() == 0' not near semaphore/semaphore.go:113
+ - citation: fragment 's.waiters.Remove(next)' not near semaphore/semaphore.go:157
+ - citation: fragment 's.waiters.Remove(elem)' not near semaphore/semaphore.go:85
+ - citation: fragment 'close(w.ready)' not near semaphore/semaphore.go:158
+ - citation: fragment 'case <-done:' not near semaphore/semaphore.go:75
+ - citation: fragment 'w := &Weighted{size: n}' not near semaphore/semaphore.go:22
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 'success := s.size-s.cur >= n && s.waiters.Len() == 0' not near semaphore/semaphore.go:113
+ - citation: fragment 's.notifyWaiters()' not near semaphore/semaphore.go:129
+ - citation: fragment 's.waiters.Remove(elem)' not near semaphore/semaphore.go:85
+ - citation: fragment 'close(w.ready)' not near semaphore/semaphore.go:158
+ - citation: fragment 'case <-done:' not near semaphore/semaphore.go:75
+ - citation: fragment '<-done' not near semaphore/semaphore.go:65
+ - citation: fragment 'w := &Weighted{size: n}' not near semaphore/semaphore.go:22
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 's.cur += n' not near semaphore/semaphore.go:115
+ - citation: fragment 's.cur -= n' not near semaphore/semaphore.go:124
+ - citation: fragment 'func (s *Weighted) Release(n int64) {' not near semaphore/semaphore.go:122
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 'case <-done:' not near semaphore/semaphore.go:75
+ - citation: fragment 'w := &Weighted{size: n}' not near semaphore/semaphore.go:22
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 'success := s.size-s.cur >= n && s.waiters.Len() == 0' not near semaphore/semaphore.go:113
+ - citation: fragment 's.notifyWaiters()' not near semaphore/semaphore.go:129
+ - citation: fragment 'func (s *Weighted) Release(n int64) {' not near semaphore/semaphore.go:122
+ - citation: fragment 's.notifyWaiters()' not near semaphore/semaphore.go:129
+ - citation: fragment 'if isFront && s.size > s.cur {' not near semaphore/semaphore.go:87
+ - citation: fragment 'w := &Weighted{size: n}' not near semaphore/semaphore.go:22
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 'success := s.size-s.cur >= n && s.waiters.Len() == 0' not near semaphore/semaphore.go:113
+ - citation: fragment 's.notifyWaiters()' not near semaphore/semaphore.go:129
+ - citation: fragment 'func (s *Weighted) Release(n int64) {' not near semaphore/semaphore.go:122
+ - citation: fragment 's.notifyWaiters()' not near semaphore/semaphore.go:129
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 's.cur -= n' not near semaphore/semaphore.go:124
+ - citation: fragment 'done := ctx.Done()' not near semaphore/semaphore.go:39
+ - citation: fragment 'done := ctx.Done()' not near semaphore/semaphore.go:39
+ - citation: fragment 'case <-done:' not near semaphore/semaphore.go:43
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 's.notifyWaiters()' not near semaphore/semaphore.go:129
+ - citation: fragment 'return ctx.Err()' not near semaphore/semaphore.go:92
+ - citation: fragment 'done := ctx.Done()' not near semaphore/semaphore.go:39
+ - citation: fragment 's.waiters.Remove(elem)' not near semaphore/semaphore.go:85
+ - citation: fragment 'elem := s.waiters.PushBack(w)' not near semaphore/semaphore.go:71
+ - citation: fragment 's.notifyWaiters()' not near semaphore/semaphore.go:129
+ - citation: fragment 'return ctx.Err()' not near semaphore/semaphore.go:92
+ - citation: fragment 'done := ctx.Done()' not near semaphore/semaphore.go:39
+ - citation: fragment 's.waiters.Remove(elem)' not near semaphore/semaphore.go:85
+ - staleness check failed: fatal: Invalid revision range 04914c200cb38d4ea960ee6a4c314a028c632991..HEAD
