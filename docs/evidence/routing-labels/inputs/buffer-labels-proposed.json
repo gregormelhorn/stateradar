@@ -1,0 +1,55 @@
+{
+  "source_sha256": "11cf45edaaf49b6dd6ece3d1a7c7779bb6623b705283e691c66c137336aa62de",
+  "checks": {
+    "B01": {
+      "kind": "claim",
+      "statement": "At the start of Buffer.Read, lastRead is assigned opInvalid.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "expected": "supported",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The cited assignment is at the beginning of Read."
+    },
+    "B02": {
+      "kind": "claim",
+      "statement": "At the start of Buffer.Read, lastRead is assigned opRead.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "expected": "contradicted",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The first assignment uses opInvalid rather than opRead."
+    },
+    "B03": {
+      "kind": "claim",
+      "statement": "The cited assignment guarantees that the buffer can never contain unread bytes.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "expected": "unclear",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The last-read marker does not specify contents or guarantee emptiness."
+    },
+    "B04": {
+      "kind": "ordering",
+      "statement": "After a ReadByte succeeds, Read(nil) occurs and then UnreadByte succeeds.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "expected": "unclear",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The quoted assignment alone does not establish all operations or the final outcome."
+    },
+    "B05": {
+      "kind": "claim",
+      "statement": "Buffer.ReadByte returns io.EOF when no byte is available.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 373,
+      "fragment": "If no byte is available, it returns error [io.EOF].",
+      "expected": "supported",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The API comment explicitly states the empty case."
+    }
+  }
+}

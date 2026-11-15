@@ -1,0 +1,23 @@
+FF
+======================================================================
+FAIL: test_includes_source_and_check (__main__.PromptTest.test_includes_source_and_check)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_compare_prompt.py", line 7, in test_includes_source_and_check
+    p=build('source line',[{'id':'A','kind':'claim','statement':'claim','line':1,'fragment':'source'}]);self.assertIn('source line',p);self.assertIn('claim',p)
+                                                                                                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: 'source line' not found in ''
+
+======================================================================
+FAIL: test_rejects_gold_and_review (__main__.PromptTest.test_rejects_gold_and_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_compare_prompt.py", line 11, in test_rejects_gold_and_review
+    with self.assertRaises(ValueError):build('source line',[c])
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (failures=2)

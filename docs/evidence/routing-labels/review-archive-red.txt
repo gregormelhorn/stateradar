@@ -1,0 +1,29 @@
+...FF
+======================================================================
+FAIL: test_changed_review (__main__.ReviewedArtifactTest.test_changed_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 28, in test_changed_review
+    def test_changed_review(self):self.exercise('changed')
+                                  ~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 26, in exercise
+    self.assertIn('review coverage mismatch' if mode=='missing' else 'review result mismatch: '+doc['cases'][0]['id'],verify(p/'runs'))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'review result mismatch: O01' not found in []
+
+======================================================================
+FAIL: test_missing_review (__main__.ReviewedArtifactTest.test_missing_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 27, in test_missing_review
+    def test_missing_review(self):self.exercise('missing')
+                                  ~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 26, in exercise
+    self.assertIn('review coverage mismatch' if mode=='missing' else 'review result mismatch: '+doc['cases'][0]['id'],verify(p/'runs'))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'review coverage mismatch' not found in []
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.114s
+
+FAILED (failures=2)

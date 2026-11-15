@@ -1,0 +1,14 @@
+{"Time":"2026-11-15T11:04:15.018662+01:00","Action":"start","Package":"routing-label-runtime-controls"}
+{"Time":"2026-11-15T11:04:15.334306+01:00","Action":"run","Package":"routing-label-runtime-controls","Test":"TestBufferEmptyReadByte"}
+{"Time":"2026-11-15T11:04:15.334408+01:00","Action":"output","Package":"routing-label-runtime-controls","Test":"TestBufferEmptyReadByte","Output":"=== RUN   TestBufferEmptyReadByte\n","OutputType":"frame"}
+{"Time":"2026-11-15T11:04:15.334523+01:00","Action":"output","Package":"routing-label-runtime-controls","Test":"TestBufferEmptyReadByte","Output":"    control_test.go:3: red probe: EOF observed\n","OutputType":"error"}
+{"Time":"2026-11-15T11:04:15.334532+01:00","Action":"output","Package":"routing-label-runtime-controls","Test":"TestBufferEmptyReadByte","Output":"--- FAIL: TestBufferEmptyReadByte (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T11:04:15.334538+01:00","Action":"fail","Package":"routing-label-runtime-controls","Test":"TestBufferEmptyReadByte","Elapsed":0}
+{"Time":"2026-11-15T11:04:15.334553+01:00","Action":"run","Package":"routing-label-runtime-controls","Test":"TestValueSwapWithoutStore"}
+{"Time":"2026-11-15T11:04:15.334558+01:00","Action":"output","Package":"routing-label-runtime-controls","Test":"TestValueSwapWithoutStore","Output":"=== RUN   TestValueSwapWithoutStore\n","OutputType":"frame"}
+{"Time":"2026-11-15T11:04:15.334562+01:00","Action":"output","Package":"routing-label-runtime-controls","Test":"TestValueSwapWithoutStore","Output":"    control_test.go:4: red probe: Load observes Swap\n","OutputType":"error"}
+{"Time":"2026-11-15T11:04:15.334572+01:00","Action":"output","Package":"routing-label-runtime-controls","Test":"TestValueSwapWithoutStore","Output":"--- FAIL: TestValueSwapWithoutStore (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T11:04:15.334583+01:00","Action":"fail","Package":"routing-label-runtime-controls","Test":"TestValueSwapWithoutStore","Elapsed":0}
+{"Time":"2026-11-15T11:04:15.334605+01:00","Action":"output","Package":"routing-label-runtime-controls","Output":"FAIL\n","OutputType":"frame"}
+{"Time":"2026-11-15T11:04:15.335565+01:00","Action":"output","Package":"routing-label-runtime-controls","Output":"FAIL\trouting-label-runtime-controls\t0.316s\n","OutputType":"frame"}
+{"Time":"2026-11-15T11:04:15.335582+01:00","Action":"fail","Package":"routing-label-runtime-controls","Elapsed":0.317}

@@ -1,0 +1,14 @@
+...F........
+======================================================================
+FAIL: test_coordinated_comparator_cost_tampering (__main__.CheckpointCostProbe.test_coordinated_comparator_cost_tampering)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 67, in test_coordinated_comparator_cost_tampering
+    with patch('verify_routing_label_eval.BASE',p):self.assertIn('comparator checkpoint cost mismatch: value',verify(run))
+                                                   ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'comparator checkpoint cost mismatch: value' not found in []
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.429s
+
+FAILED (failures=1)

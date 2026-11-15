@@ -1,0 +1,71 @@
+FEFFF
+======================================================================
+ERROR: test_duplicate_and_unknown_are_exposed (__main__.FlashAuditTest.test_duplicate_and_unknown_are_exposed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_flash_eval.py", line 12, in test_duplicate_and_unknown_are_exposed
+    def test_duplicate_and_unknown_are_exposed(self):self.r['questions']=['A01: uncertain','Z99: extra'];r=score(self.l,self.c,self.r);self.assertEqual(r['duplicate_ids'],['A01']);self.assertEqual(r['unmapped_questions'],['Z99: extra'])
+                                                                                                                                                        ~^^^^^^^^^^^^^^^^^
+KeyError: 'duplicate_ids'
+
+======================================================================
+FAIL: test_changed_is_never_matched (__main__.FlashAuditTest.test_changed_is_never_matched)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_flash_eval.py", line 10, in test_changed_is_never_matched
+    def test_changed_is_never_matched(self):self.r['claims']['A01']['statement']='different';self.assertEqual(score(self.l,self.c,self.r)['changed'],['A01'])
+                                                                                             ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['A01']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'A01'
+
+- []
++ ['A01']
+
+======================================================================
+FAIL: test_full (__main__.FlashAuditTest.test_full)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_flash_eval.py", line 8, in test_full
+    def test_full(self):self.assertEqual(score(self.l,self.c,self.r)['matched'],1)
+                        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_missing (__main__.FlashAuditTest.test_missing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_flash_eval.py", line 9, in test_missing
+    def test_missing(self):self.r['claims']={};self.assertEqual(score(self.l,self.c,self.r)['missing'],['A01'])
+                                               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['A01']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'A01'
+
+- []
++ ['A01']
+
+======================================================================
+FAIL: test_question_is_not_missing_or_accepted (__main__.FlashAuditTest.test_question_is_not_missing_or_accepted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_flash_eval.py", line 11, in test_question_is_not_missing_or_accepted
+    def test_question_is_not_missing_or_accepted(self):self.r['claims']={};self.r['questions']=['A01: uncertain'];r=score(self.l,self.c,self.r);self.assertEqual(r['questions'],['A01']);self.assertEqual(r['missing'],[]);self.assertEqual(r['matched'],0)
+                                                                                                                                                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['A01']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'A01'
+
+- []
++ ['A01']
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+FAILED (failures=4, errors=1)

@@ -1,0 +1,55 @@
+{
+  "source_sha256": "75ef56f505592fcffb188bf7660c6ea6abede3f2701b500d6946fa519c37e233",
+  "checks": {
+    "P01": {
+      "kind": "claim",
+      "statement": "CloseWithError does not overwrite an existing previous error.",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "line": 146,
+      "fragment": "CloseWithError never overwrites the previous error if it exists",
+      "expected": "supported",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The fragment states the retention rule."
+    },
+    "P02": {
+      "kind": "claim",
+      "statement": "CloseWithError always overwrites an existing previous error.",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "line": 146,
+      "fragment": "CloseWithError never overwrites the previous error if it exists",
+      "expected": "contradicted",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The fragment says never overwrite."
+    },
+    "P03": {
+      "kind": "claim",
+      "statement": "CloseWithError returns nil.",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "line": 147,
+      "fragment": "and always returns nil.",
+      "expected": "supported",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The next comment line completes the method contract."
+    },
+    "P04": {
+      "kind": "ordering",
+      "statement": "The reader closes after a two-byte read, and the blocked six-byte write returns two bytes with the reader error.",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "line": 146,
+      "fragment": "CloseWithError never overwrites the previous error if it exists",
+      "expected": "unclear",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The fragment concerns retained errors and does not contemplate this race or byte counts."
+    },
+    "P05": {
+      "kind": "claim",
+      "statement": "The callee pipe.read can return an arbitrary network timeout.",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "line": 134,
+      "fragment": "return r.pipe.read(data)",
+      "expected": "unclear",
+      "reviewer": "AI operator; independent AI review pending",
+      "reason": "The call-site fragment forwards a result but supplies no callee error contract."
+    }
+  }
+}

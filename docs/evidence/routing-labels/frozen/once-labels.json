@@ -1,0 +1,55 @@
+{
+  "source_sha256": "3bc00bab32acd134ddf50c87fdbd1dd70502f224b7684a801a077dfe0a05eb3f",
+  "checks": {
+    "O01": {
+      "kind": "claim",
+      "statement": "A Once must not be copied after first use.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "expected": "supported",
+      "reviewer": "AI operator; separately checked by isolated Codex reference reviewer before Jev",
+      "reason": "The fragment states the restriction."
+    },
+    "O02": {
+      "kind": "claim",
+      "statement": "A Once may be copied after first use.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "expected": "contradicted",
+      "reviewer": "AI operator; separately checked by isolated Codex reference reviewer before Jev",
+      "reason": "The fragment explicitly forbids this."
+    },
+    "O03": {
+      "kind": "claim",
+      "statement": "A Once must not be copied before its first use.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "expected": "unclear",
+      "reviewer": "AI operator; separately checked by isolated Codex reference reviewer before Jev",
+      "reason": "The fragment covers copying after first use, not before."
+    },
+    "O04": {
+      "kind": "ordering",
+      "statement": "A call to Do cannot return before the function f returns.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 47,
+      "fragment": "Because no call to Do returns until the one call to f returns",
+      "expected": "supported",
+      "reviewer": "AI operator; separately checked by isolated Codex reference reviewer before Jev",
+      "reason": "The fragment states the ordering."
+    },
+    "O05": {
+      "kind": "ordering",
+      "statement": "After f returns, a separately launched network request completes before Do returns.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 47,
+      "fragment": "Because no call to Do returns until the one call to f returns",
+      "expected": "unclear",
+      "reviewer": "AI operator; separately checked by isolated Codex reference reviewer before Jev",
+      "reason": "The fragment does not mention a network request or its completion."
+    }
+  }
+}

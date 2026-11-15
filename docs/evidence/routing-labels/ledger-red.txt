@@ -1,0 +1,23 @@
+F.F
+======================================================================
+FAIL: test_detects_altered_summary (__main__.LedgerTest.test_detects_altered_summary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_ledger_check.py", line 11, in test_detects_altered_summary
+    with self.assertRaisesRegex(ValueError,'ledger mismatch'):verify(p,summary)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_missing_database_fails (__main__.LedgerTest.test_missing_database_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_ledger_check.py", line 14, in test_missing_database_fails
+    with self.assertRaisesRegex(ValueError,'ledger missing'):verify(Path(d)/'missing.sqlite',{})
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.005s
+
+FAILED (failures=2)

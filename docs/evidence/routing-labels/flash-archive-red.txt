@@ -1,0 +1,32 @@
+FFF
+======================================================================
+FAIL: test_blocked (__main__.FlashArchiveTest.test_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_flash_diagnostic.py", line 11, in test_blocked
+    p=Path(d);(p/'status.json').write_text(json.dumps({'status':'BLOCKED'}));self.assertIn('status incomplete',verify(p))
+                                                                             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'status incomplete' not found in []
+
+======================================================================
+FAIL: test_changed_score (__main__.FlashArchiveTest.test_changed_score)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_flash_diagnostic.py", line 16, in test_changed_score
+    with patch('verify_routing_flash_diagnostic.BASE',p):self.assertIn('diagnostic score mismatch: once',verify(run))
+                                                         ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'diagnostic score mismatch: once' not found in []
+
+======================================================================
+FAIL: test_missing (__main__.FlashArchiveTest.test_missing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_flash_diagnostic.py", line 8, in test_missing
+    with tempfile.TemporaryDirectory() as d:self.assertIn('missing status.json',verify(Path(d)))
+                                            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'missing status.json' not found in []
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.521s
+
+FAILED (failures=3)

@@ -1,0 +1,58 @@
+{
+  "source_sha256": "11cf45edaaf49b6dd6ece3d1a7c7779bb6623b705283e691c66c137336aa62de",
+  "model": "gpt-6.1-sol",
+  "input_tokens": 25401,
+  "cost_microdollars": 33906,
+  "checks": {
+    "B01": {
+      "id": "B01",
+      "kind": "claim",
+      "statement": "At the start of Buffer.Read, lastRead is assigned opInvalid.",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "choice": "supported",
+      "reason": "The assignment at the start of Buffer.Read sets lastRead to opInvalid."
+    },
+    "B02": {
+      "id": "B02",
+      "kind": "claim",
+      "statement": "At the start of Buffer.Read, lastRead is assigned opRead.",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "choice": "contradicted",
+      "reason": "The assignment at the start of Buffer.Read sets lastRead to opInvalid, a different value from opRead."
+    },
+    "B03": {
+      "id": "B03",
+      "kind": "claim",
+      "statement": "The cited assignment guarantees that the buffer can never contain unread bytes.",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "choice": "unclear",
+      "reason": "The assignment sets lastRead and gives no information about whether the buffer contains unread bytes."
+    },
+    "B04": {
+      "id": "B04",
+      "kind": "ordering",
+      "statement": "After a ReadByte succeeds, Read(nil) occurs and then UnreadByte succeeds.",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "choice": "unclear",
+      "reason": "The assignment establishes neither the sequence of calls nor whether UnreadByte succeeds."
+    },
+    "B05": {
+      "id": "B05",
+      "kind": "claim",
+      "statement": "Buffer.ReadByte returns io.EOF when no byte is available.",
+      "line": 373,
+      "fragment": "If no byte is available, it returns error [io.EOF].",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "choice": "unclear",
+      "reason": "The comment documents io.EOF for this condition. The quoted fragment contains no executable return."
+    }
+  }
+}

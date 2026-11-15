@@ -1,0 +1,43 @@
+{
+  "protocol": "fragment-scoped labels; no human review or automatic acceptance",
+  "splits": {
+    "dev": [
+      "once",
+      "pipe"
+    ],
+    "heldout": [
+      "buffer",
+      "value"
+    ]
+  },
+  "components": {
+    "once": {
+      "split": "dev",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "sha256": "3bc00bab32acd134ddf50c87fdbd1dd70502f224b7684a801a077dfe0a05eb3f",
+      "checks": "inputs/once-checks.json",
+      "proposed_labels": "inputs/once-labels-proposed.json"
+    },
+    "pipe": {
+      "split": "dev",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "sha256": "75ef56f505592fcffb188bf7660c6ea6abede3f2701b500d6946fa519c37e233",
+      "checks": "inputs/pipe-checks.json",
+      "proposed_labels": "inputs/pipe-labels-proposed.json"
+    },
+    "buffer": {
+      "split": "heldout",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "sha256": "11cf45edaaf49b6dd6ece3d1a7c7779bb6623b705283e691c66c137336aa62de",
+      "checks": "inputs/buffer-checks.json",
+      "proposed_labels": "inputs/buffer-labels-proposed.json"
+    },
+    "value": {
+      "split": "heldout",
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "sha256": "e87f0ad5c37b11b69effbb2c58b34b3fd7d4d4300b9e83a63847ff3b4835b8cc",
+      "checks": "inputs/value-checks.json",
+      "proposed_labels": "inputs/value-labels-proposed.json"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "P01",
+    "kind": "claim",
+    "statement": "CloseWithError does not overwrite an existing previous error.",
+    "line": 146,
+    "fragment": "CloseWithError never overwrites the previous error if it exists"
+  },
+  {
+    "id": "P02",
+    "kind": "claim",
+    "statement": "CloseWithError always overwrites an existing previous error.",
+    "line": 146,
+    "fragment": "CloseWithError never overwrites the previous error if it exists"
+  },
+  {
+    "id": "P03",
+    "kind": "claim",
+    "statement": "CloseWithError returns nil.",
+    "line": 147,
+    "fragment": "and always returns nil."
+  },
+  {
+    "id": "P04",
+    "kind": "ordering",
+    "statement": "The reader closes after a two-byte read, and the blocked six-byte write returns two bytes with the reader error.",
+    "line": 146,
+    "fragment": "CloseWithError never overwrites the previous error if it exists"
+  },
+  {
+    "id": "P05",
+    "kind": "claim",
+    "statement": "The callee pipe.read can return an arbitrary network timeout.",
+    "line": 134,
+    "fragment": "return r.pipe.read(data)"
+  }
+]

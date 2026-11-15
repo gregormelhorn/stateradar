@@ -1,0 +1,34 @@
+{
+  "review": {
+    "cases": [
+      {
+        "id": "O01",
+        "verdict": "supported",
+        "reason": "The fragment explicitly prohibits copying a Once after first use."
+      },
+      {
+        "id": "O02",
+        "verdict": "contradicted",
+        "reason": "The fragment prohibits the same copying that the statement permits."
+      },
+      {
+        "id": "O03",
+        "verdict": "unclear",
+        "reason": "The fragment addresses copying after first use and gives no rule for copying before first use."
+      },
+      {
+        "id": "O04",
+        "verdict": "supported",
+        "reason": "The fragment explicitly says that no call to Do returns until the call to f returns."
+      },
+      {
+        "id": "O05",
+        "verdict": "unclear",
+        "reason": "The fragment mentions the returns of f and Do and gives no information about a separate network request or when it completes."
+      }
+    ]
+  },
+  "call_ids": [
+    0
+  ]
+}

@@ -1,0 +1,29 @@
+.....FF
+======================================================================
+FAIL: test_direct_prompt_tampering (__main__.RunIntegrityTest.test_direct_prompt_tampering)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_verify_routing_label_eval.py", line 40, in test_direct_prompt_tampering
+    def test_direct_prompt_tampering(self):self.exercise('prompt')
+                                           ~~~~~~~~~~~~~^^^^^^^^^^
+  File "tools/selftest/test_verify_routing_label_eval.py", line 38, in exercise
+    with patch('verify_routing_label_eval.BASE',p):self.assertIn(needle,verify(run))
+                                                   ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'comparator prompt mismatch: value' not found in []
+
+======================================================================
+FAIL: test_jev_score_tampering (__main__.RunIntegrityTest.test_jev_score_tampering)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_verify_routing_label_eval.py", line 39, in test_jev_score_tampering
+    def test_jev_score_tampering(self):self.exercise('score')
+                                       ~~~~~~~~~~~~~^^^^^^^^^
+  File "tools/selftest/test_verify_routing_label_eval.py", line 38, in exercise
+    with patch('verify_routing_label_eval.BASE',p):self.assertIn(needle,verify(run))
+                                                   ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'score mismatch: value' not found in ['review result mismatch: A01']
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.185s
+
+FAILED (failures=2)

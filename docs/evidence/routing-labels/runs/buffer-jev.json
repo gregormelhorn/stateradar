@@ -1,0 +1,85 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "11cf45edaaf49b6dd6ece3d1a7c7779bb6623b705283e691c66c137336aa62de",
+  "input_tokens": 6198,
+  "cost_microdollars": 261,
+  "reservation_microdollars": 962,
+  "checks": {
+    "B01": {
+      "kind": "claim",
+      "statement": "At the start of Buffer.Read, lastRead is assigned opInvalid.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "B02": {
+      "kind": "claim",
+      "statement": "At the start of Buffer.Read, lastRead is assigned opRead.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.01,
+        "contradicted": 0.95,
+        "unclear": 0.04
+      },
+      "confidence": 0.92,
+      "review_required": true
+    },
+    "B03": {
+      "kind": "claim",
+      "statement": "The cited assignment guarantees that the buffer can never contain unread bytes.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.15,
+        "unclear": 0.85
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "B04": {
+      "kind": "ordering",
+      "statement": "After a ReadByte succeeds, Read(nil) occurs and then UnreadByte succeeds.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.01,
+        "contradicted": 0.18,
+        "unclear": 0.81
+      },
+      "confidence": 0.72,
+      "review_required": true,
+      "ordering_scope_probability": 0.02
+    },
+    "B05": {
+      "kind": "claim",
+      "statement": "Buffer.ReadByte returns io.EOF when no byte is available.",
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "line": 373,
+      "fragment": "If no byte is available, it returns error [io.EOF].",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    }
+  }
+}

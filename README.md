@@ -160,9 +160,12 @@ it does not cover the calling agent or other providers.
 The [model cascade plan](docs/plan-model-cascade.md) sets out the next steps:
 independently reviewed cases, a held-out quality and cost comparison, and only
 then a calibrated experiment that escalates selected cases to stronger review.
-Automatic acceptance or escalation is not enabled, and end-to-end savings are
-not yet established. See the [project roadmap](docs/roadmap.md) for this and
-other outstanding work.
+A first [fragment-label routing evaluation](docs/evidence/routing-labels/README.md)
+compares Jev and direct Codex on 20 AI-reviewed checks, followed by a separate
+post-comparison Flash→Jev diagnostic. Both direct judges match 19/20 references
+with different discrepancies; the examples are previously exposed and not a
+full pilot. Automatic acceptance or escalation is not enabled, and end-to-end
+savings are not established. See the [project roadmap](docs/roadmap.md).
 
 After stage 04 the discipline is CI-enforced in *your* repo. Breaking a
 disposition, a decision link, a guard proof, or cell coverage breaks the

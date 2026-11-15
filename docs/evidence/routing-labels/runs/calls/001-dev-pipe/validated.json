@@ -1,0 +1,29 @@
+{
+  "cases": [
+    {
+      "id": "P01",
+      "choice": "supported",
+      "reason": "The comment explicitly says CloseWithError preserves a previous error if one exists."
+    },
+    {
+      "id": "P02",
+      "choice": "contradicted",
+      "reason": "The comment says CloseWithError never overwrites an existing error."
+    },
+    {
+      "id": "P03",
+      "choice": "supported",
+      "reason": "The comment explicitly says CloseWithError always returns nil."
+    },
+    {
+      "id": "P04",
+      "choice": "unclear",
+      "reason": "The fragment addresses preservation of a previous error and gives no read or close ordering, byte counts, or write result."
+    },
+    {
+      "id": "P05",
+      "choice": "unclear",
+      "reason": "The fragment forwards the callee's result and gives no information about which errors the callee can return."
+    }
+  ]
+}

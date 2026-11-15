@@ -1,0 +1,29 @@
+{
+  "cases": [
+    {
+      "id": "A01",
+      "verdict": "supported",
+      "reason": "The fragment explicitly says that Load returns nil for the zero value of Value."
+    },
+    {
+      "id": "A02",
+      "verdict": "contradicted",
+      "reason": "The fragment explicitly says that Load returns nil for the zero value, contradicting the claim that it never does."
+    },
+    {
+      "id": "A03",
+      "verdict": "unclear",
+      "reason": "The fragment addresses only the zero value and leaves the result of Load after Swap initialization unspecified."
+    },
+    {
+      "id": "A04",
+      "verdict": "supported",
+      "reason": "The quoted comment explicitly says that Load returns nil if Store has never been called for that Value."
+    },
+    {
+      "id": "A05",
+      "verdict": "unclear",
+      "reason": "The fragment states the no-Store condition but leaves the sequence of Swap initialization followed by Load unspecified."
+    }
+  ]
+}

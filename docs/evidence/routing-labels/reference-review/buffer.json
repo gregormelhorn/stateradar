@@ -1,0 +1,34 @@
+{
+  "review": {
+    "cases": [
+      {
+        "id": "B01",
+        "verdict": "supported",
+        "reason": "The quoted assignment sets lastRead to opInvalid and is the first statement in Buffer.Read."
+      },
+      {
+        "id": "B02",
+        "verdict": "contradicted",
+        "reason": "The quoted assignment sets lastRead to opInvalid, a different value from opRead."
+      },
+      {
+        "id": "B03",
+        "verdict": "unclear",
+        "reason": "The assignment specifies the last-read state and says nothing about whether the buffer contains unread bytes."
+      },
+      {
+        "id": "B04",
+        "verdict": "unclear",
+        "reason": "The assignment does not specify a preceding successful ReadByte, a nil argument to Read, or the outcome of a subsequent UnreadByte."
+      },
+      {
+        "id": "B05",
+        "verdict": "supported",
+        "reason": "The ReadByte comment explicitly states that it returns io.EOF when no byte is available."
+      }
+    ]
+  },
+  "call_ids": [
+    2
+  ]
+}

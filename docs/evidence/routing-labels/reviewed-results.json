@@ -1,0 +1,524 @@
+{
+  "cases": [
+    {
+      "id": "O01",
+      "component": "once",
+      "kind": "claim",
+      "reference": "supported",
+      "reference_reason": "The fragment states the restriction.",
+      "independent_reason": "The fragment explicitly prohibits copying a Once after first use.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 13,
+        "fragment": "A Once must not be copied after first use."
+      },
+      "jev": "supported",
+      "jev_probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "ordering_scope_probability": null,
+      "direct": "supported",
+      "direct_reason": "The comment explicitly prohibits copying a Once after first use.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "O02",
+      "component": "once",
+      "kind": "claim",
+      "reference": "contradicted",
+      "reference_reason": "The fragment explicitly forbids this.",
+      "independent_reason": "The fragment prohibits the same copying that the statement permits.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 13,
+        "fragment": "A Once must not be copied after first use."
+      },
+      "jev": "contradicted",
+      "jev_probabilities": {
+        "supported": 0.0,
+        "contradicted": 1.0,
+        "unclear": 0.0
+      },
+      "ordering_scope_probability": null,
+      "direct": "contradicted",
+      "direct_reason": "The comment explicitly prohibits the copying that the statement permits.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "O03",
+      "component": "once",
+      "kind": "claim",
+      "reference": "unclear",
+      "reference_reason": "The fragment covers copying after first use, not before.",
+      "independent_reason": "The fragment addresses copying after first use and gives no rule for copying before first use.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 13,
+        "fragment": "A Once must not be copied after first use."
+      },
+      "jev": "unclear",
+      "jev_probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.29,
+        "unclear": 0.71
+      },
+      "ordering_scope_probability": null,
+      "direct": "unclear",
+      "direct_reason": "The comment addresses copying after first use and says nothing about copying before first use.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "O04",
+      "component": "once",
+      "kind": "ordering",
+      "reference": "supported",
+      "reference_reason": "The fragment states the ordering.",
+      "independent_reason": "The fragment explicitly says that no call to Do returns until the call to f returns.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 47,
+        "fragment": "Because no call to Do returns until the one call to f returns"
+      },
+      "jev": "supported",
+      "jev_probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "ordering_scope_probability": 0.88,
+      "direct": "supported",
+      "direct_reason": "The comment explicitly says that no call to Do returns until f returns.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "O05",
+      "component": "once",
+      "kind": "ordering",
+      "reference": "unclear",
+      "reference_reason": "The fragment does not mention a network request or its completion.",
+      "independent_reason": "The fragment mentions the returns of f and Do and gives no information about a separate network request or when it completes.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 47,
+        "fragment": "Because no call to Do returns until the one call to f returns"
+      },
+      "jev": "unclear",
+      "jev_probabilities": {
+        "supported": 0.02,
+        "contradicted": 0.36,
+        "unclear": 0.62
+      },
+      "ordering_scope_probability": 0.02,
+      "direct": "unclear",
+      "direct_reason": "The comment gives the ordering of f and Do and says nothing about a network request or when it completes.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "P01",
+      "component": "pipe",
+      "kind": "claim",
+      "reference": "supported",
+      "reference_reason": "The fragment states the retention rule.",
+      "independent_reason": "The comment explicitly says CloseWithError preserves a previous error if one exists.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/pipe.go",
+        "line": 146,
+        "fragment": "CloseWithError never overwrites the previous error if it exists"
+      },
+      "jev": "supported",
+      "jev_probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "ordering_scope_probability": null,
+      "direct": "supported",
+      "direct_reason": "The comment explicitly says CloseWithError preserves a previous error if one exists.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "P02",
+      "component": "pipe",
+      "kind": "claim",
+      "reference": "contradicted",
+      "reference_reason": "The fragment says never overwrite.",
+      "independent_reason": "The comment says CloseWithError never overwrites an existing previous error.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/pipe.go",
+        "line": 146,
+        "fragment": "CloseWithError never overwrites the previous error if it exists"
+      },
+      "jev": "contradicted",
+      "jev_probabilities": {
+        "supported": 0.0,
+        "contradicted": 1.0,
+        "unclear": 0.0
+      },
+      "ordering_scope_probability": null,
+      "direct": "contradicted",
+      "direct_reason": "The comment says CloseWithError never overwrites an existing error.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "P03",
+      "component": "pipe",
+      "kind": "claim",
+      "reference": "supported",
+      "reference_reason": "The next comment line completes the method contract.",
+      "independent_reason": "The quoted continuation says CloseWithError always returns nil.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/pipe.go",
+        "line": 147,
+        "fragment": "and always returns nil."
+      },
+      "jev": "supported",
+      "jev_probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "ordering_scope_probability": null,
+      "direct": "supported",
+      "direct_reason": "The comment explicitly says CloseWithError always returns nil.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "P04",
+      "component": "pipe",
+      "kind": "ordering",
+      "reference": "unclear",
+      "reference_reason": "The fragment concerns retained errors and does not contemplate this race or byte counts.",
+      "independent_reason": "The fragment addresses error preservation and leaves the read and close ordering, byte counts, and blocked write result unspecified.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/pipe.go",
+        "line": 146,
+        "fragment": "CloseWithError never overwrites the previous error if it exists"
+      },
+      "jev": "unclear",
+      "jev_probabilities": {
+        "supported": 0.02,
+        "contradicted": 0.01,
+        "unclear": 0.97
+      },
+      "ordering_scope_probability": 0.01,
+      "direct": "unclear",
+      "direct_reason": "The fragment addresses preservation of a previous error and gives no read or close ordering, byte counts, or write result.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "P05",
+      "component": "pipe",
+      "kind": "claim",
+      "reference": "unclear",
+      "reference_reason": "The call-site fragment forwards a result but supplies no callee error contract.",
+      "independent_reason": "The call site forwards the result of pipe.read and leaves its possible errors unspecified.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/pipe.go",
+        "line": 134,
+        "fragment": "return r.pipe.read(data)"
+      },
+      "jev": "unclear",
+      "jev_probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.47,
+        "unclear": 0.53
+      },
+      "ordering_scope_probability": null,
+      "direct": "unclear",
+      "direct_reason": "The fragment forwards the callee's result and gives no information about which errors the callee can return.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "B01",
+      "component": "buffer",
+      "kind": "claim",
+      "reference": "supported",
+      "reference_reason": "The cited assignment is at the beginning of Read.",
+      "independent_reason": "The quoted assignment sets lastRead to opInvalid and is the first statement in Buffer.Read.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 337,
+        "fragment": "b.lastRead = opInvalid"
+      },
+      "jev": "supported",
+      "jev_probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.0,
+        "unclear": 0.03
+      },
+      "ordering_scope_probability": null,
+      "direct": "supported",
+      "direct_reason": "The assignment at the start of Buffer.Read sets lastRead to opInvalid.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "B02",
+      "component": "buffer",
+      "kind": "claim",
+      "reference": "contradicted",
+      "reference_reason": "The first assignment uses opInvalid rather than opRead.",
+      "independent_reason": "The quoted assignment sets lastRead to opInvalid, a different value from opRead.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 337,
+        "fragment": "b.lastRead = opInvalid"
+      },
+      "jev": "contradicted",
+      "jev_probabilities": {
+        "supported": 0.01,
+        "contradicted": 0.95,
+        "unclear": 0.04
+      },
+      "ordering_scope_probability": null,
+      "direct": "contradicted",
+      "direct_reason": "The assignment at the start of Buffer.Read sets lastRead to opInvalid, a different value from opRead.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "B03",
+      "component": "buffer",
+      "kind": "claim",
+      "reference": "unclear",
+      "reference_reason": "The last-read marker does not specify contents or guarantee emptiness.",
+      "independent_reason": "The assignment specifies the last-read state and says nothing about whether the buffer contains unread bytes.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 337,
+        "fragment": "b.lastRead = opInvalid"
+      },
+      "jev": "unclear",
+      "jev_probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.15,
+        "unclear": 0.85
+      },
+      "ordering_scope_probability": null,
+      "direct": "unclear",
+      "direct_reason": "The assignment sets lastRead and gives no information about whether the buffer contains unread bytes.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "B04",
+      "component": "buffer",
+      "kind": "ordering",
+      "reference": "unclear",
+      "reference_reason": "The quoted assignment alone does not establish all operations or the final outcome.",
+      "independent_reason": "The assignment does not specify a preceding successful ReadByte, a nil argument to Read, or the outcome of a subsequent UnreadByte.",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 337,
+        "fragment": "b.lastRead = opInvalid"
+      },
+      "jev": "unclear",
+      "jev_probabilities": {
+        "supported": 0.01,
+        "contradicted": 0.18,
+        "unclear": 0.81
+      },
+      "ordering_scope_probability": 0.02,
+      "direct": "unclear",
+      "direct_reason": "The assignment establishes neither the sequence of calls nor whether UnreadByte succeeds.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "B05",
+      "component": "buffer",
+      "kind": "claim",
+      "reference": "supported",
+      "reference_reason": "The API comment explicitly states the empty case.",
+      "independent_reason": "The ReadByte comment explicitly states that it returns io.EOF when no byte is available.",
+      "provenance": "explicit-requirement",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 373,
+        "fragment": "If no byte is available, it returns error [io.EOF]."
+      },
+      "jev": "supported",
+      "jev_probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "ordering_scope_probability": null,
+      "direct": "unclear",
+      "direct_reason": "The comment documents io.EOF for this condition. The quoted fragment contains no executable return.",
+      "review_note": "The comment explicitly states EOF when no byte is available. Direct Codex demanded executable evidence and marked unclear; because the statement is not explicitly phrased as a comment claim, that stricter interpretation remains OPEN as Q-R03. A separately declared runtime control observes EOF.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "A01",
+      "component": "value",
+      "kind": "claim",
+      "reference": "supported",
+      "reference_reason": "The source comment explicitly states this.",
+      "independent_reason": "The fragment explicitly says that Load returns nil for the zero value of Value.",
+      "provenance": "explicit-requirement",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/value.go",
+        "line": 12,
+        "fragment": "The zero value for a Value returns nil from [Value.Load]."
+      },
+      "jev": "supported",
+      "jev_probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "ordering_scope_probability": null,
+      "direct": "supported",
+      "direct_reason": "The fragment explicitly says Load returns nil for the zero value of Value.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "A02",
+      "component": "value",
+      "kind": "claim",
+      "reference": "contradicted",
+      "reference_reason": "The explicit zero-value result is nil.",
+      "independent_reason": "The fragment explicitly says that Load returns nil for the zero value, contradicting the claim that it never does.",
+      "provenance": "explicit-requirement",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/value.go",
+        "line": 12,
+        "fragment": "The zero value for a Value returns nil from [Value.Load]."
+      },
+      "jev": "contradicted",
+      "jev_probabilities": {
+        "supported": 0.0,
+        "contradicted": 1.0,
+        "unclear": 0.0
+      },
+      "ordering_scope_probability": null,
+      "direct": "contradicted",
+      "direct_reason": "The fragment explicitly says Load returns nil for the zero value, contradicting the word “never.”",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "A03",
+      "component": "value",
+      "kind": "claim",
+      "reference": "unclear",
+      "reference_reason": "A zero-value statement does not contemplate a prior initializing Swap.",
+      "independent_reason": "The fragment addresses only the zero value and leaves the result of Load after Swap initialization unspecified.",
+      "provenance": "explicit-requirement",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/value.go",
+        "line": 12,
+        "fragment": "The zero value for a Value returns nil from [Value.Load]."
+      },
+      "jev": "contradicted",
+      "jev_probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.63,
+        "unclear": 0.37
+      },
+      "ordering_scope_probability": null,
+      "direct": "unclear",
+      "direct_reason": "The fragment describes the zero value and leaves Load's result after initialization by Swap unspecified.",
+      "review_note": "The cited zero-value comment does not contemplate a prior Swap. Jev marks contradicted, overclaiming what this fragment itself states; actual post-Swap behavior is a separate runtime question.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "A04",
+      "component": "value",
+      "kind": "claim",
+      "reference": "supported",
+      "reference_reason": "This is the exact comment wording; implementation after Swap is a separate potential contradiction.",
+      "independent_reason": "The quoted comment explicitly says that Load returns nil if Store has never been called for that Value.",
+      "provenance": "explicit-requirement",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/value.go",
+        "line": 27,
+        "fragment": "It returns nil if there has been no call to Store for this Value."
+      },
+      "jev": "supported",
+      "jev_probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "ordering_scope_probability": null,
+      "direct": "supported",
+      "direct_reason": "The quoted comment explicitly says Load returns nil if Store has never been called for that Value.",
+      "review_note": "Supported only as a statement about the quoted comment. A separate runtime control shows Swap followed by Load without Store can return a value; the contract wording question remains OPEN.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    },
+    {
+      "id": "A05",
+      "component": "value",
+      "kind": "ordering",
+      "reference": "unclear",
+      "reference_reason": "The quoted comment does not explicitly contemplate prior Swap or this ordering; do not infer policy from the mismatch.",
+      "independent_reason": "The fragment states the no-Store condition but leaves the sequence of Swap initialization followed by Load unspecified.",
+      "provenance": "explicit-requirement",
+      "citation": {
+        "file": "docs/evidence/gepa-heldout/upstream/value.go",
+        "line": 27,
+        "fragment": "It returns nil if there has been no call to Store for this Value."
+      },
+      "jev": "unclear",
+      "jev_probabilities": {
+        "supported": 0.06,
+        "contradicted": 0.24,
+        "unclear": 0.7
+      },
+      "ordering_scope_probability": 0.05,
+      "direct": "unclear",
+      "direct_reason": "The comment states a condition involving Store and leaves the Swap-then-Load sequence and its runtime result unspecified.",
+      "review_note": "Source fragment checked against the stated label; independent AI reasoning retained.",
+      "reviewer": "supervising AI: source and reference checked; not human review"
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "Q-R01",
+      "status": "OPEN",
+      "question": "Does the Load documentation intend Store to include a prior Swap or CompareAndSwap, or should it be revised to describe all successful writes?",
+      "scope": "Documentation comment vs observed runtime behavior; no domain decision."
+    },
+    {
+      "id": "Q-R02",
+      "status": "OPEN",
+      "question": "Why did Jev mark the post-Swap claim contradicted when the cited zero-value fragment does not contemplate Swap, and can a future fragment-scope check avoid importing this missing ordering?",
+      "scope": "Method and source-scope judgment, not a domain decision."
+    },
+    {
+      "id": "Q-R03",
+      "status": "OPEN",
+      "question": "Should a stated API comment suffice as evidence for this fragment-support task when the compared direct model demands executable evidence?",
+      "scope": "Method interpretation; runtime control separately observes EOF."
+    }
+  ]
+}

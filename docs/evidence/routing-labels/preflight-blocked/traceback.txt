@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/run_routing_label_eval.py", line 64, in <module>
+    s=Run(Path(sys.argv[1]).resolve())
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/run_routing_label_eval.py", line 26, in __init__
+    save(out/'input-freeze.json',self.frozen);self.assert_frozen();self.dev_hash=None
+                                              ~~~~~~~~~~~~~~~~~~^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/run_routing_label_eval.py", line 29, in assert_frozen
+    if self.dev_hash:require(hashlib.sha256((self.out/'dev-complete.json').read_bytes()).hexdigest()==self.dev_hash,'dev freeze changed')
+       ^^^^^^^^^^^^^
+AttributeError: 'Run' object has no attribute 'dev_hash'

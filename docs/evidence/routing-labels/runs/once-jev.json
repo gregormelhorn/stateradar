@@ -1,0 +1,86 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "3bc00bab32acd134ddf50c87fdbd1dd70502f224b7684a801a077dfe0a05eb3f",
+  "input_tokens": 2057,
+  "cost_microdollars": 87,
+  "reservation_microdollars": 370,
+  "checks": {
+    "O01": {
+      "kind": "claim",
+      "statement": "A Once must not be copied after first use.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "O02": {
+      "kind": "claim",
+      "statement": "A Once may be copied after first use.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 1.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "O03": {
+      "kind": "claim",
+      "statement": "A Once must not be copied before its first use.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.29,
+        "unclear": 0.71
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "O04": {
+      "kind": "ordering",
+      "statement": "A call to Do cannot return before the function f returns.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 47,
+      "fragment": "Because no call to Do returns until the one call to f returns",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true,
+      "ordering_scope_probability": 0.88
+    },
+    "O05": {
+      "kind": "ordering",
+      "statement": "After f returns, a separately launched network request completes before Do returns.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "line": 47,
+      "fragment": "Because no call to Do returns until the one call to f returns",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.02,
+        "contradicted": 0.36,
+        "unclear": 0.62
+      },
+      "confidence": 0.43,
+      "review_required": true,
+      "ordering_scope_probability": 0.02
+    }
+  }
+}

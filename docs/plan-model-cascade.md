@@ -8,6 +8,18 @@ The current commands and their accounting limits are documented in
 [local model routing](local-model-routing.md); other project priorities are in
 the [roadmap](roadmap.md).
 
+## Latest bounded evaluation
+
+[Routing label evaluation](evidence/routing-labels/README.md) records 20
+fragment-scoped cases on four previously exposed components, with separate AI
+reference review and component-separated development/held-out calls. Jev and
+direct Codex each match 19/20 labels with different discrepancies; one label
+interpretation remains OPEN. A post-comparison Flash→Jev diagnostic preserves
+eight proposals and twelve questions. These are not an independent human gold
+set or a full-pilot cost/quality comparison. No routing or acceptance policy was
+changed. The next experiment needs new components, matched repeated end-to-end
+runs, and complete controller/continuation accounting.
+
 ## Next pilot
 
 Identify existing source-grounded examples whose expected verdicts can be

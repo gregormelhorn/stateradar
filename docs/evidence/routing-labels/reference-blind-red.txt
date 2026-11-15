@@ -1,0 +1,14 @@
+.....F.....
+======================================================================
+FAIL: test_tampered_reference_prompt_fails (__main__.ReferenceBlindTest.test_tampered_reference_prompt_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 61, in test_tampered_reference_prompt_fails
+    with patch('verify_routing_label_eval.BASE',p):self.assertIn('reference prompt mismatch: once',verify(p/'runs'))
+                                                   ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'reference prompt mismatch: once' not found in []
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.430s
+
+FAILED (failures=1)

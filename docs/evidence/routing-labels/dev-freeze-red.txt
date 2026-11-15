@@ -1,0 +1,17 @@
+.....F..
+======================================================================
+FAIL: test_dev_output_tampering (__main__.RunIntegrityTest.test_dev_output_tampering)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_verify_routing_label_eval.py", line 41, in test_dev_output_tampering
+    def test_dev_output_tampering(self):self.exercise('dev')
+                                        ~~~~~~~~~~~~~^^^^^^^
+  File "tools/selftest/test_verify_routing_label_eval.py", line 40, in exercise
+    with patch('verify_routing_label_eval.BASE',p):self.assertIn(needle,verify(run))
+                                                   ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'development output changed: once-direct.json' not found in []
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.227s
+
+FAILED (failures=1)

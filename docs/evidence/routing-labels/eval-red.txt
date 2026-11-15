@@ -1,0 +1,53 @@
+.FFFFF
+======================================================================
+FAIL: test_development_cannot_run_on_heldout (__main__.RoutingEvalTest.test_development_cannot_run_on_heldout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_evaluation.py", line 13, in test_development_cannot_run_on_heldout
+    with self.assertRaises(ValueError):allow(self.m,'b','dev',False)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_disagreement_remains_open (__main__.RoutingEvalTest.test_disagreement_remains_open)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_evaluation.py", line 19, in test_disagreement_remains_open
+    result=reconcile(p,r);self.assertEqual(set(result['agreed']),{'y'});self.assertEqual(set(result['disputes']),{'x'})
+                          ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+'checks'
+Items in the second set but not the first:
+'y'
+
+======================================================================
+FAIL: test_holdout_cannot_run_before_dev (__main__.RoutingEvalTest.test_holdout_cannot_run_before_dev)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_evaluation.py", line 11, in test_holdout_cannot_run_before_dev
+    with self.assertRaises(ValueError):allow(self.m,'b','heldout',False)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_missing_or_duplicate_review_rejected (__main__.RoutingEvalTest.test_missing_or_duplicate_review_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_evaluation.py", line 23, in test_missing_or_duplicate_review_rejected
+    with self.assertRaises(ValueError):reconcile(p,{'cases':rows})
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_overlap_rejected (__main__.RoutingEvalTest.test_overlap_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_evaluation.py", line 9, in test_overlap_rejected
+    with self.assertRaises(ValueError):check_splits(self.m)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+FAILED (failures=5)

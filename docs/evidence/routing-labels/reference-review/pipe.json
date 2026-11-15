@@ -1,0 +1,34 @@
+{
+  "review": {
+    "cases": [
+      {
+        "id": "P01",
+        "verdict": "supported",
+        "reason": "The comment explicitly says CloseWithError preserves a previous error if one exists."
+      },
+      {
+        "id": "P02",
+        "verdict": "contradicted",
+        "reason": "The comment says CloseWithError never overwrites an existing previous error."
+      },
+      {
+        "id": "P03",
+        "verdict": "supported",
+        "reason": "The quoted continuation says CloseWithError always returns nil."
+      },
+      {
+        "id": "P04",
+        "verdict": "unclear",
+        "reason": "The fragment addresses error preservation and leaves the read and close ordering, byte counts, and blocked write result unspecified."
+      },
+      {
+        "id": "P05",
+        "verdict": "unclear",
+        "reason": "The call site forwards the result of pipe.read and leaves its possible errors unspecified."
+      }
+    ]
+  },
+  "call_ids": [
+    1
+  ]
+}

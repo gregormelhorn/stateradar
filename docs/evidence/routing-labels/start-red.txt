@@ -1,0 +1,19 @@
+E
+======================================================================
+ERROR: test_constructor_initializes_freeze_before_check (__main__.StartTest.test_constructor_initializes_freeze_before_check)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_eval_start.py", line 8, in test_constructor_initializes_freeze_before_check
+    run=Run(Path(d)/'run');self.assertIsNone(run.dev_hash);self.assertTrue((Path(d)/'run/input-freeze.json').is_file())
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/run_routing_label_eval.py", line 26, in __init__
+    save(out/'input-freeze.json',self.frozen);self.assert_frozen();self.dev_hash=None
+                                              ~~~~~~~~~~~~~~~~~~^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/run_routing_label_eval.py", line 29, in assert_frozen
+    if self.dev_hash:require(hashlib.sha256((self.out/'dev-complete.json').read_bytes()).hexdigest()==self.dev_hash,'dev freeze changed')
+       ^^^^^^^^^^^^^
+AttributeError: 'Run' object has no attribute 'dev_hash'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.011s
+
+FAILED (errors=1)

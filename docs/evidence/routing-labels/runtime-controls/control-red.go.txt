@@ -1,0 +1,4 @@
+package controls
+import("bytes";"io";"sync/atomic";"testing")
+func TestBufferEmptyReadByte(t *testing.T){var b bytes.Buffer;_,e:=b.ReadByte();if e==io.EOF{t.Fatal("red probe: EOF observed")}}
+func TestValueSwapWithoutStore(t *testing.T){var v atomic.Value;if v.Swap(7)!=nil{t.Fatal("unexpected old value")};if v.Load()!=nil{t.Fatal("red probe: Load observes Swap")}}

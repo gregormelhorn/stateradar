@@ -1,0 +1,58 @@
+{
+  "source_sha256": "3bc00bab32acd134ddf50c87fdbd1dd70502f224b7684a801a077dfe0a05eb3f",
+  "model": "gpt-6.1-sol",
+  "input_tokens": 17199,
+  "cost_microdollars": 7550,
+  "checks": {
+    "O01": {
+      "id": "O01",
+      "kind": "claim",
+      "statement": "A Once must not be copied after first use.",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "choice": "supported",
+      "reason": "The comment explicitly prohibits copying a Once after first use."
+    },
+    "O02": {
+      "id": "O02",
+      "kind": "claim",
+      "statement": "A Once may be copied after first use.",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "choice": "contradicted",
+      "reason": "The comment explicitly prohibits the copying that the statement permits."
+    },
+    "O03": {
+      "id": "O03",
+      "kind": "claim",
+      "statement": "A Once must not be copied before its first use.",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "choice": "unclear",
+      "reason": "The comment addresses copying after first use and says nothing about copying before first use."
+    },
+    "O04": {
+      "id": "O04",
+      "kind": "ordering",
+      "statement": "A call to Do cannot return before the function f returns.",
+      "line": 47,
+      "fragment": "Because no call to Do returns until the one call to f returns",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "choice": "supported",
+      "reason": "The comment explicitly says that no call to Do returns until f returns."
+    },
+    "O05": {
+      "id": "O05",
+      "kind": "ordering",
+      "statement": "After f returns, a separately launched network request completes before Do returns.",
+      "line": 47,
+      "fragment": "Because no call to Do returns until the one call to f returns",
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "choice": "unclear",
+      "reason": "The comment gives the ordering of f and Do and says nothing about a network request or when it completes."
+    }
+  }
+}

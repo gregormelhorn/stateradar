@@ -1,0 +1,14 @@
+...F.....
+======================================================================
+FAIL: test_missing_label_freeze_entry (__main__.FreezeCoverageTest.test_missing_label_freeze_entry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 49, in test_missing_label_freeze_entry
+    with patch('verify_routing_label_eval.BASE',p):self.assertIn('missing freeze entry: '+name,verify(p/'runs'))
+                                                   ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'missing freeze entry: docs/evidence/routing-labels/frozen/value-labels.json' not found in []
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.715s
+
+FAILED (failures=1)

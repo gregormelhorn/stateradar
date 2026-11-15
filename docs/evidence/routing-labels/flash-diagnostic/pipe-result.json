@@ -1,0 +1,59 @@
+{
+  "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+  "source_sha256": "75ef56f505592fcffb188bf7660c6ea6abede3f2701b500d6946fa519c37e233",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 2465,
+    "output_tokens": 193,
+    "cost_microdollars": 972,
+    "reservation_microdollars": 9983
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 2090,
+    "cost_microdollars": 88,
+    "reservation_microdollars": 330,
+    "error": null
+  },
+  "claims": {
+    "P01": {
+      "kind": "claim",
+      "statement": "CloseWithError does not overwrite an existing previous error.",
+      "line": 146,
+      "fragment": "CloseWithError never overwrites the previous error if it exists",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "P03": {
+      "kind": "claim",
+      "statement": "CloseWithError returns nil.",
+      "line": 147,
+      "fragment": "and always returns nil.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    }
+  },
+  "questions": [
+    "P02: Does the fragment support that CloseWithError always overwrites an existing previous error, when it states the opposite?",
+    "P04: Does the cited fragment establish the ordering that the reader closes after a two-byte read and the blocked six-byte write returns two bytes with the reader error?",
+    "P05: Does the fragment 'return r.pipe.read(data)' establish that the callee pipe.read can return an arbitrary network timeout?"
+  ],
+  "review_required": true
+}

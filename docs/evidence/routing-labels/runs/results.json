@@ -1,0 +1,290 @@
+[
+  {
+    "component": "once",
+    "phase": "dev",
+    "excluded_disputed": [],
+    "jev": {
+      "model": "jev-1.14.0",
+      "source_sha256": "3bc00bab32acd134ddf50c87fdbd1dd70502f224b7684a801a077dfe0a05eb3f",
+      "total": 5,
+      "exact_matches": 5,
+      "confusion_matrix": {
+        "supported": {
+          "supported": 2,
+          "contradicted": 0,
+          "unclear": 0
+        },
+        "contradicted": {
+          "supported": 0,
+          "contradicted": 1,
+          "unclear": 0
+        },
+        "unclear": {
+          "supported": 0,
+          "contradicted": 0,
+          "unclear": 2
+        }
+      },
+      "false_support_ids": [],
+      "unclear_ids": [
+        "O03",
+        "O05"
+      ],
+      "input_tokens": 2057,
+      "cost_microdollars": 87,
+      "review_required": true
+    },
+    "direct": {
+      "model": "gpt-6.1-sol",
+      "source_sha256": "3bc00bab32acd134ddf50c87fdbd1dd70502f224b7684a801a077dfe0a05eb3f",
+      "total": 5,
+      "exact_matches": 5,
+      "confusion_matrix": {
+        "supported": {
+          "supported": 2,
+          "contradicted": 0,
+          "unclear": 0
+        },
+        "contradicted": {
+          "supported": 0,
+          "contradicted": 1,
+          "unclear": 0
+        },
+        "unclear": {
+          "supported": 0,
+          "contradicted": 0,
+          "unclear": 2
+        }
+      },
+      "false_support_ids": [],
+      "unclear_ids": [
+        "O03",
+        "O05"
+      ],
+      "input_tokens": 17199,
+      "cost_microdollars": 7550,
+      "review_required": true
+    },
+    "jev_seconds": 0.353,
+    "direct_seconds": 9.451,
+    "direct_call_ids": [
+      0
+    ]
+  },
+  {
+    "component": "pipe",
+    "phase": "dev",
+    "excluded_disputed": [],
+    "jev": {
+      "model": "jev-1.14.0",
+      "source_sha256": "75ef56f505592fcffb188bf7660c6ea6abede3f2701b500d6946fa519c37e233",
+      "total": 5,
+      "exact_matches": 5,
+      "confusion_matrix": {
+        "supported": {
+          "supported": 2,
+          "contradicted": 0,
+          "unclear": 0
+        },
+        "contradicted": {
+          "supported": 0,
+          "contradicted": 1,
+          "unclear": 0
+        },
+        "unclear": {
+          "supported": 0,
+          "contradicted": 0,
+          "unclear": 2
+        }
+      },
+      "false_support_ids": [],
+      "unclear_ids": [
+        "P04",
+        "P05"
+      ],
+      "input_tokens": 2765,
+      "cost_microdollars": 117,
+      "review_required": true
+    },
+    "direct": {
+      "model": "gpt-6.1-sol",
+      "source_sha256": "75ef56f505592fcffb188bf7660c6ea6abede3f2701b500d6946fa519c37e233",
+      "total": 5,
+      "exact_matches": 5,
+      "confusion_matrix": {
+        "supported": {
+          "supported": 2,
+          "contradicted": 0,
+          "unclear": 0
+        },
+        "contradicted": {
+          "supported": 0,
+          "contradicted": 1,
+          "unclear": 0
+        },
+        "unclear": {
+          "supported": 0,
+          "contradicted": 0,
+          "unclear": 2
+        }
+      },
+      "false_support_ids": [],
+      "unclear_ids": [
+        "P04",
+        "P05"
+      ],
+      "input_tokens": 21419,
+      "cost_microdollars": 45038,
+      "review_required": true
+    },
+    "jev_seconds": 0.271,
+    "direct_seconds": 9.632,
+    "direct_call_ids": [
+      1
+    ]
+  },
+  {
+    "component": "buffer",
+    "phase": "heldout",
+    "excluded_disputed": [],
+    "jev": {
+      "model": "jev-1.14.0",
+      "source_sha256": "11cf45edaaf49b6dd6ece3d1a7c7779bb6623b705283e691c66c137336aa62de",
+      "total": 5,
+      "exact_matches": 5,
+      "confusion_matrix": {
+        "supported": {
+          "supported": 2,
+          "contradicted": 0,
+          "unclear": 0
+        },
+        "contradicted": {
+          "supported": 0,
+          "contradicted": 1,
+          "unclear": 0
+        },
+        "unclear": {
+          "supported": 0,
+          "contradicted": 0,
+          "unclear": 2
+        }
+      },
+      "false_support_ids": [],
+      "unclear_ids": [
+        "B03",
+        "B04"
+      ],
+      "input_tokens": 6198,
+      "cost_microdollars": 261,
+      "review_required": true
+    },
+    "direct": {
+      "model": "gpt-6.1-sol",
+      "source_sha256": "11cf45edaaf49b6dd6ece3d1a7c7779bb6623b705283e691c66c137336aa62de",
+      "total": 5,
+      "exact_matches": 4,
+      "confusion_matrix": {
+        "supported": {
+          "supported": 1,
+          "contradicted": 0,
+          "unclear": 1
+        },
+        "contradicted": {
+          "supported": 0,
+          "contradicted": 1,
+          "unclear": 0
+        },
+        "unclear": {
+          "supported": 0,
+          "contradicted": 0,
+          "unclear": 2
+        }
+      },
+      "false_support_ids": [],
+      "unclear_ids": [
+        "B03",
+        "B04",
+        "B05"
+      ],
+      "input_tokens": 25401,
+      "cost_microdollars": 33906,
+      "review_required": true
+    },
+    "jev_seconds": 0.295,
+    "direct_seconds": 12.352,
+    "direct_call_ids": [
+      2
+    ]
+  },
+  {
+    "component": "value",
+    "phase": "heldout",
+    "excluded_disputed": [],
+    "jev": {
+      "model": "jev-1.14.0",
+      "source_sha256": "e87f0ad5c37b11b69effbb2c58b34b3fd7d4d4300b9e83a63847ff3b4835b8cc",
+      "total": 5,
+      "exact_matches": 4,
+      "confusion_matrix": {
+        "supported": {
+          "supported": 2,
+          "contradicted": 0,
+          "unclear": 0
+        },
+        "contradicted": {
+          "supported": 0,
+          "contradicted": 1,
+          "unclear": 0
+        },
+        "unclear": {
+          "supported": 0,
+          "contradicted": 1,
+          "unclear": 1
+        }
+      },
+      "false_support_ids": [],
+      "unclear_ids": [
+        "A05"
+      ],
+      "input_tokens": 2990,
+      "cost_microdollars": 126,
+      "review_required": true
+    },
+    "direct": {
+      "model": "gpt-6.1-sol",
+      "source_sha256": "e87f0ad5c37b11b69effbb2c58b34b3fd7d4d4300b9e83a63847ff3b4835b8cc",
+      "total": 5,
+      "exact_matches": 5,
+      "confusion_matrix": {
+        "supported": {
+          "supported": 2,
+          "contradicted": 0,
+          "unclear": 0
+        },
+        "contradicted": {
+          "supported": 0,
+          "contradicted": 1,
+          "unclear": 0
+        },
+        "unclear": {
+          "supported": 0,
+          "contradicted": 0,
+          "unclear": 2
+        }
+      },
+      "false_support_ids": [],
+      "unclear_ids": [
+        "A03",
+        "A05"
+      ],
+      "input_tokens": 21583,
+      "cost_microdollars": 45446,
+      "review_required": true
+    },
+    "jev_seconds": 0.279,
+    "direct_seconds": 9.812,
+    "direct_call_ids": [
+      3
+    ]
+  }
+]

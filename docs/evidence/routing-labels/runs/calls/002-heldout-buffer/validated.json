@@ -1,0 +1,29 @@
+{
+  "cases": [
+    {
+      "id": "B01",
+      "choice": "supported",
+      "reason": "The assignment at the start of Buffer.Read sets lastRead to opInvalid."
+    },
+    {
+      "id": "B02",
+      "choice": "contradicted",
+      "reason": "The assignment at the start of Buffer.Read sets lastRead to opInvalid, a different value from opRead."
+    },
+    {
+      "id": "B03",
+      "choice": "unclear",
+      "reason": "The assignment sets lastRead and gives no information about whether the buffer contains unread bytes."
+    },
+    {
+      "id": "B04",
+      "choice": "unclear",
+      "reason": "The assignment establishes neither the sequence of calls nor whether UnreadByte succeeds."
+    },
+    {
+      "id": "B05",
+      "choice": "unclear",
+      "reason": "The comment documents io.EOF for this condition. The quoted fragment contains no executable return."
+    }
+  ]
+}

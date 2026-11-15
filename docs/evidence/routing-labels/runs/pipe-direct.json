@@ -1,0 +1,58 @@
+{
+  "source_sha256": "75ef56f505592fcffb188bf7660c6ea6abede3f2701b500d6946fa519c37e233",
+  "model": "gpt-6.1-sol",
+  "input_tokens": 21419,
+  "cost_microdollars": 45038,
+  "checks": {
+    "P01": {
+      "id": "P01",
+      "kind": "claim",
+      "statement": "CloseWithError does not overwrite an existing previous error.",
+      "line": 146,
+      "fragment": "CloseWithError never overwrites the previous error if it exists",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "choice": "supported",
+      "reason": "The comment explicitly says CloseWithError preserves a previous error if one exists."
+    },
+    "P02": {
+      "id": "P02",
+      "kind": "claim",
+      "statement": "CloseWithError always overwrites an existing previous error.",
+      "line": 146,
+      "fragment": "CloseWithError never overwrites the previous error if it exists",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "choice": "contradicted",
+      "reason": "The comment says CloseWithError never overwrites an existing error."
+    },
+    "P03": {
+      "id": "P03",
+      "kind": "claim",
+      "statement": "CloseWithError returns nil.",
+      "line": 147,
+      "fragment": "and always returns nil.",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "choice": "supported",
+      "reason": "The comment explicitly says CloseWithError always returns nil."
+    },
+    "P04": {
+      "id": "P04",
+      "kind": "ordering",
+      "statement": "The reader closes after a two-byte read, and the blocked six-byte write returns two bytes with the reader error.",
+      "line": 146,
+      "fragment": "CloseWithError never overwrites the previous error if it exists",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "choice": "unclear",
+      "reason": "The fragment addresses preservation of a previous error and gives no read or close ordering, byte counts, or write result."
+    },
+    "P05": {
+      "id": "P05",
+      "kind": "claim",
+      "statement": "The callee pipe.read can return an arbitrary network timeout.",
+      "line": 134,
+      "fragment": "return r.pipe.read(data)",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "choice": "unclear",
+      "reason": "The fragment forwards the callee's result and gives no information about which errors the callee can return."
+    }
+  }
+}

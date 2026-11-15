@@ -1,0 +1,60 @@
+{
+  "source": "docs/evidence/gepa-prospective/upstream/once.go",
+  "source_sha256": "3bc00bab32acd134ddf50c87fdbd1dd70502f224b7684a801a077dfe0a05eb3f",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 1382,
+    "output_tokens": 172,
+    "cost_microdollars": 621,
+    "reservation_microdollars": 8979
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 1411,
+    "cost_microdollars": 60,
+    "reservation_microdollars": 249,
+    "error": null
+  },
+  "claims": {
+    "O01": {
+      "kind": "claim",
+      "statement": "A Once must not be copied after first use.",
+      "line": 13,
+      "fragment": "A Once must not be copied after first use.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "O04": {
+      "kind": "ordering",
+      "statement": "A call to Do cannot return before the function f returns.",
+      "line": 47,
+      "fragment": "Because no call to Do returns until the one call to f returns",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0,
+        "ordering_scope_probability": 0.87
+      }
+    }
+  },
+  "questions": [
+    "O02: Does the fragment support that a Once may be copied after first use?",
+    "O03: Does the fragment support that a Once must not be copied before its first use?",
+    "O05: Does the fragment support that a separately launched network request completes before Do returns after f returns?"
+  ],
+  "review_required": true
+}

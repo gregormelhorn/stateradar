@@ -4,6 +4,15 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Source-fragment routing label evaluation.** Freeze 20 source-grounded
+  checks on four component-separated, previously exposed Go components; an
+  independent AI review agrees on the labels, with no human review. Jev and
+  direct Codex each match 19/20 with different discrepancies. Preserve an
+  explicit documentation question, audited source/runtime controls, settled
+  model costs, and a separate post-comparison Flash→Jev diagnostic. This is
+  not a full-pilot comparison or a routing-policy change. See
+  `docs/evidence/routing-labels/README.md`.
+
 - **GEPA tie audit and prospective comparison.** Expose exact-score ties without
   calling GEPA's first-index fallback a quality winner; reproduce the upstream
   behavior with a test. Compare fixed and unselected prompts on two additional

@@ -1,0 +1,32 @@
+FFF
+======================================================================
+FAIL: test_cost_cap (__main__.RunnerTest.test_cost_cap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_routing_eval_runner.py", line 16, in test_cost_cap
+    with self.assertRaisesRegex(EvalError,'comparator soft cost cap'):r.reserve_launch()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_frozen_source_change (__main__.RunnerTest.test_frozen_source_change)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_routing_eval_runner.py", line 21, in test_frozen_source_change
+    with self.assertRaisesRegex(EvalError,'input changed'):r.assert_frozen()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_launch_cap (__main__.RunnerTest.test_launch_cap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_routing_eval_runner.py", line 12, in test_launch_cap
+    with self.assertRaisesRegex(EvalError,'8 comparator call cap'):r.reserve_launch()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+FAILED (failures=3)

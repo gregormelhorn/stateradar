@@ -1,0 +1,32 @@
+FFF
+======================================================================
+FAIL: test_absent_source (__main__.ArchiveTest.test_absent_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 14, in test_absent_source
+    self.assertIn('missing frozen input: nonexistent',verify(p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'missing frozen input: nonexistent' not found in []
+
+======================================================================
+FAIL: test_blocked_status (__main__.ArchiveTest.test_blocked_status)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 10, in test_blocked_status
+    p=Path(d);(p/'status.json').write_text(json.dumps({'status':'BLOCKED'}));self.assertIn('status incomplete',verify(p))
+                                                                             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'status incomplete' not found in []
+
+======================================================================
+FAIL: test_missing_status (__main__.ArchiveTest.test_missing_status)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_verify_routing_label_eval.py", line 7, in test_missing_status
+    with tempfile.TemporaryDirectory() as d:self.assertIn('missing status.json',verify(Path(d)))
+                                            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'missing status.json' not found in []
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.003s
+
+FAILED (failures=3)

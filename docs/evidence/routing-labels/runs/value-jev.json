@@ -1,0 +1,85 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "e87f0ad5c37b11b69effbb2c58b34b3fd7d4d4300b9e83a63847ff3b4835b8cc",
+  "input_tokens": 2990,
+  "cost_microdollars": 126,
+  "reservation_microdollars": 495,
+  "checks": {
+    "A01": {
+      "kind": "claim",
+      "statement": "The zero value of Value returns nil from Load.",
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "line": 12,
+      "fragment": "The zero value for a Value returns nil from [Value.Load].",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "A02": {
+      "kind": "claim",
+      "statement": "The zero value of Value never returns nil from Load.",
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "line": 12,
+      "fragment": "The zero value for a Value returns nil from [Value.Load].",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 1.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "A03": {
+      "kind": "claim",
+      "statement": "After Swap has initialized Value, Load is still guaranteed to return nil.",
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "line": 12,
+      "fragment": "The zero value for a Value returns nil from [Value.Load].",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.0,
+        "contradicted": 0.63,
+        "unclear": 0.37
+      },
+      "confidence": 0.44,
+      "review_required": true
+    },
+    "A04": {
+      "kind": "claim",
+      "statement": "According to the quoted Load comment, Load returns nil if Store has never been called.",
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "line": 27,
+      "fragment": "It returns nil if there has been no call to Store for this Value.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "A05": {
+      "kind": "ordering",
+      "statement": "Swap initializes Value, then Load is called, and Load must return nil because Store has never run.",
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "line": 27,
+      "fragment": "It returns nil if there has been no call to Store for this Value.",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.06,
+        "contradicted": 0.24,
+        "unclear": 0.7
+      },
+      "confidence": 0.55,
+      "review_required": true,
+      "ordering_scope_probability": 0.05
+    }
+  }
+}

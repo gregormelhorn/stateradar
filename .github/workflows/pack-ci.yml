@@ -155,3 +155,20 @@ jobs:
       - name: GEPA prospective reference controls
         working-directory: docs/evidence/gepa-prospective/reference
         run: go test -race -count=3 -timeout=30s ./...
+
+      - name: routing label evaluation and red probes
+        run: |
+          python tools/selftest/test_routing_evaluation.py
+          python tools/selftest/test_routing_label_integrity.py
+          python tools/selftest/test_routing_compare_prompt.py
+          python tools/selftest/test_routing_eval_runner.py
+          python tools/selftest/test_routing_eval_start.py
+          python tools/selftest/test_verify_routing_label_eval.py
+          python tools/selftest/test_routing_flash_eval.py
+          python tools/selftest/test_routing_ledger_check.py
+          python tools/selftest/test_verify_routing_flash_diagnostic.py
+          python tools/verify_routing_label_eval.py
+          python tools/verify_routing_flash_diagnostic.py
+      - name: routing label runtime controls
+        working-directory: docs/evidence/routing-labels/runtime-controls
+        run: go test -race -count=3 -timeout=30s ./...

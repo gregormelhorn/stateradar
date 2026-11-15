@@ -1,0 +1,32 @@
+F.FF
+======================================================================
+FAIL: test_duplicate_ids (__main__.SourceIntegrityTests.test_duplicate_ids)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_label_integrity.py", line 14, in test_duplicate_ids
+    with self.assertRaisesRegex(ValueError,'duplicate'):verify_source(self.source,self.h,self.checks*2)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_wrong_fragment (__main__.SourceIntegrityTests.test_wrong_fragment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_label_integrity.py", line 12, in test_wrong_fragment
+    with self.assertRaisesRegex(ValueError,'citation'):verify_source(self.source,self.h,self.checks)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_wrong_hash (__main__.SourceIntegrityTests.test_wrong_hash)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_routing_label_integrity.py", line 9, in test_wrong_hash
+    with self.assertRaisesRegex(ValueError,'source hash'):verify_source(self.source,'0'*64,self.checks)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+FAILED (failures=3)

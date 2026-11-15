@@ -11,11 +11,19 @@ entries and separates the new model-routing plan from shipped capabilities.
    `draft-verify` chain, a local ledger, and an offline batch evaluator exist,
    and `prompts/02-pilot.md` (v1.19) routes Steps 1, 6, 8 and Part B through
    them; two full routed pilots ran on silenceper/pool, the second blind to
-   the benchmark and with executed as-is tests (entry 11). Next run a timed
-   agent-only pilot of the same component, build independently reviewed
-   examples, split held-out components or issues, and measure errors,
-   coverage, time, and total cost of the routed pilot against the agent-only
-   pilot. Only then evaluate selective escalation.
+   the benchmark and with executed as-is tests (entry 11). The timed agent-only
+   pilot has since run (entry 11). Expand attributed, independently checked
+   source-grounded labels with component-separated development and held-out
+   groups; measure errors, coverage, time and total cost against the existing
+   workflow before evaluating selective escalation. A first [bounded fragment
+   evaluation](evidence/routing-labels/README.md) now provides 20 AI-reviewed
+   labels across four previously exposed components, with development/held-out
+   separation: Jev and direct Codex each match 19/20, with different errors
+   and an open grading ambiguity. A separately declared post-comparison
+   Flash→Jev diagnostic retains eight supported proposals and twelve questions.
+   These are single-run fragment checks, not a whole-pilot or fresh-source
+   result. Next prepare fresh components and a preregistered, repeated
+   end-to-end comparison including controller and continuation costs.
    Automatic acceptance and escalation are not implemented. Details: [model
    cascade plan](plan-model-cascade.md) and [entry
    11](#11-cost-aware-model-routing-deepseek-flash--jev).
@@ -133,9 +141,14 @@ entries and separates the new model-routing plan from shipped capabilities.
    lower on gobreaker and 0.7% higher on transfer than generic final review; an
    extra identity review costs 104%/72% above the original analysis alone.
    Preserve findings deterministically and keep identity review selective; do
-   not enable an unconditional paid final phase. Next proposed increment: a
-   smaller identity pass on an independently reviewed component, compared with
-   no extra review, using repeated matched runs and complete continuation cost.
+   not enable an unconditional paid final phase. The later [component-split GEPA
+   run](evidence/gepa-heldout/README.md) selected the fixed prompt on a tie.
+   A [prospective comparison and tie audit](evidence/gepa-prospective/README.md)
+   covered 4/8 versus 3/8 observations for fixed and longer prompts; this small
+   AI-reviewed sample does not establish an advantage or justify promotion.
+   The next identity increment remains a smaller pass on an independently
+   reviewed component, compared with no extra review using repeated matched runs
+   and complete continuation cost.
 5. **Expand semantic reachability when needed.** The existing checker covers
    the minimal model; hierarchy and parallel regions remain a possible
    follow-up, described under [semantic analysis](#3-xstate--semantic-analysis).
@@ -332,6 +345,10 @@ strict 24 case observations contain 7 full, 9 partial and 8 missing; the 60
 findings include 8 false and 4 uncertain. Repeated scope/ordering gaps provide
 candidate training feedback, but no human second review or fresh holdout is
 claimed. No GEPA optimization or prompt promotion occurred in this increment.
+
+The subsequent component-split GEPA experiment and prospective comparison are
+recorded under [current priority 4](#current-priorities). The selection tie is
+explicitly reported; neither experiment establishes a GEPA advantage.
 
 ## 10. Machine-readable cell rationale
 
