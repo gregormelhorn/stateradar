@@ -1,0 +1,49 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "T01",
+      "finding_ids": [],
+      "reason": "`callback-stop-ordering` correctly gives second Stop=false after successful cancellation and an OPEN wording question, but also falsely generalizes expiration-first to Stop=false even after possible rearm; entire finding is false, so no full credit.",
+      "partial": true
+    },
+    {
+      "id": "T02",
+      "finding_ids": [],
+      "reason": "`callback-reset-ordering` correctly describes first Reset=false with overlapping callbacks, but falsely generalizes Reset=false after expiration without excluding an intervening rearm; entire finding is false, so no full credit.",
+      "partial": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "deadline-calculation",
+      "verdict": "valid",
+      "reason": "when function timer.go:24-34 handles nonpositive deadline and clamps overflow; work dispatch is separate."
+    },
+    {
+      "id": "channel-construction",
+      "verdict": "valid",
+      "reason": "NewTimer creates channel and passes to newTimer; public behavior and unknown runtime implementation are accurately qualified."
+    },
+    {
+      "id": "deferred-channel-delivery",
+      "verdict": "valid",
+      "reason": "sendTime uses nonblocking select and subtracts runtime delta; finding conditions actual invocation rather than assuming a receive occurs."
+    },
+    {
+      "id": "callback-stop-ordering",
+      "verdict": "false",
+      "reason": "Unqualified expiration-first implies Stop=false, but a separate Reset after expiry can rearm before Stop; scope_extension_test.go:3-11 independently executes old callback started, Reset false, second Reset true, Stop true. The separate repeated-stop portion and OPEN question are correct."
+    },
+    {
+      "id": "callback-reset-ordering",
+      "verdict": "false",
+      "reason": "Expiration alone does not guarantee Reset=false if an intervening Reset rearmed the timer; scope_extension_test.go:8-11 observes false then true while old callback still runs. The first-reset overlap portion is correct."
+    },
+    {
+      "id": "channel-stop-and-reset",
+      "verdict": "valid",
+      "reason": "Timer initialization guards and Go1.23 channel Stop/Reset prose establish stated cases under indicated running/received and version conditions; rearm nuance kept OPEN."
+    }
+  ]
+}

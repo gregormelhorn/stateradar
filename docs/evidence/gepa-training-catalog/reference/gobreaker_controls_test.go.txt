@@ -1,0 +1,36 @@
+package gobreaker
+
+import "testing"
+
+// Ordinary use preserves accounting on the same underlying breaker.
+func TestTrainingUnchangedWrapper(t *testing.T) {
+	a := NewTwoStepCircuitBreaker(Settings{})
+	done, err := a.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	done(true)
+	if got := a.Counts(); got.Requests != 1 || got.TotalSuccesses != 1 {
+		t.Fatalf("ordinary completion: %+v", got)
+	}
+}
+
+// Rebinding the caller's variable is distinct from assigning through *a.
+func TestTrainingCallerVariableRebinding(t *testing.T) {
+	a := NewTwoStepCircuitBreaker(Settings{})
+	original := a
+	replacement := NewTwoStepCircuitBreaker(Settings{})
+	done, err := a.Allow()
+	if err != nil {
+		t.Fatal(err)
+	}
+	a = replacement
+	done(true)
+	if got := original.Counts(); got.Requests != 1 || got.TotalSuccesses != 1 {
+		t.Fatalf("original: %+v", got)
+	}
+	if got := replacement.Counts(); got.Requests != 0 || got.TotalSuccesses != 0 {
+		t.Fatalf("replacement: %+v", got)
+	}
+	_ = a
+}

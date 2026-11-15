@@ -1,0 +1,50 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "G01",
+      "finding_ids": [
+        "completion-receiver-replacement"
+      ],
+      "reason": "Explicit matching fresh generations, serialized overwrite through captured wrapper, replacement counts and prior admitted receiver; question explicitly OPEN."
+    },
+    {
+      "id": "G02",
+      "finding_ids": [],
+      "reason": "No scenario rebinding only the caller local variable is described. The saved copy in G01 is an observation alias, not the required local-variable rebinding control.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "execute-outcomes",
+      "verdict": "false",
+      "reason": "The panic clause states a recorded failure for any admitted request but afterRequest checks generation first at gobreaker.go:293-301 and can discard a stale report; the re-panic can still occur. No unchanged-generation condition is stated."
+    },
+    {
+      "id": "open-and-half-open-ordering",
+      "verdict": "valid",
+      "reason": "beforeRequest:279-290, afterRequest:293-307 and onSuccess/onFailure:310-330 implement the stated ordered outcomes; lazy currentState:333-346 and setState:350-360 support the OPEN question."
+    },
+    {
+      "id": "repeated-completion",
+      "verdict": "valid",
+      "reason": "Allow callback lacks once guard at 265-273; afterRequest generation check and onSuccess half-open success threshold support duplicate report then stale third report."
+    },
+    {
+      "id": "abandoned-probes",
+      "verdict": "valid",
+      "reason": "Default max=1, beforeRequest cap and half-open expiry zero make the retained unreported slot block further admissions in the specified no-completion order; onFailure opens."
+    },
+    {
+      "id": "closed-interval-completion",
+      "verdict": "valid",
+      "reason": "afterRequest obtains currentState before comparing generation; Counts only returns existing counts; currentState and toNewGeneration implement observed interval reset."
+    },
+    {
+      "id": "completion-receiver-replacement",
+      "verdict": "valid",
+      "reason": "Allow captures wrapper and reads tscb.cb on invocation (265-273); matching generation reaches replacement, and the saved original-wrapper copy keeps the original pointer; independently reproduced B05."
+    }
+  ]
+}

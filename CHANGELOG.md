@@ -4,6 +4,16 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+
+- **Reviewed GEPA training catalog and baseline.** Twelve historical-miss and
+  control cases on five components receive a separate AI source/test review;
+  ten fresh fixed-prompt outputs and all 60 findings are assessed. The strict
+  audit records 7 full, 9 partial and 8 missing case observations, plus 8 false
+  and 4 uncertain findings. These are training cases, not an unseen holdout;
+  no new optimization or independent human review is claimed. Deterministic
+  source, log, prompt, review and cost replay is in CI. See
+  `docs/evidence/gepa-training-catalog/README.md`.
+
 - **Supervised GEPA discovery comparison.** A source-grounded, component-split
   experiment reviews every returned finding and replays attributed scores and
   metered calls. GEPA retained the fixed seed; final arms used identical text,

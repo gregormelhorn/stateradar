@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "factory-paths",
+      "text": "Construction rejects capacities outside 0 <= InitialCap <= MaxIdle <= MaxCap and requires both Factory and Close. With valid settings, it calls Factory InitialCap times and buffers each successful result. If a call fails, Release invokes Close on the results already buffered and construction returns a wrapped factory error. On an open pool with no idle connection and room below MaxCap, Get calls Factory under the mutex. Success increments the tracked count and returns the factory result directly. Failure returns the factory error with the count unchanged.",
+      "citation": {
+        "line": 87,
+        "fragment": "return nil, fmt.Errorf(\"factory is not able to fill the pool: %s\", err)"
+      },
+      "question": ""
+    },
+    {
+      "id": "idle-reuse",
+      "text": "With an open pool, no queued waiter and room in the idle buffer, Put records the supplied connection with a fresh timestamp. Get takes the buffered entry, closes and skips it if a positive IdleTimeout has elapsed, then closes and skips it if a configured Ping returns an error. Otherwise Get returns the same connection. Timeout is checked at checkout, so an expired entry can still contribute to Len until Get removes it. Len measures the idle buffer and excludes checked-out connections.",
+      "citation": {
+        "line": 117,
+        "fragment": "if wrapConn.t.Add(timeout).Before(time.Now()) {"
+      },
+      "question": ""
+    },
+    {
+      "id": "waiter-handoff-and-release-order",
+      "text": "With an empty idle buffer and the tracked count at MaxCap, Get queues a request and blocks. If Put acquires the mutex before Release, it removes the oldest request and sends the same connection with a fresh timestamp into that request's private buffer. The waiter can receive it even after Release. That path checks IdleTimeout and skips Ping. If Release acquires the mutex first, it leaves the request pending, and a later Put returns nil without delivering or closing the connection. The request has no timeout or cancellation path, so it stays blocked and the closed-request ErrMaxActiveConnReached branch is never reached through Release.",
+      "citation": {
+        "line": 138,
+        "fragment": "ret, ok := <-req"
+      },
+      "question": "OPEN: What result should a pending Get receive on Release, and should a connection handed directly to a waiter undergo the same Ping check as buffered reuse?"
+    },
+    {
+      "id": "release-scope-and-in-flight-get",
+      "text": "Release detaches the idle channel and clears the callbacks under the mutex, then closes the detached channel and invokes the saved Close callback for each entry it drains. Callback errors are ignored. A subsequent Release performs no further cleanup, Len returns zero, and a Get started after detachment returns ErrClosed. A connection already checked out falls outside the drain, and a later Put or Close on it returns nil without invoking the callback. A Get that captured the old channel before detachment can still take a buffered connection before the drain claims it and return it successfully when validation is disabled.",
+      "citation": {
+        "line": 240,
+        "fragment": "for wrapConn := range conns {"
+      },
+      "question": "OPEN: Does the Release comment's promise to free all connections refer only to entries drained from the idle channel, and who owns connections still checked out or obtained concurrently with Release?"
+    },
+    {
+      "id": "repeated-put",
+      "text": "With an open pool, no queued waiters, at least two free idle slots and one checked-out connection, calling Put twice with that same connection succeeds both times. Each call creates a separate idle entry containing the same connection. With timeout and Ping disabled, two later Get calls can return that same underlying connection to callers who hold it simultaneously. If the first Put fills the buffer instead, the second Put invokes Close on the connection while the first entry remains buffered.",
+      "citation": {
+        "line": 191,
+        "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+      },
+      "question": "OPEN: Does the caller contract exclude duplicate returns, or should Put detect a connection that has already been returned?"
+    },
+    {
+      "id": "close-accounting-and-deferred-waiter",
+      "text": "On an open pool with a Close callback, every Close call with a non-nil connection decrements the tracked count before invoking the callback and returns its error. A failed callback leaves the count decremented, and repeating Close on the same connection invokes the callback and decrements the count again. If the pool was at MaxCap with a waiting Get, closing a checked-out connection still leaves that waiter blocked. With the idle buffer still empty, a new Get can use the reduced count to call Factory and obtain a connection ahead of the waiter.",
+      "citation": {
+        "line": 212,
+        "fragment": "c.openingConns--"
+      },
+      "question": "OPEN: Should failed or repeated Close calls free capacity, and should an existing waiter have priority when Close frees a slot?"
+    }
+  ]
+}

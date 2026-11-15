@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "construction",
+      "text": "With a non-nil config, construction requires 0 <= InitialCap <= MaxIdle <= MaxCap and non-nil Factory and Close callbacks. It calls Factory InitialCap times and buffers each successful result. If a call fails, it closes the previously buffered results and returns a wrapped factory error. With all three capacities zero and both callbacks supplied, construction succeeds, but the first Get queues and waits without calling Factory.",
+      "citation": {
+        "line": 60,
+        "fragment": "poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0"
+      },
+      "question": "OPEN: What behavior is intended for Get when the accepted MaxCap is zero?"
+    },
+    {
+      "id": "checkout-validation",
+      "text": "For an open pool, Get first tries the idle buffer. It closes an expired entry before any ping and retries. With Ping configured, a ping error also closes the entry and causes a retry. A valid entry is returned as the original connection. If the buffer is empty and there is capacity, Get calls Factory, propagates its error without incrementing the count, or increments the count and returns the new connection on success. If Get instead queues at capacity, the next Put hands the oldest waiter the original connection with a fresh timestamp. The waiter checks that timestamp for expiry and otherwise returns the connection without calling Ping.",
+      "citation": {
+        "line": 149,
+        "fragment": "return ret.idleConn.conn, nil"
+      },
+      "question": "OPEN: Should the configured validity check also run on a connection handed directly to a waiting Get?"
+    },
+    {
+      "id": "repeated-operations",
+      "text": "While the pool is open, Put and Close reject a nil interface. With no waiters and at least two free idle slots, putting the same checked-out connection twice succeeds twice, raises Len by two, and lets two subsequent Gets return the same underlying object if both entries pass validation. A Put that encounters a full idle buffer calls Close and returns its error. Calling Close twice on the same non-nil connection while the close callback remains installed invokes the callback twice and decrements the open count twice, even if the callback returns an error.",
+      "citation": {
+        "line": 191,
+        "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+      },
+      "question": "OPEN: Are callers required to track ownership and ensure that each checkout is put back or closed only once?"
+    },
+    {
+      "id": "capacity-wait-ordering",
+      "text": "With the idle buffer empty and the open count at MaxCap, Get observes an empty buffer before acquiring the mutex to queue. If Get queues first, a subsequent Put hands it the connection. If Put buffers a connection after that empty observation but before Get acquires the mutex, Get can queue and stay blocked while Len reports an available connection. Separately, if a waiter is already queued and Close lowers the count below MaxCap, Close does not wake the waiter. With the idle buffer still empty, a later Get can create a connection while the older waiter remains queued.",
+      "citation": {
+        "line": 138,
+        "fragment": "ret, ok := <-req"
+      },
+      "question": "OPEN: Should a waiting Get be able to claim a connection that becomes idle before it queues, or use capacity freed by Close?"
+    },
+    {
+      "id": "release-wait-ordering",
+      "text": "With a Get already queued at capacity, if Put acquires the mutex first, it removes the waiter and sends the connection. Release can then finish before the waiter resumes, and the waiter can still return that connection if its handoff timestamp passes the timeout check. If Release acquires the mutex first, it leaves the request channel open and the later Put does not send to it, so the waiter stays blocked. The branch returning ErrMaxActiveConnReached requires the request channel to be closed, and no shown path closes it. A Get started after Release returns ErrClosed.",
+      "citation": {
+        "line": 140,
+        "fragment": "return nil, ErrMaxActiveConnReached"
+      },
+      "question": "OPEN: What result should a queued Get receive when Release wins, and should a handoff completed before Release remain valid afterward?"
+    },
+    {
+      "id": "release-ownership",
+      "text": "With a connection checked out and no waiters, if Put buffers it before Release detaches the idle channel, Release invokes the saved close callback on it during the drain. If Release detaches first, a subsequent Put calls Close after the callback has been cleared, returns nil, and leaves the checked-out connection untouched. Direct Close after detachment also returns nil for a non-nil connection. Len reports zero once the channel is detached, and a second Release can return while the first is still draining. The documented release of all connections is implemented as a drain of the idle channel.",
+      "citation": {
+        "line": 224,
+        "fragment": "// Release 释放连接池中所有连接"
+      },
+      "question": "OPEN: Does the Release comment include checked-out connections and connections returned after detachment, or only entries buffered when Release begins?"
+    }
+  ]
+}

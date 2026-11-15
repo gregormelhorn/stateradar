@@ -1,0 +1,23 @@
+.F......F....
+======================================================================
+FAIL: test_forbidden_tool_event_rejected (__main__.EvidenceTest.test_forbidden_tool_event_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 50, in test_forbidden_tool_event_rejected
+    with self.assertRaises(EvalError):verify_prompt_and_events('safe','safe',[{'item':{'type':'command_execution'}}])
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_prompt_leak_rejected (__main__.EvidenceTest.test_prompt_leak_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 48, in test_prompt_leak_rejected
+    with self.assertRaises(EvalError):verify_prompt_and_events('safe','safe\nSECRET',[])
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.018s
+
+FAILED (failures=2)

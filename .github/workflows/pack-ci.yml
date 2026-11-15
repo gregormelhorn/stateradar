@@ -118,6 +118,9 @@ jobs:
           python tools/selftest/test_gepa_rates.py
           python tools/selftest/test_gepa_discovery.py
           python tools/selftest/test_gepa_discovery_archive.py
+          python tools/selftest/test_gepa_training_catalog.py
+          python tools/selftest/test_gepa_training_evidence.py
+          python tools/selftest/test_gepa_training_archive.py
       - name: independent reference replay and archived three-arm audit
         run: |
           python tools/verify_gepa_reference.py
@@ -125,6 +128,7 @@ jobs:
           python tools/gepa_report.py docs/evidence/gepa-bounded/runs
           python tools/gepa_cost_sensitivity.py docs/evidence/gepa-bounded/runs
           python tools/verify_gepa_discovery.py
+          python tools/verify_gepa_training.py
       - name: GEPA discovery reference controls
         working-directory: docs/evidence/gepa-discovery/reference
         run: |

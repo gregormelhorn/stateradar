@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "notify-before-registration",
+      "text": "With no waiters registered on a Cond, call Signal or Broadcast any number of times, then acquire c.L and call Wait. The earlier calls wake nobody and leave no notification for the new Wait. It registers, unlocks c.L, and needs a later notification to return. The documented synchronizes-before guarantee applies only to Wait calls the notification unblocks.",
+      "citation": {
+        "line": 75,
+        "fragment": "Signal wakes one goroutine waiting on c, if there is any."
+      },
+      "question": ""
+    },
+    {
+      "id": "notify-before-suspension",
+      "text": "Start with c.L held and no other waiter. Wait registers its ticket before it calls c.L.Unlock. If Signal runs after registration but before Wait enters runtime_notifyListWait, the ticket is already notified, so Wait needs no second Signal. It still finishes unlocking and reacquires c.L before returning. A notifier may call Signal without holding c.L.",
+      "citation": {
+        "line": 69,
+        "fragment": "t := runtime_notifyListAdd(&c.notify)"
+      },
+      "question": ""
+    },
+    {
+      "id": "signal-and-reacquire",
+      "text": "With two goroutines suspended in Wait, acquire c.L, make the condition true, and call Signal. One waiter is notified. That waiter cannot return while the notifier holds c.L, and another goroutine competing for the lock may acquire it first and make the condition false. When the notified waiter acquires c.L and returns, it must recheck the condition and call Wait again if it is still false.",
+      "citation": {
+        "line": 81,
+        "fragment": "they may be awoken before a \"waiting\" goroutine."
+      },
+      "question": ""
+    },
+    {
+      "id": "broadcast-reuse",
+      "text": "With multiple waiters registered, hold c.L and call Broadcast. Every registered waiter is notified, and each must reacquire c.L before returning. A goroutine that calls Wait after that Broadcast registers for a future notification. A second Broadcast can wake that goroutine on the same Cond.",
+      "citation": {
+        "line": 27,
+        "fragment": "Broadcast corresponds to closing a channel"
+      },
+      "question": "OPEN: Is the channel-closing analogy meant only to describe waking the current waiters? A closed channel also releases later receivers, while a completed Broadcast leaves later waiters waiting for another notification."
+    },
+    {
+      "id": "copy-before-or-after-use",
+      "text": "Create a Cond with NewCond(l). If you copy its value before any Wait, Signal, or Broadcast, each value initializes its own checker on first use and has its own notification list, while both retain l. If you first call Signal on the original, even with no waiters, then copy the value to a different address, the copy retains the original checker's address. Wait, Signal, or Broadcast on the copy panics before the operation touches the notification list. The original still passes its checker.",
+      "citation": {
+        "line": 109,
+        "fragment": "panic(\"sync.Cond is copied\")"
+      },
+      "question": ""
+    },
+    {
+      "id": "cancellation-while-waiting",
+      "text": "With a goroutine suspended in Wait, cancel an external context or let its deadline expire without calling Signal or Broadcast. Wait remains suspended because it takes no cancellation input. If a later Broadcast wakes it, Wait still has to reacquire c.L before the caller can observe cancellation and exit its loop.",
+      "citation": {
+        "line": 55,
+        "fragment": "Wait cannot return unless awoken by [Cond.Broadcast] or [Cond.Signal]."
+      },
+      "question": ""
+    }
+  ]
+}

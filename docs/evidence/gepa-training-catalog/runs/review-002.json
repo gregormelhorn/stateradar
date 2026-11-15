@@ -1,0 +1,62 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "W01",
+      "finding_ids": [],
+      "reason": "No panic(nil), GODEBUG=panicnil=1, or nil-recover/Done path.",
+      "partial": false
+    },
+    {
+      "id": "W02",
+      "finding_ids": [
+        "escaping-task-panic"
+      ],
+      "reason": "Explicit non-nil recover, re-panic before Done and contract exclusion."
+    },
+    {
+      "id": "W03",
+      "finding_ids": [],
+      "reason": "No synctest bubble association, retained flag or outside Wait behavior.",
+      "partial": false
+    },
+    {
+      "id": "W04",
+      "finding_ids": [],
+      "reason": "No inner bubble Wait disassociation or later outside Wait.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "go-wait-order",
+      "verdict": "false",
+      "reason": "Wait observing v>0 is not sufficient to register: if final Done changes state to zero before CompareAndSwap, that CAS fails and Wait loops and returns via zero fast-path (waitgroup.go:164-168,184-187)."
+    },
+    {
+      "id": "negative-counter",
+      "verdict": "valid",
+      "reason": "Done delegates Add(-1), atomic change precedes negative panic, and a subsequent no-intervention Wait attempts to register and acquire semaphore."
+    },
+    {
+      "id": "goexit-completion",
+      "verdict": "valid",
+      "reason": "Go wrapper defers recover and Done after f; source 236-258 and Goexit semantics support the qualified non-panicking deferred-function case."
+    },
+    {
+      "id": "escaping-task-panic",
+      "verdict": "valid",
+      "reason": "The explicit non-nil recovered-value qualification matches waitgroup.go:239-251; domain contract forbids panic."
+    },
+    {
+      "id": "reuse-detection-window",
+      "verdict": "valid",
+      "reason": "Add clears state and releases waiters at 123-142; Wait checks state after semaphore acquire at 205-215. Both state observations can occur under stated schedules."
+    },
+    {
+      "id": "delta-width",
+      "verdict": "valid",
+      "reason": "For 64-bit int, uint64(1<<32)<<32 is zero in Go 64-bit arithmetic; Add sees v=0,w=0 and returns, Wait zero path returns. Source comments do not state supported delta width."
+    }
+  ]
+}

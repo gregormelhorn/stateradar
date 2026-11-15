@@ -1,0 +1,415 @@
+{
+  "purpose": "Training/regression set only; never a fresh GEPA holdout",
+  "review_limits": "Observed behavior and requirements remain separate; all intent gaps stay open.",
+  "components": {
+    "gobreaker": {
+      "source": "docs/evidence/gepa-discovery/upstream/gobreaker.go",
+      "cases": [
+        {
+          "id": "G01",
+          "kind": "historical_miss",
+          "question_required": true,
+          "situation": "Two distinct wrappers with matching initial generation: obtain done from a.Allow(), assign *a = *b, invoke done(true).",
+          "expected": "Admission was charged to original breaker; callback resolves tscb.cb again and charges success to replacement, observed b.Requests=0 and b.TotalSuccesses=1. Whether wrapper copying/reassignment is supported remains OPEN.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/gobreaker.go",
+              "line": 272,
+              "fragment": "tscb.cb.afterRequest(generation, success)",
+              "sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc"
+            },
+            {
+              "file": "docs/evidence/identity-benchmark/fixtures/additional_test.go.txt",
+              "line": 13,
+              "fragment": "*a = *b",
+              "sha256": "88954c9329d7c88f3a332b239eb4fdc8943b82c4795cbd8cf47fb23a23354abd"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-b05-final.jsonl",
+              "line": 5,
+              "fragment": "{\"Time\":\"2026-11-15T08:51:34.99842+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestBenchmarkWrapperReassignment\",\"Elapsed\":0}",
+              "sha256": "b5e5939beeb63f41215b4a34b8159a861bd2de7a07d2ceeb8b9a35e370ed0c45"
+            }
+          ],
+          "historical": "Prior selection run 000 used the fixed seed; runs 004 and 008 used two distinct GEPA proposal paragraphs. All three missed G3; see their attributed reviews."
+        },
+        {
+          "id": "G02",
+          "kind": "negative_control",
+          "question_required": false,
+          "situation": "Obtain done from a.Allow(), then rebind the caller variable a to b without assigning through *a; invoke done(true).",
+          "expected": "The original wrapper/underlying breaker receives admission and success; b receives neither. Caller-variable rebinding alone does not redirect the callback.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/gobreaker.go",
+              "line": 271,
+              "fragment": "return func(success bool) {",
+              "sha256": "09a38e4ec94ee22405cea8a64bce908bfa764a5e8bc65a69016e1cf86bf3b1cc"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/reference/gobreaker_controls_test.go.txt",
+              "line": 19,
+              "fragment": "func TestTrainingCallerVariableRebinding",
+              "sha256": "dc73e8a76e50faa6a0c164d3f9f16b7b242f2fbff8fc3c76dff4d7387adb40df"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gobreaker-rebinding.go.txt",
+              "line": 5,
+              "fragment": "func TestIndependentCallerRebinding",
+              "sha256": "aaf8ad76492caed9bcf02c860afe9088e728086329a6211ff789e340fb25493f"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-rebinding.jsonl",
+              "line": 5,
+              "fragment": "{\"Time\":\"2026-11-15T08:53:19.5037+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/sony/gobreaker\",\"Test\":\"TestIndependentCallerRebinding\",\"Elapsed\":0}",
+              "sha256": "3576b91606cf7224734986ca3a0b2ef2899f539cd28f926338b4e4ecd09b80f5"
+            }
+          ],
+          "historical": "New explicit negative control for a distinction only partially covered by prior identity tests; no historical miss claimed."
+        }
+      ]
+    },
+    "cond": {
+      "source": "docs/evidence/gepa-discovery/upstream/cond.go",
+      "cases": [
+        {
+          "id": "C01",
+          "kind": "historical_miss",
+          "question_required": false,
+          "situation": "A caller changes the condition, calls Wait, or issues Signal/Broadcast.",
+          "expected": "The associated lock must be held while changing the condition and while calling Wait; holding it for Signal/Broadcast is allowed but not required. Distinguish these obligations.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/cond.go",
+              "line": 17,
+              "fragment": "which must be held when changing the condition and",
+              "sha256": "1159ffd7688160d8ff85b63a280eccd7ca52defde347cb443b0a3d1d1eb0519a"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/cond.go",
+              "line": 78,
+              "fragment": "// during the call.",
+              "sha256": "1159ffd7688160d8ff85b63a280eccd7ca52defde347cb443b0a3d1d1eb0519a"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-controls-final.jsonl",
+              "line": 9,
+              "fragment": "{\"Time\":\"2026-11-15T08:55:34.753966+01:00\",\"Action\":\"pass\",\"Package\":\"independent-review-controls\",\"Test\":\"TestSignalWithoutHoldingLock\",\"Elapsed\":0}",
+              "sha256": "1d89063fa4c9b889312f319d5eb6f5a797a56699d5e8c680281a0ce10b5ad16e"
+            }
+          ],
+          "historical": "reviews 009 and 010 mark the explicit condition-mutation obligation missing; descriptions mention notification lock as optional."
+        },
+        {
+          "id": "C02",
+          "kind": "negative_control",
+          "question_required": false,
+          "situation": "Signal completes with no registered waiters; a waiter registers later.",
+          "expected": "The earlier Signal is not a stored permit for that future waiter; it needs a subsequent notification. A later Signal can release it.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/cond.go",
+              "line": 75,
+              "fragment": "Signal wakes one goroutine waiting on c, if there is any.",
+              "sha256": "1159ffd7688160d8ff85b63a280eccd7ca52defde347cb443b0a3d1d1eb0519a"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/runtime-reference/sema.go",
+              "line": 584,
+              "fragment": "If one has been sent since",
+              "sha256": "451de314f2db754e318c0ab7857ec3b808d604845e6306eed064a57b8b2cd52b"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/reference/reference_test.go",
+              "line": 13,
+              "fragment": "func TestCondSignalBeforeWait",
+              "sha256": "20ec46f5ea8a77782d8cde65fbd77fba924f4ea44b2014e3dda9fd42aae47ea5"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-controls-final.jsonl",
+              "line": 9,
+              "fragment": "{\"Time\":\"2026-11-15T08:55:34.753966+01:00\",\"Action\":\"pass\",\"Package\":\"independent-review-controls\",\"Test\":\"TestSignalWithoutHoldingLock\",\"Elapsed\":0}",
+              "sha256": "1d89063fa4c9b889312f319d5eb6f5a797a56699d5e8c680281a0ce10b5ad16e"
+            }
+          ],
+          "historical": "Previously found in both final Cond reports; public-seam timed test is bounded and source/runtime semantics provide the stronger evidence."
+        }
+      ]
+    },
+    "waitgroup": {
+      "source": "docs/evidence/gepa-discovery/upstream/waitgroup.go",
+      "cases": [
+        {
+          "id": "W01",
+          "kind": "historical_false_claim",
+          "question_required": false,
+          "situation": "A Go task calls panic(nil) with GODEBUG=panicnil=1; the panic escapes f and recover is invoked in Go wrapper.",
+          "expected": "Recover returns nil in this legacy mode and the wrapper continues to Done instead of re-panicking. Panicking f is outside the documented Go API contract.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/waitgroup.go",
+              "line": 240,
+              "fragment": "if x := recover(); x != nil {",
+              "sha256": "274e43a7cbc76eb0da4635a2680785200dfaf94d85e2d55cdd5122c76a4791d9"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/runtime-reference/panic.go",
+              "line": 783,
+              "fragment": "Programs can change back to the old behavior by setting GODEBUG=panicnil=1.",
+              "sha256": "55bf157a0922d2474c4c04526eed90eec4c5a48ad92d649d0c97887760b53e11"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/reference/reference_test.go",
+              "line": 56,
+              "fragment": "func TestWaitGroupGoPanicNilLegacy",
+              "sha256": "20ec46f5ea8a77782d8cde65fbd77fba924f4ea44b2014e3dda9fd42aae47ea5"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-panicnil.jsonl",
+              "line": 5,
+              "fragment": "{\"Time\":\"2026-11-15T08:51:54.286869+01:00\",\"Action\":\"pass\",\"Package\":\"gepa-discovery-reference\",\"Test\":\"TestWaitGroupGoPanicNilLegacy\",\"Elapsed\":0}",
+              "sha256": "c4dc5d76235c99586f4f0f28cdbab0a75757f6f2629f388e5a651cf0abd4ead7"
+            }
+          ],
+          "historical": "Output 011, produced by the selected fixed prompt, falsely generalized re-panic to all escaped panic values; review-011 marks it false."
+        },
+        {
+          "id": "W02",
+          "kind": "negative_control",
+          "question_required": false,
+          "situation": "A Go task panic reaches its wrapper and recover returns a non-nil value.",
+          "expected": "Wrapper re-panics before calling Done. Do not extrapolate this non-nil case to legacy panic(nil). Go explicitly requires f not to panic.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/waitgroup.go",
+              "line": 223,
+              "fragment": "The function f must not panic.",
+              "sha256": "274e43a7cbc76eb0da4635a2680785200dfaf94d85e2d55cdd5122c76a4791d9"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/waitgroup.go",
+              "line": 251,
+              "fragment": "panic(x)",
+              "sha256": "274e43a7cbc76eb0da4635a2680785200dfaf94d85e2d55cdd5122c76a4791d9"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-controls-final.jsonl",
+              "line": 13,
+              "fragment": "{\"Time\":\"2026-11-15T08:55:34.754011+01:00\",\"Action\":\"pass\",\"Package\":\"independent-review-controls\",\"Test\":\"TestDefaultPanicNilRecoverIsNonNil\",\"Elapsed\":0}",
+              "sha256": "1d89063fa4c9b889312f319d5eb6f5a797a56699d5e8c680281a0ce10b5ad16e"
+            }
+          ],
+          "historical": "Output 012 correctly conditions the claim on a non-nil recovered value."
+        },
+        {
+          "id": "W03",
+          "kind": "historical_false_claim",
+          "question_required": true,
+          "situation": "A heap-allocated WaitGroup is used for Add(1), Done inside a completed synctest bubble without any waiter; Wait runs outside the bubble.",
+          "expected": "On pinned Go 1.27.3 the Wait follows the retained bubble flag and panics with a nil-pointer runtime error; whether the outside-bubble use is supported remains OPEN.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/waitgroup.go",
+              "line": 174,
+              "fragment": "w == 0 && state&waitGroupBubbleFlag != 0 && synctest.IsAssociated(wg)",
+              "sha256": "274e43a7cbc76eb0da4635a2680785200dfaf94d85e2d55cdd5122c76a4791d9"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/runtime-reference/synctest-runtime.go",
+              "line": 451,
+              "fragment": "getOrSetBubbleSpecial(p, getg().bubble.id, false)",
+              "sha256": "3277f8cc4ba6cba7cb997c6ee7e9e2f431e4ae9751b8e4d2b5b054363f7ca1d9"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/reference/reference_test.go",
+              "line": 65,
+              "fragment": "func TestWaitGroupSynctestOutsideWait",
+              "sha256": "20ec46f5ea8a77782d8cde65fbd77fba924f4ea44b2014e3dda9fd42aae47ea5"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-synctest.jsonl",
+              "line": 6,
+              "fragment": "{\"Time\":\"2026-11-15T08:51:54.4611+01:00\",\"Action\":\"pass\",\"Package\":\"gepa-discovery-reference\",\"Test\":\"TestWaitGroupSynctestOutsideWait\",\"Elapsed\":0}",
+              "sha256": "9dba3692d57df998276769d7da6c59852afa11ea337be9f8f9a783e9b2c6cf63"
+            }
+          ],
+          "historical": "Output 012 incorrectly says an outside Wait can return in this state; review-012 marks it false."
+        },
+        {
+          "id": "W04",
+          "kind": "negative_control",
+          "question_required": false,
+          "situation": "The owning bubble performs zero-counter Wait before the later outside Wait.",
+          "expected": "Wait in the owning bubble can disassociate the group; distinguish that sequence from outside Wait while the association remains.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/waitgroup.go",
+              "line": 177,
+              "fragment": "if wg.state.CompareAndSwap(state, 0)",
+              "sha256": "274e43a7cbc76eb0da4635a2680785200dfaf94d85e2d55cdd5122c76a4791d9"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/runtime-reference/synctest-contract.go",
+              "line": 47,
+              "fragment": "func Disassociate[T any]",
+              "sha256": "3291fd3debb2430be3017c9a3cd783ad4d1a2791d8b4133b473a11a29e250449"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/controls/control_test.go",
+              "line": 9,
+              "fragment": "func TestInsideWaitClearsBeforeOutside",
+              "sha256": "def0f264dddfcd844b30a4412cc74852ff94d4487b077ae4f199af956db7f11e"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-controls-final.jsonl",
+              "line": 5,
+              "fragment": "{\"Time\":\"2026-11-15T08:55:34.753925+01:00\",\"Action\":\"pass\",\"Package\":\"independent-review-controls\",\"Test\":\"TestInsideWaitClearsBeforeOutside\",\"Elapsed\":0}",
+              "sha256": "1d89063fa4c9b889312f319d5eb6f5a797a56699d5e8c680281a0ce10b5ad16e"
+            }
+          ],
+          "historical": "Independent reviewer has executed this control; see attributed review and retained test output."
+        }
+      ]
+    },
+    "timer": {
+      "source": "docs/evidence/gepa-discovery/upstream/timer.go",
+      "cases": [
+        {
+          "id": "T01",
+          "kind": "positive_control",
+          "question_required": true,
+          "situation": "AfterFunc timer is stopped successfully before its callback; call Stop a second time without Reset.",
+          "expected": "Second Stop returns false although the callback never started; generic and func-specific prose appear inconsistent, and normative wording remains OPEN.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/timer.go",
+              "line": 67,
+              "fragment": "It returns true if the call stops the timer, false if the timer has already",
+              "sha256": "58489f2ea41f5032921eaa448c215d7ffffcb9fb0b43c1aad891c20bed342dc5"
+            },
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/timer.go",
+              "line": 71,
+              "fragment": "if t.Stop returns false, then the timer has already expired",
+              "sha256": "58489f2ea41f5032921eaa448c215d7ffffcb9fb0b43c1aad891c20bed342dc5"
+            },
+            {
+              "file": "docs/evidence/gepa-bounded/reference/scope_extension_test.go",
+              "line": 14,
+              "fragment": "func TestRepeatedStopFalseBeforeCallback",
+              "sha256": "87d46b87aa12452820d2967ee4e78d2fbb691c915f55a247771096457f109159"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-timer-overlap.jsonl",
+              "line": 15,
+              "fragment": "{\"Time\":\"2026-11-15T08:55:05.907304+01:00\",\"Action\":\"pass\",\"Package\":\"reference.local\",\"Test\":\"TestReference/timer\",\"Elapsed\":0}",
+              "sha256": "d67a960a4714c92a51ca6e95ff7b3b24fb129bb4408e8c39ad65f7ae8345d3b8"
+            }
+          ],
+          "historical": "Already found with explicit OPEN in prior outputs 001, 003, 005 and 007; not a baseline miss."
+        },
+        {
+          "id": "T02",
+          "kind": "positive_control",
+          "question_required": false,
+          "situation": "AfterFunc callback has started and is blocked; Reset schedules the timer again while the original callback remains active.",
+          "expected": "Reset of the expired timer returns false, does not wait for the old callback, and a later callback can overlap it.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-discovery/upstream/timer.go",
+              "line": 124,
+              "fragment": "When Reset returns false, Reset neither waits for the prior f to",
+              "sha256": "58489f2ea41f5032921eaa448c215d7ffffcb9fb0b43c1aad891c20bed342dc5"
+            },
+            {
+              "file": "docs/evidence/gepa-bounded/reference/reference_test.go",
+              "line": 60,
+              "fragment": "if n.Load()!=2{t.Fatal(\"second execution not scheduled\")}",
+              "sha256": "18a83561edbbf373a0905964226d38e27a37e24f3048ef3761141af2cc32fb12"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-timer-overlap.jsonl",
+              "line": 15,
+              "fragment": "{\"Time\":\"2026-11-15T08:55:05.907304+01:00\",\"Action\":\"pass\",\"Package\":\"reference.local\",\"Test\":\"TestReference/timer\",\"Elapsed\":0}",
+              "sha256": "d67a960a4714c92a51ca6e95ff7b3b24fb129bb4408e8c39ad65f7ae8345d3b8"
+            }
+          ],
+          "historical": "Already found in timer outputs 001, 003, 005 and 007; original two-running-callback reference has been executed."
+        }
+      ]
+    },
+    "pool": {
+      "source": "docs/evidence/gepa-training-catalog/pool-source/pool-input.txt",
+      "cases": [
+        {
+          "id": "P01",
+          "kind": "historical_miss",
+          "question_required": true,
+          "situation": "In an open pool at capacity with valid non-nil connections, expiry disabled and no concurrent Release or additional consumer apart from the later Get described below: first Get misses the idle channel and pauses before the capacity lock; Put returns one held connection to idle inventory; first Get then queues.",
+          "expected": "The first Get waits while one connection is idle; a later Get takes that connection, and a later Put of a second held valid connection wakes the first. Whether this ordering is acceptable remains OPEN.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-training-catalog/pool-source/channel.go",
+              "line": 135,
+              "fragment": "c.connReqs = append(c.connReqs, req)",
+              "sha256": "fd57c54c8d03d2208f611cf12f49a91571923c27127b87e164b1205fd65949ec"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/pool-source/channel.go",
+              "line": 190,
+              "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:",
+              "sha256": "fd57c54c8d03d2208f611cf12f49a91571923c27127b87e164b1205fd65949ec"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/pool-p04a_test.go.txt",
+              "line": 82,
+              "fragment": "first Get did not block with an idle connection",
+              "sha256": "327c75bde42d71817a090f4f6c357e0c511d88f83a2fd2004ff003f6d28f8486"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-pool-p04a.jsonl",
+              "line": 5,
+              "fragment": "{\"Time\":\"2026-11-15T08:54:22.339662+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/silenceper/pool\",\"Test\":\"TestP04aGetWaitsWhileReturnedConnectionIsIdle\",\"Elapsed\":0}",
+              "sha256": "1fcbd6af9201d45cd9744de77722a501c5eec12f8ba30e9911b3e26894153bb9"
+            }
+          ],
+          "historical": "Flash v1.26 missed this exact schedule; pool-flash-controller/README.md quality table and P-04a paragraph distinguish it from a same-named unrelated trace."
+        },
+        {
+          "id": "P02",
+          "kind": "negative_control",
+          "question_required": false,
+          "situation": "In an open pool with expiry disabled, the first or only Get is already queued at capacity; another valid non-nil connection is then returned via Put, with no concurrent Release.",
+          "expected": "Put removes the first queued request and hands the returned connection directly to it; with no expiry or other interfering operation the waiter returns that connection rather than leaving it idle.",
+          "evidence": [
+            {
+              "file": "docs/evidence/gepa-training-catalog/pool-source/channel.go",
+              "line": 180,
+              "fragment": "req := c.connReqs[0]",
+              "sha256": "fd57c54c8d03d2208f611cf12f49a91571923c27127b87e164b1205fd65949ec"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/pool-source/channel.go",
+              "line": 183,
+              "fragment": "req <- connReq{",
+              "sha256": "fd57c54c8d03d2208f611cf12f49a91571923c27127b87e164b1205fd65949ec"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/pool-p04a_test.go.txt",
+              "line": 101,
+              "fragment": "second Put did not wake the first Get",
+              "sha256": "327c75bde42d71817a090f4f6c357e0c511d88f83a2fd2004ff003f6d28f8486"
+            },
+            {
+              "file": "docs/evidence/gepa-training-catalog/independent-review/gepa-independent-pool-p04a.jsonl",
+              "line": 5,
+              "fragment": "{\"Time\":\"2026-11-15T08:54:22.339662+01:00\",\"Action\":\"pass\",\"Package\":\"github.com/silenceper/pool\",\"Test\":\"TestP04aGetWaitsWhileReturnedConnectionIsIdle\",\"Elapsed\":0}",
+              "sha256": "1fcbd6af9201d45cd9744de77722a501c5eec12f8ba30e9911b3e26894153bb9"
+            }
+          ],
+          "historical": "The final Put in the independently executed P-04a probe is a control for a waiter that has already enrolled."
+        }
+      ]
+    }
+  }
+}

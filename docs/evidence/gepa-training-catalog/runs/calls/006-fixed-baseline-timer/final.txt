@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "afterfunc-stop",
+      "text": "AfterFunc returns a timer whose C field is nil. If Stop wins before expiration, it returns true and cancels that scheduled call. If expiration wins, the timer launches f in its own goroutine and Stop returns false without waiting for f to finish. If the first Stop succeeds and the caller invokes Stop again without a Reset, the general Stop contract says the second call returns false even though f was never launched.",
+      "citation": {
+        "line": 71,
+        "fragment": "if t.Stop returns false, then the timer has already expired"
+      },
+      "question": "OPEN: Should the claim that f has already started apply only when expiration caused the false return?"
+    },
+    {
+      "id": "afterfunc-reset",
+      "text": "On an active AfterFunc timer, Reset reschedules the pending invocation on the same timer and returns true. If Stop already canceled the pending invocation, Reset returns false and schedules f again on that timer. If expiration already launched the prior invocation, Reset also returns false and schedules f again. Reset can return while the prior invocation is still running, and the two invocations can overlap.",
+      "citation": {
+        "line": 124,
+        "fragment": "When Reset returns false, Reset neither waits for the prior f to"
+      },
+      "question": ""
+    },
+    {
+      "id": "channel-stop-reset",
+      "text": "Under the documented Go 1.23 semantics, if a NewTimer is running and its value has yet to be received, Stop and Reset each return true when applied independently to that state. After Stop returns, a later receive blocks while the timer stays stopped. After Reset returns, a later receive on the same C cannot get a value from the old schedule. If the one-shot value is received first, Stop returns false and leaves the timer expired, while Reset returns false and rearms it. The pre-1.23 drain note tells callers to receive after a false Stop, which also occurs when the timer was already stopped or its only value was already consumed.",
+      "citation": {
+        "line": 83,
+        "fragment": "<-t.C if Stop returned false to drain a potential stale value."
+      },
+      "question": "OPEN: Which preconditions should the legacy drain advice state so that a caller does not block when there is no value left to drain?"
+    },
+    {
+      "id": "channel-construction",
+      "text": "NewTimer allocates a channel with capacity one, passes that channel and its pointer representation to the runtime constructor, and exposes the same channel as C. After returns that C directly. The public Go 1.23 contract describes an observable capacity of zero and synchronous behavior. The runtime constructor and channel machinery needed to verify that behavior are outside the excerpt.",
+      "citation": {
+        "line": 111,
+        "fragment": "make(chan Time, 1)"
+      },
+      "question": "OPEN: How does the runtime registration make the capacity-one allocation behave as the documented capacity-zero channel?"
+    },
+    {
+      "id": "deferred-send",
+      "text": "If the runtime defers sendTime until a goroutine attempts to receive, it supplies delta as the delay since the send was due. When sendTime runs, it computes Now minus delta and attempts a nonblocking send. If the send can proceed, the value reflects the earlier scheduled send time. If it cannot proceed, sendTime returns without delivering a value in that call.",
+      "citation": {
+        "line": 154,
+        "fragment": "Now().Add(Duration(-delta))"
+      },
+      "question": ""
+    },
+    {
+      "id": "deadline-calculation",
+      "text": "When NewTimer, AfterFunc, or a valid Timer.Reset computes a deadline, a zero or negative duration yields the current runtime clock reading. A positive duration is added to that reading, and a sum that wraps below zero is replaced with MaxInt64 before the deadline is passed to the runtime.",
+      "citation": {
+        "line": 32,
+        "fragment": "t = 1<<63 - 1"
+      },
+      "question": ""
+    }
+  ]
+}

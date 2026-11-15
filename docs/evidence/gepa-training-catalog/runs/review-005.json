@@ -1,0 +1,50 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "P01",
+      "finding_ids": [],
+      "partial": false,
+      "reason": "No idle receive miss -> intervening buffered Put -> first Get queues while idle -> later Get consumes idle -> later Put wakes original trace; `close-accounting-and-deferred-waiter` overtaking via Close is a different ordering."
+    },
+    {
+      "id": "P02",
+      "finding_ids": [
+        "waiter-handoff-and-release-order"
+      ],
+      "reason": "Get queues at capacity, subsequent Put pops oldest and sends same connection; with no Release or expiry the condition covers P02."
+    }
+  ],
+  "findings": [
+    {
+      "id": "factory-paths",
+      "verdict": "uncertain",
+      "reason": "Factory/Release and below-capacity paths match channel.go:82-88,150-161; \"wrapped factory error\" ambiguous because fmt.Errorf uses %s, not %w, so error unwrapping is not retained."
+    },
+    {
+      "id": "idle-reuse",
+      "verdict": "uncertain",
+      "reason": "Get invokes Close and skips expired or ping-failed entries (channel.go:115-126), but Close callback can return error and no callee guarantee establishes that the connection was successfully physically closed."
+    },
+    {
+      "id": "waiter-handoff-and-release-order",
+      "verdict": "valid",
+      "reason": "Queued request and FIFO Put send are explicit under lock; Release detaches without closing req channels, late Put cannot deliver; handed value expiry checked and Ping skipped."
+    },
+    {
+      "id": "release-scope-and-in-flight-get",
+      "verdict": "valid",
+      "reason": "Release detaches conns and callbacks then drains saved channel, ignores callback errors; in-flight old channel read may race drain, as described with validation disabled."
+    },
+    {
+      "id": "repeated-put",
+      "verdict": "valid",
+      "reason": "Put does not track ownership; each call queues same object twice, and second overflow invokes Close leaving first buffered."
+    },
+    {
+      "id": "close-accounting-and-deferred-waiter",
+      "verdict": "valid",
+      "reason": "Close decrements before callback regardless of error and does not touch waiters; subsequent Get may create at reduced count."
+    }
+  ]
+}

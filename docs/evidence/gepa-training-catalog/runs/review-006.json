@@ -1,0 +1,49 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "T01",
+      "finding_ids": [],
+      "partial": true,
+      "reason": "`afterfunc-stop` has second Stop=false and an OPEN scope question, but wrongly asserts any expiry-first Stop returns false despite possible intervening Reset."
+    },
+    {
+      "id": "T02",
+      "finding_ids": [],
+      "partial": true,
+      "reason": "`afterfunc-reset` correctly describes first post-expiry reset and overlapping callbacks, but falsely generalizes reset=false after expiry without excluding an intervening reset."
+    }
+  ],
+  "findings": [
+    {
+      "id": "afterfunc-stop",
+      "verdict": "false",
+      "reason": "Expiration-first does not guarantee later Stop=false if an intervening Reset rearms; scope_extension_test.go:8-11 confirms expired callback, Reset(false), second Reset(true), Stop(true). Repeated-stop portion and OPEN wording question are correct."
+    },
+    {
+      "id": "afterfunc-reset",
+      "verdict": "false",
+      "reason": "Expiration already launching a callback does not guarantee Reset=false after an intervening rearm; scope_extension_test.go:8-10 confirms false then true while old callback runs. First-reset overlap portion is correct."
+    },
+    {
+      "id": "channel-stop-reset",
+      "verdict": "valid",
+      "reason": "Stop/Reset guard and Go1.23 docs support independent running/no-receive cases, immediate subsequent operations after receiving, and legacy drain ambiguity; later Reset after Stop explicitly distinguished."
+    },
+    {
+      "id": "channel-construction",
+      "verdict": "valid",
+      "reason": "NewTimer channel allocation, call and C assignment plus After wrapper match source; runtime capacity mechanism remains OPEN."
+    },
+    {
+      "id": "deferred-send",
+      "verdict": "valid",
+      "reason": "sendTime comment defines delta and code does nonblocking select of Now minus delta, with default no delivery."
+    },
+    {
+      "id": "deadline-calculation",
+      "verdict": "valid",
+      "reason": "when function uses current clock for nonpositive and clamps negative overflow sum to MaxInt64."
+    }
+  ]
+}

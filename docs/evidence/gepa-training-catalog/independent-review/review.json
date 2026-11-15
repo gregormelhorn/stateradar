@@ -1,0 +1,25 @@
+{
+  "reviewer": "Codex independent session /root/independent_review",
+  "human_reviewer": false,
+  "scope": "Separate source, contract and executed-test review before new baseline calls; no domain intent decided. All cases are training/regression, not fresh holdouts.",
+  "cases": [
+    {"id":"G01","verdict":"accepted","reason":"Exact wrapper assignment redirects a captured wrapper's later receiver; independent B05 5x replay. Corrected historical claim: only run 000 used fixed seed, 004/008 used separate GEPA proposals. Intent remains OPEN."},
+    {"id":"G02","verdict":"accepted","reason":"Separate caller-variable rebinding keeps original callback recipient; independently written Gobreaker control passes 5x."},
+    {"id":"C01","verdict":"accepted","reason":"Cond contract requires L for condition modification and Wait, but not Signal/Broadcast; prior omission means not explicitly stated, not proof the model lacked knowledge."},
+    {"id":"C02","verdict":"accepted","reason":"No-waiter Signal has no future permit; inspected notifyList callees. Finite-duration control proves bounded nonreturn only."},
+    {"id":"W01","verdict":"accepted","reason":"panicnil=1 counterexample passes 5x. A panicking f is outside the Go contract; claim concerns an overbroad implementation statement."},
+    {"id":"W02","verdict":"accepted","reason":"Non-nil recovered panic takes the re-panic path. Default panic(nil) non-nil control passed 5x; legacy panicnil configuration is a distinct case."},
+    {"id":"W03","verdict":"accepted","reason":"Source, synctest callee and 5x runtime panic replay support the stated exact ordering. Whether outside use is supported remains OPEN."},
+    {"id":"W04","verdict":"accepted","reason":"Independent owning-bubble Wait then outside Wait control completed 5x; this is a different ordering from W03."},
+    {"id":"T01","verdict":"accepted","reason":"First Stop true, second false despite prevented callback, verified 5x. Normative wording remains OPEN; previously found positive control."},
+    {"id":"T02","verdict":"accepted","reason":"The timer test waits for the second callback to enter while the first remains blocked, showing overlap; no simultaneous CPU execution is claimed."},
+    {"id":"P01","verdict":"accepted","reason":"Pinned source, 5x independently replayed probe and red recheck control support exact schedule under open-pool/no-expiry/no-extra-consumer conditions. Fairness intent remains OPEN."},
+    {"id":"P02","verdict":"accepted","reason":"Direct handoff applies to the first/only already-enrolled waiter in an open pool with valid connection and expiry disabled; exact P04a probe's second Put completes that waiter."}
+  ],
+  "limitations": [
+    "No independent human second review; this is a separate AI session.",
+    "Prior timer, Cond and WaitGroup examples were exposed in the previous GEPA experiment and are not new holdouts.",
+    "The Cond nonreturn probe is bounded; runtime callee evidence supports its ordering.",
+    "The historic P04a label is local to a prior run and must be matched by ordered events, not by name."
+  ]
+}

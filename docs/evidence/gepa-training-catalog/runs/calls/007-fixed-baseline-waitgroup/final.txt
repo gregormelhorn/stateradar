@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "wait-ordering",
+      "text": "Start with a zero-value WaitGroup and use the same instance throughout. If Go registers a task before Wait observes the state, Wait either sees that the task has already finished or registers as a waiter. While the counter is positive, the task may register another task with Go. The final Done resets the waiter count and releases all registered waiters. If Wait observes zero before Go registers a task, that Wait can return before the task runs. Starting Go after Wait has returned is valid for a new batch. The documented ordering requires Go to precede the Wait meant to cover the new task.",
+      "citation": {
+        "line": 168,
+        "fragment": "if v == 0 {"
+      },
+      "question": ""
+    },
+    {
+      "id": "counter-arithmetic",
+      "text": "Calling Done on a zero-value WaitGroup first stores a counter of -1 and then panics. If the caller recovers, a subsequent Wait on the same instance can register and block because the counter is still negative. On a 64-bit platform, Add(1 << 32) on a fresh WaitGroup shifts the entire delta out of the state word. Add returns and a following Wait returns immediately.",
+      "citation": {
+        "line": 104,
+        "fragment": "state := wg.state.Add(uint64(delta) << 32)"
+      },
+      "question": "OPEN: What range of deltas and resulting counter values does Add support? The documentation gives no bounds for its int argument."
+    },
+    {
+      "id": "early-reuse",
+      "text": "Start with a registered waiter and one outstanding task. The task calls Done, which resets the state and releases the waiter. If a new Add(1) runs after that reset but before the awakened waiter reloads state, the waiter panics when it sees the new positive counter. If the new Add(1) and matching Done both finish before that reload and leave state zero, the same waiter returns normally. Both schedules can violate the requirement to wait for previous Wait calls to return before reusing the instance.",
+      "citation": {
+        "line": 207,
+        "fragment": "isReset := wg.state.Load() != 0"
+      },
+      "question": ""
+    },
+    {
+      "id": "go-deferred-completion",
+      "text": "Start with a sole task registered by Go and a blocked waiter. If f returns normally, f's own deferred calls run before the wrapper calls Done and releases the waiter. If f calls runtime.Goexit, f's deferred calls still run, the wrapper's recover returns nil, and the wrapper calls Done even though f never returns to its caller. In either case, the waiter can return before the task goroutine has fully exited.",
+      "citation": {
+        "line": 254,
+        "fragment": "// f completed normally, or abruptly using goexit."
+      },
+      "question": "OPEN: Is completion via runtime.Goexit part of the public contract, and does the documented synchronization guarantee phrased in terms of f returning also cover that path?"
+    },
+    {
+      "id": "go-unrecovered-panic",
+      "text": "Start with a sole task registered by Go and a blocked waiter. If a panic escapes f and the wrapper's recover returns a non-nil value, the wrapper re-panics before reaching Done. The task remains counted and the waiter stays blocked until the unrecovered panic terminates the process. This execution is outside Go's documented requirement that f must not panic.",
+      "citation": {
+        "line": 251,
+        "fragment": "panic(x)"
+      },
+      "question": ""
+    },
+    {
+      "id": "synctest-association",
+      "text": "Start with a fresh WaitGroup. An Add(1) within a synctest bubble associates that instance with the bubble. If the final Done finds registered waiters, it clears the state and disassociates the instance before releasing them. If Done reaches zero with no registered waiters, the association persists. A subsequent Wait in the associated bubble can clear it. A Wait outside that bubble can observe zero and return without clearing it, so a later Add from outside or from another bubble can still terminate the process even though the counter reached zero and the earlier Wait returned.",
+      "citation": {
+        "line": 174,
+        "fragment": "if w == 0 && state&waitGroupBubbleFlag != 0 && synctest.IsAssociated(wg) {"
+      },
+      "question": "OPEN: What cross-bubble reuse is supported after the counter reaches zero, given that the association can persist after Wait returns?"
+    }
+  ]
+}

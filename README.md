@@ -251,6 +251,8 @@ full-pilot optimization. The standard routing is unchanged.
 A follow-up [supervised discovery experiment](docs/evidence/gepa-discovery/README.md)
 uses source-backed open findings and held-out components. GEPA retained the fixed
 seed, so the final arms used identical prompts; no GEPA advantage is established.
+The subsequent [reviewed training catalog and fixed baseline](docs/evidence/gepa-training-catalog/README.md)
+records recurrent source-scope gaps and controls; it is not a new GEPA optimization.
 
 ---
 

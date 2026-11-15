@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "notification-before-registration",
+      "text": "With no registered waiters, Signal or Broadcast wakes nobody. If a goroutine later acquires L, observes a false condition, and calls Wait, the earlier notification supplies no wakeup. Repeating notifications while there are no waiters supplies no future wakeups either.",
+      "citation": {
+        "line": 75,
+        "fragment": "Signal wakes one goroutine waiting on c, if there is any."
+      },
+      "question": ""
+    },
+    {
+      "id": "registration-before-notification",
+      "text": "A caller holding L enters Wait, registers a ticket, and then unlocks L before calling the runtime wait function. A notification that covers that ticket can arrive after registration and before the goroutine parks. With several registered waiters, Signal covers one ticket and Broadcast covers all current tickets. Each notified waiter must reacquire L before Wait returns.",
+      "citation": {
+        "line": 69,
+        "fragment": "t := runtime_notifyListAdd(&c.notify)"
+      },
+      "question": "OPEN: Should the atomic-unlock wording clarify that the guarantee concerns notification after registration and that a waiter notified before parking may never suspend?"
+    },
+    {
+      "id": "condition-after-wakeup",
+      "text": "A waiter sees a false condition while holding L and calls Wait. Another goroutine changes the condition under L and signals. If a competing goroutine acquires L first and makes the condition false again, the notified waiter can reacquire L and return from Wait with the condition false. The documented loop checks the condition again and calls Wait again in that case.",
+      "citation": {
+        "line": 62,
+        "fragment": "for !condition() {"
+      },
+      "question": ""
+    },
+    {
+      "id": "cancellation",
+      "text": "A goroutine calls Wait with L held and releases L as part of waiting. If an external cancellation or timeout then occurs without a Signal or Broadcast that wakes it, Wait stays pending. If a notification later wakes it, Wait reacquires L and returns with no cancellation status.",
+      "citation": {
+        "line": 55,
+        "fragment": "Wait cannot return unless awoken by [Cond.Broadcast] or [Cond.Signal]."
+      },
+      "question": ""
+    },
+    {
+      "id": "copy-checker-identity",
+      "text": "A Cond whose checker is still zero can be copied and each instance can initialize its checker to its own address on first use. The two instances then have separate notification lists, even if the copied L refers to the same locker. Once Wait, Signal, or Broadcast has initialized the checker, including a Signal with no waiters, copying the Cond to a different address leaves the copy with the original checker address. Its first Wait, Signal, or Broadcast panics before accessing the locker or notification list.",
+      "citation": {
+        "line": 107,
+        "fragment": "!atomic.CompareAndSwapUintptr((*uintptr)(c), 0, uintptr(unsafe.Pointer(c)))"
+      },
+      "question": ""
+    },
+    {
+      "id": "unlock-failure",
+      "text": "If a caller enters Wait without holding L and the locker rejects that misuse by panicking in Unlock, the copy check and ticket registration have already occurred. The panic propagates before the runtime wait call or the relock, and Wait has no cleanup for the registered ticket.",
+      "citation": {
+        "line": 70,
+        "fragment": "c.L.Unlock()"
+      },
+      "question": ""
+    }
+  ]
+}
