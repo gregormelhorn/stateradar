@@ -1,0 +1,51 @@
+{
+  "once-01": {
+    "verdict": "supported",
+    "line": 22,
+    "fragment": "d.once.Do(func() {",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/once"
+  },
+  "once-02": {
+    "verdict": "contradicted",
+    "line": 13,
+    "fragment": "d := struct {",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/once"
+  },
+  "once-03": {
+    "verdict": "supported",
+    "line": 10,
+    "fragment": "If f panics, the returned function will panic with the same value on every call.",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/once"
+  },
+  "once-04": {
+    "verdict": "supported",
+    "line": 72,
+    "fragment": "return d.result",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/once"
+  },
+  "once-05": {
+    "verdict": "contradicted",
+    "line": 19,
+    "fragment": "f: f,",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/once"
+  },
+  "once-06": {
+    "verdict": "contradicted",
+    "line": 30,
+    "fragment": "panic(d.p)",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/once"
+  },
+  "once-07": {
+    "verdict": "unspecified",
+    "line": 7,
+    "fragment": "OnceFunc returns a function that invokes f only once.",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": null
+  }
+}

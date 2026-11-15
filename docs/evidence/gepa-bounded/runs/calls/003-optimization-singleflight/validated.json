@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "singleflight-01",
+      "verdict": "contradicted",
+      "line": 212,
+      "fragment": "delete(g.m, key)",
+      "reason": "Forget deletes the key from the receiving Group's map. A later request can start a new execution while the original function continues. The running DoChan invocation retains the receiver, call pointer, key value, and function passed at line 138. Rebinding the caller's variables does not redirect it.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-02",
+      "verdict": "contradicted",
+      "line": 159,
+      "fragment": "if g.m[key] == c {",
+      "reason": "Start call A, forget its key, then register call B under that key. When A finishes, it looks up the current entry and deletes it only if it still points to A. If B is still registered, it remains eligible for duplicate suppression. A releases its own waiters and, on normal return, delivers to its own channels.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-03",
+      "verdict": "supported",
+      "line": 129,
+      "fragment": "c.chans = append(c.chans, ch)",
+      "reason": "A duplicate DoChan joins the pending call registered under the key and returns before launching its own function. On normal return, including a returned error, the original call sends its value and error to every channel attached to that call at lines 175–178. Panic and Goexit bypass result delivery.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-04",
+      "verdict": "contradicted",
+      "line": 160,
+      "fragment": "delete(g.m, key)",
+      "reason": "Completion removes the entry if it still points to the completing call. A later request with no registered call starts a fresh execution. If Forget already allowed a replacement to register, a later duplicate can join that pending replacement.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-05",
+      "verdict": "contradicted",
+      "line": 120,
+      "fragment": "The returned channel will not be closed.",
+      "reason": "The DoChan contract explicitly says the channel stays open after result delivery.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-06",
+      "verdict": "contradicted",
+      "line": 71,
+      "fragment": "Group represents a class of work and forms a namespace in",
+      "reason": "Two independently initialized Groups look up the same key in separate maps and can each start an execution. Rebinding a caller variable to a different Group leaves the original invocation on its captured receiver. Copying an initialized Group can retain the map reference, and the source specifies no concurrent-copy contract.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-07",
+      "verdict": "unspecified",
+      "line": 160,
+      "fragment": "delete(g.m, key)",
+      "reason": "Completion clears the entry it owns even when the function returns an error. The component leaves application caching and request admission policy open.",
+      "question": "OPEN: Must application-level errors be cached for thirty seconds before another request is allowed, or is that entirely an application-policy decision?"
+    }
+  ],
+  "corrections": []
+}

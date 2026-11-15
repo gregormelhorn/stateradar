@@ -97,3 +97,28 @@ jobs:
           python tools/gen_analysis_sidecar.py --root tests/golden-mini
           python tools/dsc_check.py tests/golden-mini/domain-analysis/mini --repo tests/golden-mini
           python tools/check_reachability.py tests/golden-mini/domain-analysis/mini
+
+  gepa-evaluation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r tools/requirements-dev.txt -r docs/evidence/gepa-bounded/requirements.txt
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.3"
+          cache: false
+      - name: GEPA evaluator, search adapter and accounting red probes
+        run: |
+          python tools/selftest/test_gepa_eval.py
+          python tools/selftest/test_gepa_budget.py
+          python tools/selftest/test_gepa_search.py
+          python tools/selftest/test_gepa_report.py
+          python tools/selftest/test_gepa_rates.py
+      - name: independent reference replay and archived three-arm audit
+        run: |
+          python tools/verify_gepa_reference.py
+          python tools/verify_gepa_quality.py
+          python tools/gepa_report.py docs/evidence/gepa-bounded/runs
+          python tools/gepa_cost_sensitivity.py docs/evidence/gepa-bounded/runs

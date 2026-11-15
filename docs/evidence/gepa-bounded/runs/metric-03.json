@@ -1,0 +1,82 @@
+{
+  "candidate": {
+    "review": "Preserve ordinary success, failure, cancellation, and repeated-call controls. For each deferred action, handle, or stored reference, identify what is captured and what is looked up later. Keep separate creations distinct and trace each from creation through use and cleanup, citing capture and use sites and stating the starting objects, operation order, and observable outcomes. Where permitted, compare unchanged identity, copying, replacement, wrapper or key mutation, and caller-local rebinding as distinct operations. Attribute each check and effect to the object that receives it. Require evidence beyond equal generation values to establish identity, and account for stable capture and identity guards. Cite documented exclusions and leave policy questions the source does not answer marked OPEN."
+  },
+  "trace": {
+    "component": "context",
+    "Generated Outputs": {
+      "findings": [
+        {
+          "id": "context-01",
+          "verdict": "supported",
+          "line": 333,
+          "fragment": "a.once.Do(func() {",
+          "reason": "The returned stop function captures the registration created at line 327. Before cancellation, its first call sets the result to true and cancels that registration for cleanup. A second call uses the same registration, skips the one-time action, and returns false.",
+          "question": ""
+        },
+        {
+          "id": "context-02",
+          "verdict": "contradicted",
+          "line": 319,
+          "fragment": "or f was already stopped.",
+          "reason": "A second stop can return false after the first stop prevented the callback from running. The other documented case says only that the callback has started.",
+          "question": ""
+        },
+        {
+          "id": "context-03",
+          "verdict": "contradicted",
+          "line": 320,
+          "fragment": "The stop function does not wait for f to complete before returning.",
+          "reason": "The stop function returns without waiting for callback completion. Callers who need to know when the callback finishes must coordinate with it explicitly.",
+          "question": ""
+        },
+        {
+          "id": "context-04",
+          "verdict": "supported",
+          "line": 312,
+          "fragment": "Multiple calls to AfterFunc on a context operate independently;",
+          "reason": "Each call on the same context creates a distinct registration with its own callback and one-time state at lines 327–330. Each returned stop function acts on the registration it captured, and line 313 explicitly rules out replacement.",
+          "question": ""
+        },
+        {
+          "id": "context-05",
+          "verdict": "supported",
+          "line": 310,
+          "fragment": "If ctx is already canceled, AfterFunc calls f immediately in its own goroutine.",
+          "reason": "Registration on an already canceled context takes the closed Done channel path at lines 484–488. That path cancels the new registration, whose one-time action starts its stored callback in a goroutine at line 359.",
+          "question": ""
+        },
+        {
+          "id": "context-06",
+          "verdict": "contradicted",
+          "line": 477,
+          "fragment": "c.Context = parent",
+          "reason": "AfterFunc passes the supplied context to propagateCancel at line 330, which stores it as the parent and sets up cancellation from that parent. Reassigning only the caller's local variable leaves the registration tied to the original context.",
+          "question": ""
+        },
+        {
+          "id": "context-07",
+          "verdict": "unspecified",
+          "line": 309,
+          "fragment": "AfterFunc arranges to call f in its own goroutine after ctx is canceled.",
+          "reason": "The contract describes callback scheduling and leaves latency thresholds and incident reporting to application policy.",
+          "question": "OPEN: Does the source specify any requirement for the application to report callback latency above ten milliseconds as an incident?"
+        }
+      ],
+      "corrections": []
+    },
+    "Feedback": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": [],
+      "expected_for_errors": {}
+    },
+    "call_ids": [
+      6
+    ]
+  },
+  "score": 1.00079925
+}

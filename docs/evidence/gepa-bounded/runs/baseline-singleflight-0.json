@@ -1,0 +1,106 @@
+{
+  "report": {
+    "findings": [
+      {
+        "id": "singleflight-01",
+        "verdict": "contradicted",
+        "line": 212,
+        "fragment": "delete(g.m, key)",
+        "reason": "Forget deletes the map entry under the group lock. The running function continues, and a later call can start a new execution.",
+        "question": ""
+      },
+      {
+        "id": "singleflight-02",
+        "verdict": "contradicted",
+        "line": 159,
+        "fragment": "if g.m[key] == c {",
+        "reason": "Completion deletes the entry only if it still points to the completing call. The replacement call has a different identity.",
+        "question": ""
+      },
+      {
+        "id": "singleflight-03",
+        "verdict": "supported",
+        "line": 129,
+        "fragment": "c.chans = append(c.chans, ch)",
+        "reason": "The duplicate attaches its channel to the registered pending call and returns before launching its own function. On normal return, the original call sends its result to every attached channel. Panic and Goexit bypass result delivery.",
+        "question": ""
+      },
+      {
+        "id": "singleflight-04",
+        "verdict": "contradicted",
+        "line": 160,
+        "fragment": "delete(g.m, key)",
+        "reason": "Completion removes the call if it still owns the entry. A later call with no pending entry starts a new execution.",
+        "question": ""
+      },
+      {
+        "id": "singleflight-05",
+        "verdict": "contradicted",
+        "line": 120,
+        "fragment": "The returned channel will not be closed.",
+        "reason": "The DoChan contract explicitly says the returned channel stays open.",
+        "question": ""
+      },
+      {
+        "id": "singleflight-06",
+        "verdict": "contradicted",
+        "line": 71,
+        "fragment": "Group represents a class of work and forms a namespace in",
+        "reason": "Duplicate suppression is scoped to the Group, and calls look up keys in the receiving Group's map.",
+        "question": ""
+      },
+      {
+        "id": "singleflight-07",
+        "verdict": "unspecified",
+        "line": 160,
+        "fragment": "delete(g.m, key)",
+        "reason": "The component clears the completed entry even when the function returns an error. Its contract leaves application caching and request admission policy open.",
+        "question": "OPEN: Must application-level errors be cached for thirty seconds before another request is allowed, or is that entirely an application-policy decision?"
+      }
+    ],
+    "corrections": []
+  },
+  "call_ids": [
+    1,
+    2
+  ],
+  "provider_index": 1,
+  "provider_cost": 0.001621,
+  "public": {
+    "component": "singleflight",
+    "source": "upstream/singleflight/singleflight.go",
+    "cases": [
+      {
+        "id": "singleflight-01",
+        "claim": "Forget cancels the already running function for that key."
+      },
+      {
+        "id": "singleflight-02",
+        "claim": "After Forget and a new call under the same key, completion of the old call removes the new call from duplicate suppression."
+      },
+      {
+        "id": "singleflight-03",
+        "claim": "A duplicate DoChan while the original call is pending receives the original result without running its own function."
+      },
+      {
+        "id": "singleflight-04",
+        "claim": "After a successful call finishes, subsequent calls with that key permanently reuse the cached result."
+      },
+      {
+        "id": "singleflight-05",
+        "claim": "The DoChan result channel is closed after its result is delivered."
+      },
+      {
+        "id": "singleflight-06",
+        "claim": "The same key used concurrently in two distinct Group instances shares a single execution."
+      },
+      {
+        "id": "singleflight-07",
+        "claim": "Application-level errors must be cached for thirty seconds before another request is allowed."
+      }
+    ]
+  },
+  "source": "// Copyright 2013 The Go Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style\n// license that can be found in the LICENSE file.\n\n// Package singleflight provides a duplicate function call suppression\n// mechanism.\npackage singleflight // import \"golang.org/x/sync/singleflight\"\n\nimport (\n\t\"bytes\"\n\t\"errors\"\n\t\"fmt\"\n\t\"runtime\"\n\t\"runtime/debug\"\n\t\"sync\"\n)\n\n// errGoexit indicates the runtime.Goexit was called in\n// the user given function.\nvar errGoexit = errors.New(\"runtime.Goexit was called\")\n\n// A panicError is an arbitrary value recovered from a panic\n// with the stack trace during the execution of given function.\ntype panicError struct {\n\tvalue interface{}\n\tstack []byte\n}\n\n// Error implements error interface.\nfunc (p *panicError) Error() string {\n\treturn fmt.Sprintf(\"%v\\n\\n%s\", p.value, p.stack)\n}\n\nfunc (p *panicError) Unwrap() error {\n\terr, ok := p.value.(error)\n\tif !ok {\n\t\treturn nil\n\t}\n\n\treturn err\n}\n\nfunc newPanicError(v interface{}) error {\n\tstack := debug.Stack()\n\n\t// The first line of the stack trace is of the form \"goroutine N [status]:\"\n\t// but by the time the panic reaches Do the goroutine may no longer exist\n\t// and its status will have changed. Trim out the misleading line.\n\tif line := bytes.IndexByte(stack[:], '\\n'); line >= 0 {\n\t\tstack = stack[line+1:]\n\t}\n\treturn &panicError{value: v, stack: stack}\n}\n\n// call is an in-flight or completed singleflight.Do call\ntype call struct {\n\twg sync.WaitGroup\n\n\t// These fields are written once before the WaitGroup is done\n\t// and are only read after the WaitGroup is done.\n\tval interface{}\n\terr error\n\n\t// These fields are read and written with the singleflight\n\t// mutex held before the WaitGroup is done, and are read but\n\t// not written after the WaitGroup is done.\n\tdups  int\n\tchans []chan<- Result\n}\n\n// Group represents a class of work and forms a namespace in\n// which units of work can be executed with duplicate suppression.\ntype Group struct {\n\tmu sync.Mutex       // protects m\n\tm  map[string]*call // lazily initialized\n}\n\n// Result holds the results of Do, so they can be passed\n// on a channel.\ntype Result struct {\n\tVal    interface{}\n\tErr    error\n\tShared bool\n}\n\n// Do executes and returns the results of the given function, making\n// sure that only one execution is in-flight for a given key at a\n// time. If a duplicate comes in, the duplicate caller waits for the\n// original to complete and receives the same results.\n// The return value shared indicates whether v was given to multiple callers.\nfunc (g *Group) Do(key string, fn func() (interface{}, error)) (v interface{}, err error, shared bool) {\n\tg.mu.Lock()\n\tif g.m == nil {\n\t\tg.m = make(map[string]*call)\n\t}\n\tif c, ok := g.m[key]; ok {\n\t\tc.dups++\n\t\tg.mu.Unlock()\n\t\tc.wg.Wait()\n\n\t\tif e, ok := c.err.(*panicError); ok {\n\t\t\tpanic(e)\n\t\t} else if c.err == errGoexit {\n\t\t\truntime.Goexit()\n\t\t}\n\t\treturn c.val, c.err, true\n\t}\n\tc := new(call)\n\tc.wg.Add(1)\n\tg.m[key] = c\n\tg.mu.Unlock()\n\n\tg.doCall(c, key, fn)\n\treturn c.val, c.err, c.dups > 0\n}\n\n// DoChan is like Do but returns a channel that will receive the\n// results when they are ready.\n//\n// The returned channel will not be closed.\nfunc (g *Group) DoChan(key string, fn func() (interface{}, error)) <-chan Result {\n\tch := make(chan Result, 1)\n\tg.mu.Lock()\n\tif g.m == nil {\n\t\tg.m = make(map[string]*call)\n\t}\n\tif c, ok := g.m[key]; ok {\n\t\tc.dups++\n\t\tc.chans = append(c.chans, ch)\n\t\tg.mu.Unlock()\n\t\treturn ch\n\t}\n\tc := &call{chans: []chan<- Result{ch}}\n\tc.wg.Add(1)\n\tg.m[key] = c\n\tg.mu.Unlock()\n\n\tgo g.doCall(c, key, fn)\n\n\treturn ch\n}\n\n// doCall handles the single call for a key.\nfunc (g *Group) doCall(c *call, key string, fn func() (interface{}, error)) {\n\tnormalReturn := false\n\trecovered := false\n\n\t// use double-defer to distinguish panic from runtime.Goexit,\n\t// more details see https://golang.org/cl/134395\n\tdefer func() {\n\t\t// the given function invoked runtime.Goexit\n\t\tif !normalReturn && !recovered {\n\t\t\tc.err = errGoexit\n\t\t}\n\n\t\tg.mu.Lock()\n\t\tdefer g.mu.Unlock()\n\t\tc.wg.Done()\n\t\tif g.m[key] == c {\n\t\t\tdelete(g.m, key)\n\t\t}\n\n\t\tif e, ok := c.err.(*panicError); ok {\n\t\t\t// In order to prevent the waiting channels from being blocked forever,\n\t\t\t// needs to ensure that this panic cannot be recovered.\n\t\t\tif len(c.chans) > 0 {\n\t\t\t\tgo panic(e)\n\t\t\t\tselect {} // Keep this goroutine around so that it will appear in the crash dump.\n\t\t\t} else {\n\t\t\t\tpanic(e)\n\t\t\t}\n\t\t} else if c.err == errGoexit {\n\t\t\t// Already in the process of goexit, no need to call again\n\t\t} else {\n\t\t\t// Normal return\n\t\t\tfor _, ch := range c.chans {\n\t\t\t\tch <- Result{c.val, c.err, c.dups > 0}\n\t\t\t}\n\t\t}\n\t}()\n\n\tfunc() {\n\t\tdefer func() {\n\t\t\tif !normalReturn {\n\t\t\t\t// Ideally, we would wait to take a stack trace until we've determined\n\t\t\t\t// whether this is a panic or a runtime.Goexit.\n\t\t\t\t//\n\t\t\t\t// Unfortunately, the only way we can distinguish the two is to see\n\t\t\t\t// whether the recover stopped the goroutine from terminating, and by\n\t\t\t\t// the time we know that, the part of the stack trace relevant to the\n\t\t\t\t// panic has been discarded.\n\t\t\t\tif r := recover(); r != nil {\n\t\t\t\t\tc.err = newPanicError(r)\n\t\t\t\t}\n\t\t\t}\n\t\t}()\n\n\t\tc.val, c.err = fn()\n\t\tnormalReturn = true\n\t}()\n\n\tif !normalReturn {\n\t\trecovered = true\n\t}\n}\n\n// Forget tells the singleflight to forget about a key.  Future calls\n// to Do for this key will call the function rather than waiting for\n// an earlier call to complete.\nfunc (g *Group) Forget(key string) {\n\tg.mu.Lock()\n\tdelete(g.m, key)\n\tg.mu.Unlock()\n}\n",
+  "phase": "optimization",
+  "repeat": 0
+}

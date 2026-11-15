@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "timer-01",
+      "verdict": "supported",
+      "line": 176,
+      "fragment": "The returned Timer's C field is not used and will be nil.",
+      "reason": "AfterFunc explicitly specifies that the returned timer has a nil C field.",
+      "question": ""
+    },
+    {
+      "id": "timer-02",
+      "verdict": "contradicted",
+      "line": 73,
+      "fragment": "Stop does not wait for f to complete before returning.",
+      "reason": "Stop returns without waiting for the running AfterFunc callback to finish.",
+      "question": ""
+    },
+    {
+      "id": "timer-03",
+      "verdict": "supported",
+      "line": 123,
+      "fragment": "to run again, in which case it returns false.",
+      "reason": "Once the callback starts, that timer setting has expired. Reset on the expired timer schedules another execution and returns false. If an intervening Reset has already made the timer active, a later Reset reschedules that pending execution and returns true under lines 117–123.",
+      "question": ""
+    },
+    {
+      "id": "timer-04",
+      "verdict": "contradicted",
+      "line": 125,
+      "fragment": "complete before returning nor does it guarantee that the subsequent",
+      "reason": "Lines 124–127 explicitly allow the execution scheduled by a false-returning Reset to overlap the prior callback.",
+      "question": ""
+    },
+    {
+      "id": "timer-05",
+      "verdict": "supported",
+      "line": 67,
+      "fragment": "It returns true if the call stops the timer",
+      "reason": "Lines 174–175 document Stop as a way to cancel a pending AfterFunc call. If Stop succeeds before expiry, it returns true and prevents that scheduled execution.",
+      "question": ""
+    },
+    {
+      "id": "timer-06",
+      "verdict": "contradicted",
+      "line": 178,
+      "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+      "reason": "Registering function value A passes A as the timer argument. If the caller then assigns B to its own variable, line 182 still invokes A from the stored argument. Copying A to another variable before registration passes the same value. Passing B at registration changes the stored value. Mutation of state that A itself reads is a separate matter governed by A's body.",
+      "question": ""
+    },
+    {
+      "id": "timer-07",
+      "verdict": "unspecified",
+      "line": 173,
+      "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+      "reason": "The component specifies when the callback runs and leaves application retry policy unspecified.",
+      "question": "OPEN: What retry count, if any, does the application require for a timed-out operation?"
+    }
+  ],
+  "corrections": []
+}

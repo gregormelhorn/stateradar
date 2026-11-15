@@ -1,0 +1,34 @@
+{
+  "component": "context",
+  "source": "upstream/context/context.go",
+  "cases": [
+    {
+      "id": "context-01",
+      "claim": "Stopping a registered callback before cancellation returns true on the first stop and false on a second stop."
+    },
+    {
+      "id": "context-02",
+      "claim": "A false stop result proves that the callback is currently running."
+    },
+    {
+      "id": "context-03",
+      "claim": "Stopping an already started callback waits until that callback finishes."
+    },
+    {
+      "id": "context-04",
+      "claim": "Two AfterFunc registrations on the same context operate independently rather than replacing each other."
+    },
+    {
+      "id": "context-05",
+      "claim": "Registration on an already canceled context still schedules the callback in its own goroutine."
+    },
+    {
+      "id": "context-06",
+      "claim": "After registration, reassigning only the caller local context variable redirects the registration to the new context."
+    },
+    {
+      "id": "context-07",
+      "claim": "The application is required to report callback latency above ten milliseconds as an incident."
+    }
+  ]
+}

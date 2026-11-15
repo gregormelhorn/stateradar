@@ -1,0 +1,34 @@
+{
+  "component": "once",
+  "source": "upstream/once/oncefunc.go",
+  "cases": [
+    {
+      "id": "once-01",
+      "claim": "Copying the function returned by OnceFunc shares its once state; calling both function values invokes the original function once."
+    },
+    {
+      "id": "once-02",
+      "claim": "Two separate OnceFunc calls wrapping the same function share one once state."
+    },
+    {
+      "id": "once-03",
+      "claim": "If the original function panics, repeated calls re-panic with the same value without executing the original function again."
+    },
+    {
+      "id": "once-04",
+      "claim": "If OnceValue returns a pointer, later mutation of the pointed-to object is visible through subsequent returns of that same pointer."
+    },
+    {
+      "id": "once-05",
+      "claim": "Reassigning only the caller function variable after constructing OnceFunc changes which function the wrapper invokes."
+    },
+    {
+      "id": "once-06",
+      "claim": "After recovering the first OnceFunc panic, calling the wrapper again returns normally."
+    },
+    {
+      "id": "once-07",
+      "claim": "The application must retry an initialization function after every panic."
+    }
+  ]
+}

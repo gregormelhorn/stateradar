@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "once-01",
+      "verdict": "supported",
+      "line": 22,
+      "fragment": "d.once.Do(func() {",
+      "reason": "Both copies of the returned closure use the same captured d.once, so calls through either copy invoke f only once in total.",
+      "question": ""
+    },
+    {
+      "id": "once-02",
+      "verdict": "contradicted",
+      "line": 13,
+      "fragment": "d := struct {",
+      "reason": "Each call to OnceFunc creates its own d with its own Once field, even when passed the same f.",
+      "question": ""
+    },
+    {
+      "id": "once-03",
+      "verdict": "supported",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The contract limits f to one invocation, and the wrapper saves the recovered panic value and uses it on subsequent calls.",
+      "question": ""
+    },
+    {
+      "id": "once-04",
+      "verdict": "supported",
+      "line": 72,
+      "fragment": "return d.result",
+      "reason": "OnceValue stores the returned pointer in d.result and returns that same pointer on later calls, so dereferencing it accesses the object with its later mutations.",
+      "question": ""
+    },
+    {
+      "id": "once-05",
+      "verdict": "contradicted",
+      "line": 19,
+      "fragment": "f: f,",
+      "reason": "OnceFunc stores the supplied function value in d.f and invokes that stored value. Reassigning the caller's variable leaves d.f unchanged.",
+      "question": ""
+    },
+    {
+      "id": "once-06",
+      "verdict": "contradicted",
+      "line": 10,
+      "fragment": "the returned function will panic with the same value on every call.",
+      "reason": "Recovering the first panic leaves the wrapper's failure state intact, so the next call panics with the same value.",
+      "question": ""
+    },
+    {
+      "id": "once-07",
+      "verdict": "unspecified",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The contract specifies the returned function's behavior after a panic. It leaves application retry policy open.",
+      "question": "OPEN: Must the application retry an initialization function after every panic (the inventory's once-07)?"
+    }
+  ],
+  "corrections": []
+}

@@ -1,0 +1,105 @@
+{
+  "report": {
+    "findings": [
+      {
+        "id": "timer-01",
+        "verdict": "supported",
+        "line": 176,
+        "fragment": "The returned Timer's C field is not used and will be nil.",
+        "reason": "AfterFunc explicitly documents that the returned timer has a nil C field.",
+        "question": ""
+      },
+      {
+        "id": "timer-02",
+        "verdict": "contradicted",
+        "line": 73,
+        "fragment": "Stop does not wait for f to complete before returning.",
+        "reason": "Stop returns without waiting for the running AfterFunc callback to finish.",
+        "question": ""
+      },
+      {
+        "id": "timer-03",
+        "verdict": "supported",
+        "line": 123,
+        "fragment": "to run again, in which case it returns false.",
+        "reason": "Once the scheduled callback has started, that timer setting has expired. Reset schedules another execution and returns false.",
+        "question": ""
+      },
+      {
+        "id": "timer-04",
+        "verdict": "contradicted",
+        "line": 126,
+        "fragment": "goroutine running f does not run concurrently with the prior",
+        "reason": "When Reset returns false, its contract explicitly allows for overlap by withholding any guarantee against concurrent execution.",
+        "question": ""
+      },
+      {
+        "id": "timer-05",
+        "verdict": "supported",
+        "line": 67,
+        "fragment": "It returns true if the call stops the timer",
+        "reason": "AfterFunc documents Stop as a way to cancel the pending call. A successful Stop before expiry returns true and prevents that scheduled execution.",
+        "question": ""
+      },
+      {
+        "id": "timer-06",
+        "verdict": "contradicted",
+        "line": 178,
+        "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+        "reason": "AfterFunc passes the function value at registration, and goFunc invokes that stored argument. Reassigning the caller's variable leaves the stored value unchanged.",
+        "question": ""
+      },
+      {
+        "id": "timer-07",
+        "verdict": "unspecified",
+        "line": 173,
+        "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+        "reason": "The component specifies timer and callback behavior and leaves application retry policy unspecified.",
+        "question": "OPEN: What retry count, if any, does the application require for a timed-out operation?"
+      }
+    ],
+    "corrections": []
+  },
+  "call_ids": [
+    18
+  ],
+  "provider_index": 4,
+  "provider_cost": 0.001686,
+  "public": {
+    "component": "timer",
+    "source": "upstream/timer/sleep.go",
+    "cases": [
+      {
+        "id": "timer-01",
+        "claim": "A timer returned by AfterFunc has a nil C field."
+      },
+      {
+        "id": "timer-02",
+        "claim": "Stop on an already running AfterFunc callback waits for that callback to finish."
+      },
+      {
+        "id": "timer-03",
+        "claim": "Reset after the AfterFunc callback has started returns false and schedules another execution."
+      },
+      {
+        "id": "timer-04",
+        "claim": "A callback scheduled by Reset cannot overlap the previous callback."
+      },
+      {
+        "id": "timer-05",
+        "claim": "Stop before a far-future AfterFunc expires can return true and prevent that scheduled execution."
+      },
+      {
+        "id": "timer-06",
+        "claim": "Reassigning only the caller function variable after AfterFunc registration changes which function that timer will invoke."
+      },
+      {
+        "id": "timer-07",
+        "claim": "The application must retry a timed-out operation exactly three times."
+      }
+    ]
+  },
+  "source": "// Copyright 2009 The Go Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style\n// license that can be found in the LICENSE file.\n\npackage time\n\nimport (\n\t\"unsafe\"\n)\n\n// Sleep pauses the current goroutine for at least the duration d.\n// A negative or zero duration causes Sleep to return immediately.\nfunc Sleep(d Duration)\n\n// syncTimer returns c as an unsafe.Pointer, for passing to newTimer.\nfunc syncTimer(c chan Time) unsafe.Pointer {\n\treturn *(*unsafe.Pointer)(unsafe.Pointer(&c))\n}\n\n// when is a helper function for setting the 'when' field of a runtimeTimer.\n// It returns what the time will be, in nanoseconds, Duration d in the future.\n// If d is negative, it is ignored. If the returned value would be less than\n// zero because of an overflow, MaxInt64 is returned.\nfunc when(d Duration) int64 {\n\tif d <= 0 {\n\t\treturn runtimeNano()\n\t}\n\tt := runtimeNano() + int64(d)\n\tif t < 0 {\n\t\t// N.B. runtimeNano() and d are always positive, so addition\n\t\t// (including overflow) will never result in t == 0.\n\t\tt = 1<<63 - 1 // math.MaxInt64\n\t}\n\treturn t\n}\n\n// These functions are pushed to package time from package runtime.\n\n// The arg cp is a chan Time, but the declaration in runtime uses a pointer,\n// so we use a pointer here too. This keeps some tools that aggressively\n// compare linknamed symbol definitions happier.\n//\n//go:linkname newTimer\nfunc newTimer(when, period int64, f func(any, uintptr, int64), arg any, cp unsafe.Pointer) *Timer\n\n//go:linkname stopTimer\nfunc stopTimer(*Timer) bool\n\n//go:linkname resetTimer\nfunc resetTimer(t *Timer, when, period int64) bool\n\n// Note: The runtime knows the layout of struct Timer, since newTimer allocates it.\n// The runtime also knows that Ticker and Timer have the same layout.\n// There are extra fields after the channel, reserved for the runtime\n// and inaccessible to users.\n\n// The Timer type represents a single event.\n// When the Timer expires, the current time will be sent on C,\n// unless the Timer was created by [AfterFunc].\n// A Timer must be created with [NewTimer] or AfterFunc.\ntype Timer struct {\n\tC         <-chan Time\n\tinitTimer bool\n}\n\n// Stop prevents the [Timer] from firing.\n// It returns true if the call stops the timer, false if the timer has already\n// expired or been stopped.\n//\n// For a func-based timer created with [AfterFunc](d, f),\n// if t.Stop returns false, then the timer has already expired\n// and the function f has been started in its own goroutine;\n// Stop does not wait for f to complete before returning.\n// If the caller needs to know whether f is completed,\n// it must coordinate with f explicitly.\n//\n// For a chan-based timer created with NewTimer(d), as of Go 1.23,\n// any receive from t.C after Stop has returned is guaranteed to block\n// rather than receive a stale time value from before the Stop;\n// if the program has not received from t.C already and the timer is\n// running, Stop is guaranteed to return true.\n// Before Go 1.23, the only safe way to use Stop was insert an extra\n// <-t.C if Stop returned false to drain a potential stale value.\n// See the [NewTimer] documentation for more details.\nfunc (t *Timer) Stop() bool {\n\tif !t.initTimer {\n\t\tpanic(\"time: Stop called on uninitialized Timer\")\n\t}\n\treturn stopTimer(t)\n}\n\n// NewTimer creates a new Timer that will send\n// the current time on its channel after at least duration d.\n//\n// Before Go 1.23, the garbage collector did not recover\n// timers that had not yet expired or been stopped, so code often\n// immediately deferred t.Stop after calling NewTimer, to make\n// the timer recoverable when it was no longer needed.\n// As of Go 1.23, the garbage collector can recover unreferenced\n// timers, even if they haven't expired or been stopped.\n// The Stop method is no longer necessary to help the garbage collector.\n// (Code may of course still want to call Stop to stop the timer for other reasons.)\n//\n// Before Go 1.23, the channel associated with a Timer was\n// asynchronous (buffered, capacity 1), which meant that\n// stale time values could be received even after [Timer.Stop]\n// or [Timer.Reset] returned.\n// As of Go 1.23, the channel is synchronous (unbuffered, capacity 0),\n// eliminating the possibility of those stale values.\nfunc NewTimer(d Duration) *Timer {\n\tc := make(chan Time, 1)\n\tt := newTimer(when(d), 0, sendTime, c, syncTimer(c))\n\tt.C = c\n\treturn t\n}\n\n// Reset changes the timer to expire after duration d.\n// It returns true if the timer had been active, false if the timer had\n// expired or been stopped.\n//\n// For a func-based timer created with [AfterFunc](d, f), Reset either reschedules\n// when f will run, in which case Reset returns true, or schedules f\n// to run again, in which case it returns false.\n// When Reset returns false, Reset neither waits for the prior f to\n// complete before returning nor does it guarantee that the subsequent\n// goroutine running f does not run concurrently with the prior\n// one. If the caller needs to know whether the prior execution of\n// f is completed, it must coordinate with f explicitly.\n//\n// For a chan-based timer created with NewTimer, as of Go 1.23,\n// any receive from t.C after Reset has returned is guaranteed not\n// to receive a time value corresponding to the previous timer settings;\n// if the program has not received from t.C already and the timer is\n// running, Reset is guaranteed to return true.\n// Before Go 1.23, the only safe way to use Reset was to call [Timer.Stop]\n// and explicitly drain the timer first.\n// See the [NewTimer] documentation for more details.\nfunc (t *Timer) Reset(d Duration) bool {\n\tif !t.initTimer {\n\t\tpanic(\"time: Reset called on uninitialized Timer\")\n\t}\n\tw := when(d)\n\treturn resetTimer(t, w, 0)\n}\n\n// sendTime does a non-blocking send of the current time on c.\nfunc sendTime(c any, seq uintptr, delta int64) {\n\t// delta is how long ago the channel send was supposed to happen.\n\t// The current time can be arbitrarily far into the future, because the runtime\n\t// can delay a sendTime call until a goroutine tries to receive from\n\t// the channel. Subtract delta to go back to the old time that we\n\t// used to send.\n\tselect {\n\tcase c.(chan Time) <- Now().Add(Duration(-delta)):\n\tdefault:\n\t}\n}\n\n// After waits for the duration to elapse and then sends the current time\n// on the returned channel.\n// It is equivalent to [NewTimer](d).C.\n//\n// Before Go 1.23, this documentation warned that the underlying\n// [Timer] would not be recovered by the garbage collector until the\n// timer fired, and that if efficiency was a concern, code should use\n// NewTimer instead and call [Timer.Stop] if the timer is no longer needed.\n// As of Go 1.23, the garbage collector can recover unreferenced,\n// unstopped timers. There is no reason to prefer NewTimer when After will do.\nfunc After(d Duration) <-chan Time {\n\treturn NewTimer(d).C\n}\n\n// AfterFunc waits for the duration to elapse and then calls f\n// in its own goroutine. It returns a [Timer] that can\n// be used to cancel the call using its Stop method.\n// The returned Timer's C field is not used and will be nil.\nfunc AfterFunc(d Duration, f func()) *Timer {\n\treturn newTimer(when(d), 0, goFunc, f, nil)\n}\n\nfunc goFunc(arg any, seq uintptr, delta int64) {\n\tgo arg.(func())()\n}\n",
+  "phase": "final",
+  "repeat": 2
+}

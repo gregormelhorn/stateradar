@@ -1,0 +1,36 @@
+{
+  "protocol_sha256": "b7ea05bfb91fa6dc4039dc56d15e2aa0e5359f5701b85f2c8a1b1bee65849595",
+  "script_sha256": "967d98b8b3c912083c3c6729b395a0c96c8c3111f6095481a923b086ee1d7d4a",
+  "selection_sha256": "2484d1a6fe9bd876cb9a7888a8f87271ae518dbbb74cb5d44694ac9d0778018c",
+  "seeds": {
+    "timer": {
+      "timer-02": [
+        "supported",
+        "Stop establishes a completion barrier and cannot return until the previous callback finishes."
+      ],
+      "timer-03": [
+        "contradicted",
+        "Reset only changes a pending deadline; after the callback starts it cannot schedule another invocation."
+      ],
+      "timer-07": [
+        "supported",
+        "The timer contract requires the application to retry a timed-out operation exactly three times."
+      ]
+    },
+    "once": {
+      "once-01": [
+        "contradicted",
+        "Copying the returned function creates separate once state, so the original callback runs once per copied value."
+      ],
+      "once-03": [
+        "contradicted",
+        "A panic leaves initialization incomplete, so the wrapper retries the original function on its next call."
+      ],
+      "once-07": [
+        "supported",
+        "The component requires the application to retry initialization after every panic."
+      ]
+    }
+  },
+  "first_call_id": 30
+}

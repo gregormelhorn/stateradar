@@ -1,0 +1,34 @@
+{
+  "component": "singleflight",
+  "source": "upstream/singleflight/singleflight.go",
+  "cases": [
+    {
+      "id": "singleflight-01",
+      "claim": "Forget cancels the already running function for that key."
+    },
+    {
+      "id": "singleflight-02",
+      "claim": "After Forget and a new call under the same key, completion of the old call removes the new call from duplicate suppression."
+    },
+    {
+      "id": "singleflight-03",
+      "claim": "A duplicate DoChan while the original call is pending receives the original result without running its own function."
+    },
+    {
+      "id": "singleflight-04",
+      "claim": "After a successful call finishes, subsequent calls with that key permanently reuse the cached result."
+    },
+    {
+      "id": "singleflight-05",
+      "claim": "The DoChan result channel is closed after its result is delivered."
+    },
+    {
+      "id": "singleflight-06",
+      "claim": "The same key used concurrently in two distinct Group instances shares a single execution."
+    },
+    {
+      "id": "singleflight-07",
+      "claim": "Application-level errors must be cached for thirty seconds before another request is allowed."
+    }
+  ]
+}

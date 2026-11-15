@@ -1,0 +1,41 @@
+F..F.FF
+======================================================================
+FAIL: test_cost_ceiling (test_gepa_budget.Budget.test_cost_ceiling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_budget.py", line 19, in test_cost_ceiling
+    with self.assertRaisesRegex(EvalError,'ceiling'):self.e.reserve_launch()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_launch_limit (test_gepa_budget.Budget.test_launch_limit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_budget.py", line 22, in test_launch_limit
+    with self.assertRaisesRegex(EvalError,'launch limit'):self.e.reserve_launch()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_unsettled_codex (test_gepa_budget.Budget.test_unsettled_codex)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_budget.py", line 13, in test_unsettled_codex
+    with self.assertRaisesRegex(EvalError,'unsettled Codex'):self.e.reserve_launch()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_unsettled_provider (test_gepa_budget.Budget.test_unsettled_provider)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_budget.py", line 16, in test_unsettled_provider
+    with self.assertRaisesRegex(EvalError,'unsettled provider'):self.e.reserve_launch()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.029s
+
+FAILED (failures=4)

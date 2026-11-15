@@ -1,0 +1,68 @@
+{
+  "findings": [
+    {
+      "id": "singleflight-01",
+      "verdict": "contradicted",
+      "line": 212,
+      "fragment": "delete(g.m, key)",
+      "reason": "Forget deletes the map entry under the group lock. The running function continues, and a later call can start a new execution.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-02",
+      "verdict": "contradicted",
+      "line": 159,
+      "fragment": "if g.m[key] == c {",
+      "reason": "Completion deletes the entry only if it still points to the completing call. A new call under the same key has a different entry.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-03",
+      "verdict": "supported",
+      "line": 129,
+      "fragment": "c.chans = append(c.chans, ch)",
+      "reason": "For a pending call still registered under the key, the duplicate adds its channel and returns before launching its function. On normal return, both channels receive the original result. The panic and Goexit paths bypass result delivery.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-04",
+      "verdict": "contradicted",
+      "line": 160,
+      "fragment": "delete(g.m, key)",
+      "reason": "Completion removes the call if it still owns the entry. A later call with no pending entry starts a new execution.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-05",
+      "verdict": "contradicted",
+      "line": 120,
+      "fragment": "The returned channel will not be closed.",
+      "reason": "The DoChan contract leaves the channel open, including on the panic and Goexit paths.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-06",
+      "verdict": "contradicted",
+      "line": 71,
+      "fragment": "Group represents a class of work and forms a namespace in",
+      "reason": "Each Group is a separate duplicate-suppression namespace and looks up pending calls in its own map.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-07",
+      "verdict": "unspecified",
+      "line": 160,
+      "fragment": "delete(g.m, key)",
+      "reason": "The component clears the completed entry even when the function returns an error. Its contract leaves application caching and request admission policy open.",
+      "question": "OPEN: Must application-level errors be cached for thirty seconds before another request is allowed, or is that entirely an application-policy decision?"
+    }
+  ],
+  "corrections": [
+    {"id": "singleflight-01", "before": "supported", "after": "contradicted"},
+    {"id": "singleflight-02", "before": "supported", "after": "contradicted"},
+    {"id": "singleflight-04", "before": "supported", "after": "contradicted"},
+    {"id": "singleflight-05", "before": "supported", "after": "contradicted"},
+    {"id": "singleflight-06", "before": "unclear", "after": "contradicted"},
+    {"id": "singleflight-07", "before": "supported", "after": "unspecified"}
+  ]
+}

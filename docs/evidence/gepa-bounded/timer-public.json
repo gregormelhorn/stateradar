@@ -1,0 +1,34 @@
+{
+  "component": "timer",
+  "source": "upstream/timer/sleep.go",
+  "cases": [
+    {
+      "id": "timer-01",
+      "claim": "A timer returned by AfterFunc has a nil C field."
+    },
+    {
+      "id": "timer-02",
+      "claim": "Stop on an already running AfterFunc callback waits for that callback to finish."
+    },
+    {
+      "id": "timer-03",
+      "claim": "Reset after the AfterFunc callback has started returns false and schedules another execution."
+    },
+    {
+      "id": "timer-04",
+      "claim": "A callback scheduled by Reset cannot overlap the previous callback."
+    },
+    {
+      "id": "timer-05",
+      "claim": "Stop before a far-future AfterFunc expires can return true and prevent that scheduled execution."
+    },
+    {
+      "id": "timer-06",
+      "claim": "Reassigning only the caller function variable after AfterFunc registration changes which function that timer will invoke."
+    },
+    {
+      "id": "timer-07",
+      "claim": "The application must retry a timed-out operation exactly three times."
+    }
+  ]
+}

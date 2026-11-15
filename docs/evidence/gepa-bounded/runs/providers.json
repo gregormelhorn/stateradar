@@ -1,0 +1,1297 @@
+[
+  {
+    "component": "context",
+    "phase": "optimization",
+    "repeat": 0,
+    "calls": [
+      {
+        "id": 1,
+        "provider": "deepseek-flash",
+        "amount_microdollars": 3479,
+        "status": "settled"
+      },
+      {
+        "id": 2,
+        "provider": "jev",
+        "amount_microdollars": 345,
+        "status": "settled"
+      }
+    ],
+    "cost_usd": 0.003824,
+    "seconds": 3.998167041980196,
+    "response": {
+      "source": "upstream/context/context.go",
+      "source_sha256": "971f00ffa375b79d3f65e6da33cca3a493cc3fce091c589233abfb4283e29b7d",
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 8926,
+        "output_tokens": 667,
+        "cost_microdollars": 3479,
+        "reservation_microdollars": 19396
+      },
+      "verification": {
+        "model": "jev-1.14.0",
+        "input_tokens": 8203,
+        "cost_microdollars": 345,
+        "reservation_microdollars": 1364,
+        "error": null
+      },
+      "claims": {
+        "C1": {
+          "kind": "claim",
+          "statement": "AfterFunc calls f in its own goroutine after ctx is canceled.",
+          "line": 309,
+          "fragment": "AfterFunc arranges to call f in its own goroutine after ctx is canceled.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C2": {
+          "kind": "claim",
+          "statement": "If ctx is already canceled, AfterFunc calls f immediately in its own goroutine.",
+          "line": 310,
+          "fragment": "If ctx is already canceled, AfterFunc calls f immediately in its own goroutine.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C3": {
+          "kind": "claim",
+          "statement": "Multiple AfterFunc calls on a context operate independently and one does not replace another.",
+          "line": 312,
+          "fragment": "Multiple calls to AfterFunc on a context operate independently;",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.98,
+              "contradicted": 0.0,
+              "unclear": 0.02
+            },
+            "confidence": 0.97
+          }
+        },
+        "C4": {
+          "kind": "claim",
+          "statement": "The returned stop function does not wait for f to complete before returning.",
+          "line": 320,
+          "fragment": "The stop function does not wait for f to complete before returning.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C5": {
+          "kind": "claim",
+          "statement": "Canceling a context releases resources associated with it, so code should call cancel as soon as operations running in the context complete.",
+          "line": 239,
+          "fragment": "Canceling this context releases resources associated with it, so code should",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C6": {
+          "kind": "claim",
+          "statement": "A CancelFunc does not wait for the work to stop.",
+          "line": 229,
+          "fragment": "A CancelFunc does not wait for the work to stop.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C7": {
+          "kind": "claim",
+          "statement": "The same Context may be passed to functions running in different goroutines and is safe for simultaneous use by multiple goroutines.",
+          "line": 53,
+          "fragment": "The same Context may be passed to functions running in different goroutines;",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.9,
+              "contradicted": 0.0,
+              "unclear": 0.1
+            },
+            "confidence": 0.85
+          }
+        }
+      },
+      "questions": [
+        "Does the source establish that stopping a registered callback before cancellation returns true on the first stop and false on a second stop?",
+        "Does the source establish that a false stop result proves the callback is currently running?",
+        "Does the source establish that stopping an already started callback waits until that callback finishes?",
+        "Does the source establish whether two AfterFunc registrations on the same context operate independently rather than replacing each other?",
+        "Does the source establish that registration on an already canceled context still schedules the callback in its own goroutine?",
+        "Does the source establish what happens to a registration if only the caller local context variable is reassigned after registration?",
+        "Does the source specify any requirement for the application to report callback latency above ten milliseconds as an incident?",
+        "Does the source establish that multiple AfterFunc calls on the same context are independent registrations rather than one replacing another?",
+        "Does the source establish that stopping an already started callback does not wait until the callback finishes?",
+        "Does the source establish an ordering between stopping a callback and cancellation that determines the meaning of a false stop result?",
+        "Does the source specify when a callback registered on an already canceled context is scheduled relative to the registration call?"
+      ],
+      "review_required": true
+    }
+  },
+  {
+    "component": "singleflight",
+    "phase": "optimization",
+    "repeat": 0,
+    "calls": [
+      {
+        "id": 3,
+        "provider": "deepseek-flash",
+        "amount_microdollars": 1494,
+        "status": "settled"
+      },
+      {
+        "id": 4,
+        "provider": "jev",
+        "amount_microdollars": 127,
+        "status": "settled"
+      }
+    ],
+    "cost_usd": 0.001621,
+    "seconds": 3.335418416012544,
+    "response": {
+      "source": "upstream/singleflight/singleflight.go",
+      "source_sha256": "3ab234a431a14594f1bc46e76d9d35928fa18d05947801e167df1015834719a8",
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 2551,
+        "output_tokens": 607,
+        "cost_microdollars": 1494,
+        "reservation_microdollars": 12636
+      },
+      "verification": {
+        "model": "jev-1.14.0",
+        "input_tokens": 3011,
+        "cost_microdollars": 127,
+        "reservation_microdollars": 500,
+        "error": null
+      },
+      "claims": {
+        "C1": {
+          "kind": "claim",
+          "statement": "Forget does not cancel an already running function for that key; it only deletes the key from the map so future calls will call the function rather than wait for the earlier call.",
+          "line": 208,
+          "fragment": "Future calls",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.78,
+              "contradicted": 0.0,
+              "unclear": 0.22
+            },
+            "confidence": 0.67
+          }
+        },
+        "C2": {
+          "kind": "claim",
+          "statement": "After the call completes, doCall only deletes the map entry if the stored entry is still the same call, so completion of the old call does not remove a new call from duplicate suppression.",
+          "line": 159,
+          "fragment": "if g.m[key] == c {",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.97,
+              "contradicted": 0.0,
+              "unclear": 0.03
+            },
+            "confidence": 0.96
+          }
+        },
+        "C3": {
+          "kind": "claim",
+          "statement": "A duplicate DoChan call while the original is pending receives the original result without running its own function; its channel is appended to the pending call's chans.",
+          "line": 129,
+          "fragment": "c.chans = append(c.chans, ch)",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.96,
+              "contradicted": 0.0,
+              "unclear": 0.04
+            },
+            "confidence": 0.94
+          }
+        },
+        "C4": {
+          "kind": "claim",
+          "statement": "After a call finishes and is removed, subsequent calls with that key do not permanently reuse a cached result; a call is deleted from the map on completion (unless replaced).",
+          "line": 160,
+          "fragment": "delete(g.m, key)",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.98,
+              "contradicted": 0.0,
+              "unclear": 0.02
+            },
+            "confidence": 0.97
+          }
+        },
+        "C5": {
+          "kind": "claim",
+          "statement": "The DoChan result channel is not closed after delivery.",
+          "line": 120,
+          "fragment": "The returned channel will not be closed.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C6": {
+          "kind": "claim",
+          "statement": "Distinct Group instances have separate maps, so the same key used concurrently in two distinct Group instances does not share a single execution.",
+          "line": 75,
+          "fragment": "m  map[string]*call",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "unclear",
+            "probabilities": {
+              "supported": 0.32,
+              "contradicted": 0.0,
+              "unclear": 0.68
+            },
+            "confidence": 0.52
+          }
+        },
+        "C7": {
+          "kind": "claim",
+          "statement": "The source does not require application-level errors to be cached for thirty seconds before another request is allowed.",
+          "line": 160,
+          "fragment": "delete(g.m, key)",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.51,
+              "contradicted": 0.04,
+              "unclear": 0.45
+            },
+            "confidence": 0.26
+          }
+        }
+      },
+      "questions": [
+        "Does Forget cancel an already running function for that key, or only affect future calls as stated in the comment?",
+        "After Forget and a new call under the same key, does completion of the old call remove the new call from duplicate suppression, given the g.m[key] == c check?",
+        "Is the DoChan result channel ever closed, including on panic or Goexit paths?",
+        "Must application-level errors be cached for thirty seconds before another request is allowed, or is that entirely an application-policy decision?",
+        "Is sharing a single execution across distinct Group instances intended, or is per-Group isolation the intended namespace behavior?",
+        "What should happen to pending DoChan channels when the function panics or invokes runtime.Goexit?"
+      ],
+      "review_required": true
+    }
+  },
+  {
+    "component": "timer",
+    "phase": "final",
+    "repeat": 0,
+    "calls": [
+      {
+        "id": 5,
+        "provider": "deepseek-flash",
+        "amount_microdollars": 1471,
+        "status": "settled"
+      },
+      {
+        "id": 6,
+        "provider": "jev",
+        "amount_microdollars": 132,
+        "status": "settled"
+      }
+    ],
+    "cost_usd": 0.001603,
+    "seconds": 4.064303792023566,
+    "response": {
+      "source": "upstream/timer/sleep.go",
+      "source_sha256": "58489f2ea41f5032921eaa448c215d7ffffcb9fb0b43c1aad891c20bed342dc5",
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 2647,
+        "output_tokens": 564,
+        "cost_microdollars": 1471,
+        "reservation_microdollars": 13075
+      },
+      "verification": {
+        "model": "jev-1.14.0",
+        "input_tokens": 3121,
+        "cost_microdollars": 132,
+        "reservation_microdollars": 538,
+        "error": null
+      },
+      "claims": {
+        "C1": {
+          "kind": "claim",
+          "statement": "The Timer returned by AfterFunc has a C field that is not used and will be nil.",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C2": {
+          "kind": "claim",
+          "statement": "For a func-based timer created with AfterFunc, if Stop returns false the callback has already expired and been started in its own goroutine, and Stop does not wait for it to complete.",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.86,
+              "contradicted": 0.0,
+              "unclear": 0.14
+            },
+            "confidence": 0.79
+          }
+        },
+        "C3": {
+          "kind": "claim",
+          "statement": "For a func-based AfterFunc timer, Reset either reschedules when f will run (returning true) or schedules f to run again (returning false).",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.89,
+              "contradicted": 0.0,
+              "unclear": 0.11
+            },
+            "confidence": 0.83
+          }
+        },
+        "C4": {
+          "kind": "claim",
+          "statement": "When Reset on a func-based AfterFunc timer returns false, it does not guarantee the subsequent goroutine running f avoids running concurrently with the prior one.",
+          "line": 126,
+          "fragment": "goroutine running f does not run concurrently with the prior",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C5": {
+          "kind": "claim",
+          "statement": "Stop returns true if the call stops the timer, and false if the timer has already expired or been stopped.",
+          "line": 67,
+          "fragment": "It returns true if the call stops the timer, false if the timer has already",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.99,
+              "contradicted": 0.0,
+              "unclear": 0.01
+            },
+            "confidence": 0.98
+          }
+        },
+        "C6": {
+          "kind": "claim",
+          "statement": "AfterFunc waits for the duration to elapse and then calls f in its own goroutine.",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.86,
+              "contradicted": 0.0,
+              "unclear": 0.14
+            },
+            "confidence": 0.79
+          }
+        }
+      },
+      "questions": [
+        "Does the source specify whether Stop on a far-future AfterFunc timer that has not yet expired returns true and prevents execution (timer-05)?",
+        "Does the source state whether reassigning only the caller's function variable after AfterFunc registration changes which function the timer will invoke (timer-06)?",
+        "Does the source state any requirement that a timed-out operation must be retried exactly three times (timer-07)?",
+        "Does the source establish that a callback scheduled by Reset can never overlap the previous callback (timer-04), given line 126's non-guarantee?",
+        "Does the source specify the behavior of Stop being called during an already running AfterFunc callback beyond what line 73 states?"
+      ],
+      "review_required": true
+    }
+  },
+  {
+    "component": "timer",
+    "phase": "final",
+    "repeat": 1,
+    "calls": [
+      {
+        "id": 7,
+        "provider": "deepseek-flash",
+        "amount_microdollars": 1551,
+        "status": "settled"
+      },
+      {
+        "id": 8,
+        "provider": "jev",
+        "amount_microdollars": 138,
+        "status": "settled"
+      }
+    ],
+    "cost_usd": 0.001689,
+    "seconds": 3.977464624971617,
+    "response": {
+      "source": "upstream/timer/sleep.go",
+      "source_sha256": "58489f2ea41f5032921eaa448c215d7ffffcb9fb0b43c1aad891c20bed342dc5",
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 2647,
+        "output_tokens": 630,
+        "cost_microdollars": 1551,
+        "reservation_microdollars": 13075
+      },
+      "verification": {
+        "model": "jev-1.14.0",
+        "input_tokens": 3280,
+        "cost_microdollars": 138,
+        "reservation_microdollars": 568,
+        "error": null
+      },
+      "claims": {
+        "C1": {
+          "kind": "claim",
+          "statement": "For a timer created with AfterFunc, the returned Timer's C field is not used and will be nil.",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C2": {
+          "kind": "claim",
+          "statement": "When Stop returns false for a func-based timer created with AfterFunc, the function f has already expired and has been started in its own goroutine.",
+          "line": 71,
+          "fragment": "if t.Stop returns false, then the timer has already expired",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.98,
+              "contradicted": 0.0,
+              "unclear": 0.02
+            },
+            "confidence": 0.97
+          }
+        },
+        "C3": {
+          "kind": "claim",
+          "statement": "Stop does not wait for a func-based AfterFunc callback to complete before returning.",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C4": {
+          "kind": "claim",
+          "statement": "For a func-based timer created with AfterFunc, when Reset returns false, it neither waits for the prior f to complete before returning nor guarantees the subsequent goroutine running f does not run concurrently with the prior one.",
+          "line": 124,
+          "fragment": "When Reset returns false, Reset neither waits for the prior f to",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C5": {
+          "kind": "claim",
+          "statement": "For a func-based AfterFunc timer, Reset either reschedules when f will run (returning true) or schedules f to run again (returning false).",
+          "line": 121,
+          "fragment": "Reset either reschedules",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.97,
+              "contradicted": 0.0,
+              "unclear": 0.03
+            },
+            "confidence": 0.96
+          }
+        },
+        "C6": {
+          "kind": "claim",
+          "statement": "Stop returns true if the call stops the timer, and false if the timer has already expired or been stopped.",
+          "line": 67,
+          "fragment": "It returns true if the call stops the timer, false if the timer has already",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.99,
+              "contradicted": 0.0,
+              "unclear": 0.01
+            },
+            "confidence": 0.98
+          }
+        },
+        "C7": {
+          "kind": "claim",
+          "statement": "AfterFunc waits for the duration to elapse and then calls f in its own goroutine.",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.89,
+              "contradicted": 0.0,
+              "unclear": 0.11
+            },
+            "confidence": 0.83
+          }
+        }
+      },
+      "questions": [
+        "Does the source specify whether reassigning the caller's function variable after AfterFunc registration changes which function the timer invokes?",
+        "Does the source state whether an AfterFunc callback scheduled by Reset can overlap the previous callback, or does it only address concurrency when Reset returns false?",
+        "Does the source specify how many times, if any, a timed-out operation must be retried by the application?",
+        "Does the source specify whether Stop returning false guarantees that f will start, versus that it has already started?",
+        "Does the source specify whether Stop before a far-future AfterFunc expires can return true and prevent that scheduled execution?",
+        "Does the source specify whether Reset returning false guarantees that the prior f has already started or may not have started?"
+      ],
+      "review_required": true
+    }
+  },
+  {
+    "component": "timer",
+    "phase": "final",
+    "repeat": 2,
+    "calls": [
+      {
+        "id": 9,
+        "provider": "deepseek-flash",
+        "amount_microdollars": 1549,
+        "status": "settled"
+      },
+      {
+        "id": 10,
+        "provider": "jev",
+        "amount_microdollars": 137,
+        "status": "settled"
+      }
+    ],
+    "cost_usd": 0.001686,
+    "seconds": 4.0155986250028946,
+    "response": {
+      "source": "upstream/timer/sleep.go",
+      "source_sha256": "58489f2ea41f5032921eaa448c215d7ffffcb9fb0b43c1aad891c20bed342dc5",
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 2647,
+        "output_tokens": 629,
+        "cost_microdollars": 1549,
+        "reservation_microdollars": 13075
+      },
+      "verification": {
+        "model": "jev-1.14.0",
+        "input_tokens": 3244,
+        "cost_microdollars": 137,
+        "reservation_microdollars": 561,
+        "error": null
+      },
+      "claims": {
+        "C1": {
+          "kind": "claim",
+          "statement": "A Timer returned by AfterFunc has a C field that is not used and will be nil.",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C2": {
+          "kind": "claim",
+          "statement": "For an AfterFunc timer, Stop returning false does not wait for the callback f to complete before returning.",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C3": {
+          "kind": "claim",
+          "statement": "For an AfterFunc timer, when Stop returns false the timer has already expired and f has been started in its own goroutine.",
+          "line": 71,
+          "fragment": "if t.Stop returns false, then the timer has already expired",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.98,
+              "contradicted": 0.0,
+              "unclear": 0.02
+            },
+            "confidence": 0.97
+          }
+        },
+        "C4": {
+          "kind": "claim",
+          "statement": "For a func-based AfterFunc timer, Reset can return false and schedule f to run again.",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.99,
+              "contradicted": 0.0,
+              "unclear": 0.01
+            },
+            "confidence": 0.98
+          }
+        },
+        "C5": {
+          "kind": "claim",
+          "statement": "When Reset returns false for an AfterFunc timer, it does not guarantee the subsequent goroutine running f avoids running concurrently with the prior one.",
+          "line": 125,
+          "fragment": "does it guarantee that the subsequent",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C6": {
+          "kind": "claim",
+          "statement": "Stop returns true if it stops the timer and false if the timer has already expired or been stopped.",
+          "line": 67,
+          "fragment": "It returns true if the call stops the timer, false if the timer has already",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.99,
+              "contradicted": 0.0,
+              "unclear": 0.01
+            },
+            "confidence": 0.98
+          }
+        },
+        "C7": {
+          "kind": "claim",
+          "statement": "AfterFunc calls f in its own goroutine after waiting for the duration to elapse.",
+          "line": 174,
+          "fragment": "in its own goroutine. It returns a [Timer] that can",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.75,
+              "contradicted": 0.0,
+              "unclear": 0.25
+            },
+            "confidence": 0.62
+          }
+        }
+      },
+      "questions": [
+        "Does a callback scheduled by Reset ever overlap the previous callback, or is concurrency only explicitly unspecified (not guaranteed) rather than established either way?",
+        "If the caller function variable is reassigned after AfterFunc registration, does the timer invoke the newly assigned function or the originally registered one?",
+        "Does Stop returning true before a far-future AfterFunc expiry establish that the scheduled execution is prevented, beyond the general Stop documentation?",
+        "What is the required retry count, if any, for a timed-out operation in this source?",
+        "Does a general requirement (if any were present) establish a specific ordering of events, or must ordering be specified explicitly?",
+        "Is there any source-specified ordering relationship between Stop returning and f being started, beyond Stop not waiting for completion?",
+        "Does the source specify behavior when Reset returns false for an AfterFunc timer with respect to waiting for the prior f to complete?"
+      ],
+      "review_required": true
+    }
+  },
+  {
+    "component": "once",
+    "phase": "final",
+    "repeat": 0,
+    "calls": [
+      {
+        "id": 11,
+        "provider": "deepseek-flash",
+        "amount_microdollars": 1292,
+        "status": "settled"
+      },
+      {
+        "id": 12,
+        "provider": "jev",
+        "amount_microdollars": 108,
+        "status": "settled"
+      }
+    ],
+    "cost_usd": 0.0014,
+    "seconds": 4.123103125020862,
+    "response": {
+      "source": "upstream/once/oncefunc.go",
+      "source_sha256": "0853c1ad885c593d2810e601c495f00abe197b10d12b679f94badf3efe5fa365",
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 1448,
+        "output_tokens": 714,
+        "cost_microdollars": 1292,
+        "reservation_microdollars": 11544
+      },
+      "verification": {
+        "model": "jev-1.14.0",
+        "input_tokens": 2555,
+        "cost_microdollars": 108,
+        "reservation_microdollars": 440,
+        "error": null
+      },
+      "claims": {
+        "C1": {
+          "kind": "claim",
+          "statement": "OnceFunc returns a function that invokes f only once and may be called concurrently.",
+          "line": 7,
+          "fragment": "OnceFunc returns a function that invokes f only once.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.6,
+              "contradicted": 0.0,
+              "unclear": 0.4
+            },
+            "confidence": 0.4
+          }
+        },
+        "C2": {
+          "kind": "claim",
+          "statement": "If f panics, the function returned by OnceFunc panics with the same value on every call.",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C3": {
+          "kind": "ordering",
+          "statement": "After f is invoked inside once.Do, the deferred function sets d.f to nil, then recovers into d.p, and if d.valid is false, immediately panics with d.p.",
+          "line": 25,
+          "fragment": "d.p = recover()",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.72,
+              "contradicted": 0.02,
+              "unclear": 0.26
+            },
+            "confidence": 0.58,
+            "ordering_scope_probability": 0.04
+          }
+        },
+        "C4": {
+          "kind": "ordering",
+          "statement": "Within once.Do, d.valid is set to true only after d.f returns without panicking.",
+          "line": 34,
+          "fragment": "d.valid = true // Set only if f does not panic.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.99,
+              "contradicted": 0.0,
+              "unclear": 0.01
+            },
+            "confidence": 0.98,
+            "ordering_scope_probability": 0.26
+          }
+        },
+        "C5": {
+          "kind": "claim",
+          "statement": "If d.valid is false when the wrapper resumes after once.Do, the wrapper panics with d.p.",
+          "line": 37,
+          "fragment": "panic(d.p)",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.93,
+              "contradicted": 0.0,
+              "unclear": 0.07
+            },
+            "confidence": 0.89
+          }
+        },
+        "C6": {
+          "kind": "claim",
+          "statement": "OnceValue returns a function that invokes f only once and returns the value returned by f, and that returned function may be called concurrently.",
+          "line": 42,
+          "fragment": "OnceValue returns a function that invokes f only once and returns the value",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.73,
+              "contradicted": 0.0,
+              "unclear": 0.27
+            },
+            "confidence": 0.6
+          }
+        },
+        "C7": {
+          "kind": "claim",
+          "statement": "If f panics, the function returned by OnceValue panics with the same value on every call.",
+          "line": 45,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        }
+      },
+      "questions": [
+        "Does copying the function value returned by OnceFunc share the same once state, so that calling both copies invokes the original function only once?",
+        "Do two separate OnceFunc calls wrapping the same function share one once state?",
+        "When the original function panics, is the original function re-executed on subsequent calls, or is only the stored panic value re-raised without executing the original function again?",
+        "If OnceValue returns a pointer, are later mutations of the pointed-to object visible through subsequent returns of that same pointer?",
+        "Does reassigning only the caller function variable after constructing OnceFunc change which function the wrapper invokes?",
+        "After recovering the first OnceFunc panic, does calling the wrapper again return normally, or does it panic with the same value again?",
+        "Must the application retry an initialization function after every panic?",
+        "Is the panic value stored for re-panicking on every subsequent call, or is the same stack trace reproduced each time?",
+        "What does 'same value' mean when the recovered panic value itself is mutated after the first call?",
+        "Are OnceValue and OnceValues specified to have identical panic/re-panic behavior to OnceFunc, and is concurrent-call behavior identical across all three?"
+      ],
+      "review_required": true
+    }
+  },
+  {
+    "component": "once",
+    "phase": "final",
+    "repeat": 1,
+    "calls": [
+      {
+        "id": 13,
+        "provider": "deepseek-flash",
+        "amount_microdollars": 1143,
+        "status": "settled"
+      },
+      {
+        "id": 14,
+        "provider": "jev",
+        "amount_microdollars": 97,
+        "status": "settled"
+      }
+    ],
+    "cost_usd": 0.00124,
+    "seconds": 3.746362083009444,
+    "response": {
+      "source": "upstream/once/oncefunc.go",
+      "source_sha256": "0853c1ad885c593d2810e601c495f00abe197b10d12b679f94badf3efe5fa365",
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 1448,
+        "output_tokens": 590,
+        "cost_microdollars": 1143,
+        "reservation_microdollars": 11544
+      },
+      "verification": {
+        "model": "jev-1.14.0",
+        "input_tokens": 2301,
+        "cost_microdollars": 97,
+        "reservation_microdollars": 392,
+        "error": null
+      },
+      "claims": {
+        "C1": {
+          "kind": "claim",
+          "statement": "OnceFunc returns a function that invokes f only once, and the returned function may be called concurrently.",
+          "line": 7,
+          "fragment": "returns a function that invokes f only once",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.74,
+              "contradicted": 0.0,
+              "unclear": 0.26
+            },
+            "confidence": 0.61
+          }
+        },
+        "C2": {
+          "kind": "claim",
+          "statement": "If f panics, the function returned by OnceFunc will panic with the same value on every call.",
+          "line": 10,
+          "fragment": "will panic with the same value on every call",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C3": {
+          "kind": "claim",
+          "statement": "The wrapper sets d.f to nil after invoking it, to avoid keeping f alive after invoking it.",
+          "line": 24,
+          "fragment": "d.f = nil // Do not keep f alive after invoking it.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C4": {
+          "kind": "claim",
+          "statement": "The valid flag is set only if f does not panic.",
+          "line": 34,
+          "fragment": "d.valid = true // Set only if f does not panic.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C5": {
+          "kind": "ordering",
+          "statement": "On the first call, if f panics, the deferred function re-panics immediately so the user gets a complete stack trace into f.",
+          "line": 27,
+          "fragment": "Re-panic immediately so on the first",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0,
+            "ordering_scope_probability": 0.09
+          }
+        },
+        "C6": {
+          "kind": "claim",
+          "statement": "If valid is false when the wrapper checks it, the wrapper panics with d.p.",
+          "line": 36,
+          "fragment": "if !d.valid {",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.99,
+              "contradicted": 0.0,
+              "unclear": 0.01
+            },
+            "confidence": 0.98
+          }
+        },
+        "C7": {
+          "kind": "claim",
+          "statement": "For OnceValue, if f panics, the returned function will panic with the same value on every call.",
+          "line": 45,
+          "fragment": "will panic with the same value on every call",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        }
+      },
+      "questions": [
+        "What observable behavior results from copying the function returned by OnceFunc—does sharing of the internal once state persist across copies?",
+        "Do two separate OnceFunc calls wrapping the same function share any state, or are they independent?",
+        "Can the original function execute again after a panic, or does the implementation permanently prevent re-execution?",
+        "Are mutations to a pointer returned by OnceValue visible through subsequent calls to the same returned function, and is the same pointer returned each time?",
+        "Does reassigning the caller's function variable after constructing OnceFunc change which function the wrapper invokes, given the wrapper captured f at construction?",
+        "After recovering the first OnceFunc panic, does a subsequent call return normally or re-panic?",
+        "Must the application retry an initialization function after every panic, or is retry unspecified by the source?"
+      ],
+      "review_required": true
+    }
+  },
+  {
+    "component": "once",
+    "phase": "final",
+    "repeat": 2,
+    "calls": [
+      {
+        "id": 15,
+        "provider": "deepseek-flash",
+        "amount_microdollars": 1198,
+        "status": "settled"
+      },
+      {
+        "id": 16,
+        "provider": "jev",
+        "amount_microdollars": 91,
+        "status": "settled"
+      }
+    ],
+    "cost_usd": 0.001289,
+    "seconds": 3.7670506659778766,
+    "response": {
+      "source": "upstream/once/oncefunc.go",
+      "source_sha256": "0853c1ad885c593d2810e601c495f00abe197b10d12b679f94badf3efe5fa365",
+      "draft": {
+        "model": "deepseek-flash",
+        "finish_reason": "stop",
+        "input_tokens": 1448,
+        "output_tokens": 636,
+        "cost_microdollars": 1198,
+        "reservation_microdollars": 11544
+      },
+      "verification": {
+        "model": "jev-1.14.0",
+        "input_tokens": 2159,
+        "cost_microdollars": 91,
+        "reservation_microdollars": 366,
+        "error": null
+      },
+      "claims": {
+        "C1": {
+          "kind": "claim",
+          "statement": "OnceFunc returns a function that invokes f only once and may be called concurrently.",
+          "line": 7,
+          "fragment": "returns a function that invokes f only once",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.75,
+              "contradicted": 0.0,
+              "unclear": 0.25
+            },
+            "confidence": 0.62
+          }
+        },
+        "C2": {
+          "kind": "claim",
+          "statement": "If f panics, the function returned by OnceFunc panics with the same value on every call.",
+          "line": 10,
+          "fragment": "will panic with the same value on every call",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C3": {
+          "kind": "ordering",
+          "statement": "On a panic in f, the deferred handler sets d.f to nil, then stores the recovered value in d.p, then checks d.valid.",
+          "line": 24,
+          "fragment": "d.f = nil // Do not keep f alive after invoking it.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "unclear",
+            "probabilities": {
+              "supported": 0.4,
+              "contradicted": 0.0,
+              "unclear": 0.6
+            },
+            "confidence": 0.4,
+            "ordering_scope_probability": 0.03
+          }
+        },
+        "C4": {
+          "kind": "claim",
+          "statement": "d.valid is set to true only if f does not panic.",
+          "line": 34,
+          "fragment": "d.valid = true // Set only if f does not panic.",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        },
+        "C5": {
+          "kind": "ordering",
+          "statement": "If d.valid is false after the once.Do, the returned function panics with d.p.",
+          "line": 36,
+          "fragment": "if !d.valid {\n\t\t\tpanic(d.p)",
+          "citation_check": "citation fragment must be a single line of at least 4 non-space characters",
+          "jev": null
+        },
+        "C6": {
+          "kind": "claim",
+          "statement": "OnceValue returns a function that invokes f only once and returns the value returned by f, and may be called concurrently.",
+          "line": 42,
+          "fragment": "invokes f only once and returns the value",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 0.8,
+              "contradicted": 0.0,
+              "unclear": 0.2
+            },
+            "confidence": 0.7
+          }
+        },
+        "C7": {
+          "kind": "claim",
+          "statement": "If f panics, the function returned by OnceValues panics with the same value on every call.",
+          "line": 79,
+          "fragment": "will panic with the same value on every call",
+          "citation_check": "ok",
+          "jev": {
+            "choice": "supported",
+            "probabilities": {
+              "supported": 1.0,
+              "contradicted": 0.0,
+              "unclear": 0.0
+            },
+            "confidence": 1.0
+          }
+        }
+      },
+      "questions": [
+        "Does copying the returned function value share its once state, so that calling both invokes f only once (the inventory's once-01)?",
+        "Do two separate OnceFunc calls wrapping the same f share one once state (the inventory's once-02)?",
+        "Does the code guarantee that a panicking f is never executed again, versus only guaranteeing re-panic with the same value (the inventory's once-03)?",
+        "After OnceValue returns a pointer, are later mutations of the pointed-to object visible through subsequent returns of that same pointer (the inventory's once-04)?",
+        "Does reassigning only the caller's function variable after constructing OnceFunc change which function the wrapper invokes (the inventory's once-05)?",
+        "After recovering the first OnceFunc panic, does calling the wrapper again return normally (the inventory's once-06)?",
+        "Must the application retry an initialization function after every panic (the inventory's once-07)?"
+      ],
+      "review_required": true
+    }
+  }
+]

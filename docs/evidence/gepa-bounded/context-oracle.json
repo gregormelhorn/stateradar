@@ -1,0 +1,51 @@
+{
+  "context-01": {
+    "verdict": "supported",
+    "line": 316,
+    "fragment": "It returns true if the call stopped f from being run.",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/context"
+  },
+  "context-02": {
+    "verdict": "contradicted",
+    "line": 319,
+    "fragment": "or f was already stopped.",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/context"
+  },
+  "context-03": {
+    "verdict": "contradicted",
+    "line": 320,
+    "fragment": "The stop function does not wait for f to complete",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/context"
+  },
+  "context-04": {
+    "verdict": "supported",
+    "line": 312,
+    "fragment": "Multiple calls to AfterFunc on a context operate independently;",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/context"
+  },
+  "context-05": {
+    "verdict": "supported",
+    "line": 310,
+    "fragment": "If ctx is already canceled, AfterFunc calls f immediately",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/context"
+  },
+  "context-06": {
+    "verdict": "contradicted",
+    "line": 330,
+    "fragment": "a.cancelCtx.propagateCancel(ctx, a)",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/context"
+  },
+  "context-07": {
+    "verdict": "unspecified",
+    "line": 309,
+    "fragment": "AfterFunc arranges to call f",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": null
+  }
+}

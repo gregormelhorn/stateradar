@@ -1,0 +1,29 @@
+FF.....
+======================================================================
+FAIL: test_provider_cost_cannot_disappear_from_every_strategy (__main__.ArchivedCosts.test_provider_cost_cannot_disappear_from_every_strategy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_report.py", line 42, in test_provider_cost_cannot_disappear_from_every_strategy
+    self.mutate_and_reject(remove)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_report.py", line 35, in mutate_and_reject
+    with self.assertRaises(EvalError):audit(out)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_whole_trial_cannot_disappear_from_all_arms (__main__.ArchivedCosts.test_whole_trial_cannot_disappear_from_all_arms)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_report.py", line 37, in test_whole_trial_cannot_disappear_from_all_arms
+    self.mutate_and_reject(lambda rows:rows.__setitem__(slice(None),[r for r in rows if not(r['component']=='timer' and r['repeat']==0)]))
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_report.py", line 35, in mutate_and_reject
+    with self.assertRaises(EvalError):audit(out)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.274s
+
+FAILED (failures=2)

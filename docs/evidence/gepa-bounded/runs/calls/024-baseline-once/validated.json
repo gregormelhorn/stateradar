@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "once-01",
+      "verdict": "supported",
+      "line": 22,
+      "fragment": "d.once.Do(func() {",
+      "reason": "Both copies refer to the same returned closure and use its captured d.once, so invoking both executes the original function only once.",
+      "question": ""
+    },
+    {
+      "id": "once-02",
+      "verdict": "contradicted",
+      "line": 13,
+      "fragment": "d := struct {",
+      "reason": "Each OnceFunc call creates its own d with its own Once field, even when both calls receive the same f.",
+      "question": ""
+    },
+    {
+      "id": "once-03",
+      "verdict": "supported",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The wrapper invokes f only once, saves the recovered panic value in d.p, and uses that value for subsequent panics.",
+      "question": ""
+    },
+    {
+      "id": "once-04",
+      "verdict": "supported",
+      "line": 72,
+      "fragment": "return d.result",
+      "reason": "The wrapper stores f's result once and returns it directly. A stored pointer still points to the same object, so later mutations are visible through it.",
+      "question": ""
+    },
+    {
+      "id": "once-05",
+      "verdict": "contradicted",
+      "line": 19,
+      "fragment": "f: f,",
+      "reason": "OnceFunc stores the function value supplied at construction and invokes that stored value. Reassigning the caller's variable does not change the stored value.",
+      "question": ""
+    },
+    {
+      "id": "once-06",
+      "verdict": "contradicted",
+      "line": 10,
+      "fragment": "will panic with the same value on every call.",
+      "reason": "The contract requires a panic on every call after f panics, including calls made after the caller recovers the first panic.",
+      "question": ""
+    },
+    {
+      "id": "once-07",
+      "verdict": "unspecified",
+      "line": 7,
+      "fragment": "OnceFunc returns a function that invokes f only once.",
+      "reason": "The contract governs calls to the returned wrapper and leaves application retry policy unspecified.",
+      "question": "OPEN: Must the application retry an initialization function after every panic, or is retry unspecified by the source?"
+    }
+  ],
+  "corrections": []
+}

@@ -240,6 +240,15 @@ its generation rollover is outside the terminal/idle-resource contract, so this
 is not a second adapter validation.
 [Workflow evidence and limits](docs/evidence/late-workflow/README.md).
 
+**Bounded prompt optimization (experimental)** connects GEPA to isolated Codex
+ChatGPT-login calls, Flash/Jev drafts, component-separated evaluation and complete
+child-call accounting. The first experiment evaluates 28 supplied claims across
+four components. Both fixed and GEPA final reviews correct all six seeded errors
+and add the same timer-scope qualification; neither demonstrates a quality
+advantage over the other. This is claim review, not open-ended bug discovery or
+full-pilot optimization. The standard routing is unchanged.
+[Results, costs and limitations](docs/evidence/gepa-bounded/README.md).
+
 ---
 
 ## Evidence

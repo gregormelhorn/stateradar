@@ -1,0 +1,1592 @@
+[
+  {
+    "component": "timer",
+    "repeat": 0,
+    "arm": "none",
+    "review_order": [
+      "fixed",
+      "gepa"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "timer-01",
+          "verdict": "supported",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "reason": "The AfterFunc contract explicitly states that the returned timer's C field is nil.",
+          "question": ""
+        },
+        {
+          "id": "timer-02",
+          "verdict": "contradicted",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "reason": "Stop returns without waiting for an already started AfterFunc callback. The caller must coordinate with the callback to learn when it completes.",
+          "question": ""
+        },
+        {
+          "id": "timer-03",
+          "verdict": "supported",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "reason": "Once the callback for the expiration being reset has started, Reset schedules another execution and returns false.",
+          "question": ""
+        },
+        {
+          "id": "timer-04",
+          "verdict": "contradicted",
+          "line": 125,
+          "fragment": "nor does it guarantee that the subsequent",
+          "reason": "The Reset contract explicitly allows for the newly scheduled callback to run concurrently with the prior callback when Reset returns false.",
+          "question": ""
+        },
+        {
+          "id": "timer-05",
+          "verdict": "supported",
+          "line": 67,
+          "fragment": "It returns true if the call stops the timer",
+          "reason": "AfterFunc documents that its timer can cancel the scheduled call through Stop. A successful Stop before expiration returns true and prevents that execution.",
+          "question": ""
+        },
+        {
+          "id": "timer-06",
+          "verdict": "contradicted",
+          "line": 178,
+          "fragment": "newTimer(when(d), 0, goFunc, f, nil)",
+          "reason": "AfterFunc passes the function value at registration as the timer argument, and goFunc invokes that argument. Reassigning the caller's variable leaves the registered value intact.",
+          "question": ""
+        },
+        {
+          "id": "timer-07",
+          "verdict": "unspecified",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "reason": "The component defines when a callback runs and leaves application retry policy unspecified.",
+          "question": "OPEN: Does the application require a timed-out operation to be retried exactly three times?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      12
+    ],
+    "review_call_ids": [],
+    "total_usd_estimate": 0.047689,
+    "review_usd_estimate": 0,
+    "provider_usd": 0.001603,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "timer",
+    "repeat": 0,
+    "arm": "fixed",
+    "review_order": [
+      "fixed",
+      "gepa"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "timer-01",
+          "verdict": "supported",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "reason": "AfterFunc explicitly guarantees that the Timer it returns has a nil C field.",
+          "question": ""
+        },
+        {
+          "id": "timer-02",
+          "verdict": "contradicted",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "reason": "After the callback starts, Stop can return while it is still running. The caller must coordinate with f explicitly to learn when it completes.",
+          "question": ""
+        },
+        {
+          "id": "timer-03",
+          "verdict": "supported",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "reason": "Reset on the timer after the expiration that started its callback schedules another execution of the registered f and returns false. If that scheduled execution is still pending, a further Reset reschedules it and returns true under lines 121–123.",
+          "question": ""
+        },
+        {
+          "id": "timer-04",
+          "verdict": "contradicted",
+          "line": 125,
+          "fragment": "nor does it guarantee that the subsequent",
+          "reason": "When Reset returns false, the new invocation of the registered f may run concurrently with its prior invocation, as lines 124–128 specify.",
+          "question": ""
+        },
+        {
+          "id": "timer-05",
+          "verdict": "supported",
+          "line": 67,
+          "fragment": "It returns true if the call stops the timer",
+          "reason": "AfterFunc returns a timer whose Stop method can cancel the pending call under lines 173–175. A successful Stop acts on that timer through its receiver at line 89. Copying the pointer preserves the target, while rebinding the local pointer to another timer directs a later Stop to that other timer. Under lines 67–68, a repeat Stop returns false if the timer is still stopped.",
+          "question": ""
+        },
+        {
+          "id": "timer-06",
+          "verdict": "contradicted",
+          "line": 178,
+          "fragment": "newTimer(when(d), 0, goFunc, f, nil)",
+          "reason": "AfterFunc receives the caller's function value as f at line 177 and stores that value as the timer argument at line 178. When the timer fires, goFunc invokes that argument at line 182. Copying the function value before registration or replacing only the caller's variable afterward leaves the registered function value intact. If that function reads a mutable wrapper or key when it runs, a change there can affect what the registered function does.",
+          "question": ""
+        },
+        {
+          "id": "timer-07",
+          "verdict": "unspecified",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "reason": "The component defines callback scheduling and leaves application retry policy unspecified.",
+          "question": "OPEN: Does the application require a timed-out operation to be retried exactly three times?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      12
+    ],
+    "review_call_ids": [
+      13
+    ],
+    "total_usd_estimate": 0.09521299999999999,
+    "review_usd_estimate": 0.047524,
+    "provider_usd": 0.001603,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "timer",
+    "repeat": 0,
+    "arm": "gepa",
+    "review_order": [
+      "fixed",
+      "gepa"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "timer-01",
+          "verdict": "supported",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "reason": "The AfterFunc contract explicitly states that the returned timer's C field is nil.",
+          "question": ""
+        },
+        {
+          "id": "timer-02",
+          "verdict": "contradicted",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "reason": "Stop returns without waiting for an already running AfterFunc callback to finish. Observing completion requires explicit coordination with the callback.",
+          "question": ""
+        },
+        {
+          "id": "timer-03",
+          "verdict": "supported",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "reason": "Once the callback for the expiration being reset has started, Reset returns false and schedules another execution. If another Reset has already made the timer active again, Reset returns true and reschedules that pending execution.",
+          "question": ""
+        },
+        {
+          "id": "timer-04",
+          "verdict": "contradicted",
+          "line": 126,
+          "fragment": "goroutine running f does not run concurrently with the prior",
+          "reason": "Lines 124–127 state that when Reset returns false, it neither waits for the prior callback nor guarantees that the two executions are sequential.",
+          "question": ""
+        },
+        {
+          "id": "timer-05",
+          "verdict": "supported",
+          "line": 67,
+          "fragment": "It returns true if the call stops the timer",
+          "reason": "AfterFunc documents that its timer can cancel the pending call through Stop. A successful Stop before expiration returns true and prevents that scheduled execution.",
+          "question": ""
+        },
+        {
+          "id": "timer-06",
+          "verdict": "contradicted",
+          "line": 178,
+          "fragment": "newTimer(when(d), 0, goFunc, f, nil)",
+          "reason": "AfterFunc passes the function value at registration as the timer argument, and goFunc invokes that argument at line 182. Rebinding the caller's variable leaves the registered value intact.",
+          "question": ""
+        },
+        {
+          "id": "timer-07",
+          "verdict": "unspecified",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "reason": "The component defines callback scheduling and leaves application retry policy unspecified.",
+          "question": "OPEN: Does the application require a timed-out operation to be retried exactly three times?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      12
+    ],
+    "review_call_ids": [
+      14
+    ],
+    "total_usd_estimate": 0.0655234,
+    "review_usd_estimate": 0.0178344,
+    "provider_usd": 0.001603,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "timer",
+    "repeat": 1,
+    "arm": "none",
+    "review_order": [
+      "gepa",
+      "fixed"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "timer-01",
+          "verdict": "supported",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "reason": "The AfterFunc contract explicitly states that the returned timer's C field is nil.",
+          "question": ""
+        },
+        {
+          "id": "timer-02",
+          "verdict": "contradicted",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "reason": "Stop can return while the AfterFunc callback is still running.",
+          "question": ""
+        },
+        {
+          "id": "timer-03",
+          "verdict": "supported",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "reason": "Once the scheduled callback has started, the timer for that execution has expired. Reset returns false and schedules another execution.",
+          "question": ""
+        },
+        {
+          "id": "timer-04",
+          "verdict": "contradicted",
+          "line": 126,
+          "fragment": "goroutine running f does not run concurrently with the prior",
+          "reason": "Lines 124–128 explicitly allow for concurrent executions of f when Reset returns false.",
+          "question": ""
+        },
+        {
+          "id": "timer-05",
+          "verdict": "supported",
+          "line": 175,
+          "fragment": "be used to cancel the call using its Stop method.",
+          "reason": "AfterFunc documents cancellation through Stop, and lines 66–68 say Stop prevents firing and returns true when it stops the timer.",
+          "question": ""
+        },
+        {
+          "id": "timer-06",
+          "verdict": "contradicted",
+          "line": 178,
+          "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+          "reason": "AfterFunc passes the function value as the timer argument, and line 182 invokes that argument. Reassigning the caller's variable leaves the registered value unchanged.",
+          "question": ""
+        },
+        {
+          "id": "timer-07",
+          "verdict": "unspecified",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "reason": "The contract specifies when AfterFunc calls f and leaves application retry policy unspecified.",
+          "question": "OPEN: How many times, if any, must the application retry a timed-out operation?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      15
+    ],
+    "review_call_ids": [],
+    "total_usd_estimate": 0.0195074,
+    "review_usd_estimate": 0,
+    "provider_usd": 0.001689,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "timer",
+    "repeat": 1,
+    "arm": "gepa",
+    "review_order": [
+      "gepa",
+      "fixed"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "timer-01",
+          "verdict": "supported",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "reason": "AfterFunc explicitly documents that the returned timer's C field is nil.",
+          "question": ""
+        },
+        {
+          "id": "timer-02",
+          "verdict": "contradicted",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "reason": "Stop can return while the already-started callback is still running.",
+          "question": ""
+        },
+        {
+          "id": "timer-03",
+          "verdict": "supported",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "reason": "Starting the callback means its scheduled expiration has occurred. Reset on that expired timer schedules f again and returns false. If an intervening Reset has already made the timer active, a further Reset reschedules that pending execution and returns true under lines 118–123.",
+          "question": ""
+        },
+        {
+          "id": "timer-04",
+          "verdict": "contradicted",
+          "line": 126,
+          "fragment": "goroutine running f does not run concurrently with the prior",
+          "reason": "Lines 124–128 explicitly deny a guarantee against overlap when Reset returns false and schedules another execution.",
+          "question": ""
+        },
+        {
+          "id": "timer-05",
+          "verdict": "supported",
+          "line": 175,
+          "fragment": "be used to cancel the call using its Stop method.",
+          "reason": "AfterFunc exposes cancellation through Stop. Lines 66–68 specify that a successful Stop returns true and prevents the pending timer from firing.",
+          "question": ""
+        },
+        {
+          "id": "timer-06",
+          "verdict": "contradicted",
+          "line": 178,
+          "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+          "reason": "AfterFunc passes the function value at registration, and goFunc invokes that stored argument on line 182. Rebinding only the caller's variable leaves the registered value unchanged.",
+          "question": ""
+        },
+        {
+          "id": "timer-07",
+          "verdict": "unspecified",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "reason": "The contract specifies when AfterFunc calls f and leaves application retry policy unspecified.",
+          "question": "OPEN: How many times, if any, must the application retry a timed-out operation?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      15
+    ],
+    "review_call_ids": [
+      16
+    ],
+    "total_usd_estimate": 0.0371758,
+    "review_usd_estimate": 0.0176684,
+    "provider_usd": 0.001689,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "timer",
+    "repeat": 1,
+    "arm": "fixed",
+    "review_order": [
+      "gepa",
+      "fixed"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "timer-01",
+          "verdict": "supported",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "reason": "AfterFunc explicitly guarantees that the C field of the timer it returns is nil.",
+          "question": ""
+        },
+        {
+          "id": "timer-02",
+          "verdict": "contradicted",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "reason": "Once the callback has started, Stop can return while it is still running. Lines 74–75 require explicit coordination to learn whether it has completed.",
+          "question": ""
+        },
+        {
+          "id": "timer-03",
+          "verdict": "supported",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "reason": "After the callback for the current scheduling has started, that scheduling has expired. Reset on the same timer returns false and schedules the registered function again. If an intervening Reset has already made the timer active, lines 118–123 give the active case, which returns true and reschedules the pending call.",
+          "question": ""
+        },
+        {
+          "id": "timer-04",
+          "verdict": "contradicted",
+          "line": 125,
+          "fragment": "complete before returning nor does it guarantee that the subsequent",
+          "reason": "Lines 124–128 explicitly permit the next invocation of the registered function to run concurrently with the prior invocation when Reset returns false.",
+          "question": ""
+        },
+        {
+          "id": "timer-05",
+          "verdict": "supported",
+          "line": 175,
+          "fragment": "be used to cancel the call using its Stop method.",
+          "reason": "Calling Stop on the returned timer while its scheduled execution is still pending can cancel that execution and return true. Lines 66–68 specify that Stop returns false if the timer has already expired or been stopped.",
+          "question": ""
+        },
+        {
+          "id": "timer-06",
+          "verdict": "contradicted",
+          "line": 178,
+          "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+          "reason": "If a caller variable holds f1 at registration, line 178 passes that function value as the timer argument, and line 182 invokes the stored argument. Leaving the variable alone, copying its value to another variable, or rebinding the original variable to f2 leaves the timer invoking f1. If f1 itself reads a mutable wrapper or key, that lookup can affect what f1 does while the timer still invokes f1.",
+          "question": ""
+        },
+        {
+          "id": "timer-07",
+          "verdict": "unspecified",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "reason": "AfterFunc schedules the supplied function. The component contract leaves the application's timeout retry policy unspecified.",
+          "question": "OPEN: How many times, if any, must the application retry a timed-out operation?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      15
+    ],
+    "review_call_ids": [
+      17
+    ],
+    "total_usd_estimate": 0.0666614,
+    "review_usd_estimate": 0.047154,
+    "provider_usd": 0.001689,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "timer",
+    "repeat": 2,
+    "arm": "none",
+    "review_order": [
+      "fixed",
+      "gepa"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "timer-01",
+          "verdict": "supported",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "reason": "AfterFunc explicitly documents that the returned timer has a nil C field.",
+          "question": ""
+        },
+        {
+          "id": "timer-02",
+          "verdict": "contradicted",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "reason": "Stop returns without waiting for the running AfterFunc callback to finish.",
+          "question": ""
+        },
+        {
+          "id": "timer-03",
+          "verdict": "supported",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "reason": "Once the scheduled callback has started, that timer setting has expired. Reset schedules another execution and returns false.",
+          "question": ""
+        },
+        {
+          "id": "timer-04",
+          "verdict": "contradicted",
+          "line": 126,
+          "fragment": "goroutine running f does not run concurrently with the prior",
+          "reason": "When Reset returns false, its contract explicitly allows for overlap by withholding any guarantee against concurrent execution.",
+          "question": ""
+        },
+        {
+          "id": "timer-05",
+          "verdict": "supported",
+          "line": 67,
+          "fragment": "It returns true if the call stops the timer",
+          "reason": "AfterFunc documents Stop as a way to cancel the pending call. A successful Stop before expiry returns true and prevents that scheduled execution.",
+          "question": ""
+        },
+        {
+          "id": "timer-06",
+          "verdict": "contradicted",
+          "line": 178,
+          "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+          "reason": "AfterFunc passes the function value at registration, and goFunc invokes that stored argument. Reassigning the caller's variable leaves the stored value unchanged.",
+          "question": ""
+        },
+        {
+          "id": "timer-07",
+          "verdict": "unspecified",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "reason": "The component specifies timer and callback behavior and leaves application retry policy unspecified.",
+          "question": "OPEN: What retry count, if any, does the application require for a timed-out operation?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      18
+    ],
+    "review_call_ids": [],
+    "total_usd_estimate": 0.0194176,
+    "review_usd_estimate": 0,
+    "provider_usd": 0.001686,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "timer",
+    "repeat": 2,
+    "arm": "fixed",
+    "review_order": [
+      "fixed",
+      "gepa"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "timer-01",
+          "verdict": "supported",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "reason": "AfterFunc explicitly specifies that the returned timer has a nil C field.",
+          "question": ""
+        },
+        {
+          "id": "timer-02",
+          "verdict": "contradicted",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "reason": "Stop returns without waiting for the running AfterFunc callback to finish.",
+          "question": ""
+        },
+        {
+          "id": "timer-03",
+          "verdict": "supported",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "reason": "Once the callback starts, that timer setting has expired. Reset on the expired timer schedules another execution and returns false. If an intervening Reset has already made the timer active, a later Reset reschedules that pending execution and returns true under lines 117–123.",
+          "question": ""
+        },
+        {
+          "id": "timer-04",
+          "verdict": "contradicted",
+          "line": 125,
+          "fragment": "complete before returning nor does it guarantee that the subsequent",
+          "reason": "Lines 124–127 explicitly allow the execution scheduled by a false-returning Reset to overlap the prior callback.",
+          "question": ""
+        },
+        {
+          "id": "timer-05",
+          "verdict": "supported",
+          "line": 67,
+          "fragment": "It returns true if the call stops the timer",
+          "reason": "Lines 174–175 document Stop as a way to cancel a pending AfterFunc call. If Stop succeeds before expiry, it returns true and prevents that scheduled execution.",
+          "question": ""
+        },
+        {
+          "id": "timer-06",
+          "verdict": "contradicted",
+          "line": 178,
+          "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+          "reason": "Registering function value A passes A as the timer argument. If the caller then assigns B to its own variable, line 182 still invokes A from the stored argument. Copying A to another variable before registration passes the same value. Passing B at registration changes the stored value. Mutation of state that A itself reads is a separate matter governed by A's body.",
+          "question": ""
+        },
+        {
+          "id": "timer-07",
+          "verdict": "unspecified",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "reason": "The component specifies when the callback runs and leaves application retry policy unspecified.",
+          "question": "OPEN: What retry count, if any, does the application require for a timed-out operation?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      18
+    ],
+    "review_call_ids": [
+      19
+    ],
+    "total_usd_estimate": 0.0658136,
+    "review_usd_estimate": 0.046396,
+    "provider_usd": 0.001686,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "timer",
+    "repeat": 2,
+    "arm": "gepa",
+    "review_order": [
+      "fixed",
+      "gepa"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "timer-01",
+          "verdict": "supported",
+          "line": 176,
+          "fragment": "The returned Timer's C field is not used and will be nil.",
+          "reason": "AfterFunc explicitly guarantees that the returned timer's C field is nil.",
+          "question": ""
+        },
+        {
+          "id": "timer-02",
+          "verdict": "contradicted",
+          "line": 73,
+          "fragment": "Stop does not wait for f to complete before returning.",
+          "reason": "The callback starts in its own goroutine. Once that firing has expired, Stop returns false without waiting for the callback to finish.",
+          "question": ""
+        },
+        {
+          "id": "timer-03",
+          "verdict": "supported",
+          "line": 123,
+          "fragment": "to run again, in which case it returns false.",
+          "reason": "When Reset acts on the expired firing that started the callback, it returns false and schedules f again. If an earlier Reset has already rearmed the timer and it is still active, Reset instead returns true and reschedules the pending execution.",
+          "question": ""
+        },
+        {
+          "id": "timer-04",
+          "verdict": "contradicted",
+          "line": 126,
+          "fragment": "goroutine running f does not run concurrently with the prior",
+          "reason": "Lines 124–127 explicitly withhold a guarantee against overlap when Reset returns false. The subsequent callback can run before the prior callback finishes.",
+          "question": ""
+        },
+        {
+          "id": "timer-05",
+          "verdict": "supported",
+          "line": 67,
+          "fragment": "It returns true if the call stops the timer",
+          "reason": "AfterFunc documents Stop as a way to cancel its pending call. A successful Stop returns true and prevents that firing. Another Stop returns false if the timer remains stopped, and a later Reset can schedule another firing.",
+          "question": ""
+        },
+        {
+          "id": "timer-06",
+          "verdict": "contradicted",
+          "line": 178,
+          "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+          "reason": "AfterFunc passes the function value f at registration. When the timer fires, goFunc invokes the supplied argument at line 182. Reassigning only the caller's variable leaves that argument unchanged.",
+          "question": ""
+        },
+        {
+          "id": "timer-07",
+          "verdict": "unspecified",
+          "line": 173,
+          "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+          "reason": "The component specifies when a timer invokes its callback and leaves application retry policy unspecified.",
+          "question": "OPEN: What retry count, if any, does the application require for a timed-out operation?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      18
+    ],
+    "review_call_ids": [
+      20
+    ],
+    "total_usd_estimate": 0.0520136,
+    "review_usd_estimate": 0.032596,
+    "provider_usd": 0.001686,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "once",
+    "repeat": 0,
+    "arm": "none",
+    "review_order": [
+      "gepa",
+      "fixed"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "once-01",
+          "verdict": "supported",
+          "line": 22,
+          "fragment": "d.once.Do(func() {",
+          "reason": "Both copies of the returned closure use the same captured d and therefore the same once field, so calling both invokes f only once.",
+          "question": ""
+        },
+        {
+          "id": "once-02",
+          "verdict": "contradicted",
+          "line": 13,
+          "fragment": "d := struct {",
+          "reason": "Each OnceFunc call creates its own d with its own once field, even when both calls receive the same f.",
+          "question": ""
+        },
+        {
+          "id": "once-03",
+          "verdict": "supported",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The wrapper invokes f only once, saves the recovered panic value in d.p, and panics with that saved value on later calls.",
+          "question": ""
+        },
+        {
+          "id": "once-04",
+          "verdict": "supported",
+          "line": 72,
+          "fragment": "return d.result",
+          "reason": "The wrapper returns the stored pointer value on every successful call. Dereferencing it accesses the same object, including subsequent mutations.",
+          "question": ""
+        },
+        {
+          "id": "once-05",
+          "verdict": "contradicted",
+          "line": 19,
+          "fragment": "f: f,",
+          "reason": "OnceFunc stores the supplied function value in d.f and later invokes d.f. Reassigning the caller's variable leaves that stored value unchanged.",
+          "question": ""
+        },
+        {
+          "id": "once-06",
+          "verdict": "contradicted",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The contract explicitly requires the wrapper to panic on every call after f panics, including after the caller recovers the first panic.",
+          "question": ""
+        },
+        {
+          "id": "once-07",
+          "verdict": "unspecified",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The contract specifies how the returned function behaves after a panic. Application retry policy is outside its scope.",
+          "question": "OPEN: Must the application retry an initialization function after every panic?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      21
+    ],
+    "review_call_ids": [],
+    "total_usd_estimate": 0.0168584,
+    "review_usd_estimate": 0,
+    "provider_usd": 0.0014,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "once",
+    "repeat": 0,
+    "arm": "gepa",
+    "review_order": [
+      "gepa",
+      "fixed"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "once-01",
+          "verdict": "supported",
+          "line": 22,
+          "fragment": "d.once.Do(func() {",
+          "reason": "Copying the returned function value preserves its capture of d. Both copies use the same d.once, so calling both invokes f only once.",
+          "question": ""
+        },
+        {
+          "id": "once-02",
+          "verdict": "contradicted",
+          "line": 13,
+          "fragment": "d := struct {",
+          "reason": "Each OnceFunc call creates a distinct d with its own once field, even when both calls receive the same function value.",
+          "question": ""
+        },
+        {
+          "id": "once-03",
+          "verdict": "supported",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The wrapper invokes f only once. Its deferred handler saves the recovered value in d.p and re-panics. Later calls panic with the saved value.",
+          "question": ""
+        },
+        {
+          "id": "once-04",
+          "verdict": "supported",
+          "line": 72,
+          "fragment": "return d.result",
+          "reason": "OnceValue stores the pointer returned by f and returns that same pointer on subsequent calls. Dereferencing it after a mutation accesses the same object with the mutation.",
+          "question": ""
+        },
+        {
+          "id": "once-05",
+          "verdict": "contradicted",
+          "line": 19,
+          "fragment": "f: f,",
+          "reason": "Construction stores the supplied function value in d.f. The wrapper later invokes d.f, and rebinding the caller's variable leaves that stored value unchanged.",
+          "question": ""
+        },
+        {
+          "id": "once-06",
+          "verdict": "contradicted",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The contract requires the wrapper to panic on every call once f has panicked, including a call made after the caller recovers the first panic.",
+          "question": ""
+        },
+        {
+          "id": "once-07",
+          "verdict": "unspecified",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The contract defines how the wrapper behaves after f panics. Application retry policy is outside its scope.",
+          "question": "OPEN: Must the application retry an initialization function after every panic?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      21
+    ],
+    "review_call_ids": [
+      22
+    ],
+    "total_usd_estimate": 0.0460204,
+    "review_usd_estimate": 0.029162,
+    "provider_usd": 0.0014,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "once",
+    "repeat": 0,
+    "arm": "fixed",
+    "review_order": [
+      "gepa",
+      "fixed"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "once-01",
+          "verdict": "supported",
+          "line": 22,
+          "fragment": "d.once.Do(func() {",
+          "reason": "OnceFunc creates d on line 13 and returns a closure over it on line 21. Copying that function value and calling both copies uses the same d.once on line 22, so d.f runs only once.",
+          "question": ""
+        },
+        {
+          "id": "once-02",
+          "verdict": "contradicted",
+          "line": 13,
+          "fragment": "d := struct {",
+          "reason": "Constructing two wrappers with the same f creates a separate d for each wrapper. Each wrapper uses its own d.once on line 22, so calling both can invoke f twice.",
+          "question": ""
+        },
+        {
+          "id": "once-03",
+          "verdict": "supported",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The first invocation stores the recovered value in the captured d.p on line 25 and re-panics on line 30. Later calls panic with that same d.p on line 37, and the once-only contract on line 7 rules out another invocation of f.",
+          "question": ""
+        },
+        {
+          "id": "once-04",
+          "verdict": "supported",
+          "line": 72,
+          "fragment": "return d.result",
+          "reason": "The first successful call stores the pointer returned by f in d.result on line 66. Mutating the object through that pointer is visible when a subsequent call returns the stored pointer and the caller dereferences it. Rebinding the caller's pointer variable leaves d.result unchanged.",
+          "question": ""
+        },
+        {
+          "id": "once-05",
+          "verdict": "contradicted",
+          "line": 19,
+          "fragment": "f: f,",
+          "reason": "Construction stores the supplied function value in d.f. If the caller reassigns only its own variable before invoking the wrapper, line 33 still calls the function value stored at construction.",
+          "question": ""
+        },
+        {
+          "id": "once-06",
+          "verdict": "contradicted",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "Recovery by the caller after the first panic leaves the wrapper's saved state intact. Calling the same wrapper again reaches the panic on line 37 with the saved value.",
+          "question": ""
+        },
+        {
+          "id": "once-07",
+          "verdict": "unspecified",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The contract specifies what happens when the application calls the same wrapper again. Whether the application must retry initialization is outside the component contract.",
+          "question": "OPEN: Must the application retry an initialization function after every panic?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      21
+    ],
+    "review_call_ids": [
+      23
+    ],
+    "total_usd_estimate": 0.0670264,
+    "review_usd_estimate": 0.050168,
+    "provider_usd": 0.0014,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "once",
+    "repeat": 1,
+    "arm": "none",
+    "review_order": [
+      "fixed",
+      "gepa"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "once-01",
+          "verdict": "supported",
+          "line": 22,
+          "fragment": "d.once.Do(func() {",
+          "reason": "Both copies refer to the same returned closure and use its captured d.once, so invoking both executes the original function only once.",
+          "question": ""
+        },
+        {
+          "id": "once-02",
+          "verdict": "contradicted",
+          "line": 13,
+          "fragment": "d := struct {",
+          "reason": "Each OnceFunc call creates its own d with its own Once field, even when both calls receive the same f.",
+          "question": ""
+        },
+        {
+          "id": "once-03",
+          "verdict": "supported",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The wrapper invokes f only once, saves the recovered panic value in d.p, and uses that value for subsequent panics.",
+          "question": ""
+        },
+        {
+          "id": "once-04",
+          "verdict": "supported",
+          "line": 72,
+          "fragment": "return d.result",
+          "reason": "The wrapper stores f's result once and returns it directly. A stored pointer still points to the same object, so later mutations are visible through it.",
+          "question": ""
+        },
+        {
+          "id": "once-05",
+          "verdict": "contradicted",
+          "line": 19,
+          "fragment": "f: f,",
+          "reason": "OnceFunc stores the function value supplied at construction and invokes that stored value. Reassigning the caller's variable does not change the stored value.",
+          "question": ""
+        },
+        {
+          "id": "once-06",
+          "verdict": "contradicted",
+          "line": 10,
+          "fragment": "will panic with the same value on every call.",
+          "reason": "The contract requires a panic on every call after f panics, including calls made after the caller recovers the first panic.",
+          "question": ""
+        },
+        {
+          "id": "once-07",
+          "verdict": "unspecified",
+          "line": 7,
+          "fragment": "OnceFunc returns a function that invokes f only once.",
+          "reason": "The contract governs calls to the returned wrapper and leaves application retry policy unspecified.",
+          "question": "OPEN: Must the application retry an initialization function after every panic, or is retry unspecified by the source?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      24
+    ],
+    "review_call_ids": [],
+    "total_usd_estimate": 0.0159304,
+    "review_usd_estimate": 0,
+    "provider_usd": 0.00124,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "once",
+    "repeat": 1,
+    "arm": "fixed",
+    "review_order": [
+      "fixed",
+      "gepa"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "once-01",
+          "verdict": "supported",
+          "line": 22,
+          "fragment": "d.once.Do(func() {",
+          "reason": "OnceFunc creates d at line 13 and returns a closure at line 21. Copying that function value preserves its captured d, so calls through either copy use the same d.once and invoke f only once.",
+          "question": ""
+        },
+        {
+          "id": "once-02",
+          "verdict": "contradicted",
+          "line": 13,
+          "fragment": "d := struct {",
+          "reason": "Each construction creates a separate d with its own Once field at line 15. Passing the same f to both constructions still gives each returned closure its own d.once at line 22.",
+          "question": ""
+        },
+        {
+          "id": "once-03",
+          "verdict": "supported",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "OnceFunc invokes f only once, stores the recovered panic value in the closure's d.p at line 25, and uses that value for the first and subsequent panics at lines 30 and 37.",
+          "question": ""
+        },
+        {
+          "id": "once-04",
+          "verdict": "supported",
+          "line": 72,
+          "fragment": "return d.result",
+          "reason": "OnceValue stores the pointer returned by f at line 66 and returns it directly on each successful call. Mutating the pointed-to object between calls leaves the stored pointer directed at that object, so the next return gives access to the mutated object.",
+          "question": ""
+        },
+        {
+          "id": "once-05",
+          "verdict": "contradicted",
+          "line": 19,
+          "fragment": "f: f,",
+          "reason": "OnceFunc stores the supplied function value in d.f at construction. Rebinding only the caller's variable leaves d.f unchanged, so the wrapper invokes the originally supplied value at line 33.",
+          "question": ""
+        },
+        {
+          "id": "once-06",
+          "verdict": "contradicted",
+          "line": 10,
+          "fragment": "will panic with the same value on every call.",
+          "reason": "When f panics, the wrapper's d.valid stays false at line 34. After the caller recovers the first panic, another call still reaches the panic at line 37 with the stored value.",
+          "question": ""
+        },
+        {
+          "id": "once-07",
+          "verdict": "unspecified",
+          "line": 7,
+          "fragment": "OnceFunc returns a function that invokes f only once.",
+          "reason": "The contract specifies invocation and panic behavior for the returned wrapper and leaves application retry policy unspecified.",
+          "question": "OPEN: Must the application retry an initialization function after every panic, or is retry unspecified by the source?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      24
+    ],
+    "review_call_ids": [
+      25
+    ],
+    "total_usd_estimate": 0.0315168,
+    "review_usd_estimate": 0.0155864,
+    "provider_usd": 0.00124,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "once",
+    "repeat": 1,
+    "arm": "gepa",
+    "review_order": [
+      "fixed",
+      "gepa"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "once-01",
+          "verdict": "supported",
+          "line": 22,
+          "fragment": "d.once.Do(func() {",
+          "reason": "Copying the returned function preserves its captured d. Calls through either copy use the same d.once, so f is invoked only once.",
+          "question": ""
+        },
+        {
+          "id": "once-02",
+          "verdict": "contradicted",
+          "line": 13,
+          "fragment": "d := struct {",
+          "reason": "Each call to OnceFunc creates its own d with its own Once field, even when both calls receive the same f.",
+          "question": ""
+        },
+        {
+          "id": "once-03",
+          "verdict": "supported",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The wrapper invokes f only once. Its deferred handler stores the recovered value in d.p and re-panics. Later calls panic with the stored value.",
+          "question": ""
+        },
+        {
+          "id": "once-04",
+          "verdict": "supported",
+          "line": 72,
+          "fragment": "return d.result",
+          "reason": "OnceValue stores f's result once and returns it directly. If that result is a pointer, each return refers to the same object and exposes mutations made to it.",
+          "question": ""
+        },
+        {
+          "id": "once-05",
+          "verdict": "contradicted",
+          "line": 19,
+          "fragment": "f: f,",
+          "reason": "OnceFunc stores the supplied function value in d.f at construction and invokes d.f when the wrapper runs. Rebinding the caller's variable leaves d.f unchanged.",
+          "question": ""
+        },
+        {
+          "id": "once-06",
+          "verdict": "contradicted",
+          "line": 10,
+          "fragment": "will panic with the same value on every call.",
+          "reason": "The contract specifies a panic on every call after f panics, including calls after the caller recovers the first panic.",
+          "question": ""
+        },
+        {
+          "id": "once-07",
+          "verdict": "unspecified",
+          "line": 7,
+          "fragment": "OnceFunc returns a function that invokes f only once.",
+          "reason": "The contract governs calls to the returned wrapper and leaves application retry policy unspecified.",
+          "question": "OPEN: Must the application retry an initialization function after every panic, or is retry unspecified by the source?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      24
+    ],
+    "review_call_ids": [
+      26
+    ],
+    "total_usd_estimate": 0.0580484,
+    "review_usd_estimate": 0.042118,
+    "provider_usd": 0.00124,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "once",
+    "repeat": 2,
+    "arm": "none",
+    "review_order": [
+      "gepa",
+      "fixed"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "once-01",
+          "verdict": "supported",
+          "line": 22,
+          "fragment": "d.once.Do(func() {",
+          "reason": "Both copies of the returned closure use the same captured d.once, so calls through either copy invoke f only once in total.",
+          "question": ""
+        },
+        {
+          "id": "once-02",
+          "verdict": "contradicted",
+          "line": 13,
+          "fragment": "d := struct {",
+          "reason": "Each call to OnceFunc creates its own d with its own Once field, even when passed the same f.",
+          "question": ""
+        },
+        {
+          "id": "once-03",
+          "verdict": "supported",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The contract limits f to one invocation, and the wrapper saves the recovered panic value and uses it on subsequent calls.",
+          "question": ""
+        },
+        {
+          "id": "once-04",
+          "verdict": "supported",
+          "line": 72,
+          "fragment": "return d.result",
+          "reason": "OnceValue stores the returned pointer in d.result and returns that same pointer on later calls, so dereferencing it accesses the object with its later mutations.",
+          "question": ""
+        },
+        {
+          "id": "once-05",
+          "verdict": "contradicted",
+          "line": 19,
+          "fragment": "f: f,",
+          "reason": "OnceFunc stores the supplied function value in d.f and invokes that stored value. Reassigning the caller's variable leaves d.f unchanged.",
+          "question": ""
+        },
+        {
+          "id": "once-06",
+          "verdict": "contradicted",
+          "line": 10,
+          "fragment": "the returned function will panic with the same value on every call.",
+          "reason": "Recovering the first panic leaves the wrapper's failure state intact, so the next call panics with the same value.",
+          "question": ""
+        },
+        {
+          "id": "once-07",
+          "verdict": "unspecified",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The contract specifies the returned function's behavior after a panic. It leaves application retry policy open.",
+          "question": "OPEN: Must the application retry an initialization function after every panic (the inventory's once-07)?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      27
+    ],
+    "review_call_ids": [],
+    "total_usd_estimate": 0.050984999999999996,
+    "review_usd_estimate": 0,
+    "provider_usd": 0.001289,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "once",
+    "repeat": 2,
+    "arm": "gepa",
+    "review_order": [
+      "gepa",
+      "fixed"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "once-01",
+          "verdict": "supported",
+          "line": 22,
+          "fragment": "d.once.Do(func() {",
+          "reason": "OnceFunc creates d before returning the closure on line 21. Copying that function value shares the captured d, so calls through both copies use the same d.once to invoke f once in total.",
+          "question": ""
+        },
+        {
+          "id": "once-02",
+          "verdict": "contradicted",
+          "line": 13,
+          "fragment": "d := struct {",
+          "reason": "Each OnceFunc call creates its own d with its own Once field, even when both calls receive the same function value.",
+          "question": ""
+        },
+        {
+          "id": "once-03",
+          "verdict": "supported",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The first invocation of f panics before d.valid is set. The deferred function clears d.f, saves the recovered value in d.p, and re-panics. Later calls skip the once body and panic with the saved value on line 37.",
+          "question": ""
+        },
+        {
+          "id": "once-04",
+          "verdict": "supported",
+          "line": 72,
+          "fragment": "return d.result",
+          "reason": "Line 66 stores the pointer returned by f. Subsequent successful calls return that same pointer, so dereferencing it after a mutation accesses the mutated object.",
+          "question": ""
+        },
+        {
+          "id": "once-05",
+          "verdict": "contradicted",
+          "line": 19,
+          "fragment": "f: f,",
+          "reason": "OnceFunc stores the supplied function value in d.f at construction and invokes d.f on line 33. Reassigning only the caller's variable leaves the stored function value unchanged.",
+          "question": ""
+        },
+        {
+          "id": "once-06",
+          "verdict": "contradicted",
+          "line": 10,
+          "fragment": "the returned function will panic with the same value on every call.",
+          "reason": "After the caller recovers the first panic, d.valid is still false. The next wrapper call reaches the check on line 36 and panics with d.p.",
+          "question": ""
+        },
+        {
+          "id": "once-07",
+          "verdict": "unspecified",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The contract governs what happens when the returned function is called again after a panic. Application retry policy is outside that scope.",
+          "question": "OPEN: Must the application retry an initialization function after every panic (the inventory's once-07)?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      27
+    ],
+    "review_call_ids": [
+      28
+    ],
+    "total_usd_estimate": 0.074295,
+    "review_usd_estimate": 0.02331,
+    "provider_usd": 0.001289,
+    "repair_calls": 0,
+    "residual_wrong": []
+  },
+  {
+    "component": "once",
+    "repeat": 2,
+    "arm": "fixed",
+    "review_order": [
+      "gepa",
+      "fixed"
+    ],
+    "quality": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "report": {
+      "findings": [
+        {
+          "id": "once-01",
+          "verdict": "supported",
+          "line": 22,
+          "fragment": "d.once.Do(func() {",
+          "reason": "OnceFunc creates d at line 13 and returns a closure at line 21. Copying that function value preserves the captured d, so calling both values uses the same d.once and invokes f only once in total.",
+          "question": ""
+        },
+        {
+          "id": "once-02",
+          "verdict": "contradicted",
+          "line": 13,
+          "fragment": "d := struct {",
+          "reason": "Two calls to OnceFunc with the same f each create a distinct d with its own Once field at line 15. Each returned closure uses its own d.once at line 22.",
+          "question": ""
+        },
+        {
+          "id": "once-03",
+          "verdict": "supported",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "Line 7 limits f to one invocation. On panic, the deferred callback clears d.f and saves the recovered value in the same captured d at lines 24–25. Later calls panic with d.p at line 37.",
+          "question": ""
+        },
+        {
+          "id": "once-04",
+          "verdict": "supported",
+          "line": 72,
+          "fragment": "return d.result",
+          "reason": "If f returns a pointer, line 66 stores that pointer in the captured d.result. Mutating the object through an alias after the first return is visible through the same pointer returned on the next call.",
+          "question": ""
+        },
+        {
+          "id": "once-05",
+          "verdict": "contradicted",
+          "line": 19,
+          "fragment": "f: f,",
+          "reason": "OnceFunc stores the supplied function value in d.f during construction. Reassigning the caller's variable before invoking the wrapper leaves that stored value intact. Line 33 invokes d.f.",
+          "question": ""
+        },
+        {
+          "id": "once-06",
+          "verdict": "contradicted",
+          "line": 10,
+          "fragment": "the returned function will panic with the same value on every call.",
+          "reason": "After the caller recovers the first panic, the captured d still has d.valid false and holds the recovered value in d.p. The next call reaches the panic at line 37.",
+          "question": ""
+        },
+        {
+          "id": "once-07",
+          "verdict": "unspecified",
+          "line": 10,
+          "fragment": "If f panics, the returned function will panic with the same value on every call.",
+          "reason": "The contract specifies how the returned function behaves after f panics. Application retry policy remains open.",
+          "question": "OPEN: Must the application retry an initialization function after every panic (the inventory's once-07)?"
+        }
+      ],
+      "corrections": []
+    },
+    "baseline_call_ids": [
+      27
+    ],
+    "review_call_ids": [
+      29
+    ],
+    "total_usd_estimate": 0.0659126,
+    "review_usd_estimate": 0.0149276,
+    "provider_usd": 0.001289,
+    "repair_calls": 0,
+    "residual_wrong": []
+  }
+]

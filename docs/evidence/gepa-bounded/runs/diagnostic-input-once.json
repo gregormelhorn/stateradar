@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "once-01",
+      "verdict": "contradicted",
+      "line": 22,
+      "fragment": "d.once.Do(func() {",
+      "reason": "Copying the returned function creates separate once state, so the original callback runs once per copied value.",
+      "question": ""
+    },
+    {
+      "id": "once-02",
+      "verdict": "contradicted",
+      "line": 13,
+      "fragment": "d := struct {",
+      "reason": "Each OnceFunc call creates its own d with its own once field, even when both calls receive the same f.",
+      "question": ""
+    },
+    {
+      "id": "once-03",
+      "verdict": "contradicted",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "A panic leaves initialization incomplete, so the wrapper retries the original function on its next call.",
+      "question": ""
+    },
+    {
+      "id": "once-04",
+      "verdict": "supported",
+      "line": 72,
+      "fragment": "return d.result",
+      "reason": "The wrapper returns the stored pointer value on every successful call. Dereferencing it accesses the same object, including subsequent mutations.",
+      "question": ""
+    },
+    {
+      "id": "once-05",
+      "verdict": "contradicted",
+      "line": 19,
+      "fragment": "f: f,",
+      "reason": "OnceFunc stores the supplied function value in d.f and later invokes d.f. Reassigning the caller's variable leaves that stored value unchanged.",
+      "question": ""
+    },
+    {
+      "id": "once-06",
+      "verdict": "contradicted",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The contract explicitly requires the wrapper to panic on every call after f panics, including after the caller recovers the first panic.",
+      "question": ""
+    },
+    {
+      "id": "once-07",
+      "verdict": "supported",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The component requires the application to retry initialization after every panic.",
+      "question": ""
+    }
+  ],
+  "corrections": []
+}

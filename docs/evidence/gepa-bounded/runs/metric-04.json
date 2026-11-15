@@ -1,0 +1,81 @@
+{
+  "candidate": {
+    "review": "Preserve ordinary success, failure, cancellation, and repeated-call controls. For each deferred action, handle, or stored reference, identify what is captured and what is looked up later. Keep separate creations distinct and trace each from creation through use and cleanup, citing capture and use sites and stating the starting objects, operation order, and observable outcomes. Where permitted, compare unchanged identity, copying, replacement, wrapper or key mutation, and caller-local rebinding as distinct operations. Attribute each check and effect to the object that receives it. Require evidence beyond equal generation values to establish identity, and account for stable capture and identity guards. Cite documented exclusions and leave policy questions the source does not answer marked OPEN."
+  },
+  "trace": {
+    "component": "singleflight",
+    "Generated Outputs": {
+      "findings": [
+        {
+          "id": "singleflight-01",
+          "verdict": "contradicted",
+          "line": 212,
+          "fragment": "delete(g.m, key)",
+          "reason": "Forget removes the key from the receiving Group's map. The existing doCall still holds its call pointer and function, so the function can finish and deliver its result to channels already attached to that call (lines 138, 176–177, 198). A later lookup can create a new call for the same key.",
+          "question": ""
+        },
+        {
+          "id": "singleflight-02",
+          "verdict": "contradicted",
+          "line": 159,
+          "fragment": "if g.m[key] == c {",
+          "reason": "After Forget removes the old entry, a new Do or DoChan creates and registers a distinct call pointer (lines 108–110 and 133–135). The old call's deferred cleanup retains its receiver, key, and call pointer. Under the Group lock it looks up the current entry and deletes it only if it still points to the old call (lines 156–161).",
+          "question": ""
+        },
+        {
+          "id": "singleflight-03",
+          "verdict": "supported",
+          "line": 129,
+          "fragment": "c.chans = append(c.chans, ch)",
+          "reason": "DoChan creates a fresh result channel, attaches it to the registered pending call, and returns before the function launch (lines 122–138). On normal return, including a returned error, that call sends its own result to each attached channel. Panic and Goexit take separate paths that bypass result delivery (lines 163–178).",
+          "question": ""
+        },
+        {
+          "id": "singleflight-04",
+          "verdict": "contradicted",
+          "line": 160,
+          "fragment": "delete(g.m, key)",
+          "reason": "Completion removes the entry if it still points to the finishing call. A subsequent lookup with no pending entry creates a fresh call and runs the supplied function (lines 96–114 and 127–138).",
+          "question": ""
+        },
+        {
+          "id": "singleflight-05",
+          "verdict": "contradicted",
+          "line": 120,
+          "fragment": "The returned channel will not be closed.",
+          "reason": "The DoChan contract explicitly says the returned channel stays open. Normal completion sends a result to each attached channel (lines 175–178).",
+          "question": ""
+        },
+        {
+          "id": "singleflight-06",
+          "verdict": "contradicted",
+          "line": 71,
+          "fragment": "Group represents a class of work and forms a namespace in",
+          "reason": "Each independently initialized Group has its own map. Do and DoChan look up the key in the receiving Group's map, so the same key in two such Groups can start two executions (lines 91–113 and 121–138).",
+          "question": ""
+        },
+        {
+          "id": "singleflight-07",
+          "verdict": "unspecified",
+          "line": 160,
+          "fragment": "delete(g.m, key)",
+          "reason": "Completion removes the owning entry even when the function returns an error. The component defines no thirty-second retention or application request admission policy.",
+          "question": "OPEN: Must application-level errors be cached for thirty seconds before another request is allowed, or is that entirely an application-policy decision?"
+        }
+      ],
+      "corrections": []
+    },
+    "Feedback": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": []
+    },
+    "call_ids": [
+      7
+    ]
+  },
+  "score": 1.00079925
+}

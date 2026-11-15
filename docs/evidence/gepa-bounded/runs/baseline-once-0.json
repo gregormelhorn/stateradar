@@ -1,0 +1,105 @@
+{
+  "report": {
+    "findings": [
+      {
+        "id": "once-01",
+        "verdict": "supported",
+        "line": 22,
+        "fragment": "d.once.Do(func() {",
+        "reason": "Both copies of the returned closure use the same captured d and therefore the same once field, so calling both invokes f only once.",
+        "question": ""
+      },
+      {
+        "id": "once-02",
+        "verdict": "contradicted",
+        "line": 13,
+        "fragment": "d := struct {",
+        "reason": "Each OnceFunc call creates its own d with its own once field, even when both calls receive the same f.",
+        "question": ""
+      },
+      {
+        "id": "once-03",
+        "verdict": "supported",
+        "line": 10,
+        "fragment": "If f panics, the returned function will panic with the same value on every call.",
+        "reason": "The wrapper invokes f only once, saves the recovered panic value in d.p, and panics with that saved value on later calls.",
+        "question": ""
+      },
+      {
+        "id": "once-04",
+        "verdict": "supported",
+        "line": 72,
+        "fragment": "return d.result",
+        "reason": "The wrapper returns the stored pointer value on every successful call. Dereferencing it accesses the same object, including subsequent mutations.",
+        "question": ""
+      },
+      {
+        "id": "once-05",
+        "verdict": "contradicted",
+        "line": 19,
+        "fragment": "f: f,",
+        "reason": "OnceFunc stores the supplied function value in d.f and later invokes d.f. Reassigning the caller's variable leaves that stored value unchanged.",
+        "question": ""
+      },
+      {
+        "id": "once-06",
+        "verdict": "contradicted",
+        "line": 10,
+        "fragment": "If f panics, the returned function will panic with the same value on every call.",
+        "reason": "The contract explicitly requires the wrapper to panic on every call after f panics, including after the caller recovers the first panic.",
+        "question": ""
+      },
+      {
+        "id": "once-07",
+        "verdict": "unspecified",
+        "line": 10,
+        "fragment": "If f panics, the returned function will panic with the same value on every call.",
+        "reason": "The contract specifies how the returned function behaves after a panic. Application retry policy is outside its scope.",
+        "question": "OPEN: Must the application retry an initialization function after every panic?"
+      }
+    ],
+    "corrections": []
+  },
+  "call_ids": [
+    21
+  ],
+  "provider_index": 5,
+  "provider_cost": 0.0014,
+  "public": {
+    "component": "once",
+    "source": "upstream/once/oncefunc.go",
+    "cases": [
+      {
+        "id": "once-01",
+        "claim": "Copying the function returned by OnceFunc shares its once state; calling both function values invokes the original function once."
+      },
+      {
+        "id": "once-02",
+        "claim": "Two separate OnceFunc calls wrapping the same function share one once state."
+      },
+      {
+        "id": "once-03",
+        "claim": "If the original function panics, repeated calls re-panic with the same value without executing the original function again."
+      },
+      {
+        "id": "once-04",
+        "claim": "If OnceValue returns a pointer, later mutation of the pointed-to object is visible through subsequent returns of that same pointer."
+      },
+      {
+        "id": "once-05",
+        "claim": "Reassigning only the caller function variable after constructing OnceFunc changes which function the wrapper invokes."
+      },
+      {
+        "id": "once-06",
+        "claim": "After recovering the first OnceFunc panic, calling the wrapper again returns normally."
+      },
+      {
+        "id": "once-07",
+        "claim": "The application must retry an initialization function after every panic."
+      }
+    ]
+  },
+  "source": "// Copyright 2022 The Go Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style\n// license that can be found in the LICENSE file.\n\npackage sync\n\n// OnceFunc returns a function that invokes f only once. The returned function\n// may be called concurrently.\n//\n// If f panics, the returned function will panic with the same value on every call.\nfunc OnceFunc(f func()) func() {\n\t// Use a struct so that there's a single heap allocation.\n\td := struct {\n\t\tf     func()\n\t\tonce  Once\n\t\tvalid bool\n\t\tp     any\n\t}{\n\t\tf: f,\n\t}\n\treturn func() {\n\t\td.once.Do(func() {\n\t\t\tdefer func() {\n\t\t\t\td.f = nil // Do not keep f alive after invoking it.\n\t\t\t\td.p = recover()\n\t\t\t\tif !d.valid {\n\t\t\t\t\t// Re-panic immediately so on the first\n\t\t\t\t\t// call the user gets a complete stack\n\t\t\t\t\t// trace into f.\n\t\t\t\t\tpanic(d.p)\n\t\t\t\t}\n\t\t\t}()\n\t\t\td.f()\n\t\t\td.valid = true // Set only if f does not panic.\n\t\t})\n\t\tif !d.valid {\n\t\t\tpanic(d.p)\n\t\t}\n\t}\n}\n\n// OnceValue returns a function that invokes f only once and returns the value\n// returned by f. The returned function may be called concurrently.\n//\n// If f panics, the returned function will panic with the same value on every call.\nfunc OnceValue[T any](f func() T) func() T {\n\t// Use a struct so that there's a single heap allocation.\n\td := struct {\n\t\tf      func() T\n\t\tonce   Once\n\t\tvalid  bool\n\t\tp      any\n\t\tresult T\n\t}{\n\t\tf: f,\n\t}\n\treturn func() T {\n\t\td.once.Do(func() {\n\t\t\tdefer func() {\n\t\t\t\td.f = nil\n\t\t\t\td.p = recover()\n\t\t\t\tif !d.valid {\n\t\t\t\t\tpanic(d.p)\n\t\t\t\t}\n\t\t\t}()\n\t\t\td.result = d.f()\n\t\t\td.valid = true\n\t\t})\n\t\tif !d.valid {\n\t\t\tpanic(d.p)\n\t\t}\n\t\treturn d.result\n\t}\n}\n\n// OnceValues returns a function that invokes f only once and returns the values\n// returned by f. The returned function may be called concurrently.\n//\n// If f panics, the returned function will panic with the same value on every call.\nfunc OnceValues[T1, T2 any](f func() (T1, T2)) func() (T1, T2) {\n\t// Use a struct so that there's a single heap allocation.\n\td := struct {\n\t\tf     func() (T1, T2)\n\t\tonce  Once\n\t\tvalid bool\n\t\tp     any\n\t\tr1    T1\n\t\tr2    T2\n\t}{\n\t\tf: f,\n\t}\n\treturn func() (T1, T2) {\n\t\td.once.Do(func() {\n\t\t\tdefer func() {\n\t\t\t\td.f = nil\n\t\t\t\td.p = recover()\n\t\t\t\tif !d.valid {\n\t\t\t\t\tpanic(d.p)\n\t\t\t\t}\n\t\t\t}()\n\t\t\td.r1, d.r2 = d.f()\n\t\t\td.valid = true\n\t\t})\n\t\tif !d.valid {\n\t\t\tpanic(d.p)\n\t\t}\n\t\treturn d.r1, d.r2\n\t}\n}\n",
+  "phase": "final",
+  "repeat": 0
+}

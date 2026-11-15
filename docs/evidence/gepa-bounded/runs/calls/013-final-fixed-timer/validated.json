@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "timer-01",
+      "verdict": "supported",
+      "line": 176,
+      "fragment": "The returned Timer's C field is not used and will be nil.",
+      "reason": "AfterFunc explicitly guarantees that the Timer it returns has a nil C field.",
+      "question": ""
+    },
+    {
+      "id": "timer-02",
+      "verdict": "contradicted",
+      "line": 73,
+      "fragment": "Stop does not wait for f to complete before returning.",
+      "reason": "After the callback starts, Stop can return while it is still running. The caller must coordinate with f explicitly to learn when it completes.",
+      "question": ""
+    },
+    {
+      "id": "timer-03",
+      "verdict": "supported",
+      "line": 123,
+      "fragment": "to run again, in which case it returns false.",
+      "reason": "Reset on the timer after the expiration that started its callback schedules another execution of the registered f and returns false. If that scheduled execution is still pending, a further Reset reschedules it and returns true under lines 121–123.",
+      "question": ""
+    },
+    {
+      "id": "timer-04",
+      "verdict": "contradicted",
+      "line": 125,
+      "fragment": "nor does it guarantee that the subsequent",
+      "reason": "When Reset returns false, the new invocation of the registered f may run concurrently with its prior invocation, as lines 124–128 specify.",
+      "question": ""
+    },
+    {
+      "id": "timer-05",
+      "verdict": "supported",
+      "line": 67,
+      "fragment": "It returns true if the call stops the timer",
+      "reason": "AfterFunc returns a timer whose Stop method can cancel the pending call under lines 173–175. A successful Stop acts on that timer through its receiver at line 89. Copying the pointer preserves the target, while rebinding the local pointer to another timer directs a later Stop to that other timer. Under lines 67–68, a repeat Stop returns false if the timer is still stopped.",
+      "question": ""
+    },
+    {
+      "id": "timer-06",
+      "verdict": "contradicted",
+      "line": 178,
+      "fragment": "newTimer(when(d), 0, goFunc, f, nil)",
+      "reason": "AfterFunc receives the caller's function value as f at line 177 and stores that value as the timer argument at line 178. When the timer fires, goFunc invokes that argument at line 182. Copying the function value before registration or replacing only the caller's variable afterward leaves the registered function value intact. If that function reads a mutable wrapper or key when it runs, a change there can affect what the registered function does.",
+      "question": ""
+    },
+    {
+      "id": "timer-07",
+      "verdict": "unspecified",
+      "line": 173,
+      "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+      "reason": "The component defines callback scheduling and leaves application retry policy unspecified.",
+      "question": "OPEN: Does the application require a timed-out operation to be retried exactly three times?"
+    }
+  ],
+  "corrections": []
+}

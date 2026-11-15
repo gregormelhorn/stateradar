@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "splits": {
+    "train": [
+      "context"
+    ],
+    "validation": [
+      "singleflight"
+    ],
+    "test": [
+      "timer",
+      "once"
+    ]
+  },
+  "components": {
+    "context": {
+      "public": "context-public.json",
+      "oracle": "context-oracle.json",
+      "family": "context"
+    },
+    "singleflight": {
+      "public": "singleflight-public.json",
+      "oracle": "singleflight-oracle.json",
+      "family": "singleflight"
+    },
+    "timer": {
+      "public": "timer-public.json",
+      "oracle": "timer-oracle.json",
+      "family": "timer"
+    },
+    "once": {
+      "public": "once-public.json",
+      "oracle": "once-oracle.json",
+      "family": "once"
+    }
+  }
+}

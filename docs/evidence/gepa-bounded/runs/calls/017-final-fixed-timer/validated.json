@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "timer-01",
+      "verdict": "supported",
+      "line": 176,
+      "fragment": "The returned Timer's C field is not used and will be nil.",
+      "reason": "AfterFunc explicitly guarantees that the C field of the timer it returns is nil.",
+      "question": ""
+    },
+    {
+      "id": "timer-02",
+      "verdict": "contradicted",
+      "line": 73,
+      "fragment": "Stop does not wait for f to complete before returning.",
+      "reason": "Once the callback has started, Stop can return while it is still running. Lines 74–75 require explicit coordination to learn whether it has completed.",
+      "question": ""
+    },
+    {
+      "id": "timer-03",
+      "verdict": "supported",
+      "line": 123,
+      "fragment": "to run again, in which case it returns false.",
+      "reason": "After the callback for the current scheduling has started, that scheduling has expired. Reset on the same timer returns false and schedules the registered function again. If an intervening Reset has already made the timer active, lines 118–123 give the active case, which returns true and reschedules the pending call.",
+      "question": ""
+    },
+    {
+      "id": "timer-04",
+      "verdict": "contradicted",
+      "line": 125,
+      "fragment": "complete before returning nor does it guarantee that the subsequent",
+      "reason": "Lines 124–128 explicitly permit the next invocation of the registered function to run concurrently with the prior invocation when Reset returns false.",
+      "question": ""
+    },
+    {
+      "id": "timer-05",
+      "verdict": "supported",
+      "line": 175,
+      "fragment": "be used to cancel the call using its Stop method.",
+      "reason": "Calling Stop on the returned timer while its scheduled execution is still pending can cancel that execution and return true. Lines 66–68 specify that Stop returns false if the timer has already expired or been stopped.",
+      "question": ""
+    },
+    {
+      "id": "timer-06",
+      "verdict": "contradicted",
+      "line": 178,
+      "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+      "reason": "If a caller variable holds f1 at registration, line 178 passes that function value as the timer argument, and line 182 invokes the stored argument. Leaving the variable alone, copying its value to another variable, or rebinding the original variable to f2 leaves the timer invoking f1. If f1 itself reads a mutable wrapper or key, that lookup can affect what f1 does while the timer still invokes f1.",
+      "question": ""
+    },
+    {
+      "id": "timer-07",
+      "verdict": "unspecified",
+      "line": 173,
+      "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+      "reason": "AfterFunc schedules the supplied function. The component contract leaves the application's timeout retry policy unspecified.",
+      "question": "OPEN: How many times, if any, must the application retry a timed-out operation?"
+    }
+  ],
+  "corrections": []
+}

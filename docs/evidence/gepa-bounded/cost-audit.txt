@@ -1,0 +1,48 @@
+{
+  "arms": {
+    "none": {
+      "weekend_strategy_cost_equivalent_range": [
+        0.16447845500000002,
+        0.16628435000000003
+      ],
+      "controller_cost_if_no_cache_discount": 0.282108,
+      "actual_review_controller_equivalent": 0.0,
+      "review_controller_if_no_cache_discount": 0.0
+    },
+    "fixed": {
+      "weekend_strategy_cost_equivalent_range": [
+        0.386234455,
+        0.38804035000000003
+      ],
+      "controller_cost_if_no_cache_discount": 0.567096,
+      "actual_review_controller_equivalent": 0.221756,
+      "review_controller_if_no_cache_discount": 0.284988
+    },
+    "gepa": {
+      "weekend_strategy_cost_equivalent_range": [
+        0.327167255,
+        0.32897315000000005
+      ],
+      "controller_cost_if_no_cache_discount": 0.56056,
+      "actual_review_controller_equivalent": 0.16268880000000002,
+      "review_controller_if_no_cache_discount": 0.27845200000000003
+    }
+  },
+  "actual_experiment_equivalent_range": [
+    1.151660086,
+    1.1551531
+  ],
+  "optimization_equivalent_range": [
+    0.527863631,
+    0.52955075
+  ],
+  "flash_source": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "jev_source": "https://help.typesafe.ai/articles/5187202169-how-much-does-jev-cost",
+  "observed_date": "2026-11-15",
+  "flash_offpeak_per_million": {
+    "cached_input": 0.003,
+    "uncached_input": 0.15,
+    "output": 0.6
+  },
+  "limitation": "Flash cache split absent; range assumes all inputs cached versus uncached. Codex is a $0.04/credit equivalent, not an account debit. No-cache sensitivity is not actual spend. Unmetered supervising/human work remains excluded."
+}

@@ -1,0 +1,82 @@
+{
+  "candidate": {
+    "review": "Apply the following identity check as the final review of the preserved findings.\nFor each deferred callback, handle or stored reference, distinguish the captured\nobject or value from a later lookup through a mutable wrapper or key. Follow\nidentity from creation to invocation and attribute admission, success, cleanup\nand generation checks to the object that actually receives each effect. Numeric\ngeneration equality alone does not establish object identity. Where the boundary\npermits it, compare unchanged identity with copying, object replacement, mutation\nof a referenced wrapper/key, and rebinding of only the caller's local variable.\nKeep these operations distinct. State starting objects, ordered operations and\nobservable outcomes; cite capture and use sites. Retain all earlier ordinary\nsuccess, failure, cancellation and repeated-call findings while adding identity\nvariants. Do not assume replacement is a defect when stable capture or an identity\nguard prevents redirection. Cite documented exclusions; leave silent intent open.\n"
+  },
+  "trace": {
+    "component": "context",
+    "Generated Outputs": {
+      "findings": [
+        {
+          "id": "context-01",
+          "verdict": "supported",
+          "line": 333,
+          "fragment": "a.once.Do(func() {",
+          "reason": "Each registration creates its own a, which the returned stop closure captures (327–331). Before cancellation, the first stop consumes a.once, sets stopped to true, and calls a.cancel. A second stop through the same handle or a copy of that handle uses the same a.once and returns false (332–339).",
+          "question": ""
+        },
+        {
+          "id": "context-02",
+          "verdict": "contradicted",
+          "line": 319,
+          "fragment": "or f was already stopped.",
+          "reason": "After the first stop prevents the callback from running, a second stop on the same registration returns false (332–339).",
+          "question": ""
+        },
+        {
+          "id": "context-03",
+          "verdict": "contradicted",
+          "line": 320,
+          "fragment": "The stop function does not wait for f to complete before returning.",
+          "reason": "Cancellation launches the registered callback with go a.f() (358–360). A subsequent stop can return while that callback is still executing. Callers that need to know when it finishes must coordinate with it explicitly (321–322).",
+          "question": ""
+        },
+        {
+          "id": "context-04",
+          "verdict": "supported",
+          "line": 312,
+          "fragment": "Multiple calls to AfterFunc on a context operate independently;",
+          "reason": "Registering twice on the same context creates two distinct a objects, each with its own callback and one-time action (326–330, 347–350). Stopping the first before cancellation leaves the second eligible to run when the context is canceled.",
+          "question": ""
+        },
+        {
+          "id": "context-05",
+          "verdict": "supported",
+          "line": 310,
+          "fragment": "If ctx is already canceled, AfterFunc calls f immediately in its own goroutine.",
+          "reason": "Registration stores f in the new a (327–330). Propagation detects the supplied context's closed Done channel and cancels that registration (479–488), which launches the stored f in its own goroutine (353–360).",
+          "question": ""
+        },
+        {
+          "id": "context-06",
+          "verdict": "contradicted",
+          "line": 477,
+          "fragment": "c.Context = parent",
+          "reason": "Registering with a local variable holding context A passes A to propagateCancel (330), which stores A and reads its Done channel (477–479). Rebinding the local variable to context B leaves that association intact. The fallback watcher reads Done, Err, and Cause through its captured parent (523–526), and stop cleanup uses the stored context (355–356). Mutating a referenced wrapper could affect what its methods return, an operation distinct from rebinding the local variable.",
+          "question": ""
+        },
+        {
+          "id": "context-07",
+          "verdict": "unspecified",
+          "line": 309,
+          "fragment": "AfterFunc arranges to call f in its own goroutine after ctx is canceled.",
+          "reason": "The callback contract describes scheduling and leaves latency thresholds and incident reporting to application policy.",
+          "question": "OPEN: Does the source specify any requirement for the application to report callback latency above ten milliseconds as an incident?"
+        }
+      ],
+      "corrections": []
+    },
+    "Feedback": {
+      "correct": 7,
+      "total": 7,
+      "wrong": [],
+      "false_supported": [],
+      "missed_supported": [],
+      "closed_policy": [],
+      "expected_for_errors": {}
+    },
+    "call_ids": [
+      4
+    ]
+  },
+  "score": 1.00073925
+}

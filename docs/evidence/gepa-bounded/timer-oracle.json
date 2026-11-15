@@ -1,0 +1,51 @@
+{
+  "timer-01": {
+    "verdict": "supported",
+    "line": 176,
+    "fragment": "The returned Timer's C field is not used and will be nil.",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/timer"
+  },
+  "timer-02": {
+    "verdict": "contradicted",
+    "line": 73,
+    "fragment": "Stop does not wait for f to complete",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/timer"
+  },
+  "timer-03": {
+    "verdict": "supported",
+    "line": 123,
+    "fragment": "to run again, in which case it returns false.",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/timer"
+  },
+  "timer-04": {
+    "verdict": "contradicted",
+    "line": 126,
+    "fragment": "does not run concurrently with the prior",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/timer"
+  },
+  "timer-05": {
+    "verdict": "supported",
+    "line": 66,
+    "fragment": "Stop prevents the [Timer] from firing.",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/timer"
+  },
+  "timer-06": {
+    "verdict": "contradicted",
+    "line": 178,
+    "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/timer"
+  },
+  "timer-07": {
+    "verdict": "unspecified",
+    "line": 173,
+    "fragment": "AfterFunc waits for the duration to elapse",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": null
+  }
+}

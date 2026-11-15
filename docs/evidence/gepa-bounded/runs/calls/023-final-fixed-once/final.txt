@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "once-01",
+      "verdict": "supported",
+      "line": 22,
+      "fragment": "d.once.Do(func() {",
+      "reason": "OnceFunc creates d on line 13 and returns a closure over it on line 21. Copying that function value and calling both copies uses the same d.once on line 22, so d.f runs only once.",
+      "question": ""
+    },
+    {
+      "id": "once-02",
+      "verdict": "contradicted",
+      "line": 13,
+      "fragment": "d := struct {",
+      "reason": "Constructing two wrappers with the same f creates a separate d for each wrapper. Each wrapper uses its own d.once on line 22, so calling both can invoke f twice.",
+      "question": ""
+    },
+    {
+      "id": "once-03",
+      "verdict": "supported",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The first invocation stores the recovered value in the captured d.p on line 25 and re-panics on line 30. Later calls panic with that same d.p on line 37, and the once-only contract on line 7 rules out another invocation of f.",
+      "question": ""
+    },
+    {
+      "id": "once-04",
+      "verdict": "supported",
+      "line": 72,
+      "fragment": "return d.result",
+      "reason": "The first successful call stores the pointer returned by f in d.result on line 66. Mutating the object through that pointer is visible when a subsequent call returns the stored pointer and the caller dereferences it. Rebinding the caller's pointer variable leaves d.result unchanged.",
+      "question": ""
+    },
+    {
+      "id": "once-05",
+      "verdict": "contradicted",
+      "line": 19,
+      "fragment": "f: f,",
+      "reason": "Construction stores the supplied function value in d.f. If the caller reassigns only its own variable before invoking the wrapper, line 33 still calls the function value stored at construction.",
+      "question": ""
+    },
+    {
+      "id": "once-06",
+      "verdict": "contradicted",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "Recovery by the caller after the first panic leaves the wrapper's saved state intact. Calling the same wrapper again reaches the panic on line 37 with the saved value.",
+      "question": ""
+    },
+    {
+      "id": "once-07",
+      "verdict": "unspecified",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The contract specifies what happens when the application calls the same wrapper again. Whether the application must retry initialization is outside the component contract.",
+      "question": "OPEN: Must the application retry an initialization function after every panic?"
+    }
+  ],
+  "corrections": []
+}

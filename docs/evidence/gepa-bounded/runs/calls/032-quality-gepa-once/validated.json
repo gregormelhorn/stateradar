@@ -1,0 +1,77 @@
+{
+  "findings": [
+    {
+      "id": "once-01",
+      "verdict": "supported",
+      "line": 22,
+      "fragment": "d.once.Do(func() {",
+      "reason": "One OnceFunc call creates one d. Copying its returned function preserves the closure's reference to that d, so calling both values uses the same once field and invokes f once.",
+      "question": ""
+    },
+    {
+      "id": "once-02",
+      "verdict": "contradicted",
+      "line": 13,
+      "fragment": "d := struct {",
+      "reason": "Each OnceFunc call creates its own d with its own once field, even when both calls receive the same f.",
+      "question": ""
+    },
+    {
+      "id": "once-03",
+      "verdict": "supported",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The contract limits f to one invocation. On panic, the deferred code clears d.f, saves the panic value in d.p, and re-panics. Later calls panic with d.p because d.valid remains false.",
+      "question": ""
+    },
+    {
+      "id": "once-04",
+      "verdict": "supported",
+      "line": 72,
+      "fragment": "return d.result",
+      "reason": "The wrapper returns the stored pointer value on each successful call. Each pointer refers to the same object, so dereferencing it after a mutation reveals that mutation.",
+      "question": ""
+    },
+    {
+      "id": "once-05",
+      "verdict": "contradicted",
+      "line": 19,
+      "fragment": "f: f,",
+      "reason": "OnceFunc stores the supplied function value in d.f and later invokes d.f. Reassigning the caller's variable leaves that stored value unchanged.",
+      "question": ""
+    },
+    {
+      "id": "once-06",
+      "verdict": "contradicted",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The wrapper panics with the saved value on every call after f panics, including calls made after the caller recovers the first panic.",
+      "question": ""
+    },
+    {
+      "id": "once-07",
+      "verdict": "unspecified",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The contract specifies how the wrapper behaves after f panics and leaves application retry policy undefined.",
+      "question": "OPEN: Must the application retry an initialization function after every panic?"
+    }
+  ],
+  "corrections": [
+    {
+      "id": "once-01",
+      "before": "contradicted",
+      "after": "supported"
+    },
+    {
+      "id": "once-03",
+      "before": "contradicted",
+      "after": "supported"
+    },
+    {
+      "id": "once-07",
+      "before": "supported",
+      "after": "unspecified"
+    }
+  ]
+}

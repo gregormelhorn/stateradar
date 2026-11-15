@@ -1,0 +1,41 @@
+FFF.F
+======================================================================
+FAIL: test_missing_pair (test_gepa_report.Costs.test_missing_pair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_report.py", line 28, in test_missing_pair
+    with self.assertRaises(EvalError):summarize(self.rows,self.calls,self.providers)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_repair_cost_cannot_disappear (test_gepa_report.Costs.test_repair_cost_cannot_disappear)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_report.py", line 19, in test_repair_cost_cannot_disappear
+    with self.assertRaises(EvalError):summarize(self.rows,self.calls,self.providers)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_repair_count_cannot_disappear (test_gepa_report.Costs.test_repair_count_cannot_disappear)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_report.py", line 22, in test_repair_count_cannot_disappear
+    with self.assertRaises(EvalError):summarize(self.rows,self.calls,self.providers)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_unknown_is_not_free (test_gepa_report.Costs.test_unknown_is_not_free)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_report.py", line 25, in test_unknown_is_not_free
+    with self.assertRaises(EvalError):summarize(self.rows,self.calls,self.providers)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+FAILED (failures=4)

@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "context-01",
+      "verdict": "supported",
+      "line": 333,
+      "fragment": "a.once.Do(func() {",
+      "reason": "With cancellation still pending, the first stop uses the registration's one-time action to set its result to true and detach the registration. The second stop uses the same registration and returns false because the action has already been consumed.",
+      "question": ""
+    },
+    {
+      "id": "context-02",
+      "verdict": "contradicted",
+      "line": 319,
+      "fragment": "or f was already stopped.",
+      "reason": "A second stop can return false after the first stop prevented the callback from running.",
+      "question": ""
+    },
+    {
+      "id": "context-03",
+      "verdict": "contradicted",
+      "line": 320,
+      "fragment": "The stop function does not wait for f to complete before returning.",
+      "reason": "The stop function can return while the callback is running. Callers that need to know when it completes must coordinate with it explicitly.",
+      "question": ""
+    },
+    {
+      "id": "context-04",
+      "verdict": "supported",
+      "line": 312,
+      "fragment": "Multiple calls to AfterFunc on a context operate independently;",
+      "reason": "Each call creates a distinct registration at line 327, and the stop function returned at line 331 operates on that registration. Line 313 explicitly rules out replacement.",
+      "question": ""
+    },
+    {
+      "id": "context-05",
+      "verdict": "supported",
+      "line": 310,
+      "fragment": "If ctx is already canceled, AfterFunc calls f immediately in its own goroutine.",
+      "reason": "Registration against an already canceled parent reaches child cancellation at line 487, which launches the stored callback with go a.f() at line 359.",
+      "question": ""
+    },
+    {
+      "id": "context-06",
+      "verdict": "contradicted",
+      "line": 477,
+      "fragment": "c.Context = parent",
+      "reason": "Line 330 passes the context supplied at registration, and line 477 stores it as the parent. Cleanup uses the stored association at line 356. Rebinding only the caller's local variable leaves that association intact.",
+      "question": ""
+    },
+    {
+      "id": "context-07",
+      "verdict": "unspecified",
+      "line": 309,
+      "fragment": "AfterFunc arranges to call f in its own goroutine after ctx is canceled.",
+      "reason": "The callback contract specifies scheduling behavior and leaves latency thresholds and incident reporting to application policy.",
+      "question": "OPEN: Does the source specify any requirement for the application to report callback latency above ten milliseconds as an incident?"
+    }
+  ],
+  "corrections": []
+}

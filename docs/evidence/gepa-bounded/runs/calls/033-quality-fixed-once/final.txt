@@ -1,0 +1,77 @@
+{
+  "findings": [
+    {
+      "id": "once-01",
+      "verdict": "supported",
+      "line": 22,
+      "fragment": "d.once.Do(func() {",
+      "reason": "One OnceFunc call creates d at line 13 and returns a closure at line 21. Copying that function value preserves the captured d. Calling both copies uses the same d.once and invokes the original f once under line 7.",
+      "question": ""
+    },
+    {
+      "id": "once-02",
+      "verdict": "contradicted",
+      "line": 13,
+      "fragment": "d := struct {",
+      "reason": "Calling OnceFunc twice with the same f creates two distinct d instances, each with its own once field at line 15. Each returned closure uses its own d.once at line 22.",
+      "question": ""
+    },
+    {
+      "id": "once-03",
+      "verdict": "supported",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "Line 7 limits f to one invocation. When f panics, the defer clears d.f and saves the recovered value at lines 24–25. Later calls find d.valid still false and panic with d.p at lines 36–37.",
+      "question": ""
+    },
+    {
+      "id": "once-04",
+      "verdict": "supported",
+      "line": 72,
+      "fragment": "return d.result",
+      "reason": "Line 66 stores the pointer returned by f. After the caller mutates the pointed-to object, a subsequent successful call returns the same stored pointer, so dereferencing it accesses the mutated object.",
+      "question": ""
+    },
+    {
+      "id": "once-05",
+      "verdict": "contradicted",
+      "line": 19,
+      "fragment": "f: f,",
+      "reason": "Construction stores the supplied function value in d.f. Rebinding the caller's variable afterward leaves that stored value unchanged, and the wrapper invokes d.f at line 33.",
+      "question": ""
+    },
+    {
+      "id": "once-06",
+      "verdict": "contradicted",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "After the caller recovers the first panic, the wrapper still has d.valid false because line 34 was never reached. The next call panics with the stored value at lines 36–37.",
+      "question": ""
+    },
+    {
+      "id": "once-07",
+      "verdict": "unspecified",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "Lines 7–10 define how the returned wrapper behaves after f panics and leave application retry policy open.",
+      "question": "OPEN: Must the application retry initialization after every panic?"
+    }
+  ],
+  "corrections": [
+    {
+      "id": "once-01",
+      "before": "contradicted",
+      "after": "supported"
+    },
+    {
+      "id": "once-03",
+      "before": "contradicted",
+      "after": "supported"
+    },
+    {
+      "id": "once-07",
+      "before": "supported",
+      "after": "unspecified"
+    }
+  ]
+}

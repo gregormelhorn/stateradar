@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "context-01",
+      "verdict": "supported",
+      "line": 333,
+      "fragment": "a.once.Do(func() {",
+      "reason": "Before cancellation, the first stop consumes the one-time action and sets its result to true. The second stop skips that action and returns its initial false value.",
+      "question": ""
+    },
+    {
+      "id": "context-02",
+      "verdict": "contradicted",
+      "line": 319,
+      "fragment": "or f was already stopped.",
+      "reason": "A second stop can return false after the first stop prevented the callback from running.",
+      "question": ""
+    },
+    {
+      "id": "context-03",
+      "verdict": "contradicted",
+      "line": 320,
+      "fragment": "The stop function does not wait for f to complete before returning.",
+      "reason": "The contract requires callers who need to know whether the callback has completed to coordinate with it explicitly.",
+      "question": ""
+    },
+    {
+      "id": "context-04",
+      "verdict": "supported",
+      "line": 312,
+      "fragment": "Multiple calls to AfterFunc on a context operate independently;",
+      "reason": "Each call creates a separate registration, and the next line explicitly rules out replacement.",
+      "question": ""
+    },
+    {
+      "id": "context-05",
+      "verdict": "supported",
+      "line": 310,
+      "fragment": "If ctx is already canceled, AfterFunc calls f immediately in its own goroutine.",
+      "reason": "The contract explicitly provides for a separate callback goroutine when the context is already canceled at registration.",
+      "question": ""
+    },
+    {
+      "id": "context-06",
+      "verdict": "contradicted",
+      "line": 477,
+      "fragment": "c.Context = parent",
+      "reason": "The registration stores the context passed as its parent. Reassigning only the caller's local variable leaves that stored parent intact.",
+      "question": ""
+    },
+    {
+      "id": "context-07",
+      "verdict": "unspecified",
+      "line": 309,
+      "fragment": "AfterFunc arranges to call f in its own goroutine after ctx is canceled.",
+      "reason": "The callback contract describes when the callback is scheduled and leaves latency thresholds and incident reporting to application policy.",
+      "question": "OPEN: Does the source specify any requirement for the application to report callback latency above ten milliseconds as an incident?"
+    }
+  ],
+  "corrections": []
+}

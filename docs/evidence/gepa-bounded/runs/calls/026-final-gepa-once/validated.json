@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "once-01",
+      "verdict": "supported",
+      "line": 22,
+      "fragment": "d.once.Do(func() {",
+      "reason": "Copying the returned function preserves its captured d. Calls through either copy use the same d.once, so f is invoked only once.",
+      "question": ""
+    },
+    {
+      "id": "once-02",
+      "verdict": "contradicted",
+      "line": 13,
+      "fragment": "d := struct {",
+      "reason": "Each call to OnceFunc creates its own d with its own Once field, even when both calls receive the same f.",
+      "question": ""
+    },
+    {
+      "id": "once-03",
+      "verdict": "supported",
+      "line": 10,
+      "fragment": "If f panics, the returned function will panic with the same value on every call.",
+      "reason": "The wrapper invokes f only once. Its deferred handler stores the recovered value in d.p and re-panics. Later calls panic with the stored value.",
+      "question": ""
+    },
+    {
+      "id": "once-04",
+      "verdict": "supported",
+      "line": 72,
+      "fragment": "return d.result",
+      "reason": "OnceValue stores f's result once and returns it directly. If that result is a pointer, each return refers to the same object and exposes mutations made to it.",
+      "question": ""
+    },
+    {
+      "id": "once-05",
+      "verdict": "contradicted",
+      "line": 19,
+      "fragment": "f: f,",
+      "reason": "OnceFunc stores the supplied function value in d.f at construction and invokes d.f when the wrapper runs. Rebinding the caller's variable leaves d.f unchanged.",
+      "question": ""
+    },
+    {
+      "id": "once-06",
+      "verdict": "contradicted",
+      "line": 10,
+      "fragment": "will panic with the same value on every call.",
+      "reason": "The contract specifies a panic on every call after f panics, including calls after the caller recovers the first panic.",
+      "question": ""
+    },
+    {
+      "id": "once-07",
+      "verdict": "unspecified",
+      "line": 7,
+      "fragment": "OnceFunc returns a function that invokes f only once.",
+      "reason": "The contract governs calls to the returned wrapper and leaves application retry policy unspecified.",
+      "question": "OPEN: Must the application retry an initialization function after every panic, or is retry unspecified by the source?"
+    }
+  ],
+  "corrections": []
+}

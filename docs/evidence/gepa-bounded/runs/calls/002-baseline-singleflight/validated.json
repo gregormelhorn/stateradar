@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "singleflight-01",
+      "verdict": "contradicted",
+      "line": 212,
+      "fragment": "delete(g.m, key)",
+      "reason": "Forget deletes the map entry under the group lock. The running function continues, and a later call can start a new execution.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-02",
+      "verdict": "contradicted",
+      "line": 159,
+      "fragment": "if g.m[key] == c {",
+      "reason": "Completion deletes the entry only if it still points to the completing call. The replacement call has a different identity.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-03",
+      "verdict": "supported",
+      "line": 129,
+      "fragment": "c.chans = append(c.chans, ch)",
+      "reason": "The duplicate attaches its channel to the registered pending call and returns before launching its own function. On normal return, the original call sends its result to every attached channel. Panic and Goexit bypass result delivery.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-04",
+      "verdict": "contradicted",
+      "line": 160,
+      "fragment": "delete(g.m, key)",
+      "reason": "Completion removes the call if it still owns the entry. A later call with no pending entry starts a new execution.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-05",
+      "verdict": "contradicted",
+      "line": 120,
+      "fragment": "The returned channel will not be closed.",
+      "reason": "The DoChan contract explicitly says the returned channel stays open.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-06",
+      "verdict": "contradicted",
+      "line": 71,
+      "fragment": "Group represents a class of work and forms a namespace in",
+      "reason": "Duplicate suppression is scoped to the Group, and calls look up keys in the receiving Group's map.",
+      "question": ""
+    },
+    {
+      "id": "singleflight-07",
+      "verdict": "unspecified",
+      "line": 160,
+      "fragment": "delete(g.m, key)",
+      "reason": "The component clears the completed entry even when the function returns an error. Its contract leaves application caching and request admission policy open.",
+      "question": "OPEN: Must application-level errors be cached for thirty seconds before another request is allowed, or is that entirely an application-policy decision?"
+    }
+  ],
+  "corrections": []
+}

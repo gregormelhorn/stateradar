@@ -1,0 +1,51 @@
+{
+  "singleflight-01": {
+    "verdict": "contradicted",
+    "line": 207,
+    "fragment": "Future calls",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/singleflight"
+  },
+  "singleflight-02": {
+    "verdict": "contradicted",
+    "line": 159,
+    "fragment": "if g.m[key] == c {",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/singleflight"
+  },
+  "singleflight-03": {
+    "verdict": "supported",
+    "line": 96,
+    "fragment": "if c, ok := g.m[key]; ok {",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/singleflight"
+  },
+  "singleflight-04": {
+    "verdict": "contradicted",
+    "line": 160,
+    "fragment": "delete(g.m, key)",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/singleflight"
+  },
+  "singleflight-05": {
+    "verdict": "contradicted",
+    "line": 120,
+    "fragment": "The returned channel will not be closed.",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/singleflight"
+  },
+  "singleflight-06": {
+    "verdict": "contradicted",
+    "line": 71,
+    "fragment": "Group represents a class of work and forms a namespace",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": "TestReference/singleflight"
+  },
+  "singleflight-07": {
+    "verdict": "unspecified",
+    "line": 5,
+    "fragment": "Package singleflight provides a duplicate function call suppression",
+    "basis": "upstream contract/source; case assembled by Codex",
+    "referenceTest": null
+  }
+}

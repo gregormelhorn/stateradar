@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "timer-01",
+      "verdict": "supported",
+      "line": 176,
+      "fragment": "The returned Timer's C field is not used and will be nil.",
+      "reason": "The AfterFunc contract explicitly states that the returned timer's C field is nil.",
+      "question": ""
+    },
+    {
+      "id": "timer-02",
+      "verdict": "contradicted",
+      "line": 73,
+      "fragment": "Stop does not wait for f to complete before returning.",
+      "reason": "Stop can return while the AfterFunc callback is still running.",
+      "question": ""
+    },
+    {
+      "id": "timer-03",
+      "verdict": "supported",
+      "line": 123,
+      "fragment": "to run again, in which case it returns false.",
+      "reason": "Once the scheduled callback has started, the timer for that execution has expired. Reset returns false and schedules another execution.",
+      "question": ""
+    },
+    {
+      "id": "timer-04",
+      "verdict": "contradicted",
+      "line": 126,
+      "fragment": "goroutine running f does not run concurrently with the prior",
+      "reason": "Lines 124–128 explicitly allow for concurrent executions of f when Reset returns false.",
+      "question": ""
+    },
+    {
+      "id": "timer-05",
+      "verdict": "supported",
+      "line": 175,
+      "fragment": "be used to cancel the call using its Stop method.",
+      "reason": "AfterFunc documents cancellation through Stop, and lines 66–68 say Stop prevents firing and returns true when it stops the timer.",
+      "question": ""
+    },
+    {
+      "id": "timer-06",
+      "verdict": "contradicted",
+      "line": 178,
+      "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+      "reason": "AfterFunc passes the function value as the timer argument, and line 182 invokes that argument. Reassigning the caller's variable leaves the registered value unchanged.",
+      "question": ""
+    },
+    {
+      "id": "timer-07",
+      "verdict": "unspecified",
+      "line": 173,
+      "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+      "reason": "The contract specifies when AfterFunc calls f and leaves application retry policy unspecified.",
+      "question": "OPEN: How many times, if any, must the application retry a timed-out operation?"
+    }
+  ],
+  "corrections": []
+}

@@ -119,8 +119,8 @@ entries and separates the new model-routing plan from shipped capabilities.
    [Format and limits](cell-rationale.md). Expand adoption only after reviewing
    scenario scope and accepted decision or callee evidence for each component.
    See [machine-readable cell rationale](#10-machine-readable-cell-rationale).
-4. **Evaluate bounded prompt optimization.** After sufficient independent
-   benchmark cases exist, test a small sub-prompt against held-out cases; see
+4. **Evaluate bounded prompt optimization.** The first bounded, component-held-out
+   review experiment is implemented and executed; see
    [GEPA experiment](#9-gepa-experiment-the-feedback-loop-as-an-algorithm).
    Keep this separate from assuming that a more stable model answer is correct.
    The first [English reference/identity candidate](evidence/identity-benchmark/prompts/candidate.md)
@@ -291,17 +291,30 @@ targeted, per-class hardening.
 
 ## 9. GEPA experiment (the feedback loop as an algorithm)
 
-**Status:** Planned — once the benchmark suite has a few more cases.
-GEPA (arXiv:2507.19457, ICLR 2026 oral, in DSPy) optimizes prompts by
-natural-language reflection over execution trajectories and needs a
-textual feedback function — which the pack already has: checker
-outputs and Part-B diff classes. Our manual cycle (divergence classes
-folded into the pilot changelog) *is* GEPA by hand. First step: not
-the whole 380-line pilot — evolve one bounded sub-prompt (e.g. the
-Step-3 UV-checklist section) against the benchmark suite and see
-whether the machine finds rules eleven human-run pilots did not.
-Order of operations is already right: measurement harness first,
-optimizer second.
+**Status:** First bounded integration and comparison executed; no default promotion.
+The [experiment](evidence/gepa-bounded/README.md) connects actual GEPA 0.1.4 to the
+Codex login transport and metered Flash/Jev drafts. Twenty-eight supplied claims
+use upstream Go contracts and public-API probes, with context for training,
+singleflight for validation, and timer/once held out until selection. Seven
+metric evaluations and two proposals select one English final-review paragraph.
+The local oracle has no independent human second review.
+
+All three arms retain 42/42 primary verdict observations (14 distinct held-out
+claims, three repetitions). Both final reviews add a timer-scope qualification
+absent from the baseline reasons, and both repair 6/6 seeded errors while retaining
+8/8 correct controls in a separately declared post-selection diagnostic. These
+are benefits of review; no GEPA-specific quality gain is demonstrated. All
+optimization candidates already score 7/7, so the length tie-break determines
+selection. Observed cost differences are largely sensitive to Codex cache usage.
+
+Next priority is **quality beyond cheaper answers**: independently reviewed,
+executable discovery cases with contradictory contract wording, missing findings,
+scope errors and negative controls. Measure new valid findings, lost findings,
+open-question preservation, correction and transfer before cost. Freeze a new
+held-out set before any further tuning; the current test set is now consumed.
+The supervising review's repeated-Stop contract question remains OPEN. Do not
+claim whole-pilot improvement, independent discovery or broad transfer from this
+supplied-claim task, and keep standard routing unchanged until stronger evidence.
 
 ## 10. Machine-readable cell rationale
 

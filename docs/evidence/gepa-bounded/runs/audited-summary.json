@@ -1,0 +1,54 @@
+{
+  "arms": {
+    "none": {
+      "trials": 6,
+      "correct": 42,
+      "total_case_observations": 42,
+      "strategy_cost_usd_estimate": 0.17038779999999998,
+      "incremental_review_usd_estimate": 0.0,
+      "repair_calls": 0
+    },
+    "fixed": {
+      "trials": 6,
+      "correct": 42,
+      "total_case_observations": 42,
+      "strategy_cost_usd_estimate": 0.3921438,
+      "incremental_review_usd_estimate": 0.221756,
+      "repair_calls": 0
+    },
+    "gepa": {
+      "trials": 6,
+      "correct": 42,
+      "total_case_observations": 42,
+      "strategy_cost_usd_estimate": 0.3330766,
+      "incremental_review_usd_estimate": 0.16268880000000002,
+      "repair_calls": 0
+    }
+  },
+  "actual_experiment_usd_estimate": 1.1617435999999999,
+  "optimization_usd_estimate": 0.5320378,
+  "break_even_uses_vs_fixed": 54.04398380150068,
+  "cost_basis": "Metered Codex credit equivalents at $0.04/credit plus settled provider ledger. Not invoice debit.",
+  "unmetered": "Supervising implementation/review chat and human effort; not zero. Residual incorrect findings are unresolved, not repaired for free.",
+  "unit": "14 unique held-out claims on two components, three paired repeats; 42 observations per arm, not 42 independent cases",
+  "quality_extension": {
+    "fixed": {
+      "corrected": 6,
+      "seeded_errors": 6,
+      "retained_correct_controls": 8,
+      "controls": 8,
+      "introduced": 0,
+      "incremental_usd_estimate": 0.0432744,
+      "repair_calls": 0
+    },
+    "gepa": {
+      "corrected": 6,
+      "seeded_errors": 6,
+      "retained_correct_controls": 8,
+      "controls": 8,
+      "introduced": 0,
+      "incremental_usd_estimate": 0.0315988,
+      "repair_calls": 0
+    }
+  }
+}

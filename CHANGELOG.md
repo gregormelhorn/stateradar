@@ -4,6 +4,17 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Bounded GEPA review experiment.** Optional GEPA 0.1.4 adapter, separated
+  train/validation/test components, source-pinned public-API probes, exact report
+  validation and raw child-call cost auditing. The executed three-arm comparison
+  preserves all 42/42 held-out verdict observations; fixed and GEPA reviews both
+  add the same timer-scope qualification and repair 6/6 seeded errors without
+  losing 8/8 controls. No GEPA-specific quality advantage or whole-pilot benefit
+  is established. Costs include optimization and the observed structural repair;
+  pricing/cache uncertainty and unmetered supervising work remain explicit.
+  CI replays evidence without paid calls. Standard routing is unchanged.
+  See `docs/evidence/gepa-bounded/README.md`.
+
 - **Late-completion in Testgen.** Reviewed scope inventory and explicit
   applicable/not-applicable/blocked rows bind traces, cells and accepted DRs.
   A deterministic checker separates plan completeness from execution evidence,

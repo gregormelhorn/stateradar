@@ -1,0 +1,61 @@
+{
+  "findings": [
+    {
+      "id": "timer-01",
+      "verdict": "supported",
+      "line": 176,
+      "fragment": "The returned Timer's C field is not used and will be nil.",
+      "reason": "AfterFunc explicitly documents that the returned timer's C field is nil.",
+      "question": ""
+    },
+    {
+      "id": "timer-02",
+      "verdict": "contradicted",
+      "line": 73,
+      "fragment": "Stop does not wait for f to complete before returning.",
+      "reason": "Stop can return while the already-started callback is still running.",
+      "question": ""
+    },
+    {
+      "id": "timer-03",
+      "verdict": "supported",
+      "line": 123,
+      "fragment": "to run again, in which case it returns false.",
+      "reason": "Starting the callback means its scheduled expiration has occurred. Reset on that expired timer schedules f again and returns false. If an intervening Reset has already made the timer active, a further Reset reschedules that pending execution and returns true under lines 118–123.",
+      "question": ""
+    },
+    {
+      "id": "timer-04",
+      "verdict": "contradicted",
+      "line": 126,
+      "fragment": "goroutine running f does not run concurrently with the prior",
+      "reason": "Lines 124–128 explicitly deny a guarantee against overlap when Reset returns false and schedules another execution.",
+      "question": ""
+    },
+    {
+      "id": "timer-05",
+      "verdict": "supported",
+      "line": 175,
+      "fragment": "be used to cancel the call using its Stop method.",
+      "reason": "AfterFunc exposes cancellation through Stop. Lines 66–68 specify that a successful Stop returns true and prevents the pending timer from firing.",
+      "question": ""
+    },
+    {
+      "id": "timer-06",
+      "verdict": "contradicted",
+      "line": 178,
+      "fragment": "return newTimer(when(d), 0, goFunc, f, nil)",
+      "reason": "AfterFunc passes the function value at registration, and goFunc invokes that stored argument on line 182. Rebinding only the caller's variable leaves the registered value unchanged.",
+      "question": ""
+    },
+    {
+      "id": "timer-07",
+      "verdict": "unspecified",
+      "line": 173,
+      "fragment": "AfterFunc waits for the duration to elapse and then calls f",
+      "reason": "The contract specifies when AfterFunc calls f and leaves application retry policy unspecified.",
+      "question": "OPEN: How many times, if any, must the application retry a timed-out operation?"
+    }
+  ],
+  "corrections": []
+}

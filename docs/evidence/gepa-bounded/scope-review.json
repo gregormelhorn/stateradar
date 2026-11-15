@@ -1,0 +1,82 @@
+{
+  "status": "supplementary post-selection review; no optimization feedback",
+  "primary_scope_limit": "timer-03 primary label assumes Reset of the expired firing without an intervening rearm. The claim inventory does not spell that exclusion out. The additional review exposes this evaluation-scope limitation; the frozen label/score is not retrospectively rewritten.",
+  "comparison_sha256": "257d8d17ef68930e12b2d69a5f4e0c3d2bf63a0edf6b5b267093d04fc42c4721",
+  "probe_sha256": "87d46b87aa12452820d2967ee4e78d2fbb691c915f55a247771096457f109159",
+  "execution_sha256": "639021fb08174ec70bbe15395ec78eec7a38680b31b81f88349fc8baa69313b2",
+  "rows": [
+    {
+      "repeat": 0,
+      "arm": "none",
+      "reason": "Once the callback for the expiration being reset has started, Reset schedules another execution and returns false.",
+      "explicit_intervening_rearm_qualification": false,
+      "reviewer": "Codex, supervising source/trace review",
+      "rationale": "Explains the expired scheduling but does not explicitly examine a separate intervening Reset."
+    },
+    {
+      "repeat": 0,
+      "arm": "fixed",
+      "reason": "Reset on the timer after the expiration that started its callback schedules another execution of the registered f and returns false. If that scheduled execution is still pending, a further Reset reschedules it and returns true under lines 121\u2013123.",
+      "explicit_intervening_rearm_qualification": true,
+      "reviewer": "Codex, supervising source/trace review",
+      "rationale": "Names the intervening rearm/active case and its true return."
+    },
+    {
+      "repeat": 0,
+      "arm": "gepa",
+      "reason": "Once the callback for the expiration being reset has started, Reset returns false and schedules another execution. If another Reset has already made the timer active again, Reset returns true and reschedules that pending execution.",
+      "explicit_intervening_rearm_qualification": true,
+      "reviewer": "Codex, supervising source/trace review",
+      "rationale": "Names the intervening rearm/active case and its true return."
+    },
+    {
+      "repeat": 1,
+      "arm": "none",
+      "reason": "Once the scheduled callback has started, the timer for that execution has expired. Reset returns false and schedules another execution.",
+      "explicit_intervening_rearm_qualification": false,
+      "reviewer": "Codex, supervising source/trace review",
+      "rationale": "Explains the expired scheduling but does not explicitly examine a separate intervening Reset."
+    },
+    {
+      "repeat": 1,
+      "arm": "gepa",
+      "reason": "Starting the callback means its scheduled expiration has occurred. Reset on that expired timer schedules f again and returns false. If an intervening Reset has already made the timer active, a further Reset reschedules that pending execution and returns true under lines 118\u2013123.",
+      "explicit_intervening_rearm_qualification": true,
+      "reviewer": "Codex, supervising source/trace review",
+      "rationale": "Names the intervening rearm/active case and its true return."
+    },
+    {
+      "repeat": 1,
+      "arm": "fixed",
+      "reason": "After the callback for the current scheduling has started, that scheduling has expired. Reset on the same timer returns false and schedules the registered function again. If an intervening Reset has already made the timer active, lines 118\u2013123 give the active case, which returns true and reschedules the pending call.",
+      "explicit_intervening_rearm_qualification": true,
+      "reviewer": "Codex, supervising source/trace review",
+      "rationale": "Names the intervening rearm/active case and its true return."
+    },
+    {
+      "repeat": 2,
+      "arm": "none",
+      "reason": "Once the scheduled callback has started, that timer setting has expired. Reset schedules another execution and returns false.",
+      "explicit_intervening_rearm_qualification": false,
+      "reviewer": "Codex, supervising source/trace review",
+      "rationale": "Explains the expired scheduling but does not explicitly examine a separate intervening Reset."
+    },
+    {
+      "repeat": 2,
+      "arm": "fixed",
+      "reason": "Once the callback starts, that timer setting has expired. Reset on the expired timer schedules another execution and returns false. If an intervening Reset has already made the timer active, a later Reset reschedules that pending execution and returns true under lines 117\u2013123.",
+      "explicit_intervening_rearm_qualification": true,
+      "reviewer": "Codex, supervising source/trace review",
+      "rationale": "Names the intervening rearm/active case and its true return."
+    },
+    {
+      "repeat": 2,
+      "arm": "gepa",
+      "reason": "When Reset acts on the expired firing that started the callback, it returns false and schedules f again. If an earlier Reset has already rearmed the timer and it is still active, Reset instead returns true and reschedules the pending execution.",
+      "explicit_intervening_rearm_qualification": true,
+      "reviewer": "Codex, supervising source/trace review",
+      "rationale": "Names the intervening rearm/active case and its true return."
+    }
+  ],
+  "meaning": "This is a review benefit shared by fixed and GEPA, not a GEPA-specific quality win. Annotation integrity does not prove prose entailment."
+}
