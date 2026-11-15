@@ -248,6 +248,9 @@ and add the same timer-scope qualification; neither demonstrates a quality
 advantage over the other. This is claim review, not open-ended bug discovery or
 full-pilot optimization. The standard routing is unchanged.
 [Results, costs and limitations](docs/evidence/gepa-bounded/README.md).
+A follow-up [supervised discovery experiment](docs/evidence/gepa-discovery/README.md)
+uses source-backed open findings and held-out components. GEPA retained the fixed
+seed, so the final arms used identical prompts; no GEPA advantage is established.
 
 ---
 

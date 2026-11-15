@@ -1,0 +1,54 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "C1",
+      "finding_ids": [],
+      "reason": "Predicate is rechecked and relocking described, but finding does not explicitly state Wait cannot return spuriously; no full-case credit."
+    },
+    {
+      "id": "C2",
+      "finding_ids": [
+        "notification-order"
+      ],
+      "reason": "Explicit no waiter -> later Wait requires later notification; independently checked runtime-reference/sema.go:578,584,631,668 and bounded public-seam control."
+    },
+    {
+      "id": "C3",
+      "finding_ids": [],
+      "reason": "Signal/Broadcast lock optional is stated, but requirement to hold L for changing condition is not stated."
+    }
+  ],
+  "findings": [
+    {
+      "id": "signal-and-broadcast",
+      "verdict": "valid",
+      "reason": "Cond Signal/Broadcast and Wait comments; runtime-reference/sema.go:631,668 confirms ticket notifications and waiting for lock."
+    },
+    {
+      "id": "notification-order",
+      "verdict": "valid",
+      "reason": "Independently inspected runtime-reference/sema.go:578,584,631,668: empty notification is not stored and notified ticket does not park; model did not see that callee."
+    },
+    {
+      "id": "predicate-after-wakeup",
+      "verdict": "valid",
+      "reason": "Cond Wait lines 52-65 and Signal scheduling comment justify rechecking after another goroutine changes predicate."
+    },
+    {
+      "id": "cancellation",
+      "verdict": "valid",
+      "reason": "Wait takes no context; documented return requires Signal/Broadcast; independent notification by user remains possible."
+    },
+    {
+      "id": "copy-identity",
+      "verdict": "valid",
+      "reason": "copyChecker initialization/check and Wait/Signal/Broadcast entry guards support before/after first use behavior."
+    },
+    {
+      "id": "broadcast-channel-analogy",
+      "verdict": "valid",
+      "reason": "Cond and channel semantic distinction: runtime-reference/sema.go:631 empty notification is not a saved channel-close state."
+    }
+  ]
+}

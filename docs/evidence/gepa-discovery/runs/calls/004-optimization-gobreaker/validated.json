@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "closed-execute",
+      "text": "A newly constructed breaker starts closed with zero counts. With default settings and serial Execute calls, each admitted request increments Requests before its function runs, and Execute returns the value and error supplied by that function. A nil error counts as success and resets the failure streak. Each non-nil error counts as a failure and resets the success streak. On the sixth consecutive failure, the breaker opens and clears all counts before Execute returns the sixth request's value and error. A custom IsSuccessful can change the accounting while preserving the returned value and error.",
+      "citation": {
+        "line": 243,
+        "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+      },
+      "question": ""
+    },
+    {
+      "id": "deferred-expiry",
+      "text": "Start with a closed breaker whose positive interval has elapsed, or an open breaker whose timeout has elapsed. Time passing alone causes no transition or reset. Counts can still return the previous snapshot because it does not check expiry. State, admission, or completion checks expiry using a strict before comparison. The first such check strictly after expiry clears counts and starts a fresh closed interval, or transitions open to half-open. If an older completion makes that check, it can trigger the reset or transition before its own outcome is discarded for having an old generation. Execute still returns the request's value and error on normal completion.",
+      "citation": {
+        "line": 298,
+        "fragment": "state, generation := cb.currentState(now)"
+      },
+      "question": "OPEN: Should the documented interval and timeout be understood as taking effect only when an operation checks expiry, including when Counts still reports a pre-expiry snapshot?"
+    },
+    {
+      "id": "half-open-admission",
+      "text": "An admission attempt while the breaker is still open returns ErrOpenState with a nil Execute result or nil Allow callback. Execute does not run the request. Once the breaker is half-open with fresh counts, it admits up to MaxRequests requests in that generation, with zero configured as one. At the cap, further attempts return ErrTooManyRequests with the same nil result or callback. Each same-generation success advances the success count and reaching MaxRequests closes the breaker and clears counts. The first same-generation failure reopens it and clears counts. If every slot is used and a necessary Allow callback is abandoned while the reported outcomes are all successes, the breaker stays half-open and keeps rejecting admissions. Half-open has no expiry or cancellation operation.",
+      "citation": {
+        "line": 285,
+        "fragment": "state == StateHalfOpen && cb.counts.Requests >= cb.maxRequests"
+      },
+      "question": "OPEN: Is a half-open breaker expected to remain at capacity indefinitely when an admitted caller never reports an outcome?"
+    },
+    {
+      "id": "repeated-completion",
+      "text": "Start half-open with fresh counts and MaxRequests set to two. Call Allow once, retain its callback, and call that same callback with true twice without any intervening transition. The first call records one success and leaves the breaker half-open. The second records another success, closes the breaker, and clears counts even though only one request was admitted. Two separately admitted requests reporting one success each produce the same final state and counts. The callback carries a generation but no per-admission completion guard. A further invocation of the original callback is ignored once the generation changes.",
+      "citation": {
+        "line": 272,
+        "fragment": "tscb.cb.afterRequest(generation, success)"
+      },
+      "question": "OPEN: Does Allow require exactly one callback invocation per admission, or should the implementation ignore duplicate reports?"
+    },
+    {
+      "id": "execute-panic",
+      "text": "After Execute admits a request, if the request panics and recover returns a non-nil value, Execute reports a failure directly, bypassing IsSuccessful. If the generation is still current, ordinary failure handling applies. An expired or replaced generation can discard the outcome. If failure reporting returns normally, Execute panics with the recovered value and supplies no normal result. With legacy Go behavior where panic(nil) makes recover return nil, the deferred handler neither reports failure nor re-panics, and Execute returns nil, nil.",
+      "citation": {
+        "line": 236,
+        "fragment": "if e != nil {"
+      },
+      "question": "OPEN: Which Go versions or panicnil settings does the documented same-panic guarantee cover?"
+    },
+    {
+      "id": "state-change-callback",
+      "text": "With OnStateChange configured, an operation that causes an actual transition first assigns the new state, then clears counts and initializes the new generation, then synchronously invokes the callback with the configured name and old and new states. The originating operation still holds the breaker mutex and resumes only after the callback returns. A callback that synchronously calls State or Counts on that same breaker deadlocks. Construction and a closed-interval reset can initialize or replace a generation without invoking the callback because neither changes the state.",
+      "citation": {
+        "line": 359,
+        "fragment": "cb.onStateChange(cb.name, prev, state)"
+      },
+      "question": "OPEN: Is OnStateChange intended to permit the callback to query the same breaker synchronously?"
+    }
+  ]
+}

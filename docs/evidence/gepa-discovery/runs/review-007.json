@@ -1,0 +1,58 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "T1",
+      "finding_ids": [
+        "callback-stop"
+      ],
+      "reason": "Repeated stop false after successful stop and conflicting clause remains OPEN."
+    },
+    {
+      "id": "T2",
+      "finding_ids": [
+        "callback-reset"
+      ],
+      "reason": "Reset false after expiration; prior and new callbacks may overlap."
+    },
+    {
+      "id": "T3",
+      "finding_ids": [
+        "channel-stop"
+      ],
+      "reason": "Go 1.23 post-Stop receive cannot obtain stale time, with no later Reset."
+    }
+  ],
+  "findings": [
+    {
+      "id": "duration-boundaries",
+      "verdict": "valid",
+      "reason": "when function and Sleep comment support deadline cases, while outcome ordering is not inferred."
+    },
+    {
+      "id": "channel-creation-and-delivery",
+      "verdict": "valid",
+      "reason": "NewTimer, After, sendTime and garbage-collection comments support claims; runtime mechanism remains OPEN."
+    },
+    {
+      "id": "channel-stop",
+      "verdict": "valid",
+      "reason": "Stop general and Go 1.23 prose, guard and pointer delegation; version distinction preserved."
+    },
+    {
+      "id": "channel-reset",
+      "verdict": "valid",
+      "reason": "Reset prose and pointer delegation support described return, stale-read and rearm distinctions."
+    },
+    {
+      "id": "callback-stop",
+      "verdict": "valid",
+      "reason": "AfterFunc, goFunc, Stop prose and executed repeated-stop control support the distinction."
+    },
+    {
+      "id": "callback-reset",
+      "verdict": "valid",
+      "reason": "Reset AfterFunc prose and constructor support rearming and potential overlap."
+    }
+  ]
+}

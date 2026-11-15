@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "train": ["timer"],
+  "validation": ["gobreaker"],
+  "test": ["cond", "waitgroup"],
+  "components": {
+    "timer": {
+      "source":"upstream/timer.go",
+      "source_origin":"Go 1.27.3 src/time/sleep.go; previously used in GEPA evaluation",
+      "cases":[
+        {"id":"T1","question_required":true,"description":"Repeated Stop can return false after a previous successful stop even though callback never starts; this conflicts with unconditional func-timer wording. Preserve an OPEN question on wording scope.","evidence":"docs/evidence/gepa-bounded/open-questions.md and scope-reference.jsonl TestRepeatedStopFalseBeforeCallback"},
+        {"id":"T2","question_required":false,"description":"For AfterFunc, Reset of an expired timer schedules a new call but does not wait for a prior callback to complete, so callbacks may overlap.","evidence":"upstream/timer.go Reset documentation; docs/evidence/gepa-bounded/reference-output.jsonl"},
+        {"id":"T3","question_required":false,"description":"For a channel timer under Go 1.23 and later, after Stop returns no stale pre-Stop time value may be received.","evidence":"upstream/timer.go Stop documentation"}
+      ]
+    },
+    "gobreaker": {
+      "source":"upstream/gobreaker.go",
+      "source_origin":"github.com/sony/gobreaker 27b8e2cfc65aacd09abb3968455e4b01df4a83fa",
+      "cases":[
+        {"id":"G1","question_required":false,"description":"A single HalfOpen Allow callback called twice with success can close the breaker with MaxRequests=2 without two distinct completions.","evidence":"docs/evidence/identity-benchmark/benchmark.json B02 and benchmark-proof.jsonl"},
+        {"id":"G2","question_required":false,"description":"A user state-change or ready-to-trip callback executed while the breaker mutex is held can block by reentering the same breaker State or Counts.","evidence":"docs/evidence/identity-benchmark/benchmark.json B04 and benchmark-proof.jsonl"},
+        {"id":"G3","question_required":false,"description":"If a TwoStepCircuitBreaker wrapper is reassigned after Allow, the returned callback uses the wrapper's replacement breaker: matching generation values do not establish identity.","evidence":"docs/evidence/identity-benchmark/benchmark.json B05 and benchmark-proof.jsonl"}
+      ]
+    },
+    "cond": {
+      "source":"upstream/cond.go",
+      "source_origin":"Go 1.27.3 src/sync/cond.go, separate component not used in prior GEPA search",
+      "cases":[
+        {"id":"C1","question_required":false,"description":"Wait releases L while waiting and locks L before returning; it cannot return without Signal or Broadcast, yet callers must recheck the predicate in a loop because it may no longer hold.","evidence":"upstream/cond.go Wait contract and upstream/cond_test.go TestCondSignal"},
+        {"id":"C2","question_required":false,"description":"Signal wakes one existing waiter if present; a Signal before any waiter is not a stored notification for a future Wait.","evidence":"upstream/cond.go Signal contract; TestCondSignalGenerations covers successive waits, not a signal-before-wait control"},
+        {"id":"C3","question_required":false,"description":"It is allowed, but not required, to hold c.L while calling Signal or Broadcast; holding it is required when changing the condition and calling Wait.","evidence":"upstream/cond.go Cond, Wait, Signal and Broadcast contracts"}
+      ]
+    },
+    "waitgroup": {
+      "source":"upstream/waitgroup.go",
+      "source_origin":"Go 1.27.3 src/sync/waitgroup.go, separate component not used in prior GEPA search",
+      "cases":[
+        {"id":"W1","question_required":false,"description":"A negative counter causes Add to panic; Done is Add(-1).", "evidence":"upstream/waitgroup.go Add and Done contracts; upstream/waitgroup_test.go TestWaitGroupMisuse"},
+        {"id":"W2","question_required":false,"description":"If reused for independent work, new positive Adds must occur only after all prior Wait calls have returned.","evidence":"upstream/waitgroup.go Add contract; TestWaitGroup covers sequential reuse"},
+        {"id":"W3","question_required":false,"description":"A positive Add starting while the counter is already greater than zero may occur at any time, unlike a positive Add when it is zero which must precede Wait.","evidence":"upstream/waitgroup.go Add contract; no dedicated executable control for this exact ordering"}
+      ]
+    }
+  }
+}

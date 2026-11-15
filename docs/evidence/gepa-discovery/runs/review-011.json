@@ -1,0 +1,56 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "W1",
+      "finding_ids": [
+        "extra-done"
+      ],
+      "reason": "Unmatched Done/Add(-1) makes counter negative and panics; upstream TestWaitGroupMisuse."
+    },
+    {
+      "id": "W2",
+      "finding_ids": [
+        "reuse-before-wait-return"
+      ],
+      "reason": "Explicit requirement that all earlier Wait calls return before reuse."
+    },
+    {
+      "id": "W3",
+      "finding_ids": [],
+      "reason": "Nested Go is an instance of adding while nonzero but does not state the full general Add rule; no case credit."
+    }
+  ],
+  "findings": [
+    {
+      "id": "go-task-lifecycle",
+      "verdict": "valid",
+      "reason": "Go calls Add before launch, defer executes Done on normal return/Goexit; final Add releases waiters."
+    },
+    {
+      "id": "wait-and-registration-order",
+      "verdict": "valid",
+      "reason": "Wait zero fast path and Add documentation support stated orderings."
+    },
+    {
+      "id": "extra-done",
+      "verdict": "valid",
+      "reason": "Done delegates Add(-1); atomic update precedes negative check; Add(1) from -1 produces zero with no waiter."
+    },
+    {
+      "id": "reuse-before-wait-return",
+      "verdict": "valid",
+      "reason": "Wait tests state after semaphore acquire and documented reuse requires all Wait returns."
+    },
+    {
+      "id": "escaping-task-panic",
+      "verdict": "false",
+      "reason": "FALSE without qualification: with GODEBUG=panicnil=1 and f panicking with nil, recover returns nil and wrapper executes Done rather than re-panicking; runtime-reference/panic.go:780-783 and separately executed panicnil-tests.jsonl, 3/3. Panics are outside Go contract but implementation assertion is universal."
+    },
+    {
+      "id": "synctest-association-after-zero",
+      "verdict": "valid",
+      "reason": "Add and Wait state/flag paths plus runtime-reference/synctest-contract.go:33-55 and synctest-runtime.go:432-451 support association and disassociation; question remains OPEN."
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "G1",
+      "finding_ids": [
+        "repeated-completion"
+      ],
+      "reason": "Correct MaxRequests=2 one-callback/two-success sequence; see Allow closure and onSuccess; benchmark B02."
+    },
+    {
+      "id": "G2",
+      "finding_ids": [
+        "state-hook-reentrancy"
+      ],
+      "reason": "OnStateChange runs under mutex in State/setState, reentry via State or Counts blocks; benchmark B04."
+    },
+    {
+      "id": "G3",
+      "finding_ids": [],
+      "reason": "No serialized wrapper reassignment or changed receiver is described."
+    }
+  ],
+  "findings": [
+    {
+      "id": "execute-controls",
+      "verdict": "valid",
+      "reason": "Source beforeRequest, Execute, onSuccess/onFailure and defaultReadyToTrip support sequence with stated defaults."
+    },
+    {
+      "id": "panic-propagation",
+      "verdict": "valid",
+      "reason": "Execute defer calls afterRequest(false); onFailure increments then invokes ReadyToTrip and may itself panic, subject to stated conditions."
+    },
+    {
+      "id": "repeated-completion",
+      "verdict": "valid",
+      "reason": "Allow closure has no once guard; afterRequest generation guard and onSuccess/onFailure implement the described outcomes."
+    },
+    {
+      "id": "abandoned-probe",
+      "verdict": "valid",
+      "reason": "HalfOpen has no expiry and admission is exhausted; without another outstanding completion it remains."
+    },
+    {
+      "id": "expiry-ordering",
+      "verdict": "valid",
+      "reason": "afterRequest calls currentState; Counts does not; currentState advances expired generations and open state."
+    },
+    {
+      "id": "state-hook-reentrancy",
+      "verdict": "valid",
+      "reason": "setState invokes callback while callers hold mutex; State and Counts reacquire that mutex."
+    }
+  ]
+}

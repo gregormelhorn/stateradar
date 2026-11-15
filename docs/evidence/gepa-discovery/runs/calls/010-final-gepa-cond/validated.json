@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "wait-rechecks-condition",
+      "text": "Start with a caller holding c.L and observing a false condition. Wait registers the caller, unlocks c.L, and waits for a notification. After notification it must reacquire c.L before returning. Another goroutine can acquire c.L first and make the condition false again, so the caller must recheck the condition under c.L and repeat Wait if needed.",
+      "citation": {
+        "line": 72,
+        "fragment": "c.L.Lock()"
+      },
+      "question": ""
+    },
+    {
+      "id": "notification-order",
+      "text": "Start with a Cond that has no registered waiters. If Signal finishes before a caller registers in Wait, the later Wait still needs a notification. If Wait registers first and Signal runs before the caller enters runtime_notifyListWait, the registered caller can receive that notification without needing a second Signal. It still reacquires c.L before returning.",
+      "citation": {
+        "line": 69,
+        "fragment": "t := runtime_notifyListAdd(&c.notify)"
+      },
+      "question": ""
+    },
+    {
+      "id": "repeated-notifications",
+      "text": "Start with three goroutines already waiting on one Cond. With no new waiters, two successive Signal calls each notify one waiter, and a following Broadcast notifies the remaining waiter. These calls may run with or without c.L held. Notification does not establish which goroutine returns first. Once no waiters remain, another Broadcast leaves a later Wait dependent on a fresh notification.",
+      "citation": {
+        "line": 87,
+        "fragment": "Broadcast wakes all goroutines waiting on c."
+      },
+      "question": "OPEN: Is the comparison with closing a channel intended to describe only the wake-all effect on current waiters? A closed channel also affects later receivers, while Broadcast leaves later waiters dependent on another notification."
+    },
+    {
+      "id": "cancellation",
+      "text": "Start with a goroutine already in Wait and cancel its surrounding operation or let its deadline expire. If no Signal or Broadcast unblocks it, Wait remains pending. If cancellation instead causes another goroutine to Broadcast, Wait must reacquire c.L before it returns, and the caller must inspect cancellation separately because Wait returns no status.",
+      "citation": {
+        "line": 55,
+        "fragment": "Wait cannot return unless awoken by [Cond.Broadcast] or [Cond.Signal]."
+      },
+      "question": ""
+    },
+    {
+      "id": "checker-initialization",
+      "text": "Start with a Cond returned by NewCond before any Wait, Signal, or Broadcast. A value copy at this point has a zero checker and its own notification list, and it carries the same Locker value. First use of each Cond initializes its checker to its own address. If two first-use calls race on the same Cond, the call that loses the initialization CAS rechecks the stored address and proceeds when it matches.",
+      "citation": {
+        "line": 107,
+        "fragment": "!atomic.CompareAndSwapUintptr((*uintptr)(c), 0, uintptr(unsafe.Pointer(c)))"
+      },
+      "question": ""
+    },
+    {
+      "id": "copy-after-first-use",
+      "text": "Start with a fresh Cond and call Signal while it has no waiters. The call initializes the checker even though it wakes nobody. After that call completes, copy the Cond by value. The original can still be used, but the first Wait, Signal, or Broadcast on the copy panics because its checker stores the original checker address. The panic happens before Wait can register or unlock c.L and before Signal or Broadcast can notify anyone.",
+      "citation": {
+        "line": 109,
+        "fragment": "panic(\"sync.Cond is copied\")"
+      },
+      "question": ""
+    }
+  ]
+}

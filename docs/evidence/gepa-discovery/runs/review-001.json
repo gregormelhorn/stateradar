@@ -1,0 +1,58 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "T1",
+      "finding_ids": [
+        "function-stop"
+      ],
+      "reason": "Names second Stop false after successful cancellation, the conflicting sentence, and leaves its scope OPEN; scope-reference repeated Stop control."
+    },
+    {
+      "id": "T2",
+      "finding_ids": [
+        "function-reset"
+      ],
+      "reason": "Describes prior running callback, false Reset, new scheduling and overlap; Reset contract lines 121-127."
+    },
+    {
+      "id": "T3",
+      "finding_ids": [
+        "channel-stop"
+      ],
+      "reason": "States no stale pre-Stop receive for channel timer in stated Go 1.23 behavior; Stop lines 76-82."
+    }
+  ],
+  "findings": [
+    {
+      "id": "channel-stop",
+      "verdict": "valid",
+      "reason": "Stop comments and initialization guard; subsequent receive condition assumes no later Reset."
+    },
+    {
+      "id": "channel-reset",
+      "verdict": "valid",
+      "reason": "Reset comments, resetTimer call and NewTimer channel initialization support stated sequence under documented Go 1.23 behavior."
+    },
+    {
+      "id": "channel-construction",
+      "verdict": "valid",
+      "reason": "NewTimer allocation and comments distinguish internal allocation from documented externally observable capacity; runtime left as an open question."
+    },
+    {
+      "id": "deferred-send",
+      "verdict": "valid",
+      "reason": "sendTime select has nonblocking default and computes Now minus delta under the specified invocation assumption."
+    },
+    {
+      "id": "function-stop",
+      "verdict": "valid",
+      "reason": "AfterFunc C nil, Stop general and func-specific prose, plus previously executed repeated-Stop reference; potential scope contradiction kept OPEN."
+    },
+    {
+      "id": "function-reset",
+      "verdict": "valid",
+      "reason": "Reset AfterFunc prose explicitly permits overlapping callbacks and returns false for stopped or expired timers."
+    }
+  ]
+}

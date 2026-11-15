@@ -116,9 +116,18 @@ jobs:
           python tools/selftest/test_gepa_search.py
           python tools/selftest/test_gepa_report.py
           python tools/selftest/test_gepa_rates.py
+          python tools/selftest/test_gepa_discovery.py
+          python tools/selftest/test_gepa_discovery_archive.py
       - name: independent reference replay and archived three-arm audit
         run: |
           python tools/verify_gepa_reference.py
           python tools/verify_gepa_quality.py
           python tools/gepa_report.py docs/evidence/gepa-bounded/runs
           python tools/gepa_cost_sensitivity.py docs/evidence/gepa-bounded/runs
+          python tools/verify_gepa_discovery.py
+      - name: GEPA discovery reference controls
+        working-directory: docs/evidence/gepa-discovery/reference
+        run: |
+          go test -race -count=5 -timeout=20s -run '^(TestCondSignalBeforeWait|TestWaitGroupPositiveAddWhileActive)$' ./...
+          GODEBUG=panicnil=1 go test -race -count=3 -timeout=20s -run '^TestWaitGroupGoPanicNilLegacy$' ./...
+          go test -race -count=3 -timeout=20s -run '^TestWaitGroupSynctestOutsideWait$' ./...

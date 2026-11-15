@@ -4,6 +4,15 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Supervised GEPA discovery comparison.** A source-grounded, component-split
+  experiment reviews every returned finding and replays attributed scores and
+  metered calls. GEPA retained the fixed seed; final arms used identical text,
+  so their differing outputs do not demonstrate a prompt benefit. Two model
+  claims were falsified by executed Go controls; mypy handles absent optional
+  GEPA imports without requiring it for pack users. One contract question remains
+  OPEN. No independent human second review or broad transfer is claimed.
+  See `docs/evidence/gepa-discovery/README.md`.
+
 - **Bounded GEPA review experiment.** Optional GEPA 0.1.4 adapter, separated
   train/validation/test components, source-pinned public-API probes, exact report
   validation and raw child-call cost auditing. The executed three-arm comparison

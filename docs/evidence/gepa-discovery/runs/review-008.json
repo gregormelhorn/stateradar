@@ -1,0 +1,56 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "G1",
+      "finding_ids": [
+        "allow-callback-lifecycle"
+      ],
+      "reason": "Exact one admission / duplicate success / two slots sequence present."
+    },
+    {
+      "id": "G2",
+      "finding_ids": [
+        "synchronous-hooks"
+      ],
+      "reason": "State hook under mutex reentering State/Counts blocks."
+    },
+    {
+      "id": "G3",
+      "finding_ids": [],
+      "reason": "No wrapper reassignment or changed receiver behavior."
+    }
+  ],
+  "findings": [
+    {
+      "id": "execute-result",
+      "verdict": "valid",
+      "reason": "beforeRequest, isSuccessful, afterRequest, counts and defaultReadyToTrip implement the qualified closed-state sequence."
+    },
+    {
+      "id": "admission-limits",
+      "verdict": "valid",
+      "reason": "beforeRequest checks state and capacity before increment; onSuccess/onFailure transition and reset."
+    },
+    {
+      "id": "allow-callback-lifecycle",
+      "verdict": "valid",
+      "reason": "Allow closure, generation guard, onSuccess and half-open expiry support duplicate and abandoned callback sequences."
+    },
+    {
+      "id": "expiry-and-stale-completion",
+      "verdict": "valid",
+      "reason": "Counts does not refresh; currentState is called before generation comparison, with documented interval and timeout defaults."
+    },
+    {
+      "id": "synchronous-hooks",
+      "verdict": "valid",
+      "reason": "setState invokes OnStateChange under caller-held lock; onFailure calls ReadyToTrip under lock, whereas Execute invokes IsSuccessful before afterRequest."
+    },
+    {
+      "id": "execute-panic-scope",
+      "verdict": "valid",
+      "reason": "Execute defer covers classifier and reporting; first hook panic can be recovered and trigger a second afterRequest, subject to stated generation and hook conditions."
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "T1",
+      "finding_ids": [
+        "callback-stop-order"
+      ],
+      "reason": "Repeated stop returns false without starting callback; conflict is OPEN."
+    },
+    {
+      "id": "T2",
+      "finding_ids": [
+        "callback-reset-order"
+      ],
+      "reason": "Expired callback reset returns false and may overlap."
+    },
+    {
+      "id": "T3",
+      "finding_ids": [
+        "channel-stop-order"
+      ],
+      "reason": "Running channel timer Go 1.23 after stop cannot receive stale value; claim restricts no intervening rearm."
+    }
+  ],
+  "findings": [
+    {
+      "id": "channel-creation",
+      "verdict": "valid",
+      "reason": "Constructor, After and NewTimer docs support claims; runtime representation question remains OPEN."
+    },
+    {
+      "id": "channel-stop-order",
+      "verdict": "valid",
+      "reason": "Stop Go 1.23 docs and initialization guard support sequence and stated conditions."
+    },
+    {
+      "id": "channel-reset-order",
+      "verdict": "valid",
+      "reason": "Reset docs and pointer receiver preserve channel; stale-receive restriction noted."
+    },
+    {
+      "id": "callback-stop-order",
+      "verdict": "valid",
+      "reason": "General and func-specific Stop wording plus executed repeated-Stop control support described contradiction."
+    },
+    {
+      "id": "callback-reset-order",
+      "verdict": "valid",
+      "reason": "Reset contract and AfterFunc constructor support scheduling and overlap."
+    },
+    {
+      "id": "deferred-channel-send",
+      "verdict": "valid",
+      "reason": "sendTime select adjusts by delta and has a default nonblocking branch."
+    }
+  ]
+}
