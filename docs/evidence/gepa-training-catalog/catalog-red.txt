@@ -1,0 +1,59 @@
+FFFFFF..
+======================================================================
+FAIL: test_bad_fragment (__main__.CatalogTest.test_bad_fragment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_catalog.py", line 24, in test_bad_fragment
+    with self.assertRaises(EvalError):validate_catalog(self.c,self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_drifted_hash (__main__.CatalogTest.test_drifted_hash)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_catalog.py", line 27, in test_drifted_hash
+    with self.assertRaises(EvalError):validate_catalog(self.c,self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_duplicate_case (__main__.CatalogTest.test_duplicate_case)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_catalog.py", line 30, in test_duplicate_case
+    with self.assertRaises(EvalError):validate_catalog(self.c,self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_invalid_question_marker (__main__.CatalogTest.test_invalid_question_marker)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_catalog.py", line 36, in test_invalid_question_marker
+    with self.assertRaises(EvalError):validate_catalog(self.c,self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_missing_case_evidence (__main__.CatalogTest.test_missing_case_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_catalog.py", line 21, in test_missing_case_evidence
+    with self.assertRaises(EvalError):validate_catalog(self.c,self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_parent_path (__main__.CatalogTest.test_parent_path)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_catalog.py", line 33, in test_parent_path
+    with self.assertRaises(EvalError):validate_catalog(self.c,self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.007s
+
+FAILED (failures=6)

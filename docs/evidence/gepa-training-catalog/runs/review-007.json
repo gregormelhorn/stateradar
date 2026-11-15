@@ -1,0 +1,62 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "W01",
+      "finding_ids": [],
+      "partial": false,
+      "reason": "No nil-panic legacy GODEBUG or Done path."
+    },
+    {
+      "id": "W02",
+      "finding_ids": [
+        "go-unrecovered-panic"
+      ],
+      "reason": "Non-nil recover re-panics before Done, with Go panic exclusion."
+    },
+    {
+      "id": "W03",
+      "finding_ids": [],
+      "partial": true,
+      "reason": "`synctest-association` identifies retained bubble association and outside Wait but incorrectly asserts it can return for tested sequence; no OPEN question specifically about the observed panic."
+    },
+    {
+      "id": "W04",
+      "finding_ids": [],
+      "partial": true,
+      "reason": "`synctest-association` correctly notes Wait inside owning bubble can clear association but same finding falsely claims outside Wait can return while association remains; no full credit."
+    }
+  ],
+  "findings": [
+    {
+      "id": "wait-ordering",
+      "verdict": "valid",
+      "reason": "Go adds before launch; Wait either successfully registers or loops after CAS failure and may see completed task. Zero-before-Go schedule and new-batch ordering are accurately scoped to initial empty group."
+    },
+    {
+      "id": "counter-arithmetic",
+      "verdict": "valid",
+      "reason": "Done/negative WaitGroup state and uint64 shift leading to zero on 64-bit follow Add and Wait state operations; valid range question remains OPEN."
+    },
+    {
+      "id": "early-reuse",
+      "verdict": "valid",
+      "reason": "Wait checks state after semaphore acquire, so positive state panics while new batch fully completed before check can leave zero."
+    },
+    {
+      "id": "go-deferred-completion",
+      "verdict": "valid",
+      "reason": "Go wrapper defers Done after normal return or Goexit; waiter unblocking need not wait for final goroutine termination; public guarantee question OPEN."
+    },
+    {
+      "id": "go-unrecovered-panic",
+      "verdict": "valid",
+      "reason": "Explicit non-nil recover causes re-panic before Done; source and exclusion match."
+    },
+    {
+      "id": "synctest-association",
+      "verdict": "false",
+      "reason": "Unqualified outside Wait can return is contradicted by sync Wait branch plus runtime-reference/synctest-runtime.go:450-451 nil bubble dereference and 5x independent TestWaitGroupSynctestOutsideWait. Inside-bubble disassociation portion is correct."
+    }
+  ]
+}

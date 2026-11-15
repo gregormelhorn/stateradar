@@ -1,0 +1,77 @@
+F.FFFFFFF
+======================================================================
+FAIL: test_changed_combined_source_mapping (__main__.TrainingArchiveTest.test_changed_combined_source_mapping)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_archive.py", line 47, in test_changed_combined_source_mapping
+    with self.assertRaises(EvalError):verify_archive(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_false_partial_and_full (__main__.TrainingArchiveTest.test_false_partial_and_full)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_archive.py", line 41, in test_false_partial_and_full
+    with self.assertRaises(EvalError):verify_archive(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_incomplete_cost (__main__.TrainingArchiveTest.test_incomplete_cost)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_archive.py", line 35, in test_incomplete_cost
+    with self.assertRaises(EvalError):verify_archive(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_missing_frozen_input (__main__.TrainingArchiveTest.test_missing_frozen_input)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_archive.py", line 38, in test_missing_frozen_input
+    with self.assertRaises(EvalError):verify_archive(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_missing_review_case (__main__.TrainingArchiveTest.test_missing_review_case)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_archive.py", line 26, in test_missing_review_case
+    with self.assertRaises(EvalError):verify_archive(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_missing_trial (__main__.TrainingArchiveTest.test_missing_trial)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_archive.py", line 32, in test_missing_trial
+    with self.assertRaises(EvalError):verify_archive(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_prompt_tampering (__main__.TrainingArchiveTest.test_prompt_tampering)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_archive.py", line 44, in test_prompt_tampering
+    with self.assertRaises(EvalError):verify_archive(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_unreviewed_finding (__main__.TrainingArchiveTest.test_unreviewed_finding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_archive.py", line 29, in test_unreviewed_finding
+    with self.assertRaises(EvalError):verify_archive(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.432s
+
+FAILED (failures=8)

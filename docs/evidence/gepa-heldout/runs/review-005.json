@@ -1,0 +1,49 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "T01",
+      "finding_ids": [],
+      "reason": "Repeated Stop=false after successful cancellation and OPEN wording question are explicit; whole finding also overgeneralizes expiry-first without excluding intervening Reset.",
+      "partial": true
+    },
+    {
+      "id": "T02",
+      "finding_ids": [],
+      "reason": "First post-expiry Reset and overlap are described, but the finding does not exclude intervening rearm before asserting Reset=false.",
+      "partial": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "deadline-calculation",
+      "verdict": "valid",
+      "reason": "when computes positive/nonpositive deadlines and overflow clamp, delegating timer dispatch."
+    },
+    {
+      "id": "channel-stop-and-reset",
+      "verdict": "valid",
+      "reason": "Stop/Reset Go1.23 and legacy comments with stated running/received conditions and subsequent reactivation."
+    },
+    {
+      "id": "afterfunc-repeated-stop",
+      "verdict": "false",
+      "reason": "The expiry-before-first-Stop statement lacks exclusion of an intervening Reset. scope_extension_test.go:8-11 demonstrates expiry, rearm, then Stop=true. Correct repeated-stop part and OPEN question retained."
+    },
+    {
+      "id": "afterfunc-reset-overlap",
+      "verdict": "false",
+      "reason": "The expiry-first Reset=false sentence lacks exclusion of an intervening Reset; scope_extension_test.go:8-10 shows false then true while prior callback runs. First post-expiry overlap description is correct."
+    },
+    {
+      "id": "channel-dispatch-and-delivery",
+      "verdict": "valid",
+      "reason": "sendTime computes Now minus delta, attempts nonblocking send, with external runtime behavior left OPEN."
+    },
+    {
+      "id": "abandoned-channel-timer",
+      "verdict": "valid",
+      "reason": "NewTimer and After comments describe Go1.23 recovery and earlier behavior without timing guarantee."
+    }
+  ]
+}

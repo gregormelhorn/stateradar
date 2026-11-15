@@ -1,0 +1,57 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "C1",
+      "finding_ids": [
+        "wait-rechecks-condition",
+        "cancellation"
+      ],
+      "reason": "Combined findings say Wait reacquires L, needs notification to return, and predicate must be rechecked."
+    },
+    {
+      "id": "C2",
+      "finding_ids": [
+        "notification-order"
+      ],
+      "reason": "Signal-before-Wait needs another signal; runtime-reference/sema.go:578,584,668 corroborates."
+    },
+    {
+      "id": "C3",
+      "finding_ids": [],
+      "reason": "Optional lock for notifications described but requirement for changing predicate is not explicit."
+    }
+  ],
+  "findings": [
+    {
+      "id": "wait-rechecks-condition",
+      "verdict": "valid",
+      "reason": "Wait code and comments prescribe registration, unlock, reacquire and predicate loop."
+    },
+    {
+      "id": "notification-order",
+      "verdict": "valid",
+      "reason": "Runtime callee contract at runtime-reference/sema.go:578,584,668 establishes both orders; public-seam bounded control also exercised."
+    },
+    {
+      "id": "repeated-notifications",
+      "verdict": "valid",
+      "reason": "Signal/Broadcast contract and runtime-reference/sema.go:631,668 support successive wakeups and nonpersistent broadcasts."
+    },
+    {
+      "id": "cancellation",
+      "verdict": "valid",
+      "reason": "Wait docs require Signal/Broadcast for return and lack of status/context; external goroutine may broadcast as stated."
+    },
+    {
+      "id": "checker-initialization",
+      "verdict": "valid",
+      "reason": "copyChecker code and NewCond initialize as described; pre-use copying scope is as stated."
+    },
+    {
+      "id": "copy-after-first-use",
+      "verdict": "valid",
+      "reason": "Signal calls checker then runtime; check stores address and later use of copied checker panics before notification or unlock."
+    }
+  ]
+}

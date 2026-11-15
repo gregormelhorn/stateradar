@@ -1,0 +1,23 @@
+........FF.
+======================================================================
+FAIL: test_trial_duplicate_call (__main__.EvidenceTest.test_trial_duplicate_call)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 46, in test_trial_duplicate_call
+    with self.assertRaises(EvalError):verify_trial_coverage(calls,trials,['a','a'])
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_trial_missing_component (__main__.EvidenceTest.test_trial_missing_component)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 42, in test_trial_missing_component
+    with self.assertRaises(EvalError):verify_trial_coverage(calls,trials,['a','b'])
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.009s
+
+FAILED (failures=2)

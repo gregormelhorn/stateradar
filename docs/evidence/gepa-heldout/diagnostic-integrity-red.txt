@@ -1,0 +1,29 @@
+...FF....
+======================================================================
+FAIL: test_tampered_prompt_fails (__main__.DiagnosticIntegrityProbe.test_tampered_prompt_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 39, in test_tampered_prompt_fails
+    def test_tampered_prompt_fails(self):self.exercise('prompt')
+                                         ~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 35, in exercise
+    self.assertIn('diagnostic prompt mismatch: '+row['review'],verify_diagnostic(p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'diagnostic prompt mismatch: review-000.json' not found in []
+
+======================================================================
+FAIL: test_tampered_score_fails (__main__.DiagnosticIntegrityProbe.test_tampered_score_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 40, in test_tampered_score_fails
+    def test_tampered_score_fails(self):self.exercise('score')
+                                        ~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 38, in exercise
+    self.assertIn('diagnostic score mismatch: '+row['review'],verify_diagnostic(p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'diagnostic score mismatch: review-000.json' not found in []
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.226s
+
+FAILED (failures=2)

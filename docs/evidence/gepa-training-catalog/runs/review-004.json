@@ -1,0 +1,50 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "P01",
+      "finding_ids": [],
+      "partial": true,
+      "reason": "`capacity-wait-ordering` contains miss -> Put buffers -> queue and Len idle, with OPEN question, but omits the specified later Get taking that idle connection and subsequent Put waking the first."
+    },
+    {
+      "id": "P02",
+      "finding_ids": [
+        "release-wait-ordering"
+      ],
+      "reason": "With a queued Get, Put-first removes the waiter and sends that connection, and a waiter may return if timestamp passes; under P02 no expiry/interference condition this is the direct-handoff control."
+    }
+  ],
+  "findings": [
+    {
+      "id": "construction",
+      "verdict": "uncertain",
+      "reason": "Capacity checks and zero-cap wait match channel.go:59-88,103-137. Phrase \"wrapped factory error\" is ambiguous: fmt.Errorf at channel.go:86 uses %s, preserving text but not Go %w unwrapping; cleanup invokes callbacks but their successful closure is not guaranteed."
+    },
+    {
+      "id": "checkout-validation",
+      "verdict": "uncertain",
+      "reason": "Get invokes Close and retries for expired/ping-failed entries, but does not establish successful resource closure: channel.go:118,125 ignores Close errors and callback contract channel.go:27-28 does not guarantee effect. Direct handoff and expiry/no-ping portions are source-supported."
+    },
+    {
+      "id": "repeated-operations",
+      "verdict": "valid",
+      "reason": "Put appends when no waiters and sufficient idle slots; no ownership deduplication; Close decrements then invokes callback regardless of callback result."
+    },
+    {
+      "id": "capacity-wait-ordering",
+      "verdict": "valid",
+      "reason": "Get idle-select precedes capacity lock and waiter enqueue; queued Close does not wake, later Get may create while waiter stays, assuming stated no interfering operations."
+    },
+    {
+      "id": "release-wait-ordering",
+      "verdict": "valid",
+      "reason": "Put sends to queued request under lock before Release; Release never closes request channels, later Put after detach cannot send; waiter may return handoff if timestamp passes."
+    },
+    {
+      "id": "release-ownership",
+      "verdict": "valid",
+      "reason": "Release swaps callbacks/channel under lock then drains saved channel, late Put/Close sees nil close callback, repeat Release can return while prior drain still runs."
+    }
+  ]
+}

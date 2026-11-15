@@ -1,0 +1,594 @@
+{
+  "cases": [
+    {
+      "id": "O01",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 77,
+        "fragment": "defer o.done.Store(true)"
+      },
+      "test": "TestOncePanicDone",
+      "test_citation": {
+        "file": "docs/evidence/gepa-prospective/reference/reference_test.go",
+        "line": 12,
+        "fragment": "func TestOncePanicDone("
+      }
+    },
+    {
+      "id": "O02",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 74,
+        "fragment": "o.m.Lock()"
+      },
+      "test": "TestOnceConcurrentWait",
+      "test_citation": {
+        "file": "docs/evidence/gepa-prospective/reference/reference_test.go",
+        "line": 20,
+        "fragment": "func TestOnceConcurrentWait("
+      }
+    },
+    {
+      "id": "B01",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 341,
+        "fragment": "if len(p) == 0 {"
+      },
+      "test": "TestBufferEmptyReads",
+      "test_citation": {
+        "file": "docs/evidence/gepa-prospective/reference/reference_test.go",
+        "line": 31,
+        "fragment": "func TestBufferEmptyReads("
+      }
+    },
+    {
+      "id": "B02",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 337,
+        "fragment": "b.lastRead = opInvalid"
+      },
+      "test": "TestBufferZeroReadInvalidatesUnread",
+      "test_citation": {
+        "file": "docs/evidence/gepa-prospective/reference/reference_test.go",
+        "line": 36,
+        "fragment": "func TestBufferZeroReadInvalidatesUnread("
+      }
+    }
+  ],
+  "findings": [
+    {
+      "call_id": 0,
+      "id": "sequential-calls",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 38,
+        "fragment": "even if f has a different value in each invocation. A new instance of"
+      }
+    },
+    {
+      "call_id": 0,
+      "id": "competing-calls",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 74,
+        "fragment": "o.m.Lock()"
+      }
+    },
+    {
+      "call_id": 0,
+      "id": "callback-completion",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 77,
+        "fragment": "defer o.done.Store(true)"
+      }
+    },
+    {
+      "call_id": 0,
+      "id": "panic-consumes-once",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 50,
+        "fragment": "If f panics, Do considers it to have returned"
+      }
+    },
+    {
+      "call_id": 0,
+      "id": "cancellation-and-goroutine-exit",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 75,
+        "fragment": "defer o.m.Unlock()"
+      }
+    },
+    {
+      "call_id": 0,
+      "id": "reentrant-call",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 48,
+        "fragment": "Do to be called, it will deadlock."
+      }
+    },
+    {
+      "call_id": 1,
+      "id": "completion-order",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 76,
+        "fragment": "if !o.done.Load() {"
+      }
+    },
+    {
+      "call_id": 1,
+      "id": "panic",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 50,
+        "fragment": "If f panics, Do considers it to have returned"
+      }
+    },
+    {
+      "call_id": 1,
+      "id": "goroutine-exit",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 77,
+        "fragment": "defer o.done.Store(true)"
+      }
+    },
+    {
+      "call_id": 1,
+      "id": "reentrant-call",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 48,
+        "fragment": "Do to be called, it will deadlock."
+      }
+    },
+    {
+      "call_id": 1,
+      "id": "copy-boundary",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 13,
+        "fragment": "A Once must not be copied after first use."
+      }
+    },
+    {
+      "call_id": 1,
+      "id": "captured-argument",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 42,
+        "fragment": "use a function literal to capture"
+      }
+    },
+    {
+      "call_id": 2,
+      "id": "normal-completion",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 38,
+        "fragment": "even if f has a different value in each invocation."
+      }
+    },
+    {
+      "call_id": 2,
+      "id": "concurrent-completion",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 77,
+        "fragment": "defer o.done.Store(true)"
+      }
+    },
+    {
+      "call_id": 2,
+      "id": "panic",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 50,
+        "fragment": "If f panics, Do considers it to have returned"
+      }
+    },
+    {
+      "call_id": 2,
+      "id": "goexit",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 75,
+        "fragment": "defer o.m.Unlock()"
+      }
+    },
+    {
+      "call_id": 2,
+      "id": "reentrant-call",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 48,
+        "fragment": "Do to be called, it will deadlock."
+      }
+    },
+    {
+      "call_id": 2,
+      "id": "copying",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 13,
+        "fragment": "A Once must not be copied after first use."
+      }
+    },
+    {
+      "call_id": 3,
+      "id": "sequential-success",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 67,
+        "fragment": "if !o.done.Load() {"
+      }
+    },
+    {
+      "call_id": 3,
+      "id": "concurrent-ordering",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 74,
+        "fragment": "o.m.Lock()"
+      }
+    },
+    {
+      "call_id": 3,
+      "id": "panic-consumes-once",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 50,
+        "fragment": "If f panics, Do considers it to have returned"
+      }
+    },
+    {
+      "call_id": 3,
+      "id": "goexit-consumes-once",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 77,
+        "fragment": "defer o.done.Store(true)"
+      }
+    },
+    {
+      "call_id": 3,
+      "id": "reentrant-call",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 48,
+        "fragment": "Do to be called, it will deadlock."
+      }
+    },
+    {
+      "call_id": 3,
+      "id": "asynchronous-work",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/once.go",
+        "line": 59,
+        "fragment": "Do guarantees that when it returns, f has finished."
+      }
+    },
+    {
+      "call_id": 4,
+      "id": "delimiter-eof-enables-unread",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 466,
+        "fragment": "b.lastRead = opRead"
+      }
+    },
+    {
+      "call_id": 4,
+      "id": "unread-after-peek-and-grow",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 147,
+        "fragment": "if m == 0 && b.off != 0 {"
+      }
+    },
+    {
+      "call_id": 4,
+      "id": "copy-and-storage-aliasing",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 25,
+        "fragment": "Copying and modifying a non-zero Buffer is prone to error,"
+      }
+    },
+    {
+      "call_id": 4,
+      "id": "readfrom-count-before-error",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 234,
+        "fragment": "b.buf = b.buf[:i+m]"
+      }
+    },
+    {
+      "call_id": 4,
+      "id": "writeto-error-before-reset",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 285,
+        "fragment": "if e != nil {"
+      }
+    },
+    {
+      "call_id": 4,
+      "id": "negative-peek-and-next",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 359,
+        "fragment": "b.lastRead = opInvalid"
+      }
+    },
+    {
+      "call_id": 5,
+      "id": "peek-boundaries",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 89,
+        "fragment": "return b.buf[b.off : b.off+n], nil"
+      }
+    },
+    {
+      "call_id": 5,
+      "id": "unread-after-peek-or-grow",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 147,
+        "fragment": "if m == 0 && b.off != 0 {"
+      }
+    },
+    {
+      "call_id": 5,
+      "id": "delimiter-eof-unread",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 466,
+        "fragment": "b.lastRead = opRead"
+      }
+    },
+    {
+      "call_id": 5,
+      "id": "write-to-commit-before-error",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 283,
+        "fragment": "b.off += m"
+      }
+    },
+    {
+      "call_id": 5,
+      "id": "read-from-loop-and-capacity",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 227,
+        "fragment": "i := b.grow(MinRead)"
+      }
+    },
+    {
+      "call_id": 5,
+      "id": "borrowed-storage-lifetime",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 169,
+        "fragment": "b.buf = growSlice(b.buf[b.off:], b.off+n)"
+      }
+    },
+    {
+      "call_id": 6,
+      "id": "delimiter-read-unread",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 466,
+        "fragment": "b.lastRead = opRead"
+      }
+    },
+    {
+      "call_id": 6,
+      "id": "grow-unread-order",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 418,
+        "fragment": "if b.off >= int(b.lastRead) {"
+      }
+    },
+    {
+      "call_id": 6,
+      "id": "write-to-drain-and-retry",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 285,
+        "fragment": "if e != nil {"
+      }
+    },
+    {
+      "call_id": 6,
+      "id": "read-from-eof-order",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 227,
+        "fragment": "i := b.grow(MinRead)"
+      }
+    },
+    {
+      "call_id": 6,
+      "id": "peek-and-next",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 359,
+        "fragment": "b.lastRead = opInvalid"
+      }
+    },
+    {
+      "call_id": 6,
+      "id": "borrowed-and-copied-bytes",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 452,
+        "fragment": "line = append(line, slice...)"
+      }
+    },
+    {
+      "call_id": 7,
+      "id": "delimiter-eof-unread",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 466,
+        "fragment": "b.lastRead = opRead"
+      }
+    },
+    {
+      "call_id": 7,
+      "id": "grow-between-read-and-unread",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 172,
+        "fragment": "b.off = 0"
+      }
+    },
+    {
+      "call_id": 7,
+      "id": "write-to-report-before-reset",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 286,
+        "fragment": "return n, e"
+      }
+    },
+    {
+      "call_id": 7,
+      "id": "read-from-commit-and-retry",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 236,
+        "fragment": "if e == io.EOF {"
+      }
+    },
+    {
+      "call_id": 7,
+      "id": "copy-and-storage-ownership",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 25,
+        "fragment": "Copying and modifying a non-zero Buffer is prone to error,"
+      }
+    },
+    {
+      "call_id": 7,
+      "id": "peek-next-and-unread",
+      "verdict": "valid",
+      "provenance": "observed-in-code",
+      "citation": {
+        "file": "docs/evidence/gepa-prospective/upstream/buffer.go",
+        "line": 359,
+        "fragment": "b.lastRead = opInvalid"
+      }
+    }
+  ]
+}

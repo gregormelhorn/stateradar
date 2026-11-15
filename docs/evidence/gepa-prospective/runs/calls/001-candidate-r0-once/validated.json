@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "completion-order",
+      "text": "Start with a zero-value Once and two calls supplying different functions. If the second call arrives while the first function is running, it loads false and enters the mutex path. After the first function returns, the deferred store sets done before the deferred unlock. The waiting call then acquires the mutex, sees true on the second check, and returns without invoking its function. A call that first loads done after the store can return without acquiring the mutex, even before the first call unlocks or returns. If both calls load false before either acquires the mutex, the one that acquires it first supplies the function that runs. Later calls on the same instance skip their functions.",
+      "citation": {
+        "line": 76,
+        "fragment": "if !o.done.Load() {"
+      },
+      "question": "OPEN: Should “only the first call” explicitly mean the call that first acquires the mutex when calls overlap?"
+    },
+    {
+      "id": "panic",
+      "text": "Start with an unused Once and let the selected function panic without recovering internally. As the panic unwinds through Do, the deferred store marks the Once done and the deferred unlock releases the mutex. The initiating call propagates the panic, which an outer defer can recover. A concurrent caller that was waiting on the mutex, or a later caller after recovery, returns without running its own function or receiving the original panic. Passing a nil function on first use also panics at the invocation and leaves the Once done. Passing nil after completion returns without invoking it.",
+      "citation": {
+        "line": 50,
+        "fragment": "If f panics, Do considers it to have returned"
+      },
+      "question": ""
+    },
+    {
+      "id": "goroutine-exit",
+      "text": "Start with an unused Once and have the selected function call runtime.Goexit. Goexit runs deferred calls, so the store marks the Once done and the unlock releases the mutex. The initiating goroutine exits without returning from Do. A caller already waiting can acquire the mutex and return without invoking its function, and later calls also skip their functions. This outcome follows from the deferred cleanup and Goexit semantics.",
+      "citation": {
+        "line": 77,
+        "fragment": "defer o.done.Store(true)"
+      },
+      "question": "OPEN: Should the Do contract explicitly say that runtime.Goexit consumes the Once even though the initiating call never returns?"
+    },
+    {
+      "id": "reentrant-call",
+      "text": "Start with an unused Once and let its selected function synchronously call Do on that same instance. The outer call still holds the mutex and done is false. The inner call loads false and attempts to acquire the mutex, so the function cannot return to trigger the deferred store and unlock. A synchronous call on a distinct unused Once can run and return normally if its function completes without a dependency back to the outer call.",
+      "citation": {
+        "line": 48,
+        "fragment": "Do to be called, it will deadlock."
+      },
+      "question": "OPEN: Should the deadlock wording specify a call on the same Once or a dependency cycle involving it?"
+    },
+    {
+      "id": "copy-boundary",
+      "text": "Start with a zero-value Once and copy it before either value is used. Each value has its own done flag and mutex, so each first Do can run its own function. In the reverse order, once Do has begun, copying is outside the documented contract, including after completion. Reusing the original instance after its function completes is supported and skips the supplied function. Copying a pointer to the instance preserves that same identity and shares the completed state.",
+      "citation": {
+        "line": 13,
+        "fragment": "A Once must not be copied after first use."
+      },
+      "question": ""
+    },
+    {
+      "id": "captured-argument",
+      "text": "Start with an unused Once, let p point to a value, and construct a closure that reads *p when invoked. Rebind p before the first Do invokes the closure and it reads through the new pointer. Keep p unchanged and replace the value through it before invocation and the closure reads the replacement through the original pointer. With both the pointer and pointee unchanged, it reads the original value. These changes can be made in the same goroutine before Do. After the closure completes, a later Do on that instance skips invocation regardless of subsequent changes.",
+      "citation": {
+        "line": 42,
+        "fragment": "use a function literal to capture"
+      },
+      "question": ""
+    }
+  ]
+}

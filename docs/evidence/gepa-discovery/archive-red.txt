@@ -1,0 +1,50 @@
+.FFFFF
+======================================================================
+FAIL: test_corrupt_review_rejected (__main__.ArchiveTest.test_corrupt_review_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery_archive.py", line 31, in test_corrupt_review_rejected
+    with self.assertRaises(EvalError): verify(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_frozen_input_tamper_rejected (__main__.ArchiveTest.test_frozen_input_tamper_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery_archive.py", line 43, in test_frozen_input_tamper_rejected
+    with self.assertRaises(EvalError): verify(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_incomplete_cost_rejected (__main__.ArchiveTest.test_incomplete_cost_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery_archive.py", line 37, in test_incomplete_cost_rejected
+    with self.assertRaises(EvalError): verify(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_missing_call_rejected (__main__.ArchiveTest.test_missing_call_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery_archive.py", line 34, in test_missing_call_rejected
+    with self.assertRaises(EvalError): verify(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_summary_forgery_rejected (__main__.ArchiveTest.test_summary_forgery_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery_archive.py", line 40, in test_summary_forgery_rejected
+    with self.assertRaises(EvalError): verify(self.root)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.324s
+
+FAILED (failures=5)

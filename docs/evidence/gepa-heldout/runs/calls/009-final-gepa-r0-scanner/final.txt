@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "line-tokens-and-storage",
+      "text": "With the default splitter and a reader that returns `a\\r\\n\\nb\\r` followed by EOF, successive calls to Scan return true with `a`, a non-nil empty token, and `b`, then return false with Err() == nil. The final `b` loses its carriage return even though the documented line-ending pattern requires a newline. Bytes returns the current token slice, whose backing array may be overwritten by later scans. A string already obtained from Text retains its value.",
+      "citation": {
+        "line": 368,
+        "fragment": "return len(data), dropCR(data), nil"
+      },
+      "question": "OPEN: Should an unterminated final line lose its trailing carriage return?"
+    },
+    {
+      "id": "final-token-and-read-error-order",
+      "text": "Configure a splitter to return ErrFinalToken with a non-nil empty token when it first sees a byte. If Read returns the byte with nil and would return a non-EOF error on its next call, Scan returns true, Err() is nil, and subsequent scans return false without that next read. If Read returns the byte and the error together, the splitter receives atEOF=true and Scan still returns true, but Err() retains the read error. In both orders, a nil token makes that first Scan return false, and the reported advance is bypassed even if it is invalid.",
+      "citation": {
+        "line": 152,
+        "fragment": "if err == ErrFinalToken {"
+      },
+      "question": "OPEN: Should the promise that ErrFinalToken stops scanning with no error apply only when no non-EOF error has already been recorded?"
+    },
+    {
+      "id": "scan-after-split-error",
+      "text": "Start with a reader that supplies `ab` with nil and a stateful splitter. Have the splitter first consume `a` and return it as a token, then return a non-EOF error E for `b`. The second Scan returns false, Err() is E, and Bytes still exposes `a`. Call Scan again and have the splitter consume and return `b` when called with atEOF=true. This call returns true, Bytes now exposes `b`, and Err() remains E. The retry uses the buffered byte without another read.",
+      "citation": {
+        "line": 160,
+        "fragment": "s.setErr(err)"
+      },
+      "question": "OPEN: Should a false return caused by a split error be terminal, as the split-function documentation suggests?"
+    },
+    {
+      "id": "scan-after-eof",
+      "text": "Start with an empty reader and a stateful splitter that returns `(0, nil, nil)` the first time it receives empty data with atEOF=true and `(0, []byte(\"late\"), nil)` the second time. The first Scan reads EOF and returns false with Err() == nil. The next Scan calls the splitter again with empty data and atEOF=true, returns true with `late`, and leaves Err() nil.",
+      "citation": {
+        "line": 149,
+        "fragment": "if s.end > s.start || s.err != nil {"
+      },
+      "question": "OPEN: Should the documented unrecoverable stop at EOF require every later Scan to return false?"
+    },
+    {
+      "id": "zero-advance-tokens",
+      "text": "Use a splitter that repeatedly returns `(0, []byte(\"x\"), nil)` once it has input. If the first read supplies a byte with nil, each Scan returns true with the same buffered input and resets the counter. The reader is never asked for its next result. If the same byte arrives with EOF or another read error, the scanner increments the counter on each call and panics when it exceeds maxConsecutiveEmptyReads. The token is non-empty in both cases. A positive advance on a token resets the counter even after a read error.",
+      "citation": {
+        "line": 168,
+        "fragment": "if s.err == nil || advance > 0 {"
+      },
+      "question": "OPEN: Should the panic contract describe any zero-advance token after a read error, or should the implementation enforce a bound before that point as well?"
+    },
+    {
+      "id": "buffer-limit-and-eof-order",
+      "text": "Use the default line splitter, call Buffer with capacity N and max N for positive N, and provide exactly N bytes with no newline or trailing carriage return. If Read returns all N bytes with EOF, Scan returns the N-byte token and the next call returns false with Err() == nil. If Read returns all N bytes with nil and would report EOF on the next read, the full buffer makes the first Scan return false with ErrTooLong before that read. A second Scan passes the buffered bytes to the splitter with atEOF=true and returns the N-byte token while Err() remains ErrTooLong. Both sequences use the supplied buffer. After the first Scan, calls to Buffer or Split panic.",
+      "citation": {
+        "line": 200,
+        "fragment": "if len(s.buf) >= s.maxTokenSize || len(s.buf) > maxInt/2 {"
+      },
+      "question": "OPEN: Should the documented strict size bound apply only when the splitter needs more input at the buffer limit, and should ErrTooLong leave a token available on a later Scan?"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "V01",
+      "finding_ids": [
+        "repeated-close"
+      ],
+      "reason": "First nonnil end error retained and subsequent opposite-end operations return it; repeated close returns nil.",
+      "partial": false
+    },
+    {
+      "id": "V02",
+      "finding_ids": [
+        "close-during-transfer"
+      ],
+      "reason": "General partially acknowledged write returns acknowledged count and reader close error; covers the specified two-of-six instance without depending on that literal size.",
+      "partial": false
+    },
+    {
+      "id": "V03",
+      "finding_ids": [],
+      "reason": "Zero-length write requires a read acknowledgment and succeeds, but the write return count/error pair is not explicitly stated; zero-length read pair is stated.",
+      "partial": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "synchronous-transfer",
+      "verdict": "valid",
+      "reason": "write loop and read copy/ack implement multi-read and zero-byte behavior; wrMu serializes writes."
+    },
+    {
+      "id": "close-during-transfer",
+      "verdict": "valid",
+      "reason": "After wrCh handoff reader sends rdCh without closure selection; otherwise writer selects done and returns accumulated n plus writeCloseError."
+    },
+    {
+      "id": "repeated-close",
+      "verdict": "valid",
+      "reason": "onceError retains first error, closeRead/closeWrite default nil error and return nil; peer error logic is conditioned on peer end open."
+    },
+    {
+      "id": "both-ends-closed",
+      "verdict": "valid",
+      "reason": "readCloseError/writeCloseError test their own stored error before yielding other-end error; both closed yields ErrClosedPipe."
+    },
+    {
+      "id": "waiting-writers",
+      "verdict": "valid",
+      "reason": "Initial done select precedes wrMu, mutex serializes writes, later call may see done before locking."
+    },
+    {
+      "id": "endpoint-value-copy",
+      "verdict": "valid",
+      "reason": "PipeReader value copy before use copies channels and separate zero Once; closing one closes shared done, another close may panic; copying used locks remains explicitly unsupported/OPEN."
+    }
+  ]
+}

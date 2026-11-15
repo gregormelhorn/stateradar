@@ -1,0 +1,49 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "G01",
+      "finding_ids": [],
+      "partial": false,
+      "reason": "No overwrite of captured wrapper through *a, no redirected completion or replacement counter trace."
+    },
+    {
+      "id": "G02",
+      "finding_ids": [],
+      "partial": false,
+      "reason": "No caller-local pointer rebinding and preserved original receiver comparison."
+    }
+  ],
+  "findings": [
+    {
+      "id": "execute-controls",
+      "verdict": "false",
+      "reason": "Without a same-generation condition an admitted nil/non-nil return does not necessarily update success/failure counters: afterRequest discards an outcome after intervening generation change (gobreaker.go:293-301). Initial behavior under an unchanged generation and ordinary default settings is correct."
+    },
+    {
+      "id": "execute-panic-and-cancellation",
+      "verdict": "valid",
+      "reason": "Defer covers request and IsSuccessful panic, afterRequest gates outcome on generation and Goexit bypasses reporting; cancellation classified as failure under default classifier subject to the explicitly noted generation gate."
+    },
+    {
+      "id": "lazy-expiry-and-late-results",
+      "verdict": "valid",
+      "reason": "currentState runs before generation check, Counts only reads current counters, deadline transition is lazy; first case explicitly assumes no intervening state change."
+    },
+    {
+      "id": "repeated-reports-and-order",
+      "verdict": "valid",
+      "reason": "Same-generation duplicate reports are not guarded; either success threshold or failure changes generation so later report is ignored."
+    },
+    {
+      "id": "abandoned-half-open-admission",
+      "verdict": "valid",
+      "reason": "Default max=1, half-open expiry zero and absent callback leave cap occupied; current-generation result can change state."
+    },
+    {
+      "id": "state-change-callback-reentry",
+      "verdict": "valid",
+      "reason": "setState mutates state and clears counts while caller holds mutex, invokes callback synchronously; State/Counts lock same mutex, Name does not."
+    }
+  ]
+}

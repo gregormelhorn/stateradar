@@ -1,0 +1,53 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "O01",
+      "finding_ids": [
+        "panic-consumes-once"
+      ],
+      "reason": "Panic propagates and later callback is skipped.",
+      "partial": false
+    },
+    {
+      "id": "O02",
+      "finding_ids": [
+        "concurrent-ordering"
+      ],
+      "reason": "Wait on mutex until callback finishes and skip of competing callback are stated.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "sequential-success",
+      "verdict": "valid",
+      "reason": "Once source and Mutex/Bool/Goexit contracts support the conditional behavior."
+    },
+    {
+      "id": "concurrent-ordering",
+      "verdict": "valid",
+      "reason": "Once source and Mutex/Bool/Goexit contracts support the conditional behavior."
+    },
+    {
+      "id": "panic-consumes-once",
+      "verdict": "valid",
+      "reason": "Once source and Mutex/Bool/Goexit contracts support the conditional behavior."
+    },
+    {
+      "id": "goexit-consumes-once",
+      "verdict": "valid",
+      "reason": "Once source and Mutex/Bool/Goexit contracts support the conditional behavior."
+    },
+    {
+      "id": "reentrant-call",
+      "verdict": "valid",
+      "reason": "Once source and Mutex/Bool/Goexit contracts support the conditional behavior."
+    },
+    {
+      "id": "asynchronous-work",
+      "verdict": "valid",
+      "reason": "Once source and Mutex/Bool/Goexit contracts support the conditional behavior."
+    }
+  ]
+}

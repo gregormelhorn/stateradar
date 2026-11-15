@@ -1,0 +1,16 @@
+[
+  {
+    "id": "S01",
+    "kind": "claim",
+    "statement": "With strings.NewReader(\"x\") and no prior non-EOF reader error, a split function returning ErrFinalToken with a non-nil empty token makes Scan return true once, then false with nil Err; with a nil token the first Scan is false with nil Err.",
+    "line": 51,
+    "fragment": "stops with no error. A non-nil token"
+  },
+  {
+    "id": "S02",
+    "kind": "claim",
+    "statement": "Calling Scanner.Buffer or Scanner.Split after Scan was called panics even when the first Scan returned false for empty input.",
+    "line": 274,
+    "fragment": "Buffer panics if it is called after scanning has started."
+  }
+]

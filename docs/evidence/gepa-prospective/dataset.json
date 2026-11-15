@@ -1,0 +1,18 @@
+{
+  "components": {
+    "once": {
+      "source": "docs/evidence/gepa-prospective/upstream/once.go",
+      "cases": [
+        {"id":"O01","question_required":false,"description":"On a fresh sync.Once, if the first function panics, the panic propagates; after recovery, a later Do returns without calling its function.","test":"TestOncePanicDone"},
+        {"id":"O02","question_required":false,"description":"When the first Do function has started and is blocked, a concurrent Do cannot return until the first function finishes, and the second function is not called.","test":"TestOnceConcurrentWait"}
+      ]
+    },
+    "buffer": {
+      "source": "docs/evidence/gepa-prospective/upstream/buffer.go",
+      "cases": [
+        {"id":"B01","question_required":false,"description":"On an empty bytes.Buffer, Read(nil) returns (0,nil) while Read with a one-byte destination returns (0,io.EOF).","test":"TestBufferEmptyReads"},
+        {"id":"B02","question_required":false,"description":"After ReadByte succeeds on a nonempty bytes.Buffer, a zero-length Read returns (0,nil) and prevents UnreadByte from succeeding; after a subsequent successful ReadByte, UnreadByte succeeds and permits reading that same byte again.","test":"TestBufferZeroReadInvalidatesUnread"}
+      ]
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+    "component": "gobreaker",
+    "Generated Outputs": {
+        "findings": [
+            {
+                "id": "execute-controls",
+                "text": "On a new closed breaker with default settings, each admitted Execute increments Requests, runs the supplied function, and returns its original result and error. A nil error records a success and resets the consecutive failure count. A non-nil error records a failure and resets the consecutive success count. The sixth consecutive failure opens the breaker and clears its counters. Before the open timeout expires, another Execute returns (nil, ErrOpenState) without running the function or incrementing Requests. A custom IsSuccessful changes the accounting while Execute still returns the original error.",
+                "citation": {
+                    "line": 243,
+                    "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+                },
+                "question": ""
+            },
+            {
+                "id": "panic-propagation",
+                "text": "If an admitted request panics with a value that recover returns as non-nil, Execute's defer reports a failure directly, bypassing IsSuccessful. If reporting returns normally, Execute re-panics with the recovered value. If the breaker is still in the request's closed generation and ReadyToTrip itself panics while handling that failure, the failure counters have already been incremented and the hook's panic propagates instead of the original request panic.",
+                "citation": {
+                    "line": 237,
+                    "fragment": "cb.afterRequest(generation, false)"
+                },
+                "question": "OPEN: Should the promise to cause the same panic again apply when a configured hook panics during failure reporting?"
+            },
+            {
+                "id": "repeated-completion",
+                "text": "With MaxRequests set to 2, admit one Allow call in a fresh half-open generation. Calling its same done callback twice with true records two successes against one admitted request and closes the breaker, clearing the counters. With MaxRequests set to 1, the order of two calls to the same callback determines the outcome: true then false leaves the breaker closed, and false then true leaves it open, provided the open timeout has not elapsed. In either order the first call changes the generation and the second result is discarded.",
+                "citation": {
+                    "line": 272,
+                    "fragment": "tscb.cb.afterRequest(generation, success)"
+                },
+                "question": "OPEN: Is done required to be called exactly once, or should the breaker ignore duplicate calls?"
+            },
+            {
+                "id": "abandoned-probe",
+                "text": "With the default MaxRequests of 1, let an open breaker pass its timeout and call Allow. That call enters half-open, consumes its only admission, and returns a callback. If the caller cancels or abandons the operation without invoking the callback, later Allow calls return (nil, ErrTooManyRequests) indefinitely because half-open has no expiry. If the caller instead invokes the callback with false while that generation is current, the breaker opens immediately.",
+                "citation": {
+                    "line": 378,
+                    "fragment": "cb.expiry = zero"
+                },
+                "question": "OPEN: What outcome should callers report for a canceled probe if cancellation should release the admission without reopening the breaker?"
+            },
+            {
+                "id": "expiry-ordering",
+                "text": "Start a request in a closed generation with a positive Interval. If completion is processed before expiry, its outcome is counted in that generation. If completion is processed after expiry, the completion path itself can clear the counters and advance the generation before discarding the outcome. A State call or another admission after expiry can perform the same rollover first. Counts alone can still return the old counters after the deadline. The open timeout is also applied on observation: the first state evaluation strictly after expiry changes open to half-open.",
+                "citation": {
+                    "line": 298,
+                    "fragment": "state, generation := cb.currentState(now)"
+                },
+                "question": "OPEN: Should the documented interval and timeout take effect only when an operation evaluates state, including when Counts still exposes an expired generation?"
+            },
+            {
+                "id": "state-hook-reentrancy",
+                "text": "If OnStateChange is configured and an operation triggers a transition, the breaker assigns the new state, advances the generation, and clears the counts before calling the hook synchronously under the mutex. For example, an expired open breaker can invoke the hook from State. If that hook calls Counts or State on the same breaker, it waits on the held mutex and the triggering call cannot return.",
+                "citation": {
+                    "line": 359,
+                    "fragment": "cb.onStateChange(cb.name, prev, state)"
+                },
+                "question": "OPEN: May OnStateChange inspect the same breaker, or must the callback contract forbid calls that acquire its mutex?"
+            }
+        ]
+    },
+    "Feedback": {
+        "summary": {
+            "found": 2,
+            "total": 3,
+            "false": 0,
+            "uncertain": 0,
+            "missing": [
+                "G3"
+            ],
+            "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+        }
+    },
+    "call_ids": [
+        0
+    ]
+}

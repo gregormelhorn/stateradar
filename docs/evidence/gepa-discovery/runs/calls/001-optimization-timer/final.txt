@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "channel-stop",
+      "text": "For a running NewTimer under the documented Go 1.23 behavior, if Stop runs before any receive from C completes, Stop returns true and a later receive blocks in the absence of a Reset. If a receive consumes the one-shot event first, Stop returns false. A second Stop after a successful Stop also returns false if there was no intervening Reset. Calling Stop on a zero-value Timer panics before reaching the runtime.",
+      "citation": {
+        "line": 78,
+        "fragment": "any receive from t.C after Stop has returned is guaranteed to block"
+      },
+      "question": ""
+    },
+    {
+      "id": "channel-reset",
+      "text": "For a running NewTimer under the documented Go 1.23 behavior, calling Reset before any receive completes returns true. If the original event is received first, or the timer was successfully stopped first, Reset returns false and still schedules a new expiration. Reset passes the same Timer pointer to the runtime, so a receiver holding the original C uses that channel for the new event and cannot receive a stale value from the prior settings after Reset returns. Calling Reset on a zero-value Timer panics before scheduling anything.",
+      "citation": {
+        "line": 143,
+        "fragment": "return resetTimer(t, w, 0)"
+      },
+      "question": ""
+    },
+    {
+      "id": "channel-construction",
+      "text": "NewTimer allocates a channel with capacity 1, passes that channel and its pointer representation to the runtime, then exposes the same channel through C. After(d) returns C from its own NewTimer(d) call. The documentation says the exposed channel is synchronous with capacity 0 as of Go 1.23. The allocation alone does not establish what callers observe or whether stale values are possible because the runtime implementation is outside this excerpt.",
+      "citation": {
+        "line": 111,
+        "fragment": "c := make(chan Time, 1)"
+      },
+      "question": "OPEN: What runtime behavior makes this capacity-1 allocation present as capacity 0 to callers, and under which configurations does the documented guarantee apply?"
+    },
+    {
+      "id": "deferred-send",
+      "text": "If the runtime invokes sendTime after the scheduled send time and supplies the elapsed delay as delta, sendTime computes Now minus delta. If the channel can accept the value immediately, the receiver gets that adjusted timestamp. If the channel cannot accept it, the default branch returns without sending or blocking.",
+      "citation": {
+        "line": 154,
+        "fragment": "case c.(chan Time) <- Now().Add(Duration(-delta)):"
+      },
+      "question": ""
+    },
+    {
+      "id": "function-stop",
+      "text": "An AfterFunc timer has a nil C. If Stop cancels the pending invocation before expiration, it returns true. Calling Stop again without an intervening Reset returns false even though that canceled invocation never started. In the reverse order, when expiration wins, Stop returns false and does not wait for f to complete. The AfterFunc-specific comment attributes a false return to expiration and callback startup, while the general Stop contract also allows a false return for an already stopped timer.",
+      "citation": {
+        "line": 71,
+        "fragment": "if t.Stop returns false, then the timer has already expired"
+      },
+      "question": "OPEN: Is the callback-started statement meant to apply only when expiration caused Stop to return false, and does 'started' mean the goroutine was launched or that f began executing?"
+    },
+    {
+      "id": "function-reset",
+      "text": "If Reset runs while an AfterFunc invocation is still pending, it returns true and moves that invocation to the new deadline. If expiration wins first and the previous invocation is still running, Reset returns false and schedules the same function again on the existing Timer. Reset can return before the first invocation completes, and the new invocation can start in another goroutine while the first is still running. Reset after a successful Stop also returns false and schedules an invocation.",
+      "citation": {
+        "line": 125,
+        "fragment": "complete before returning nor does it guarantee that the subsequent"
+      },
+      "question": ""
+    }
+  ]
+}

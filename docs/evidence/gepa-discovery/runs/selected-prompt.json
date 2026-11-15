@@ -1,0 +1,34 @@
+{
+  "candidate": {
+    "review": "Examine ordinary success and failure as well as repeated operations, deferred work, cancellation and both event orderings. Trace state, object identity and effects across each lifecycle boundary. Compare contract language with behavior, including its exclusions and the possibility that a valid statement applies only to a narrower situation. Retain correct controls. Cite evidence and leave unanswered intent or contradictory requirements as OPEN questions.\n"
+  },
+  "metric_calls": 7,
+  "best_index": 0,
+  "candidates": [
+    {
+      "review": "Examine ordinary success and failure as well as repeated operations, deferred work, cancellation and both event orderings. Trace state, object identity and effects across each lifecycle boundary. Compare contract language with behavior, including its exclusions and the possibility that a valid statement applies only to a narrower situation. Retain correct controls. Cite evidence and leave unanswered intent or contradictory requirements as OPEN questions.\n"
+    },
+    {
+      "review": "Trace ordinary success and failure, repeated operations, deferred work, cancellation, and relevant event orderings. At each lifecycle boundary, record the prior state, return value, resulting state, object identity, and observable effects. Check whether different histories produce the same result while implying different effects, and distinguish scheduling or cancellation from the start and completion of work. Compare contract language with implementation evidence, checking exclusions, configuration and version limits, and whether a guarantee applies only to a narrower set of conditions. Follow delegated behavior to its implementation when available, and distinguish internal representation from what callers can observe. Cite the source that supports each material claim, retain correct controls, and mark unresolved intent, apparent contradictions, or gaps in source evidence as OPEN questions."
+    },
+    {
+      "review": "Trace ordinary success and failure, repeated calls, cancellation, and deferred work from each public entry point through the code it delegates to. For each relevant ordering of operations and events, record the starting state, return value, resulting state, object identity, and observable effects. Distinguish work that is scheduled, started, completed, or delivered, and check whether earlier work can still take effect after a call returns. Compare each contract claim with the implementation and related documentation. Check exclusions and applicable conditions, and test whether the same result can arise from different histories before inferring what it means. Preserve verified guarantees and controls. Cite the source for each material claim, distinguish direct evidence from inference, and mark unresolved intent or apparent contradictions as OPEN questions."
+    }
+  ],
+  "validation_scores": [
+    0.6666666666666666,
+    0.6666666666666666,
+    0.6666666666666666
+  ],
+  "parents": [
+    [
+      null
+    ],
+    [
+      0
+    ],
+    [
+      0
+    ]
+  ]
+}

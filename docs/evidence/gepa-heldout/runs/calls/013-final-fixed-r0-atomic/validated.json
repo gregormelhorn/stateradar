@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "first-publication",
+      "text": "Start with a zero Value. When the first Store, Swap, or CompareAndSwap(nil, new) reserves the type slot, a Load that reads the reservation marker returns nil, even if the writer has already written the data pointer. A Load that reads the published concrete type can return the initialized value or a later same-type update. A competing writer that encounters the marker spins and rechecks the type after publication. If Swap or CompareAndSwap initializes the Value and Store is never called, Load still returns the published value.",
+      "citation": {
+        "line": 31,
+        "fragment": "if typ == nil || typ == unsafe.Pointer(&firstStoreInProgress)"
+      },
+      "question": "OPEN: Should the Load comment name all three publishing methods and describe nil in terms of whether the first publication has completed?"
+    },
+    {
+      "id": "store-swap-type",
+      "text": "With no concurrent writers, Swap(1) on a zero Value returns nil and publishes int(1). Swap(2) returns int(1), then Store(3) makes Load return int(3). A subsequent Store or Swap with a nil interface or a different concrete type panics before changing the stored value. On a separate zero Value, Store((*int)(nil)) succeeds and Load returns a non-nil interface holding a nil *int.",
+      "citation": {
+        "line": 120,
+        "fragment": "if typ != np.typ"
+      },
+      "question": "OPEN: Should the Store and Swap comments explicitly say that the concrete type is shared across all three writing methods, including CompareAndSwap?"
+    },
+    {
+      "id": "compare-and-swap-empty",
+      "text": "With no concurrent writers, CompareAndSwap(1, 2) on a zero Value returns false and leaves it empty. CompareAndSwap(nil, 2) then returns true and publishes int(2). Repeating that call returns false and leaves int(2) in place. A nil new interface or differing concrete types for non-nil old and new panic before the empty-state check. Once int is published, CompareAndSwap(nil, \"x\") panics on the stored-type check before comparing old with the current value.",
+      "citation": {
+        "line": 147,
+        "fragment": "if old != nil"
+      },
+      "question": ""
+    },
+    {
+      "id": "compare-and-swap-comparability",
+      "text": "Start with a zero Value and call CompareAndSwap(nil, []int(nil)). It returns true and publishes the typed nil slice. A second call with nil old and a new []int returns false. A call with a []int old and a []int new passes both concrete-type checks, then panics during interface equality because both operands have dynamic type []int. The original slice remains stored.",
+      "citation": {
+        "line": 183,
+        "fragment": "if i != old"
+      },
+      "question": "OPEN: Is the CompareAndSwap comment intended to exclude non-comparable concrete types when equality compares the current value and old, even though those types can be published?"
+    },
+    {
+      "id": "compare-and-swap-interference",
+      "text": "Store pointer A and start CompareAndSwap(A, C), with A, B, and C distinct pointers of the same concrete type. After it reads A and passes the equality check, a Store(B) before the final pointer CAS makes that CAS return false without retrying. If the pointer CAS occurs first, it returns true and publishes C, which the later Store(B) overwrites. If Store(B) and then Store(A) both occur between the read of A and the pointer CAS, the CAS can return true because the data pointer is A again.",
+      "citation": {
+        "line": 186,
+        "fragment": "return CompareAndSwapPointer(&vp.data, data, np.data)"
+      },
+      "question": "OPEN: Should the comment saying the data pointer 'has not changed since LoadPointer' say that the pointer matches at the final CAS, since an intervening change can be reversed?"
+    },
+    {
+      "id": "copy-contract",
+      "text": "Start with a zero Value and call Load. It returns nil without writing either field. Copying the Value afterward falls under the broad reading of 'after first use', even though the separate Store-specific copy restriction has not been triggered. Likewise, a successful first Swap or CompareAndSwap publishes a value before any Store call, so the first-use rule governs copying at that point.",
+      "citation": {
+        "line": 15,
+        "fragment": "A Value must not be copied after first use."
+      },
+      "question": "OPEN: Does 'first use' include a Load on a zero Value or a CompareAndSwap that returns false while the Value is empty?"
+    }
+  ]
+}

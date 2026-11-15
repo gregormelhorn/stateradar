@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "peek-boundaries",
+      "text": "With unread contents \"abc\", Peek(2) returns a view of \"ab\" with nil error, Peek(4) returns a view of \"abc\" with io.EOF, and Peek(0) returns an empty slice with nil error. Each leaves Len at 3. Changing the first byte of either nonempty view immediately after obtaining it changes the next ReadByte result. Peek(-1) panics on the slice bounds before advancing the buffer.",
+      "citation": {
+        "line": 89,
+        "fragment": "return b.buf[b.off : b.off+n], nil"
+      },
+      "question": "OPEN: Should Peek document that a negative count panics?"
+    },
+    {
+      "id": "unread-after-peek-or-grow",
+      "text": "After ReadRune consumes the two-byte rune in \"éx\", an intervening Peek(1) returns \"x\" and leaves UnreadRune able to restore all of \"éx\". If UnreadByte is called first instead, it restores only the final byte of the rune and a subsequent UnreadRune fails. Grow(0) also has an ordering-dependent effect: after ReadRune consumes \"é\" from \"éx\", Grow(0) preserves the ability to unread the rune, while after ReadRune consumes the only rune in \"é\", Grow(0) resets the drained buffer and UnreadRune fails.",
+      "citation": {
+        "line": 147,
+        "fragment": "if m == 0 && b.off != 0 {"
+      },
+      "question": "OPEN: Does the UnreadRune contract count Peek or Grow as an intervening operation, and is Grow(0) intended to differ depending on whether the prior read drained the buffer?"
+    },
+    {
+      "id": "delimiter-eof-unread",
+      "text": "Starting with \"abc\" and no newline, ReadString('\\n') or ReadBytes('\\n') consumes all three bytes and returns them with io.EOF. UnreadByte nevertheless succeeds and restores \"c\". If the delimiter read is repeated on the drained buffer before UnreadByte, it returns empty data with io.EOF and UnreadByte still restores \"c\". On a fresh zero-value buffer the same empty delimiter read lets UnreadByte return nil while Len stays zero. By comparison, an empty ReadByte returns io.EOF and leaves UnreadByte returning an error.",
+      "citation": {
+        "line": 466,
+        "fragment": "b.lastRead = opRead"
+      },
+      "question": "OPEN: Should delimiter reads returning io.EOF retain unread eligibility despite the UnreadByte contract excluding reads that return an error or consume zero bytes?"
+    },
+    {
+      "id": "write-to-commit-before-error",
+      "text": "Starting with \"abc\", WriteTo calls the writer once. If it reports one byte and a non-nil error, WriteTo returns that count and error and leaves \"bc\" for a retry. One byte with nil error leaves the same suffix and returns io.ErrShortWrite. Three bytes with nil error resets the buffer and recovers the full tail capacity. Three bytes with a non-nil error leaves Len zero and Available reduced by three. A subsequent WriteTo resets that drained buffer and returns (0, nil) without calling the writer.",
+      "citation": {
+        "line": 283,
+        "fragment": "b.off += m"
+      },
+      "question": "OPEN: Is retaining the consumed offset after a full-count write with an error intentional?"
+    },
+    {
+      "id": "read-from-loop-and-capacity",
+      "text": "ReadFrom reserves MinRead bytes before calling the supplied reader. A (0, nil) result leads to another iteration. A positive count with io.EOF is appended and counted before ReadFrom returns nil error, while a positive count with another error is appended and counted before that error is returned. If the backing slice starts with length and capacity 1024 and Next(900) has left 124 unread bytes, ReadFrom allocates a new backing slice even when the first reader call returns (0, io.EOF). There are 900 consumed bytes at the front and zero bytes available at the tail.",
+      "citation": {
+        "line": 227,
+        "fragment": "i := b.grow(MinRead)"
+      },
+      "question": "OPEN: Does the MinRead no-growth guarantee refer only to space available at the tail, and should its reference to Buffer.Read name the supplied reader's Read method?"
+    },
+    {
+      "id": "borrowed-storage-lifetime",
+      "text": "With \"ab\" stored in a buffer of capacity 8, appending 'x' to AvailableBuffer stages it in the backing array while Len stays 2. Passing the resulting slice to the immediately following Write makes the unread contents \"abx\". In a separate run starting with \"ab\", Peek(2) returns an alias. Calling Grow(9) before the next read or write allocates new backing storage, so changing the old peeked slice afterward has no effect on the buffer.",
+      "citation": {
+        "line": 169,
+        "fragment": "b.buf = growSlice(b.buf[b.off:], b.off+n)"
+      },
+      "question": "OPEN: Should Peek's lifetime wording explicitly include storage-changing operations such as Grow, alongside calls to read or write methods?"
+    }
+  ]
+}

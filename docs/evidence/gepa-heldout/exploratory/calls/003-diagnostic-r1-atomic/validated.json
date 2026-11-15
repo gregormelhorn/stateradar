@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "copy-boundary",
+      "text": "Copy an unused zero Value, then Store(1) in the original and Store(\"x\") in the copy. Each Value's Load returns what was stored in that Value. If the original has already been used, the general contract prohibits copying it. That wording also covers copying immediately after a zero-value Load, even though Load returned nil and left the Value empty. A successful initial Swap or CompareAndSwap can also initialize the Value before any Store call.",
+      "citation": {
+        "line": 15,
+        "fragment": "A Value must not be copied after first use."
+      },
+      "question": "OPEN: Does the copy restriction begin with any method call, including a zero-value Load or an unsuccessful CompareAndSwap, or with successful initialization? The nearby wording names Store specifically."
+    },
+    {
+      "id": "first-publication",
+      "text": "Start with a zero Value. An initializer must atomically replace the nil type word with the in-progress marker before it can write the data and then publish the concrete type. A Load that reads nil or the marker returns nil, even if publication occurs before that Load returns. A Load that reads the published type proceeds to read the data. A Store, Swap, or CompareAndSwap that loses the marker claim unpins and retries. A writer that observes the marker spins, then applies its operation to the initialized Value once it observes the published type.",
+      "citation": {
+        "line": 31,
+        "fragment": "if typ == nil || typ == unsafe.Pointer(&firstStoreInProgress) {"
+      },
+      "question": ""
+    },
+    {
+      "id": "store-and-swap",
+      "text": "With no concurrent writers, Swap((*int)(nil)) on a zero Value returns a nil interface and initializes the Value with concrete type *int. Load then returns a non-nil interface containing a nil *int. Store(p), where p is a *int, replaces that value. A subsequent Swap((*int)(nil)) returns p and restores the typed nil. Store(nil) and Swap(nil) panic before changing the Value. A Store or Swap with a different concrete type also panics and leaves the current value in place.",
+      "citation": {
+        "line": 124,
+        "fragment": "op.typ, op.data = np.typ, SwapPointer(&vp.data, np.data)"
+      },
+      "question": ""
+    },
+    {
+      "id": "compare-and-swap-validation",
+      "text": "CompareAndSwap first rejects a nil new interface, then panics if old has a concrete type different from new's, even on a zero Value. With those checks passed and the type word still nil, a non-nil old interface, including a typed nil, returns false and leaves the Value empty. A nil old can initialize it and return true if it wins the marker claim. If another writer publishes first, CompareAndSwap(nil, new) returns false when the stored concrete type matches new's and panics when it differs, because the stored-type check precedes equality.",
+      "citation": {
+        "line": 141,
+        "fragment": "if op.typ != nil && np.typ != op.typ {"
+      },
+      "question": ""
+    },
+    {
+      "id": "compare-and-swap-equality",
+      "text": "With no competing writer, after Store(7), CompareAndSwap(7, 8) returns true and Load returns 8. CompareAndSwap(7, 9) then returns false and leaves 8 in place. If the Value instead stores a slice, CompareAndSwap with old and new of that same slice type passes the type checks and panics at interface equality, even when old is the very slice passed to Store. CompareAndSwap(nil, slice) can initialize an empty Value and subsequently returns false against the initialized slice without a comparison panic.",
+      "citation": {
+        "line": 183,
+        "fragment": "if i != old {"
+      },
+      "question": "OPEN: Should the CompareAndSwap contract explicitly describe the comparison panic for matching concrete types whose values cannot be compared?"
+    },
+    {
+      "id": "compare-and-swap-intervening-writes",
+      "text": "Store a non-nil pointer a, with b and c distinct pointers of the same concrete type. Start CompareAndSwap(a, c) and let it read a and pass equality. If Store(b) happens before the final pointer CAS and b is still current, the CAS returns false without retrying. If Store(b) is followed by Store(a) before the final CAS, the restored data pointer lets it return true and install c. If the final CAS runs first, it returns true and the later Store(b) then replaces c. With no intervening writer, the same CAS succeeds and leaves c current.",
+      "citation": {
+        "line": 186,
+        "fragment": "return CompareAndSwapPointer(&vp.data, data, np.data)"
+      },
+      "question": ""
+    }
+  ]
+}

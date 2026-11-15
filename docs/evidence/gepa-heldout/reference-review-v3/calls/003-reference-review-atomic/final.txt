@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "id": "A01",
+      "verdict": "confirmed",
+      "reason": "A nil *int boxed as any has a concrete type, so it passes the nil-interface guard. The first store publishes its type and nil data. Store(nil) panics before modifying the Value. The test checks that Load returns a non-nil interface containing a nil *int, recovers a panic from Store(nil), and checks that the same typed nil is still observable afterward.",
+      "line": 48,
+      "fragment": "if val == nil {\n\t\tpanic(\"sync/atomic: store of nil value into Value\")\n\t}"
+    },
+    {
+      "id": "A02",
+      "verdict": "confirmed",
+      "reason": "The two string arguments pass the type check. With an empty Value and a non-nil old argument, the function returns false before writing. With a nil old argument and no concurrent operations, it publishes the new value and returns true. The test checks both return values and checks that Load returns nil after the first call and \"new\" after the second.",
+      "line": 146,
+      "fragment": "if typ == nil {\n\t\t\tif old != nil {\n\t\t\t\treturn false\n\t\t\t}"
+    }
+  ]
+}

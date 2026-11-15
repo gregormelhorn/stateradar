@@ -316,6 +316,23 @@ The supervising review's repeated-Stop contract question remains OPEN. Do not
 claim whole-pilot improvement, independent discovery or broad transfer from this
 supplied-claim task, and keep standard routing unchanged until stronger evidence.
 
+Follow-up: [supervised GEPA discovery](evidence/gepa-discovery/README.md)
+used known train/selection cases and two separately held-out Go sync components.
+GEPA retained the unchanged fixed prompt after both proposals tied on the selection
+case. Identical-prompt final calls varied in coverage and each WaitGroup call had
+one independently probed incorrect finding. No GEPA-specific gain is established;
+the operator authored cases and reviews, with no independent human second review.
+A new outside-bubble Wait question remains OPEN. A varied independently reviewed
+benchmark and repeated different-prompt comparison remain future work.
+
+The [reviewed training catalog and baseline](evidence/gepa-training-catalog/README.md)
+now includes 12 cases across five components, a separate AI case review with
+independent test replays and two fresh fixed-prompt calls per component. The
+strict 24 case observations contain 7 full, 9 partial and 8 missing; the 60
+findings include 8 false and 4 uncertain. Repeated scope/ordering gaps provide
+candidate training feedback, but no human second review or fresh holdout is
+claimed. No GEPA optimization or prompt promotion occurred in this increment.
+
 ## 10. Machine-readable cell rationale
 
 **Status:** Initial implementation and semaphore adoption complete; see

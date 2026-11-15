@@ -1,0 +1,83 @@
+{
+  "candidate": {
+    "review": "Examine ordinary success and failure as well as repeated operations, deferred work, cancellation and both event orderings. Trace state, object identity and effects across each lifecycle boundary. Compare contract language with behavior, including its exclusions and the possibility that a valid statement applies only to a narrower situation. Retain correct controls. Cite evidence and leave unanswered intent or contradictory requirements as OPEN questions.\n"
+  },
+  "trace": {
+    "component": "pipe",
+    "Generated Outputs": {
+      "findings": [
+        {
+          "id": "synchronous-transfer",
+          "text": "On a fresh pipe, start Write with five bytes and keep both ends open. A Read with a two-byte buffer returns the first two bytes and nil. The writer acknowledges that count and waits with three bytes left. A second Read with room for at least three bytes returns the remainder and nil, and Write returns (5, nil). The returned reader is the writer's embedded reader, so both ends use the same unbuffered channels. A competing Write cannot interleave bytes while the first holds the write mutex.",
+          "citation": {
+            "line": 201,
+            "fragment": "return &pw.r, pw"
+          },
+          "question": ""
+        },
+        {
+          "id": "one-sided-close-and-repeat",
+          "text": "On a fresh pipe, close only the writer with a non-nil error W, then close it again with a different error. Both calls return nil, and a subsequent Read returns (0, W) with the original error value. If the first call was plain Close, the Read returns (0, EOF) even after a later CloseWithError. In the mirror case, closing only the reader preserves its first custom error for subsequent Writes, with ErrClosedPipe stored by plain Close. An operation on the end that was itself closed returns (0, ErrClosedPipe).",
+          "citation": {
+            "line": 24,
+            "fragment": "if a.err != nil {"
+          },
+          "question": ""
+        },
+        {
+          "id": "both-close-orders",
+          "text": "On a fresh pipe, close the writer with a custom error W and let it return. A Read before the reader closes returns (0, W). Now close the reader with a custom error R. Later Reads and Writes both return (0, ErrClosedPipe). In the reverse order, a Write between the closes returns (0, R), and both operations again return (0, ErrClosedPipe) after the second close. The second close stores its own end's error even though the shared done channel is already closed. With plain writer Close, the same sequence makes a Read return EOF between closes and ErrClosedPipe after both.",
+          "citation": {
+            "line": 110,
+            "fragment": "rerr == nil && werr != nil"
+          },
+          "question": "OPEN: Should the documented guarantees about the peer receiving the supplied error or EOF apply only while the peer's own end remains open, or should the first close's result remain observable after both ends close?"
+        },
+        {
+          "id": "close-before-next-transfer",
+          "text": "With both ends open, start a five-byte Write and let a Read take and acknowledge two bytes. With no further reader available, close the reader with a non-nil error R. The blocked Write wakes and returns (2, R), and a later Write returns (0, R) while the writer end remains open. If the reader closes before any handoff and no Read can receive the data, the blocked Write returns (0, R). In the mirror case, a Read waiting with no writer wakes and returns (0, EOF) when the writer calls plain Close.",
+          "citation": {
+            "line": 92,
+            "fragment": "return n, p.writeCloseError()"
+          },
+          "question": ""
+        },
+        {
+          "id": "close-around-handoff",
+          "text": "With both ends open, let a Read receive all the bytes of a pending Write, then close the reader before the count is acknowledged. The Read still copies the bytes and sends the count. It returns the full count and nil, and the Write returns the full count and nil. If the close happens before the handoff but after both operations pass their initial checks, a ready data handoff can still win over a ready done channel. An operation that first checks done after closure returns a close error without transferring data.",
+          "citation": {
+            "line": 88,
+            "fragment": "nw := <-p.rdCh"
+          },
+          "question": "OPEN: Should a data handoff remain possible after closure when the Read and Write already passed their initial checks, or should closure prevent every handoff that has yet to occur?"
+        },
+        {
+          "id": "zero-length-operations",
+          "text": "On a fresh open pipe, start Write with an empty slice and no reader. It waits until a Read receives the slice and acknowledges zero, then both calls return (0, nil). Conversely, when a Read with an empty buffer meets a pending nonempty Write, the Read returns (0, nil) and the writer retains every byte, waiting again until another Read consumes data or a close ends the Write.",
+          "citation": {
+            "line": 85,
+            "fragment": "for once := true; once || len(b) > 0; once = false {"
+          },
+          "question": "OPEN: Is an empty Write intended to require a reader rendezvous even though there are no bytes to consume?"
+        }
+      ]
+    },
+    "Feedback": {
+      "summary": {
+        "found": 2,
+        "total": 3,
+        "false": 0,
+        "uncertain": 0,
+        "missing": [
+          "V02"
+        ],
+        "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+      }
+    },
+    "call_ids": [
+      0
+    ],
+    "mode": "fresh"
+  },
+  "score": 0.6666666666666666
+}

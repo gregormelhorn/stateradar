@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "construction",
+      "text": "With a non-nil config, construction requires 0 <= InitialCap <= MaxIdle <= MaxCap and non-nil Factory and Close callbacks. It calls Factory InitialCap times and timestamps each successful result as it enters the idle buffer. If a call returns an error, Release invokes Close on the previously buffered results, ignores returned cleanup errors, and leaves any value returned by the failing call untouched. If cleanup returns normally, construction returns a new error containing the factory error's text without wrapping it. A later factory error from Get is returned directly. If a cleanup callback panics, construction unwinds before returning its formatted error.",
+      "citation": {
+        "line": 87,
+        "fragment": "fmt.Errorf(\"factory is not able to fill the pool: %s\", err)"
+      },
+      "question": "OPEN: Who owns a value returned alongside a factory error, and should construction preserve the factory error's identity?"
+    },
+    {
+      "id": "checkout_validation",
+      "text": "With an open pool and a buffered entry, Get first checks expiry when IdleTimeout is positive. The calculated deadline must be strictly before the time of the check. If the entry survives, Get runs Ping when configured. Expiry or a Ping error invokes Close and retries if Close returns, regardless of its returned error. Without a checkout, an entry can remain buffered past its deadline. A successful factory result returns without either check. A result handed directly to a queued Get is timestamped by Put, checked for expiry when the waiter processes it, and returned without Ping if it survives. If a buffered Get passes the non-nil Ping check and Release then clears the callback before Ping reads it, a non-nil connection can reach a nil callback invocation.",
+      "citation": {
+        "line": 125,
+        "fragment": "if err := c.Ping(wrapConn.conn); err != nil {"
+      },
+      "question": "OPEN: Should a direct handoff run Ping, and what validation should a buffered checkout observe when Release overlaps it?"
+    },
+    {
+      "id": "registration_order",
+      "text": "With the pool at MaxCap, a checked-out connection, and an empty idle buffer with room, let Get take the select default and pause before locking. If Put obtains the mutex first, it sees no waiter and buffers the connection. Get then locks, sees the unchanged active count, appends a request without rechecking the buffer, and waits. A later Get can take that buffered connection while the older request remains pending. If the later caller successfully puts the connection back, Put sends it to the oldest queued request. In the reverse order, registration happens first and the original Put sends directly to that request.",
+      "citation": {
+        "line": 136,
+        "fragment": "c.connReqs = append(c.connReqs, req)"
+      },
+      "question": "OPEN: Should Get recheck the idle buffer under the mutex before registering, and what ordering is intended between registered waiters and later callers?"
+    },
+    {
+      "id": "close_and_capacity",
+      "text": "With an open pool at MaxCap and a Get already queued, Close on a non-nil checked-out value decrements the count before invoking the close callback and leaves the decrement in place even if the callback returns an error. Close leaves the waiter queued. A later Get that finds the idle buffer empty can use the freed capacity to call Factory. A factory error returns directly with no count increment, while success increments the count and returns the new connection to the later caller. A subsequent Put can hand that connection to the older waiter. Close performs no ownership or duplicate tracking, so repeated closes of the same non-nil value while the callback remains installed can drive the count below zero. With no queued requests, Put buffers a non-nil value if a send is possible and delegates to Close otherwise.",
+      "citation": {
+        "line": 212,
+        "fragment": "c.openingConns--"
+      },
+      "question": "OPEN: Should a failed close free capacity, should existing waiters receive newly available capacity, and what ownership requirements apply to Close and Put?"
+    },
+    {
+      "id": "shutdown_and_waiters",
+      "text": "With one or more registered waiters, Release clears the pool fields under the mutex, then closes and drains the idle channel without removing or closing pending request channels. New Gets return ErrClosed after observing the cleared field. A later Put of a non-nil value observes the cleared field and calls Close, which returns nil once the callback is cleared. That Put neither hands off the value nor invokes the callback. If Put wins the mutex before Release, it can remove the oldest request and buffer a handoff on that request's channel. The waiter can return the handed-off connection after Release if it passes expiry, while other unsatisfied requests remain blocked. Although Get handles a closed request channel, the pinned code provides no operation that closes one. All-zero capacities are accepted and allow the first Get to register even when no connection has ever been created.",
+      "citation": {
+        "line": 228,
+        "fragment": "c.conns = nil"
+      },
+      "question": "OPEN: Does Release's comment about releasing all connections include outstanding loans, completed handoffs, or blocked Gets, and what result should each receive?"
+    },
+    {
+      "id": "release_completion",
+      "text": "With buffered entries at shutdown, the first Release captures the idle channel and close callback, clears the shared fields, unlocks, closes the channel, and calls the captured callback for each entry it drains. A second Release arriving after the fields are cleared can return while the first is still draining. Close callback errors are discarded, so Release has no result that confirms cleanup succeeded. If a callback panics and an outer caller recovers, entries still buffered when the drain stopped are left behind by that Release, and another Release returns before reaching the drain.",
+      "citation": {
+        "line": 242,
+        "fragment": "closeFun(wrapConn.conn)"
+      },
+      "question": "OPEN: Should repeated Release calls wait for cleanup, and what completion guarantee is intended when a close callback returns an error or panics?"
+    }
+  ]
+}

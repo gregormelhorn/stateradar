@@ -1,0 +1,51 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "O01",
+      "finding_ids": [
+        "panic"
+      ],
+      "reason": "Panic propagates, later callback skipped.",
+      "partial": false
+    },
+    {
+      "id": "O02",
+      "finding_ids": [],
+      "reason": "States mutex wait and done recheck after callback but does not explicitly state that the waiting callback is skipped on this normal completion path.",
+      "partial": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "normal-completion",
+      "verdict": "valid",
+      "reason": "Stated behavior follows from Once.Do/doSlow under the given conditions."
+    },
+    {
+      "id": "concurrent-completion",
+      "verdict": "valid",
+      "reason": "Stated behavior follows from Once.Do/doSlow under the given conditions."
+    },
+    {
+      "id": "panic",
+      "verdict": "valid",
+      "reason": "Stated behavior follows from Once.Do/doSlow under the given conditions."
+    },
+    {
+      "id": "goexit",
+      "verdict": "valid",
+      "reason": "Stated behavior follows from Once.Do/doSlow under the given conditions."
+    },
+    {
+      "id": "reentrant-call",
+      "verdict": "valid",
+      "reason": "Stated behavior follows from Once.Do/doSlow under the given conditions."
+    },
+    {
+      "id": "copying",
+      "verdict": "valid",
+      "reason": "Stated behavior follows from Once.Do/doSlow under the given conditions."
+    }
+  ]
+}

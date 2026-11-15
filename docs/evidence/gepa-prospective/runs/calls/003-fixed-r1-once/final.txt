@@ -1,0 +1,40 @@
+{
+  "findings": [
+    {
+      "id": "sequential-success",
+      "text": "On a zero-value Once, Do(f) calls f, waits for f and its deferred functions to finish, marks that instance done, and returns. A later Do(g) on the same instance returns without running g, even when g differs from f. Do(g) on a separate zero-value Once can run g.",
+      "citation": {"line": 67, "fragment": "if !o.done.Load() {"},
+      "question": ""
+    },
+    {
+      "id": "concurrent-ordering",
+      "text": "On an unused Once, A can read done as false and pause before locking. If B acquires the mutex first, B runs its callback and A skips its own after acquiring the mutex and rechecking done. If A acquires the mutex first, A runs its callback and B skips its own. A caller that reads false while the callback is running must wait for the mutex before it can return. A caller that reads true after the deferred store can return before the winning call unlocks, because the callback has already finished.",
+      "citation": {"line": 74, "fragment": "o.m.Lock()"},
+      "question": "OPEN: Does “first call” mean the call that acquires the mutex first when calls overlap?"
+    },
+    {
+      "id": "panic-consumes-once",
+      "text": "If the winning callback panics and the panic escapes it, the deferred store marks the Once done and the deferred unlock releases the mutex before the panic reaches the caller. If the program continues, waiting and later calls return without running their callbacks or replaying the panic. A nil callback on an unused Once also panics and consumes the instance. A nil callback passed after completion is skipped.",
+      "citation": {"line": 50, "fragment": "If f panics, Do considers it to have returned"},
+      "question": ""
+    },
+    {
+      "id": "goexit-consumes-once",
+      "text": "If the winning callback calls runtime.Goexit, the callback's deferred functions run, then the deferred store marks the Once done and the mutex is released as the goroutine exits. The winning Do never returns to its caller, but waiting and later calls skip their callbacks. A cancellation signal alone has no effect on Do. If the callback handles cancellation by returning early, that return also consumes the instance.",
+      "citation": {"line": 77, "fragment": "defer o.done.Store(true)"},
+      "question": "OPEN: Should the contract explicitly cover goroutine exit, where the Once is consumed even though neither the callback nor the winning Do returns?"
+    },
+    {
+      "id": "reentrant-call",
+      "text": "If the winning callback synchronously calls Do on the same Once, the nested call sees done as false and waits for the mutex held by the outer call. The outer call cannot finish the callback and unlock until the nested call returns. A nested call on an independent unused Once can complete normally if its callback returns without creating a dependency on the outer call.",
+      "citation": {"line": 48, "fragment": "Do to be called, it will deadlock."},
+      "question": "OPEN: Should the deadlock sentence specify reentry on the same Once or a dependency cycle involving it?"
+    },
+    {
+      "id": "asynchronous-work",
+      "text": "If the winning callback starts a goroutine and returns without waiting for it, the Once is marked done when the callback exits. Later calls can return while the goroutine's work is still pending. If the callback waits for that work before returning, including in a deferred function, later calls wait for the callback to finish.",
+      "citation": {"line": 59, "fragment": "Do guarantees that when it returns, f has finished."},
+      "question": ""
+    }
+  ]
+}

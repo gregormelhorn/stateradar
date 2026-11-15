@@ -1,0 +1,23 @@
+FF
+======================================================================
+FAIL: test_invalid_label_fails (__main__.ProvenanceTests.test_invalid_label_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_provenance.py", line 17, in test_invalid_label_fails
+    self.assertIn('invalid provenance: f',validate(rows,p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'invalid provenance: f' not found in []
+
+======================================================================
+FAIL: test_wrong_fragment_fails (__main__.ProvenanceTests.test_wrong_fragment_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_provenance.py", line 12, in test_wrong_fragment_fails
+    self.assertIn('invalid citation: f',validate(rows,p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'invalid citation: f' not found in []
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+
+FAILED (failures=2)

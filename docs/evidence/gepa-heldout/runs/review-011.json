@@ -1,0 +1,51 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "S01",
+      "finding_ids": [
+        "final-token-error-order"
+      ],
+      "reason": "Sentinel cases including no previous error are covered.",
+      "partial": false
+    },
+    {
+      "id": "S02",
+      "finding_ids": [],
+      "reason": "Panic described for two buffer-limit sequences, not general empty-input first scan.",
+      "partial": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "split-error-retry",
+      "verdict": "uncertain",
+      "reason": "Names ScanBytes then has splitter return a custom error; ScanBytes itself cannot do that and Split cannot be replaced after Scan. A stateful wrapper would make the scenario possible."
+    },
+    {
+      "id": "final-token-error-order",
+      "verdict": "valid",
+      "reason": "Source scan loop supports the described behavior under the stated conditions."
+    },
+    {
+      "id": "zero-advance-token-guard",
+      "verdict": "valid",
+      "reason": "Source scan loop supports the described behavior under the stated conditions."
+    },
+    {
+      "id": "buffer-boundary-eof-order",
+      "verdict": "valid",
+      "reason": "Source scan loop supports the described behavior under the stated conditions."
+    },
+    {
+      "id": "lines-termination",
+      "verdict": "valid",
+      "reason": "Source scan loop supports the described behavior under the stated conditions."
+    },
+    {
+      "id": "token-storage-reuse",
+      "verdict": "valid",
+      "reason": "Source scan loop supports the described behavior under the stated conditions."
+    }
+  ]
+}

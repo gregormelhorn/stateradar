@@ -1,0 +1,14 @@
+.....F...
+======================================================================
+FAIL: test_omitted_expected_case (__main__.CatalogTest.test_omitted_expected_case)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_catalog.py", line 29, in test_omitted_expected_case
+    with self.assertRaises(EvalError):validate_catalog(self.c,self.root,{'C1','C2'})
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.007s
+
+FAILED (failures=1)

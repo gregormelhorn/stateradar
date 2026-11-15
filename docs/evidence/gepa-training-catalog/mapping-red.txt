@@ -1,0 +1,23 @@
+.....FF..
+======================================================================
+FAIL: test_pool_mapping_drift (__main__.EvidenceTest.test_pool_mapping_drift)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 35, in test_pool_mapping_drift
+    with self.assertRaises(EvalError):verify_pool_mapping(info,'// BEGIN pinned channel.go\na\n\n// BEGIN pinned pool.go\nb\n','changed\n','b\n')
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_pool_mapping_line_number (__main__.EvidenceTest.test_pool_mapping_line_number)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 38, in test_pool_mapping_line_number
+    with self.assertRaises(EvalError):verify_pool_mapping(info,'// BEGIN pinned channel.go\na\n\n// BEGIN pinned pool.go\nb\n','a\n','b\n')
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.009s
+
+FAILED (failures=2)

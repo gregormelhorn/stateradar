@@ -1,0 +1,23 @@
+.........FF.
+======================================================================
+FAIL: test_review_missing_case (__main__.CatalogTest.test_review_missing_case)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_catalog.py", line 40, in test_review_missing_case
+    with self.assertRaises(EvalError):validate_independent_review(self.c,{'reviewer':'independent','cases':[]})
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_review_rejected_case (__main__.CatalogTest.test_review_rejected_case)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_catalog.py", line 43, in test_review_rejected_case
+    with self.assertRaises(EvalError):validate_independent_review(self.c,review)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.008s
+
+FAILED (failures=2)

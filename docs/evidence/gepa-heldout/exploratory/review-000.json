@@ -1,0 +1,53 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "S01",
+      "finding_ids": [
+        "final-token"
+      ],
+      "reason": "Both sentinel outcomes and no-prior-error condition are explicit.",
+      "partial": false
+    },
+    {
+      "id": "S02",
+      "finding_ids": [
+        "configuration-and-copying"
+      ],
+      "reason": "General after-first-Scan false covers empty input.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "read-error-and-buffered-tokens",
+      "verdict": "valid",
+      "reason": "Scanner source supports the stated conditional behavior."
+    },
+    {
+      "id": "final-token",
+      "verdict": "valid",
+      "reason": "Scanner source supports the stated conditional behavior."
+    },
+    {
+      "id": "retry-after-split-failure",
+      "verdict": "valid",
+      "reason": "Scanner source supports the stated conditional behavior."
+    },
+    {
+      "id": "nonprogress-limits",
+      "verdict": "valid",
+      "reason": "Scanner source supports the stated conditional behavior."
+    },
+    {
+      "id": "buffer-boundary-and-read-order",
+      "verdict": "false",
+      "reason": "The stated M-byte token need not have length M when the newline-free line ends in carriage return: ScanLines strips it. Other conditions do not exclude this case."
+    },
+    {
+      "id": "configuration-and-copying",
+      "verdict": "valid",
+      "reason": "Scanner source supports the stated conditional behavior."
+    }
+  ]
+}

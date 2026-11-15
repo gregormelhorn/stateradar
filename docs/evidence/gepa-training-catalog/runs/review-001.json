@@ -1,0 +1,50 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "C01",
+      "finding_ids": [],
+      "reason": "`notify-before-suspension` states Signal without L is allowed and `signal-and-reacquire` shows one mutation while L held; neither states the general condition-mutation obligation or Broadcast lock optionality.",
+      "partial": true
+    },
+    {
+      "id": "C02",
+      "finding_ids": [
+        "notify-before-registration"
+      ],
+      "reason": "Explicit signal before any waiter has no stored notification; later Wait needs a later signal."
+    }
+  ],
+  "findings": [
+    {
+      "id": "notify-before-registration",
+      "verdict": "valid",
+      "reason": "Signal/Broadcast have no effect with no registered waiter; runtime-reference/sema.go:631-638,668-675 and bounded TestCondSignalBeforeWait support this."
+    },
+    {
+      "id": "notify-before-suspension",
+      "verdict": "valid",
+      "reason": "Wait registers before unlocking; runtime-reference/sema.go:578-591 says an already-notified ticket returns without parking; Signal need not hold L."
+    },
+    {
+      "id": "signal-and-reacquire",
+      "verdict": "valid",
+      "reason": "Wait reacquires L and documentation says lock competitors can win; condition loop is prescribed in cond.go:52-65."
+    },
+    {
+      "id": "broadcast-reuse",
+      "verdict": "valid",
+      "reason": "Broadcast wakes the current notified list; runtime-reference/sema.go:631-648 resets notifications to current waiter count; subsequent Wait needs a new notification."
+    },
+    {
+      "id": "copy-before-or-after-use",
+      "verdict": "valid",
+      "reason": "copyChecker and method entry sites in cond.go:67-109 support initialization and copied-address panic before operations."
+    },
+    {
+      "id": "cancellation-while-waiting",
+      "verdict": "valid",
+      "reason": "Wait has no context input, docs explicitly require a Signal/Broadcast to unblock and L is reacquired before returning."
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "reviewer": "independent_review: source-and-reference review; separate from benchmark author",
+  "cases": [
+    {
+      "id": "C01",
+      "finding_ids": [],
+      "partial": true,
+      "reason": "`condition-after-wakeup` illustrates changing condition while holding L and `registration-before-notification` starts Wait holding L; neither states these as general requirements nor notes both notification calls may occur without L."
+    },
+    {
+      "id": "C02",
+      "finding_ids": [
+        "notification-before-registration",
+        "registration-before-notification"
+      ],
+      "reason": "The first describes no stored future notification, the second states a later notification covering registered ticket permits wakeup."
+    }
+  ],
+  "findings": [
+    {
+      "id": "notification-before-registration",
+      "verdict": "valid",
+      "reason": "Signal and Broadcast notify only current waiters; runtime-reference/sema.go:631-638,668-675 and bounded control confirm no saved notification."
+    },
+    {
+      "id": "registration-before-notification",
+      "verdict": "valid",
+      "reason": "Cond Wait ticket allocation precedes unlock; runtime-reference/sema.go:578-591 handles already-notified ticket without parking, and notify functions cover one/all."
+    },
+    {
+      "id": "condition-after-wakeup",
+      "verdict": "valid",
+      "reason": "Cond documentation explicitly requires predicate loop after reacquiring L; another lock holder may alter condition."
+    },
+    {
+      "id": "cancellation",
+      "verdict": "valid",
+      "reason": "No context cancellation path in Wait and docs require Signal/Broadcast; reacquire and no status are source-supported."
+    },
+    {
+      "id": "copy-checker-identity",
+      "verdict": "valid",
+      "reason": "copyChecker stores receiver address on first method use, before any notification; copied nonzero checker at another address panics."
+    },
+    {
+      "id": "unlock-failure",
+      "verdict": "valid",
+      "reason": "Condition explicitly assumes a Locker whose Unlock panics; Wait registers before c.L.Unlock, has no deferred ticket cleanup, so that panic exits before runtime wait/relock. runtime-reference/sema.go:574-585 documents eventual Wait obligation."
+    }
+  ]
+}

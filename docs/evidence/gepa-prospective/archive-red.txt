@@ -1,0 +1,32 @@
+FFF
+======================================================================
+FAIL: test_blocked_status (__main__.ArchiveTest.test_blocked_status)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_prospective_archive.py", line 14, in test_blocked_status
+    p=Path(d);(p/'status.json').write_text(json.dumps({'status':'blocked'}));self.assertIn('status incomplete',verify(p))
+                                                                             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'status incomplete' not found in []
+
+======================================================================
+FAIL: test_missing_frozen_input (__main__.ArchiveTest.test_missing_frozen_input)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_prospective_archive.py", line 18, in test_missing_frozen_input
+    self.assertIn('missing frozen input: missing',verify(p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'missing frozen input: missing' not found in []
+
+======================================================================
+FAIL: test_missing_status (__main__.ArchiveTest.test_missing_status)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_prospective_archive.py", line 11, in test_missing_status
+    with tempfile.TemporaryDirectory() as d:self.assertIn('missing status.json',verify(Path(d)))
+                                            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'missing status.json' not found in []
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+FAILED (failures=3)

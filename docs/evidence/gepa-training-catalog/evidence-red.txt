@@ -1,0 +1,50 @@
+..FFFFF
+======================================================================
+FAIL: test_missing_package_completion (__main__.EvidenceTest.test_missing_package_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 26, in test_missing_package_completion
+    with self.assertRaises(EvalError):verify_test_log(self.p,{'TestA'},2)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_missing_repetition (__main__.EvidenceTest.test_missing_repetition)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 23, in test_missing_repetition
+    with self.assertRaises(EvalError):verify_test_log(self.p,{'TestA'},2)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_missing_test (__main__.EvidenceTest.test_missing_test)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 20, in test_missing_test
+    with self.assertRaises(EvalError):verify_test_log(self.p,{'TestA'},2)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_red_without_reason (__main__.EvidenceTest.test_red_without_reason)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 32, in test_red_without_reason
+    with self.assertRaises(EvalError):verify_expected_red(self.p,'TestA','intended reason')
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_wrong_test_failure (__main__.EvidenceTest.test_wrong_test_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_training_evidence.py", line 29, in test_wrong_test_failure
+    with self.assertRaises(EvalError):verify_expected_red(self.p,'TestA','intended reason')
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.005s
+
+FAILED (failures=5)

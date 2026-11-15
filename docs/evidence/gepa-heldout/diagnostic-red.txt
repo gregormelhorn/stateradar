@@ -1,0 +1,23 @@
+...FF..
+======================================================================
+FAIL: test_blocked_diagnostic_fails (__main__.DiagnosticProbe.test_blocked_diagnostic_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 25, in test_blocked_diagnostic_fails
+    p=Path(d);(p/'status.json').write_text(json.dumps({'status':'blocked'}));self.assertIn('diagnostic incomplete',verify_diagnostic(p))
+                                                                             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'diagnostic incomplete' not found in []
+
+======================================================================
+FAIL: test_missing_diagnostic_fails (__main__.DiagnosticProbe.test_missing_diagnostic_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 22, in test_missing_diagnostic_fails
+    with tempfile.TemporaryDirectory() as d:self.assertIn('missing diagnostic status',verify_diagnostic(Path(d)))
+                                            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'missing diagnostic status' not found in []
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.183s
+
+FAILED (failures=2)

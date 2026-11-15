@@ -1,0 +1,149 @@
+{
+  "catalog_cases": 12,
+  "reviewed_outputs": 10,
+  "findings_reviewed": 60,
+  "case_results": {
+    "G01": [
+      "found",
+      "missing"
+    ],
+    "G02": [
+      "missing",
+      "missing"
+    ],
+    "C01": [
+      "partial",
+      "partial"
+    ],
+    "C02": [
+      "found",
+      "found"
+    ],
+    "W01": [
+      "missing",
+      "missing"
+    ],
+    "W02": [
+      "found",
+      "found"
+    ],
+    "W03": [
+      "missing",
+      "partial"
+    ],
+    "W04": [
+      "missing",
+      "partial"
+    ],
+    "T01": [
+      "partial",
+      "partial"
+    ],
+    "T02": [
+      "partial",
+      "partial"
+    ],
+    "P01": [
+      "partial",
+      "missing"
+    ],
+    "P02": [
+      "found",
+      "found"
+    ]
+  },
+  "outputs": [
+    {
+      "call": 0,
+      "component": "gobreaker",
+      "found": 1,
+      "total": 2,
+      "false": 1,
+      "uncertain": 0
+    },
+    {
+      "call": 1,
+      "component": "cond",
+      "found": 1,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0
+    },
+    {
+      "call": 2,
+      "component": "waitgroup",
+      "found": 1,
+      "total": 4,
+      "false": 1,
+      "uncertain": 0
+    },
+    {
+      "call": 3,
+      "component": "timer",
+      "found": 0,
+      "total": 2,
+      "false": 2,
+      "uncertain": 0
+    },
+    {
+      "call": 4,
+      "component": "pool",
+      "found": 1,
+      "total": 2,
+      "false": 0,
+      "uncertain": 2
+    },
+    {
+      "call": 5,
+      "component": "pool",
+      "found": 1,
+      "total": 2,
+      "false": 0,
+      "uncertain": 2
+    },
+    {
+      "call": 6,
+      "component": "timer",
+      "found": 0,
+      "total": 2,
+      "false": 2,
+      "uncertain": 0
+    },
+    {
+      "call": 7,
+      "component": "waitgroup",
+      "found": 1,
+      "total": 4,
+      "false": 1,
+      "uncertain": 0
+    },
+    {
+      "call": 8,
+      "component": "cond",
+      "found": 1,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0
+    },
+    {
+      "call": 9,
+      "component": "gobreaker",
+      "found": 0,
+      "total": 2,
+      "false": 1,
+      "uncertain": 0
+    }
+  ],
+  "reference_checks": {
+    "independent_test_and_subtest_passes": 70,
+    "pool_control": "expected red",
+    "gobreaker_controls": "3 tests x 5 pass"
+  },
+  "model_cost_equivalent_usd": 0.35818720000000004,
+  "limitations": [
+    "two repetitions per component",
+    "separate AI review, no independent human review",
+    "training/regression cases, not held out",
+    "semantic grades are attributed judgments"
+  ]
+}

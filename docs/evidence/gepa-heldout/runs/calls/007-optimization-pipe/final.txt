@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "synchronous-transfer",
+      "text": "On an open pipe, a Write of three bytes can pair with a one-byte Read, which copies one byte, sends an acknowledgment, and returns (1, nil). The writer advances by one byte and waits for another Read to consume the remaining two before returning (3, nil). A zero-length Read can acknowledge zero and return (0, nil) while a nonempty Write remains pending. A zero-length Write still waits for a Read to acknowledge zero before succeeding.",
+      "citation": {
+        "line": 85,
+        "fragment": "for once := true; once || len(b) > 0; once = false {"
+      },
+      "question": ""
+    },
+    {
+      "id": "close-during-transfer",
+      "text": "With both ends open, if the reader closes before a pending Write hands off any bytes and no Read is ready, the Write returns zero and the reader's close error. If a Read accepts the slice first, it copies and acknowledges bytes even if Close runs before the acknowledgment. A fully acknowledged Write succeeds, while a partially acknowledged Write with no next Read ready returns its acknowledged count and the close error. If both calls have passed their initial checks and a channel match and closure are both selectable, the transfer can still win. Calls whose initial check observes the closed pipe return zero and a close error.",
+      "citation": {
+        "line": 88,
+        "fragment": "nw := <-p.rdCh"
+      },
+      "question": "OPEN: How should the blocking and close contracts describe a transfer that remains selectable after done closes?"
+    },
+    {
+      "id": "repeated-close",
+      "text": "Starting with a fresh pipe, closing only the writer with nil makes later Reads return (0, EOF), and closing only the reader with nil makes later Writes return (0, ErrClosedPipe). When the first close on an end supplies a non-nil error, later operations on the still-open opposite end return that same error value. Further closes on the same end return nil and retain the first stored value, including a default stored by a nil close.",
+      "citation": {
+        "line": 24,
+        "fragment": "if a.err != nil {"
+      },
+      "question": ""
+    },
+    {
+      "id": "both-ends-closed",
+      "text": "On a fresh pipe, close the writer with error W, then Read and observe (0, W). Close the reader as well, then Read again and observe (0, ErrClosedPipe). In the reverse order, close the reader with error R, then Write and observe (0, R). Close the writer as well, then Write again and observe (0, ErrClosedPipe). Each end stores its first error even if the other end already closed the shared done channel. After both closes return, both operation types yield ErrClosedPipe, although the CloseWithError comments describe subsequent operations as returning the supplied error without stating this condition.",
+      "citation": {
+        "line": 110,
+        "fragment": "if werr := p.werr.Load(); rerr == nil && werr != nil {"
+      },
+      "question": "OPEN: Should both CloseWithError comments limit the promised error to operations on an end that has not itself closed?"
+    },
+    {
+      "id": "waiting-writers",
+      "text": "On an open pipe, let one Write hold wrMu while waiting for a Read and let a second Write pass the initial done check and block on wrMu. With no Read ready, closing the reader releases the first Write through its transfer select. The first Write unlocks on return, and the second must acquire the mutex before its own select can observe closure. A later Write whose initial check observes closure can return before that second Write without acquiring the mutex. With no closure, Reads can finish the first Write and allow another writer to proceed. The pipe code establishes serialization but specifies no FIFO admission order among waiting writers.",
+      "citation": {
+        "line": 81,
+        "fragment": "p.wrMu.Lock()"
+      },
+      "question": "OPEN: Does “gated sequentially” promise only serialized transfers, or also an order among waiting calls?"
+    },
+    {
+      "id": "endpoint-value-copy",
+      "text": "Starting with an unused pair, saving the reader pointer and rebinding the caller's reader variable leaves the saved pointer and writer attached to the original embedded reader. Assigning through the saved pointer would instead replace the reader value inside that writer. With an unchanged pointer alias as a control, closing through the alias and then the writer shares one sync.Once and both calls return nil. If the caller instead copies the reader value before first use, the copy shares the channels but has separate close state. Closing the copy closes the shared done channel, and a subsequent close on the original attempts to close it again and panics. A value copy after first use can also copy used synchronization fields, so the pre-use sequence does not establish a general outcome for later copies.",
+      "citation": {
+        "line": 201,
+        "fragment": "return &pw.r, pw"
+      },
+      "question": "OPEN: Should the exported endpoint types explicitly state the restrictions on copying their values?"
+    }
+  ]
+}

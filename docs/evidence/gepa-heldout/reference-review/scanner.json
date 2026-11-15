@@ -1,0 +1,23 @@
+{
+  "review": {
+    "cases": [
+      {
+        "id": "S01",
+        "verdict": "refuted",
+        "reason": "The Scan results follow from the source: the sentinel branch sets done and returns whether the token is non-nil. The nil Err claim holds when the stored reader error is nil or EOF. A reader can return a non-EOF error before the split function returns ErrFinalToken, and that error remains visible through Err. The test uses strings.NewReader(\"x\") and checks the first Scan result for each token variant, then checks that the second Scan returns false and Err is nil. It checks Err only after the second Scan.",
+        "line": 152,
+        "fragment": "if err == ErrFinalToken {"
+      },
+      {
+        "id": "S02",
+        "verdict": "confirmed",
+        "reason": "Scan sets scanCalled before processing input, and both Buffer and Split panic when that flag is set. The test uses a fresh empty scanner for each method, checks that its first Scan returns false, and verifies that the configuration call panics. It does not check the panic value.",
+        "line": 143,
+        "fragment": "s.scanCalled = true"
+      }
+    ]
+  },
+  "call_ids": [
+    2
+  ]
+}

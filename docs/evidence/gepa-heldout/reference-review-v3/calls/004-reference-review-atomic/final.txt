@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "id": "A01",
+      "verdict": "confirmed",
+      "reason": "A nil *int passed as any has a concrete type, so it passes the nil check and the first store publishes its type and nil data. Store(nil) panics before writing. The test verifies that Load yields a non-nil interface containing a nil *int, that Store(nil) panics, and that Load still yields a nil *int afterward. It does not check the panic message.",
+      "line": 49,
+      "fragment": "panic(\"sync/atomic: store of nil value into Value\")"
+    },
+    {
+      "id": "A02",
+      "verdict": "confirmed",
+      "reason": "With an empty Value, the non-nil old string takes the early false return before any write. A nil old argument reaches the first-store path, which publishes the new string and returns true. The test verifies both return values and the corresponding Load results for those two calls in sequence.",
+      "line": 147,
+      "fragment": "if old != nil {"
+    }
+  ]
+}

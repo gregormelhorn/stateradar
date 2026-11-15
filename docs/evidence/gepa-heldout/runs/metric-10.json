@@ -1,0 +1,128 @@
+{
+  "candidate": {
+    "review": "Use the reviewed source and any pinned runtime evidence to trace ordinary success and failure, repetition, cancellation, abandonment, deferred work, and reuse. State the initial conditions and order the steps that determine the outcome. Compare both event orders and test intervening operations before treating an earlier event as decisive. Follow each completion from admission through reporting, state refresh, and effect. Check whether an obsolete report can be discarded even when cleanup or error propagation continues. Distinguish rebinding a caller's reference from replacing the value through the captured reference, and use an unchanged reference as a control. Check whether registration actually succeeds after a state observation, and keep notification, suspension, lock reacquisition, and return distinct. Compare notifications before and after registration, and distinguish when a lock is required to change the condition or begin waiting from when it is optional for notification. Preserve controls for copying before and after first use, cleanup after normal and abrupt exit, and valid reuse after earlier waiters return. Qualify exceptional behavior by the documented exclusions, compatibility mode, and whether a prior association is still present. Separate deadline calculation from dispatch and delivery. Compare repeated cancellation, expiry, and reactivation in order, checking the current state and whether earlier work has started, finished, or can overlap later work. For queued work, trace availability checks, enqueue, handoff, and shutdown through later callers and subsequent returns. Check who receives an available resource, what eventually releases the older waiter, and which validation runs on each path. Distinguish invoking cleanup from establishing its effect, and preserving error text from preserving error identity. Cite the branches, tests, and contract language that support each claim, and qualify conclusions by source coverage, version, configuration, and supported input range. Leave intent OPEN where the evidence does not settle transition timing, duplicate or abandoned completion, counter refresh and numeric limits, ownership or copying, exceptional exits, notification analogies, delivery guarantees, queue ordering, validation, or shutdown obligations. Where contract statements appear inconsistent, identify the event order and scope that expose the conflict and leave the intended wording OPEN."
+  },
+  "trace": {
+    "component": "timer",
+    "Generated Outputs": {
+      "findings": [
+        {
+          "id": "deadline-calculation",
+          "text": "When NewTimer, AfterFunc, or Reset on an initialized Timer computes a deadline, a zero or negative duration uses the runtime clock reading directly. A positive duration is added to that reading. Under the source's positive-clock assumption, a wrapped negative sum is clamped to 9223372036854775807. The resulting deadline is passed to the runtime. This calculation leaves callback dispatch and channel delivery to the runtime, including for a nonpositive duration.",
+          "citation": {
+            "line": 32,
+            "fragment": "t = 1<<63 - 1 // math.MaxInt64"
+          },
+          "question": ""
+        },
+        {
+          "id": "channel-stop-and-reset",
+          "text": "Start with a NewTimer timer that is still running and whose value has never been received. Under the documented Go 1.23 synchronous semantics, Stop and Reset each return true when called in that state. A receive begun after Stop returns is protected against a stale value, and a receive begun after Reset returns is protected against a value from the previous settings. If Stop returns and a later Reset reactivates the timer, a subsequent receive can get the new expiration. Under the documented legacy buffered semantics, expiry can leave a value available for a receive after either call returns. The excerpt passes a capacity-one channel to the runtime and leaves the implementation and selection of the effective channel mode outside the shown code.",
+          "citation": {
+            "line": 78,
+            "fragment": "any receive from t.C after Stop has returned is guaranteed to block"
+          },
+          "question": "OPEN: Should the Stop wording explicitly limit the blocking guarantee to the stopped interval, given that a later Reset can schedule a new value on the same channel?"
+        },
+        {
+          "id": "afterfunc-repeated-stop",
+          "text": "Start with an AfterFunc timer and call Stop while it is active. If Stop returns true, that scheduled invocation is prevented. A second Stop before any Reset finds an already-stopped timer, so the general return contract gives false. In the opposite order, where expiry wins before the first Stop, the function-specific comment also gives false and says the callback goroutine has been started. The callback may still be running when Stop returns, so code that needs completion must coordinate with the callback.",
+          "citation": {
+            "line": 71,
+            "fragment": "if t.Stop returns false, then the timer has already expired"
+          },
+          "question": "OPEN: Should the AfterFunc-specific statement apply only when expiry caused Stop to return false? A successful Stop followed by another Stop also yields false under the general contract, with the scheduled callback canceled."
+        },
+        {
+          "id": "afterfunc-reset-overlap",
+          "text": "Start with an active AfterFunc timer. Reset before expiry returns true and reschedules the pending invocation. If Stop succeeds first, Reset on the stopped timer returns false and schedules an invocation. If expiry occurs first and the prior callback is still running, Reset also returns false and schedules another invocation. Reset can return before the prior invocation finishes, and the next invocation can overlap it. If the prior invocation finishes before the next one begins, the invocations run sequentially.",
+          "citation": {
+            "line": 126,
+            "fragment": "goroutine running f does not run concurrently with the prior"
+          },
+          "question": ""
+        },
+        {
+          "id": "channel-dispatch-and-delivery",
+          "text": "For a NewTimer or After channel, once the runtime invokes sendTime, the callback subtracts the supplied lateness from the current time to form the value. The runtime may defer that invocation until a goroutine tries to receive, so receipt can occur substantially later than the time represented by the value. At the callback's select, a ready send delivers or buffers the value according to the channel mode. If the send cannot proceed, the default branch returns immediately. The single callback performs no retry, and the shown body does not inspect its sequence argument.",
+          "citation": {
+            "line": 154,
+            "fragment": "case c.(chan Time) <- Now().Add(Duration(-delta)):"
+          },
+          "question": "OPEN: Which runtime conditions ensure that the send is ready when dispatch has been deferred, and where does the runtime suppress a callback made obsolete by Stop or Reset?"
+        },
+        {
+          "id": "abandoned-channel-timer",
+          "text": "Call NewTimer and drop the remaining references before the timer expires or is stopped. Under the documented Go 1.23 semantics, the timer is eligible for garbage collection while still pending. Under the documented earlier behavior, expiry or a successful Stop was needed for recovery. After exposes the same timer channel through NewTimer(d).C and documents the same recovery of unreferenced, unstopped timers. The recovery wording gives no collection deadline.",
+          "citation": {
+            "line": 100,
+            "fragment": "timers, even if they haven't expired or been stopped."
+          },
+          "question": ""
+        }
+      ]
+    },
+    "Feedback": {
+      "summary": {
+        "found": 0,
+        "total": 2,
+        "false": 2,
+        "uncertain": 0,
+        "missing": [
+          "T01",
+          "T02"
+        ],
+        "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+      },
+      "reviewed_cases": [
+        {
+          "id": "T01",
+          "description": "Second Stop returns false although the callback never started; generic and func-specific prose appear inconsistent, and normative wording remains OPEN.",
+          "kind": "positive_control"
+        },
+        {
+          "id": "T02",
+          "description": "Reset of the expired timer returns false, does not wait for the old callback, and a later callback can overlap it.",
+          "kind": "positive_control"
+        }
+      ],
+      "finding_reviews": [
+        {
+          "id": "deadline-calculation",
+          "verdict": "valid",
+          "reason": "when computes positive/nonpositive deadlines and overflow clamp, delegating timer dispatch."
+        },
+        {
+          "id": "channel-stop-and-reset",
+          "verdict": "valid",
+          "reason": "Stop/Reset Go1.23 and legacy comments with stated running/received conditions and subsequent reactivation."
+        },
+        {
+          "id": "afterfunc-repeated-stop",
+          "verdict": "false",
+          "reason": "The expiry-before-first-Stop statement lacks exclusion of an intervening Reset. scope_extension_test.go:8-11 demonstrates expiry, rearm, then Stop=true. Correct repeated-stop part and OPEN question retained."
+        },
+        {
+          "id": "afterfunc-reset-overlap",
+          "verdict": "false",
+          "reason": "The expiry-first Reset=false sentence lacks exclusion of an intervening Reset; scope_extension_test.go:8-10 shows false then true while prior callback runs. First post-expiry overlap description is correct."
+        },
+        {
+          "id": "channel-dispatch-and-delivery",
+          "verdict": "valid",
+          "reason": "sendTime computes Now minus delta, attempts nonblocking send, with external runtime behavior left OPEN."
+        },
+        {
+          "id": "abandoned-channel-timer",
+          "verdict": "valid",
+          "reason": "NewTimer and After comments describe Go1.23 recovery and earlier behavior without timing guarantee."
+        }
+      ]
+    },
+    "call_ids": [
+      5
+    ],
+    "mode": "fresh"
+  },
+  "score": 0
+}

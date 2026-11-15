@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "load-after-writes",
+      "text": "On a fresh Value, Load returns nil. After Store(1) and Store(2), Load returns 2. Swap(3) then returns 2, and Load returns 3. On a separate fresh Value, Swap(3) returns nil and the next Load returns 3 even though Store has never been called. A successful CompareAndSwap(nil, 3) on a fresh Value likewise makes the next Load return 3 without a Store call.",
+      "citation": {
+        "line": 27,
+        "fragment": "It returns nil if there has been no call to Store for this Value."
+      },
+      "question": "OPEN: Is Store in the Load documentation meant to include writes by Swap and CompareAndSwap?"
+    },
+    {
+      "id": "nil-and-type-rejection",
+      "text": "Store(nil), Swap(nil), and CompareAndSwap(old, nil) panic before changing the Value. CompareAndSwap(\"x\", 1) also panics on a fresh Value because the operands have different concrete types, before checking whether the Value is empty. After Store(1), Store(\"x\"), Swap(\"x\"), and CompareAndSwap(nil, \"x\") each panic, and Load still returns 1. The stored concrete type governs all three write methods.",
+      "citation": {
+        "line": 141,
+        "fragment": "if op.typ != nil && np.typ != op.typ {"
+      },
+      "question": ""
+    },
+    {
+      "id": "empty-and-typed-nil",
+      "text": "On a fresh Value, with p and q both nil *int pointers, CompareAndSwap(p, q) returns false and Load still returns nil. CompareAndSwap(nil, p) then returns true. Load now returns an interface with concrete type *int and a nil pointer, and that interface compares unequal to nil. CompareAndSwap(nil, q) now returns false, while CompareAndSwap(p, q) returns true.",
+      "citation": {
+        "line": 147,
+        "fragment": "if old != nil {"
+      },
+      "question": ""
+    },
+    {
+      "id": "first-write-ordering",
+      "text": "On a fresh Value, race Store(1) with CompareAndSwap(nil, 2). The first writer to claim the type slot publishes the data pointer before the concrete type. A Load that observes the in-progress marker returns nil. A competing writer that observes the marker spins until publication, with no cancellation path in the loop. If Store claims the slot first, CompareAndSwap returns false. If CompareAndSwap claims it first, it returns true and Store subsequently overwrites 2. After both finish, Load returns 1 in either ordering.",
+      "citation": {
+        "line": 164,
+        "fragment": "if typ == unsafe.Pointer(&firstStoreInProgress) {"
+      },
+      "question": ""
+    },
+    {
+      "id": "comparison-panic",
+      "text": "Swap([]int{1}) on a fresh Value returns nil and initializes it. CompareAndSwap([]int{1}, []int{2}) then passes the concrete-type checks but panics when Go compares the two interfaces because their dynamic type is a slice. The replacement is never attempted, and Load still returns the original slice. CompareAndSwap(nil, []int{2}) on that initialized Value returns false without panicking.",
+      "citation": {
+        "line": 183,
+        "fragment": "if i != old {"
+      },
+      "question": "OPEN: Should the CompareAndSwap contract document the panic when interface equality reaches operands of the same non-comparable dynamic type?"
+    },
+    {
+      "id": "data-pointer-race",
+      "text": "Start with Store(A), where A, B, and C are distinct pointers to nonzero-sized objects of the same concrete type. CompareAndSwap(A, C) reads A and passes the equality check. If Store(B) completes before the final pointer exchange and B remains current, CompareAndSwap returns false and leaves B stored. If Store(B) and then Store(A) both complete before that exchange, CompareAndSwap returns true and installs C because the data pointer again equals A. The pointer exchange detects a difference at the time of the exchange and can miss an intervening change.",
+      "citation": {
+        "line": 178,
+        "fragment": "has not changed since LoadPointer."
+      },
+      "question": "OPEN: Is the comment meant to describe pointer equality at the exchange, or is it meant to promise detection of an intervening write?"
+    }
+  ]
+}

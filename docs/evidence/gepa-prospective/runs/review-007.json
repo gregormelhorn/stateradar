@@ -1,0 +1,49 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "B01",
+      "finding_ids": [],
+      "reason": "Empty Read destination behavior is not stated.",
+      "partial": false
+    },
+    {
+      "id": "B02",
+      "finding_ids": [],
+      "reason": "Zero-length Next invalidates unread opportunity after ReadByte, but the specified zero-length Read and subsequent recovery sequence are absent.",
+      "partial": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "delimiter-eof-unread",
+      "verdict": "valid",
+      "reason": "Buffer source supports the stated sequence; negative count and nil-error short write are outside the Writer contract."
+    },
+    {
+      "id": "grow-between-read-and-unread",
+      "verdict": "valid",
+      "reason": "Buffer source supports the stated sequence; negative count and nil-error short write are outside the Writer contract."
+    },
+    {
+      "id": "write-to-report-before-reset",
+      "verdict": "valid",
+      "reason": "Buffer source supports the stated sequence; negative count and nil-error short write are outside the Writer contract."
+    },
+    {
+      "id": "read-from-commit-and-retry",
+      "verdict": "valid",
+      "reason": "Buffer source supports the stated sequence; negative count and nil-error short write are outside the Writer contract."
+    },
+    {
+      "id": "copy-and-storage-ownership",
+      "verdict": "valid",
+      "reason": "Buffer source supports the stated sequence; negative count and nil-error short write are outside the Writer contract."
+    },
+    {
+      "id": "peek-next-and-unread",
+      "verdict": "valid",
+      "reason": "Buffer source supports the stated sequence; negative count and nil-error short write are outside the Writer contract."
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "G01",
+      "finding_ids": [
+        "completion_receiver_and_copying"
+      ],
+      "reason": "Explicit overwrite through alias redirects success to second, with OPEN question."
+    },
+    {
+      "id": "G02",
+      "finding_ids": [
+        "completion_receiver_and_copying"
+      ],
+      "reason": "Caller pointer rebinding leaves captured wrapper and result on original breaker."
+    }
+  ],
+  "findings": [
+    {
+      "id": "execute_admission_and_result",
+      "verdict": "false",
+      "reason": "Unqualified returned outcome accounting omits generation guard: a concurrent transition can discard an admitted outcome; gobreaker.go:293-301."
+    },
+    {
+      "id": "expiry_refresh_and_obsolete_reports",
+      "verdict": "false",
+      "reason": "The before-expiry report need not apply if another operation changed the generation before it; condition does not exclude that ordering (afterRequest:293-301). Other expiry behaviors are supported."
+    },
+    {
+      "id": "duplicate_and_abandoned_half_open_reports",
+      "verdict": "valid",
+      "reason": "Allow closure, generation check and onSuccess half-open threshold support duplicate, distinct and abandoned cases."
+    },
+    {
+      "id": "completion_receiver_and_copying",
+      "verdict": "valid",
+      "reason": "Captured wrapper dereferences cb on invocation; archived rebinding and reassignment probes pass; sync/mutex.go:20 prohibits copying Mutex after first use."
+    },
+    {
+      "id": "abrupt_exit_and_panic_propagation",
+      "verdict": "valid",
+      "reason": "Execute defer, recover and afterRequest generation gate support qualified panic/Goexit behavior; legacy panicnil case correctly scoped."
+    },
+    {
+      "id": "callback_order_and_locking",
+      "verdict": "valid",
+      "reason": "afterRequest locks and samples time, onFailure records counts and invokes hooks; setState resets and calls hook under mutex."
+    }
+  ]
+}

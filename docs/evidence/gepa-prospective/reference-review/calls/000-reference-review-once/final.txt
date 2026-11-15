@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "id": "O01",
+      "verdict": "confirmed",
+      "reason": "The deferred store marks the Once done during panic unwinding, and Do does not recover the panic. TestOncePanicDone checks that the caller recovers the original panic value and that a later Do returns without invoking its function.",
+      "line": 77,
+      "fragment": "\t\tdefer o.done.Store(true)\n\t\tf()"
+    },
+    {
+      "id": "O02",
+      "verdict": "confirmed",
+      "reason": "The first call holds the mutex while its function runs and sets done before unlocking. A concurrent call that sees done as false must acquire the mutex and then recheck done, so it cannot return while the first function is blocked and will skip its own function. TestOnceConcurrentWait checks for early return during a 50 ms window and checks completion and callback suppression after release. The timeout establishes only bounded nonreturn and does not establish that the second goroutine was scheduled before release.",
+      "line": 74,
+      "fragment": "\to.m.Lock()\n\tdefer o.m.Unlock()\n\tif !o.done.Load() {\n\t\tdefer o.done.Store(true)\n\t\tf()"
+    }
+  ]
+}

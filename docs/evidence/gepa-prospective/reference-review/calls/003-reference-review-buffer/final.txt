@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "id": "B01",
+      "verdict": "confirmed",
+      "reason": "The empty-buffer branch returns (0, nil) for a zero-length destination and (0, io.EOF) for a one-byte destination. TestBufferEmptyReads asserts both results.",
+      "line": 341,
+      "fragment": "if len(p) == 0 {"
+    },
+    {
+      "id": "B02",
+      "verdict": "confirmed",
+      "reason": "Read clears lastRead and returns (0, nil) for a zero-length destination. UnreadByte then returns an error. The next successful ReadByte sets lastRead to opRead, so UnreadByte succeeds and moves the offset back one byte. TestBufferZeroReadInvalidatesUnread asserts each result, including reading 'b' again.",
+      "line": 337,
+      "fragment": "b.lastRead = opInvalid"
+    }
+  ]
+}

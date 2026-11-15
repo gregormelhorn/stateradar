@@ -1,0 +1,56 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "W1",
+      "finding_ids": [
+        "negative-counter"
+      ],
+      "reason": "Done on zero executes Add(-1), stores negative and panics; upstream TestWaitGroupMisuse."
+    },
+    {
+      "id": "W2",
+      "finding_ids": [
+        "reuse-before-wait-returns"
+      ],
+      "reason": "Clearly distinguishes legal reuse after Wait return and potential violations before it."
+    },
+    {
+      "id": "W3",
+      "finding_ids": [],
+      "reason": "Nested Go is an example of adding while active but general Add rule is not stated; no case credit."
+    }
+  ],
+  "findings": [
+    {
+      "id": "wait-completion-order",
+      "verdict": "valid",
+      "reason": "Wait zero fast path and semaphore release in Add support both event orders, subject to scheduling."
+    },
+    {
+      "id": "negative-counter",
+      "verdict": "valid",
+      "reason": "Done delegates to Add(-1), atomic state becomes negative before panic; subsequent Wait attempts semaphore wait if no changes."
+    },
+    {
+      "id": "reuse-before-wait-returns",
+      "verdict": "valid",
+      "reason": "Add detects positive increment while waiters remain; Wait later checks state after semaphore acquire, permitting stated race windows."
+    },
+    {
+      "id": "go-completion-and-goexit",
+      "verdict": "valid",
+      "reason": "Go calls Add before launching and its deferred wrapper calls Done after normal return or Goexit; nested Go documented."
+    },
+    {
+      "id": "go-escaping-panic",
+      "verdict": "valid",
+      "reason": "Correctly limited to recover returning non-nil; wrapper panics before Done."
+    },
+    {
+      "id": "synctest-association-after-completion",
+      "verdict": "false",
+      "reason": "FALSE: outside Wait is not generally able to return at zero while association flag remains: runtime-reference/synctest-runtime.go:450-451 accesses getg().bubble.id; outside bubble is nil. TestWaitGroupSynctestOutsideWait reproducibly recovers a panic in 3/3; see synctest-outside-wait.jsonl. Other association cases follow the code, but this universal claim is false."
+    }
+  ]
+}

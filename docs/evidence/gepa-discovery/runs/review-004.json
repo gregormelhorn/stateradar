@@ -1,0 +1,56 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "G1",
+      "finding_ids": [
+        "repeated-completion"
+      ],
+      "reason": "Single callback called twice, two successes, close; benchmark B02."
+    },
+    {
+      "id": "G2",
+      "finding_ids": [
+        "state-change-callback"
+      ],
+      "reason": "Callback on same mutex reenters State/Counts and blocks; benchmark B04."
+    },
+    {
+      "id": "G3",
+      "finding_ids": [],
+      "reason": "No wrapper reassignment with receiver redirection."
+    }
+  ],
+  "findings": [
+    {
+      "id": "closed-execute",
+      "verdict": "valid",
+      "reason": "Constructor, beforeRequest, onSuccess/onFailure, defaultReadyToTrip and Execute support sequence."
+    },
+    {
+      "id": "deferred-expiry",
+      "verdict": "valid",
+      "reason": "Counts omits currentState; State, beforeRequest and afterRequest check expiry and generation before effects."
+    },
+    {
+      "id": "half-open-admission",
+      "verdict": "valid",
+      "reason": "beforeRequest and onSuccess/onFailure plus half-open expiry state support admission and abandonment ordering."
+    },
+    {
+      "id": "repeated-completion",
+      "verdict": "valid",
+      "reason": "Allow has no per-admission completion guard; onSuccess closes after the second report."
+    },
+    {
+      "id": "execute-panic",
+      "verdict": "valid",
+      "reason": "Execute defer and afterRequest support non-nil and legacy recover-nil paths; Go runtime setting qualification explicitly OPEN."
+    },
+    {
+      "id": "state-change-callback",
+      "verdict": "valid",
+      "reason": "State/onFailure hold mutex and setState invokes callback synchronously; State and Counts reacquire it."
+    }
+  ]
+}

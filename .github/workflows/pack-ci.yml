@@ -117,9 +117,41 @@ jobs:
           python tools/selftest/test_gepa_search.py
           python tools/selftest/test_gepa_report.py
           python tools/selftest/test_gepa_rates.py
+          python tools/selftest/test_gepa_discovery.py
+          python tools/selftest/test_gepa_discovery_archive.py
+          python tools/selftest/test_gepa_training_catalog.py
+          python tools/selftest/test_gepa_training_evidence.py
+          python tools/selftest/test_gepa_training_archive.py
+          python tools/selftest/test_gepa_heldout.py
+          python tools/selftest/test_gepa_heldout_diagnostic.py
+          python tools/selftest/test_gepa_heldout_archive.py
+          python tools/selftest/test_gepa_selection.py
+          python tools/selftest/test_gepa_provenance.py
+          python tools/selftest/test_gepa_selection_upstream.py
+          python tools/selftest/test_gepa_prospective_budget.py
+          python tools/selftest/test_gepa_prospective_archive.py
       - name: independent reference replay and archived three-arm audit
         run: |
           python tools/verify_gepa_reference.py
           python tools/verify_gepa_quality.py
           python tools/gepa_report.py docs/evidence/gepa-bounded/runs
           python tools/gepa_cost_sensitivity.py docs/evidence/gepa-bounded/runs
+          python tools/verify_gepa_discovery.py
+          python tools/verify_gepa_training.py
+          python tools/verify_gepa_heldout.py
+          python tools/report_gepa_selection.py
+          python tools/verify_gepa_prospective.py
+      - name: GEPA discovery reference controls
+        working-directory: docs/evidence/gepa-discovery/reference
+        run: |
+          go test -race -count=5 -timeout=20s -run '^(TestCondSignalBeforeWait|TestWaitGroupPositiveAddWhileActive)$' ./...
+          GODEBUG=panicnil=1 go test -race -count=3 -timeout=20s -run '^TestWaitGroupGoPanicNilLegacy$' ./...
+          go test -race -count=3 -timeout=20s -run '^TestWaitGroupSynctestOutsideWait$' ./...
+
+      - name: GEPA held-out reference controls
+        working-directory: docs/evidence/gepa-heldout/reference
+        run: go test -race -count=3 -timeout=30s ./...
+
+      - name: GEPA prospective reference controls
+        working-directory: docs/evidence/gepa-prospective/reference
+        run: go test -race -count=3 -timeout=30s ./...

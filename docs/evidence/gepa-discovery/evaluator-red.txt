@@ -1,0 +1,77 @@
+.FFFFFFFF
+======================================================================
+FAIL: test_duplicate_finding (__main__.DiscoveryAuditTests.test_duplicate_finding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 38, in test_duplicate_finding
+    with self.assertRaises(EvalError): audit(self.report,self.source,self.cases,self.review)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_false_finding_cannot_score (__main__.DiscoveryAuditTests.test_false_finding_cannot_score)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 32, in test_false_finding_cannot_score
+    with self.assertRaises(EvalError): audit(self.report,self.source,self.cases,self.review)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_missing_case (__main__.DiscoveryAuditTests.test_missing_case)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 20, in test_missing_case
+    with self.assertRaises(EvalError): audit(self.report,self.source,self.cases,self.review)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_missing_finding_review (__main__.DiscoveryAuditTests.test_missing_finding_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 23, in test_missing_finding_review
+    with self.assertRaises(EvalError): audit(self.report,self.source,self.cases,self.review)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_open_question_required_for_credit (__main__.DiscoveryAuditTests.test_open_question_required_for_credit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 35, in test_open_question_required_for_credit
+    with self.assertRaises(EvalError): audit(self.report,self.source,self.cases,self.review)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_unknown_case_reference (__main__.DiscoveryAuditTests.test_unknown_case_reference)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 41, in test_unknown_case_reference
+    with self.assertRaises(EvalError): audit(self.report,self.source,self.cases,self.review)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_unreviewed_is_not_credit (__main__.DiscoveryAuditTests.test_unreviewed_is_not_credit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 29, in test_unreviewed_is_not_credit
+    with self.assertRaises(EvalError): audit(self.report,self.source,self.cases,self.review)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_wrong_citation (__main__.DiscoveryAuditTests.test_wrong_citation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 26, in test_wrong_citation
+    with self.assertRaises(EvalError): audit(self.report,self.source,self.cases,self.review)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.001s
+
+FAILED (failures=8)

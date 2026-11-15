@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "normal-completion",
+      "text": "Start with a zero-value Once. Call Do(f) and let f return normally. Do then marks the instance done, unlocks, and returns. A later call on the same instance returns without invoking its callback, whether it supplies f again or supplies a different function. A fresh zero-value Once can run that other function.",
+      "citation": {
+        "line": 38,
+        "fragment": "even if f has a different value in each invocation."
+      },
+      "question": ""
+    },
+    {
+      "id": "concurrent-completion",
+      "text": "Start with an unused Once and two callers supplying different callbacks. The caller that acquires the mutex while done is false runs its callback, even if the other caller performed the initial load first. A caller that reads false while the callback is running must acquire the mutex and recheck done before returning. The winner stores true after its callback finishes and before unlocking. A caller whose initial load sees true can return without acquiring the mutex, potentially before the winning Do itself returns.",
+      "citation": {
+        "line": 77,
+        "fragment": "defer o.done.Store(true)"
+      },
+      "question": ""
+    },
+    {
+      "id": "panic",
+      "text": "Start with an unused Once whose first callback panics without recovering inside the callback. As the panic unwinds through Do, Do stores true and then unlocks. The panic continues to the invoking goroutine's caller. A caller already waiting can acquire the mutex and return without running its callback, even before an outer deferred recovery runs. Calls made after recovery also skip their callbacks.",
+      "citation": {
+        "line": 50,
+        "fragment": "If f panics, Do considers it to have returned"
+      },
+      "question": ""
+    },
+    {
+      "id": "goexit",
+      "text": "Start with an unused Once in a worker goroutine, with another goroutine able to call Do on the same instance. If the winning callback calls runtime.Goexit, the worker runs its deferred calls, including the store of true and then the unlock. The worker never resumes after Do. A caller already waiting can return after acquiring the mutex, and a later caller can return on the fast path. Neither runs its callback.",
+      "citation": {
+        "line": 75,
+        "fragment": "defer o.m.Unlock()"
+      },
+      "question": "OPEN: The implementation consumes the Once on runtime.Goexit, while the contract describes normal return and panic. Should it explicitly cover Goexit?"
+    },
+    {
+      "id": "reentrant-call",
+      "text": "Start with an unused Once. Its first callback synchronously calls Do on that same instance before finishing. The nested call sees done as false and waits on the mutex held by the outer call. The outer callback cannot finish while the nested call waits, so neither call returns. If the callback finishes first and the second call occurs afterward, the second call returns without invoking its callback.",
+      "citation": {
+        "line": 48,
+        "fragment": "Do to be called, it will deadlock."
+      },
+      "question": "OPEN: Should the deadlock wording specify that the callback must depend on a call to the same Once returning, since a callback can start such a call in another goroutine and finish without waiting for it?"
+    },
+    {
+      "id": "copying",
+      "text": "Copy a zero-value Once before either value is used. Calling Do on the original and then on the copy runs one callback per value. If the copy is made after the original has completed Do, the contract already forbids the copy, including when all concurrent callers have returned. The source provides no supported way to reuse a completed Once for another callback.",
+      "citation": {
+        "line": 13,
+        "fragment": "A Once must not be copied after first use."
+      },
+      "question": ""
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+FFF
+======================================================================
+FAIL: test_absent_archive_is_failure (__main__.ArchiveTests.test_absent_archive_is_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 12, in test_absent_archive_is_failure
+    with tempfile.TemporaryDirectory() as d:self.assertIn('missing status.json',verify(Path(d)))
+                                            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'missing status.json' not found in []
+
+======================================================================
+FAIL: test_incomplete_status_is_failure (__main__.ArchiveTests.test_incomplete_status_is_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 15, in test_incomplete_status_is_failure
+    p=Path(d);(p/'status.json').write_text(json.dumps({'status':'blocked'}));self.assertIn('status incomplete',verify(p))
+                                                                             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'status incomplete' not found in []
+
+======================================================================
+FAIL: test_missing_declared_evidence_is_failure (__main__.ArchiveTests.test_missing_declared_evidence_is_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 18, in test_missing_declared_evidence_is_failure
+    p=Path(d);(p/'status.json').write_text(json.dumps({'status':'complete'}));(p/'input-freeze.json').write_text(json.dumps({'missing':'0'*64}));self.assertIn('missing frozen input: missing',verify(p))
+                                                                                                                                                 ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'missing frozen input: missing' not found in []
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.004s
+
+FAILED (failures=3)

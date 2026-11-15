@@ -1,0 +1,39 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "67ad04ac41a859798cb26e112d52ac15ec2fb11b4948293e20c0f7983d029c0b",
+  "input_tokens": 4734,
+  "cost_microdollars": 199,
+  "reservation_microdollars": 760,
+  "checks": {
+    "S01": {
+      "kind": "claim",
+      "statement": "A split function returning ErrFinalToken with non-nil empty token makes Scan return true once, then false with nil Err; with nil token the first Scan is false with nil Err.",
+      "source": "docs/evidence/gepa-heldout/upstream/scan.go",
+      "line": 51,
+      "fragment": "stops with no error. A non-nil token",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.29,
+        "contradicted": 0.2,
+        "unclear": 0.51
+      },
+      "confidence": 0.26,
+      "review_required": true
+    },
+    "S02": {
+      "kind": "claim",
+      "statement": "Calling Scanner.Buffer or Scanner.Split after Scan was called panics even when the first Scan returned false for empty input.",
+      "source": "docs/evidence/gepa-heldout/upstream/scan.go",
+      "line": 274,
+      "fragment": "Buffer panics if it is called after scanning has started.",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.77,
+        "contradicted": 0.0,
+        "unclear": 0.23
+      },
+      "confidence": 0.66,
+      "review_required": true
+    }
+  }
+}

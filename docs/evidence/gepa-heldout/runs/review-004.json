@@ -1,0 +1,51 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "C01",
+      "finding_ids": [
+        "notification-around-registration"
+      ],
+      "reason": "Explicitly distinguishes obligation to hold L for condition and Wait from optional lock for both Signal and Broadcast."
+    },
+    {
+      "id": "C02",
+      "finding_ids": [
+        "notification-around-registration"
+      ],
+      "reason": "Signal/Broadcast before registration is not saved; later notification required."
+    }
+  ],
+  "findings": [
+    {
+      "id": "notification-around-registration",
+      "verdict": "valid",
+      "reason": "Cond contract and Wait lines 16-18, 67-72; runtime-reference/sema.go:578-591,631-638,668-675 independently supports ticket sequencing."
+    },
+    {
+      "id": "signal-reacquisition-and-recheck",
+      "verdict": "valid",
+      "reason": "Cond Wait and Signal docs explicitly require predicate loop and note other lockers can win."
+    },
+    {
+      "id": "broadcast-and-reuse",
+      "verdict": "valid",
+      "reason": "Broadcast notifies existing waiters, Wait reacquires L, runtime notify list is reusable."
+    },
+    {
+      "id": "copy-before-and-after-use",
+      "verdict": "valid",
+      "reason": "NewCond and copyChecker check initialize identity, prevent use after copying initialized checker."
+    },
+    {
+      "id": "locker-read-after-wake",
+      "verdict": "valid",
+      "reason": "Wait calls c.L separately at Unlock and Lock; result conditional on an ordered replacement and successful Lock; intent OPEN."
+    },
+    {
+      "id": "unlock-panic-after-registration",
+      "verdict": "valid",
+      "reason": "Wait adds ticket before Unlock and has no deferred cleanup; later runtime effect remains explicitly unresolved."
+    }
+  ]
+}

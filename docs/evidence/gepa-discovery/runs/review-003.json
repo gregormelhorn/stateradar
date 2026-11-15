@@ -1,0 +1,58 @@
+{
+  "reviewer": "operator:source-reviewed",
+  "cases": [
+    {
+      "id": "T1",
+      "finding_ids": [
+        "afterfunc-stop"
+      ],
+      "reason": "Repeated stop, no callback and conflicting text all present; wording left OPEN."
+    },
+    {
+      "id": "T2",
+      "finding_ids": [
+        "afterfunc-reset"
+      ],
+      "reason": "Expired/reset false; prior callback may still run and overlap; source Reset comment."
+    },
+    {
+      "id": "T3",
+      "finding_ids": [
+        "channel-stop-and-reset"
+      ],
+      "reason": "Under stated Go 1.23 condition, receives after Stop cannot see stale value; source Stop comment."
+    }
+  ],
+  "findings": [
+    {
+      "id": "afterfunc-stop",
+      "verdict": "valid",
+      "reason": "Stop general and func-specific comments plus repeated-Stop reference; callback entry distinction left OPEN."
+    },
+    {
+      "id": "afterfunc-reset",
+      "verdict": "valid",
+      "reason": "Reset contract, AfterFunc constructor and pointer methods support both orderings."
+    },
+    {
+      "id": "channel-stop-and-reset",
+      "verdict": "valid",
+      "reason": "Stop and Reset Go 1.23 guarantees with stated running/no-receive condition; NewTimer shows channel passed through."
+    },
+    {
+      "id": "deferred-channel-send",
+      "verdict": "valid",
+      "reason": "sendTime nonblocking select, After and GC documentation support claimed behavior subject to runtime invocation."
+    },
+    {
+      "id": "uninitialized-timer",
+      "verdict": "valid",
+      "reason": "Stop and Reset initTimer guards occur before delegation or deadline computation."
+    },
+    {
+      "id": "deadline-and-dispatch",
+      "verdict": "valid",
+      "reason": "when handles nonpositive and overflow; timer constructors and goFunc dispatch as described, runtime ordering stays OPEN."
+    }
+  ]
+}

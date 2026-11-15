@@ -1,0 +1,100 @@
+{
+  "input_hashes": "PASS",
+  "calls": 13,
+  "complete_usage": true,
+  "reviews_replayed": 11,
+  "forbidden_model_tool_events": 0,
+  "selection_identical_to_fixed": true,
+  "calls_by_category": {
+    "optimization": 7,
+    "reflection": 2,
+    "final-fixed": 2,
+    "final-gepa": 2
+  },
+  "usd_equivalent_by_category": {
+    "optimization": 0.34623040000000005,
+    "reflection": 0.08416599999999999,
+    "final-fixed": 0.0714044,
+    "final-gepa": 0.089342
+  },
+  "usd_equivalent_total": 0.5911428000000001,
+  "final": [
+    {
+      "component": "cond",
+      "phase": "final",
+      "category": "final-fixed",
+      "call_ids": [
+        9
+      ],
+      "review": "review-009.json",
+      "summary": {
+        "found": 1,
+        "total": 3,
+        "false": 0,
+        "uncertain": 0,
+        "missing": [
+          "C1",
+          "C3"
+        ],
+        "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+      }
+    },
+    {
+      "component": "cond",
+      "phase": "final",
+      "category": "final-gepa",
+      "call_ids": [
+        10
+      ],
+      "review": "review-010.json",
+      "summary": {
+        "found": 2,
+        "total": 3,
+        "false": 0,
+        "uncertain": 0,
+        "missing": [
+          "C3"
+        ],
+        "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+      }
+    },
+    {
+      "component": "waitgroup",
+      "phase": "final",
+      "category": "final-gepa",
+      "call_ids": [
+        11
+      ],
+      "review": "review-011.json",
+      "summary": {
+        "found": 2,
+        "total": 3,
+        "false": 1,
+        "uncertain": 0,
+        "missing": [
+          "W3"
+        ],
+        "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+      }
+    },
+    {
+      "component": "waitgroup",
+      "phase": "final",
+      "category": "final-fixed",
+      "call_ids": [
+        12
+      ],
+      "review": "review-012.json",
+      "summary": {
+        "found": 2,
+        "total": 3,
+        "false": 1,
+        "uncertain": 0,
+        "missing": [
+          "W3"
+        ],
+        "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+      }
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "W01",
+      "finding_ids": [
+        "go-completion"
+      ],
+      "reason": "Explicit legacy panicnil=1 recover nil and Done path, outside normal contract.",
+      "partial": false
+    },
+    {
+      "id": "W02",
+      "finding_ids": [
+        "go-completion"
+      ],
+      "reason": "Explicit nonnil recovered panic re-panics without Done; contract excludes f panic.",
+      "partial": false
+    },
+    {
+      "id": "W03",
+      "finding_ids": [],
+      "reason": "synctest-association identifies retained association but does not describe outside Wait or its tested panic.",
+      "partial": true
+    },
+    {
+      "id": "W04",
+      "finding_ids": [],
+      "reason": "synctest-association describes an intervening zero-counter Wait clearing association but does not specify owning bubble or later outside Wait.",
+      "partial": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "wait-registration",
+      "verdict": "valid",
+      "reason": "CAS success or failure is explicitly distinguished; final Done resets and releases waiters; zero fast path source waitgroup.go:160-215."
+    },
+    {
+      "id": "reuse-after-release",
+      "verdict": "valid",
+      "reason": "state reset, later loaded state and documented reuse contract support described cases."
+    },
+    {
+      "id": "go-completion",
+      "verdict": "valid",
+      "reason": "Go wrapper checks recover and Done; legacy panicnil tested independently, and contract excludes panic."
+    },
+    {
+      "id": "copy-and-receiver",
+      "verdict": "valid",
+      "reason": "Go captures pointer receiver and gated overwrite before Done targets same storage; copy after use excluded by WaitGroup contract."
+    },
+    {
+      "id": "counter-limits",
+      "verdict": "valid",
+      "reason": "Add shifts uint64 delta 32 bits, treats upper counter as int32 and checks negative; numeric bound question remains OPEN."
+    },
+    {
+      "id": "synctest-association",
+      "verdict": "valid",
+      "reason": "Add flag and association paths plus Wait cleanup and runtime synctest callee support the specified same/other-bubble cases."
+    }
+  ]
+}

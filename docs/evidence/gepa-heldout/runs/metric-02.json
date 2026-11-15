@@ -1,0 +1,120 @@
+{
+  "candidate": {
+    "review": "Examine ordinary success and failure as well as repeated operations, deferred work, cancellation and both event orderings. Trace state, object identity and effects across each lifecycle boundary. Compare contract language with behavior, including its exclusions and the possibility that a valid statement applies only to a narrower situation. Retain correct controls. Cite evidence and leave unanswered intent or contradictory requirements as OPEN questions.\n"
+  },
+  "trace": {
+    "component": "gobreaker",
+    "Generated Outputs": {
+      "findings": [
+        {
+          "id": "execute-outcomes",
+          "text": "On a newly constructed breaker with default settings, an admitted Execute increments Requests and returns the request's original result and error. A nil error increments successes and resets the failure streak. A non-nil error increments failures, and the sixth consecutive failure opens the breaker and clears the counters. If an admitted request panics with a non-nil recovered value and reporting the failure returns normally, Execute records the failure and re-panics with that value. A custom IsSuccessful can change how a returned error is counted while Execute still returns the original result and error.",
+          "citation": {
+            "line": 243,
+            "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+          },
+          "question": ""
+        },
+        {
+          "id": "open-and-half-open-ordering",
+          "text": "Start with a newly opened breaker configured with MaxRequests of 2. Before timeout, admission returns ErrOpenState and does not run the request or issue a completion callback. Once the deadline has passed, the first State call or admission advances the breaker to half-open and clears its counters. Two probes can then be admitted, and a third attempt returns ErrTooManyRequests. If one probe succeeds before the other fails, its success is briefly visible and the failure reopens the breaker and clears the counters. If the failure arrives first, it reopens the breaker immediately and the later success is ignored. If both succeed, the second success closes the breaker and clears the counters.",
+          "citation": {
+            "line": 299,
+            "fragment": "if generation != before {"
+          },
+          "question": "OPEN: The Timeout comment says the breaker becomes half-open after the period. Is the transition and its callback intended to wait until an operation checks the state?"
+        },
+        {
+          "id": "repeated-completion",
+          "text": "With a half-open two-step breaker and MaxRequests of 2, call Allow once and invoke the returned callback twice with true while no other operation changes the generation. The first call records one success while Requests remains 1. The second call records another success for the same admission, closes the breaker and clears its counters. A third invocation of that callback is ignored because closing advanced the generation.",
+          "citation": {
+            "line": 272,
+            "fragment": "tscb.cb.afterRequest(generation, success)"
+          },
+          "question": "OPEN: Is the callback intended to be single-use by caller convention, or should repeated invocations be ignored?"
+        },
+        {
+          "id": "abandoned-probes",
+          "text": "With a half-open two-step breaker using the default MaxRequests of 1, admit a probe and then cancel or abandon its work without invoking the callback. Requests stays at 1 and outcome counters stay at zero. Even after waiting longer than Timeout, later admissions return ErrTooManyRequests. If the caller instead invokes the callback with false while the probe's generation is current, the breaker reopens and starts a new open timeout.",
+          "citation": {
+            "line": 378,
+            "fragment": "cb.expiry = zero"
+          },
+          "question": "OPEN: Must callers report cancellation as failure, or should cancellation release the probe slot without counting as failure?"
+        },
+        {
+          "id": "closed-interval-completion",
+          "text": "With a closed breaker using a positive Interval, admit a request before the deadline. If its completion is processed before the deadline, its outcome is counted in that interval and is cleared when a later state check rolls the interval forward. If its completion is first processed after the deadline, completion itself rolls the interval forward and discards the old outcome, even if no other operation has run. A Counts call made after the deadline and before any operation refreshes the state can still return the previous interval's counters.",
+          "citation": {
+            "line": 298,
+            "fragment": "state, generation := cb.currentState(now)"
+          },
+          "question": "OPEN: Should Counts refresh an expired closed interval before returning, or is it intended to report the last materialized counters?"
+        },
+        {
+          "id": "completion-receiver-replacement",
+          "text": "Create two fresh two-step breakers with default settings and hold a pointer to the first wrapper. Call Allow through that pointer, then overwrite the wrapper value through the same pointer with a copy of the second wrapper before calling done(true). Both underlying breakers started at the same generation, so the callback credits the second breaker. Its counters show one success and zero requests, while a previously saved copy of the first wrapper still shows one request and zero successes.",
+          "citation": {
+            "line": 272,
+            "fragment": "tscb.cb.afterRequest(generation, success)"
+          },
+          "question": "OPEN: Should the completion callback retain the underlying breaker that admitted the request, or is replacing the wrapper value while a callback is outstanding outside the contract?"
+        }
+      ]
+    },
+    "Feedback": {
+      "summary": {
+        "found": 1,
+        "total": 2,
+        "false": 1,
+        "uncertain": 0,
+        "missing": [
+          "G02"
+        ],
+        "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+      },
+      "reviewed_cases": [
+        {
+          "id": "G02",
+          "description": "The original wrapper/underlying breaker receives admission and success; b receives neither. Caller-variable rebinding alone does not redirect the callback.",
+          "kind": "negative_control"
+        }
+      ],
+      "finding_reviews": [
+        {
+          "id": "execute-outcomes",
+          "verdict": "false",
+          "reason": "The panic clause states a recorded failure for any admitted request but afterRequest checks generation first at gobreaker.go:293-301 and can discard a stale report; the re-panic can still occur. No unchanged-generation condition is stated."
+        },
+        {
+          "id": "open-and-half-open-ordering",
+          "verdict": "valid",
+          "reason": "beforeRequest:279-290, afterRequest:293-307 and onSuccess/onFailure:310-330 implement the stated ordered outcomes; lazy currentState:333-346 and setState:350-360 support the OPEN question."
+        },
+        {
+          "id": "repeated-completion",
+          "verdict": "valid",
+          "reason": "Allow callback lacks once guard at 265-273; afterRequest generation check and onSuccess half-open success threshold support duplicate report then stale third report."
+        },
+        {
+          "id": "abandoned-probes",
+          "verdict": "valid",
+          "reason": "Default max=1, beforeRequest cap and half-open expiry zero make the retained unreported slot block further admissions in the specified no-completion order; onFailure opens."
+        },
+        {
+          "id": "closed-interval-completion",
+          "verdict": "valid",
+          "reason": "afterRequest obtains currentState before comparing generation; Counts only returns existing counts; currentState and toNewGeneration implement observed interval reset."
+        },
+        {
+          "id": "completion-receiver-replacement",
+          "verdict": "valid",
+          "reason": "Allow captures wrapper and reads tscb.cb on invocation (265-273); matching generation reaches replacement, and the saved original-wrapper copy keeps the original pointer; independently reproduced B05."
+        }
+      ]
+    },
+    "call_ids": [],
+    "mode": "historical-seed"
+  },
+  "score": 0.4
+}

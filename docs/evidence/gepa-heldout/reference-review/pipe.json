@@ -1,0 +1,31 @@
+{
+  "review": {
+    "cases": [
+      {
+        "id": "V01",
+        "verdict": "confirmed",
+        "reason": "The store preserves the first writer error, and both close calls return nil. While the reader remains open, its next read returns that stored error. The test checks both close results and the identity of the read error.",
+        "line": 24,
+        "fragment": "if a.err != nil {"
+      },
+      {
+        "id": "V02",
+        "verdict": "confirmed",
+        "reason": "The writer adds the acknowledged two bytes to its count before checking for closure again. With only the reader closed, the writer returns that count and the reader's error. The test verifies that the read returns two bytes containing \"ab\" and a nil error, and that the write returns two and the exact reader error.",
+        "line": 92,
+        "fragment": "return n, p.writeCloseError()"
+      },
+      {
+        "id": "V03",
+        "verdict": "confirmed",
+        "reason": "On an open pipe, the write loop runs once for an empty slice and waits for the reader's acknowledgment. A matching empty read acknowledges zero bytes, so both calls return zero and nil. The test checks the read count and both errors. It discards the write count. The timeout establishes only that no completion was observed within 50 ms. The test does not establish that the writer had entered Write during that interval.",
+        "line": 85,
+        "fragment": "once || len(b) > 0"
+      }
+    ]
+  },
+  "call_ids": [
+    0,
+    1
+  ]
+}

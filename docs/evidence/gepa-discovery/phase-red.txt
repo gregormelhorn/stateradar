@@ -1,0 +1,32 @@
+..........FFF
+======================================================================
+FAIL: test_final_cannot_enter_optimization (__main__.PhaseTests.test_final_cannot_enter_optimization)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 46, in test_final_cannot_enter_optimization
+    with self.assertRaises(EvalError): check_phase(data,'c','optimization',False)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_final_needs_frozen_selection (__main__.PhaseTests.test_final_needs_frozen_selection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 49, in test_final_needs_frozen_selection
+    with self.assertRaises(EvalError): check_phase(data,'c','final',False)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_split_overlap_rejected (__main__.PhaseTests.test_split_overlap_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_discovery.py", line 52, in test_split_overlap_rejected
+    with self.assertRaises(EvalError): check_phase(data,'a','optimization',False)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.001s
+
+FAILED (failures=3)

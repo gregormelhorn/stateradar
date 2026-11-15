@@ -4,6 +4,40 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **GEPA tie audit and prospective comparison.** Expose exact-score ties without
+  calling GEPA's first-index fallback a quality winner; reproduce the upstream
+  behavior with a test. Compare fixed and unselected prompts on two additional
+  components with frozen inputs, isolated AI reference review, race controls,
+  source-reviewed findings, costs and deterministic archive red probes. The
+  small no-human-review run does not establish a prompt advantage. See
+  `docs/evidence/gepa-prospective/README.md`.
+
+- **GEPA distinct-component experiment.** Trained on twelve reviewed cases,
+  selected on new Pipe cases, and tested on distinct Scanner and Value cases.
+  GEPA retained the fixed seed, so the primary final arms have identical prompts.
+  Preserve AI-reviewed references, grading uncertainty, raw metered runs,
+  separately declared candidate exploration, executable controls, and red/green
+  archive checks. This is not a full pilot, independent human review, or evidence
+  of an optimized-prompt benefit. See `docs/evidence/gepa-heldout/README.md`.
+
+- **Reviewed GEPA training catalog and baseline.** Twelve historical-miss and
+  control cases on five components receive a separate AI source/test review;
+  ten fresh fixed-prompt outputs and all 60 findings are assessed. The strict
+  audit records 7 full, 9 partial and 8 missing case observations, plus 8 false
+  and 4 uncertain findings. These are training cases, not an unseen holdout;
+  no new optimization or independent human review is claimed. Deterministic
+  source, log, prompt, review and cost replay is in CI. See
+  `docs/evidence/gepa-training-catalog/README.md`.
+
+- **Supervised GEPA discovery comparison.** A source-grounded, component-split
+  experiment reviews every returned finding and replays attributed scores and
+  metered calls. GEPA retained the fixed seed; final arms used identical text,
+  so their differing outputs do not demonstrate a prompt benefit. Two model
+  claims were falsified by executed Go controls; mypy handles absent optional
+  GEPA imports without requiring it for pack users. One contract question remains
+  OPEN. No independent human second review or broad transfer is claimed.
+  See `docs/evidence/gepa-discovery/README.md`.
+
 - **Bounded GEPA review experiment.** Optional GEPA 0.1.4 adapter, separated
   train/validation/test components, source-pinned public-API probes, exact report
   validation and raw child-call cost auditing. The executed three-arm comparison

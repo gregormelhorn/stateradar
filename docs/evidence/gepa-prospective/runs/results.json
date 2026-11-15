@@ -1,0 +1,152 @@
+[
+  {
+    "component": "once",
+    "arm": "fixed",
+    "repeat": 0,
+    "call_ids": [
+      0
+    ],
+    "review": "review-000.json",
+    "summary": {
+      "found": 2,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0,
+      "missing": [],
+      "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+    }
+  },
+  {
+    "component": "once",
+    "arm": "candidate",
+    "repeat": 0,
+    "call_ids": [
+      1
+    ],
+    "review": "review-001.json",
+    "summary": {
+      "found": 2,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0,
+      "missing": [],
+      "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+    }
+  },
+  {
+    "component": "once",
+    "arm": "candidate",
+    "repeat": 1,
+    "call_ids": [
+      2
+    ],
+    "review": "review-002.json",
+    "summary": {
+      "found": 1,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0,
+      "missing": [
+        "O02"
+      ],
+      "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+    }
+  },
+  {
+    "component": "once",
+    "arm": "fixed",
+    "repeat": 1,
+    "call_ids": [
+      3
+    ],
+    "review": "review-003.json",
+    "summary": {
+      "found": 2,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0,
+      "missing": [],
+      "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+    }
+  },
+  {
+    "component": "buffer",
+    "arm": "candidate",
+    "repeat": 0,
+    "call_ids": [
+      4
+    ],
+    "review": "review-004.json",
+    "summary": {
+      "found": 0,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0,
+      "missing": [
+        "B01",
+        "B02"
+      ],
+      "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+    }
+  },
+  {
+    "component": "buffer",
+    "arm": "fixed",
+    "repeat": 0,
+    "call_ids": [
+      5
+    ],
+    "review": "review-005.json",
+    "summary": {
+      "found": 0,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0,
+      "missing": [
+        "B01",
+        "B02"
+      ],
+      "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+    }
+  },
+  {
+    "component": "buffer",
+    "arm": "fixed",
+    "repeat": 1,
+    "call_ids": [
+      6
+    ],
+    "review": "review-006.json",
+    "summary": {
+      "found": 0,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0,
+      "missing": [
+        "B01",
+        "B02"
+      ],
+      "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+    }
+  },
+  {
+    "component": "buffer",
+    "arm": "candidate",
+    "repeat": 1,
+    "call_ids": [
+      7
+    ],
+    "review": "review-007.json",
+    "summary": {
+      "found": 0,
+      "total": 2,
+      "false": 0,
+      "uncertain": 0,
+      "missing": [
+        "B01",
+        "B02"
+      ],
+      "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+    }
+  }
+]

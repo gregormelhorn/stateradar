@@ -1,0 +1,131 @@
+package reference
+
+import (
+	"bufio"
+	"errors"
+	"io"
+	"strings"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+func TestPipeFirstWriterError(t *testing.T) {
+	r, w := io.Pipe()
+	first := errors.New("first")
+	second := errors.New("second")
+	if err := w.CloseWithError(first); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.CloseWithError(second); err != nil {
+		t.Fatal(err)
+	}
+	_, err := r.Read(make([]byte, 1))
+	if err != first {
+		t.Fatalf("got %v", err)
+	}
+}
+func TestPipePartialWriteClose(t *testing.T) {
+	r, w := io.Pipe()
+	defer w.Close()
+	marker := errors.New("reader closed")
+	type result struct {
+		n   int
+		err error
+	}
+	done := make(chan result, 1)
+	go func() { n, err := w.Write([]byte("abcdef")); done <- result{n, err} }()
+	b := make([]byte, 2)
+	n, err := r.Read(b)
+	if n != 2 || err != nil || string(b) != "ab" {
+		t.Fatalf("read %d %q %v", n, b, err)
+	}
+	r.CloseWithError(marker)
+	got := <-done
+	if got.n != 2 || got.err != marker {
+		t.Fatalf("write %+v", got)
+	}
+}
+func TestPipeZeroWriteHandshake(t *testing.T) {
+	r, w := io.Pipe()
+	defer r.Close()
+	defer w.Close()
+	done := make(chan error, 1)
+	go func() { _, err := w.Write(nil); done <- err }()
+	select {
+	case err := <-done:
+		t.Fatalf("write completed before read: %v", err)
+	case <-time.After(50 * time.Millisecond):
+	}
+	n, err := r.Read(nil)
+	if n != 0 || err != nil {
+		t.Fatalf("read %d %v", n, err)
+	}
+	if err = <-done; err != nil {
+		t.Fatal(err)
+	}
+}
+func TestScannerFinalTokenVariants(t *testing.T) {
+	for _, nilToken := range []bool{false, true} {
+		s := bufio.NewScanner(strings.NewReader("x"))
+		s.Split(func([]byte, bool) (int, []byte, error) {
+			if nilToken {
+				return 0, nil, bufio.ErrFinalToken
+			}
+			return 0, []byte{}, bufio.ErrFinalToken
+		})
+		if got := s.Scan(); got == nilToken {
+			t.Fatalf("nil=%v first scan=%v", nilToken, got)
+		}
+		if s.Scan() || s.Err() != nil {
+			t.Fatalf("second scan or error: %v", s.Err())
+		}
+	}
+}
+func TestScannerLateConfiguration(t *testing.T) {
+	for _, configure := range []func(*bufio.Scanner){func(s *bufio.Scanner) { s.Buffer(nil, 32) }, func(s *bufio.Scanner) { s.Split(bufio.ScanBytes) }} {
+		s := bufio.NewScanner(strings.NewReader(""))
+		if s.Scan() {
+			t.Fatal("empty input")
+		}
+		func() {
+			defer func() {
+				if recover() == nil {
+					t.Error("expected late configuration panic")
+				}
+			}()
+			configure(s)
+		}()
+	}
+}
+func TestValueTypedNilAndNil(t *testing.T) {
+	var v atomic.Value
+	var p *int
+	v.Store(p)
+	if v.Load() == nil {
+		t.Fatal("typed nil disappeared")
+	}
+	if v.Load().(*int) != nil {
+		t.Fatal("expected typed nil pointer")
+	}
+	func() {
+		defer func() {
+			if recover() == nil {
+				t.Error("Store(nil) must panic")
+			}
+		}()
+		v.Store(nil)
+	}()
+	if _, ok := v.Load().(*int); !ok {
+		t.Fatal("panic changed type")
+	}
+}
+func TestValueEmptyCompareAndSwap(t *testing.T) {
+	var v atomic.Value
+	if v.CompareAndSwap("old", "new") || v.Load() != nil {
+		t.Fatal("non-nil old changed empty value")
+	}
+	if !v.CompareAndSwap(nil, "new") || v.Load() != "new" {
+		t.Fatal("nil old did not initialize")
+	}
+}

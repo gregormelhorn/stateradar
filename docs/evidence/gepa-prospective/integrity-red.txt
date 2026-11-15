@@ -1,0 +1,29 @@
+...FF
+======================================================================
+FAIL: test_prompt_tamper (__main__.RealArchiveProbe.test_prompt_tamper)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_gepa_prospective_archive.py", line 33, in test_prompt_tamper
+    def test_prompt_tamper(self):self.exercise('prompt')
+                                 ~~~~~~~~~~~~~^^^^^^^^^^
+  File "tools/selftest/test_gepa_prospective_archive.py", line 29, in exercise
+    self.assertIn('prompt mismatch: '+row['review'],verify(p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'prompt mismatch: review-000.json' not found in []
+
+======================================================================
+FAIL: test_score_tamper (__main__.RealArchiveProbe.test_score_tamper)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_gepa_prospective_archive.py", line 34, in test_score_tamper
+    def test_score_tamper(self):self.exercise('score')
+                                ~~~~~~~~~~~~~^^^^^^^^^
+  File "tools/selftest/test_gepa_prospective_archive.py", line 32, in exercise
+    self.assertIn('score mismatch: '+row['review'],verify(p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'score mismatch: review-000.json' not found in []
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.060s
+
+FAILED (failures=2)
