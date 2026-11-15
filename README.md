@@ -256,7 +256,9 @@ records recurrent source-scope gaps and controls; it is not a new GEPA optimizat
 A [new component-split GEPA experiment](docs/evidence/gepa-heldout/README.md)
 trained on that catalog and again selected the unchanged prompt. Separate
 exploratory results and AI-review uncertainty are retained; no human review or
-GEPA improvement is claimed.
+GEPA improvement is claimed. A subsequent [prospective comparison and tie audit](docs/evidence/gepa-prospective/README.md)
+reproduces GEPA's index-based exact-tie behavior, reports ties without a winner,
+and compares both prompts on two further components.
 
 ---
 

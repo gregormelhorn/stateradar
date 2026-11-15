@@ -1,0 +1,54 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "O01",
+      "finding_ids": [
+        "panic-consumes-once"
+      ],
+      "reason": "Explicit panic propagates, done is stored, later callback skipped.",
+      "partial": false
+    },
+    {
+      "id": "O02",
+      "finding_ids": [
+        "competing-calls",
+        "reentrant-call"
+      ],
+      "reason": "Together state that callback holds mutex while running and the competing caller takes that mutex, then skips callback after done is set.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "sequential-calls",
+      "verdict": "valid",
+      "reason": "Do and doSlow source and documented synchronization support stated conditional behavior."
+    },
+    {
+      "id": "competing-calls",
+      "verdict": "valid",
+      "reason": "Do and doSlow source and documented synchronization support stated conditional behavior."
+    },
+    {
+      "id": "callback-completion",
+      "verdict": "valid",
+      "reason": "Do and doSlow source and documented synchronization support stated conditional behavior."
+    },
+    {
+      "id": "panic-consumes-once",
+      "verdict": "valid",
+      "reason": "Do and doSlow source and documented synchronization support stated conditional behavior."
+    },
+    {
+      "id": "cancellation-and-goroutine-exit",
+      "verdict": "valid",
+      "reason": "Do and doSlow source and documented synchronization support stated conditional behavior."
+    },
+    {
+      "id": "reentrant-call",
+      "verdict": "valid",
+      "reason": "Do and doSlow source and documented synchronization support stated conditional behavior."
+    }
+  ]
+}

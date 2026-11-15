@@ -1,0 +1,49 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "B01",
+      "finding_ids": [],
+      "reason": "Empty Read for zero and nonzero destinations is absent.",
+      "partial": false
+    },
+    {
+      "id": "B02",
+      "finding_ids": [],
+      "reason": "Analogous zero-length Next invalidates UnreadByte after ReadByte; zero-length Read and the subsequent successful sequence are not stated.",
+      "partial": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "delimiter-read-unread",
+      "verdict": "valid",
+      "reason": "Buffer implementation supports the stated sequence; Writer contract explicitly labels short nil-error as nonconforming."
+    },
+    {
+      "id": "grow-unread-order",
+      "verdict": "valid",
+      "reason": "Buffer implementation supports the stated sequence; Writer contract explicitly labels short nil-error as nonconforming."
+    },
+    {
+      "id": "write-to-drain-and-retry",
+      "verdict": "valid",
+      "reason": "Buffer implementation supports the stated sequence; Writer contract explicitly labels short nil-error as nonconforming."
+    },
+    {
+      "id": "read-from-eof-order",
+      "verdict": "valid",
+      "reason": "Buffer implementation supports the stated sequence; Writer contract explicitly labels short nil-error as nonconforming."
+    },
+    {
+      "id": "peek-and-next",
+      "verdict": "valid",
+      "reason": "Buffer implementation supports the stated sequence; Writer contract explicitly labels short nil-error as nonconforming."
+    },
+    {
+      "id": "borrowed-and-copied-bytes",
+      "verdict": "valid",
+      "reason": "Buffer implementation supports the stated sequence; Writer contract explicitly labels short nil-error as nonconforming."
+    }
+  ]
+}

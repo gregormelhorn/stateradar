@@ -1,0 +1,49 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "B01",
+      "finding_ids": [],
+      "reason": "Empty Read with zero and nonzero destinations is not described.",
+      "partial": false
+    },
+    {
+      "id": "B02",
+      "finding_ids": [],
+      "reason": "An analogous invalidation by Next(-1) is described, but not zero-length Read or the subsequent successful read/unread sequence.",
+      "partial": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "delimiter-eof-enables-unread",
+      "verdict": "valid",
+      "reason": "Buffer implementation and explicitly stated reader/writer preconditions support the sequence."
+    },
+    {
+      "id": "unread-after-peek-and-grow",
+      "verdict": "valid",
+      "reason": "Buffer implementation and explicitly stated reader/writer preconditions support the sequence."
+    },
+    {
+      "id": "copy-and-storage-aliasing",
+      "verdict": "valid",
+      "reason": "Buffer implementation and explicitly stated reader/writer preconditions support the sequence."
+    },
+    {
+      "id": "readfrom-count-before-error",
+      "verdict": "valid",
+      "reason": "Buffer implementation and explicitly stated reader/writer preconditions support the sequence."
+    },
+    {
+      "id": "writeto-error-before-reset",
+      "verdict": "valid",
+      "reason": "Buffer implementation and explicitly stated reader/writer preconditions support the sequence."
+    },
+    {
+      "id": "negative-peek-and-next",
+      "verdict": "valid",
+      "reason": "Buffer implementation and explicitly stated reader/writer preconditions support the sequence."
+    }
+  ]
+}

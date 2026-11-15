@@ -1,0 +1,49 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "B01",
+      "finding_ids": [],
+      "reason": "Neither empty Buffer.Read return case is stated.",
+      "partial": false
+    },
+    {
+      "id": "B02",
+      "finding_ids": [],
+      "reason": "Unread behavior after rune and delimiter operations is discussed, not the ReadByte/zero-length Read sequence.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "peek-boundaries",
+      "verdict": "valid",
+      "reason": "Buffer source and Go Reader/Writer contracts support the specified conditions; nil-error short write is an adversarial variant."
+    },
+    {
+      "id": "unread-after-peek-or-grow",
+      "verdict": "valid",
+      "reason": "Buffer source and Go Reader/Writer contracts support the specified conditions; nil-error short write is an adversarial variant."
+    },
+    {
+      "id": "delimiter-eof-unread",
+      "verdict": "valid",
+      "reason": "Buffer source and Go Reader/Writer contracts support the specified conditions; nil-error short write is an adversarial variant."
+    },
+    {
+      "id": "write-to-commit-before-error",
+      "verdict": "valid",
+      "reason": "Buffer source and Go Reader/Writer contracts support the specified conditions; nil-error short write is an adversarial variant."
+    },
+    {
+      "id": "read-from-loop-and-capacity",
+      "verdict": "valid",
+      "reason": "Buffer source and Go Reader/Writer contracts support the specified conditions; nil-error short write is an adversarial variant."
+    },
+    {
+      "id": "borrowed-storage-lifetime",
+      "verdict": "valid",
+      "reason": "Buffer source and Go Reader/Writer contracts support the specified conditions; nil-error short write is an adversarial variant."
+    }
+  ]
+}

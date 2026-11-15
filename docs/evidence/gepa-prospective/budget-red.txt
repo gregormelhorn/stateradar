@@ -1,0 +1,23 @@
+FF
+======================================================================
+FAIL: test_cost_cap (__main__.BudgetTests.test_cost_cap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_gepa_prospective_budget.py", line 18, in test_cost_cap
+    with self.assertRaisesRegex(EvalError,'\\$3 soft cap'):s.reserve_launch()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+======================================================================
+FAIL: test_launch_cap (__main__.BudgetTests.test_launch_cap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_gepa_prospective_budget.py", line 14, in test_launch_cap
+    with self.assertRaisesRegex(EvalError,'12-launch cap'):s.reserve_launch()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvalError not raised
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+
+FAILED (failures=2)

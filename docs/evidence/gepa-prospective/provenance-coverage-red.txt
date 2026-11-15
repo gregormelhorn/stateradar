@@ -1,0 +1,29 @@
+...FF..
+======================================================================
+FAIL: test_missing_case (__main__.ProvenanceCoverageProbe.test_missing_case)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_gepa_prospective_archive.py", line 44, in test_missing_case
+    def test_missing_case(self):self.exercise('cases')
+                                ~~~~~~~~~~~~~^^^^^^^^^
+  File "tools/selftest/test_gepa_prospective_archive.py", line 43, in exercise
+    self.assertIn('provenance '+('case' if kind=='cases' else 'finding')+' coverage mismatch',verify(p/'runs'))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'provenance case coverage mismatch' not found in []
+
+======================================================================
+FAIL: test_missing_finding (__main__.ProvenanceCoverageProbe.test_missing_finding)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tools/selftest/test_gepa_prospective_archive.py", line 45, in test_missing_finding
+    def test_missing_finding(self):self.exercise('findings')
+                                   ~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "tools/selftest/test_gepa_prospective_archive.py", line 43, in exercise
+    self.assertIn('provenance '+('case' if kind=='cases' else 'finding')+' coverage mismatch',verify(p/'runs'))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'provenance finding coverage mismatch' not found in []
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.164s
+
+FAILED (failures=2)

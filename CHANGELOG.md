@@ -4,6 +4,14 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **GEPA tie audit and prospective comparison.** Expose exact-score ties without
+  calling GEPA's first-index fallback a quality winner; reproduce the upstream
+  behavior with a test. Compare fixed and unselected prompts on two additional
+  components with frozen inputs, isolated AI reference review, race controls,
+  source-reviewed findings, costs and deterministic archive red probes. The
+  small no-human-review run does not establish a prompt advantage. See
+  `docs/evidence/gepa-prospective/README.md`.
+
 - **GEPA distinct-component experiment.** Trained on twelve reviewed cases,
   selected on new Pipe cases, and tested on distinct Scanner and Value cases.
   GEPA retained the fixed seed, so the primary final arms have identical prompts.
