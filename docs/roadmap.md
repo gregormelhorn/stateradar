@@ -96,7 +96,15 @@ entries and separates the new model-routing plan from shipped capabilities.
    the declared cell; weak controls survive. Its six-cell projection is not a
    complete replay of the 182-cell historical pilot. The owner delegated adoption
    of the reviewed recommendations for Q-01..Q-16; all are ANSWERED in the new
-   evaluation records, with broad implementation work explicitly pending.
+   evaluation records. DR-001 now has a scoped evaluation implementation; other
+   implementation work remains pending.
+   The [reusable late-completion oracle](late-completion.md) adds a language-neutral
+   trace profile, both event orderings, independent state/publication/effect/resource canaries
+   and strict integration with the general mutant runner. The addrConn reference
+   reproduces two historical race windows, applies DR-001 in a disposable
+   evaluation copy and kills both F-04 guard-removal mutants. A second adapter
+   has not been validated; full addrConn matrix conformance remains outside this
+   scoped proof. See [evidence](evidence/late-completion/README.md).
    Crashes and unrelated failures cannot count as kills. Four contract limits
    and two queued cells without a supported operator remain explicit exclusions.
 3. **Make disposition rationale machine-readable.** Implemented as an optional
@@ -204,8 +212,19 @@ golden-mini suite kills every supported mutant.
 
 ## 8. ACH-style fault-class mutants (testgen upgrade)
 
-**Status:** 🔶 Partially shipped — 5 of 22 fault classes operationalized
-(F-01, F-02, F-04, F-05, F-14). The `fault-mutants.json` contract and
+**Status:** 🔶 Partially shipped. Current evidence is separated by level:
+
+| Evidence level | Executed coverage |
+|---|---|
+| Golden-mini implementation variants | F-01, F-02, F-04, F-05, F-14; six variants |
+| Golden-mini reverse matrix mutations | F-12, F-15, F-16, F-17; fixture evidence |
+| Weighted semaphore source bindings | F-04, F-05, F-09; five variants |
+| addrConn backoff source binding | F-09; one fault plus two independent canaries |
+| addrConn late-completion reference | Two F-04 guard-removal mutants plus independent F-04/F-03/F-09 projection canaries |
+
+These are bounded proofs, not class-wide completion or an additive count of
+universally supported classes. The following paragraph describes the historical
+five-class implementation-fixture milestone (F-01, F-02, F-04, F-05, F-14). The `fault-mutants.json` contract and
 `tools/check_fault_mutants.py` prove a behavioral cell suite kills one
 implementation mutant per class while a mirroring suite
 survives. Remaining classes pending. Golden-mini now derives the F-01,
@@ -229,7 +248,7 @@ It does **not** claim F-13 or F-18: delay needs clock injection and value needs
 payload-effect projection. F-20 needs a terminal-progress shape, which is not a
 UV column at all.
 
-**F-14 (duplication) is now claimed** — 5 of 22 classes operationalised. It cost
+**Historical F-14 (duplication) milestone** — five implementation-fixture classes at that release. It cost
 more than F-05 despite the same `dup_count` projection, because its registry
 precondition is "idempotence observable via repeated delivery plus counter": a
 projection alone is not enough, the suite needs a *delivery rule*. The suite now

@@ -38,7 +38,27 @@ The state-only weak suite deliberately survives all three.
 The owner additionally delegated adoption of reviewed recommendations for all
 16 historical questions. `resolution.md`, `resolution.json` and DR-001..016
 record ANSWERED evaluation decisions with author/owner attribution and checked
-source fragments. All broad implementation obligations remain pending. The
+source fragments. DR-001 now has a separate partial implementation in `late-completion/`. Other
+implementation obligations remain pending. The
 local no-transport backoff path already implements the resource contract being
-probed; none of the other decisions is silently implemented or marked verified.
+probed; no broad decision is silently marked fully verified.
 The historical archive and its original OPEN statuses remain a frozen record.
+
+## Late-completion reference
+
+`late-completion/` is a separate reference binding of the shared language-neutral
+late-completion oracle. It reproduces both historical completion/shutdown races,
+applies DR-001 to disposable evaluation copies, and checks the publication and
+notification guards with two F-04 mutants and four independent canaries. The
+parent remains live. An idle fake transport and controlled barriers expose real
+addrConn behavior; this is not a full transport implementation test.
+
+```sh
+.venv/bin/python tools/addrconn_late.py --checkout /path/to/pinned/grpc-go --output-dir /tmp/late-proof
+```
+
+The same run executes the prior six-cell backoff regression on corrected source
+and five named upstream cancellation/state-transition subtests. The historical
+source pin and the evaluation patch are separate; `late-completion-manifest.json`
+tracks committed oracle, adapter, profile and patch revisions. DR-001 remains
+partial for broad conformance; all other implementation statuses stay pending.

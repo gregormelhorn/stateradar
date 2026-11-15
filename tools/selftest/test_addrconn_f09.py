@@ -35,7 +35,7 @@ class AddrConnFixture(unittest.TestCase):
         self.assertEqual([r['source_question'] for r in records],[f'Q-{i:02}' for i in range(1,17)])
         for r in records:
             self.assertEqual(r['question_status'],'ANSWERED')
-            self.assertEqual(r['implementation_status'],'pending')
+            self.assertEqual(r['implementation_status'],'partial' if r['id']=='DR-001' else 'pending')
             self.assertIn('delegated',r['acceptance_basis'])
             self.assertEqual(json.loads((f.ANALYSIS/'decisions'/(r['id']+'.yaml')).read_text()),r)
 

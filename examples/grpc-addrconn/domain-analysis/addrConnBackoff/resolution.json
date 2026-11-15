@@ -17,7 +17,7 @@
       "recommendation_author": "Codex",
       "authorization": "die offenen fragen analysieren und dann nach deinen empfehlungen beantworten",
       "acceptance_basis": "owner-delegated adoption of recommendations; not a claim of per-question verbatim owner answers",
-      "implementation_status": "pending",
+      "implementation_status": "partial",
       "affects": [
         "Shutdown x UV08",
         "P-01a"
@@ -35,7 +35,9 @@
           "fragment": "func (ac *addrConn) updateConnectivityState",
           "provenance": "observed-in-code"
         }
-      ]
+      ],
+      "implementation_evidence": "docs/evidence/late-completion/README.md",
+      "implementation_scope": "DR-001 guards implemented in the source-pinned evaluation patch; both shutdown/completion orderings tested with an idle transport and health checks disabled. This is not full addrConn conformance."
     },
     {
       "id": "DR-002",

@@ -1,0 +1,12 @@
+BASELINE: OK (cells=3)
+MUT-001 KILLED fault=F-04 cell=Shutdown x CompleteTransport id=state-canary target=clientconn.go exit=1 duration=3.560s
+CANARY id=state-canary: KILLED
+MUT-002 KILLED fault=F-04 cell=Shutdown x CompleteTransport id=publication-canary target=clientconn.go exit=1 duration=3.442s
+CANARY id=publication-canary: KILLED
+MUT-003 KILLED fault=F-03 cell=Shutdown x CompleteTransport id=effect-canary target=clientconn.go exit=1 duration=3.434s
+CANARY id=effect-canary: KILLED
+MUT-004 KILLED fault=F-09 cell=Shutdown x CompleteTransport id=resource-canary target=clientconn.go exit=1 duration=3.432s
+CANARY id=resource-canary: KILLED
+MUT-005 KILLED fault=F-04 cell=Shutdown x CompleteTransport id=omit-publication-guard target=clientconn.go exit=1 duration=3.468s
+MUT-006 KILLED fault=F-04 cell=Shutdown x NotifyReady id=omit-terminal-guard target=clientconn.go exit=1 duration=3.443s
+FAULT MUTANTS: OK (killed=6 survived=0 errors=0 blocked=0)

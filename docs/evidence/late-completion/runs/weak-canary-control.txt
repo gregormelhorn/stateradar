@@ -1,0 +1,9 @@
+BASELINE: OK (cells=3)
+MUT-001 SURVIVED fault=F-04 cell=Shutdown x CompleteTransport id=state-canary target=clientconn.go exit=0 duration=3.433s
+CANARY id=state-canary: SURVIVED
+MUT-002 BLOCKED id=publication-canary fault=F-04 cell=Shutdown x CompleteTransport canary=state-canary verdict=SURVIVED; not executed
+MUT-003 BLOCKED id=effect-canary fault=F-03 cell=Shutdown x CompleteTransport canary=publication-canary verdict=BLOCKED; not executed
+MUT-004 BLOCKED id=resource-canary fault=F-09 cell=Shutdown x CompleteTransport canary=effect-canary verdict=BLOCKED; not executed
+MUT-005 BLOCKED id=omit-publication-guard fault=F-04 cell=Shutdown x CompleteTransport canary=resource-canary verdict=BLOCKED; not executed
+MUT-006 BLOCKED id=omit-terminal-guard fault=F-04 cell=Shutdown x NotifyReady canary=resource-canary verdict=BLOCKED; not executed
+FAULT MUTANTS: FAIL (killed=0 survived=1 errors=0 blocked=5)

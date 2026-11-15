@@ -4,6 +4,19 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Reusable late-completion oracle, first validated on addrConn.** A declarative
+  profile and language-neutral observation protocol check both completion/
+  termination orderings, terminality/publication, effects and resource release.
+  Invalid discovery or traces are BLOCKED. Two historical races are reproduced;
+  an exact source-pinned DR-001 evaluation patch makes them green. Two F-04
+  guard-removal mutants and four independent projection canaries fail the
+  complete oracle and survive the weak control. Generic canary dependency gates,
+  upstream transition tests and the previous backoff slice are executed. This
+  is three scenario checks with an idle fake transport, not full addrConn
+  conformance or cross-component validation of this new feature. README and
+  roadmap now distinguish fixture, matrix, component and canary evidence.
+  See `docs/evidence/late-completion/README.md`.
+
 - **Second real-component F-09 slice.** Pinned grpc-go addrConn backoff
   teardown is tested with a live parent, controlled nonfiring timer and an
   observed real-worker return. Two independent resource canaries plus omitted

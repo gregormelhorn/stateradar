@@ -74,3 +74,13 @@ mutant or blocked outcome exits 1.
 The existing generator still checks declarations and generated-source drift.
 Always run it as well: the execution runner does not claim that a stored variant
 is up to date merely because its tests produced a valid verdict.
+
+## Late-completion adapters
+
+The [late-completion oracle](late-completion.md) implements this verdict protocol
+for declared scenario traces. `expectedCells` is the number of distinct scenario
+cell references, regardless of repeated execution. The addrConn reference has
+three such scenarios, four independent projection canaries and two F-04 mutants.
+Its weak oracle still executes complete traces, but checks only the immediate
+terminal state. A surviving weak canary blocks dependent mutations in the same
+general runner; a separate direct weak replay demonstrates survival of each fault.

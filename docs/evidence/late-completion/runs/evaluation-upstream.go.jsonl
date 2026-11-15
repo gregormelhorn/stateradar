@@ -1,0 +1,155 @@
+{"Time":"2026-11-15T01:59:47.391009+01:00","Action":"start","Package":"google.golang.org/grpc"}
+{"Time":"2026-11-15T01:59:47.804898+01:00","Action":"output","Package":"google.golang.org/grpc","Output":"ERROR: logging before flag.Parse: I1115 01:59:47.804661   45319 syscall_nonlinux.go:31] CPU time info is unavailable on non-linux or appengine environment.\n"}
+{"Time":"2026-11-15T01:59:47.805875+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test"}
+{"Time":"2026-11-15T01:59:47.805898+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"=== RUN   Test\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:47.806674+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel"}
+{"Time":"2026-11-15T01:59:47.806682+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"=== RUN   Test/BackoffCancel\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:47.808324+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"--- PASS: Test/BackoffCancel (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:47.808342+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Elapsed":0}
+{"Time":"2026-11-15T01:59:47.813505+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady"}
+{"Time":"2026-11-15T01:59:47.813518+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"=== RUN   Test/StateTransitions_MultipleAddrsEntersReady\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:48.87146+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"--- PASS: Test/StateTransitions_MultipleAddrsEntersReady (1.06s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:48.871541+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Elapsed":1.06}
+{"Time":"2026-11-15T01:59:48.871804+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure"}
+{"Time":"2026-11-15T01:59:48.871824+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"=== RUN   Test/StateTransitions_ReadyToTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:49.927374+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"--- PASS: Test/StateTransitions_ReadyToTransientFailure (1.06s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:49.927405+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Elapsed":1.06}
+{"Time":"2026-11-15T01:59:49.927491+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress"}
+{"Time":"2026-11-15T01:59:49.927515+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"=== RUN   Test/StateTransitions_SingleAddress\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:49.927532+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server returns server preface, the client enters READY.\n"}
+{"Time":"2026-11-15T01:59:49.928075+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the connection is closed, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:49.92851+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server sends its connection preface, but the connection dies before the client can write its\n"}
+{"Time":"2026-11-15T01:59:49.928524+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        connection preface, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:49.929371+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server reads the client connection preface but does not send its connection preface, the\n"}
+{"Time":"2026-11-15T01:59:49.929405+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:50.030259+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"--- PASS: Test/StateTransitions_SingleAddress (0.10s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:50.030299+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Elapsed":0.1}
+{"Time":"2026-11-15T01:59:50.030388+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure"}
+{"Time":"2026-11-15T01:59:50.030392+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"=== RUN   Test/StateTransitions_TriesAllAddrsBeforeTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:50.033216+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"--- PASS: Test/StateTransitions_TriesAllAddrsBeforeTransientFailure (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:50.033241+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Elapsed":0}
+{"Time":"2026-11-15T01:59:50.035116+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"--- PASS: Test (2.23s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:50.03513+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test","Elapsed":2.23}
+{"Time":"2026-11-15T01:59:50.035219+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test"}
+{"Time":"2026-11-15T01:59:50.035225+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"=== RUN   Test\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:50.035498+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel"}
+{"Time":"2026-11-15T01:59:50.035502+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"=== RUN   Test/BackoffCancel\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:50.035979+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"--- PASS: Test/BackoffCancel (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:50.035987+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Elapsed":0}
+{"Time":"2026-11-15T01:59:50.041388+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady"}
+{"Time":"2026-11-15T01:59:50.041405+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"=== RUN   Test/StateTransitions_MultipleAddrsEntersReady\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:51.046438+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"--- PASS: Test/StateTransitions_MultipleAddrsEntersReady (1.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:51.046483+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Elapsed":1}
+{"Time":"2026-11-15T01:59:51.047193+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure"}
+{"Time":"2026-11-15T01:59:51.047213+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"=== RUN   Test/StateTransitions_ReadyToTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.052951+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"--- PASS: Test/StateTransitions_ReadyToTransientFailure (1.01s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.052996+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Elapsed":1.01}
+{"Time":"2026-11-15T01:59:52.053278+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress"}
+{"Time":"2026-11-15T01:59:52.053288+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"=== RUN   Test/StateTransitions_SingleAddress\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.053454+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server returns server preface, the client enters READY.\n"}
+{"Time":"2026-11-15T01:59:52.05483+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the connection is closed, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:52.055339+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server sends its connection preface, but the connection dies before the client can write its\n"}
+{"Time":"2026-11-15T01:59:52.055346+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        connection preface, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:52.055787+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server reads the client connection preface but does not send its connection preface, the\n"}
+{"Time":"2026-11-15T01:59:52.055796+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:52.158149+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"--- PASS: Test/StateTransitions_SingleAddress (0.10s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.158173+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Elapsed":0.1}
+{"Time":"2026-11-15T01:59:52.158361+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure"}
+{"Time":"2026-11-15T01:59:52.158367+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"=== RUN   Test/StateTransitions_TriesAllAddrsBeforeTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.160612+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"--- PASS: Test/StateTransitions_TriesAllAddrsBeforeTransientFailure (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.16064+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Elapsed":0}
+{"Time":"2026-11-15T01:59:52.162347+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"--- PASS: Test (2.13s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.162354+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test","Elapsed":2.13}
+{"Time":"2026-11-15T01:59:52.162459+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test"}
+{"Time":"2026-11-15T01:59:52.162465+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"=== RUN   Test\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.162853+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel"}
+{"Time":"2026-11-15T01:59:52.162875+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"=== RUN   Test/BackoffCancel\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.163233+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"--- PASS: Test/BackoffCancel (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:52.163238+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Elapsed":0}
+{"Time":"2026-11-15T01:59:52.168662+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady"}
+{"Time":"2026-11-15T01:59:52.16868+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"=== RUN   Test/StateTransitions_MultipleAddrsEntersReady\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:53.173549+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"--- PASS: Test/StateTransitions_MultipleAddrsEntersReady (1.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:53.173798+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Elapsed":1}
+{"Time":"2026-11-15T01:59:53.17433+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure"}
+{"Time":"2026-11-15T01:59:53.174435+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"=== RUN   Test/StateTransitions_ReadyToTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.179791+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"--- PASS: Test/StateTransitions_ReadyToTransientFailure (1.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.179831+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Elapsed":1}
+{"Time":"2026-11-15T01:59:54.180102+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress"}
+{"Time":"2026-11-15T01:59:54.180117+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"=== RUN   Test/StateTransitions_SingleAddress\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.180335+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server returns server preface, the client enters READY.\n"}
+{"Time":"2026-11-15T01:59:54.18098+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the connection is closed, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:54.181824+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server sends its connection preface, but the connection dies before the client can write its\n"}
+{"Time":"2026-11-15T01:59:54.181841+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        connection preface, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:54.182278+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server reads the client connection preface but does not send its connection preface, the\n"}
+{"Time":"2026-11-15T01:59:54.182285+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:54.28672+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"--- PASS: Test/StateTransitions_SingleAddress (0.11s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.286758+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Elapsed":0.11}
+{"Time":"2026-11-15T01:59:54.286952+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure"}
+{"Time":"2026-11-15T01:59:54.28696+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"=== RUN   Test/StateTransitions_TriesAllAddrsBeforeTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.290024+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"--- PASS: Test/StateTransitions_TriesAllAddrsBeforeTransientFailure (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.29005+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Elapsed":0}
+{"Time":"2026-11-15T01:59:54.291921+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"--- PASS: Test (2.13s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.291941+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test","Elapsed":2.13}
+{"Time":"2026-11-15T01:59:54.292023+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test"}
+{"Time":"2026-11-15T01:59:54.292027+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"=== RUN   Test\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.292333+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel"}
+{"Time":"2026-11-15T01:59:54.292345+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"=== RUN   Test/BackoffCancel\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.346353+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"--- PASS: Test/BackoffCancel (0.05s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:54.3464+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Elapsed":0.05}
+{"Time":"2026-11-15T01:59:54.352827+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady"}
+{"Time":"2026-11-15T01:59:54.352844+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"=== RUN   Test/StateTransitions_MultipleAddrsEntersReady\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:55.359016+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"--- PASS: Test/StateTransitions_MultipleAddrsEntersReady (1.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:55.359053+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Elapsed":1}
+{"Time":"2026-11-15T01:59:55.359199+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure"}
+{"Time":"2026-11-15T01:59:55.359214+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"=== RUN   Test/StateTransitions_ReadyToTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.422628+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"--- PASS: Test/StateTransitions_ReadyToTransientFailure (1.06s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.422668+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Elapsed":1.06}
+{"Time":"2026-11-15T01:59:56.422988+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress"}
+{"Time":"2026-11-15T01:59:56.423007+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"=== RUN   Test/StateTransitions_SingleAddress\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.423114+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server returns server preface, the client enters READY.\n"}
+{"Time":"2026-11-15T01:59:56.424103+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the connection is closed, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:56.425169+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server sends its connection preface, but the connection dies before the client can write its\n"}
+{"Time":"2026-11-15T01:59:56.425187+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        connection preface, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:56.42619+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server reads the client connection preface but does not send its connection preface, the\n"}
+{"Time":"2026-11-15T01:59:56.426204+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:56.580511+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"--- PASS: Test/StateTransitions_SingleAddress (0.16s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.58055+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Elapsed":0.16}
+{"Time":"2026-11-15T01:59:56.580791+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure"}
+{"Time":"2026-11-15T01:59:56.580802+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"=== RUN   Test/StateTransitions_TriesAllAddrsBeforeTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.637673+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"--- PASS: Test/StateTransitions_TriesAllAddrsBeforeTransientFailure (0.06s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.637709+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Elapsed":0.06}
+{"Time":"2026-11-15T01:59:56.641294+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"--- PASS: Test (2.35s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.641423+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test","Elapsed":2.35}
+{"Time":"2026-11-15T01:59:56.641744+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test"}
+{"Time":"2026-11-15T01:59:56.641753+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"=== RUN   Test\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.642612+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel"}
+{"Time":"2026-11-15T01:59:56.642616+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"=== RUN   Test/BackoffCancel\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.643683+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Output":"--- PASS: Test/BackoffCancel (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:56.643692+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/BackoffCancel","Elapsed":0}
+{"Time":"2026-11-15T01:59:56.652108+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady"}
+{"Time":"2026-11-15T01:59:56.652132+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"=== RUN   Test/StateTransitions_MultipleAddrsEntersReady\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:57.662125+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Output":"--- PASS: Test/StateTransitions_MultipleAddrsEntersReady (1.01s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:57.662319+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_MultipleAddrsEntersReady","Elapsed":1.01}
+{"Time":"2026-11-15T01:59:57.66246+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure"}
+{"Time":"2026-11-15T01:59:57.662466+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"=== RUN   Test/StateTransitions_ReadyToTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:58.72227+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Output":"--- PASS: Test/StateTransitions_ReadyToTransientFailure (1.06s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:58.72252+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_ReadyToTransientFailure","Elapsed":1.06}
+{"Time":"2026-11-15T01:59:58.722818+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress"}
+{"Time":"2026-11-15T01:59:58.722826+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"=== RUN   Test/StateTransitions_SingleAddress\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:58.724079+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server returns server preface, the client enters READY.\n"}
+{"Time":"2026-11-15T01:59:58.724305+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the connection is closed, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:58.724667+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server sends its connection preface, but the connection dies before the client can write its\n"}
+{"Time":"2026-11-15T01:59:58.724676+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        connection preface, the client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:58.725191+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"    clientconn_state_transition_test.go:145: When the server reads the client connection preface but does not send its connection preface, the\n"}
+{"Time":"2026-11-15T01:59:58.725202+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"        client enters TRANSIENT FAILURE.\n"}
+{"Time":"2026-11-15T01:59:58.82836+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Output":"--- PASS: Test/StateTransitions_SingleAddress (0.11s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:58.828382+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_SingleAddress","Elapsed":0.11}
+{"Time":"2026-11-15T01:59:58.828582+01:00","Action":"run","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure"}
+{"Time":"2026-11-15T01:59:58.82859+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"=== RUN   Test/StateTransitions_TriesAllAddrsBeforeTransientFailure\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:58.830889+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Output":"--- PASS: Test/StateTransitions_TriesAllAddrsBeforeTransientFailure (0.00s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:58.830901+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test/StateTransitions_TriesAllAddrsBeforeTransientFailure","Elapsed":0}
+{"Time":"2026-11-15T01:59:58.832631+01:00","Action":"output","Package":"google.golang.org/grpc","Test":"Test","Output":"--- PASS: Test (2.19s)\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:58.832646+01:00","Action":"pass","Package":"google.golang.org/grpc","Test":"Test","Elapsed":2.19}
+{"Time":"2026-11-15T01:59:58.832705+01:00","Action":"output","Package":"google.golang.org/grpc","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-11-15T01:59:59.843349+01:00","Action":"output","Package":"google.golang.org/grpc","Output":"ok  \tgoogle.golang.org/grpc\t12.452s\n"}
+{"Time":"2026-11-15T01:59:59.843377+01:00","Action":"pass","Package":"google.golang.org/grpc","Elapsed":12.452}

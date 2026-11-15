@@ -1,0 +1,27 @@
+package grpc
+
+import "google.golang.org/grpc/balancer"
+
+// The historical recording builder returns the same mutable Balancer across
+// ClientConns, racing old callbacks against Build. Keep all original test bodies,
+// assertions and recorder methods unchanged; select a per-connection instance
+// through the documented builder registry seam instead.
+type lateRegressionBuilder struct{}
+
+func (lateRegressionBuilder) Name() string { return stateRecordingBalancerName }
+func (lateRegressionBuilder) Build(cc balancer.ClientConn, opts balancer.BuildOptions) balancer.Balancer {
+	testBalancer.mu.Lock()
+	notifier := testBalancer.notifier
+	testBalancer.mu.Unlock()
+	return &stateRecordingBalancer{
+		notifier: notifier,
+		Balancer: balancer.Get(PickFirstBalancerName).Build(cc, opts),
+	}
+}
+func init() {
+	// Added as zz_late_regression_test.go so the original registration precedes it.
+	if balancer.Get(stateRecordingBalancerName) != testBalancer {
+		panic("unexpected historical recording-builder registration")
+	}
+	balancer.Register(lateRegressionBuilder{})
+}

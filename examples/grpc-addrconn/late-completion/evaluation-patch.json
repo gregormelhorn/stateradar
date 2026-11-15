@@ -1,0 +1,14 @@
+{
+  "decision": "DR-001",
+  "upstreamSha": "a02b0774206b209466313a0b525d2c738fe407eb",
+  "edits": [
+    {
+      "match": "func (ac *addrConn) updateConnectivityState(s connectivity.State) {",
+      "replace": "func (ac *addrConn) updateConnectivityState(s connectivity.State) {\n\t// DR-001: terminal connectivity cannot be resurrected.\n\tif ac.state == connectivity.Shutdown {\n\t\treturn\n\t}"
+    },
+    {
+      "match": "\t\t\tif err == nil {\n\t\t\t\tac.mu.Lock()\n\t\t\t\tac.curAddr = addr",
+      "replace": "\t\t\tif err == nil {\n\t\t\t\tac.mu.Lock()\n\t\t\t\t// DR-001: dispose late completion before publishing.\n\t\t\t\tif ac.state == connectivity.Shutdown {\n\t\t\t\t\tac.mu.Unlock()\n\t\t\t\t\tnewTr.Close()\n\t\t\t\t\treturn\n\t\t\t\t}\n\t\t\t\tac.curAddr = addr"
+    }
+  ]
+}

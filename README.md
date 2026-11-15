@@ -203,7 +203,8 @@ named fault class at a time, and ask whether the suite notices. The classes
 come from Binder's state-machine fault taxonomy plus empirical additions,
 registered as F-01…F-22 in `formats/rules.toml`. Fixture coverage includes
 F-01 missing transition, F-02 transfer fault, F-04 sneak path, F-05 corrupt
-state and F-14 duplication. The semaphore adds a real F-09 cancellation-leak binding.
+state and F-14 duplication. F-09 cancellation-leak bindings are executed on
+both weighted semaphore and grpc-go addrConn.
 Results report `KILLED / SURVIVED / BLOCKED` — never a bare rate. Declared
 projection canaries execute before dependent mutants; incomplete or wrong-cell
 results cannot count as kills. The required `expectedCells` pins the suite's
@@ -216,8 +217,21 @@ than a judgment call — and equivalence is decided against the matrix instead
 of by an LLM judge.
 
 Component-local bindings generate the six golden-mini and five semaphore
-variants. F-09 has one real-component slice; the second-component proof remains
-open. [Generic canary evidence and addrConn readiness](docs/evidence/generic-canary/README.md).
+variants, plus three addrConn backoff variants (two canaries and one F-09 fault).
+[Second-component F-09 proof](docs/evidence/addrconn-f09/README.md).
+
+**Late-completion scenario checks** (`tools/late_completion.py`) consume a
+language-neutral profile and recorded observations for operation → termination
+→ completion, with completion → termination as a required positive control.
+They verify terminal state/publication, emitted effects and exactly-once resource
+release; malformed or incomplete traces are BLOCKED. Component adapters own
+scheduling and actual discovery. The first reference, pinned grpc-go addrConn,
+uses the accepted DR-001 evaluation patch, two F-04 mutants and four independent
+state/publication/output/resource canaries. It is validated on this reference, not yet on a
+second component. These three scenario checks are not a complete state/event
+matrix, and the idle fake transport does not validate transport internals.
+[Contract and adapter guide](docs/late-completion.md) ·
+[Executed evidence](docs/evidence/late-completion/README.md).
 
 ---
 

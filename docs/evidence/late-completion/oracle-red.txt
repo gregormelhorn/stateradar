@@ -1,0 +1,140 @@
+FFFFFFFFFFFFFF.F
+======================================================================
+FAIL: test_count_must_match (__main__.Oracle.test_count_must_match)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 43, in test_count_must_match
+    with self.assertRaises(EvidenceError):evaluate(PROFILE,evidence(),2)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_empty_missing_duplicate_wrong_order_identity_and_parent_block (__main__.Oracle.test_empty_missing_duplicate_wrong_order_identity_and_parent_block) (traces=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 41, in test_empty_missing_duplicate_wrong_order_identity_and_parent_block
+    with self.subTest(traces=traces),self.assertRaises(EvidenceError):evaluate(PROFILE,traces,1)
+                                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_empty_missing_duplicate_wrong_order_identity_and_parent_block (__main__.Oracle.test_empty_missing_duplicate_wrong_order_identity_and_parent_block) (traces=[{'case': 'late', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}]}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 41, in test_empty_missing_duplicate_wrong_order_identity_and_parent_block
+    with self.subTest(traces=traces),self.assertRaises(EvidenceError):evaluate(PROFILE,traces,1)
+                                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_empty_missing_duplicate_wrong_order_identity_and_parent_block (__main__.Oracle.test_empty_missing_duplicate_wrong_order_identity_and_parent_block) (traces=[{'case': 'late', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}]}, {'case': 'early', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Active', 'published': True, 'releaseCount': 0, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}]}, {'case': 'late', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}]}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 41, in test_empty_missing_duplicate_wrong_order_identity_and_parent_block
+    with self.subTest(traces=traces),self.assertRaises(EvidenceError):evaluate(PROFILE,traces,1)
+                                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_empty_missing_duplicate_wrong_order_identity_and_parent_block (__main__.Oracle.test_empty_missing_duplicate_wrong_order_identity_and_parent_block) (traces=[{'case': 'late', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}]}, {'case': 'early', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Active', 'published': True, 'releaseCount': 0, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}]}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 41, in test_empty_missing_duplicate_wrong_order_identity_and_parent_block
+    with self.subTest(traces=traces),self.assertRaises(EvidenceError):evaluate(PROFILE,traces,1)
+                                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_empty_missing_duplicate_wrong_order_identity_and_parent_block (__main__.Oracle.test_empty_missing_duplicate_wrong_order_identity_and_parent_block) (traces=[{'case': 'late', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'foreign', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}]}, {'case': 'early', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Active', 'published': True, 'releaseCount': 0, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}]}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 41, in test_empty_missing_duplicate_wrong_order_identity_and_parent_block
+    with self.subTest(traces=traces),self.assertRaises(EvidenceError):evaluate(PROFILE,traces,1)
+                                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_empty_missing_duplicate_wrong_order_identity_and_parent_block (__main__.Oracle.test_empty_missing_duplicate_wrong_order_identity_and_parent_block) (traces=[{'case': 'late', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': False}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}]}, {'case': 'early', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Active', 'published': True, 'releaseCount': 0, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}]}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 41, in test_empty_missing_duplicate_wrong_order_identity_and_parent_block
+    with self.subTest(traces=traces),self.assertRaises(EvidenceError):evaluate(PROFILE,traces,1)
+                                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_empty_missing_duplicate_wrong_order_identity_and_parent_block (__main__.Oracle.test_empty_missing_duplicate_wrong_order_identity_and_parent_block) (traces=[{'case': 'late', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Stopped', 'published': False, 'releaseCount': True, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}]}, {'case': 'early', 'repeat': 0, 'steps': [{'action': 'start', 'state': 'Starting', 'published': False, 'releaseCount': 0, 'effects': [], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'complete', 'state': 'Active', 'published': True, 'releaseCount': 0, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'terminate', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}, {'action': 'observe', 'state': 'Stopped', 'published': False, 'releaseCount': 1, 'effects': ['accepted'], 'resource': 'resource-1', 'parentAlive': True}]}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 41, in test_empty_missing_duplicate_wrong_order_identity_and_parent_block
+    with self.subTest(traces=traces),self.assertRaises(EvidenceError):evaluate(PROFILE,traces,1)
+                                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_independent_coordinates (__main__.Oracle.test_independent_coordinates) (field='state')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 31, in test_independent_coordinates
+    self.assertIn('Stopped x Complete',evaluate(PROFILE,traces,1))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'Stopped x Complete' not found in {}
+
+======================================================================
+FAIL: test_independent_coordinates (__main__.Oracle.test_independent_coordinates) (field='published')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 31, in test_independent_coordinates
+    self.assertIn('Stopped x Complete',evaluate(PROFILE,traces,1))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'Stopped x Complete' not found in {}
+
+======================================================================
+FAIL: test_independent_coordinates (__main__.Oracle.test_independent_coordinates) (field='releaseCount')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 31, in test_independent_coordinates
+    self.assertIn('Stopped x Complete',evaluate(PROFILE,traces,1))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'Stopped x Complete' not found in {}
+
+======================================================================
+FAIL: test_independent_coordinates (__main__.Oracle.test_independent_coordinates) (field='effects')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 31, in test_independent_coordinates
+    self.assertIn('Stopped x Complete',evaluate(PROFILE,traces,1))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'Stopped x Complete' not found in {}
+
+======================================================================
+FAIL: test_no_duplicate_profile_ids_or_cells (__main__.Oracle.test_no_duplicate_profile_ids_or_cells)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 50, in test_no_duplicate_profile_ids_or_cells
+    with self.assertRaises(EvidenceError):evaluate(p,evidence(),1)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_no_effects_can_disappear (__main__.Oracle.test_no_effects_can_disappear)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 46, in test_no_effects_can_disappear
+    with self.assertRaises(EvidenceError):evaluate(PROFILE,traces,1)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_positive_control_cannot_be_vacuous (__main__.Oracle.test_positive_control_cannot_be_vacuous)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_completion.py", line 35, in test_positive_control_cannot_be_vacuous
+    self.assertIn('Starting x Complete',evaluate(PROFILE,traces,1))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'Starting x Complete' not found in {}
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.002s
+
+FAILED (failures=15)

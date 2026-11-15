@@ -30,7 +30,7 @@ def verify_records(checkout, analysis=ANALYSIS):
         raise ValueError('decision coverage is not exactly Q-01..Q-16')
     for r in records:
         if (r['status']!='accepted' or r['question_status']!='ANSWERED' or
-                r['implementation_status']!='pending' or not r['authorization'] or not r['rationale']):
+                r['implementation_status']!=('partial' if r['id']=='DR-001' else 'pending') or not r['authorization'] or not r['rationale']):
             raise ValueError('decision attribution/status missing')
         if json.loads((analysis/'decisions'/(r['id']+'.yaml')).read_text())!=r:
             raise ValueError('decision record/index drift')
@@ -38,7 +38,7 @@ def verify_records(checkout, analysis=ANALYSIS):
             lines=(checkout/c['file']).read_text().splitlines();n=c['line']
             if not any(c['fragment'] in l for l in lines[max(0,n-4):n+3]):
                 raise ValueError('decision citation drift: '+str(c))
-    print('DECISIONS: 16 ANSWERED with delegated attribution; implementation pending',flush=True)
+    print('DECISIONS: 16 ANSWERED; DR-001 scoped implementation partial, 15 implementations pending',flush=True)
 
 
 def verify_harness():

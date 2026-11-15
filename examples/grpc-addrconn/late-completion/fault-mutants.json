@@ -1,0 +1,56 @@
+{
+  "formatVersion": 1,
+  "workingDirectory": "..",
+  "testCommand": [
+    "python3",
+    "late/run.py",
+    "--analysis",
+    "{analysis_dir}"
+  ],
+  "expectedCells": 3,
+  "timeoutSeconds": 120,
+  "mutants": [
+    {
+      "id": "state-canary",
+      "fault": "F-04",
+      "cell": "Shutdown x CompleteTransport",
+      "target": "clientconn.go",
+      "variant": "late/mutants/state-canary.go.txt"
+    },
+    {
+      "id": "publication-canary",
+      "fault": "F-04",
+      "cell": "Shutdown x CompleteTransport",
+      "target": "clientconn.go",
+      "variant": "late/mutants/publication-canary.go.txt"
+    },
+    {
+      "id": "effect-canary",
+      "fault": "F-03",
+      "cell": "Shutdown x CompleteTransport",
+      "target": "clientconn.go",
+      "variant": "late/mutants/effect-canary.go.txt"
+    },
+    {
+      "id": "resource-canary",
+      "fault": "F-09",
+      "cell": "Shutdown x CompleteTransport",
+      "target": "clientconn.go",
+      "variant": "late/mutants/resource-canary.go.txt"
+    },
+    {
+      "id": "omit-publication-guard",
+      "fault": "F-04",
+      "cell": "Shutdown x CompleteTransport",
+      "target": "clientconn.go",
+      "variant": "late/mutants/omit-publication-guard.go.txt"
+    },
+    {
+      "id": "omit-terminal-guard",
+      "fault": "F-04",
+      "cell": "Shutdown x NotifyReady",
+      "target": "clientconn.go",
+      "variant": "late/mutants/omit-terminal-guard.go.txt"
+    }
+  ]
+}

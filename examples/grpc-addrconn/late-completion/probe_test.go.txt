@@ -1,0 +1,195 @@
+package grpc
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"strconv"
+	"sync"
+	"testing"
+	"time"
+
+	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/internal/transport"
+)
+
+type lateTransport struct {
+	transport.ClientTransport // Unexpected calls panic: incomplete evidence, not a kill.
+	probe                     *lateProbe
+	onClose                   func()
+	once                      sync.Once
+}
+
+func (tr *lateTransport) Close() error {
+	// Real transport close can reenter addrConn. This blocks if caller holds ac.mu.
+	tr.probe.ac.getState()
+	tr.probe.mu.Lock()
+	tr.probe.closes++
+	tr.probe.mu.Unlock()
+	tr.once.Do(tr.onClose)
+	return nil
+}
+func (tr *lateTransport) GracefulClose() error { return tr.Close() } // idle fake, no streams
+
+type lateProbe struct {
+	finishResume                 chan struct{}
+	mu                           sync.Mutex
+	checkpoint                   string
+	ac                           *addrConn
+	tr                           *lateTransport
+	effects                      []string
+	closes                       int
+	ready, resume, settled, done chan struct{}
+	resumed, finished            sync.Once
+}
+
+var lateMu sync.Mutex
+var lateCurrent *lateProbe
+
+func lateGet() *lateProbe { lateMu.Lock(); defer lateMu.Unlock(); return lateCurrent }
+func lateEffect(s connectivity.State) {
+	if p := lateGet(); p != nil {
+		p.mu.Lock()
+		p.effects = append(p.effects, s.String())
+		p.mu.Unlock()
+	}
+}
+func lateFactory(ac *addrConn, connectCtx, parentCtx context.Context, target transport.TargetInfo, copts transport.ConnectOptions, preface func(), goAway func(transport.GoAwayReason), onClose func()) (transport.ClientTransport, error) {
+	p := lateGet()
+	p.mu.Lock()
+	if p.tr != nil {
+		p.mu.Unlock()
+		panic("unexpected second transport")
+	}
+	p.ac = ac
+	p.tr = &lateTransport{probe: p, onClose: onClose}
+	tr := p.tr
+	p.mu.Unlock()
+	preface()
+	return tr, nil
+}
+func lateCheckpoint(ac *addrConn, location string) {
+	p := lateGet()
+	if p != nil && p.ac == ac && p.checkpoint == location {
+		close(p.ready)
+		<-p.resume
+	}
+}
+func lateSettled(ac *addrConn) {
+	p := lateGet()
+	if p != nil && p.ac == ac {
+		p.finished.Do(func() { close(p.settled) })
+		<-p.finishResume
+	}
+}
+func lateReturned(ac *addrConn) {
+	lateSettled(ac)
+	p := lateGet()
+	if p != nil && p.ac == ac {
+		close(p.done)
+	}
+}
+func lateWait(t *testing.T, ch <-chan struct{}, label string) {
+	t.Helper()
+	select {
+	case <-ch:
+	case <-time.After(2 * time.Second):
+		t.Fatalf("adapter incomplete: %s watchdog", label)
+	}
+}
+
+type lateObservation struct {
+	Action       string   `json:"action"`
+	State        string   `json:"state"`
+	Published    bool     `json:"published"`
+	ReleaseCount int      `json:"releaseCount"`
+	Effects      []string `json:"effects"`
+	Resource     string   `json:"resource"`
+	ParentAlive  bool     `json:"parentAlive"`
+}
+
+func lateSnapshot(p *lateProbe, cc *ClientConn, action string) lateObservation {
+	p.ac.mu.Lock()
+	state := p.ac.state.String()
+	published := p.ac.transport == p.tr
+	p.ac.mu.Unlock()
+	p.mu.Lock()
+	closes := p.closes
+	effects := append([]string{}, p.effects...)
+	p.mu.Unlock()
+	return lateObservation{action, state, published, closes, effects, "transport-1", cc.ctx.Err() == nil}
+}
+func lateScenario(t *testing.T, id, checkpoint string, order []string, repeat int) {
+	p := &lateProbe{finishResume: make(chan struct{}), checkpoint: checkpoint, ready: make(chan struct{}), resume: make(chan struct{}), settled: make(chan struct{}), done: make(chan struct{})}
+	lateMu.Lock()
+	lateCurrent = p
+	lateMu.Unlock()
+	cc, err := Dial("passthrough:///late-completion", WithInsecure())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		// Evidence is emitted before all cleanup; parent teardown cannot mask the bug.
+		cc.Close()
+		p.resumed.Do(func() { close(p.resume) })
+		if p.tr != nil {
+			p.tr.Close()
+		}
+		close(p.finishResume)
+		lateWait(t, p.done, "cleanup worker exit")
+		lateMu.Lock()
+		lateCurrent = nil
+		lateMu.Unlock()
+	})
+	lateWait(t, p.ready, "completion checkpoint")
+	var steps []lateObservation
+	for _, action := range order {
+		switch action {
+		case "start":
+		case "terminate":
+			p.ac.tearDown(errConnDrain)
+		case "complete":
+			p.resumed.Do(func() { close(p.resume) })
+			lateWait(t, p.settled, "completion processing")
+		case "observe":
+		default:
+			t.Fatalf("unknown action %s", action)
+		}
+		steps = append(steps, lateSnapshot(p, cc, action))
+	}
+	trace := struct {
+		Case   string            `json:"case"`
+		Repeat int               `json:"repeat"`
+		Steps  []lateObservation `json:"steps"`
+	}{id, repeat, steps}
+	raw, err := json.Marshal(trace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("LATE TRACE %s\n", raw)
+}
+func TestLateCompletionEvidence(t *testing.T) {
+	var profile struct {
+		Cases []struct {
+			ID, Checkpoint string
+			Order          []string
+		}
+	}
+	raw, err := os.ReadFile(os.Getenv("LATE_PROFILE"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal(raw, &profile); err != nil {
+		t.Fatal(err)
+	}
+	repeats, err := strconv.Atoi(os.Getenv("LATE_REPEATS"))
+	if err != nil || repeats < 1 {
+		t.Fatal("invalid repetitions")
+	}
+	for _, c := range profile.Cases {
+		for r := 0; r < repeats; r++ {
+			t.Run(c.ID+"/"+strconv.Itoa(r), func(t *testing.T) { lateScenario(t, c.ID, c.Checkpoint, c.Order, r) })
+		}
+	}
+}

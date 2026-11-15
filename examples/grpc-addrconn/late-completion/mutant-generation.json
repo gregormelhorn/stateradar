@@ -1,0 +1,165 @@
+{
+  "formatVersion": 1,
+  "workingDirectory": "..",
+  "source": "clientconn.go",
+  "projections": {
+    "terminal": {
+      "kind": "projected-terminal-state",
+      "provenBy": "state-canary"
+    },
+    "effect": {
+      "kind": "emitted-acceptance-effect",
+      "provenBy": "effect-canary"
+    },
+    "resource": {
+      "kind": "owned-resource-release",
+      "provenBy": "resource-canary"
+    },
+    "publication": {
+      "kind": "projected-publication",
+      "provenBy": "publication-canary"
+    }
+  },
+  "bindings": [
+    {
+      "id": "state-canary",
+      "fault": "F-04",
+      "cell": "Shutdown x CompleteTransport",
+      "variant": "late/mutants/state-canary.go.txt",
+      "mode": "replace-block",
+      "binder": "sneak-path",
+      "requiresProjection": "terminal",
+      "match": [
+        "\t\t\t\t// DR-001: dispose late completion before publishing.",
+        "\t\t\t\tif ac.state == connectivity.Shutdown {",
+        "\t\t\t\t\tac.mu.Unlock()",
+        "\t\t\t\t\tnewTr.Close()",
+        "\t\t\t\t\treturn",
+        "\t\t\t\t}"
+      ],
+      "replace": [
+        "\t\t\t\t// DR-001: dispose late completion before publishing.",
+        "\t\t\t\tif ac.state == connectivity.Shutdown {",
+        "\t\t\t\t\tac.state = connectivity.Ready // canary: state only",
+        "\t\t\t\t\tac.mu.Unlock()",
+        "\t\t\t\t\tnewTr.Close()",
+        "\t\t\t\t\treturn",
+        "\t\t\t\t}"
+      ]
+    },
+    {
+      "id": "publication-canary",
+      "fault": "F-04",
+      "cell": "Shutdown x CompleteTransport",
+      "variant": "late/mutants/publication-canary.go.txt",
+      "mode": "replace-block",
+      "binder": "sneak-path",
+      "requiresProjection": "terminal",
+      "match": [
+        "\t\t\t\t// DR-001: dispose late completion before publishing.",
+        "\t\t\t\tif ac.state == connectivity.Shutdown {",
+        "\t\t\t\t\tac.mu.Unlock()",
+        "\t\t\t\t\tnewTr.Close()",
+        "\t\t\t\t\treturn",
+        "\t\t\t\t}"
+      ],
+      "replace": [
+        "\t\t\t\t// DR-001: dispose late completion before publishing.",
+        "\t\t\t\tif ac.state == connectivity.Shutdown {",
+        "\t\t\t\t\tac.transport = newTr // canary: publication only",
+        "\t\t\t\t\tac.mu.Unlock()",
+        "\t\t\t\t\tnewTr.Close()",
+        "\t\t\t\t\treturn",
+        "\t\t\t\t}"
+      ]
+    },
+    {
+      "id": "effect-canary",
+      "fault": "F-03",
+      "cell": "Shutdown x CompleteTransport",
+      "variant": "late/mutants/effect-canary.go.txt",
+      "mode": "replace-block",
+      "binder": "output-fault",
+      "requiresProjection": "publication",
+      "match": [
+        "\t\t\t\t// DR-001: dispose late completion before publishing.",
+        "\t\t\t\tif ac.state == connectivity.Shutdown {",
+        "\t\t\t\t\tac.mu.Unlock()",
+        "\t\t\t\t\tnewTr.Close()",
+        "\t\t\t\t\treturn",
+        "\t\t\t\t}"
+      ],
+      "replace": [
+        "\t\t\t\t// DR-001: dispose late completion before publishing.",
+        "\t\t\t\tif ac.state == connectivity.Shutdown {",
+        "\t\t\t\t\tac.mu.Unlock()",
+        "\t\t\t\t\tac.cc.handleSubConnStateChange(ac.acbw, connectivity.Ready) // canary: output only",
+        "\t\t\t\t\tnewTr.Close()",
+        "\t\t\t\t\treturn",
+        "\t\t\t\t}"
+      ]
+    },
+    {
+      "id": "resource-canary",
+      "fault": "F-09",
+      "cell": "Shutdown x CompleteTransport",
+      "variant": "late/mutants/resource-canary.go.txt",
+      "mode": "replace-block",
+      "binder": "cancellation-leak",
+      "requiresProjection": "effect",
+      "match": [
+        "\t\t\t\t// DR-001: dispose late completion before publishing.",
+        "\t\t\t\tif ac.state == connectivity.Shutdown {",
+        "\t\t\t\t\tac.mu.Unlock()",
+        "\t\t\t\t\tnewTr.Close()",
+        "\t\t\t\t\treturn",
+        "\t\t\t\t}"
+      ],
+      "replace": [
+        "\t\t\t\t// DR-001: dispose late completion before publishing.",
+        "\t\t\t\tif ac.state == connectivity.Shutdown {",
+        "\t\t\t\t\tac.mu.Unlock()",
+        "\t\t\t\t\t// canary: omit late resource close",
+        "\t\t\t\t\treturn",
+        "\t\t\t\t}"
+      ]
+    },
+    {
+      "id": "omit-publication-guard",
+      "fault": "F-04",
+      "cell": "Shutdown x CompleteTransport",
+      "variant": "late/mutants/omit-publication-guard.go.txt",
+      "mode": "replace-block",
+      "binder": "sneak-path",
+      "requiresProjection": "resource",
+      "match": [
+        "\t\t\t\t// DR-001: dispose late completion before publishing.",
+        "\t\t\t\tif ac.state == connectivity.Shutdown {",
+        "\t\t\t\t\tac.mu.Unlock()",
+        "\t\t\t\t\tnewTr.Close()",
+        "\t\t\t\t\treturn",
+        "\t\t\t\t}"
+      ],
+      "replace": []
+    },
+    {
+      "id": "omit-terminal-guard",
+      "fault": "F-04",
+      "cell": "Shutdown x NotifyReady",
+      "variant": "late/mutants/omit-terminal-guard.go.txt",
+      "mode": "replace-block",
+      "binder": "sneak-path",
+      "requiresProjection": "resource",
+      "match": [
+        "func (ac *addrConn) updateConnectivityState(s connectivity.State) {",
+        "\t// DR-001: terminal connectivity cannot be resurrected.",
+        "\tif ac.state == connectivity.Shutdown {",
+        "\t\treturn",
+        "\t}"
+      ],
+      "replace": [
+        "func (ac *addrConn) updateConnectivityState(s connectivity.State) {"
+      ]
+    }
+  ]
+}

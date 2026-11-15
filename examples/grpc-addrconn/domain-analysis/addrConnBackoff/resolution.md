@@ -1,8 +1,9 @@
 # Evaluation decisions for Q-01 through Q-16
 
 All 16 questions are ANSWERED under the owner delegation quoted in each DR.
-Answers do not mean implementation complete. All broad implementation obligations
-remain pending; the separately measured F-09 slice covers only local backoff cleanup.
+Answers do not mean implementation complete. DR-001 now has a separately tested late-completion evaluation patch with both
+guards; its broad conformance status is partial. Other implementation obligations
+remain pending. The F-09 slice covers only local backoff cleanup.
 The frozen historical analysis remains unchanged.
 
 ## Q-01 — Prevent resurrection and dispose late transports
@@ -11,7 +12,7 @@ The frozen historical analysis remains unchanged.
 
 **Rationale:** Both guards are needed: suppressing a notification alone does not release the returned resource.
 
-Status: ANSWERED; implementation pending.
+Status: ANSWERED; implementation partial. Both guards and the idle-transport late-completion scenarios are tested in `../../late-completion/`; full component conformance remains pending.
 
 Evidence: clientconn.go:1027 ("ac.mu.Lock()"); clientconn.go:935 ("func (ac *addrConn) updateConnectivityState")
 

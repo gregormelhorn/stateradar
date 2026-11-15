@@ -87,3 +87,8 @@ The harness anchor is reconciled to implementation commit `ff2263aa`.
 `harness-staleness-red.txt` retains the real stale-anchor rejection after the
 implementation commit. `reconciled-gates.txt` records the complete successful
 rerun after updating the anchor; no behavior or cell expectations changed.
+
+Subsequent increment: [late-completion reference](../late-completion/README.md)
+implements and tests DR-001's publication/connectivity guards in a separate
+evaluation patch. Its current implementation status is partial; the original
+F-09 measurements above retain their original scope and source pin.

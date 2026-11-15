@@ -16,6 +16,11 @@ jobs:
         with:
           go-version-file: examples/weighted-semaphore/go.mod
           cache: false
+      - name: reusable late-completion oracle and addrConn reference
+        run: |
+          python tools/selftest/test_late_completion.py
+          python tools/selftest/test_late_adapter.py
+          python tools/addrconn_late.py
       - name: pinned addrConn backoff slice and decisions
         run: |
           python tools/selftest/test_addrconn_f09.py

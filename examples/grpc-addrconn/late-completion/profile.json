@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "terminalState": "SHUTDOWN",
+  "acceptedState": "READY",
+  "acceptanceEffect": "READY",
+  "decision": "../domain-analysis/addrConnBackoff/decisions/DR-001.yaml",
+  "cases": [
+    {"id":"late-publication","cell":"Shutdown x CompleteTransport","checkpoint":"after-create","order":["start","terminate","complete","observe"]},
+    {"id":"late-notification","cell":"Shutdown x NotifyReady","checkpoint":"before-ready","order":["start","terminate","complete","observe"]},
+    {"id":"normal-completion","cell":"Connecting x CompleteTransport","checkpoint":"after-create","order":["start","complete","terminate","observe"]}
+  ]
+}
