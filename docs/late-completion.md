@@ -133,3 +133,60 @@ race is retained as evidence. A public-registry builder adapter returns a new
 recorder per connection while leaving all test files and assertions unchanged.
 Both historical and corrected source run those same adapted tests. See the
 evidence report for the original failure and the non-reproducing pristine sample.
+
+## Testgen applicability gate
+
+Step 3 of `prompts/04-testgen.md` now produces a separate `scenario-scope.json`
+and a `workflow.json`. The addrConn fixture is the executable example. Paths in
+the workflow and scope are repository-relative; the profile's `decision` is
+profile-relative. Decision records must be accepted JSON-compatible YAML in v1.
+
+The scope declares `boundary`, `coverage` (`scenario-slice` or `matrix`), and a
+nonempty `traces` inventory. Each trace has an ID, cell, order, fragment citations,
+`seamsAvailable`, and four tri-state `contract` facts: `terminal`,
+`ownedIdleResource`, `noLateEffects`, `exactRelease`. Values are booleans or
+`"unknown"`. The plan has exactly one row per trace, with a reason and status.
+False facts require `not-applicable`; otherwise unknown facts or missing seams
+require `blocked`; otherwise `applicable`. Any unknown fact carries a question
+object with ID, text and `status: OPEN`. Applicable rows alone name `profileCase`;
+their scope trace names the same accepted decision as the profile. Excluded and
+blocked rows cannot claim executed profile cases. A plan with no applicable rows
+has no executable `inputs` or `execution` section.
+
+For applicable plans, `inputs` names profile, mutant config, generation config,
+adapter, probe, oracle and evaluation patch. `execution` selects `go-json-v1`,
+its test root, exact positive baseline/full/weak counts and the original source
+SHA-256. Four distinct projection canaries must transitively precede behavioral
+mutants. The reader currently supports a single generated source with exact
+replace-block bindings, an evaluation patch, and Go subtests named
+`<testRoot>/<case>/<repeat>`. Other execution readers remain future work.
+
+```sh
+python tools/check_late_workflow.py examples/grpc-addrconn/late-completion/workflow.json
+python tools/addrconn_late.py --checkout /path/to/pinned/grpc-go --output-dir /tmp/late-run
+python tools/check_late_workflow.py examples/grpc-addrconn/late-completion/workflow.json --evidence /tmp/late-run
+python tools/gobreaker_late_readiness.py --output-dir /tmp/gobreaker-readiness
+```
+
+Plan-only validation explicitly makes no execution claim. The normal addrConn
+runner emits and validates a fresh workflow receipt after its executions. The
+receipt binds the reviewed inputs, citations, decision, checker and source
+variant generator. Each adapter execution binds raw Go output, observations,
+source, profile, probe, adapter, oracle and count. Revalidation checks hashes,
+actual run/pass identities, package completion and agreement between raw emitted
+traces and observations, then replays the oracle. Every full repetition must
+fail its declared target; every canary must isolate its single cause. Every weak
+repetition must survive. Invalid or stale evidence exits 2 (`BLOCKED`).
+
+These are integrity and completeness checks within a reviewed inventory, not
+proof that the inventory includes every behavior or that an arbitrary producer
+is honest. Fragment matching does not establish semantic entailment. Review of
+contracts, test seams and mutation independence remains necessary. A `matrix`
+label does not replace the existing totality/coverage checkers.
+
+The second candidate, archived gobreaker, has an executed stale-generation
+completion probe (10 baseline passes, five failures after guard removal).
+It is explicitly **not applicable** to this terminal/idle-resource profile:
+its lifecycle continues and its seam owns no releasable transport. This is a
+readiness assessment, not a second adapter validation. See
+[evidence](evidence/late-workflow/README.md).

@@ -1,0 +1,103 @@
+{
+  "formatVersion": 1,
+  "boundary": "addrConn DR-001 idle-transport evaluation; health checks disabled; three named scenarios, not the 182-cell historical matrix",
+  "coverage": "scenario-slice",
+  "traces": [
+    {
+      "id": "LC-late-publication",
+      "cell": "Shutdown x CompleteTransport",
+      "order": [
+        "start",
+        "terminate",
+        "complete",
+        "observe"
+      ],
+      "decision": "examples/grpc-addrconn/domain-analysis/addrConnBackoff/decisions/DR-001.yaml",
+      "contract": {
+        "terminal": true,
+        "ownedIdleResource": true,
+        "noLateEffects": true,
+        "exactRelease": true
+      },
+      "seamsAvailable": true,
+      "citations": [
+        {
+          "file": "examples/grpc-addrconn/domain-analysis/addrConnBackoff/decisions/DR-001.yaml",
+          "line": 8,
+          "fragment": "A late successful transport must be closed outside ac.mu",
+          "provenance": "explicit-requirement"
+        },
+        {
+          "file": "examples/grpc-addrconn/late-completion/probe_test.go.txt",
+          "line": 172,
+          "fragment": "func TestLateCompletionEvidence(t *testing.T) {",
+          "provenance": "observed-in-tests"
+        }
+      ]
+    },
+    {
+      "id": "LC-late-notification",
+      "cell": "Shutdown x NotifyReady",
+      "order": [
+        "start",
+        "terminate",
+        "complete",
+        "observe"
+      ],
+      "decision": "examples/grpc-addrconn/domain-analysis/addrConnBackoff/decisions/DR-001.yaml",
+      "contract": {
+        "terminal": true,
+        "ownedIdleResource": true,
+        "noLateEffects": true,
+        "exactRelease": true
+      },
+      "seamsAvailable": true,
+      "citations": [
+        {
+          "file": "examples/grpc-addrconn/domain-analysis/addrConnBackoff/decisions/DR-001.yaml",
+          "line": 8,
+          "fragment": "A late successful transport must be closed outside ac.mu",
+          "provenance": "explicit-requirement"
+        },
+        {
+          "file": "examples/grpc-addrconn/late-completion/probe_test.go.txt",
+          "line": 172,
+          "fragment": "func TestLateCompletionEvidence(t *testing.T) {",
+          "provenance": "observed-in-tests"
+        }
+      ]
+    },
+    {
+      "id": "LC-normal-completion",
+      "cell": "Connecting x CompleteTransport",
+      "order": [
+        "start",
+        "complete",
+        "terminate",
+        "observe"
+      ],
+      "decision": "examples/grpc-addrconn/domain-analysis/addrConnBackoff/decisions/DR-001.yaml",
+      "contract": {
+        "terminal": true,
+        "ownedIdleResource": true,
+        "noLateEffects": true,
+        "exactRelease": true
+      },
+      "seamsAvailable": true,
+      "citations": [
+        {
+          "file": "examples/grpc-addrconn/domain-analysis/addrConnBackoff/decisions/DR-001.yaml",
+          "line": 8,
+          "fragment": "A late successful transport must be closed outside ac.mu",
+          "provenance": "explicit-requirement"
+        },
+        {
+          "file": "examples/grpc-addrconn/late-completion/probe_test.go.txt",
+          "line": 172,
+          "fragment": "func TestLateCompletionEvidence(t *testing.T) {",
+          "provenance": "observed-in-tests"
+        }
+      ]
+    }
+  ]
+}

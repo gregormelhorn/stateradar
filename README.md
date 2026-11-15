@@ -232,6 +232,13 @@ second component. These three scenario checks are not a complete state/event
 matrix, and the idle fake transport does not validate transport internals.
 [Contract and adapter guide](docs/late-completion.md) ·
 [Executed evidence](docs/evidence/late-completion/README.md).
+The Testgen workflow additionally checks a reviewed applicability inventory,
+trace/cell/DR bindings and fresh execution receipts with
+`tools/check_late_workflow.py`. Plan-only passes are separate from replayed
+execution evidence. Gobreaker was assessed with an executed public-API probe:
+its generation rollover is outside the terminal/idle-resource contract, so this
+is not a second adapter validation.
+[Workflow evidence and limits](docs/evidence/late-workflow/README.md).
 
 ---
 

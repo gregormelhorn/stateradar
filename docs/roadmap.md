@@ -105,6 +105,13 @@ entries and separates the new model-routing plan from shipped capabilities.
    evaluation copy and kills both F-04 guard-removal mutants. A second adapter
    has not been validated; full addrConn matrix conformance remains outside this
    scoped proof. See [evidence](evidence/late-completion/README.md).
+   The next workflow increment adds a reviewed applicability inventory to Testgen
+   and deterministic plan/execution validation, including raw discovery, stale
+   input rejection and cause-isolated canaries. Gobreaker's executed readiness
+   probe demonstrates stale-generation observability but excludes its continuing
+   lifecycle from this terminal/resource contract. A second compatible adapter
+   remains open; no cross-component transfer is claimed.
+   See [workflow evidence](evidence/late-workflow/README.md).
    Crashes and unrelated failures cannot count as kills. Four contract limits
    and two queued cells without a supported operator remain explicit exclusions.
 3. **Make disposition rationale machine-readable.** Implemented as an optional

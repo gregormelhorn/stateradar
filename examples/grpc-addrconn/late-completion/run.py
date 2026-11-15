@@ -2,6 +2,7 @@
 import argparse
 from collections import Counter
 import json
+import hashlib
 import os
 from pathlib import Path
 import subprocess
@@ -49,6 +50,14 @@ try:
  output=''.join(r.get('Output','') for r in records)
  traces=[json.loads(l[len('LATE TRACE '):]) for l in output.splitlines() if l.startswith('LATE TRACE ')]
  if a.output_dir:(a.output_dir/'observations.json').write_text(json.dumps(traces,indent=2)+'\n')
+ if a.output_dir:
+  def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+  meta={'formatVersion':1,'count':a.count,'weak':a.weak,'goExit':run.returncode,
+        'sourceSha256':sha(root/'clientconn.go'),'profileSha256':sha(a.analysis/'profile.json'),
+        'adapterSha256':sha(Path(__file__)),'probeSha256':sha(root/'late/probe_test.go.txt'),
+        'oracleSha256':sha(root/'late/late_completion.py'),
+        'goSha256':sha(a.output_dir/'go.jsonl'),'observationsSha256':sha(a.output_dir/'observations.json')}
+  (a.output_dir/'execution.json').write_text(json.dumps(meta,indent=2)+'\n')
  code=report(profile,traces,a.count,a.weak)
 except (EvidenceError,ValueError,OSError,subprocess.TimeoutExpired) as exc:
  print('BLOCKED: '+str(exc));code=2

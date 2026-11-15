@@ -1,0 +1,86 @@
+.F..F..F.F...FFFF..F....
+======================================================================
+FAIL: test_canary_cannot_change_two_projections (__main__.Execution.test_canary_cannot_change_two_projections)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 146, in test_canary_cannot_change_two_projections
+    with self.assertRaisesRegex(w.EvidenceError,'independently isolated'):self.execute()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_empty_discovery_even_with_matching_hash (__main__.Execution.test_empty_discovery_even_with_matching_hash)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 131, in test_empty_discovery_even_with_matching_hash
+    with self.assertRaisesRegex(w.EvidenceError,'discovery'):self.execute()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_incomplete_observations_even_with_matching_hashes (__main__.Execution.test_incomplete_observations_even_with_matching_hashes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 134, in test_incomplete_observations_even_with_matching_hashes
+    with self.assertRaisesRegex(w.EvidenceError,'incomplete'):self.execute()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_missing_canary_execution (__main__.Execution.test_missing_canary_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 126, in test_missing_canary_execution
+    with self.assertRaises(OSError):self.execute()
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^
+AssertionError: OSError not raised
+
+======================================================================
+FAIL: test_raw_observations_must_match (__main__.Execution.test_raw_observations_must_match)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 155, in test_raw_observations_must_match
+    with self.assertRaisesRegex(w.EvidenceError,'raw execution'):self.execute()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_source_mismatch (__main__.Execution.test_source_mismatch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 149, in test_source_mismatch
+    with self.assertRaisesRegex(w.EvidenceError,'receipt mismatch'):self.execute()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_stale_inputs (__main__.Execution.test_stale_inputs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 123, in test_stale_inputs
+    with self.assertRaisesRegex(w.EvidenceError,'stale workflow'):self.execute()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_target_must_fail_every_repeat (__main__.Execution.test_target_must_fail_every_repeat)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 139, in test_target_must_fail_every_repeat
+    with self.assertRaisesRegex(w.EvidenceError,'every repetition'):self.execute()
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_valid_execution (__main__.Execution.test_valid_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 120, in test_valid_execution
+    def test_valid_execution(self):self.assertEqual(self.execute(),5)
+                                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 5
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.395s
+
+FAILED (failures=9)

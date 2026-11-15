@@ -4,6 +4,16 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Late-completion in Testgen.** Reviewed scope inventory and explicit
+  applicable/not-applicable/blocked rows bind traces, cells and accepted DRs.
+  A deterministic checker separates plan completeness from execution evidence,
+  replays observations against raw Go discovery and input/source hashes, and
+  verifies full/weak repetitions plus four independent canaries. The normal
+  addrConn runner invokes this gate. Gobreaker has a public-API readiness probe
+  with an observable guard-removal red; generation rollover is explicitly outside
+  the terminal/idle-resource v1 contract. No second adapter transfer is claimed.
+  See `docs/evidence/late-workflow/README.md`.
+
 - **Reusable late-completion oracle, first validated on addrConn.** A declarative
   profile and language-neutral observation protocol check both completion/
   termination orderings, terminality/publication, effects and resource release.

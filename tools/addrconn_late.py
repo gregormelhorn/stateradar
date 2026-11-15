@@ -14,6 +14,7 @@ import tempfile
 from addrconn_f09 import PIN, ROOT, COMPONENT, command, verify_records, verify_harness
 from check_fault_mutants import copy_component, load_config, run_command, classify_result
 from late_completion import evaluate
+from check_late_workflow import check_plan, write_receipt, check_execution
 from mutation_verdict import cell_verdict
 
 FIXTURE = COMPONENT / 'late-completion'
@@ -84,8 +85,10 @@ def main():
         if command(['git','rev-parse','HEAD'],checkout).strip()!=PIN or command(['git','status','--porcelain'],checkout).strip():
             raise ValueError('reference checkout must be clean and exactly pinned')
         verify_harness();verify_anchor();verify_records(checkout)
+        workflow=check_plan(FIXTURE/'workflow.json',ROOT)
         output = args.output_dir.resolve() if args.output_dir else tmp/'evidence'
         output.mkdir(parents=True,exist_ok=True)
+        (output/'upstream-source.go.txt').write_bytes((checkout/'clientconn.go').read_bytes())
         root = tmp/'component'
         shutil.copytree(checkout,root,ignore=shutil.ignore_patterns('.git'))
         shutil.copytree(FIXTURE,root/'late')
@@ -150,6 +153,9 @@ def main():
             rows.append({'id':mutant.identifier,'full':'KILLED','weak':verdict})
             print(f'REPLAY {mutant.identifier}: full KILLED (5 repeats), weak SURVIVED (10 repeats)',flush=True)
         (output/'results.json').write_text(json.dumps({'upstreamSha':PIN,'results':rows},indent=2)+'\n')
+        write_receipt(FIXTURE/'workflow.json',ROOT,output)
+        verified=check_execution(workflow,ROOT,output)
+        print(f'LATE WORKFLOW PASS: 3 applicable scenarios; {verified} full/weak variants; 4 independent canaries',flush=True)
         print('LATE COMPLETION PASS: 2 F-04 mutants; 4 independent canaries; both orders; prior backoff and upstream controls pass')
 
 

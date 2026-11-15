@@ -123,6 +123,48 @@ Convert each adversarial trace from `adversarial-traces.md` whose question has a
 
 → `test_scenarios_*.py`
 
+#### Late-completion applicability and evidence
+
+Review the scoped traces for pending operations that can complete after termination
+or a lifecycle change. Write `scenario-scope.json` as a separate reviewed inventory:
+boundary, matrix or explicitly bounded scenario slice, trace IDs, cell references,
+orderings, contract facts, seam availability and fragment citations. Do not claim
+that a scenario slice covers the whole matrix. Include the positive ordering.
+
+Write `workflow.json` with exactly one reasoned disposition per inventoried trace:
+`applicable`, `not-applicable`, or `blocked`. For the v1 late-completion oracle,
+check an accepted terminal lifecycle, one owned idle resource, no post-terminal
+effects, and exactly-once release. Record these facts as true, false or unknown;
+do not infer a terminal/resource contract from an event's name. A false fact
+excludes this profile. Unknown semantics require an OPEN question; unavailable
+scheduling or observation seams block execution. Block only the affected traces.
+Exclusions require citations and reasons too. Generation rollover, replacement,
+or active-resource draining must not be forced into terminal/idle semantics.
+
+Applicable rows bind their trace, cell, order and accepted DR to unique cases in
+`profile.json`. Both completion/termination orderings are mandatory. Use the
+schemas and reference fixtures described in `docs/late-completion.md`; v1 decision
+files use the pack's JSON-compatible YAML representation. First validate the plan:
+
+```sh
+python tools/check_late_workflow.py <workflow.json> --repo <repository>
+```
+
+A plan pass is not execution evidence. Run the component adapter, baseline,
+full/weak mutants and four independent state/publication/effect/resource canaries.
+Require all four canaries before scoring behavioral mutants. Retain raw Go test
+events, observations, exact repetition counts, pinned source, and input hashes in
+`execution.json` and `workflow-receipt.json`. Then run the same checker with
+`--evidence <run-directory>` and wire it into acceptance/CI. The current execution
+reader is Go JSON; a different runtime needs its own executed discovery reader.
+The shared behavioral oracle remains language-neutral. Demonstrate invalid-plan,
+incomplete-execution and stale-input failures before trusting the gate.
+
+The checker replays every observation and requires the declared target to fail
+in every full repetition, each canary to isolate its projection, and complete
+weak controls to survive. Timeouts, missing tests, partial traces or stale inputs
+are BLOCKED, never kills. Never weaken tests to produce a favorable classification.
+
 ### Step 4 — Coverage map and checker
 
 Write `matrix-coverage.json`: every matrix cell → test id, or `untestable-via-seam: <reason>`. Keep the generated suite type-clean: the cell suite must pass the repo's static type gate — typed seams make assertions machine-checkable, and untyped fixture helpers are where construction bugs hide (dobby found ~8 real construction bugs the first time the domain suite was type-gated, 2026-08-05). Extend `domain-analysis/<component>/check_matrix.py` with two checks. Every non-UNSPECIFIED cell has a mapped test or a reasoned untestable entry. Every ignore/reject/defer cell has a DR link. Then wire both checkers into the suite:
@@ -246,4 +288,4 @@ Run the full suite. Write `deviation-report.md`: every failing test is a deviati
 
 ### Step 6 — Summary
 
-Update `summary.md`: cells total / tested / untestable / UNSPECIFIED-skipped; scenarios converted / skipped; the suite result; the deviations found (and fixed, if permitted); the checker status. Optional honesty probe, if a mutation tool is available (`mutmut`, `cosmic-ray`, Stryker). Run it on the component's lifecycle code. Report surviving mutants as weak spots of the suite.
+Update `summary.md`: cells total / tested / untestable / UNSPECIFIED-skipped; scenarios converted / skipped; the suite result; the deviations found (and fixed, if permitted); the checker status. Also report late-completion applicable/excluded/blocked counts, the declared scope boundary, and plan-only versus executed evidence status. Optional honesty probe, if a mutation tool is available (`mutmut`, `cosmic-ray`, Stryker). Run it on the component's lifecycle code. Report surviving mutants as weak spots of the suite.

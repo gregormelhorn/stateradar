@@ -1,0 +1,39 @@
+package gobreaker
+
+import (
+    "testing"
+    "time"
+)
+
+// Public API only: an old completion must not count in the new half-open trial.
+func TestStaleCompletionReadiness(t *testing.T) {
+    cb := NewTwoStepCircuitBreaker(Settings{
+        MaxRequests: 1,
+        Timeout: time.Nanosecond,
+        ReadyToTrip: func(c Counts) bool { return c.TotalFailures >= 1 },
+    })
+    oldDone, err := cb.Allow()
+    if err != nil { t.Fatal(err) }
+    failDone, err := cb.Allow()
+    if err != nil { t.Fatal(err) }
+    failDone(false)
+    deadline := time.Now().Add(time.Second)
+    var currentDone func(bool)
+    for {
+        currentDone, err = cb.Allow()
+        if err == nil { break }
+        if err != ErrOpenState || time.Now().After(deadline) { t.Fatalf("new generation unavailable: %v", err) }
+        time.Sleep(time.Microsecond)
+    }
+    if cb.State() != StateHalfOpen { t.Fatal("control did not reach half-open") }
+    before := cb.Counts()
+    oldDone(true)
+    if cb.State() != StateHalfOpen || cb.Counts() != before {
+        t.Fatalf("stale completion changed current trial: state=%v counts=%+v want=%+v", cb.State(), cb.Counts(), before)
+    }
+    currentDone(true)
+    if cb.State() != StateClosed { t.Fatal("current completion did not close breaker") }
+    next, err := cb.Allow()
+    if err != nil { t.Fatalf("component did not continue: %v", err) }
+    next(true)
+}

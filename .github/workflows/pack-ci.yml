@@ -18,6 +18,8 @@ jobs:
           cache: false
       - name: reusable late-completion oracle and addrConn reference
         run: |
+          python tools/selftest/test_late_workflow.py
+          python tools/gobreaker_late_readiness.py
           python tools/selftest/test_late_completion.py
           python tools/selftest/test_late_adapter.py
           python tools/addrconn_late.py

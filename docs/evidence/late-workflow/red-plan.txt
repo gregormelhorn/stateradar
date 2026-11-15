@@ -1,0 +1,170 @@
+FFFEFFFFFFF.FFF
+======================================================================
+ERROR: test_excluded_plan_reports_no_execution (__main__.Workflow.test_excluded_plan_reports_no_execution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 83, in test_excluded_plan_reports_no_execution
+    self.assertEqual(result['applicable'],0)
+                     ~~~~~~^^^^^^^^^^^^^^
+KeyError: 'applicable'
+
+======================================================================
+FAIL: test_bad_citation (__main__.Workflow.test_bad_citation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 71, in test_bad_citation
+    self.scope['traces'][0]['citations'][0]['fragment']='invented';self.reject('citation')
+                                                                   ~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_canary_dependency_bypass (__main__.Workflow.test_canary_dependency_bypass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 76, in test_canary_dependency_bypass
+    self.write('generation.json',self.generation);self.reject('canary prerequisites')
+                                                  ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_duplicate_row (__main__.Workflow.test_duplicate_row)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 51, in test_duplicate_row
+    self.plan['rows'].append(self.plan['rows'][0]);self.reject('scope coverage')
+                                                   ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_false_exemption (__main__.Workflow.test_false_exemption)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 64, in test_false_exemption
+    self.plan['rows'][0].update(status='not-applicable');self.reject('applicability')
+                                                         ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_missing_canary (__main__.Workflow.test_missing_canary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 73, in test_missing_canary
+    del self.generation['projections']['resource'];self.write('generation.json',self.generation);self.reject('four projections')
+                                                                                                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_missing_positive_control (__main__.Workflow.test_missing_positive_control)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 62, in test_missing_positive_control
+    self.profile['cases'].pop();self.write('profile.json',self.profile);self.reject('both late')
+                                                                        ~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_missing_seam_is_blocked (__main__.Workflow.test_missing_seam_is_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 69, in test_missing_seam_is_blocked
+    self.scope['traces'][0]['seamsAvailable']=False;self.reject('applicability')
+                                                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_omitted_scope_row (__main__.Workflow.test_omitted_scope_row)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 49, in test_omitted_scope_row
+    self.plan['rows'].pop();self.reject('scope coverage')
+                            ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_unaccepted_dr (__main__.Workflow.test_unaccepted_dr)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 60, in test_unaccepted_dr
+    self.write('decision.yaml',{'id':'DR-001','status':'proposed'});self.reject('accepted decision')
+                                                                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_unknown_requires_open_question (__main__.Workflow.test_unknown_requires_open_question)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 67, in test_unknown_requires_open_question
+    self.plan['rows'][0]={'trace':'late','status':'blocked','reason':'Awaiting owner'};self.reject('OPEN question')
+                                                                                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_wrong_cell (__main__.Workflow.test_wrong_cell)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 53, in test_wrong_cell
+    self.scope['traces'][0]['cell']='Other x Complete';self.reject('cell/order')
+                                                       ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_wrong_dr (__main__.Workflow.test_wrong_dr)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 58, in test_wrong_dr
+    self.scope['traces'][0]['decision']='other.yaml';self.reject('decision')
+                                                     ~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+======================================================================
+FAIL: test_wrong_order (__main__.Workflow.test_wrong_order)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 55, in test_wrong_order
+    self.scope['traces'][0]['order']=self.profile['cases'][1]['order'];self.reject('cell/order')
+                                                                       ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_late_workflow.py", line 46, in reject
+    with self.assertRaisesRegex(w.EvidenceError,pattern):w.check_plan(self.path,self.root)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: EvidenceError not raised
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.035s
+
+FAILED (failures=13, errors=1)

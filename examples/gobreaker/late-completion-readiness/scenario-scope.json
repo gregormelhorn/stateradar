@@ -1,0 +1,44 @@
+{
+  "formatVersion": 1,
+  "boundary": "Content-pinned gobreaker TwoStepCircuitBreaker generation rollover, public API; one readiness trace",
+  "coverage": "scenario-slice",
+  "traces": [
+    {
+      "id": "GB-old-completion",
+      "cell": "HalfOpen x OldCompletion",
+      "order": [
+        "request",
+        "generation-change",
+        "old-completion",
+        "current-completion"
+      ],
+      "contract": {
+        "terminal": false,
+        "ownedIdleResource": false,
+        "noLateEffects": true,
+        "exactRelease": false
+      },
+      "seamsAvailable": true,
+      "citations": [
+        {
+          "file": "docs/evidence/identity-postreview/runs/gobreaker-identity/input/gobreaker.go",
+          "line": 46,
+          "fragment": "Counts ignores the results of the requests sent before clearing.",
+          "provenance": "explicit-requirement"
+        },
+        {
+          "file": "docs/evidence/identity-postreview/runs/gobreaker-identity/input/gobreaker.go",
+          "line": 36,
+          "fragment": "case StateOpen:",
+          "provenance": "observed-in-code"
+        },
+        {
+          "file": "docs/evidence/identity-postreview/runs/gobreaker-identity/input/gobreaker.go",
+          "line": 342,
+          "fragment": "cb.setState(StateHalfOpen, now)",
+          "provenance": "observed-in-code"
+        }
+      ]
+    }
+  ]
+}

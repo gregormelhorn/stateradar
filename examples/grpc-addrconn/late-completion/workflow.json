@@ -1,0 +1,43 @@
+{
+  "formatVersion": 1,
+  "scope": "examples/grpc-addrconn/late-completion/scenario-scope.json",
+  "rows": [
+    {
+      "trace": "LC-late-publication",
+      "status": "applicable",
+      "reason": "Accepted DR-001 terminal contract, observed idle-resource seam; positive control included.",
+      "profileCase": "late-publication"
+    },
+    {
+      "trace": "LC-late-notification",
+      "status": "applicable",
+      "reason": "Accepted DR-001 terminal contract, observed idle-resource seam; positive control included.",
+      "profileCase": "late-notification"
+    },
+    {
+      "trace": "LC-normal-completion",
+      "status": "applicable",
+      "reason": "Accepted DR-001 terminal contract, observed idle-resource seam; positive control included.",
+      "profileCase": "normal-completion"
+    }
+  ],
+  "inputs": {
+    "profile": "examples/grpc-addrconn/late-completion/profile.json",
+    "mutants": "examples/grpc-addrconn/late-completion/fault-mutants.json",
+    "generation": "examples/grpc-addrconn/late-completion/mutant-generation.json",
+    "adapter": "examples/grpc-addrconn/late-completion/run.py",
+    "probe": "examples/grpc-addrconn/late-completion/probe_test.go.txt",
+    "oracle": "tools/late_completion.py",
+    "patch": "examples/grpc-addrconn/late-completion/evaluation-patch.json"
+  },
+  "execution": {
+    "reader": "go-json-v1",
+    "testRoot": "TestLateCompletionEvidence",
+    "counts": {
+      "baseline": 10,
+      "full": 5,
+      "weak": 10
+    },
+    "sourceSha256": "a488d93d6a3963b46150f39d7167147edad5208ad0f79d9153fbfce048fed74a"
+  }
+}
