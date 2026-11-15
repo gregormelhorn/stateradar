@@ -1,0 +1,24 @@
+     1	// Copyright IBM Corp. 2014, 2025
+     2	// SPDX-License-Identifier: MPL-2.0
+     3	
+     4	// Package lru provides three different LRU caches of varying sophistication.
+     5	//
+     6	// Cache is a simple LRU cache. It is based on the LRU implementation in
+     7	// groupcache: https://github.com/golang/groupcache/tree/master/lru
+     8	//
+     9	// TwoQueueCache tracks frequently used and recently used entries separately.
+    10	// This avoids a burst of accesses from taking out frequently used entries, at
+    11	// the cost of about 2x computational overhead and some extra bookkeeping.
+    12	//
+    13	// ARCCache is an adaptive replacement cache. It tracks recent evictions as well
+    14	// as recent usage in both the frequent and recent caches. Its computational
+    15	// overhead is comparable to TwoQueueCache, but the memory overhead is linear
+    16	// with the size of the cache.
+    17	//
+    18	// ARC has been patented by IBM, so do not use it if that is problematic for
+    19	// your program. For this reason, it is in a separate go module contained within
+    20	// this repository.
+    21	//
+    22	// All caches in this package take locks while operating, and are therefore
+    23	// thread-safe for consumers.
+    24	package lru

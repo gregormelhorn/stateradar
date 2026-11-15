@@ -1,0 +1,55 @@
+group G-01 New: proven
+group G-02 Resize occupancy: proven
+group G-03 Add miss: proven
+group G-04 Oldest and removal: proven
+group G-05 Capture and delivery: proven
+group G-08 Loop index: proven
+group G-09 Resize signed difference: proven
+group G-10 Resize target sign: proven
+group G-06 membership/equality: not-formalizable: dynamic-state: map hash/equality and list membership depend on runtime key and stored entries; UV-08/09 probe faults
+group G-07 callback completion: not-formalizable: external-call: injected callback controls return, panic, exit, reentry and waiting
+G-01 New boundary probes (NAT-01; finite signed Go int projected to Int because only comparison with zero):
+  {'size': -1}: reject
+  {'size': 0}: reject
+  {'size': 1}: construct
+G-02 Resize occupancy boundary probes (NAT-01; requested size nonnegative; diff cannot wrap):
+  {'n': 2, 'size': 0}: shrink
+  {'n': 2, 'size': 1}: shrink
+  {'n': 2, 'size': 2}: equal
+  {'n': 2, 'size': 3}: expand
+G-03 Add miss boundary probes (NAT-01; feasible list length (excludes int overflow on list insert)):
+  {'n': 0, 'cap': 2}: retain
+  {'n': 1, 'cap': 2}: retain
+  {'n': 2, 'cap': 2}: evict
+  {'n': 0, 'cap': -1}: evict
+  {'n': 0, 'cap': 0}: evict
+  {'n': 0, 'cap': 1}: retain
+G-04 Oldest and removal boundary probes (NAT-01; negative count outside domain):
+  {'n': -1}: 
+  {'n': 0}: empty
+  {'n': 1}: last
+  {'n': 2}: multiple
+G-05 Capture and delivery boundary probes (NAT-02; work is operation-specific boolean, not a guarantee of nonempty batch if reported diff exceeds removals):
+  {'has_callback': False, 'work_present': False}: no delivery
+  {'has_callback': False, 'work_present': True}: no delivery
+  {'has_callback': True, 'work_present': False}: no delivery
+  {'has_callback': True, 'work_present': True}: deliver
+G-08 Loop index boundary probes (NAT-01; loop indices nonnegative, diff clamped):
+  {'j': 1, 'diff': 2}: next
+  {'j': 2, 'diff': 2}: stop
+  {'j': 3, 'diff': 2}: stop
+  {'j': 0, 'diff': 0}: stop
+  {'j': 0, 'diff': 1}: next
+G-09 Resize signed difference boundary probes (NAT-01; BitVec signed subtraction/comparison, Go int width on this checkout runtime):
+  {'ln': 1, 'requested': 9223372036854775808}: clamp
+  {'ln': 1, 'requested': 18446744073709551614}: loop-bound
+  {'ln': 1, 'requested': 18446744073709551615}: loop-bound
+  {'ln': 1, 'requested': 0}: loop-bound
+  {'ln': 1, 'requested': 1}: loop-bound
+  {'ln': 1, 'requested': 2}: clamp
+G-10 Resize target sign boundary probes (NAT-01; classify target by written size):
+  {'size': -1}: negative
+  {'size': 0}: disabled
+  {'size': 1}: positive
+G-09 n=1 requested=-2 signed difference=3
+G-09 n=1 requested=-9223372036854775808 signed difference=-9223372036854775807

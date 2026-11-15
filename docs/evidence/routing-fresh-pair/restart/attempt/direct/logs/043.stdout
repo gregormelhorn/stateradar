@@ -1,0 +1,84 @@
+1:// Copyright 2009 The Go Authors. All rights reserved.
+2:// Use of this source code is governed by a BSD-style
+3:// license that can be found in the LICENSE file.
+13:// There is a modified copy of this file in runtime/rwmutex.go.
+14:// If you make any changes here, see if you should make them there.
+16:// A RWMutex is a reader/writer mutual exclusion lock.
+17:// The lock can be held by an arbitrary number of readers or a single writer.
+18:// The zero value for a RWMutex is an unlocked mutex.
+19://
+20:// A RWMutex must not be copied after first use.
+21://
+22:// If any goroutine calls [RWMutex.Lock] while the lock is already held by
+23:// one or more readers, concurrent calls to [RWMutex.RLock] will block until
+24:// the writer has acquired (and released) the lock, to ensure that
+25:// the lock eventually becomes available to the writer.
+26:// Note that this prohibits recursive read-locking.
+27:// A [RWMutex.RLock] cannot be upgraded into a [RWMutex.Lock],
+28:// nor can a [RWMutex.Lock] be downgraded into a [RWMutex.RLock].
+29://
+30:// In the terminology of [the Go memory model],
+31:// the n'th call to [RWMutex.Unlock] “synchronizes before” the m'th call to Lock
+32:// for any n < m, just as for [Mutex].
+33:// For any call to RLock, there exists an n such that
+34:// the n'th call to Unlock “synchronizes before” that call to RLock,
+35:// and the corresponding call to [RWMutex.RUnlock] “synchronizes before”
+36:// the n+1'th call to Lock.
+37://
+38:// [the Go memory model]: https://go.dev/ref/mem
+49:// Happens-before relationships are indicated to the race detector via:
+50:// - Unlock  -> Lock:  readerSem
+51:// - Unlock  -> RLock: readerSem
+52:// - RUnlock -> Lock:  writerSem
+53://
+54:// The methods below temporarily disable handling of race synchronization
+55:// events in order to provide the more precise model above to the race
+56:// detector.
+57://
+58:// For example, atomic.AddInt32 in RLock should not appear to provide
+59:// acquire-release semantics, which would incorrectly synchronize racing
+60:// readers, thus potentially missing races.
+62:// RLock locks rw for reading.
+63://
+64:// It should not be used for recursive read locking; a blocked Lock
+65:// call excludes new readers from acquiring the lock. See the
+66:// documentation on the [RWMutex] type.
+67:func (rw *RWMutex) RLock() {
+82:// TryRLock tries to lock rw for reading and reports whether it succeeded.
+83://
+84:// Note that while correct uses of TryRLock do exist, they are rare,
+85:// and use of TryRLock is often a sign of a deeper problem
+86:// in a particular use of mutexes.
+87:func (rw *RWMutex) TryRLock() bool {
+110:// RUnlock undoes a single [RWMutex.RLock] call;
+111:// it does not affect other simultaneous readers.
+112:// It is a run-time error if rw is not locked for reading
+113:// on entry to RUnlock.
+141:// Lock locks rw for writing.
+142:// If the lock is already locked for reading or writing,
+143:// Lock blocks until the lock is available.
+144:func (rw *RWMutex) Lock() {
+164:// TryLock tries to lock rw for writing and reports whether it succeeded.
+165://
+166:// Note that while correct uses of TryLock do exist, they are rare,
+167:// and use of TryLock is often a sign of a deeper problem
+168:// in a particular use of mutexes.
+169:func (rw *RWMutex) TryLock() bool {
+195:// Unlock unlocks rw for writing. It is a run-time error if rw is
+196:// not locked for writing on entry to Unlock.
+197://
+198:// As with Mutexes, a locked [RWMutex] is not associated with a particular
+199:// goroutine. One goroutine may [RWMutex.RLock] ([RWMutex.Lock]) a RWMutex and then
+200:// arrange for another goroutine to [RWMutex.RUnlock] ([RWMutex.Unlock]) it.
+225:// syscall_hasWaitingReaders reports whether any goroutine is waiting
+226:// to acquire a read lock on rw. This exists because syscall.ForkLock
+227:// is an RWMutex, and we can't change that without breaking compatibility.
+228:// We don't need or want RWMutex semantics for ForkLock, and we use
+229:// this private API to avoid having to change the type of ForkLock.
+230:// For more details see the syscall package.
+231://
+232://go:linkname syscall_hasWaitingReaders syscall.hasWaitingReaders
+238:// RLocker returns a [Locker] interface that implements
+239:// the [Locker.Lock] and [Locker.Unlock] methods by calling rw.RLock and rw.RUnlock.
+240:func (rw *RWMutex) RLocker() Locker {
+246:func (r *rlocker) Lock()   { (*RWMutex)(r).RLock() }

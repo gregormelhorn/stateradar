@@ -1,0 +1,182 @@
+[
+  {
+    "file": "lru_test.go",
+    "line": 86,
+    "fragment": "\tif l.Len() != 128 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 89,
+    "fragment": "\tif l.Cap() != 128 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 93,
+    "fragment": "\tif evictCounter != 128 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 98,
+    "fragment": "\t\tif v, ok := l.Get(k); !ok || v != k || v != i+128 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 103,
+    "fragment": "\t\tif v != i+128 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 108,
+    "fragment": "\t\tif _, ok := l.Get(i); ok {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 113,
+    "fragment": "\t\tif _, ok := l.Get(i); !ok {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 119,
+    "fragment": "\t\tif _, ok := l.Get(i); ok {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 124,
+    "fragment": "\tl.Get(192) // expect 192 to be last key in l.Keys()"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 127,
+    "fragment": "\t\tif (i < 63 && k != i+193) || (i == 63 && k != 192) {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 133,
+    "fragment": "\tif l.Len() != 0 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 136,
+    "fragment": "\tif _, ok := l.Get(200); ok {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 153,
+    "fragment": "\tif l.Add(1, 1) == true || evictCounter != 0 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 156,
+    "fragment": "\tif l.Add(2, 2) == false || evictCounter != 1 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 175,
+    "fragment": "\tif l.Contains(1) {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 189,
+    "fragment": "\tcontains, evict := l.ContainsOrAdd(1, 1)"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 198,
+    "fragment": "\tcontains, evict = l.ContainsOrAdd(1, 1)"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 219,
+    "fragment": "\tprevious, contains, evict := l.PeekOrAdd(1, 1)"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 231,
+    "fragment": "\tcontains, evict = l.ContainsOrAdd(1, 1)"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 252,
+    "fragment": "\tif v, ok := l.Peek(1); !ok || v != 1 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 257,
+    "fragment": "\tif l.Contains(1) {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 276,
+    "fragment": "\tevicted := l.Resize(1)"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 280,
+    "fragment": "\tif onEvictCounter != 1 {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 290,
+    "fragment": "\tevicted = l.Resize(2)"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 296,
+    "fragment": "\tif !l.Contains(3) || !l.Contains(4) {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 332,
+    "fragment": "\t\tcache.wantKeys(t, []int{2, 1})"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 337,
+    "fragment": "\t\tcache.wantKeys(t, []int{1, 3})"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 340,
+    "fragment": "\t\tif !reflect.DeepEqual(evictedKeys, want) {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 379,
+    "fragment": "\t\tcache.wantKeys(t, []int{1, 2})"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 388,
+    "fragment": "\t\tcache.wantKeys(t, []int{2, 3})"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 391,
+    "fragment": "\t\tif !reflect.DeepEqual(evictedKeys, want) {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 430,
+    "fragment": "\t\tcache.wantKeys(t, []int{1, 2})"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 439,
+    "fragment": "\t\tcache.wantKeys(t, []int{2, 3})"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 442,
+    "fragment": "\t\tif !reflect.DeepEqual(evictedKeys, want) {"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 27,
+    "fragment": "\t\t\tl.Add(trace[i], trace[i])"
+  },
+  {
+    "file": "lru_test.go",
+    "line": 61,
+    "fragment": "\t\tif _, ok := l.Get(trace[i]); ok {"
+  }
+]

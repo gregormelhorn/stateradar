@@ -79,6 +79,9 @@ jobs:
           python tools/selftest/test_pilot_accounting.py
           python tools/selftest/test_run_flash_pilot.py
           python tools/selftest/test_hybrid_pilot.py
+      - name: isolated routing pair and restart accounting
+        run: |
+          python -m unittest tools.selftest.test_fresh_pair_gates tools.selftest.test_fresh_pair_server tools.selftest.test_fresh_pair_smoke_check tools.selftest.test_fresh_pair_recovery tools.selftest.test_fresh_pair_restart
       # The tool regression runner executes the pack tools against golden
       # fixtures and asserts expected output. Hard-fails on zero cases.
       - name: tool regression tests

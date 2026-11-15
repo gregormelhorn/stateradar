@@ -1,0 +1,75 @@
+// Copyright IBM Corp. 2014, 2025
+// SPDX-License-Identifier: MPL-2.0
+
+package lru
+
+import (
+	"sync"
+
+	"github.com/hashicorp/golang-lru/v2/simplelru"
+)
+
+const (
+	// DefaultEvictedBufferSize defines the default buffer size to store evicted key/val
+	DefaultEvictedBufferSize = 16
+)
+
+// Cache is a thread-safe fixed size LRU cache.
+type Cache[K comparable, V any] struct {
+	lru         *simplelru.LRU[K, V]
+	evictedKeys []K
+	evictedVals []V
+	onEvictedCB func(k K, v V)
+	lock        sync.RWMutex
+}
+
+// New creates an LRU of the given size.
+func New[K comparable, V any](size int) (*Cache[K, V], error) {
+	return NewWithEvict[K, V](size, nil)
+}
+
+// NewWithEvict constructs a fixed size cache with the given eviction
+// callback.
+func NewWithEvict[K comparable, V any](size int, onEvicted func(key K, value V)) (c *Cache[K, V], err error) {
+	// create a cache with default settings
+	c = &Cache[K, V]{
+		onEvictedCB: onEvicted,
+	}
+	if onEvicted != nil {
+		c.initEvictBuffers()
+		onEvicted = c.onEvicted
+	}
+	c.lru, err = simplelru.NewLRU(size, onEvicted)
+	return
+}
+
+func (c *Cache[K, V]) initEvictBuffers() {
+	c.evictedKeys = make([]K, 0, DefaultEvictedBufferSize)
+	c.evictedVals = make([]V, 0, DefaultEvictedBufferSize)
+}
+
+// onEvicted save evicted key/val and sent in externally registered callback
+// outside of critical section
+func (c *Cache[K, V]) onEvicted(k K, v V) {
+	c.evictedKeys = append(c.evictedKeys, k)
+	c.evictedVals = append(c.evictedVals, v)
+}
+
+// Purge is used to completely clear the cache.
+func (c *Cache[K, V]) Purge() {
+	var ks []K
+	var vs []V
+	c.lock.Lock()
+	c.lru.Purge()
+	if c.onEvictedCB != nil && len(c.evictedKeys) > 0 {
+		ks, vs = c.evictedKeys, c.evictedVals
+		c.initEvictBuffers()
+	}
+	c.lock.Unlock()
+	// invoke callback outside of critical section
+	if c.onEvictedCB != nil {
+		for i := 0; i < len(ks); i++ {
+			c.onEvictedCB(ks[i], vs[i])
+		}
+	}
+}

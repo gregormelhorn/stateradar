@@ -1,0 +1,11 @@
+24:func TestPilotPurgeThenAdd(t *testing.T) {
+46:		t.Log("purge then add reached full while older callback remained pending")
+48:		t.Fatal("purge then add did not leave just the new entry")
+67:func TestPilotResizeBoundary(t *testing.T) {
+92:func TestPilotNaNRemovalAndPurge(t *testing.T) {
+115:func TestPilotKeyPanicAndLock(t *testing.T) {
+146:func TestPilotFailedConstructorPanic(t *testing.T) {
+152:func TestPilotCallbackPanicAndGoexit(t *testing.T) {
+199:func TestPilotCallbackAfterPurgeFailureAndRecovery(t *testing.T) {
+231:func TestPilotGetTwiceSameValue(t *testing.T) {
+247:func TestPilotRaceCapResize(t *testing.T) {

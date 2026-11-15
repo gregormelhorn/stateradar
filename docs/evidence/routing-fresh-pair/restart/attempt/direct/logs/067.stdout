@@ -1,0 +1,48 @@
+6:catalogue, the prose requirements, and the normative contract text of
+16:      --requirements DECISIONS.md \
+17:      --requirements docs/ARCHITECTURE_CONTEXT.md:M8.3 \
+22:  --requirements FILE         whole file
+23:  --requirements FILE:PATTERN only lines from the first PATTERN match
+61:def _read_requirements(spec: str, repo: Path) -> str:
+66:        raise ValueError(f"requirements file missing: {path}")
+72:        raise ValueError(f"requirements pattern {pattern!r} not found in {path}")
+276:# text Part B needs (doctrine lines, requirements), not implementation code
+278:# the Part B inputs and the prose files the doctrine lines cite, never a file
+296:def quote_files(doctrine: str, inputs: list[str], repo: Path, analysis_dir: Path) -> frozenset:
+298:    --repo: the Part B inputs and the files the doctrine lines cite. A path
+310:    paths.update(_norm(m.group(1)) for m in re.finditer("(" + _FILE + r")`?:\d", doctrine))
+318:# kept when the Part B sources (requirements, contracts, doctrine lines) use
+325:def domain_ids(*sources: str, doctrine: str = "") -> set[str]:
+329:    doctrine lines only the quoted text counts: their glosses are Part A's."""
+333:    for quote in re.findall(r"[\"\u201c]([^\"\u201c\u201d\n]+)[\"\u201d]", doctrine):
+431:def _extract_doctrine(extraction: str) -> str:
+432:    """The doctrine lines of an extraction: DOC-n bullets, numbered items or
+433:    table rows under a heading (any level) that names doctrine. Rows outside
+440:        if heading and "doctrine" in s.lower():
+459:def assemble(args: argparse.Namespace, pack_root: Path) -> int:
+469:    # Doctrine lines travel with the requirements: every artefact in the
+471:    # doctrine line missing from the blind input.
+472:    doctrine = ""
+476:        doctrine = _extract_doctrine(ext)
+477:        if not doctrine and re.search(r"\bDOC-\d+", ext):
+478:            # A silent skip sent Part B no doctrine lines (routed pilot 2026-11-13).
+480:                             "item or table row under a heading that names doctrine")
+481:    sources = [(f"INPUT 2: REQUIREMENTS ({spec})", _read_requirements(spec, repo))
+482:               for spec in args.requirements]
+485:    keep_ids = domain_ids(*(text for _, text in sources), doctrine=doctrine)
+486:    keep_quotes = quote_files(doctrine, list(args.requirements) + list(args.contracts), repo, adir)
+488:    later = cited_names(catalogue + "\n" + doctrine, repo)
+497:                         "ids the requirements do not use)")
+500:    blind_doctrine = blind_catalogue(doctrine, keep_ids, keep_quotes, later) if doctrine else ""
+501:    if blind_doctrine:
+502:        blocks.append(("INPUT 2b: DOCTRINE LINES (from the extraction)", blind_doctrine))
+505:        changed_table_rows(doctrine, blind_doctrine) if blind_doctrine else [])
+510:    left = leftover_fragments(blind_copy + "\n" + blind_doctrine, keep_quotes, later)
+519:    kept = sorted(set(_LOCAL_ID.findall(blind_copy + "\n" + blind_doctrine)))
+520:    both = catalogue + "\n" + doctrine
+529:        print("PART-B PACK: kept in the catalogue or doctrine lines because the requirements, "
+530:              "contracts or quoted doctrine text use them: " + ", ".join(kept), file=sys.stderr)
+656:    parser.add_argument("--requirements", action="append", default=[],
+670:    if not args.requirements and not args.contracts:
+671:        print("PART-B PACK: assemble mode needs --requirements and/or --contracts",
+676:    except ValueError as error:  # missing inputs, undeliverable doctrine, stripped ids

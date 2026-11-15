@@ -1,0 +1,262 @@
+[
+  {
+    "file": "simplelru/lru.go",
+    "line": 25,
+    "fragment": "\tif size <= 0 {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 26,
+    "fragment": "\t\treturn nil, errors.New(\"must provide a positive size\")"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 31,
+    "fragment": "\t\tevictList: internal.NewList[K, V](),"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 32,
+    "fragment": "\t\titems:     make(map[K]*internal.Entry[K, V]),"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 35,
+    "fragment": "\treturn c, nil"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 40,
+    "fragment": "\tfor k, v := range c.items {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 42,
+    "fragment": "\t\t\tc.onEvict(k, v.Value)"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 44,
+    "fragment": "\t\tdelete(c.items, k)"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 46,
+    "fragment": "\tc.evictList.Init()"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 52,
+    "fragment": "\tif ent, ok := c.items[key]; ok {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 53,
+    "fragment": "\t\tc.evictList.MoveToFront(ent)"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 54,
+    "fragment": "\t\tent.Value = value"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 59,
+    "fragment": "\tent := c.evictList.PushFront(key, value)"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 60,
+    "fragment": "\tc.items[key] = ent"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 62,
+    "fragment": "\tevict := c.evictList.Length() > c.size"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 65,
+    "fragment": "\t\tc.removeOldest()"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 67,
+    "fragment": "\treturn evict"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 72,
+    "fragment": "\tif ent, ok := c.items[key]; ok {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 73,
+    "fragment": "\t\tc.evictList.MoveToFront(ent)"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 74,
+    "fragment": "\t\treturn ent.Value, true"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 76,
+    "fragment": "\treturn"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 82,
+    "fragment": "\t_, ok = c.items[key]"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 83,
+    "fragment": "\treturn ok"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 90,
+    "fragment": "\tif ent, ok = c.items[key]; ok {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 93,
+    "fragment": "\treturn"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 99,
+    "fragment": "\tif ent, ok := c.items[key]; ok {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 101,
+    "fragment": "\t\treturn true"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 103,
+    "fragment": "\treturn false"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 108,
+    "fragment": "\tif ent := c.evictList.Back(); ent != nil {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 112,
+    "fragment": "\treturn"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 117,
+    "fragment": "\tif ent := c.evictList.Back(); ent != nil {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 120,
+    "fragment": "\treturn"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 125,
+    "fragment": "\tkeys := make([]K, c.evictList.Length())"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 127,
+    "fragment": "\tfor ent := c.evictList.Back(); ent != nil; ent = ent.PrevEntry() {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 131,
+    "fragment": "\treturn keys"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 136,
+    "fragment": "\tvalues := make([]V, c.evictList.Length())"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 138,
+    "fragment": "\tfor ent := c.evictList.Back(); ent != nil; ent = ent.PrevEntry() {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 142,
+    "fragment": "\treturn values"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 147,
+    "fragment": "\treturn c.evictList.Length()"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 152,
+    "fragment": "\treturn c.size"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 157,
+    "fragment": "\tdiff := c.Len() - size"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 158,
+    "fragment": "\tif diff < 0 {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 159,
+    "fragment": "\t\tdiff = 0"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 161,
+    "fragment": "\tfor i := 0; i < diff; i++ {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 162,
+    "fragment": "\t\tc.removeOldest()"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 164,
+    "fragment": "\tc.size = size"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 165,
+    "fragment": "\treturn diff"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 170,
+    "fragment": "\tif ent := c.evictList.Back(); ent != nil {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 177,
+    "fragment": "\tc.evictList.Remove(e)"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 178,
+    "fragment": "\tdelete(c.items, e.Key)"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 179,
+    "fragment": "\tif c.onEvict != nil {"
+  },
+  {
+    "file": "simplelru/lru.go",
+    "line": 180,
+    "fragment": "\t\tc.onEvict(e.Key, e.Value)"
+  }
+]

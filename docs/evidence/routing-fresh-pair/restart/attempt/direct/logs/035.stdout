@@ -1,0 +1,21 @@
+    blind_parser.add_argument("--max-tokens", type=int, default=8192)
+    blind_parser.add_argument("--package-only", action="store_true",
+                              help="write <output stem>.package.md for inspection; make no call")
+    args = parser.parse_args()
+    if args.command == "jev-batch" and args.summary and args.output is None:
+        batch_parser.error("--summary requires --output to retain all judgments")
+    for path in [getattr(args, "output", None)]:
+        # Fail before anything is paid for if the result cannot be written.
+        if path is not None and (path.is_dir() or not path.parent.is_dir() or not os.access(path.parent, os.W_OK)):
+            print(f"LOCAL MODELS: output {path} is a directory, or {path.parent} does not exist or is not writable",
+                  file=sys.stderr)
+            return 1
+    result: Mapping[str, object]  # printed as JSON; each command has its own shape
+    try:
+        budget = Budget(args.ledger, args.limit_microdollars)
+        if args.command == "status":
+            result = {"committed_or_reserved_microdollars": budget.total(), "limit_microdollars": budget.limit,
+                      "calls": budget.calls()}
+        elif args.command == "set-limit":
+            budget.set_limit(args.amount_microdollars)
+            result = {"limit_microdollars": budget.limit}

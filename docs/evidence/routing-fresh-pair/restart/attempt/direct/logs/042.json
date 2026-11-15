@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "rg",
+    "-n",
+    "func (Goexit|gopanic)|^// Goexit|^// The Goexit|^//.*defer",
+    "/opt/homebrew/Cellar/go/1.27.3/libexec/src/runtime/panic.go"
+  ],
+  "exit_code": 0
+}

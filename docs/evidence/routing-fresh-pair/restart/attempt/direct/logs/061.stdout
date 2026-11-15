@@ -1,0 +1,30 @@
+}
+
+// Keys returns a slice of the keys in the cache, from oldest to newest.
+func (c *Cache[K, V]) Keys() []K {
+	c.lock.RLock()
+	keys := c.lru.Keys()
+	c.lock.RUnlock()
+	return keys
+}
+
+// Values returns a slice of the values in the cache, from oldest to newest.
+func (c *Cache[K, V]) Values() []V {
+	c.lock.RLock()
+	values := c.lru.Values()
+	c.lock.RUnlock()
+	return values
+}
+
+// Len returns the number of items in the cache.
+func (c *Cache[K, V]) Len() int {
+	c.lock.RLock()
+	length := c.lru.Len()
+	c.lock.RUnlock()
+	return length
+}
+
+// Cap returns the capacity of the cache
+func (c *Cache[K, V]) Cap() int {
+	return c.lru.Cap()
+}

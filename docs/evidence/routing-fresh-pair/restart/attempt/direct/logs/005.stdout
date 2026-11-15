@@ -1,0 +1,79 @@
+     1	golang-lru
+     2	==========
+     3	
+     4	This provides the `lru` package which implements a fixed-size
+     5	thread safe LRU cache. It is based on the cache in Groupcache.
+     6	
+     7	Documentation
+     8	=============
+     9	
+    10	Full docs are available on [Go Packages](https://pkg.go.dev/github.com/hashicorp/golang-lru/v2)
+    11	
+    12	LRU cache example
+    13	=================
+    14	
+    15	```go
+    16	package main
+    17	
+    18	import (
+    19		"fmt"
+    20		"github.com/hashicorp/golang-lru/v2"
+    21	)
+    22	
+    23	func main() {
+    24		l, _ := lru.New[int, any](128)
+    25		for i := 0; i < 256; i++ {
+    26			l.Add(i, nil)
+    27		}
+    28		if l.Len() != 128 {
+    29			panic(fmt.Sprintf("bad len: %v", l.Len()))
+    30		}
+    31	}
+    32	```
+    33	
+    34	Expirable LRU cache example
+    35	===========================
+    36	
+    37	```go
+    38	package main
+    39	
+    40	import (
+    41		"fmt"
+    42		"time"
+    43	
+    44		"github.com/hashicorp/golang-lru/v2/expirable"
+    45	)
+    46	
+    47	func main() {
+    48		// make cache with 10ms TTL and 5 max keys
+    49		cache := expirable.NewLRU[string, string](5, nil, time.Millisecond*10)
+    50	
+    51	
+    52		// set value under key1.
+    53		cache.Add("key1", "val1")
+    54	
+    55		// get value under key1
+    56		r, ok := cache.Get("key1")
+    57	
+    58		// check for OK value
+    59		if ok {
+    60			fmt.Printf("value before expiration is found: %v, value: %q\n", ok, r)
+    61		}
+    62	
+    63		// wait for cache to expire
+    64		time.Sleep(time.Millisecond * 12)
+    65	
+    66		// get value under key1 after key expiration
+    67		r, ok = cache.Get("key1")
+    68		fmt.Printf("value after expiration is found: %v, value: %q\n", ok, r)
+    69	
+    70		// set value under key2, would evict old entry because it is already expired.
+    71		cache.Add("key2", "val2")
+    72	
+    73		fmt.Printf("Cache len: %d\n", cache.Len())
+    74		// Output:
+    75		// value before expiration is found: true, value: "val1"
+    76		// value after expiration is found: false, value: ""
+    77		// Cache len: 1
+    78	}
+    79	```

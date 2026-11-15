@@ -1,0 +1,43 @@
+        if not inherits:
+            errors.append(
+                f"event {ev}: no external/internal classification in the "
+                f"catalogue table, and no classified base event referenced "
+                f"(PA-4)")
+
+    # Stage 2: every pair id appears in the traces; control-trace
+    # verdicts that cite a requirement or decision carry the scope
+    # line (requirement-scope rule): "cited text contemplates this
+    # ordering: yes/no". Blocks are split on trace headers, bold or
+    # markdown headings ('**T-01', '### T-01'); a file with no recognised
+    # header would be one block and pass vacuously.
+    traces_path = adir / "adversarial-traces.md"
+    if traces_path.is_file():
+        traces = traces_path.read_text(encoding="utf-8")
+        for pair in sorted(set(re.findall(r"P-\d+[ab]", cat))):
+            if pair not in traces:
+                errors.append(f"pair {pair} missing from adversarial-traces.md")
+        blocks = re.split(r"\n(?=(?:#{1,6}\s+|\*\*)\s*[PTM]-[A-Z]*\d)", traces)
+        for block in blocks:
+            header = block.split("\n", 1)[0][:40]
+            flat = " ".join(block.split())  # scope lines wrap across lines
+            if "control trace" not in flat:
+                continue
+            if not re.search(r"\b(DOC-\d|DR-\d)", flat):
+                continue
+            if "contemplates this ordering" not in flat:
+                errors.append(
+                    f"control trace {header!r} cites a requirement/decision "
+                    f"but carries no 'cited text contemplates this "
+                    f"ordering: yes/no' scope line")
+
+    if errors:
+        print("CHECK MATRIX: FAIL")
+        for e in errors:
+            print(" -", e)
+        return 1
+    print(f"CHECK MATRIX: OK ({len(rows)} rows x {len(events)} events)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

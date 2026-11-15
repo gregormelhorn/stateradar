@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "from pathlib import Path\nimport sys\nd=Path(sys.argv[1])\np=Path('README.md').read_text().splitlines()\n(d/'requirements-prose.md').write_text('\\n'.join(p[:10])+'\\n')\ngroups={'lru.go':[(17,17),(26,26),(31,32),(58,58),(77,77),(94,94),(102,103),(111,112),(120,122),(143,145),(167,167),(184,184),(203,203),(220,220),(228,228),(236,236),(244,244),(252,252)],'doc.go':[(22,23)],'simplelru/lru.go':[(12,12),(23,23)],'simplelru/lru_interface.go':[(9,10),(13,14),(17,17),(20,20),(23,23),(26,26),(29,29),(32,32),(35,35),(38,38),(41,41),(44,44),(47,47)]}\nparts=[]\nfor f,rs in groups.items():\n lines=Path(f).read_text().splitlines()\n for a,b in rs:\n  partes=[x.lstrip() for x in lines[a-1:b]]; assert all(x.startswith('// ') for x in partes)\n  parts.append(f'{f}:{a}\\n'+'\\n'.join(x[3:] for x in partes))\n(d/'contracts.txt').write_text('\\n\\n'.join(parts)+'\\n')\n",
+    "domain-analysis/lruCache"
+  ],
+  "exit_code": 0
+}

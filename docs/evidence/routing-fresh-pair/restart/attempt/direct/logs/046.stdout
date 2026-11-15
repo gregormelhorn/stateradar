@@ -1,0 +1,352 @@
+[
+  {
+    "file": "lru.go",
+    "line": 42,
+    "fragment": "\tc.lru, err = simplelru.NewLRU(size, onEvicted)"
+  },
+  {
+    "file": "lru.go",
+    "line": 54,
+    "fragment": "\tc.evictedKeys = append(c.evictedKeys, k)"
+  },
+  {
+    "file": "lru.go",
+    "line": 63,
+    "fragment": "\tc.lru.Purge()"
+  },
+  {
+    "file": "lru.go",
+    "line": 72,
+    "fragment": "\t\t\tc.onEvictedCB(ks[i], vs[i])"
+  },
+  {
+    "file": "lru.go",
+    "line": 82,
+    "fragment": "\tevicted = c.lru.Add(key, value)"
+  },
+  {
+    "file": "lru.go",
+    "line": 89,
+    "fragment": "\t\tc.onEvictedCB(k, v)"
+  },
+  {
+    "file": "lru.go",
+    "line": 96,
+    "fragment": "\tc.lock.Lock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 97,
+    "fragment": "\tvalue, ok = c.lru.Get(key)"
+  },
+  {
+    "file": "lru.go",
+    "line": 106,
+    "fragment": "\tcontainKey := c.lru.Contains(key)"
+  },
+  {
+    "file": "lru.go",
+    "line": 115,
+    "fragment": "\tvalue, ok = c.lru.Peek(key)"
+  },
+  {
+    "file": "lru.go",
+    "line": 127,
+    "fragment": "\tif c.lru.Contains(key) {"
+  },
+  {
+    "file": "lru.go",
+    "line": 150,
+    "fragment": "\tprevious, ok = c.lru.Peek(key)"
+  },
+  {
+    "file": "lru.go",
+    "line": 172,
+    "fragment": "\tpresent = c.lru.Remove(key)"
+  },
+  {
+    "file": "lru.go",
+    "line": 189,
+    "fragment": "\tevicted = c.lru.Resize(size)"
+  },
+  {
+    "file": "lru.go",
+    "line": 197,
+    "fragment": "\t\t\tc.onEvictedCB(ks[i], vs[i])"
+  },
+  {
+    "file": "lru.go",
+    "line": 208,
+    "fragment": "\tkey, value, ok = c.lru.RemoveOldest()"
+  },
+  {
+    "file": "lru.go",
+    "line": 223,
+    "fragment": "\tkey, value, ok = c.lru.GetOldest()"
+  },
+  {
+    "file": "lru.go",
+    "line": 231,
+    "fragment": "\tkeys := c.lru.Keys()"
+  },
+  {
+    "file": "lru.go",
+    "line": 239,
+    "fragment": "\tvalues := c.lru.Values()"
+  },
+  {
+    "file": "lru.go",
+    "line": 247,
+    "fragment": "\tlength := c.lru.Len()"
+  },
+  {
+    "file": "lru.go",
+    "line": 254,
+    "fragment": "\treturn c.lru.Cap()"
+  },
+  {
+    "file": "lru.go",
+    "line": 85,
+    "fragment": "\t\tc.evictedKeys, c.evictedVals = c.evictedKeys[:0], c.evictedVals[:0]"
+  },
+  {
+    "file": "lru.go",
+    "line": 87,
+    "fragment": "\tc.lock.Unlock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 176,
+    "fragment": "\t}"
+  },
+  {
+    "file": "lru.go",
+    "line": 188,
+    "fragment": "\tc.lock.Lock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 194,
+    "fragment": "\tc.lock.Unlock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 213,
+    "fragment": "\tc.lock.Unlock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 38,
+    "fragment": "\tif onEvicted != nil {"
+  },
+  {
+    "file": "lru.go",
+    "line": 64,
+    "fragment": "\tif c.onEvictedCB != nil && len(c.evictedKeys) > 0 {"
+  },
+  {
+    "file": "lru.go",
+    "line": 35,
+    "fragment": "\tc = &Cache[K, V]{"
+  },
+  {
+    "file": "lru.go",
+    "line": 66,
+    "fragment": "\t\tc.initEvictBuffers()"
+  },
+  {
+    "file": "lru.go",
+    "line": 80,
+    "fragment": "\tvar v V"
+  },
+  {
+    "file": "lru.go",
+    "line": 98,
+    "fragment": "\tc.lock.Unlock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 105,
+    "fragment": "\tc.lock.RLock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 107,
+    "fragment": "\tc.lock.RUnlock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 81,
+    "fragment": "\tc.lock.Lock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 126,
+    "fragment": "\tc.lock.Lock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 149,
+    "fragment": "\tc.lock.Lock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 171,
+    "fragment": "\tc.lock.Lock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 207,
+    "fragment": "\tc.lock.Lock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 222,
+    "fragment": "\tc.lock.RLock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 230,
+    "fragment": "\tc.lock.RLock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 238,
+    "fragment": "\tc.lock.RLock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 246,
+    "fragment": "\tc.lock.RLock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 47,
+    "fragment": "\tc.evictedKeys = make([]K, 0, DefaultEvictedBufferSize)"
+  },
+  {
+    "file": "lru.go",
+    "line": 48,
+    "fragment": "\tc.evictedVals = make([]V, 0, DefaultEvictedBufferSize)"
+  },
+  {
+    "file": "lru.go",
+    "line": 55,
+    "fragment": "\tc.evictedVals = append(c.evictedVals, v)"
+  },
+  {
+    "file": "lru.go",
+    "line": 36,
+    "fragment": "\t\tonEvictedCB: onEvicted,"
+  },
+  {
+    "file": "lru.go",
+    "line": 41,
+    "fragment": "\t}"
+  },
+  {
+    "file": "lru.go",
+    "line": 132,
+    "fragment": "\tif c.onEvictedCB != nil && evicted {"
+  },
+  {
+    "file": "lru.go",
+    "line": 137,
+    "fragment": "\tif c.onEvictedCB != nil && evicted {"
+  },
+  {
+    "file": "lru.go",
+    "line": 156,
+    "fragment": "\tif c.onEvictedCB != nil && evicted {"
+  },
+  {
+    "file": "lru.go",
+    "line": 161,
+    "fragment": "\tif c.onEvictedCB != nil && evicted {"
+  },
+  {
+    "file": "lru.go",
+    "line": 173,
+    "fragment": "\tif c.onEvictedCB != nil && present {"
+  },
+  {
+    "file": "lru.go",
+    "line": 178,
+    "fragment": "\tif c.onEvictedCB != nil && present {"
+  },
+  {
+    "file": "lru.go",
+    "line": 209,
+    "fragment": "\tif c.onEvictedCB != nil && ok {"
+  },
+  {
+    "file": "lru.go",
+    "line": 214,
+    "fragment": "\tif c.onEvictedCB != nil && ok {"
+  },
+  {
+    "file": "lru.go",
+    "line": 68,
+    "fragment": "\tc.lock.Unlock()"
+  },
+  {
+    "file": "lru.go",
+    "line": 70,
+    "fragment": "\tif c.onEvictedCB != nil {"
+  },
+  {
+    "file": "lru.go",
+    "line": 190,
+    "fragment": "\tif c.onEvictedCB != nil && evicted > 0 {"
+  },
+  {
+    "file": "lru.go",
+    "line": 195,
+    "fragment": "\tif c.onEvictedCB != nil && evicted > 0 {"
+  },
+  {
+    "file": "lru.go",
+    "line": 84,
+    "fragment": "\t\tk, v = c.evictedKeys[0], c.evictedVals[0]"
+  },
+  {
+    "file": "lru.go",
+    "line": 157,
+    "fragment": "\t\tk, v = c.evictedKeys[0], c.evictedVals[0]"
+  },
+  {
+    "file": "lru.go",
+    "line": 174,
+    "fragment": "\t\tk, v = c.evictedKeys[0], c.evictedVals[0]"
+  },
+  {
+    "file": "lru.go",
+    "line": 210,
+    "fragment": "\t\tk, v = c.evictedKeys[0], c.evictedVals[0]"
+  },
+  {
+    "file": "lru.go",
+    "line": 91,
+    "fragment": "\treturn"
+  },
+  {
+    "file": "lru.go",
+    "line": 99,
+    "fragment": "\treturn value, ok"
+  },
+  {
+    "file": "lru.go",
+    "line": 33,
+    "fragment": "func NewWithEvict[K comparable, V any](size int, onEvicted func(key K, value V)) (c *Cache[K, V], err error) {"
+  },
+  {
+    "file": "lru.go",
+    "line": 28,
+    "fragment": "\treturn NewWithEvict[K, V](size, nil)"
+  },
+  {
+    "file": "lru.go",
+    "line": 19,
+    "fragment": "\tlru         *simplelru.LRU[K, V]"
+  }
+]

@@ -1,0 +1,32 @@
+EEE
+======================================================================
+ERROR: test_changed_blind_usage_stops (tools.selftest.test_fresh_pair_restart.RestartTest.test_changed_blind_usage_stops)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_restart.py", line 18, in test_changed_blind_usage_stops
+    with self.assertRaisesRegex(ValueError,'smoke'):pair.restart_prior(p)
+                                                    ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'run_fresh_routing_pair' has no attribute 'restart_prior'
+
+======================================================================
+ERROR: test_incomplete_usage_stops (tools.selftest.test_fresh_pair_restart.RestartTest.test_incomplete_usage_stops)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_restart.py", line 13, in test_incomplete_usage_stops
+    with self.assertRaisesRegex(ValueError,'smoke'):pair.restart_prior(p)
+                                                    ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'run_fresh_routing_pair' has no attribute 'restart_prior'
+
+======================================================================
+ERROR: test_known_smoke_cost_is_prior (tools.selftest.test_fresh_pair_restart.RestartTest.test_known_smoke_cost_is_prior)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_restart.py", line 8, in test_known_smoke_cost_is_prior
+    self.assertAlmostEqual(pair.restart_prior(SMOKE),.071886)
+                           ^^^^^^^^^^^^^^^^^^
+AttributeError: module 'run_fresh_routing_pair' has no attribute 'restart_prior'
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.030s
+
+FAILED (errors=3)

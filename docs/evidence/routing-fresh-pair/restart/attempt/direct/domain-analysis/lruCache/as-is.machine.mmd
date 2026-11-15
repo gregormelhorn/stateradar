@@ -1,0 +1,40 @@
+stateDiagram-v2
+    [*] --> Uninitialized
+    Uninitialized --> Empty: New positive
+    Uninitialized --> Uninitialized: New rejects nonpositive
+    state Initialized {
+        Empty --> BelowCapacity: insert, size greater than one
+        Empty --> AtCapacity: insert, size one
+        BelowCapacity --> AtCapacity: insert or shrink
+        AtCapacity --> BelowCapacity: expand or remove, entries remain
+        AtCapacity --> Empty: remove last or Purge
+        BelowCapacity --> Empty: remove last or Purge
+        Empty --> Disabled: resize zero
+        BelowCapacity --> Disabled: resize zero
+        AtCapacity --> Disabled: resize zero
+        Empty --> NegativeCapacity: resize negative
+        BelowCapacity --> NegativeCapacity: resize negative
+        AtCapacity --> NegativeCapacity: resize negative
+        Disabled --> NegativeCapacity: resize negative
+        NegativeCapacity --> Disabled: resize zero
+        Disabled --> Empty: resize positive
+        NegativeCapacity --> Empty: resize positive with no survivors
+        NegativeCapacity --> BelowCapacity: resize positive above retained length
+        NegativeCapacity --> AtCapacity: resize positive at or below retained length
+    }
+    state InvocationTrack {
+        [*] --> ObservingUnderLock
+        ObservingUnderLock --> NoNotification: no capture
+        ObservingUnderLock --> Captured: adapter captures removal
+        ObservingUnderLock --> LockStranded: panic before unlock
+        Captured --> Delivering: unlock then callback
+        Delivering --> Delivering: nested call or next payload
+        Delivering --> CallbackBlocked: callback waits
+        CallbackBlocked --> Delivering: progress resumes
+        Delivering --> Returned: final callback returned
+        Delivering --> Aborted: panic or Goexit, remaining batch skipped
+    }
+    note right of InvocationTrack
+        Per call. Many deliveries can overlap.
+        Stranded lock applies to the receiver.
+    end note

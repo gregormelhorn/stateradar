@@ -1,0 +1,102 @@
+[
+  {
+    "file": "internal/list.go",
+    "line": 36,
+    "fragment": "\tif p := e.prev; e.list != nil && p != &e.list.root {"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 43,
+    "fragment": "// The zero Value for LruList is an empty list ready to use."
+  },
+  {
+    "file": "internal/list.go",
+    "line": 45,
+    "fragment": "\troot Entry[K, V] // sentinel list element, only &root, root.prev, and root.next are used"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 53,
+    "fragment": "\tl.len = 0"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 58,
+    "fragment": "func NewList[K comparable, V any]() *LruList[K, V] { return new(LruList[K, V]).Init() }"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 62,
+    "fragment": "func (l *LruList[K, V]) Length() int { return l.len }"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 66,
+    "fragment": "\tif l.len == 0 {"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 67,
+    "fragment": "\t\treturn nil"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 69,
+    "fragment": "\treturn l.root.prev"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 74,
+    "fragment": "\tif l.root.next == nil {"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 86,
+    "fragment": "\tl.len++"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 92,
+    "fragment": "\treturn l.insert(&Entry[K, V]{Value: v, Key: k, ExpiresAt: expiresAt}, at)"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 97,
+    "fragment": "\te.prev.next = e.next"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 99,
+    "fragment": "\te.next = nil // avoid memory leaks"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 100,
+    "fragment": "\te.prev = nil // avoid memory leaks"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 101,
+    "fragment": "\te.list = nil"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 102,
+    "fragment": "\tl.len--"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 109,
+    "fragment": "\tif e == at {"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 137,
+    "fragment": "\tif e.list != l || l.root.next == e {"
+  },
+  {
+    "file": "internal/list.go",
+    "line": 141,
+    "fragment": "\tl.move(e, &l.root)"
+  }
+]

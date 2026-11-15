@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import sys,json,pathlib\nr=pathlib.Path.cwd()\np=r/sys.argv[1]\n(p/'_probe'/'overlay.json').write_text(json.dumps({'Replace':{str(r/'cache_pilot_evidence_test.go'):str(p/'_probe'/'cache_pilot_test.go')}},indent=2)+'\\n')",
+    "domain-analysis/lruCache"
+  ],
+  "exit_code": 0
+}

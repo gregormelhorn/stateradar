@@ -1,0 +1,40 @@
+=== RUN   TestPilotRaceCapResize
+==================
+WARNING: DATA RACE
+Write at 0x00c00007e200 by goroutine 7:
+  github.com/hashicorp/golang-lru/v2/simplelru.(*LRU[go.shape.int,go.shape.int]).Resize()
+      /private/tmp/stateradar-lru-restart-pair/direct/pool/simplelru/lru.go:164 +0xe0
+  github.com/hashicorp/golang-lru/v2.(*Cache[go.shape.int,go.shape.int]).Resize()
+      /private/tmp/stateradar-lru-restart-pair/direct/pool/lru.go:189 +0x74
+  github.com/hashicorp/golang-lru/v2.TestPilotRaceCapResize.func1()
+      /private/tmp/stateradar-lru-restart-pair/direct/pool/cache_pilot_evidence_test.go:256 +0xb4
+
+Previous read at 0x00c00007e200 by goroutine 8:
+  github.com/hashicorp/golang-lru/v2/simplelru.(*LRU[go.shape.int,go.shape.int]).Cap()
+      /private/tmp/stateradar-lru-restart-pair/direct/pool/simplelru/lru.go:152 +0xcc
+  github.com/hashicorp/golang-lru/v2.(*Cache[go.shape.int,go.shape.int]).Cap()
+      /private/tmp/stateradar-lru-restart-pair/direct/pool/lru.go:254 +0x9c
+  github.com/hashicorp/golang-lru/v2.TestPilotRaceCapResize.func2()
+      /private/tmp/stateradar-lru-restart-pair/direct/pool/cache_pilot_evidence_test.go:263 +0xa4
+
+Goroutine 7 (running) created at:
+  github.com/hashicorp/golang-lru/v2.TestPilotRaceCapResize()
+      /private/tmp/stateradar-lru-restart-pair/direct/pool/cache_pilot_evidence_test.go:252 +0x154
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+
+Goroutine 8 (finished) created at:
+  github.com/hashicorp/golang-lru/v2.TestPilotRaceCapResize()
+      /private/tmp/stateradar-lru-restart-pair/direct/pool/cache_pilot_evidence_test.go:259 +0x224
+  testing.tRunner()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2195 +0x164
+  testing.(*T).Run.gowrap1()
+      /opt/homebrew/Cellar/go/1.27.3/libexec/src/testing/testing.go:2260 +0x34
+==================
+    testing.go:1867: race detected during execution of test
+--- FAIL: TestPilotRaceCapResize (0.00s)
+FAIL
+FAIL	github.com/hashicorp/golang-lru/v2	0.328s
+FAIL

@@ -1,0 +1,146 @@
+_PROSE_EXT = (".md", ".txt", ".rst", ".adoc")
+
+
+def _norm(path: str) -> str:
+    return str(Path(path.strip("`")).as_posix()).removeprefix("./")
+
+
+def _citation_stripper(quote_files: frozenset):
+    def strip(m: re.Match) -> str:
+        if m.group(2) and _norm(m.group(1)) in quote_files:
+            quote = m.group(3) if m.group(3) is not None else m.group(4)  # balanced, last
+            return f'{m.group(1)} ("{quote}")'
+        return m.group(1)
+    return strip
+
+
+def quote_files(doctrine: str, inputs: list[str], repo: Path, analysis_dir: Path) -> frozenset:
+    """Prose files whose cited quotes may reach Part B, as paths relative to
+    --repo: the Part B inputs and the files the doctrine lines cite. A path
+    inside the analysis directory never qualifies. Matching is by exact path,
+    so vendor/lib/README.md does not ride on README.md."""
+    paths = set()
+    for spec in inputs:
+        path = Path(spec.split(":", 1)[0])
+        if path.is_absolute():
+            try:
+                path = path.resolve().relative_to(repo)
+            except ValueError:
+                continue
+        paths.add(_norm(str(path)))
+    paths.update(_norm(m.group(1)) for m in re.finditer("(" + _FILE + r")`?:\d", doctrine))
+    adir = analysis_dir.resolve()
+    return frozenset(p for p in paths if p.lower().endswith(_PROSE_EXT)
+                     and not (repo / p).resolve().is_relative_to(adir))
+
+
+# Analysis-only id families. Single-letter families (L-, G-, F-, T-) also
+# name domain things ("the T-1 threshold"), so an id of those families is
+# kept when the Part B sources (requirements, contracts, doctrine lines) use
+# it, and removed otherwise (domain_ids).
+_ANALYSIS_ID = re.compile(r"(?:[ \t]*→[ \t]*)?\b(?:Q|PA|SYS|NAT|DR)-[A-Z]*\d[\w-]*")
+_LOCAL_ID = re.compile(r"\b(?:L|G|F|T)-[A-Z]*\d[\w-]*")
+_MARK = "\x00"
+
+
+def domain_ids(*sources: str, doctrine: str = "") -> set[str]:
+    """Single-letter-family ids the Part B sources themselves use. They are
+    domain terms Part B sees anyway; every other L-/G-/F-/T- id in the
+    catalogue is an analysis reference (lint, guard, fault, trace). From
+    doctrine lines only the quoted text counts: their glosses are Part A's."""
+    ids: set[str] = set()
+    for source in sources:
+        ids.update(_LOCAL_ID.findall(source))
+    for quote in re.findall(r"[\"\u201c]([^\"\u201c\u201d\n]+)[\"\u201d]", doctrine):
+        ids.update(_LOCAL_ID.findall(quote))
+    return ids
+
+
+def blind_catalogue(text: str, keep_ids: set[str] | frozenset = frozenset(),
+                    keep_quotes_from: frozenset = frozenset(), later_names: frozenset = frozenset()) -> str:
+    """The catalogue as Part B may see it.
+
+    02-pilot rule 3 puts a verbatim code fragment into every observed-in-code
+    citation, and the catalogue carries the analysis's own ids (questions,
+    lints, invariants, guards, decisions, faults, traces). Part B must see
+    neither the code nor Part A's conclusions (R-PART-B; routed pilot
+    2026-11-13). Citations keep the file name only, without line or code
+    fragment (a quote cited from a file in keep_quotes_from stays);
+    analysis ids and the labels that introduced them are removed; L-, G-,
+    F- and T- ids survive only when listed in keep_ids. Prose
+    conclusions cannot be removed mechanically: the agent still reads the
+    package (rule 7). Pass later_names=cited_names(text, repo) so that bare
+    citations of repository files end a fragment; assemble does.
+    """
+    names = cited_names(text) | frozenset(later_names)
+    text = _DASH_RANGE.sub(r"\1-", text)  # "file:7–9" is the range "file:7-9"
+    text = sub_citations(text, names, _citation_stripper(frozenset(keep_quotes_from)))
+    text = _ANALYSIS_ID.sub(_MARK, text)
+    # Removing an id never joins two lines: no pattern here crosses a newline.
+    text = re.sub(r"(?:[ \t]*→[ \t]*)?" + _LOCAL_ID.pattern,
+                  lambda m: m.group(0) if m.group(0).lstrip(" \t→") in keep_ids else _MARK, text)
+    # Labels whose only content was a removed id: "lint L-4", "Finding → Q-12",
+    # "see DR-002"; "see" in prose stays.
+    text = re.sub(r"\b(?=[A-Z])(?i:see|cf\.)[ \t]*(?=\x00)", "\x01", text)  # a sentence start
+    text = re.sub(r"\b(?i:see|cf\.)[ \t]*(?=\x00)", "", text)
+    text = re.sub(r"(?:\b(?:recorded as[ \t]+)?lints?[ \t]*|\b[Ff]inding[ \t]*(?::[ \t]*)?)(?=\x00)", "", text)
+    # An article left before a removed id that ends the clause ("itself a
+    # finding L-06." -> "itself.").
+    text = re.sub(r"[ \t]+\b(?:a|an|the)[ \t]+(?=\x00[ \t]*(?:[.;,)\]\n]|$))", " ", text)
+    # Parentheses that held only removed ids, then the ids with their separators.
+    text = re.sub(r"(?m)(^[ \t]*)?(?(1)|[ \t]*)\((?:[ \t,;\x01]|\x00)*\x00(?:[ \t,;]|\x00)*\)(?(1)[ \t]*)",
+                  lambda m: m.group(1) or "", text)
+    # A removed id between two separators takes one of them with it; at the
+    # end of a clause it takes the separator before it; before text it
+    # leaves that separator ("cache; lint L-4; G-01 holds" keeps a ";").
+    text = re.sub(r"\x00(?:[ \t]*(?:[,;]|\band\b)[ \t]*\x00)+", _MARK, text)  # id lists
+    while _MARK in text:
+        text = re.sub(r"[ \t]*[,;][ \t]*\x00(?=[ \t]*[,;])", "", text)
+        text = re.sub(r"[ \t]*(?:[,;]|\band\b)?[ \t]*\x00(?=[ \t]*(?:[).|\]\n]|\x00|$))", "", text)
+        text = re.sub(r"\x00[ \t]*(?![ \t]*(?:[,;).|\]\n]|\x00|$))", "", text)
+        text = re.sub(r"(?<![,;\s])[ \t]*\x00(?=[ \t]*[,;])", "", text)
+        text = re.sub(r"(?<![,;])\x00(?=[ \t]*[,;])", "", text)
+    # Debris: a reference word left before a separator, doubled separators
+    # and doubled spaces ("see DR-002; then" -> "; then").
+    text = re.sub(r"[,;][ \t]*([,;])", r"\1", text)
+    # A sentence that started with a removed label starts with a capital, and
+    # one left as bare punctuation ("Cf. DR-002.") goes.
+    text = re.sub(r"\x01[ \t]*\.+[ \t]*", "", text)
+    text = re.sub(r"\x01[ \t]*[;,]*[ \t]*([a-z])", lambda m: m.group(1).upper(), text)
+    text = re.sub(r"\x01[ \t]*[;,]*", "", text)
+    # A file listed twice once its line numbers are gone ("(channel.go:136,
+    # channel.go:151)" -> "(channel.go)"). Only comma lists: "a.go and a.go
+    # returns" may join two clauses.
+    text = re.sub(r"(?<![\w./-])([\w./-]*\w\.[A-Za-z]\w*)(?:[ \t]*,[ \t]*\1(?![\w./-]))+", r"\1", text)
+    text = re.sub(r"\|[ \t]{2,}\|", "| |", text)
+    text = re.sub(r"(?<=\S)[ \t]{2,}(?=\S)", " ", text)
+    return re.sub(r"(?<=[^\s|])[ \t]+$", "", text, flags=re.M)
+
+
+# Catalogue sections and per-event fields that 02-pilot Step 3 fills from the
+# code (gate, remembrance, upstream guard, lock discipline, the event
+# annotations and the coverage table). Part B needs them to read the events,
+# but they state what the implementation does, and the second routed pilot and
+# the agent-only run of 2026-11-13 saw Part B take them as documented intent.
+# The package keeps them and labels their provenance; the instruction asks
+# Part B to mark rows that rest on them.
+# That mark is Part B's own report, not a measurement: rule 7's reading stays
+# the check. A per-event list from the labels would not help, since 02-pilot
+# gives every event a gate and an upstream-guard field.
+OBSERVED = "observed in code, not documented intent"
+_OBSERVED_HEADING = re.compile(
+    r"(?im)^(#{1,6}[ \t]+(?=[^\n]*\b(?:gate[- ]type|remembrance|upstream[- ]guards?|lock[- ]discipline"
+    r"|event[ \t]+annotations?|undesired[- ]coverage)\b)[^\n]*?)([ \t]+#+)?[ \t]*$")
+# "- gate:", "- **gate:**" and "- **gate**:", in any case.
+_OBSERVED_FIELD = re.compile(r"(?im)^([ \t]*[-*][ \t]+\**)(gate|upstream_guards)(?=\**[ \t]*:)")
+
+
+def mark_observed(text: str) -> str:
+    """Label the catalogue's code-derived sections and fields (no line is added)."""
+    text = _OBSERVED_HEADING.sub(lambda m: m.group(0) if OBSERVED in m.group(1)
+                                 else f"{m.group(1)} ({OBSERVED}){m.group(2) or ''}", text)
+    return _OBSERVED_FIELD.sub(r"\1\2 (observed in code)", text)
+
+
+# Asked for at the start of the behaviour cell; counted anywhere in the row.
+_AS_IS_ROW = re.compile(r"(?<![\w-])as-is:", re.I)

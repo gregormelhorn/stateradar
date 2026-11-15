@@ -1,0 +1,62 @@
+
+
+def _catalogue_ids(catalogue: str) -> tuple[list[str], list[str]]:
+    """Event ids from the declaration comment + pair orderings."""
+    m = re.search(r"<!-- event-ids: (.+?) -->", catalogue)
+    if not m:
+        raise ValueError("catalogue: no event-ids declaration comment")
+    events = m.group(1).split()
+    pairs = sorted(set(re.findall(r"P-\d+[ab]\b", catalogue)))
+    return events, pairs
+
+
+def _read_requirements(spec: str, repo: Path) -> str:
+    """FILE or FILE:PATTERN → requirement text (guarded)."""
+    file_part, _, pattern = spec.partition(":")
+    path = repo / file_part
+    if not path.is_file():
+        raise ValueError(f"requirements file missing: {path}")
+    text = path.read_text(encoding="utf-8")
+    if not pattern:
+        return text
+    m = re.search(pattern, text)
+    if not m:
+        raise ValueError(f"requirements pattern {pattern!r} not found in {path}")
+    start = m.start()
+    level = len(text[start:]) - len(text[start:].lstrip("#"))
+    rest = text[start:]
+    if level:
+        nxt = re.search(rf"^#{{1,{level}}} ", rest[1:], re.M)
+        return rest[: nxt.start() + 1 if nxt else len(rest)]
+    # No heading at the match (e.g. a bullet inside a bigger entry):
+    # cut at the next heading of any level.
+    nxt = re.search(r"^#{1,6} ", rest[1:], re.M)
+    return rest[: nxt.start() + 1 if nxt else len(rest)]
+
+
+def _read_contracts(spec: str, repo: Path) -> str:
+    """FILE:Class1,Class2 → docstring + fields blocks per class.
+
+    A prepared contract-text file (.md, .txt, .rst) may be passed whole. A
+    source file always needs class names: the blind pass must never receive
+    implementation code.
+    """
+    file_part, _, classes = spec.partition(":")
+    path = repo / file_part
+    if not path.is_file():
+        raise ValueError(f"contracts file missing: {path}")
+    if not classes:
+        if path.suffix.lower() in (".md", ".txt", ".rst"):
+            return path.read_text(encoding="utf-8")
+        raise ValueError(f"contracts spec needs class names for a source file: {spec!r} "
+                         "(or extract the contract text into a .md file)")
+    lines = path.read_text(encoding="utf-8").splitlines()
+    out: list[str] = []
+    for cls in classes.split(","):
+        cls = cls.strip()
+        for i, line in enumerate(lines):
+            if line.startswith(f"class {cls}"):
+                block = [line]
+                for follow in lines[i + 1 :]:
+                    if follow.startswith(("class ", "def ")) or (
+                        follow and not follow.startswith((" ", "\t", "@", ")"))

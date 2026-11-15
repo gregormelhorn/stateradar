@@ -1,0 +1,68 @@
+../pack/tools/check_matrix.py:10:- Stage 1: every row covers every catalogue event exactly once (rows
+../pack/tools/check_matrix.py:14:- Stage 2: every hole cell (UNSPECIFIED / ignore (accidental)) carries
+../pack/tools/check_matrix.py:119:    # Stage 1: undesired-coverage totality, when the catalogue carries
+../pack/tools/check_matrix.py:136:    # Stage 2: hole cells carry Q refs present in open-questions.md
+../pack/tools/check_matrix.py:153:            "relative to (hierarchy inheritance, guard predicates)")
+../pack/tools/check_matrix.py:181:    # Stage 2: every pair id appears in the traces; control-trace
+../pack/tools/local_models.py:611:    parser.add_argument("--ledger", type=Path, required=True)
+../pack/tools/local_models.py:612:    parser.add_argument("--limit-microdollars", type=int, help="initial limit for a new ledger")
+../pack/tools/local_models.py:616:    limit_parser.add_argument("amount_microdollars", type=int)
+../pack/tools/local_models.py:618:    settle_parser.add_argument("reservation", type=int)
+../pack/tools/local_models.py:619:    settle_parser.add_argument("actual_microdollars", type=int)
+../pack/tools/local_models.py:621:    flash_parser.add_argument("input", type=Path)
+../pack/tools/local_models.py:622:    flash_parser.add_argument("--max-tokens", type=int, default=4096)
+../pack/tools/local_models.py:623:    flash_parser.add_argument("--output", type=Path, help="save the full JSON and print usage only")
+../pack/tools/local_models.py:625:    jev_parser.add_argument("input", type=Path)
+../pack/tools/local_models.py:626:    jev_parser.add_argument("question")
+../pack/tools/local_models.py:627:    jev_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+../pack/tools/local_models.py:629:    batch_parser.add_argument("input", type=Path, help="UTF-8 source shared by the checks")
+../pack/tools/local_models.py:630:    batch_parser.add_argument("checks", type=Path, help="JSON array of checks")
+../pack/tools/local_models.py:631:    batch_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+../pack/tools/local_models.py:632:    batch_parser.add_argument("--output", type=Path, help="also write the result JSON to this file")
+../pack/tools/local_models.py:633:    batch_parser.add_argument("--summary", action="store_true",
+../pack/tools/local_models.py:636:    draft_parser.add_argument("input", type=Path, help="UTF-8 source the claims must cite")
+../pack/tools/local_models.py:637:    draft_parser.add_argument("task", type=Path, help="UTF-8 file with the bounded drafting task")
+../pack/tools/local_models.py:638:    draft_parser.add_argument("--output", type=Path, required=True, help="JSON result file")
+../pack/tools/local_models.py:639:    draft_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+../pack/tools/local_models.py:640:    draft_parser.add_argument("--max-tokens", type=int, default=12000,
+../pack/tools/local_models.py:644:    cells_parser.add_argument("input", type=Path, help="UTF-8 source the cells must cite")
+../pack/tools/local_models.py:645:    cells_parser.add_argument("task", type=Path, help="JSON file: states (name, condition), events (id, gist), notes")
+../pack/tools/local_models.py:646:    cells_parser.add_argument("--output", type=Path, required=True,
+../pack/tools/local_models.py:648:    cells_parser.add_argument("--model", default="jev-latest", help="TypeSafe model name or alias")
+../pack/tools/local_models.py:649:    cells_parser.add_argument("--max-tokens", type=int, default=16384, help="Flash output budget")
+../pack/tools/local_models.py:651:    windows.add_argument("input", type=Path)
+../pack/tools/local_models.py:652:    windows.add_argument("--max-tokens", type=int, default=16384)
+../pack/tools/local_models.py:653:    windows.add_argument("--output", type=Path, required=True)
+../pack/tools/local_models.py:655:    blind_parser.add_argument("analysis")
+../pack/tools/local_models.py:656:    blind_parser.add_argument("--repo", default=".")
+../pack/tools/local_models.py:657:    blind_parser.add_argument("--requirements", action="append", required=True)
+../pack/tools/local_models.py:658:    blind_parser.add_argument("--contracts", action="append", required=True)
+../pack/tools/local_models.py:659:    blind_parser.add_argument("--output", type=Path, required=True)
+../pack/tools/local_models.py:660:    blind_parser.add_argument("--max-tokens", type=int, default=8192)
+../pack/tools/local_models.py:661:    blind_parser.add_argument("--package-only", action="store_true",
+../pack/tools/gen_analysis_sidecar.py:62:    upstream_guards: list[str]
+../pack/tools/gen_analysis_sidecar.py:123:        - upstream_guards: <comma-separated list>
+../pack/tools/gen_analysis_sidecar.py:127:    Returns {event_id: {"gate": str|None, "upstream_guards": [...],
+../pack/tools/gen_analysis_sidecar.py:150:                {"gate": None, "upstream_guards": [], "coverage": {}})
+../pack/tools/gen_analysis_sidecar.py:160:        mu = re.match(r"^- upstream_guards:\s*(.+)$", line)
+../pack/tools/gen_analysis_sidecar.py:162:            cur["upstream_guards"] = [
+../pack/tools/gen_analysis_sidecar.py:423:def _parse_guard_results(path: Path) -> list[GuardGroup]:
+../pack/tools/gen_analysis_sidecar.py:424:    """guard-results.txt as tools/guard_proofs.render writes it ('group G-01
+../pack/tools/gen_analysis_sidecar.py:659:    # Catalogue annotations (gate / upstream_guards / UV coverage) carry
+../pack/tools/gen_analysis_sidecar.py:670:        if ann.get("upstream_guards"):
+../pack/tools/gen_analysis_sidecar.py:671:            ev["upstream_guards"] = ann["upstream_guards"]
+../pack/tools/gen_analysis_sidecar.py:691:    # Pairs, guard outcomes and the coverage table live outside the matrix
+../pack/tools/gen_analysis_sidecar.py:692:    # (event-catalogue.md + adversarial-traces.md, guard-results.txt,
+../pack/tools/gen_analysis_sidecar.py:701:        "guardGroups": {"count": 0, "reason": absent.format(
+../pack/tools/gen_analysis_sidecar.py:702:            what="guard outcome lines", src="guard-results.txt")},
+../pack/tools/gen_analysis_sidecar.py:711:    guard_groups = _parse_guard_results(adir / "guard-results.txt")
+../pack/tools/gen_analysis_sidecar.py:712:    if guard_groups:
+../pack/tools/gen_analysis_sidecar.py:713:        data["guardGroups"] = guard_groups
+../pack/tools/gen_analysis_sidecar.py:714:        completeness.pop("guardGroups", None)
+../pack/tools/gen_analysis_sidecar.py:731:        if prior.get("guardGroups") and not data.get("guardGroups"):
+../pack/tools/gen_analysis_sidecar.py:732:            data["guardGroups"] = prior["guardGroups"]
+../pack/tools/gen_analysis_sidecar.py:733:            completeness.pop("guardGroups", None)
+../pack/tools/gen_analysis_sidecar.py:752:    parser.add_argument("components", nargs="*")
+../pack/tools/gen_analysis_sidecar.py:753:    parser.add_argument("--root", default=".")
+../pack/tools/gen_analysis_sidecar.py:754:    parser.add_argument(
+../pack/tools/gen_analysis_sidecar.py:759:    parser.add_argument(

@@ -1,0 +1,44 @@
+46:from check_reachability import pair_reachability
+62:    upstream_guards: list[str]
+123:        - upstream_guards: <comma-separated list>
+127:    Returns {event_id: {"gate": str|None, "upstream_guards": [...],
+150:                {"gate": None, "upstream_guards": [], "coverage": {}})
+160:        mu = re.match(r"^- upstream_guards:\s*(.+)$", line)
+162:            cur["upstream_guards"] = [
+341:def _parse_doc_map(path: Path) -> list[DocLine]:
+367:    """open-questions.md → [{id, status}] pairs (DECIDED → RESOLVED)."""
+400:def _parse_pairs(catalogue: Path, traces: Path) -> list[Pair]:
+401:    """Step-3 pair ids (P-01a, P-01b, ...) declared in event-catalogue.md,
+402:    each with the adversarial-traces.md heading that carries its id. A pair
+404:    ("no trace"): an untraced pair is a gap, not something to drop."""
+410:    reachability = pair_reachability(traces)
+411:    pairs: list[Pair] = []
+416:        pair: Pair = {"id": pid, "trace": trace}
+418:            pair["reachability"] = reachability[pid]
+419:        pairs.append(pair)
+420:    return pairs
+423:def _parse_guard_results(path: Path) -> list[GuardGroup]:
+424:    """guard-results.txt as tools/guard_proofs.render writes it ('group G-01
+659:    # Catalogue annotations (gate / upstream_guards / UV coverage) carry
+670:        if ann.get("upstream_guards"):
+671:            ev["upstream_guards"] = ann["upstream_guards"]
+691:    # Pairs, guard outcomes and the coverage table live outside the matrix
+692:    # (event-catalogue.md + adversarial-traces.md, guard-results.txt,
+699:        "pairs": {"count": 0, "reason": absent.format(
+700:            what="pair ids (P-01a, ...)", src="event-catalogue.md")},
+701:        "guardGroups": {"count": 0, "reason": absent.format(
+702:            what="guard outcome lines", src="guard-results.txt")},
+707:    pairs = _parse_pairs(adir / "event-catalogue.md", adir / "adversarial-traces.md")
+708:    if pairs:
+709:        data["pairs"] = pairs
+710:        completeness.pop("pairs", None)
+711:    guard_groups = _parse_guard_results(adir / "guard-results.txt")
+712:    if guard_groups:
+713:        data["guardGroups"] = guard_groups
+714:        completeness.pop("guardGroups", None)
+728:        if prior.get("pairs") and not data.get("pairs"):
+729:            data["pairs"] = prior["pairs"]
+730:            completeness.pop("pairs", None)
+731:        if prior.get("guardGroups") and not data.get("guardGroups"):
+732:            data["guardGroups"] = prior["guardGroups"]
+733:            completeness.pop("guardGroups", None)

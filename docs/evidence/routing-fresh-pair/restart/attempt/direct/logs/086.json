@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "go",
+    "test",
+    "-race",
+    "-timeout",
+    "15s",
+    "-overlay",
+    "domain-analysis/lruCache/_probe/overlay.json",
+    "-run",
+    "^TestPilotRaceCapResize$",
+    "-v",
+    "."
+  ],
+  "exit_code": 1
+}

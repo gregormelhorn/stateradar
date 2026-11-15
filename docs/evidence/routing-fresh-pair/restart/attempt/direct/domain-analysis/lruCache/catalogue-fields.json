@@ -1,0 +1,787 @@
+{
+  "events": [
+    {
+      "id": "New",
+      "classification": "external",
+      "undesired": false,
+      "source": "constructor owner",
+      "description": "capacity and optional callback registration; observed-in-code lru.go:42 (\"c.lru, err = simplelru.NewLRU(size, onEvicted)\").",
+      "gate": "payload: requested capacity and callback presence",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:42 (\"c.lru, err = simplelru.NewLRU(size, onEvicted)\")."
+      ],
+      "coverage": {
+        "loss": "UV-01",
+        "delay": "UV-01",
+        "duplication": "UV-02",
+        "out-of-order": "UV-01",
+        "contradiction": "UV-02",
+        "commission": "n/a: synchronous direct invocation from lru.go:42 (\"c.lru, err = simplelru.NewLRU(size, onEvicted)\").",
+        "value": "UV-02"
+      }
+    },
+    {
+      "id": "Purge",
+      "classification": "external",
+      "undesired": false,
+      "source": "lifecycle owner",
+      "description": "clear request for a selected cache; observed-in-code lru.go:63 (\"c.lru.Purge()\").",
+      "gate": "service: entries and callback registration",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:63 (\"c.lru.Purge()\")."
+      ],
+      "coverage": {
+        "loss": "UV-03",
+        "delay": "UV-03",
+        "duplication": "UV-03, UV-04",
+        "out-of-order": "UV-03, UV-04",
+        "contradiction": "UV-03, UV-04",
+        "commission": "n/a: synchronous direct invocation from lru.go:189 (\"evicted = c.lru.Resize(size)\").",
+        "value": "UV-04"
+      }
+    },
+    {
+      "id": "Resize",
+      "classification": "external",
+      "undesired": false,
+      "source": "lifecycle owner",
+      "description": "change capacity to requested integer; observed-in-code lru.go:189 (\"evicted = c.lru.Resize(size)\").",
+      "gate": "payload and service: requested size and current length",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:189 (\"evicted = c.lru.Resize(size)\")."
+      ],
+      "coverage": {
+        "loss": "UV-03",
+        "delay": "UV-03",
+        "duplication": "UV-03, UV-04",
+        "out-of-order": "UV-03, UV-04",
+        "contradiction": "UV-03, UV-04",
+        "commission": "n/a: synchronous direct invocation from lru.go:189 (\"evicted = c.lru.Resize(size)\").",
+        "value": "UV-04"
+      }
+    },
+    {
+      "id": "Add",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "key and value to insert or replace; observed-in-code lru.go:82 (\"evicted = c.lru.Add(key, value)\").",
+      "gate": "payload and service: key membership, length, capacity and callback registration",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:82 (\"evicted = c.lru.Add(key, value)\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "Get",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "read value with recency update; observed-in-code lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+      "gate": "payload and service: key membership",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:97 (\"value, ok = c.lru.Get(key)\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "Contains",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "test membership; observed-in-code lru.go:106 (\"containKey := c.lru.Contains(key)\").",
+      "gate": "payload and service: key membership",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:106 (\"containKey := c.lru.Contains(key)\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "Peek",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "read without recency update; observed-in-code lru.go:115 (\"value, ok = c.lru.Peek(key)\").",
+      "gate": "payload and service: key membership",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:115 (\"value, ok = c.lru.Peek(key)\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "ContainsOrAdd",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "test membership or insert key/value; observed-in-code lru.go:127 (\"if c.lru.Contains(key) {\").",
+      "gate": "payload and service: membership, length, capacity and callback registration",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:127 (\"if c.lru.Contains(key) {\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "PeekOrAdd",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "read or insert key/value; observed-in-code lru.go:150 (\"previous, ok = c.lru.Peek(key)\").",
+      "gate": "payload and service: membership, length, capacity and callback registration",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:150 (\"previous, ok = c.lru.Peek(key)\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "Remove",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "remove selected key; observed-in-code lru.go:172 (\"present = c.lru.Remove(key)\").",
+      "gate": "payload and service: membership and callback registration",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:172 (\"present = c.lru.Remove(key)\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "RemoveOldest",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "remove oldest entry; observed-in-code lru.go:208 (\"key, value, ok = c.lru.RemoveOldest()\").",
+      "gate": "service: length and callback registration",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:208 (\"key, value, ok = c.lru.RemoveOldest()\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "GetOldest",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "read oldest entry; observed-in-code lru.go:223 (\"key, value, ok = c.lru.GetOldest()\").",
+      "gate": "service: length",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:223 (\"key, value, ok = c.lru.GetOldest()\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "Keys",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "snapshot keys; observed-in-code lru.go:231 (\"keys := c.lru.Keys()\").",
+      "gate": "service: list contents",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:231 (\"keys := c.lru.Keys()\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "Values",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "snapshot values; observed-in-code lru.go:239 (\"values := c.lru.Values()\").",
+      "gate": "service: list contents",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:239 (\"values := c.lru.Values()\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "Len",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "read entry count; observed-in-code lru.go:247 (\"length := c.lru.Len()\").",
+      "gate": "service: list length",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:247 (\"length := c.lru.Len()\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "Cap",
+      "classification": "external",
+      "undesired": false,
+      "source": "cache caller",
+      "description": "read configured capacity; observed-in-code lru.go:254 (\"return c.lru.Cap()\").",
+      "gate": "service: capacity",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:254 (\"return c.lru.Cap()\")."
+      ],
+      "coverage": {
+        "loss": "UV-05",
+        "delay": "UV-05",
+        "duplication": "UV-06",
+        "out-of-order": "UV-05, UV-07",
+        "contradiction": "UV-07",
+        "commission": "n/a: synchronous direct invocation from lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+        "value": "UV-07, UV-08, UV-09"
+      }
+    },
+    {
+      "id": "CaptureEviction",
+      "classification": "internal",
+      "undesired": false,
+      "source": "simplelru (internal)",
+      "description": "capture key and value from simplelru; observed-in-code lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\").",
+      "gate": "service: registered adapter and removal path",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\")."
+      ],
+      "coverage": {
+        "loss": "n/a: synchronous direct invocation from lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\").",
+        "delay": "n/a: synchronous direct invocation from lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\").",
+        "duplication": "UV-08",
+        "out-of-order": "n/a: synchronous direct invocation from lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\").",
+        "contradiction": "n/a: synchronous direct invocation from lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\").",
+        "commission": "n/a: synchronous direct invocation from lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\").",
+        "value": "n/a: synchronous direct invocation from lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\")."
+      }
+    },
+    {
+      "id": "DeliverEviction",
+      "classification": "internal",
+      "undesired": false,
+      "source": "cache invocation (internal)",
+      "description": "invoke the registered callback with a captured key and value; observed-in-code lru.go:72 (\"c.onEvictedCB(ks[i], vs[i])\").",
+      "gate": "service: registered callback and captured work",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:72 (\"c.onEvictedCB(ks[i], vs[i])\")."
+      ],
+      "coverage": {
+        "loss": "UV-10, UV-12",
+        "delay": "UV-10, UV-12",
+        "duplication": "UV-08, UV-11",
+        "out-of-order": "UV-10, UV-12",
+        "contradiction": "UV-10, UV-12",
+        "commission": "n/a: synchronous direct invocation from lru.go:89 (\"c.onEvictedCB(k, v)\").",
+        "value": "n/a: synchronous direct invocation from lru.go:89 (\"c.onEvictedCB(k, v)\")."
+      }
+    },
+    {
+      "id": "CallbackReturn",
+      "classification": "external",
+      "undesired": false,
+      "source": "injected callback",
+      "description": "registered function returns control to its invoking cache method; observed-in-code lru.go:72 (\"c.onEvictedCB(ks[i], vs[i])\").",
+      "gate": "service: active invocation and remaining batch",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:72 (\"c.onEvictedCB(ks[i], vs[i])\")."
+      ],
+      "coverage": {
+        "loss": "UV-10",
+        "delay": "UV-10, UV-12",
+        "duplication": "UV-11",
+        "out-of-order": "UV-11, UV-12",
+        "contradiction": "UV-11",
+        "commission": "n/a: synchronous direct invocation from lru.go:89 (\"c.onEvictedCB(k, v)\").",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "CallbackReenter",
+      "classification": "external",
+      "undesired": false,
+      "source": "injected callback",
+      "description": "registered function invokes cache API before returning; observed-in-code lru.go:89 (\"c.onEvictedCB(k, v)\").",
+      "gate": "payload and service: nested operation, receiver, active outer invocation",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:89 (\"c.onEvictedCB(k, v)\")."
+      ],
+      "coverage": {
+        "loss": "UV-10",
+        "delay": "UV-10, UV-12",
+        "duplication": "UV-11",
+        "out-of-order": "UV-11, UV-12",
+        "contradiction": "UV-11",
+        "commission": "n/a: synchronous direct invocation from lru.go:89 (\"c.onEvictedCB(k, v)\").",
+        "value": "UV-11"
+      }
+    },
+    {
+      "id": "UV-01",
+      "classification": "external",
+      "undesired": true,
+      "source": "constructor owner",
+      "description": "constructor omitted or delayed; use before successful publication, including the pointer returned with an error; observed boundary lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:97 (\"value, ok = c.lru.Get(key)\")."
+      ]
+    },
+    {
+      "id": "UV-02",
+      "classification": "external",
+      "undesired": true,
+      "source": "constructor owner",
+      "description": "constructor receives zero, negative, or valid but unintended positive size; a duplicate constructor creates another instance; observed boundary lru.go:42 (\"c.lru, err = simplelru.NewLRU(size, onEvicted)\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:42 (\"c.lru, err = simplelru.NewLRU(size, onEvicted)\")."
+      ]
+    },
+    {
+      "id": "UV-03",
+      "classification": "external",
+      "undesired": true,
+      "source": "lifecycle owner",
+      "description": "Purge omitted/delayed or executed twice; a stale Purge can act after repopulation; observed boundary lru.go:63 (\"c.lru.Purge()\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:63 (\"c.lru.Purge()\")."
+      ]
+    },
+    {
+      "id": "UV-04",
+      "classification": "external",
+      "undesired": true,
+      "source": "lifecycle owner",
+      "description": "Resize zero or negative, extreme signed size or valid but unintended positive size; duplicate Resize and competing different sizes; observed boundary lru.go:189 (\"evicted = c.lru.Resize(size)\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:189 (\"evicted = c.lru.Resize(size)\")."
+      ]
+    },
+    {
+      "id": "UV-05",
+      "classification": "external",
+      "undesired": true,
+      "source": "cache caller",
+      "description": "caller omits operation, loses interest while waiting, or invokes later using a stale key, value or decision; observed boundary lru.go:96 (\"c.lock.Lock()\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:96 (\"c.lock.Lock()\")."
+      ]
+    },
+    {
+      "id": "UV-06",
+      "classification": "external",
+      "undesired": true,
+      "source": "cache caller",
+      "description": "same caller issues a second Get while first is pending or while retaining first value; repeated conditional adds, Add or Remove; observed boundary lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:97 (\"value, ok = c.lru.Get(key)\")."
+      ]
+    },
+    {
+      "id": "UV-07",
+      "classification": "external",
+      "undesired": true,
+      "source": "cache caller",
+      "description": "wrong receiver, distinct from plausible wrong key/value or stale generation on intended receiver; contradictory same-key operations; observed boundary lru.go:82 (\"evicted = c.lru.Add(key, value)\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:82 (\"evicted = c.lru.Add(key, value)\")."
+      ]
+    },
+    {
+      "id": "UV-08",
+      "classification": "external",
+      "undesired": true,
+      "source": "cache caller",
+      "description": "non-reflexive comparable key such as NaN; observed boundary lru.go:82 (\"evicted = c.lru.Add(key, value)\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:82 (\"evicted = c.lru.Add(key, value)\")."
+      ]
+    },
+    {
+      "id": "UV-09",
+      "classification": "external",
+      "undesired": true,
+      "source": "cache caller",
+      "description": "interface key with non-comparable dynamic value; observed boundary lru.go:97 (\"value, ok = c.lru.Get(key)\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:97 (\"value, ok = c.lru.Get(key)\")."
+      ]
+    },
+    {
+      "id": "UV-10",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected callback",
+      "description": "callback panics or terminates its goroutine before returning; callback waits indefinitely or returns late; observed boundary lru.go:72 (\"c.onEvictedCB(ks[i], vs[i])\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:72 (\"c.onEvictedCB(ks[i], vs[i])\")."
+      ]
+    },
+    {
+      "id": "UV-11",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected callback",
+      "description": "concurrent callbacks can overlap; callback performs duplicate or stale nested work; contradictory nested writes or wrong receiver/payload; observed boundary lru.go:89 (\"c.onEvictedCB(k, v)\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:89 (\"c.onEvictedCB(k, v)\")."
+      ]
+    },
+    {
+      "id": "UV-12",
+      "classification": "external",
+      "undesired": true,
+      "source": "injected callback",
+      "description": "late or aborting callback on either side of Purge or Resize, including captured batch tail; observed boundary lru.go:197 (\"c.onEvictedCB(ks[i], vs[i])\").",
+      "gate": "payload or service state depending on the concrete variant above",
+      "upstream_guards": [
+        "No application guard supplied; local boundary lru.go:197 (\"c.onEvictedCB(ks[i], vs[i])\")."
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "id": "P-01",
+      "first": "Purge",
+      "second": "Add",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-02",
+      "first": "Purge",
+      "second": "Get",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-03",
+      "first": "Purge",
+      "second": "Contains",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-04",
+      "first": "Purge",
+      "second": "Peek",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-05",
+      "first": "Purge",
+      "second": "ContainsOrAdd",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-06",
+      "first": "Purge",
+      "second": "PeekOrAdd",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-07",
+      "first": "Purge",
+      "second": "Remove",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-08",
+      "first": "Purge",
+      "second": "RemoveOldest",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-09",
+      "first": "Purge",
+      "second": "GetOldest",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-10",
+      "first": "Purge",
+      "second": "Keys",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-11",
+      "first": "Purge",
+      "second": "Values",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-12",
+      "first": "Purge",
+      "second": "Len",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-13",
+      "first": "Purge",
+      "second": "Cap",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-14",
+      "first": "Resize",
+      "second": "Add",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-15",
+      "first": "Resize",
+      "second": "Get",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-16",
+      "first": "Resize",
+      "second": "Contains",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-17",
+      "first": "Resize",
+      "second": "Peek",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-18",
+      "first": "Resize",
+      "second": "ContainsOrAdd",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-19",
+      "first": "Resize",
+      "second": "PeekOrAdd",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-20",
+      "first": "Resize",
+      "second": "Remove",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-21",
+      "first": "Resize",
+      "second": "RemoveOldest",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-22",
+      "first": "Resize",
+      "second": "GetOldest",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-23",
+      "first": "Resize",
+      "second": "Keys",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-24",
+      "first": "Resize",
+      "second": "Values",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-25",
+      "first": "Resize",
+      "second": "Len",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-26",
+      "first": "Resize",
+      "second": "Cap",
+      "entity": "same receiver; lifecycle owner and independent cache caller"
+    },
+    {
+      "id": "P-27",
+      "first": "Purge",
+      "second": "CallbackReturn",
+      "entity": "same receiver; lifecycle owner and already running callback"
+    },
+    {
+      "id": "P-28",
+      "first": "Purge",
+      "second": "CallbackReenter",
+      "entity": "same receiver; lifecycle owner and nested cache call"
+    },
+    {
+      "id": "P-29",
+      "first": "Purge",
+      "second": "UV-10",
+      "entity": "same receiver; lifecycle owner and callback whose execution stalls or escapes"
+    },
+    {
+      "id": "P-30",
+      "first": "Resize",
+      "second": "CallbackReturn",
+      "entity": "same receiver; lifecycle owner and already running callback"
+    },
+    {
+      "id": "P-31",
+      "first": "Resize",
+      "second": "CallbackReenter",
+      "entity": "same receiver; lifecycle owner and nested cache call"
+    },
+    {
+      "id": "P-32",
+      "first": "Resize",
+      "second": "UV-10",
+      "entity": "same receiver; lifecycle owner and callback whose execution stalls or escapes"
+    },
+    {
+      "id": "P-33",
+      "first": "Add",
+      "second": "CallbackReenter",
+      "entity": "same receiver or key; independent caller and callback issuing a nested competing method"
+    },
+    {
+      "id": "P-34",
+      "first": "Get",
+      "second": "CallbackReenter",
+      "entity": "same receiver or key; independent caller and callback issuing a nested competing method"
+    },
+    {
+      "id": "P-35",
+      "first": "ContainsOrAdd",
+      "second": "CallbackReenter",
+      "entity": "same receiver or key; independent caller and callback issuing a nested competing method"
+    },
+    {
+      "id": "P-36",
+      "first": "PeekOrAdd",
+      "second": "CallbackReenter",
+      "entity": "same receiver or key; independent caller and callback issuing a nested competing method"
+    },
+    {
+      "id": "P-37",
+      "first": "Remove",
+      "second": "CallbackReenter",
+      "entity": "same receiver or key; independent caller and callback issuing a nested competing method"
+    },
+    {
+      "id": "P-38",
+      "first": "RemoveOldest",
+      "second": "CallbackReenter",
+      "entity": "same receiver or key; independent caller and callback issuing a nested competing method"
+    },
+    {
+      "id": "P-39",
+      "first": "Cap",
+      "second": "CallbackReenter",
+      "entity": "same receiver or key; independent caller and callback issuing a nested competing method"
+    },
+    {
+      "id": "P-40",
+      "first": "Add",
+      "second": "UV-10",
+      "entity": "same receiver; independent insert and older callback that can stall or escape"
+    },
+    {
+      "id": "P-41",
+      "first": "New",
+      "second": "UV-05",
+      "entity": "publication slot; owner constructs replacement and delayed caller might hold an old receiver"
+    }
+  ],
+  "remembrance": "No tombstones for reflexive keys; ring count decrements at internal/list.go:102 (\"l.len--\"), resets at internal/list.go:53 (\"l.len = 0\"), links clear at internal/list.go:99 (\"e.next = nil // avoid memory leaks\"), map delete at simplelru/lru.go:178 (\"delete(c.items, e.Key)\"). Non-reflexive keys use Go equality at simplelru/lru.go:44 (\"delete(c.items, k)\") and simplelru/lru.go:178 (\"delete(c.items, e.Key)\"). Single-callback slices truncate at lru.go:85 (\"c.evictedKeys, c.evictedVals = c.evictedKeys[:0], c.evictedVals[:0]\") without clearing backing slots; batch paths replace the buffers at lru.go:66 (\"c.initEvictBuffers()\") and lru.go:192 (\"c.initEvictBuffers()\"). Initial capacity is sixteen (lru.go:47 (\"c.evictedKeys = make([]K, 0, DefaultEvictedBufferSize)\") and lru.go:48 (\"c.evictedVals = make([]V, 0, DefaultEvictedBufferSize)\")); batch append can grow at lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\") and lru.go:55 (\"c.evictedVals = append(c.evictedVals, v)\"); retention cost unmeasured. Capture is owned by the initiating call.",
+  "lock_discipline": "Writer sites: lru.go:62 (\"c.lock.Lock()\"); lru.go:81 (\"c.lock.Lock()\"); lru.go:96 (\"c.lock.Lock()\"); lru.go:126 (\"c.lock.Lock()\"); lru.go:149 (\"c.lock.Lock()\"); lru.go:171 (\"c.lock.Lock()\"); lru.go:188 (\"c.lock.Lock()\"); lru.go:207 (\"c.lock.Lock()\"). Reader sites: lru.go:105 (\"c.lock.RLock()\"); lru.go:114 (\"c.lock.RLock()\"); lru.go:222 (\"c.lock.RLock()\"); lru.go:230 (\"c.lock.RLock()\"); lru.go:238 (\"c.lock.RLock()\"); lru.go:246 (\"c.lock.RLock()\"). Cap observation lru.go:254 (\"return c.lru.Cap()\"). Internal adapter captures under writer lock at lru.go:54 (\"c.evictedKeys = append(c.evictedKeys, k)\") and lru.go:55 (\"c.evictedVals = append(c.evictedVals, v)\"). Public release and callback sites: lru.go:68 (\"c.lock.Unlock()\") and lru.go:72 (\"c.onEvictedCB(ks[i], vs[i])\"); lru.go:87 (\"c.lock.Unlock()\") and lru.go:89 (\"c.onEvictedCB(k, v)\"); lru.go:136 (\"c.lock.Unlock()\") and lru.go:137 (\"if c.onEvictedCB != nil && evicted {\"); lru.go:160 (\"c.lock.Unlock()\") and lru.go:161 (\"if c.onEvictedCB != nil && evicted {\"); lru.go:177 (\"c.lock.Unlock()\") and lru.go:178 (\"if c.onEvictedCB != nil && present {\"); lru.go:194 (\"c.lock.Unlock()\") and lru.go:197 (\"c.onEvictedCB(ks[i], vs[i])\"); lru.go:213 (\"c.lock.Unlock()\") and lru.go:214 (\"if c.onEvictedCB != nil && ok {\"). Registration contract lru.go:31-32; no stated reentrancy, order or failure guarantee.",
+  "notes": "Owner and caller describe roles; pair classes include equivalent variants through context. Replacement publication belongs to owner wiring. Same-role concurrent callers are covered in free traces."
+}

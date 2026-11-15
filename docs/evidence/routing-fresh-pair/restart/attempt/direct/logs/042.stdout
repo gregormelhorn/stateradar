@@ -1,0 +1,62 @@
+38:// We have two different ways of doing defers. The older way involves creating a
+39:// defer record at the time that a defer statement is executing and adding it to a
+40:// defer chain. This chain is inspected by the deferreturn call at all function
+41:// exits in order to run the appropriate defer calls. A cheaper way (which we call
+42:// open-coded defers) is used for functions in which no defer statements occur in
+43:// loops. In that case, we simply store the defer function/arg information into
+44:// specific stack slots at the point of each defer statement, as well as setting a
+46:// the appropriate defer calls based on the bitmask and fn/arg information stored
+47:// on the stack. During panic/Goexit processing, the appropriate defer calls are
+49:// contain the bitmask and defer fn/args.
+351:// Create a new deferred function fn, which has no arguments and results.
+352:// The compiler turns a defer statement into a call to this.
+391:// deferrangefunc is called by functions that are about to
+393:// may execute a defer statement. That defer needs to add to
+396:// calls deferrangefunc to obtain an opaque token representing
+397:// the current frame, and then the loop body uses deferprocat
+398:// instead of deferproc to add to that frame's defer lists.
+400:// The token is an 'any' with underlying type *atomic.Pointer[_defer].
+401:// It is the atomically-updated head of a linked list of _defer structs
+402:// representing deferred calls. At the same time, we create a _defer
+403:// struct on the main g._defer list with d.head set to this head pointer.
+405:// The g._defer list is now a linked list of deferred calls,
+408://		g._defer => d4 -> d3 -> drangefunc -> d2 -> d1 -> nil
+416:// its own defers (d4 and d3), so drangefunc need not be at the
+417:// top of the list when deferprocat is used. This is why we pass
+421:// deferprocat pushes new defers onto the .head list atomically.
+423:// defer list means that the main goroutine's defers can still
+427:// drangefunc would be processed, which is to say the defer order
+429:// when defer processing reaches a d with rangefunc=true,
+430:// it calls deferconvert to atomically take the extras
+433:// That is, deferconvert changes this list:
+435://		g._defer => drangefunc -> d2 -> d1 -> nil
+442://	g._defer => dY -> dX -> d2 -> d1 -> nil
+445:// deferprocat using that head will throw.
+452:// deferconvert, which would catch calling the loop body
+453:// and having it defer after the loop is done. If we have a
+480:// badDefer returns a fixed bad defer pointer for poisoning an atomic defer list head.
+485:// deferprocat is like deferproc but adds to the atomic list represented by frame.
+486:// See the doc comment for deferrangefunc for details.
+505:// deferconvert converts the rangefunc defer list of d0 into an ordinary list
+507:// See the doc comment for deferrangefunc for details.
+538:// deferprocStack queues a new deferred function with a defer record on the stack.
+539:// The defer record must have its fn field initialized.
+573:// Each P holds a pool for defers.
+576:// Each defer must be released with freedefer.  The defer is not
+577:// added to any defer chain yet.
+608:// popDefer pops the head of gp's defer list and frees it.
+655:// deferreturn runs deferred functions for the caller's frame.
+657:// function which calls defer.
+672:// Goexit terminates the goroutine that calls it. No other goroutine is affected.
+673:// Goexit runs all deferred calls before terminating the goroutine. Because Goexit
+674:// is not a panic, any recover calls in those deferred functions will return nil.
+682:func Goexit() {
+809:func gopanic(e any) {
+926:// nextDefer returns the next deferred function to invoke, if any.
+929:// the deferred function itself was nil (e.g., "defer (func())(nil)").
+995:// nextFrame finds the next frame that contains deferred calls, if any.
+1272:// when fatal occurs in panics while running defer.
+1292:// runningPanicDefers is non-zero while running deferred functions for panic.
+1303:// Unwind the stack after a deferred function calls recover
+1305:// the caller of the deferred function returned normally.
+1309:// defers instead.

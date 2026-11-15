@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "go",
+    "test",
+    "-timeout",
+    "15s",
+    "-gcflags=github.com/hashicorp/golang-lru/v2=-lang=go1.20",
+    "-overlay",
+    "domain-analysis/lruCache/_probe/overlay.json",
+    "-run",
+    "^TestPilot",
+    "-v",
+    "."
+  ],
+  "exit_code": 1
+}

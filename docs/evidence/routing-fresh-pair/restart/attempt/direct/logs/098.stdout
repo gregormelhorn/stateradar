@@ -1,0 +1,29 @@
+=== RUN   TestPilotPurgeThenAdd
+    cache_pilot_evidence_test.go:46: purge then add reached full while older callback remained pending
+--- PASS: TestPilotPurgeThenAdd (0.00s)
+=== RUN   TestPilotResizeBoundary
+--- PASS: TestPilotResizeBoundary (0.00s)
+=== RUN   TestPilotNaNRemovalAndPurge
+--- PASS: TestPilotNaNRemovalAndPurge (0.00s)
+=== RUN   TestPilotKeyPanicAndLock
+--- PASS: TestPilotKeyPanicAndLock (0.06s)
+=== RUN   TestPilotFailedConstructorPanic
+--- PASS: TestPilotFailedConstructorPanic (0.00s)
+=== RUN   TestPilotCallbackPanicAndGoexit
+=== RUN   TestPilotCallbackPanicAndGoexit/panic
+=== RUN   TestPilotCallbackPanicAndGoexit/goexit
+--- PASS: TestPilotCallbackPanicAndGoexit (0.00s)
+    --- PASS: TestPilotCallbackPanicAndGoexit/panic (0.00s)
+    --- PASS: TestPilotCallbackPanicAndGoexit/goexit (0.00s)
+=== RUN   TestPilotCallbackAfterPurgeFailureAndRecovery
+=== RUN   TestPilotCallbackAfterPurgeFailureAndRecovery/normal
+=== RUN   TestPilotCallbackAfterPurgeFailureAndRecovery/panic
+--- PASS: TestPilotCallbackAfterPurgeFailureAndRecovery (0.00s)
+    --- PASS: TestPilotCallbackAfterPurgeFailureAndRecovery/normal (0.00s)
+    --- PASS: TestPilotCallbackAfterPurgeFailureAndRecovery/panic (0.00s)
+=== RUN   TestPilotGetTwiceSameValue
+--- PASS: TestPilotGetTwiceSameValue (0.00s)
+=== RUN   TestPilotRaceCapResize
+--- PASS: TestPilotRaceCapResize (0.00s)
+PASS
+ok  	github.com/hashicorp/golang-lru/v2	0.450s

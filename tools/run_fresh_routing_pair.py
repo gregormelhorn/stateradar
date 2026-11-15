@@ -48,6 +48,20 @@ def blind_cost(root,final=False):
   else:total+=report['total_usd_estimate']
  return total,complete if final else True
 
+def restart_prior(root):
+ root=Path(root);receipt=json.loads((root/'receipt.json').read_text())
+ for name,digest in receipt['files'].items():
+  if hashlib.sha256((root/name).read_bytes()).hexdigest()!=digest:raise ValueError('smoke evidence changed: '+name)
+ for name,key in (('fresh_pair_server.py','server_sha256'),('fresh_pair_gates.py','guard_sha256')):
+  if hashlib.sha256((ROOT/'tools'/name).read_bytes()).hexdigest()!=receipt[key]:raise ValueError('smoke tool changed: '+name)
+ phase=json.loads((root/'phase-status.json').read_text());checkpoint=json.loads((root/'usage-checkpoint.json').read_text());routing=json.loads((root/'routing-cost.json').read_text());saved=json.loads((root/'cost-estimate.json').read_text())
+ if phase['controller']!='completed' or 'PART-B COVERAGE: OK' not in (root/'coverage.txt').read_text():raise ValueError('smoke did not finish')
+ controller=cost_report(checkpoint,routing,MODEL);blind,complete=blind_cost(root,True)
+ if not controller['complete'] or not complete or not saved['complete'] or not saved['blind_complete']:raise ValueError('smoke cost unknown')
+ total=round(controller['total_usd_estimate']+blind,9)
+ if abs(total-saved['total_with_blind'])>1e-9:raise ValueError('smoke cost mismatch')
+ return total
+
 def prompt(pack,arm):
  b=core.brief(pack,'fresh-lru','routed' if arm=='routed' else 'agent-only')
  if arm=='direct':
@@ -101,11 +115,11 @@ def main(out,prepare_only=False):
  expected_smoke=cost_report(json.loads((EVIDENCE/'model-preflight/usage-checkpoint.json').read_text()),{'charged_microdollars':0,'reserved_microdollars':0},MODEL)
  if expected_smoke!=smoke['cost']:raise ValueError('smoke cost disagrees with checkpoint')
  if hashlib.sha256((ROOT/'tools/fresh_pair_server.py').read_bytes()).hexdigest()!=smoke['server_sha256']:raise ValueError('server differs from model preflight')
- prior=freeze['reference_cost_usd_equivalent']+smoke['cost']['total_usd_estimate'];enforce_cap(prior,CAP)
+ prior=restart_prior(EVIDENCE/'restart/blind-smoke');enforce_cap(prior,CAP)
  for name,digest in freeze['files'].items():
   if hashlib.sha256((EVIDENCE/name).read_bytes()).hexdigest()!=digest:raise ValueError('reference changed: '+name)
  server=ROOT/'tools/fresh_pair_server.py';guard=ROOT/'tools/fresh_pair_gates.py';out.mkdir()
- core.save(out/'experiment.json',{'pack_sha':PACK_SHA,'component_sha':SOURCE_SHA,'reserve_component_sha':'f167a9d53145b661d05ac28b5702b6f29ea9c502','arm_order':['direct','routed'],'model':MODEL,'timeout_seconds':TIMEOUT,'soft_cap_usd_equivalent':CAP,'reference_cost_usd_equivalent':freeze['reference_cost_usd_equivalent'],'preflight_smoke_cost_usd_equivalent':smoke['cost']['total_usd_estimate'],'preflight_smoke_sha256':hashlib.sha256((EVIDENCE/'preflight-model-smoke.json').read_bytes()).hexdigest(),'reference_freeze_sha256':hashlib.sha256((EVIDENCE/'reference/freeze.json').read_bytes()).hexdigest(),'runner_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'server_sha256':hashlib.sha256(server.read_bytes()).hexdigest(),'guard_sha256':hashlib.sha256(guard.read_bytes()).hexdigest()})
+ core.save(out/'experiment.json',{'pack_sha':PACK_SHA,'component_sha':SOURCE_SHA,'reserve_component_sha':'f167a9d53145b661d05ac28b5702b6f29ea9c502','arm_order':['direct','routed'],'model':MODEL,'timeout_seconds':TIMEOUT,'soft_cap_usd_equivalent':CAP,'old_reference_cost_usd_equivalent':freeze['reference_cost_usd_equivalent'],'old_preflight_smoke_cost_usd_equivalent':smoke['cost']['total_usd_estimate'],'restart_blind_smoke_cost_usd_equivalent':prior,'budget_scope':'new smoke and new pair; old attempt tracked separately','preflight_smoke_sha256':hashlib.sha256((EVIDENCE/'preflight-model-smoke.json').read_bytes()).hexdigest(),'reference_freeze_sha256':hashlib.sha256((EVIDENCE/'reference/freeze.json').read_bytes()).hexdigest(),'runner_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'server_sha256':hashlib.sha256(server.read_bytes()).hexdigest(),'guard_sha256':hashlib.sha256(guard.read_bytes()).hexdigest()})
  for arm in ('direct','routed'):
   core.prepare(out/arm,ROOT,PACK_SHA,Path('/tmp/stateradar-lru-benchmark'),SOURCE_SHA);Budget(out/arm/'routing.sqlite',2_000_000)
   status,_,err=core.execute(out/arm,['python3','-c','import jsonschema,z3'],0,python)

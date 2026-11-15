@@ -1,0 +1,75 @@
+	if previous != 1 {
+		t.Errorf("previous is not equal to 1")
+	}
+
+	l.Add(3, 3)
+	contains, evict = l.ContainsOrAdd(1, 1)
+	if contains {
+		t.Errorf("1 should not have been contained")
+	}
+	if !evict {
+		t.Errorf("an eviction should have occurred")
+	}
+	if !l.Contains(1) {
+		t.Errorf("now 1 should be contained")
+	}
+}
+
+// test that Peek doesn't update recent-ness
+func TestLRUPeek(t *testing.T) {
+	l, err := New[int, int](2)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	l.Add(1, 1)
+	l.Add(2, 2)
+	if v, ok := l.Peek(1); !ok || v != 1 {
+		t.Errorf("1 should be set to 1: %v, %v", v, ok)
+	}
+
+	l.Add(3, 3)
+	if l.Contains(1) {
+		t.Errorf("should not have updated recent-ness of 1")
+	}
+}
+
+// test that Resize can upsize and downsize
+func TestLRUResize(t *testing.T) {
+	onEvictCounter := 0
+	onEvicted := func(k int, v int) {
+		onEvictCounter++
+	}
+	l, err := NewWithEvict(2, onEvicted)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	// Downsize
+	l.Add(1, 1)
+	l.Add(2, 2)
+	evicted := l.Resize(1)
+	if evicted != 1 {
+		t.Errorf("1 element should have been evicted: %v", evicted)
+	}
+	if onEvictCounter != 1 {
+		t.Errorf("onEvicted should have been called 1 time: %v", onEvictCounter)
+	}
+
+	l.Add(3, 3)
+	if l.Contains(1) {
+		t.Errorf("Element 1 should have been evicted")
+	}
+
+	// Upsize
+	evicted = l.Resize(2)
+	if evicted != 0 {
+		t.Errorf("0 elements should have been evicted: %v", evicted)
+	}
+
+	l.Add(4, 4)
+	if !l.Contains(3) || !l.Contains(4) {
+		t.Errorf("Cache should have contained 2 elements")
+	}
+}
+

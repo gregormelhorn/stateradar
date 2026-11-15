@@ -1,0 +1,49 @@
+     1	// Copyright IBM Corp. 2014, 2025
+     2	// SPDX-License-Identifier: MPL-2.0
+     3	
+     4	// Package simplelru provides simple LRU implementation based on build-in container/list.
+     5	package simplelru
+     6	
+     7	// LRUCache is the interface for simple LRU cache.
+     8	type LRUCache[K comparable, V any] interface {
+     9		// Adds a value to the cache, returns true if an eviction occurred and
+    10		// updates the "recently used"-ness of the key.
+    11		Add(key K, value V) bool
+    12	
+    13		// Returns key's value from the cache and
+    14		// updates the "recently used"-ness of the key. #value, isFound
+    15		Get(key K) (value V, ok bool)
+    16	
+    17		// Checks if a key exists in cache without updating the recent-ness.
+    18		Contains(key K) (ok bool)
+    19	
+    20		// Returns key's value without updating the "recently used"-ness of the key.
+    21		Peek(key K) (value V, ok bool)
+    22	
+    23		// Removes a key from the cache.
+    24		Remove(key K) bool
+    25	
+    26		// Removes the oldest entry from cache.
+    27		RemoveOldest() (K, V, bool)
+    28	
+    29		// Returns the oldest entry from the cache. #key, value, isFound
+    30		GetOldest() (K, V, bool)
+    31	
+    32		// Returns a slice of the keys in the cache, from oldest to newest.
+    33		Keys() []K
+    34	
+    35		// Values returns a slice of the values in the cache, from oldest to newest.
+    36		Values() []V
+    37	
+    38		// Returns the number of items in the cache.
+    39		Len() int
+    40	
+    41		// Returns the capacity of the cache.
+    42		Cap() int
+    43	
+    44		// Clears all cache entries.
+    45		Purge()
+    46	
+    47		// Resizes cache, returning number evicted
+    48		Resize(int) int
+    49	}

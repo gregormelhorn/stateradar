@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "python3",
+    "-c",
+    "import sys\nfrom pathlib import Path\nd=Path(sys.argv[1])\np=d/'adversarial-traces.md'\ns=p.read_text()\ns='\\n'.join(x for x in s.split('\\n') if not x.startswith('- Reachability: Empty → AtCapacity'))\np.write_text(s)\np=d/'disposition-matrix.md'\ns=p.read_text()\ns += '\\n- G-09 proven: signed subtraction compares with 0; MinInt may wrap and cause clamp with entries retained. G-10 proven: classify target by sign of final capacity. See guard-results.txt.\\n'\np.write_text(s)\n",
+    "domain-analysis/lruCache"
+  ],
+  "exit_code": 0
+}
