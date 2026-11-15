@@ -11,7 +11,8 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install -r tools/requirements-dev.txt
+      # The pack-wide mypy pass also checks the optional GEPA adapter.
+      - run: pip install -r tools/requirements-dev.txt -r docs/evidence/gepa-bounded/requirements.txt
       - uses: actions/setup-go@v5
         with:
           go-version-file: examples/weighted-semaphore/go.mod
