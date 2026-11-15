@@ -60,6 +60,10 @@ A future generation-isolation profile would require its own contract and probes.
 - `addrconn/`: fresh raw historical/evaluation/full/weak runs, execution receipts,
   source snapshot, workflow receipt and the existing regression/control outputs.
 - `gobreaker/`: public-API baseline and guard-removal outputs with a content receipt.
+- `anchor-red.txt`: the implementation commit correctly stales the prior harness anchor.
+  `anchor-and-replay.txt` verifies the refreshed anchor and replays the recorded
+  evidence with unchanged executable sources. This is harness anchoring, not a
+  promotion of the incomplete addrConn model.
 - `full-gates.txt`: full acceptance output; expected historical and mutant reds
   are success conditions, never suppressed failures.
 

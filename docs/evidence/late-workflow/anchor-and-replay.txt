@@ -1,0 +1,14 @@
+HARNESS ANCHOR: committed watched paths unchanged since 7248be61
+LATE HARNESS ANCHOR: 533dfe0d593b9241456cac4785f70be1424cc1da
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python tools/check_late_workflow.py examples/grpc-addrconn/late-completion/workflow.json --evidence docs/evidence/late-workflow/addrconn
+LATE PLAN: {"applicable": 3}; declared scope only
+LATE EXECUTION PASS: baseline, 6 full/weak variants, 4 independent canaries; exact repetitions and Go discovery
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python tools/check_late_workflow.py examples/gobreaker/late-completion-readiness/workflow.json
+LATE PLAN: {"not-applicable": 1}; declared scope only
+PLAN ONLY: no execution claim
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python tools/check_pack_consistency.py
+RULES REGISTRY: OK (73 rules, 22 fault classes, 0 warnings)
+ODC table: OK
+PACK CONSISTENCY: OK (24 artifacts, registry, version 1.53)
+$ git diff --check
+ANCHOR AND REPLAY PASS: executable sources unchanged from full accepted run
