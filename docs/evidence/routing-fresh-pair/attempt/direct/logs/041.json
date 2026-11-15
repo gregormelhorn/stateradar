@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "python3",
+    "../pack/tools/local_models.py",
+    "--ledger",
+    "../routing.sqlite",
+    "blind",
+    "domain-analysis/lruCache",
+    "--repo",
+    ".",
+    "--requirements",
+    "domain-analysis/lruCache/blind-requirements.md",
+    "--contracts",
+    "domain-analysis/lruCache/blind-contracts.txt",
+    "--max-tokens",
+    "16384",
+    "--package-only",
+    "--output",
+    "domain-analysis/lruCache/part-b-blind.md"
+  ],
+  "exit_code": 0
+}

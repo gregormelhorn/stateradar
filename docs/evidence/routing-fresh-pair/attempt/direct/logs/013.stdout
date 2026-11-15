@@ -1,0 +1,19 @@
+     1	// Copyright IBM Corp. 2014, 2025
+     2	// SPDX-License-Identifier: MPL-2.0
+     3	
+     4	package lru
+     5	
+     6	import (
+     7		"crypto/rand"
+     8		"math"
+     9		"math/big"
+    10		"testing"
+    11	)
+    12	
+    13	func getRand(tb testing.TB) int64 {
+    14		out, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
+    15		if err != nil {
+    16			tb.Fatal(err)
+    17		}
+    18		return out.Int64()
+    19	}

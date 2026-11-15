@@ -1,0 +1,14 @@
+F
+======================================================================
+FAIL: test_direct_refuses_provider_even_if_parent_has_keys (__main__.ServerTest.test_direct_refuses_provider_even_if_parent_has_keys)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_server.py", line 11, in test_direct_refuses_provider_even_if_parent_has_keys
+    self.assertEqual(p.returncode,0,p.stderr);self.assertIn('providers are unavailable',p.stdout);self.assertNotIn('sentinel-secret',p.stdout+p.stderr)
+                                              ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'providers are unavailable' not found in '{"jsonrpc": "2.0", "id": 1, "result": {"content": [{"type": "text", "text": "{\\"exit_code\\": 2, \\"stderr\\": \\"blind requires requirements, contracts and one exact output path\\"}"}]}}\n'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.086s
+
+FAILED (failures=1)

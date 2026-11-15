@@ -1,0 +1,32 @@
+FFF.
+======================================================================
+FAIL: test_missing_denial (__main__.SmokeTest.test_missing_denial)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_smoke_check.py", line 11, in test_missing_denial
+    with self.assertRaisesRegex(ValueError,'provider refusal'):verify('github.com/hashicorp/golang-lru/v2',self.events()[:1])
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_missing_read (__main__.SmokeTest.test_missing_read)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_smoke_check.py", line 13, in test_missing_read
+    with self.assertRaisesRegex(ValueError,'module read'):verify('github.com/hashicorp/golang-lru/v2',self.events()[1:])
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_refuses_other_tool (__main__.SmokeTest.test_refuses_other_tool)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_smoke_check.py", line 16, in test_refuses_other_tool
+    with self.assertRaisesRegex(ValueError,'unexpected tool'):verify('github.com/hashicorp/golang-lru/v2',events)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+FAILED (failures=3)

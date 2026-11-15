@@ -1,0 +1,182 @@
+     1	// Copyright IBM Corp. 2014, 2026
+     2	// SPDX-License-Identifier: MPL-2.0
+     3	
+     4	package simplelru
+     5	
+     6	import (
+     7		"errors"
+     8	
+     9		"github.com/hashicorp/golang-lru/v2/internal"
+    10	)
+    11	
+    12	// EvictCallback is used to get a callback when a cache entry is evicted
+    13	type EvictCallback[K comparable, V any] func(key K, value V)
+    14	
+    15	// LRU implements a non-thread safe fixed size LRU cache
+    16	type LRU[K comparable, V any] struct {
+    17		size      int
+    18		evictList *internal.LruList[K, V]
+    19		items     map[K]*internal.Entry[K, V]
+    20		onEvict   EvictCallback[K, V]
+    21	}
+    22	
+    23	// NewLRU constructs an LRU of the given size
+    24	func NewLRU[K comparable, V any](size int, onEvict EvictCallback[K, V]) (*LRU[K, V], error) {
+    25		if size <= 0 {
+    26			return nil, errors.New("must provide a positive size")
+    27		}
+    28	
+    29		c := &LRU[K, V]{
+    30			size:      size,
+    31			evictList: internal.NewList[K, V](),
+    32			items:     make(map[K]*internal.Entry[K, V]),
+    33			onEvict:   onEvict,
+    34		}
+    35		return c, nil
+    36	}
+    37	
+    38	// Purge is used to completely clear the cache.
+    39	func (c *LRU[K, V]) Purge() {
+    40		for k, v := range c.items {
+    41			if c.onEvict != nil {
+    42				c.onEvict(k, v.Value)
+    43			}
+    44			delete(c.items, k)
+    45		}
+    46		c.evictList.Init()
+    47	}
+    48	
+    49	// Add adds a value to the cache.  Returns true if an eviction occurred.
+    50	func (c *LRU[K, V]) Add(key K, value V) (evicted bool) {
+    51		// Check for existing item
+    52		if ent, ok := c.items[key]; ok {
+    53			c.evictList.MoveToFront(ent)
+    54			ent.Value = value
+    55			return false
+    56		}
+    57	
+    58		// Add new item
+    59		ent := c.evictList.PushFront(key, value)
+    60		c.items[key] = ent
+    61	
+    62		evict := c.evictList.Length() > c.size
+    63		// Verify size not exceeded
+    64		if evict {
+    65			c.removeOldest()
+    66		}
+    67		return evict
+    68	}
+    69	
+    70	// Get looks up a key's value from the cache.
+    71	func (c *LRU[K, V]) Get(key K) (value V, ok bool) {
+    72		if ent, ok := c.items[key]; ok {
+    73			c.evictList.MoveToFront(ent)
+    74			return ent.Value, true
+    75		}
+    76		return
+    77	}
+    78	
+    79	// Contains checks if a key is in the cache, without updating the recent-ness
+    80	// or deleting it for being stale.
+    81	func (c *LRU[K, V]) Contains(key K) (ok bool) {
+    82		_, ok = c.items[key]
+    83		return ok
+    84	}
+    85	
+    86	// Peek returns the key value (or undefined if not found) without updating
+    87	// the "recently used"-ness of the key.
+    88	func (c *LRU[K, V]) Peek(key K) (value V, ok bool) {
+    89		var ent *internal.Entry[K, V]
+    90		if ent, ok = c.items[key]; ok {
+    91			return ent.Value, true
+    92		}
+    93		return
+    94	}
+    95	
+    96	// Remove removes the provided key from the cache, returning if the
+    97	// key was contained.
+    98	func (c *LRU[K, V]) Remove(key K) (present bool) {
+    99		if ent, ok := c.items[key]; ok {
+   100			c.removeElement(ent)
+   101			return true
+   102		}
+   103		return false
+   104	}
+   105	
+   106	// RemoveOldest removes the oldest item from the cache.
+   107	func (c *LRU[K, V]) RemoveOldest() (key K, value V, ok bool) {
+   108		if ent := c.evictList.Back(); ent != nil {
+   109			c.removeElement(ent)
+   110			return ent.Key, ent.Value, true
+   111		}
+   112		return
+   113	}
+   114	
+   115	// GetOldest returns the oldest entry
+   116	func (c *LRU[K, V]) GetOldest() (key K, value V, ok bool) {
+   117		if ent := c.evictList.Back(); ent != nil {
+   118			return ent.Key, ent.Value, true
+   119		}
+   120		return
+   121	}
+   122	
+   123	// Keys returns a slice of the keys in the cache, from oldest to newest.
+   124	func (c *LRU[K, V]) Keys() []K {
+   125		keys := make([]K, c.evictList.Length())
+   126		i := 0
+   127		for ent := c.evictList.Back(); ent != nil; ent = ent.PrevEntry() {
+   128			keys[i] = ent.Key
+   129			i++
+   130		}
+   131		return keys
+   132	}
+   133	
+   134	// Values returns a slice of the values in the cache, from oldest to newest.
+   135	func (c *LRU[K, V]) Values() []V {
+   136		values := make([]V, c.evictList.Length())
+   137		i := 0
+   138		for ent := c.evictList.Back(); ent != nil; ent = ent.PrevEntry() {
+   139			values[i] = ent.Value
+   140			i++
+   141		}
+   142		return values
+   143	}
+   144	
+   145	// Len returns the number of items in the cache.
+   146	func (c *LRU[K, V]) Len() int {
+   147		return c.evictList.Length()
+   148	}
+   149	
+   150	// Cap returns the capacity of the cache
+   151	func (c *LRU[K, V]) Cap() int {
+   152		return c.size
+   153	}
+   154	
+   155	// Resize changes the cache size.
+   156	func (c *LRU[K, V]) Resize(size int) (evicted int) {
+   157		diff := c.Len() - size
+   158		if diff < 0 {
+   159			diff = 0
+   160		}
+   161		for i := 0; i < diff; i++ {
+   162			c.removeOldest()
+   163		}
+   164		c.size = size
+   165		return diff
+   166	}
+   167	
+   168	// removeOldest removes the oldest item from the cache.
+   169	func (c *LRU[K, V]) removeOldest() {
+   170		if ent := c.evictList.Back(); ent != nil {
+   171			c.removeElement(ent)
+   172		}
+   173	}
+   174	
+   175	// removeElement is used to remove a given list element from the cache
+   176	func (c *LRU[K, V]) removeElement(e *internal.Entry[K, V]) {
+   177		c.evictList.Remove(e)
+   178		delete(c.items, e.Key)
+   179		if c.onEvict != nil {
+   180			c.onEvict(e.Key, e.Value)
+   181		}
+   182	}

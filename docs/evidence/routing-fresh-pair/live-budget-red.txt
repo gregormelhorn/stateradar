@@ -1,0 +1,32 @@
+......FFF...
+======================================================================
+FAIL: test_controller_usage_counts_toward_cap (__main__.LiveBudgetTests.test_controller_usage_counts_toward_cap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 39, in test_controller_usage_counts_toward_cap
+    with self.assertRaisesRegex(ValueError,'budget reached'):live_budget(.1,usage,[],0,10,5)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_reserved_provider_counts_toward_cap (__main__.LiveBudgetTests.test_reserved_provider_counts_toward_cap)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 36, in test_reserved_provider_counts_toward_cap
+    with self.assertRaisesRegex(ValueError,'budget reached'):live_budget(4.0,None,[{'amount_microdollars':1100000,'status':'reserved'}],0,10,5)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_unreported_controller_cannot_continue (__main__.LiveBudgetTests.test_unreported_controller_cannot_continue)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 34, in test_unreported_controller_cannot_continue
+    with self.assertRaisesRegex(ValueError,'unknown controller'):live_budget(.1,None,[],0,181,5)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.002s
+
+FAILED (failures=3)

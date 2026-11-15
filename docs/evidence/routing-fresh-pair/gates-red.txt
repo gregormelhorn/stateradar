@@ -1,0 +1,41 @@
+FFFF
+======================================================================
+FAIL: test_blind_requires_exact_output_and_package (__main__.GateTests.test_blind_requires_exact_output_and_package)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 18, in test_blind_requires_exact_output_and_package
+    with self.assertRaises(ValueError):allow_blind(args,out)
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_cost_includes_all_parts (__main__.GateTests.test_cost_includes_all_parts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 8, in test_cost_includes_all_parts
+    n=tally(.1,{'usage':self.usage},[{'status':'settled','amount_microdollars':2000}],[{'usage':self.usage,'complete':True}]);self.assertGreater(n,.1)
+                                                                                                                              ~~~~~~~~~~~~~~~~~~^^^^^^
+AssertionError: 0 not greater than 0.1
+
+======================================================================
+FAIL: test_reserved_provider_fails (__main__.GateTests.test_reserved_provider_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 13, in test_reserved_provider_fails
+    with self.assertRaisesRegex(ValueError,'unsettled'):tally(.1,{'usage':self.usage},[{'status':'reserved','amount_microdollars':1}],[])
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_unknown_prior_or_blind_fails (__main__.GateTests.test_unknown_prior_or_blind_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 11, in test_unknown_prior_or_blind_fails
+    with self.assertRaisesRegex(ValueError,'unknown'):tally(prior,{'usage':self.usage},[],blind)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+FAILED (failures=4)

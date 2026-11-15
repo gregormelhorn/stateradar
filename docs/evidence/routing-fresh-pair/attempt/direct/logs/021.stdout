@@ -1,0 +1,25 @@
+../pack/tools/pilot_artifacts.py:39:def render_catalogue(data):
+../pack/tools/pilot_artifacts.py:165:    catalogue.add_argument('fields', type=Path)
+../pack/tools/pilot_artifacts.py:166:    catalogue.add_argument('output', type=Path)
+../pack/tools/pilot_artifacts.py:167:    catalogue.add_argument('--check', action='store_true')
+../pack/tools/pilot_artifacts.py:169:    cite.add_argument('source', type=Path)
+../pack/tools/pilot_artifacts.py:170:    cite.add_argument('lines', nargs='+', type=int)
+../pack/tools/pilot_artifacts.py:172:    audit.add_argument('analysis', type=Path)
+../pack/tools/pilot_artifacts.py:173:    audit.add_argument('--repo', type=Path, default=Path('.'))
+../pack/tools/hybrid_pilot.py:83:def render_matrix(data: object, repo: Path) -> str:
+../pack/tools/hybrid_pilot.py:140:def render_cell(cell: dict, states: list[str], repo: Path, sources: dict[str, list[str]]) -> str:
+../pack/tools/hybrid_pilot.py:208:    parser.add_argument('fields', type=Path)
+../pack/tools/hybrid_pilot.py:209:    parser.add_argument('output', type=Path)
+../pack/tools/hybrid_pilot.py:210:    parser.add_argument('--repo', type=Path, default=Path('.'))
+../pack/tools/hybrid_pilot.py:211:    parser.add_argument('--check', action='store_true', help='verify that output matches structured fields')
+../pack/tools/gen_analysis_sidecar.py:752:    parser.add_argument("components", nargs="*")
+../pack/tools/gen_analysis_sidecar.py:753:    parser.add_argument("--root", default=".")
+../pack/tools/gen_analysis_sidecar.py:754:    parser.add_argument(
+../pack/tools/gen_analysis_sidecar.py:759:    parser.add_argument(
+../pack/tools/part_b_pack.py:654:    parser.add_argument("analysis_dir", help="e.g. domain-analysis/trigger-service")
+../pack/tools/part_b_pack.py:655:    parser.add_argument("--repo", default=".")
+../pack/tools/part_b_pack.py:656:    parser.add_argument("--requirements", action="append", default=[],
+../pack/tools/part_b_pack.py:658:    parser.add_argument("--contracts", action="append", default=[],
+../pack/tools/part_b_pack.py:660:    parser.add_argument("--out", help="write the package here (default: stdout)")
+../pack/tools/part_b_pack.py:661:    parser.add_argument("--check", metavar="BLIND_OUTPUT.md",
+../pack/tools/part_b_pack.py:663:    parser.add_argument("--for-dispatch", action="store_true",

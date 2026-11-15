@@ -1,0 +1,49 @@
+{
+  "review": {
+    "cases": [
+      {
+        "id": "R01",
+        "verdict": "confirmed",
+        "reason": "NewWithEvict allocates the outer Cache before calling NewLRU. For size zero, NewLRU returns a nil inner LRU and a non-nil error. The wrapper returns the allocated Cache with that error and a nil inner LRU. TestReferenceInvalidConstructor passed and checks that both the outer pointer and the error are non-nil.",
+        "file": "lru.go",
+        "line": 42,
+        "fragment": "c.lru, err = simplelru.NewLRU(size, onEvicted)"
+      },
+      {
+        "id": "R02",
+        "verdict": "confirmed",
+        "reason": "Get moves the entry to the front, Peek reads it without changing list order, and Add evicts from the back when capacity is exceeded. Both subtests passed. Add returned true and the callback recorded exactly one key in each case, key 1 after Peek and key 2 after Get. The test checks callback keys only.",
+        "file": "simplelru/lru.go",
+        "line": 73,
+        "fragment": "c.evictList.MoveToFront(ent)"
+      },
+      {
+        "id": "R03",
+        "verdict": "confirmed",
+        "reason": "The internal eviction hook buffers entries while the cache lock is held. Purge clears the underlying LRU and releases the lock before calling the user callback. The passing test observed Purge complete, two callbacks run, and the key added by the first callback remain as the sole entry. The proposed citation is off by one. The unlock is on line 68.",
+        "file": "lru.go",
+        "line": 68,
+        "fragment": "c.lock.Unlock()"
+      },
+      {
+        "id": "R04",
+        "verdict": "confirmed",
+        "reason": "With one entry, Resize(-1) computes a difference of two and makes two removal attempts. The first removes the entry and the second finds the list empty. Resize stores -1 and returns two. The next Add inserts an entry, exceeds the stored capacity, and immediately removes that entry. The passing test checks the return value, capacity, empty cache, and exact callback keys.",
+        "file": "simplelru/lru.go",
+        "line": 157,
+        "fragment": "diff := c.Len() - size"
+      },
+      {
+        "id": "R05",
+        "verdict": "confirmed",
+        "reason": "Cache.Cap reads the underlying size without acquiring the cache lock, while Cache.Resize holds that lock when writing the size. All three supplied race-detector runs reported a same-address conflict between the Cap read at simplelru/lru.go line 152 and the Resize write at line 164, causing the test to fail.",
+        "file": "lru.go",
+        "line": 254,
+        "fragment": "return c.lru.Cap()"
+      }
+    ]
+  },
+  "call_ids": [
+    0
+  ]
+}

@@ -1,0 +1,14 @@
+{
+ "source_commit":"2bb29091a6c341aba625d23fea354c4fbaef5d6f",
+ "cases":[
+  {"id":"R01","description":"NewWithEvict(0,nil) returns a non-nil Cache pointer and a non-nil error; callers cannot treat that result as a successfully initialized cache.","test":"TestReferenceInvalidConstructor","provenance":"observed-in-code","citation":{"file":"upstream/simplelru/lru.go","line":25,"fragment":"if size <= 0 {"}},
+  {"id":"R02","description":"With capacity two, Peek of the oldest key leaves it oldest while Get makes that key most recent; the next Add evicts the respective oldest key and reports the callback.","test":"TestReferenceGetVersusPeek","provenance":"observed-in-tests","citation":{"file":"upstream/simplelru/lru.go","line":73,"fragment":"c.evictList.MoveToFront(ent)"}},
+  {"id":"R03","description":"Purge invokes eviction callbacks outside the cache lock; a callback may reenter Add and leave a newly added entry after Purge returns.","test":"TestReferencePurgeReentrantCallback","provenance":"observed-in-tests","citation":{"file":"upstream/lru.go","line":69,"fragment":"c.lock.Unlock()"}},
+  {"id":"R04","description":"With capacity two and one entry, Resize(-1) returns two while one existing entry is actually evicted; it leaves capacity -1 and a later Add immediately evicts its inserted entry.","test":"TestReferenceNegativeResize","provenance":"observed-in-tests","citation":{"file":"upstream/simplelru/lru.go","line":157,"fragment":"diff := c.Len() - size"}},
+  {"id":"R05","description":"Concurrent Cache.Cap and Cache.Resize access the underlying size without a common lock, producing a race-detector report on the size read and write.","test":"TestReferenceCapResizeRace","provenance":"observed-in-tests","citation":{"file":"upstream/lru.go","line":254,"fragment":"return c.lru.Cap()"}}
+ ],
+ "open_questions":[
+  {"id":"Q-REF01","status":"OPEN","question":"What behavior should Resize have for a negative capacity and what does its returned count mean?"},
+  {"id":"Q-REF02","status":"OPEN","question":"What should Purge guarantee at return if an eviction callback reenters and adds an entry?"}
+ ]
+}

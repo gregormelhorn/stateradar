@@ -1,0 +1,195 @@
+     1	# How StateRadar works: instructions for an LLM
+     2	
+     3	You are an agent in a repository that uses StateRadar. This document tells you what the system is. It shows how information flows through the system. It lists the rules that bind you. The language layer (STE/DTK) is a separate concern.
+     4	
+     5	## 1. What this is
+     6	
+     7	The pack treats a Harel-style statechart as the specification and the test oracle for one stateful component. The division of work does not change. You extract, classify, draft, and propose. Deterministic code verifies your outputs. The human owner decides domain semantics.
+     8	
+     9	Never fill a specification gap with your own judgment, however plausible. Your value is completeness and honesty, not decisiveness.
+    10	
+    11	## 2. The objects
+    12	
+    13	* **Machine boundary**: the scope statement declares one bounded component. The machine boundary is this component, not the whole system.
+    14	* **State**: a state is a mode of the component. Implicit states count. Enumerate the reachable combinations of boolean flags and nullable references. These combinations are the real state space.
+    15	* **Event**: an event has one of three sources: external (boundary calls), internal (timers, delivered results), or an undesired variant (`UV-nn`). Derive the undesired variants per source from a fixed checklist (generated from `formats/rules.toml`):
+    16	
+    17	<!-- generated:rules key=uv-categories -->
+    18	* loss or failure of the source (F-12, sidecar key: `loss`)
+    19	* delay beyond timeout (F-13, sidecar key: `delay`)
+    20	* duplication (F-14, sidecar key: `duplication`)
+    21	* out-of-order or stale arrival, especially after cancellation or shutdown (F-15, sidecar key: `out-of-order`)
+    22	* contradictory simultaneous inputs (F-16, sidecar key: `contradiction`)
+    23	* spontaneous commission — an event with no legitimate trigger (spurious wakeup, callback without a matching request, unsolicited push) (F-17, sidecar key: `commission`)
+    24	* subtle value fault — a plausible but wrong payload (foreign session or entity id, stale epoch or generation counter) (F-18, sidecar key: `value`)
+    25	<!-- /generated:rules -->
+    26	
+    27	  The coverage table must show every category. Write a reason for each `n/a`.
+    28	* **Interaction pairs** (`P-nna/b`): an interaction pair is a cross-source event pair on one shared entity, in both orderings. Per-source checklists structurally miss races between sources. Interaction pairs close this gap.
+    29	* **Disposition**: each matrix cell has exactly one disposition: `transition → <target>`, `handle`, `ignore (documented)`, `ignore (accidental)`, `defer (queued)`, `reject`, or `UNSPECIFIED`. The values `ignore (accidental)` and `UNSPECIFIED` are holes.
+    30	* **Guards**: formalizable guard groups get z3 proofs: pairwise disjointness, coverage, and boundary probes. Each group ends as `proven`, `violation`, or `not-formalizable: <reason>`. Never skip a guard group silently.
+    31	* **Invariants**: `NAT` marks an assumption about the environment. Cite the assumption into the callee or upstream. `SYS` marks an obligation of the system. Check each SYS invariant state by state.
+    32	* **Doctrine lines** (`DOC-n`): extract every normative sentence from the requirements. Map each doctrine line to an invariant, a disposition constraint, or an explicit rejection. An unmapped doctrine line is an error.
+    33	* **Provenance**: every behavioural claim carries one label: `explicit-requirement`, `observed-in-code`, `observed-in-tests`, `inferred`, or `proposed`. Code and test citations carry a fragment: `file:line ("fragment")`. The checkers verify the fragment near that line.
+    34	* **Questions** (`Q-nn`): every hole, contradiction, and violated assumption becomes a question. Only the human can answer it. Drop nothing in consolidation. Every hole cell carries `→ Q-nn`.
+    35	* **Decision records** (`DR-nnn.yaml`): a decision record holds the human's answers with attributed rationale. The decision records are the permanent memory. A to-be deviation without a DR is an error.
+    36	* **Sidecar and manifest**: `analysis.json` holds your machine-readable claims. `manifest.json` holds `analyzedSha` and the watch paths. The pack checker consumes both files. Git diffs against the SHA turn staleness into a CI signal.
+    37	
+    38	## 3. The loop
+    39	
+    40	```text
+    41	01 Scout      rank stateful components; evidence-based, read-only
+    42	02 Pilot      Part A: extract → as-is model → catalogue → matrix → guards
+    43	              → invariants → adversarial traces → open questions
+    44	              Part B: a BLIND session predicts dispositions from the
+    45	              catalogue + requirements only; a diff classifies every row
+    46	   (human)    answers the questions — interview mode: one per round,
+    47	              recommended option first (Enter default), attributed
+    48	              rationale, write-through per answer, defer stays OPEN
+    49	03 Resolution DRs, to-be model, matrix update, re-run all checkers
+    50	04 Testgen    one test per matrix cell + scenario tests from decided
+    51	              traces; red tests against current code = deviation report
+    52	              = the implementation worklist, never a test defect
+    53	   (impl.)    fix code DR by DR; docs-only DRs first (no red test
+    54	              reminds you); tests are read-only
+    55	06 Reconcile  after green: promote to-be → as-is, refresh citations at
+    56	              HEAD, write sidecar + manifest, archive superseded files
+    57	07 Test audit off-cycle: weak tests first (structure over function),
+    58	              then redundancy, deviations, gaps; propose, never delete
+    59	```
+    60	
+    61	Run 06 first when the manifest reports staleness. Run 01 or 02 for a new component. For a behaviour change request, follow the standing instruction: model and DR first, code second.
+    62	## 4. Rules that do not bend
+    63	
+    64	<!-- rule:R-NO-SILENT-DECISIONS -->
+    65	1. **Never decide domain semantics.** If behaviour is unclear, contradictory, or unspecified, write a question. Treat a "benign" gap as a proposal inside the question. It is never a reason to omit the question.
+    66	<!-- rule:R-REQUIREMENT-SCOPE-a -->
+    67	2. **Requirement-scope rule.** A citation covers only the scenario that its text describes. A control-trace verdict that cites a requirement must carry the line: *cited text contemplates this ordering: yes/no*. A "no" voids the verdict. Then raise a question.
+    68	<!-- rule:R-SEAM-CONTRACT -->
+    69	3. **Read callee contracts. Do not infer them.** Missing error handling at a call site is not evidence that failures propagate. Read the contract of the seam. Cite into the callee.
+    70	<!-- rule:R-EXECUTED-CHECKS -->
+    71	4. **Run checks as executed code.** You emit data. The pack verifies it with `tools/dsc_check.py` on the sidecar. When you write per-run checkers, run them and paste the output. A red checker means: fix the artefact, or fix the checker openly and re-run. Never "fix" the data to silence a check.
+    72	<!-- rule:R-PROPOSALS -->
+    73	5. **Proposals are not decisions.** Recommendations have flipped between runs on the same code. Present them, label them `proposed`, and hold them loosely. Pre-selection in the interview is presentation, not authority.
+    74	<!-- rule:R-ANTI-MIRRORING -->
+    75	6. **Tests bind to behaviour, not structure.** Assert only through the declared seam: projected state, emitted effects, and SYS invariants. Never weaken, skip, or delete a test to make it pass. A failing cell test is a finding.
+    76	<!-- rule:R-PART-B -->
+    77	7. **Part B stays blind.** The blind session gets the catalogue, the requirements, and the event contracts. It never gets the code, the matrix, or prior analyses. Do no git archaeology on deleted analyses.
+    78	<!-- rule:R-DEFERRED-OPEN -->
+    79	8. **Deferred stays OPEN.** A deferred question blocks only its own cells.
+    80	<!-- rule:R-READ-PROMPTS -->
+    81	9. **Read prompts in full.** When a task says "run prompt X" or references a prompt file (e.g. `prompts/02-pilot.md`), read the complete file before producing output. Do not guess its content from the filename, derive it from memory, or skip steps that the prompt requires. A subagent that produces the wrong number of events because it did not read the undesired-variant checklist has not executed the prompt.
+    82	
+    83	## 5. What the checkers catch
+    84	
+    85	The checkers catch the following defects. Do not fight them. (Generated from `formats/rules.toml` — the registry maps each line to its rule, checker, and selftest.)
+    86	
+    87	<!-- generated:rules key=checker-catalogue -->
+    88	* grid totality
+    89	* disposition vocabulary
+    90	* hole → Q back-references
+    91	* DR links on ignore, reject, and defer
+    92	* behavioural-DR reverse coverage: every decided change connects to a cell
+    93	* pair → trace coverage
+    94	* guard outcomes present
+    95	* coverage-table totality
+    96	* Mermaid ↔ matrix sync
+    97	* fragment citations within ±3 lines
+    98	* manifest staleness
+    99	* blind-table row coverage
+   100	* schema validity of the sidecar
+   101	* existence of every cited DR file
+   102	* reachable states and terminal-state marking
+   103	* state names follow PA-17 (PascalCase segments or ALL-CAPS API enums)
+   104	* doctrine-line mapping totality (DOC-n → cell / invariant / rejected)
+   105	* event classification present per catalogue event (PA-4)
+   106	* abstraction statement in the matrix (PA-10)
+   107	* scope lines on citing control traces
+   108	* gate-type annotation presence on events
+   109	* opt-in cell rationale completeness and source-backed scope
+   110	* upstream-guard annotation presence on events
+   111	<!-- /generated:rules -->
+   112	
+   113	## 6. Failure modes seen in real runs
+   114	
+   115	Avoid these failure modes from real runs.
+   116	
+   117	* Call-site inference declared a publisher failure path. The callee's contract excludes this path.
+   118	* An agent applied a recorded decision for steady state to a race. The decision never contemplated this race.
+   119	* A checklist category silently produced no variant.
+   120	* A catalogue stated gates but not remembrance semantics. Remembrance semantics say what ended entities leave behind. Blind readers misread five rows for that one omission.
+   121	* Consolidation lost findings between runs.
+   122	* An agent almost softened an expected-red test instead of reporting it.
+   123	
+   124	When your Part-B diff exposes a recurring divergence class, fold it back into the pilot prompt's changelog as a rule. Single findings stay findings. The goal is not zero divergence. A blind pass that cannot disagree is dead weight.
+   125	
+   126	- **Completion-report drift.** Session reports have described work
+   127	  absent from the repository: tasks marked done that were never
+   128	  committed, tags reported "pushed" that never left the workspace.
+   129	  Countermeasures that worked: acceptance criteria as executable
+   130	  commands, remote verification, paste obligations.
+   131	- **Hollow checks.** A verification mechanism was built so it could
+   132	  not fail (file-existence instead of anchor verification; anchors
+   133	  resolving into generated blocks). The countermeasure is R-RED-PROBE:
+   134	  a mechanism's failure path is demonstrated at build time.
+   135	- **Vacuous green.** A relocated test runner reported "0/0 cases
+   136	  pass" with exit 0. Discovery that finds nothing now hard-fails.
+   137	- **First-contact failures.** Across one extended session, every tool
+   138	  change shipped without a simultaneous gate arrived defective but
+   139	  green; every change built together with its red case held on first
+   140	  contact. The gate is not overhead — it is the difference.
+   141	
+   142	## 7. Working on this pack
+   143	
+   144	The rules above govern the analysis. These govern changes to the pack
+   145	itself — every one of them exists because its violation was observed
+   146	in real pack-development sessions.
+   147	
+   148	<!-- rule:R-VERIFIED-COMPLETION -->
+   149	1. **Completion = diff + executed acceptance.** Describe only work
+   150	   that is in the committed diff, and only acceptance commands you
+   151	   ran. Paste their output under `Evidence:` in the commit body.
+   152	<!-- rule:R-RED-PROBE -->
+   153	2. **No mechanism without an observed failure.** Build the red probe
+   154	   first, watch it fail for the intended reason, then build the
+   155	   mechanism, then watch the probe pass. Paste both runs. A check
+   156	   that has never been red proves nothing (see §5's CI note).
+   157	<!-- rule:R-REMOTE-TRUTH -->
+   158	3. **"Pushed" means the remote says so.** Verify tags and pushes with
+   159	   `git ls-remote` and paste it. Your working copy is not the release.
+   160	<!-- rule:R-GREEN-MAIN -->
+   161	4. **Green before push.** Run the full gate set (§5) before every
+   162	   commit to main. Red gate → no push. Red CI after a push → fixing
+   163	   it comes before everything else.
+   164	<!-- rule:R-REMEASURE -->
+   165	5. **Reality wins.** When a check disagrees with a recorded number,
+   166	   the number is re-measured, never massaged — and every surface that
+   167	   states it (tool output, selftest asserts, CHANGELOG, README,
+   168	   CONVERGENCE) moves in the same commit.
+   169	<!-- rule:R-BLOCKED-HONESTY -->
+   170	6. **BLOCKED is a valid result.** A premise that fails stops the task.
+   171	   Record `BLOCKED(<task>): <reason>` and move on. Substituting
+   172	   something plausible and reporting success is the failure mode this
+   173	   whole section exists to prevent.
+   174	
+   175	## 8. Local model routing
+   176	
+   177	When `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` are set, route StateRadar
+   178	analysis through `tools/local_models.py` as the "Model routing" section of
+   179	`prompts/02-pilot.md` specifies: DeepSeek Flash for bounded drafting and
+   180	the blind Part B, Jev for narrow source-grounded judgments. Without the
+   181	keys, do Steps 1, 6 and 8 yourself. `draft-verify` lets Flash propose cited
+   182	claims and questions as JSON; code checks every citation and Jev judges
+   183	the citable claims in one batch. `jev-batch` evaluates several claim or
+   184	event-ordering checks against one source. Drafts seed a step and never
+   185	bound it: you still do the complete step and review every returned
+   186	judgment against its source, including apparently confident answers. A Jev
+   187	response is a proposal: it may add a question, but it never removes one,
+   188	resolves a hole, sets provenance, or establishes a requirement. Part B is
+   189	never done by the Part-A agent: pass `blind` only the catalogue,
+   190	requirements prose, and prepared contract text, and if it fails, dispatch
+   191	a fresh blind session; never write or repair a blind table yourself.
+   192	
+   193	Use one ledger per pilot. Its default $2 covers calls made through this
+   194	tool. The calling agent's own costs are separate. See
+   195	`docs/local-model-routing.md` for commands, accounting limits, and recovery.

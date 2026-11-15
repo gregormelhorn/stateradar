@@ -1,0 +1,13 @@
+# Scope and extraction
+
+One `Cache` in lru.go, including its private simplelru map and internal list. Actors are the lifecycle owner, API callers, injected eviction callback, and synchronous capture hook. A successful constructor yields the initial instance. A failed constructor may yield a nonnil wrapper. Excluded are TwoQueueCache, ARC, expirable caches, application-side cancellation, and operations on a separately constructed instance. No neighbouring model was supplied. The private callees are inside the boundary. Go runtime and application callback implementations are seams.
+
+## Doctrine lines
+
+- DOC-1 explicit-requirement README.md:4-5 ("This provides the `lru` package which implements a fixed-size") continued by "thread safe LRU cache. It is based on the cache in Groupcache." Fixed-size clause.
+- DOC-2 explicit-requirement README.md:5 ("thread safe LRU cache. It is based on the cache in Groupcache."). Thread-safety clause.
+- DOC-3 explicit-requirement README.md:4-5 ("This provides the `lru` package which implements a fixed-size"). LRU clause, scoped to normal access and eviction.
+- DOC-4 observed-in-code API documentation doc.go:23 ("// thread-safe for consumers."). The preceding line claims all caches take locks while operating.
+- DOC-5 observed-in-code API documentation simplelru/lru.go:23 ("// NewLRU constructs an LRU of the given size"). Constructor size is subject to its positive-size check.
+
+README.md:10 is a documentation pointer and its origin attribution is descriptive. The README.md:24-30 example demonstrates 256 inserts into capacity 128 with expected length 128. The TTL example belongs to a different package (README.md:34-79).

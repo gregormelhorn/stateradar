@@ -1,0 +1,139 @@
+lru.go:17
+Cache is a thread-safe fixed size LRU cache.
+
+lru.go:26
+New creates an LRU of the given size.
+
+lru.go:31
+NewWithEvict constructs a fixed size cache with the given eviction
+callback.
+
+lru.go:58
+Purge is used to completely clear the cache.
+
+lru.go:77
+Add adds a value to the cache. Returns true if an eviction occurred.
+
+lru.go:94
+Get looks up a key's value from the cache.
+
+lru.go:102
+Contains checks if a key is in the cache, without updating the
+recent-ness or deleting it for being stale.
+
+lru.go:111
+Peek returns the key value (or undefined if not found) without updating
+the "recently used"-ness of the key.
+
+lru.go:120
+ContainsOrAdd checks if a key is in the cache without updating the
+recent-ness or deleting it for being stale, and if not, adds the value.
+Returns whether found and whether an eviction occurred.
+
+lru.go:143
+PeekOrAdd checks if a key is in the cache without updating the
+recent-ness or deleting it for being stale, and if not, adds the value.
+Returns whether found and whether an eviction occurred.
+
+lru.go:167
+Remove removes the provided key from the cache.
+
+lru.go:184
+Resize changes the cache size.
+
+lru.go:203
+RemoveOldest removes the oldest item from the cache.
+
+lru.go:220
+GetOldest returns the oldest entry
+
+lru.go:228
+Keys returns a slice of the keys in the cache, from oldest to newest.
+
+lru.go:236
+Values returns a slice of the values in the cache, from oldest to newest.
+
+lru.go:244
+Len returns the number of items in the cache.
+
+lru.go:252
+Cap returns the capacity of the cache
+
+simplelru/lru.go:12
+EvictCallback is used to get a callback when a cache entry is evicted
+
+simplelru/lru.go:23
+NewLRU constructs an LRU of the given size
+
+simplelru/lru.go:96
+Remove removes the provided key from the cache, returning if the
+key was contained.
+
+simplelru/lru_interface.go:9
+Adds a value to the cache, returns true if an eviction occurred and
+updates the "recently used"-ness of the key.
+
+simplelru/lru_interface.go:13
+Returns key's value from the cache and
+updates the "recently used"-ness of the key. #value, isFound
+
+simplelru/lru_interface.go:17
+Checks if a key exists in cache without updating the recent-ness.
+
+simplelru/lru_interface.go:20
+Returns key's value without updating the "recently used"-ness of the key.
+
+simplelru/lru_interface.go:23
+Removes a key from the cache.
+
+simplelru/lru_interface.go:26
+Removes the oldest entry from cache.
+
+simplelru/lru_interface.go:29
+Returns the oldest entry from the cache. #key, value, isFound
+
+simplelru/lru_interface.go:32
+Returns a slice of the keys in the cache, from oldest to newest.
+
+simplelru/lru_interface.go:35
+Values returns a slice of the values in the cache, from oldest to newest.
+
+simplelru/lru_interface.go:38
+Returns the number of items in the cache.
+
+simplelru/lru_interface.go:41
+Returns the capacity of the cache.
+
+simplelru/lru_interface.go:44
+Clears all cache entries.
+
+simplelru/lru_interface.go:47
+Resizes cache, returning number evicted
+
+internal/list.go:42
+LruList represents a doubly linked list.
+The zero Value for LruList is an empty list ready to use.
+
+internal/list.go:49
+Init initializes or clears list l.
+
+internal/list.go:57
+NewList returns an initialized list.
+
+internal/list.go:60
+Length returns the number of elements of list l.
+The complexity is O(1).
+
+internal/list.go:64
+Back returns the last element of list l or nil if the list is empty.
+
+internal/list.go:95
+Remove removes e from its list, decrements l.len
+
+internal/list.go:121
+PushFront inserts a new element e with value v at the front of list l and returns e.
+
+internal/list.go:133
+MoveToFront moves element e to the front of list l.
+If e is not an element of l, the list is not modified.
+The element must not be nil.

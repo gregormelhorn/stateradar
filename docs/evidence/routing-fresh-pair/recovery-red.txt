@@ -1,0 +1,23 @@
+F.E
+======================================================================
+ERROR: test_runtime_cli_is_forwarded_to_both_arms (tools.selftest.test_fresh_pair_recovery.RecoveryTest.test_runtime_cli_is_forwarded_to_both_arms)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_recovery.py", line 8, in test_runtime_cli_is_forwarded_to_both_arms
+    self.assertIn('CODEX_APP_RUNTIME_CLI_PATH',pair.pilot_env_vars('direct'))
+                                               ^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'run_fresh_routing_pair' has no attribute 'pilot_env_vars'
+
+======================================================================
+FAIL: test_failed_blind_is_not_priced_as_zero_while_controller_runs (tools.selftest.test_fresh_pair_recovery.RecoveryTest.test_failed_blind_is_not_priced_as_zero_while_controller_runs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_recovery.py", line 15, in test_failed_blind_is_not_priced_as_zero_while_controller_runs
+    with self.assertRaisesRegex(ValueError,'blind.*unknown'):pair.blind_cost(Path(d))
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.003s
+
+FAILED (failures=1, errors=1)

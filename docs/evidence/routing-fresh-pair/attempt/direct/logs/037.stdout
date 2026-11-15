@@ -1,0 +1,21 @@
+6:catalogue, the prose requirements, and the normative contract text of
+16:      --requirements DECISIONS.md \
+17:      --requirements docs/ARCHITECTURE_CONTEXT.md:M8.3 \
+22:  --requirements FILE         whole file
+23:  --requirements FILE:PATTERN only lines from the first PATTERN match
+61:def _read_requirements(spec: str, repo: Path) -> str:
+66:        raise ValueError(f"requirements file missing: {path}")
+72:        raise ValueError(f"requirements pattern {pattern!r} not found in {path}")
+270:    # quote ("README.md ("...")") is not a fragment.
+276:# text Part B needs (doctrine lines, requirements), not implementation code
+300:    so vendor/lib/README.md does not ride on README.md."""
+318:# kept when the Part B sources (requirements, contracts, doctrine lines) use
+469:    # Doctrine lines travel with the requirements: every artefact in the
+481:    sources = [(f"INPUT 2: REQUIREMENTS ({spec})", _read_requirements(spec, repo))
+482:               for spec in args.requirements]
+486:    keep_quotes = quote_files(doctrine, list(args.requirements) + list(args.contracts), repo, adir)
+497:                         "ids the requirements do not use)")
+529:        print("PART-B PACK: kept in the catalogue or doctrine lines because the requirements, "
+656:    parser.add_argument("--requirements", action="append", default=[],
+670:    if not args.requirements and not args.contracts:
+671:        print("PART-B PACK: assemble mode needs --requirements and/or --contracts",

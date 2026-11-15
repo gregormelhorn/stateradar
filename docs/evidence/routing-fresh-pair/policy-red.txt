@@ -1,0 +1,29 @@
+....FF.
+======================================================================
+FAIL: test_direct_blind_dispatch_and_package_only (__main__.PolicyTests.test_direct_blind_dispatch_and_package_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 24, in test_direct_blind_dispatch_and_package_only
+    self.assertEqual(route_policy('direct','blind',True),'package')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'normal' != 'package'
+- normal
++ package
+
+
+======================================================================
+FAIL: test_direct_provider_calls_refused (__main__.PolicyTests.test_direct_provider_calls_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 22, in test_direct_provider_calls_refused
+    self.assertEqual(route_policy('direct',command,False),'deny')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'normal' != 'deny'
+- normal
++ deny
+
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+FAILED (failures=2)

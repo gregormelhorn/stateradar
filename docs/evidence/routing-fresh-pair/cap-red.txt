@@ -1,0 +1,14 @@
+F........
+======================================================================
+FAIL: test_cap_stops_at_and_above (__main__.CapTests.test_cap_stops_at_and_above)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_fresh_pair_gates.py", line 30, in test_cap_stops_at_and_above
+    with self.assertRaisesRegex(ValueError,'budget reached'):enforce_cap(amount,5)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.001s
+
+FAILED (failures=1)

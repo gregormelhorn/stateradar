@@ -1,0 +1,10 @@
+568:        raise ValueError(f"run blind with --package-only first and read {package_path}")
+592:                         "run --package-only again and read it")
+622:    flash_parser.add_argument("--max-tokens", type=int, default=4096)
+640:    draft_parser.add_argument("--max-tokens", type=int, default=12000,
+649:    cells_parser.add_argument("--max-tokens", type=int, default=16384, help="Flash output budget")
+652:    windows.add_argument("--max-tokens", type=int, default=16384)
+657:    blind_parser.add_argument("--requirements", action="append", required=True)
+658:    blind_parser.add_argument("--contracts", action="append", required=True)
+660:    blind_parser.add_argument("--max-tokens", type=int, default=8192)
+661:    blind_parser.add_argument("--package-only", action="store_true",

@@ -1,0 +1,255 @@
+     1	// Copyright IBM Corp. 2014, 2025
+     2	// SPDX-License-Identifier: MPL-2.0
+     3	
+     4	package lru
+     5	
+     6	import (
+     7		"sync"
+     8	
+     9		"github.com/hashicorp/golang-lru/v2/simplelru"
+    10	)
+    11	
+    12	const (
+    13		// DefaultEvictedBufferSize defines the default buffer size to store evicted key/val
+    14		DefaultEvictedBufferSize = 16
+    15	)
+    16	
+    17	// Cache is a thread-safe fixed size LRU cache.
+    18	type Cache[K comparable, V any] struct {
+    19		lru         *simplelru.LRU[K, V]
+    20		evictedKeys []K
+    21		evictedVals []V
+    22		onEvictedCB func(k K, v V)
+    23		lock        sync.RWMutex
+    24	}
+    25	
+    26	// New creates an LRU of the given size.
+    27	func New[K comparable, V any](size int) (*Cache[K, V], error) {
+    28		return NewWithEvict[K, V](size, nil)
+    29	}
+    30	
+    31	// NewWithEvict constructs a fixed size cache with the given eviction
+    32	// callback.
+    33	func NewWithEvict[K comparable, V any](size int, onEvicted func(key K, value V)) (c *Cache[K, V], err error) {
+    34		// create a cache with default settings
+    35		c = &Cache[K, V]{
+    36			onEvictedCB: onEvicted,
+    37		}
+    38		if onEvicted != nil {
+    39			c.initEvictBuffers()
+    40			onEvicted = c.onEvicted
+    41		}
+    42		c.lru, err = simplelru.NewLRU(size, onEvicted)
+    43		return
+    44	}
+    45	
+    46	func (c *Cache[K, V]) initEvictBuffers() {
+    47		c.evictedKeys = make([]K, 0, DefaultEvictedBufferSize)
+    48		c.evictedVals = make([]V, 0, DefaultEvictedBufferSize)
+    49	}
+    50	
+    51	// onEvicted save evicted key/val and sent in externally registered callback
+    52	// outside of critical section
+    53	func (c *Cache[K, V]) onEvicted(k K, v V) {
+    54		c.evictedKeys = append(c.evictedKeys, k)
+    55		c.evictedVals = append(c.evictedVals, v)
+    56	}
+    57	
+    58	// Purge is used to completely clear the cache.
+    59	func (c *Cache[K, V]) Purge() {
+    60		var ks []K
+    61		var vs []V
+    62		c.lock.Lock()
+    63		c.lru.Purge()
+    64		if c.onEvictedCB != nil && len(c.evictedKeys) > 0 {
+    65			ks, vs = c.evictedKeys, c.evictedVals
+    66			c.initEvictBuffers()
+    67		}
+    68		c.lock.Unlock()
+    69		// invoke callback outside of critical section
+    70		if c.onEvictedCB != nil {
+    71			for i := 0; i < len(ks); i++ {
+    72				c.onEvictedCB(ks[i], vs[i])
+    73			}
+    74		}
+    75	}
+    76	
+    77	// Add adds a value to the cache. Returns true if an eviction occurred.
+    78	func (c *Cache[K, V]) Add(key K, value V) (evicted bool) {
+    79		var k K
+    80		var v V
+    81		c.lock.Lock()
+    82		evicted = c.lru.Add(key, value)
+    83		if c.onEvictedCB != nil && evicted {
+    84			k, v = c.evictedKeys[0], c.evictedVals[0]
+    85			c.evictedKeys, c.evictedVals = c.evictedKeys[:0], c.evictedVals[:0]
+    86		}
+    87		c.lock.Unlock()
+    88		if c.onEvictedCB != nil && evicted {
+    89			c.onEvictedCB(k, v)
+    90		}
+    91		return
+    92	}
+    93	
+    94	// Get looks up a key's value from the cache.
+    95	func (c *Cache[K, V]) Get(key K) (value V, ok bool) {
+    96		c.lock.Lock()
+    97		value, ok = c.lru.Get(key)
+    98		c.lock.Unlock()
+    99		return value, ok
+   100	}
+   101	
+   102	// Contains checks if a key is in the cache, without updating the
+   103	// recent-ness or deleting it for being stale.
+   104	func (c *Cache[K, V]) Contains(key K) bool {
+   105		c.lock.RLock()
+   106		containKey := c.lru.Contains(key)
+   107		c.lock.RUnlock()
+   108		return containKey
+   109	}
+   110	
+   111	// Peek returns the key value (or undefined if not found) without updating
+   112	// the "recently used"-ness of the key.
+   113	func (c *Cache[K, V]) Peek(key K) (value V, ok bool) {
+   114		c.lock.RLock()
+   115		value, ok = c.lru.Peek(key)
+   116		c.lock.RUnlock()
+   117		return value, ok
+   118	}
+   119	
+   120	// ContainsOrAdd checks if a key is in the cache without updating the
+   121	// recent-ness or deleting it for being stale, and if not, adds the value.
+   122	// Returns whether found and whether an eviction occurred.
+   123	func (c *Cache[K, V]) ContainsOrAdd(key K, value V) (ok, evicted bool) {
+   124		var k K
+   125		var v V
+   126		c.lock.Lock()
+   127		if c.lru.Contains(key) {
+   128			c.lock.Unlock()
+   129			return true, false
+   130		}
+   131		evicted = c.lru.Add(key, value)
+   132		if c.onEvictedCB != nil && evicted {
+   133			k, v = c.evictedKeys[0], c.evictedVals[0]
+   134			c.evictedKeys, c.evictedVals = c.evictedKeys[:0], c.evictedVals[:0]
+   135		}
+   136		c.lock.Unlock()
+   137		if c.onEvictedCB != nil && evicted {
+   138			c.onEvictedCB(k, v)
+   139		}
+   140		return false, evicted
+   141	}
+   142	
+   143	// PeekOrAdd checks if a key is in the cache without updating the
+   144	// recent-ness or deleting it for being stale, and if not, adds the value.
+   145	// Returns whether found and whether an eviction occurred.
+   146	func (c *Cache[K, V]) PeekOrAdd(key K, value V) (previous V, ok, evicted bool) {
+   147		var k K
+   148		var v V
+   149		c.lock.Lock()
+   150		previous, ok = c.lru.Peek(key)
+   151		if ok {
+   152			c.lock.Unlock()
+   153			return previous, true, false
+   154		}
+   155		evicted = c.lru.Add(key, value)
+   156		if c.onEvictedCB != nil && evicted {
+   157			k, v = c.evictedKeys[0], c.evictedVals[0]
+   158			c.evictedKeys, c.evictedVals = c.evictedKeys[:0], c.evictedVals[:0]
+   159		}
+   160		c.lock.Unlock()
+   161		if c.onEvictedCB != nil && evicted {
+   162			c.onEvictedCB(k, v)
+   163		}
+   164		return
+   165	}
+   166	
+   167	// Remove removes the provided key from the cache.
+   168	func (c *Cache[K, V]) Remove(key K) (present bool) {
+   169		var k K
+   170		var v V
+   171		c.lock.Lock()
+   172		present = c.lru.Remove(key)
+   173		if c.onEvictedCB != nil && present {
+   174			k, v = c.evictedKeys[0], c.evictedVals[0]
+   175			c.evictedKeys, c.evictedVals = c.evictedKeys[:0], c.evictedVals[:0]
+   176		}
+   177		c.lock.Unlock()
+   178		if c.onEvictedCB != nil && present {
+   179			c.onEvictedCB(k, v)
+   180		}
+   181		return
+   182	}
+   183	
+   184	// Resize changes the cache size.
+   185	func (c *Cache[K, V]) Resize(size int) (evicted int) {
+   186		var ks []K
+   187		var vs []V
+   188		c.lock.Lock()
+   189		evicted = c.lru.Resize(size)
+   190		if c.onEvictedCB != nil && evicted > 0 {
+   191			ks, vs = c.evictedKeys, c.evictedVals
+   192			c.initEvictBuffers()
+   193		}
+   194		c.lock.Unlock()
+   195		if c.onEvictedCB != nil && evicted > 0 {
+   196			for i := 0; i < len(ks); i++ {
+   197				c.onEvictedCB(ks[i], vs[i])
+   198			}
+   199		}
+   200		return evicted
+   201	}
+   202	
+   203	// RemoveOldest removes the oldest item from the cache.
+   204	func (c *Cache[K, V]) RemoveOldest() (key K, value V, ok bool) {
+   205		var k K
+   206		var v V
+   207		c.lock.Lock()
+   208		key, value, ok = c.lru.RemoveOldest()
+   209		if c.onEvictedCB != nil && ok {
+   210			k, v = c.evictedKeys[0], c.evictedVals[0]
+   211			c.evictedKeys, c.evictedVals = c.evictedKeys[:0], c.evictedVals[:0]
+   212		}
+   213		c.lock.Unlock()
+   214		if c.onEvictedCB != nil && ok {
+   215			c.onEvictedCB(k, v)
+   216		}
+   217		return
+   218	}
+   219	
+   220	// GetOldest returns the oldest entry
+   221	func (c *Cache[K, V]) GetOldest() (key K, value V, ok bool) {
+   222		c.lock.RLock()
+   223		key, value, ok = c.lru.GetOldest()
+   224		c.lock.RUnlock()
+   225		return
+   226	}
+   227	
+   228	// Keys returns a slice of the keys in the cache, from oldest to newest.
+   229	func (c *Cache[K, V]) Keys() []K {
+   230		c.lock.RLock()
+   231		keys := c.lru.Keys()
+   232		c.lock.RUnlock()
+   233		return keys
+   234	}
+   235	
+   236	// Values returns a slice of the values in the cache, from oldest to newest.
+   237	func (c *Cache[K, V]) Values() []V {
+   238		c.lock.RLock()
+   239		values := c.lru.Values()
+   240		c.lock.RUnlock()
+   241		return values
+   242	}
+   243	
+   244	// Len returns the number of items in the cache.
+   245	func (c *Cache[K, V]) Len() int {
+   246		c.lock.RLock()
+   247		length := c.lru.Len()
+   248		c.lock.RUnlock()
+   249		return length
+   250	}
+   251	
+   252	// Cap returns the capacity of the cache
+   253	func (c *Cache[K, V]) Cap() int {
+   254		return c.lru.Cap()
+   255	}
