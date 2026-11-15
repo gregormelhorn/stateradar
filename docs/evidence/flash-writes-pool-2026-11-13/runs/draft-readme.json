@@ -1,0 +1,512 @@
+{
+  "source": "README.md",
+  "source_sha256": "f1ee56748fe3bf0567a05c4c5a284dfe752b952ae9c9cada76e7687d4dcdbfb2",
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 1082,
+    "output_tokens": 1894,
+    "cost_microdollars": 2598,
+    "reservation_microdollars": 15928
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 5212,
+    "cost_microdollars": 219,
+    "reservation_microdollars": 937,
+    "error": null
+  },
+  "claims": {
+    "C1": {
+      "kind": "claim",
+      "statement": "The pool is a golang universal network connection pool.",
+      "line": 8,
+      "fragment": "A golang universal network connection pool.",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C2": {
+      "kind": "claim",
+      "statement": "The connection type in the connection pool is interface{}, making it more versatile.",
+      "line": 12,
+      "fragment": "The connection type in the connection pool is `interface{}`, making it more versatile",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C3": {
+      "kind": "claim",
+      "statement": "The connection supports setting the maximum idle time.",
+      "line": 13,
+      "fragment": "The connection supports setting the maximum idle time",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C4": {
+      "kind": "claim",
+      "statement": "The timeout connection will be closed and discarded.",
+      "line": 13,
+      "fragment": "the timeout connection will be closed and discarded",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C5": {
+      "kind": "claim",
+      "statement": "Setting the maximum idle time can avoid the problem of automatic connection failure when idle.",
+      "line": 13,
+      "fragment": "which can avoid the problem of automatic connection failure when idle",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C6": {
+      "kind": "claim",
+      "statement": "The pool supports user setting a ping method.",
+      "line": 14,
+      "fragment": "Support user setting `ping` method",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C7": {
+      "kind": "claim",
+      "statement": "The ping method is used to check the connectivity of connection.",
+      "line": 14,
+      "fragment": "used to check the connectivity of connection",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C8": {
+      "kind": "claim",
+      "statement": "Invalid connection will be discarded.",
+      "line": 14,
+      "fragment": "invalid connection will be discarded",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C9": {
+      "kind": "claim",
+      "statement": "The pool supports connection waiting.",
+      "line": 15,
+      "fragment": "Support connection waiting",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C10": {
+      "kind": "claim",
+      "statement": "When the connection pool is full, it supports connection waiting (like the go db connection pool).",
+      "line": 15,
+      "fragment": "When the connection pool is full, support for connection waiting (like the go db connection pool)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C11": {
+      "kind": "claim",
+      "statement": "The factory specifies the method to create the connection.",
+      "line": 21,
+      "fragment": "factory Specify the method to create the connection",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C12": {
+      "kind": "claim",
+      "statement": "The close function specifies the method to close the connection.",
+      "line": 24,
+      "fragment": "close Specify the method to close the connection",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C13": {
+      "kind": "claim",
+      "statement": "The ping function specifies the method to detect whether the connection is invalid.",
+      "line": 27,
+      "fragment": "ping Specify the method to detect whether the connection is invalid",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C14": {
+      "kind": "claim",
+      "statement": "InitialCap initializes the number of connections to 5.",
+      "line": 30,
+      "fragment": "Initialize the number of connections to 5",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    "C15": {
+      "kind": "claim",
+      "statement": "MaxIdle is the maximum idle connection, set to 20.",
+      "line": 30,
+      "fragment": "the maximum idle connection is 20",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    "C16": {
+      "kind": "claim",
+      "statement": "MaxCap is the maximum concurrent connection, set to 30.",
+      "line": 30,
+      "fragment": "the maximum concurrent connection is 30",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.92,
+          "contradicted": 0.0,
+          "unclear": 0.08
+        },
+        "confidence": 0.88
+      }
+    },
+    "C17": {
+      "kind": "claim",
+      "statement": "IdleTimeout is the maximum idle time of the connection.",
+      "line": 38,
+      "fragment": "The maximum idle time of the connection",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    "C18": {
+      "kind": "claim",
+      "statement": "The connection exceeding the idle time will be closed.",
+      "line": 38,
+      "fragment": "the connection exceeding this time will be closed",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C19": {
+      "kind": "claim",
+      "statement": "The maximum idle time can avoid the problem of automatic failure when connecting to EOF when idle.",
+      "line": 38,
+      "fragment": "which can avoid the problem of automatic failure when connecting to EOF when idle",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.99,
+          "contradicted": 0.0,
+          "unclear": 0.01
+        },
+        "confidence": 0.98
+      }
+    },
+    "C20": {
+      "kind": "claim",
+      "statement": "The pool is created with pool.NewChannelPool(poolConfig).",
+      "line": 41,
+      "fragment": "p, err := pool.NewChannelPool(poolConfig)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C21": {
+      "kind": "claim",
+      "statement": "Get gets a connection from the connection pool.",
+      "line": 46,
+      "fragment": "Get a connection from the connection pool",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C22": {
+      "kind": "claim",
+      "statement": "The connection is retrieved from the pool via p.Get().",
+      "line": 47,
+      "fragment": "v, err := p.Get()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C23": {
+      "kind": "claim",
+      "statement": "The connection is put back into the connection pool when the connection is no longer in use.",
+      "line": 52,
+      "fragment": "Put the connection back into the connection pool, when the connection is no longer in use",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C24": {
+      "kind": "claim",
+      "statement": "The connection is returned via p.Put(v).",
+      "line": 53,
+      "fragment": "p.Put(v)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.91,
+          "contradicted": 0.01,
+          "unclear": 0.08
+        },
+        "confidence": 0.86
+      }
+    },
+    "C25": {
+      "kind": "claim",
+      "statement": "Release releases all connections in the connection pool when resources need to be destroyed.",
+      "line": 55,
+      "fragment": "Release all connections in the connection pool, when resources need to be destroyed",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C26": {
+      "kind": "claim",
+      "statement": "Release is invoked via p.Release().",
+      "line": 56,
+      "fragment": "p.Release()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C27": {
+      "kind": "claim",
+      "statement": "Len views the number of connections in the current connection pool.",
+      "line": 58,
+      "fragment": "View the number of connections in the current connection pool",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.0,
+          "unclear": 0.04
+        },
+        "confidence": 0.94
+      }
+    },
+    "C28": {
+      "kind": "claim",
+      "statement": "The current number of connections is obtained via p.Len().",
+      "line": 59,
+      "fragment": "current := p.Len()",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    },
+    "C29": {
+      "kind": "claim",
+      "statement": "The connection pool implementation refers to pool github.com/fatih/pool.",
+      "line": 66,
+      "fragment": "The connection pool implementation refers to pool [https://github.com/fatih/pool](https://github.com/fatih/pool)",
+      "citation_check": "ok",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 1.0,
+          "contradicted": 0.0,
+          "unclear": 0.0
+        },
+        "confidence": 1.0
+      }
+    }
+  },
+  "questions": [
+    "What happens when Get is called and the pool is full and no connection is available — does it block, wait, or return an error?",
+    "How long does a caller wait for a connection when the pool is full?",
+    "Is there a timeout for waiting for a connection, and can it be configured?",
+    "Does Get validate a connection before returning it (e.g., via ping), or is ping only used on Put/return?",
+    "When exactly is ping called — on Get, on Put, periodically, or another time?",
+    "What happens to a connection when ping returns an error?",
+    "What is the default behavior if Ping is not configured?",
+    "Is InitialCap a minimum number of connections maintained at all times, or only the initial number created at pool construction?",
+    "How does MaxIdle relate to MaxCap and InitialCap — what happens to idle connections beyond MaxIdle?",
+    "What happens when Put is called and the number of idle connections would exceed MaxIdle?",
+    "Does Put close connections beyond MaxIdle?",
+    "Is IdleTimeout checked on Get, on Put, periodically, or another time?",
+    "What happens to a connection retrieved by Get that has exceeded IdleTimeout?",
+    "What happens if Get returns an error — is the caller returned a nil connection?",
+    "What does Release do to connections currently checked out by callers?",
+    "Does the pool remain usable after Release is called?",
+    "Does Len count idle connections only, in-use connections only, or both?",
+    "Is MaxCap a hard limit on total connections created, or only on concurrent connections?",
+    "What happens if Factory returns an error during pool creation or connection creation?",
+    "Is the pool thread-safe / safe for concurrent use by multiple goroutines?",
+    "What does NewChannelPool return as error, and when does it fail?",
+    "Does the pool reopen or recreate connections after Release?",
+    "Is there any ordering guarantee between Put returning a connection and a waiting Get receiving it?",
+    "What happens to a connection if the caller never calls Put after Get?"
+  ],
+  "review_required": true
+}

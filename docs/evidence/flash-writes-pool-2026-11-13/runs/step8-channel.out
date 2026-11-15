@@ -1,0 +1,429 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "fd57c54c8d03d2208f611cf12f49a91571923c27127b87e164b1205fd65949ec",
+  "input_tokens": 6293,
+  "cost_microdollars": 265,
+  "reservation_microdollars": 1037,
+  "checks": {
+    "L123-0": {
+      "kind": "claim",
+      "statement": "Get tests whether the ping function is set without holding c.mu.",
+      "source": "channel.go",
+      "line": 123,
+      "fragment": "if c.ping != nil {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.78,
+        "contradicted": 0.01,
+        "unclear": 0.21
+      },
+      "confidence": 0.67,
+      "review_required": true
+    },
+    "L229-1": {
+      "kind": "claim",
+      "statement": "Release sets the ping function to nil while holding c.mu.",
+      "source": "channel.go",
+      "line": 229,
+      "fragment": "c.ping = nil",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.0,
+        "unclear": 0.04
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "L220-2": {
+      "kind": "claim",
+      "statement": "Ping calls c.ping without checking that it is non-nil.",
+      "source": "channel.go",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.85,
+        "contradicted": 0.05,
+        "unclear": 0.1
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "L137-3": {
+      "kind": "claim",
+      "statement": "Get blocks on a receive from its request channel with no timeout or cancellation.",
+      "source": "channel.go",
+      "line": 137,
+      "fragment": "ret, ok := <-req",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.01,
+        "unclear": 0.03
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "L139-4": {
+      "kind": "claim",
+      "statement": "Get returns ErrMaxActiveConnReached only when the request channel is closed.",
+      "source": "channel.go",
+      "line": 139,
+      "fragment": "return nil, ErrMaxActiveConnReached",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.86,
+        "contradicted": 0.03,
+        "unclear": 0.11
+      },
+      "confidence": 0.79,
+      "review_required": true
+    },
+    "L46-5": {
+      "kind": "claim",
+      "statement": "The field waitTimeOut is declared in channelPool.",
+      "source": "channel.go",
+      "line": 46,
+      "fragment": "idleTimeout, waitTimeOut time.Duration",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "L211-6": {
+      "kind": "claim",
+      "statement": "Close lowers openingConns before it calls the close callback.",
+      "source": "channel.go",
+      "line": 211,
+      "fragment": "c.openingConns--",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "L212-7": {
+      "kind": "claim",
+      "statement": "Close calls the user close callback while c.mu is held.",
+      "source": "channel.go",
+      "line": 212,
+      "fragment": "return c.close(conn)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.96,
+        "contradicted": 0.01,
+        "unclear": 0.03
+      },
+      "confidence": 0.94,
+      "review_required": true
+    },
+    "L154-8": {
+      "kind": "claim",
+      "statement": "Get calls the factory while c.mu is held.",
+      "source": "channel.go",
+      "line": 154,
+      "fragment": "conn, err := c.factory()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.68,
+        "contradicted": 0.05,
+        "unclear": 0.27
+      },
+      "confidence": 0.52,
+      "review_required": true
+    },
+    "L209-9": {
+      "kind": "claim",
+      "statement": "Close returns nil without lowering openingConns when c.close is nil.",
+      "source": "channel.go",
+      "line": 209,
+      "fragment": "return nil",
+      "choice": "contradicted",
+      "probabilities": {
+        "supported": 0.29,
+        "contradicted": 0.39,
+        "unclear": 0.32
+      },
+      "confidence": 0.09,
+      "review_required": true
+    },
+    "L176-10": {
+      "kind": "claim",
+      "statement": "Put on a pool whose conns is nil delegates to Close.",
+      "source": "channel.go",
+      "line": 176,
+      "fragment": "return c.Close(conn)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.94,
+        "contradicted": 0.02,
+        "unclear": 0.04
+      },
+      "confidence": 0.91,
+      "review_required": true
+    },
+    "L183-11": {
+      "kind": "claim",
+      "statement": "Put hands the connection to the oldest waiting request.",
+      "source": "channel.go",
+      "line": 183,
+      "fragment": "req <- connReq{",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.71,
+        "contradicted": 0.02,
+        "unclear": 0.27
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "L184-12": {
+      "kind": "claim",
+      "statement": "The handed-over connection is stamped with the current time.",
+      "source": "channel.go",
+      "line": 184,
+      "fragment": "idleConn: &idleConn{conn: conn, t: time.Now()},",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "L190-13": {
+      "kind": "claim",
+      "statement": "Put stores the connection in the idle channel with a non-blocking send.",
+      "source": "channel.go",
+      "line": 190,
+      "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.65,
+        "contradicted": 0.11,
+        "unclear": 0.24
+      },
+      "confidence": 0.48,
+      "review_required": true
+    },
+    "L196-14": {
+      "kind": "claim",
+      "statement": "When the idle channel is full Put closes the connection through Close.",
+      "source": "channel.go",
+      "line": 196,
+      "fragment": "return c.Close(conn)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.01,
+        "unclear": 0.02
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "L241-15": {
+      "kind": "claim",
+      "statement": "Release calls the saved close callback for each idle connection after releasing the lock.",
+      "source": "channel.go",
+      "line": 241,
+      "fragment": "closeFun(wrapConn.conn)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.88,
+        "contradicted": 0.01,
+        "unclear": 0.11
+      },
+      "confidence": 0.82,
+      "review_required": true
+    },
+    "L59-16": {
+      "kind": "claim",
+      "statement": "The capacity validation does not require MaxCap to be positive.",
+      "source": "channel.go",
+      "line": 59,
+      "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.71,
+        "contradicted": 0.15,
+        "unclear": 0.14
+      },
+      "confidence": 0.56,
+      "review_required": true
+    },
+    "L75-17": {
+      "kind": "claim",
+      "statement": "NewChannelPool presets openingConns to InitialCap before filling the pool.",
+      "source": "channel.go",
+      "line": 75,
+      "fragment": "openingConns: poolConfig.InitialCap,",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.78,
+        "contradicted": 0.04,
+        "unclear": 0.18
+      },
+      "confidence": 0.67,
+      "review_required": true
+    },
+    "L84-18": {
+      "kind": "claim",
+      "statement": "NewChannelPool calls Release when the factory fails during the pre-fill.",
+      "source": "channel.go",
+      "line": 84,
+      "fragment": "c.Release()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    },
+    "L88-19": {
+      "kind": "claim",
+      "statement": "The pre-fill stores each new connection in the idle channel.",
+      "source": "channel.go",
+      "line": 88,
+      "fragment": "c.conns <- &idleConn{conn: conn, t: time.Now()}",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.99,
+        "contradicted": 0.0,
+        "unclear": 0.01
+      },
+      "confidence": 0.98,
+      "review_required": true
+    },
+    "L118-20": {
+      "kind": "claim",
+      "statement": "Get ignores the result of Close when it discards an expired idle connection.",
+      "source": "channel.go",
+      "line": 118,
+      "fragment": "c.Close(wrapConn.conn)",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.87,
+        "contradicted": 0.01,
+        "unclear": 0.12
+      },
+      "confidence": 0.8,
+      "review_required": true
+    },
+    "L234-21": {
+      "kind": "claim",
+      "statement": "A second Release returns early when conns is already nil.",
+      "source": "channel.go",
+      "line": 234,
+      "fragment": "if conns == nil {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.94,
+        "contradicted": 0.0,
+        "unclear": 0.06
+      },
+      "confidence": 0.91,
+      "review_required": true
+    },
+    "L247-22": {
+      "kind": "claim",
+      "statement": "Len returns the number of entries in the idle channel.",
+      "source": "channel.go",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.66,
+        "contradicted": 0.1,
+        "unclear": 0.24
+      },
+      "confidence": 0.49,
+      "review_required": true
+    },
+    "L104-23": {
+      "kind": "claim",
+      "statement": "Get takes one snapshot of the idle channel at its start.",
+      "source": "channel.go",
+      "line": 104,
+      "fragment": "conns := c.getConns()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.85,
+        "contradicted": 0.01,
+        "unclear": 0.14
+      },
+      "confidence": 0.77,
+      "review_required": true
+    },
+    "L141-24": {
+      "kind": "claim",
+      "statement": "On the waiter path Get checks the idle timeout and does not call ping.",
+      "source": "channel.go",
+      "line": 141,
+      "fragment": "if timeout := c.idleTimeout; timeout > 0 {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.75,
+        "contradicted": 0.02,
+        "unclear": 0.23
+      },
+      "confidence": 0.62,
+      "review_required": true
+    },
+    "L150-25": {
+      "kind": "claim",
+      "statement": "Get tests for a nil factory only after the openingConns >= maxActive test.",
+      "source": "channel.go",
+      "line": 150,
+      "fragment": "if c.factory == nil {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.97,
+        "contradicted": 0.01,
+        "unclear": 0.02
+      },
+      "confidence": 0.96,
+      "review_required": true
+    },
+    "L133-26": {
+      "kind": "claim",
+      "statement": "Get queues a waiter when openingConns has reached maxActive.",
+      "source": "channel.go",
+      "line": 133,
+      "fragment": "if c.openingConns >= c.maxActive {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.98,
+        "contradicted": 0.0,
+        "unclear": 0.02
+      },
+      "confidence": 0.97,
+      "review_required": true
+    },
+    "L19-27": {
+      "kind": "claim",
+      "statement": "The Config comment describes InitialCap as the minimum number of connections.",
+      "source": "channel.go",
+      "line": 19,
+      "fragment": "最小连接数",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 1.0,
+        "contradicted": 0.0,
+        "unclear": 0.0
+      },
+      "confidence": 1.0,
+      "review_required": true
+    }
+  }
+}

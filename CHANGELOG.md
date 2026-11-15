@@ -4,6 +4,13 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **Blind independence pointers and flash-writes archive.** Always report the
+  number of explicit `as-is:` marks, and separately flag keyed rows mentioning
+  `as-is` in prose for inspection. The flags neither classify leaks nor establish
+  independence. Preserve the historical flash-writes pilot and its failed
+  reachability gate; its changed steering model confounds the cost comparison.
+  The archived raw files were checked against their source PR's Git blobs.
+
 - **Source-fragment routing label evaluation.** Freeze 20 source-grounded
   checks on four component-separated, previously exposed Go components; an
   independent AI review agrees on the labels, with no human review. Jev and

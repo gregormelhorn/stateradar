@@ -1,0 +1,23 @@
+[
+ {
+  "id": "T94",
+  "kind": "claim",
+  "statement": "TestPool_Get expects ErrMaxActiveConnReached from the Get after the maximum number of connections is borrowed.",
+  "line": 94,
+  "fragment": "if err != ErrMaxActiveConnReached {"
+ },
+ {
+  "id": "T121",
+  "kind": "claim",
+  "statement": "TestPool_Put expects Len to equal MaxIdleCap after returning all connections.",
+  "line": 121,
+  "fragment": "if p.Len() != MaxIdleCap {"
+ },
+ {
+  "id": "T213",
+  "kind": "claim",
+  "statement": "TestPoolConcurrent2 calls wg.Add inside a goroutine for the first group of ten.",
+  "line": 213,
+  "fragment": "wg.Add(1)"
+ }
+]

@@ -1,0 +1,30 @@
+[
+ {
+  "id": "T-01",
+  "kind": "ordering",
+  "statement": "A caller gets a connection from the pool, later puts it back, and a following Get is served with that connection from the pool.",
+  "line": 52,
+  "fragment": "//Put the connection back into the connection pool, when the connection is no longer in use"
+ },
+ {
+  "id": "T-02",
+  "kind": "ordering",
+  "statement": "A connection sits idle in the pool for longer than the configured maximum idle time, then a caller asks for a connection: the idle connection is closed and discarded and not handed out.",
+  "line": 13,
+  "fragment": "the timeout connection will be closed and discarded"
+ },
+ {
+  "id": "T-03",
+  "kind": "ordering",
+  "statement": "All allowed connections are in use, a caller asks for one and waits, then another caller puts a connection back: the waiting caller receives it.",
+  "line": 15,
+  "fragment": "support for connection waiting (like the go db connection pool)"
+ },
+ {
+  "id": "T-05",
+  "kind": "ordering",
+  "statement": "A pool holding idle connections is released: all idle connections are closed.",
+  "line": 55,
+  "fragment": "//Release all connections in the connection pool, when resources need to be destroyed"
+ }
+]

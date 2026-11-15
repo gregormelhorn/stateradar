@@ -1,0 +1,24 @@
+PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmppxe_1fff/package.md (4903 chars, 2 events, 0 pair orderings)
+FF
+======================================================================
+FAIL: test_blind_labels_code_derived_catalogue_text_and_counts_as_is_rows (tools.selftest.test_local_models.ModelTest.test_blind_labels_code_derived_catalogue_text_and_counts_as_is_rows)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_local_models.py", line 596, in test_blind_labels_code_derived_catalogue_text_and_counts_as_is_rows
+    self.assertIn('PART-B INDEPENDENCE (prose): 1 more row says "as-is" without the mark (read them, not counted): E02 (late)', err.getvalue())
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'PART-B INDEPENDENCE (prose): 1 more row says "as-is" without the mark (read them, not counted): E02 (late)' not found in 'PART-B PACK: /var/folders/tl/fw9gmcx10qngxl45xrgxw9t00000gn/T/tmphzqd_vwo/package.md (4903 chars, 2 events, 0 pair orderings)\nPART-B COVERAGE: OK (2 events, 0 pair orderings)\nPART-B INDEPENDENCE: 3 rows marked as-is (not independent): E01, E02 (closed), E02 (open)\n'
+
+======================================================================
+FAIL: test_blind_unmarked_rows_warn_about_self_report_limit (tools.selftest.test_local_models.ModelTest.test_blind_unmarked_rows_warn_about_self_report_limit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/stateradar-routing-fresh-pilot/tools/selftest/test_local_models.py", line 617, in test_blind_unmarked_rows_warn_about_self_report_limit
+    self.assertIn("0 rows marked as-is (not independent); the mark can be missing", out.getvalue())
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '0 rows marked as-is (not independent); the mark can be missing' not found in 'PART-B COVERAGE: OK (1 events, 0 pair orderings)\n'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.012s
+
+FAILED (failures=2)

@@ -475,7 +475,11 @@ Open, in order:
    add checks on top of the agent's own complete pass, showed no saving in
    time or cost; one run each, and the runs differ in model size (7 against
    9 states), so the small differences are not a measured effect.
-2. **Flash writes, the steering agent decides.** Next. Since the steering
+2. **Flash writes, the steering agent decides.** Historical result: the
+   [archived pilot](evidence/flash-writes-pool-2026-11-13/ARCHIVE.md) did not
+   meet its preregistered criteria: reachability failed and differing steering
+   models confounded cost. The variant remains experimental. The original
+   plan follows for context. Since the steering
    agent's cache reads, writes and output are almost the whole cost, the aim
    is fewer agent rounds and less agent output. In the routed run, output
    was about $4.20 of the steering agent's $12.84 (210k tokens), so cutting

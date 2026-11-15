@@ -1,0 +1,198 @@
+[
+ {
+  "id": "L123-0",
+  "kind": "claim",
+  "statement": "Get tests whether the ping function is set without holding c.mu.",
+  "line": 123,
+  "fragment": "if c.ping != nil {"
+ },
+ {
+  "id": "L229-1",
+  "kind": "claim",
+  "statement": "Release sets the ping function to nil while holding c.mu.",
+  "line": 229,
+  "fragment": "c.ping = nil"
+ },
+ {
+  "id": "L220-2",
+  "kind": "claim",
+  "statement": "Ping calls c.ping without checking that it is non-nil.",
+  "line": 220,
+  "fragment": "return c.ping(conn)"
+ },
+ {
+  "id": "L137-3",
+  "kind": "claim",
+  "statement": "Get blocks on a receive from its request channel with no timeout or cancellation.",
+  "line": 137,
+  "fragment": "ret, ok := <-req"
+ },
+ {
+  "id": "L139-4",
+  "kind": "claim",
+  "statement": "Get returns ErrMaxActiveConnReached only when the request channel is closed.",
+  "line": 139,
+  "fragment": "return nil, ErrMaxActiveConnReached"
+ },
+ {
+  "id": "L46-5",
+  "kind": "claim",
+  "statement": "The field waitTimeOut is declared in channelPool.",
+  "line": 46,
+  "fragment": "idleTimeout, waitTimeOut time.Duration"
+ },
+ {
+  "id": "L211-6",
+  "kind": "claim",
+  "statement": "Close lowers openingConns before it calls the close callback.",
+  "line": 211,
+  "fragment": "c.openingConns--"
+ },
+ {
+  "id": "L212-7",
+  "kind": "claim",
+  "statement": "Close calls the user close callback while c.mu is held.",
+  "line": 212,
+  "fragment": "return c.close(conn)"
+ },
+ {
+  "id": "L154-8",
+  "kind": "claim",
+  "statement": "Get calls the factory while c.mu is held.",
+  "line": 154,
+  "fragment": "conn, err := c.factory()"
+ },
+ {
+  "id": "L209-9",
+  "kind": "claim",
+  "statement": "Close returns nil without lowering openingConns when c.close is nil.",
+  "line": 209,
+  "fragment": "return nil"
+ },
+ {
+  "id": "L176-10",
+  "kind": "claim",
+  "statement": "Put on a pool whose conns is nil delegates to Close.",
+  "line": 176,
+  "fragment": "return c.Close(conn)"
+ },
+ {
+  "id": "L183-11",
+  "kind": "claim",
+  "statement": "Put hands the connection to the oldest waiting request.",
+  "line": 183,
+  "fragment": "req <- connReq{"
+ },
+ {
+  "id": "L184-12",
+  "kind": "claim",
+  "statement": "The handed-over connection is stamped with the current time.",
+  "line": 184,
+  "fragment": "idleConn: &idleConn{conn: conn, t: time.Now()},"
+ },
+ {
+  "id": "L190-13",
+  "kind": "claim",
+  "statement": "Put stores the connection in the idle channel with a non-blocking send.",
+  "line": 190,
+  "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:"
+ },
+ {
+  "id": "L196-14",
+  "kind": "claim",
+  "statement": "When the idle channel is full Put closes the connection through Close.",
+  "line": 196,
+  "fragment": "return c.Close(conn)"
+ },
+ {
+  "id": "L241-15",
+  "kind": "claim",
+  "statement": "Release calls the saved close callback for each idle connection after releasing the lock.",
+  "line": 241,
+  "fragment": "closeFun(wrapConn.conn)"
+ },
+ {
+  "id": "L59-16",
+  "kind": "claim",
+  "statement": "The capacity validation does not require MaxCap to be positive.",
+  "line": 59,
+  "fragment": "if !(poolConfig.InitialCap <= poolConfig.MaxIdle && poolConfig.MaxCap >= poolConfig.MaxIdle && poolConfig.InitialCap >= 0) {"
+ },
+ {
+  "id": "L75-17",
+  "kind": "claim",
+  "statement": "NewChannelPool presets openingConns to InitialCap before filling the pool.",
+  "line": 75,
+  "fragment": "openingConns: poolConfig.InitialCap,"
+ },
+ {
+  "id": "L84-18",
+  "kind": "claim",
+  "statement": "NewChannelPool calls Release when the factory fails during the pre-fill.",
+  "line": 84,
+  "fragment": "c.Release()"
+ },
+ {
+  "id": "L88-19",
+  "kind": "claim",
+  "statement": "The pre-fill stores each new connection in the idle channel.",
+  "line": 88,
+  "fragment": "c.conns <- &idleConn{conn: conn, t: time.Now()}"
+ },
+ {
+  "id": "L118-20",
+  "kind": "claim",
+  "statement": "Get ignores the result of Close when it discards an expired idle connection.",
+  "line": 118,
+  "fragment": "c.Close(wrapConn.conn)"
+ },
+ {
+  "id": "L234-21",
+  "kind": "claim",
+  "statement": "A second Release returns early when conns is already nil.",
+  "line": 234,
+  "fragment": "if conns == nil {"
+ },
+ {
+  "id": "L247-22",
+  "kind": "claim",
+  "statement": "Len returns the number of entries in the idle channel.",
+  "line": 247,
+  "fragment": "return len(c.getConns())"
+ },
+ {
+  "id": "L104-23",
+  "kind": "claim",
+  "statement": "Get takes one snapshot of the idle channel at its start.",
+  "line": 104,
+  "fragment": "conns := c.getConns()"
+ },
+ {
+  "id": "L141-24",
+  "kind": "claim",
+  "statement": "On the waiter path Get checks the idle timeout and does not call ping.",
+  "line": 141,
+  "fragment": "if timeout := c.idleTimeout; timeout > 0 {"
+ },
+ {
+  "id": "L150-25",
+  "kind": "claim",
+  "statement": "Get tests for a nil factory only after the openingConns >= maxActive test.",
+  "line": 150,
+  "fragment": "if c.factory == nil {"
+ },
+ {
+  "id": "L133-26",
+  "kind": "claim",
+  "statement": "Get queues a waiter when openingConns has reached maxActive.",
+  "line": 133,
+  "fragment": "if c.openingConns >= c.maxActive {"
+ },
+ {
+  "id": "L19-27",
+  "kind": "claim",
+  "statement": "The Config comment describes InitialCap as the minimum number of connections.",
+  "line": 19,
+  "fragment": "最小连接数"
+ }
+]

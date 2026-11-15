@@ -291,7 +291,9 @@ table itself; it dispatches a fresh blind session. The calling agent must
 review the catalogue and supplied files for suitable blind inputs and follow
 `prompts/02-pilot.md` for the diff, divergence classification, and questions.
 The coverage checker checks row presence, not whether the predictions are
-correct.
+correct. It reports explicit `as-is:` marks even when there are zero, and lists
+unmarked rows containing `as-is` in prose as reading pointers. These self-reports
+can miss code-derived conclusions; neither list proves independence.
 
 ## Pilot runner output
 

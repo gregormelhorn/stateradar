@@ -1,0 +1,57 @@
+=== RUN   TestAsIs_Get_IdleAvailable
+--- PASS: TestAsIs_Get_IdleAvailable (0.00s)
+=== RUN   TestAsIs_Get_NoIdleBelowCap
+--- PASS: TestAsIs_Get_NoIdleBelowCap (0.00s)
+=== RUN   TestAsIs_Put_StoresIdle
+--- PASS: TestAsIs_Put_StoresIdle (0.00s)
+=== RUN   TestAsIs_Put_IdleFull_ClosesConnection
+--- PASS: TestAsIs_Put_IdleFull_ClosesConnection (0.00s)
+=== RUN   TestAsIs_Get_AtCap_BlocksUntilPut
+--- PASS: TestAsIs_Get_AtCap_BlocksUntilPut (0.20s)
+=== RUN   TestAsIs_Get_ExpiredIdle_Replaced
+--- PASS: TestAsIs_Get_ExpiredIdle_Replaced (0.15s)
+=== RUN   TestAsIs_Get_PingFails_DiscardsIdle
+--- PASS: TestAsIs_Get_PingFails_DiscardsIdle (0.00s)
+=== RUN   TestAsIs_Release_ClosesIdleThenGetErrClosed
+--- PASS: TestAsIs_Release_ClosesIdleThenGetErrClosed (0.00s)
+=== RUN   TestAsIs_Release_Twice
+--- PASS: TestAsIs_Release_Twice (0.00s)
+=== RUN   TestAsIs_Put_AfterRelease_NoClose
+--- PASS: TestAsIs_Put_AfterRelease_NoClose (0.00s)
+=== RUN   TestAsIs_Release_DoesNotWakeWaiter
+--- PASS: TestAsIs_Release_DoesNotWakeWaiter (0.35s)
+=== RUN   TestAsIs_Close_DoesNotServeWaiter
+--- PASS: TestAsIs_Close_DoesNotServeWaiter (0.35s)
+=== RUN   TestAsIs_Nil_Rejected
+--- PASS: TestAsIs_Nil_Rejected (0.00s)
+=== RUN   TestAsIs_Close_Twice_ExceedsMaxCap
+--- PASS: TestAsIs_Close_Twice_ExceedsMaxCap (0.00s)
+=== RUN   TestAsIs_Len_CountsIdleOnly
+--- PASS: TestAsIs_Len_CountsIdleOnly (0.00s)
+=== RUN   TestAsIs_New_FactoryError
+--- PASS: TestAsIs_New_FactoryError (0.00s)
+=== RUN   TestAsIs_New_InvalidConfig
+--- PASS: TestAsIs_New_InvalidConfig (0.00s)
+=== RUN   TestAsIs_New_ZeroCapAccepted
+--- PASS: TestAsIs_New_ZeroCapAccepted (0.00s)
+=== RUN   TestAsIs_Get_ConcurrentWithRelease
+    asis_test.go:580: panics observed in 200 rounds: 0
+--- PASS: TestAsIs_Get_ConcurrentWithRelease (0.00s)
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestPool_Get_Impl
+--- PASS: TestPool_Get_Impl (0.00s)
+=== RUN   TestPool_Put
+--- PASS: TestPool_Put (0.04s)
+=== RUN   TestPool_UsedCapacity
+--- PASS: TestPool_UsedCapacity (0.00s)
+=== RUN   TestPool_Close
+--- PASS: TestPool_Close (0.00s)
+=== RUN   TestPoolConcurrent
+--- PASS: TestPoolConcurrent (0.00s)
+=== RUN   TestPoolWriteRead
+--- PASS: TestPoolWriteRead (0.00s)
+=== RUN   TestPoolConcurrent2
+--- PASS: TestPoolConcurrent2 (0.09s)
+PASS
+ok  	github.com/silenceper/pool	3.005s

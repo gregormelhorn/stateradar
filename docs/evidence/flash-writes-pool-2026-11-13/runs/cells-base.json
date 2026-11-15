@@ -1,0 +1,976 @@
+{
+  "source": "channel.go",
+  "task": {
+    "states": [
+      {
+        "name": "Open_IdleAvailable",
+        "condition": "conns is non-nil and holds at least one idle connection but fewer than MaxIdle; connReqs is empty"
+      },
+      {
+        "name": "Open_IdleFull",
+        "condition": "conns is non-nil and holds exactly MaxIdle idle connections (the channel is full); connReqs is empty"
+      },
+      {
+        "name": "Open_NoIdle_BelowCap",
+        "condition": "conns is non-nil and holds no idle connection; connReqs is empty; openingConns < maxActive"
+      },
+      {
+        "name": "Open_NoIdle_AtCap",
+        "condition": "conns is non-nil and holds no idle connection; connReqs is empty; openingConns >= maxActive"
+      },
+      {
+        "name": "Open_Waiting_AtCap",
+        "condition": "conns is non-nil and holds no idle connection; connReqs is non-empty; openingConns >= maxActive"
+      },
+      {
+        "name": "Open_Waiting_BelowCap",
+        "condition": "conns is non-nil and holds no idle connection; connReqs is non-empty; openingConns < maxActive"
+      },
+      {
+        "name": "Open_Waiting_IdleAvailable",
+        "condition": "conns is non-nil and holds at least one idle connection; connReqs is non-empty"
+      },
+      {
+        "name": "Closed",
+        "condition": "conns is nil (Release has completed): factory, ping and close are nil"
+      }
+    ],
+    "events": [
+      {
+        "id": "Get",
+        "gist": "a caller calls Get() on the pool"
+      },
+      {
+        "id": "Put",
+        "gist": "a caller calls Put(conn) with a non-nil connection that it earlier obtained from Get"
+      },
+      {
+        "id": "Close",
+        "gist": "a caller calls Close(conn) with a non-nil connection that it earlier obtained from Get"
+      },
+      {
+        "id": "Ping",
+        "gist": "a caller calls Ping(conn) with a non-nil connection"
+      },
+      {
+        "id": "Release",
+        "gist": "a caller calls Release() on the pool"
+      },
+      {
+        "id": "Len",
+        "gist": "a caller calls Len() on the pool"
+      }
+    ],
+    "notes": "Each cell describes one call run to completion in the given state. Unless a cell says otherwise, Ping is configured (non-nil), IdleTimeout > 0, MaxIdle >= 1 and the idle connections are not expired. Where the outcome depends on a guard (for example whether the last idle connection is taken, or a callback returns an error), write the main branch as the disposition and the other branches in the note. A transition target is the state after the call returns. Connections are values of type interface{} handed in by the caller."
+  },
+  "cells": [
+    {
+      "state": "Open_IdleAvailable",
+      "event": "Get",
+      "disposition": "transition",
+      "line": 129,
+      "fragment": "return wrapConn.conn, nil",
+      "note": "Takes an idle conn and returns it; if it was the last idle conn, goes to Open_NoIdle_BelowCap, otherwise stays in Open_IdleAvailable.",
+      "problems": [],
+      "target": "Open_NoIdle_BelowCap",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.42,
+          "contradicted": 0.01,
+          "unclear": 0.57
+        },
+        "confidence": 0.35
+      }
+    },
+    {
+      "state": "Open_IdleAvailable",
+      "event": "Put",
+      "disposition": "handle",
+      "line": 190,
+      "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:",
+      "note": "Appends the returned conn to the idle channel and stays.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.97,
+          "contradicted": 0.0,
+          "unclear": 0.03
+        },
+        "confidence": 0.96
+      }
+    },
+    {
+      "state": "Open_IdleAvailable",
+      "event": "Close",
+      "disposition": "handle",
+      "line": 211,
+      "fragment": "c.openingConns--",
+      "note": "Decrements openingConns and calls close(conn); stays in Open_IdleAvailable.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.67,
+          "contradicted": 0.02,
+          "unclear": 0.31
+        },
+        "confidence": 0.5
+      }
+    },
+    {
+      "state": "Open_IdleAvailable",
+      "event": "Ping",
+      "disposition": "handle",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "note": "Calls the configured ping callback and returns its result; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.91,
+          "contradicted": 0.01,
+          "unclear": 0.08
+        },
+        "confidence": 0.86
+      }
+    },
+    {
+      "state": "Open_IdleAvailable",
+      "event": "Release",
+      "disposition": "transition",
+      "line": 227,
+      "fragment": "c.conns = nil",
+      "note": "Closes the idle channel and closes all idle conns; transitions to Closed.",
+      "problems": [],
+      "target": "Closed",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.63,
+          "contradicted": 0.01,
+          "unclear": 0.36
+        },
+        "confidence": 0.44
+      }
+    },
+    {
+      "state": "Open_IdleAvailable",
+      "event": "Len",
+      "disposition": "handle",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "note": "Returns the number of idle conns; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.88,
+          "contradicted": 0.01,
+          "unclear": 0.11
+        },
+        "confidence": 0.82
+      }
+    },
+    {
+      "state": "Open_IdleFull",
+      "event": "Get",
+      "disposition": "transition",
+      "line": 129,
+      "fragment": "return wrapConn.conn, nil",
+      "note": "Takes an idle conn; channel is now below MaxIdle so state becomes Open_IdleAvailable.",
+      "problems": [],
+      "target": "Open_IdleAvailable",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.52,
+          "contradicted": 0.03,
+          "unclear": 0.45
+        },
+        "confidence": 0.28
+      }
+    },
+    {
+      "state": "Open_IdleFull",
+      "event": "Put",
+      "disposition": "handle",
+      "line": 196,
+      "fragment": "return c.Close(conn)",
+      "note": "Idle channel full, so Put closes the returned conn; stays in Open_IdleFull.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.02,
+          "unclear": 0.05
+        },
+        "confidence": 0.89
+      }
+    },
+    {
+      "state": "Open_IdleFull",
+      "event": "Close",
+      "disposition": "handle",
+      "line": 211,
+      "fragment": "c.openingConns--",
+      "note": "Decrements openingConns and calls close(conn); stays in Open_IdleFull.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.65,
+          "contradicted": 0.08,
+          "unclear": 0.27
+        },
+        "confidence": 0.48
+      }
+    },
+    {
+      "state": "Open_IdleFull",
+      "event": "Ping",
+      "disposition": "handle",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "note": "Calls the configured ping callback and returns its result; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.89,
+          "contradicted": 0.01,
+          "unclear": 0.1
+        },
+        "confidence": 0.83
+      }
+    },
+    {
+      "state": "Open_IdleFull",
+      "event": "Release",
+      "disposition": "transition",
+      "line": 227,
+      "fragment": "c.conns = nil",
+      "note": "Closes the idle channel and closes all idle conns; transitions to Closed.",
+      "problems": [],
+      "target": "Closed",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.6,
+          "contradicted": 0.01,
+          "unclear": 0.39
+        },
+        "confidence": 0.4
+      }
+    },
+    {
+      "state": "Open_IdleFull",
+      "event": "Len",
+      "disposition": "handle",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "note": "Returns MaxIdle; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.67,
+          "contradicted": 0.02,
+          "unclear": 0.31
+        },
+        "confidence": 0.5
+      }
+    },
+    {
+      "state": "Open_NoIdle_BelowCap",
+      "event": "Get",
+      "disposition": "transition",
+      "line": 159,
+      "fragment": "c.openingConns++",
+      "note": "No idle conn and below cap, so a new conn is created and openingConns++; may reach maxActive.",
+      "problems": [],
+      "target": "Open_NoIdle_AtCap",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.89,
+          "contradicted": 0.0,
+          "unclear": 0.11
+        },
+        "confidence": 0.83
+      }
+    },
+    {
+      "state": "Open_NoIdle_BelowCap",
+      "event": "Put",
+      "disposition": "transition",
+      "line": 190,
+      "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:",
+      "note": "Adds conn to idle channel; becomes Open_IdleAvailable.",
+      "problems": [],
+      "target": "Open_IdleAvailable",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.95,
+          "contradicted": 0.0,
+          "unclear": 0.05
+        },
+        "confidence": 0.92
+      }
+    },
+    {
+      "state": "Open_NoIdle_BelowCap",
+      "event": "Close",
+      "disposition": "handle",
+      "line": 211,
+      "fragment": "c.openingConns--",
+      "note": "Decrements openingConns and calls close(conn); stays in Open_NoIdle_BelowCap (or transitions if openingConns no longer < maxActive).",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.82,
+          "contradicted": 0.01,
+          "unclear": 0.17
+        },
+        "confidence": 0.73
+      }
+    },
+    {
+      "state": "Open_NoIdle_BelowCap",
+      "event": "Ping",
+      "disposition": "handle",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "note": "Calls the configured ping callback and returns its result; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.94,
+          "contradicted": 0.0,
+          "unclear": 0.06
+        },
+        "confidence": 0.91
+      }
+    },
+    {
+      "state": "Open_NoIdle_BelowCap",
+      "event": "Release",
+      "disposition": "transition",
+      "line": 227,
+      "fragment": "c.conns = nil",
+      "note": "Closes the (empty) idle channel and sets fields nil; transitions to Closed.",
+      "problems": [],
+      "target": "Closed",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.74,
+          "contradicted": 0.01,
+          "unclear": 0.25
+        },
+        "confidence": 0.61
+      }
+    },
+    {
+      "state": "Open_NoIdle_BelowCap",
+      "event": "Len",
+      "disposition": "handle",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "note": "Returns 0; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.77,
+          "contradicted": 0.02,
+          "unclear": 0.21
+        },
+        "confidence": 0.66
+      }
+    },
+    {
+      "state": "Open_NoIdle_AtCap",
+      "event": "Get",
+      "disposition": "transition",
+      "line": 133,
+      "fragment": "if c.openingConns >= c.maxActive {",
+      "note": "At cap, so Get enqueues a connReq and blocks waiting; state becomes Open_Waiting_AtCap.",
+      "problems": [],
+      "target": "Open_Waiting_AtCap",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.01,
+          "unclear": 0.03
+        },
+        "confidence": 0.94
+      }
+    },
+    {
+      "state": "Open_NoIdle_AtCap",
+      "event": "Put",
+      "disposition": "transition",
+      "line": 190,
+      "fragment": "case c.conns <- &idleConn{conn: conn, t: time.Now()}:",
+      "note": "Adds conn to idle channel; becomes Open_IdleAvailable.",
+      "problems": [],
+      "target": "Open_IdleAvailable",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.36,
+          "contradicted": 0.29,
+          "unclear": 0.35
+        },
+        "confidence": 0.04
+      }
+    },
+    {
+      "state": "Open_NoIdle_AtCap",
+      "event": "Close",
+      "disposition": "handle",
+      "line": 211,
+      "fragment": "c.openingConns--",
+      "note": "Decrements openingConns and calls close(conn); openingConns now below cap so state becomes Open_NoIdle_BelowCap.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.0,
+          "unclear": 0.07
+        },
+        "confidence": 0.89
+      }
+    },
+    {
+      "state": "Open_NoIdle_AtCap",
+      "event": "Ping",
+      "disposition": "handle",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "note": "Calls the configured ping callback and returns its result; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.85,
+          "contradicted": 0.01,
+          "unclear": 0.14
+        },
+        "confidence": 0.77
+      }
+    },
+    {
+      "state": "Open_NoIdle_AtCap",
+      "event": "Release",
+      "disposition": "transition",
+      "line": 227,
+      "fragment": "c.conns = nil",
+      "note": "Closes the (empty) idle channel and sets fields nil; transitions to Closed.",
+      "problems": [],
+      "target": "Closed",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.71,
+          "contradicted": 0.01,
+          "unclear": 0.28
+        },
+        "confidence": 0.56
+      }
+    },
+    {
+      "state": "Open_NoIdle_AtCap",
+      "event": "Len",
+      "disposition": "handle",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "note": "Returns 0; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.81,
+          "contradicted": 0.02,
+          "unclear": 0.17
+        },
+        "confidence": 0.72
+      }
+    },
+    {
+      "state": "Open_Waiting_AtCap",
+      "event": "Get",
+      "disposition": "transition",
+      "line": 135,
+      "fragment": "c.connReqs = append(c.connReqs, req)",
+      "note": "Another waiter is enqueued; stays Open_Waiting_AtCap.",
+      "problems": [],
+      "target": "Open_Waiting_AtCap",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.01,
+          "unclear": 0.12
+        },
+        "confidence": 0.8
+      }
+    },
+    {
+      "state": "Open_Waiting_AtCap",
+      "event": "Put",
+      "disposition": "transition",
+      "line": 183,
+      "fragment": "req <- connReq{",
+      "note": "Conn is handed to the first waiter via its req channel, not stored idle; waits may remain.",
+      "problems": [],
+      "target": "Open_Waiting_AtCap",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.98,
+          "contradicted": 0.0,
+          "unclear": 0.02
+        },
+        "confidence": 0.97
+      }
+    },
+    {
+      "state": "Open_Waiting_AtCap",
+      "event": "Close",
+      "disposition": "handle",
+      "line": 211,
+      "fragment": "c.openingConns--",
+      "note": "Decrements openingConns and calls close(conn); state may change to Open_Waiting_BelowCap if openingConns now < maxActive.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.01,
+          "unclear": 0.12
+        },
+        "confidence": 0.8
+      }
+    },
+    {
+      "state": "Open_Waiting_AtCap",
+      "event": "Ping",
+      "disposition": "handle",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "note": "Calls the configured ping callback and returns its result; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.84,
+          "contradicted": 0.01,
+          "unclear": 0.15
+        },
+        "confidence": 0.76
+      }
+    },
+    {
+      "state": "Open_Waiting_AtCap",
+      "event": "Release",
+      "disposition": "transition",
+      "line": 227,
+      "fragment": "c.conns = nil",
+      "note": "Sets conns nil and closes channel; waiting connReqs are never signaled (see questions).",
+      "problems": [],
+      "target": "Closed",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.52,
+          "contradicted": 0.01,
+          "unclear": 0.47
+        },
+        "confidence": 0.28
+      }
+    },
+    {
+      "state": "Open_Waiting_AtCap",
+      "event": "Len",
+      "disposition": "handle",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "note": "Returns 0; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.76,
+          "contradicted": 0.04,
+          "unclear": 0.2
+        },
+        "confidence": 0.64
+      }
+    },
+    {
+      "state": "Open_Waiting_BelowCap",
+      "event": "Get",
+      "disposition": "transition",
+      "line": 159,
+      "fragment": "c.openingConns++",
+      "note": "No idle conn, below cap, so a new conn is created and openingConns++; may become AtCap.",
+      "problems": [],
+      "target": "Open_Waiting_AtCap",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.56,
+          "contradicted": 0.12,
+          "unclear": 0.32
+        },
+        "confidence": 0.34
+      }
+    },
+    {
+      "state": "Open_Waiting_BelowCap",
+      "event": "Put",
+      "disposition": "transition",
+      "line": 183,
+      "fragment": "req <- connReq{",
+      "note": "Conn handed to the first waiter; remaining waiters may keep state Open_Waiting_BelowCap.",
+      "problems": [],
+      "target": "Open_Waiting_BelowCap",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.87,
+          "contradicted": 0.05,
+          "unclear": 0.08
+        },
+        "confidence": 0.8
+      }
+    },
+    {
+      "state": "Open_Waiting_BelowCap",
+      "event": "Close",
+      "disposition": "handle",
+      "line": 211,
+      "fragment": "c.openingConns--",
+      "note": "Decrements openingConns and calls close(conn); no state change (openingConns already below cap).",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.7,
+          "contradicted": 0.03,
+          "unclear": 0.27
+        },
+        "confidence": 0.55
+      }
+    },
+    {
+      "state": "Open_Waiting_BelowCap",
+      "event": "Ping",
+      "disposition": "handle",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "note": "Calls the configured ping callback and returns its result; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.86,
+          "contradicted": 0.01,
+          "unclear": 0.13
+        },
+        "confidence": 0.79
+      }
+    },
+    {
+      "state": "Open_Waiting_BelowCap",
+      "event": "Release",
+      "disposition": "transition",
+      "line": 227,
+      "fragment": "c.conns = nil",
+      "note": "Sets conns nil and closes channel; waiting connReqs are never signaled.",
+      "problems": [],
+      "target": "Closed",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.48,
+          "contradicted": 0.04,
+          "unclear": 0.48
+        },
+        "confidence": 0.22
+      }
+    },
+    {
+      "state": "Open_Waiting_BelowCap",
+      "event": "Len",
+      "disposition": "handle",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "note": "Returns 0; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.58,
+          "contradicted": 0.07,
+          "unclear": 0.35
+        },
+        "confidence": 0.37
+      }
+    },
+    {
+      "state": "Open_Waiting_IdleAvailable",
+      "event": "Get",
+      "disposition": "transition",
+      "line": 129,
+      "fragment": "return wrapConn.conn, nil",
+      "note": "Takes an idle conn; if more idle conns remain state stays, else transitions out.",
+      "problems": [],
+      "target": "Open_Waiting_IdleAvailable",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.37,
+          "contradicted": 0.05,
+          "unclear": 0.58
+        },
+        "confidence": 0.37
+      }
+    },
+    {
+      "state": "Open_Waiting_IdleAvailable",
+      "event": "Put",
+      "disposition": "transition",
+      "line": 183,
+      "fragment": "req <- connReq{",
+      "note": "Conn handed to first waiter; idle conns remain so state may stay Open_Waiting_IdleAvailable.",
+      "problems": [],
+      "target": "Open_Waiting_IdleAvailable",
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.92,
+          "contradicted": 0.02,
+          "unclear": 0.06
+        },
+        "confidence": 0.88
+      }
+    },
+    {
+      "state": "Open_Waiting_IdleAvailable",
+      "event": "Close",
+      "disposition": "handle",
+      "line": 211,
+      "fragment": "c.openingConns--",
+      "note": "Decrements openingConns and calls close(conn); no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.73,
+          "contradicted": 0.02,
+          "unclear": 0.25
+        },
+        "confidence": 0.6
+      }
+    },
+    {
+      "state": "Open_Waiting_IdleAvailable",
+      "event": "Ping",
+      "disposition": "handle",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "note": "Calls the configured ping callback and returns its result; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.84,
+          "contradicted": 0.01,
+          "unclear": 0.15
+        },
+        "confidence": 0.76
+      }
+    },
+    {
+      "state": "Open_Waiting_IdleAvailable",
+      "event": "Release",
+      "disposition": "transition",
+      "line": 227,
+      "fragment": "c.conns = nil",
+      "note": "Closes idle channel and all idle conns; waiting connReqs are never signaled.",
+      "problems": [],
+      "target": "Closed",
+      "jev": {
+        "choice": "unclear",
+        "probabilities": {
+          "supported": 0.39,
+          "contradicted": 0.03,
+          "unclear": 0.58
+        },
+        "confidence": 0.37
+      }
+    },
+    {
+      "state": "Open_Waiting_IdleAvailable",
+      "event": "Len",
+      "disposition": "handle",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "note": "Returns number of idle conns; no state change.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.73,
+          "contradicted": 0.03,
+          "unclear": 0.24
+        },
+        "confidence": 0.6
+      }
+    },
+    {
+      "state": "Closed",
+      "event": "Get",
+      "disposition": "reject",
+      "line": 106,
+      "fragment": "return nil, ErrClosed",
+      "note": "Returns ErrClosed.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.93,
+          "contradicted": 0.01,
+          "unclear": 0.06
+        },
+        "confidence": 0.89
+      }
+    },
+    {
+      "state": "Closed",
+      "event": "Put",
+      "disposition": "reject",
+      "line": 176,
+      "fragment": "return c.Close(conn)",
+      "note": "conns is nil so Put calls c.Close(conn); since close was nil'd, Close returns nil without closing the conn (see questions).",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.61,
+          "contradicted": 0.17,
+          "unclear": 0.22
+        },
+        "confidence": 0.42
+      }
+    },
+    {
+      "state": "Closed",
+      "event": "Close",
+      "disposition": "handle",
+      "line": 209,
+      "fragment": "return nil",
+      "note": "close is nil, so Close returns nil without decrementing openingConns or invoking close.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.53,
+          "contradicted": 0.16,
+          "unclear": 0.31
+        },
+        "confidence": 0.3
+      }
+    },
+    {
+      "state": "Closed",
+      "event": "Ping",
+      "disposition": "UNSPECIFIED",
+      "line": 220,
+      "fragment": "return c.ping(conn)",
+      "note": "ping is nil after Release, so calling c.ping will nil-panic (or be unspecified).",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.73,
+          "contradicted": 0.06,
+          "unclear": 0.21
+        },
+        "confidence": 0.6
+      }
+    },
+    {
+      "state": "Closed",
+      "event": "Release",
+      "disposition": "ignore (documented)",
+      "line": 234,
+      "fragment": "if conns == nil {",
+      "note": "Release returns early because conns is nil; stays Closed.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.96,
+          "contradicted": 0.02,
+          "unclear": 0.02
+        },
+        "confidence": 0.94
+      }
+    },
+    {
+      "state": "Closed",
+      "event": "Len",
+      "disposition": "handle",
+      "line": 247,
+      "fragment": "return len(c.getConns())",
+      "note": "len of nil channel is 0; stays Closed.",
+      "problems": [],
+      "jev": {
+        "choice": "supported",
+        "probabilities": {
+          "supported": 0.58,
+          "contradicted": 0.07,
+          "unclear": 0.35
+        },
+        "confidence": 0.37
+      }
+    }
+  ],
+  "missing": [],
+  "questions": [
+    "In Open_Waiting_AtCap, when Put delivers a conn to a waiter and multiple waiters remain, how should the state be classified given connReqs is still non-empty?",
+    "Release sets c.conns=nil and closes the channel, but connReqs waiters are never signaled; their Get blocks forever. What disposition should represent that?",
+    "In Closed, Put calls c.Close(conn) but c.close has been set to nil, so Close returns nil without closing the conn; is the conn leaked and what disposition covers this?",
+    "In Closed, Ping calls c.ping which is nil after Release; is the resulting nil-pointer panic 'handle' or 'UNSPECIFIED'?",
+    "In Open_NoIdle_BelowCap, Close decrements openingConns and may push it below zero when no opening conns exist; how should this be classified?",
+    "Are the state names sufficient given that openingConns counts active conns but idle channel length counts idle conns; can both idle>0 and openingConns>=maxActive coexist after Put/Close combinations?"
+  ],
+  "draft": {
+    "model": "deepseek-flash",
+    "finish_reason": "stop",
+    "input_tokens": 3143,
+    "output_tokens": 3686,
+    "cost_microdollars": 5367,
+    "reservation_microdollars": 22917
+  },
+  "verification": {
+    "model": "jev-1.14.0",
+    "input_tokens": 12330,
+    "cost_microdollars": 518,
+    "error": null
+  },
+  "matrix": "<!-- states: Open_IdleAvailable, Open_IdleFull, Open_NoIdle_BelowCap, Open_NoIdle_AtCap, Open_Waiting_AtCap, Open_Waiting_BelowCap, Open_Waiting_IdleAvailable, Closed -->\n\nDrafted by DeepSeek Flash (`draft-cells`); every cell is a proposal until the steering agent has read its cited line. `→ Q-?` and `MISSING` stay until decided.\n\n### Sub-table 1\n\n| State | Get | Put | Close | Ping | Release | Len |\n|---|---|---|---|---|---|---|\n| **Open_IdleAvailable** | transition → Open_NoIdle_BelowCap channel.go:129 (\"return wrapConn.conn, nil\") — Takes an idle conn and returns it; if it was the last idle conn, goes to Open_NoIdle_BelowCap, otherwise stays in Open_IdleAvailable. | handle channel.go:190 (\"case c.conns <- &idleConn{conn: conn, t: time.Now()}:\") — Appends the returned conn to the idle channel and stays. | handle channel.go:211 (\"c.openingConns--\") — Decrements openingConns and calls close(conn); stays in Open_IdleAvailable. | handle channel.go:220 (\"return c.ping(conn)\") — Calls the configured ping callback and returns its result; no state change. | transition → Closed channel.go:227 (\"c.conns = nil\") — Closes the idle channel and closes all idle conns; transitions to Closed. | handle channel.go:247 (\"return len(c.getConns())\") — Returns the number of idle conns; no state change. |\n| **Open_IdleFull** | transition → Open_IdleAvailable channel.go:129 (\"return wrapConn.conn, nil\") — Takes an idle conn; channel is now below MaxIdle so state becomes Open_IdleAvailable. | handle channel.go:196 (\"return c.Close(conn)\") — Idle channel full, so Put closes the returned conn; stays in Open_IdleFull. | handle channel.go:211 (\"c.openingConns--\") — Decrements openingConns and calls close(conn); stays in Open_IdleFull. | handle channel.go:220 (\"return c.ping(conn)\") — Calls the configured ping callback and returns its result; no state change. | transition → Closed channel.go:227 (\"c.conns = nil\") — Closes the idle channel and closes all idle conns; transitions to Closed. | handle channel.go:247 (\"return len(c.getConns())\") — Returns MaxIdle; no state change. |\n| **Open_NoIdle_BelowCap** | transition → Open_NoIdle_AtCap channel.go:159 (\"c.openingConns++\") — No idle conn and below cap, so a new conn is created and openingConns++; may reach maxActive. | transition → Open_IdleAvailable channel.go:190 (\"case c.conns <- &idleConn{conn: conn, t: time.Now()}:\") — Adds conn to idle channel; becomes Open_IdleAvailable. | handle channel.go:211 (\"c.openingConns--\") — Decrements openingConns and calls close(conn); stays in Open_NoIdle_BelowCap (or transitions if openingConns no longer < maxActive). | handle channel.go:220 (\"return c.ping(conn)\") — Calls the configured ping callback and returns its result; no state change. | transition → Closed channel.go:227 (\"c.conns = nil\") — Closes the (empty) idle channel and sets fields nil; transitions to Closed. | handle channel.go:247 (\"return len(c.getConns())\") — Returns 0; no state change. |\n| **Open_NoIdle_AtCap** | transition → Open_Waiting_AtCap channel.go:133 (\"if c.openingConns >= c.maxActive {\") — At cap, so Get enqueues a connReq and blocks waiting; state becomes Open_Waiting_AtCap. | transition → Open_IdleAvailable channel.go:190 (\"case c.conns <- &idleConn{conn: conn, t: time.Now()}:\") — Adds conn to idle channel; becomes Open_IdleAvailable. | handle channel.go:211 (\"c.openingConns--\") — Decrements openingConns and calls close(conn); openingConns now below cap so state becomes Open_NoIdle_BelowCap. | handle channel.go:220 (\"return c.ping(conn)\") — Calls the configured ping callback and returns its result; no state change. | transition → Closed channel.go:227 (\"c.conns = nil\") — Closes the (empty) idle channel and sets fields nil; transitions to Closed. | handle channel.go:247 (\"return len(c.getConns())\") — Returns 0; no state change. |\n| **Open_Waiting_AtCap** | transition → Open_Waiting_AtCap channel.go:135 (\"c.connReqs = append(c.connReqs, req)\") — Another waiter is enqueued; stays Open_Waiting_AtCap. | transition → Open_Waiting_AtCap channel.go:183 (\"req <- connReq{\") — Conn is handed to the first waiter via its req channel, not stored idle; waits may remain. | handle channel.go:211 (\"c.openingConns--\") — Decrements openingConns and calls close(conn); state may change to Open_Waiting_BelowCap if openingConns now < maxActive. | handle channel.go:220 (\"return c.ping(conn)\") — Calls the configured ping callback and returns its result; no state change. | transition → Closed channel.go:227 (\"c.conns = nil\") — Sets conns nil and closes channel; waiting connReqs are never signaled (see questions). | handle channel.go:247 (\"return len(c.getConns())\") — Returns 0; no state change. |\n| **Open_Waiting_BelowCap** | transition → Open_Waiting_AtCap channel.go:159 (\"c.openingConns++\") — No idle conn, below cap, so a new conn is created and openingConns++; may become AtCap. | transition → Open_Waiting_BelowCap channel.go:183 (\"req <- connReq{\") — Conn handed to the first waiter; remaining waiters may keep state Open_Waiting_BelowCap. | handle channel.go:211 (\"c.openingConns--\") — Decrements openingConns and calls close(conn); no state change (openingConns already below cap). | handle channel.go:220 (\"return c.ping(conn)\") — Calls the configured ping callback and returns its result; no state change. | transition → Closed channel.go:227 (\"c.conns = nil\") — Sets conns nil and closes channel; waiting connReqs are never signaled. | handle channel.go:247 (\"return len(c.getConns())\") — Returns 0; no state change. |\n| **Open_Waiting_IdleAvailable** | transition → Open_Waiting_IdleAvailable channel.go:129 (\"return wrapConn.conn, nil\") — Takes an idle conn; if more idle conns remain state stays, else transitions out. | transition → Open_Waiting_IdleAvailable channel.go:183 (\"req <- connReq{\") — Conn handed to first waiter; idle conns remain so state may stay Open_Waiting_IdleAvailable. | handle channel.go:211 (\"c.openingConns--\") — Decrements openingConns and calls close(conn); no state change. | handle channel.go:220 (\"return c.ping(conn)\") — Calls the configured ping callback and returns its result; no state change. | transition → Closed channel.go:227 (\"c.conns = nil\") — Closes idle channel and all idle conns; waiting connReqs are never signaled. | handle channel.go:247 (\"return len(c.getConns())\") — Returns number of idle conns; no state change. |\n| **Closed** | reject channel.go:106 (\"return nil, ErrClosed\") — Returns ErrClosed. | reject channel.go:176 (\"return c.Close(conn)\") — conns is nil so Put calls c.Close(conn); since close was nil'd, Close returns nil without closing the conn (see questions). | handle channel.go:209 (\"return nil\") — close is nil, so Close returns nil without decrementing openingConns or invoking close. | UNSPECIFIED → Q-? channel.go:220 (\"return c.ping(conn)\") — ping is nil after Release, so calling c.ping will nil-panic (or be unspecified). | ignore (documented) channel.go:234 (\"if conns == nil {\") — Release returns early because conns is nil; stays Closed. | handle channel.go:247 (\"return len(c.getConns())\") — len of nil channel is 0; stays Closed. |\n\n## Review list\n\n- Open_IdleAvailable x Get: jev unclear (confidence 0.35)\n- Open_Waiting_BelowCap x Release: jev unclear (confidence 0.22)\n- Open_Waiting_IdleAvailable x Get: jev unclear (confidence 0.37)\n- Open_Waiting_IdleAvailable x Release: jev unclear (confidence 0.37)\n\n## Draft questions\n\n- In Open_Waiting_AtCap, when Put delivers a conn to a waiter and multiple waiters remain, how should the state be classified given connReqs is still non-empty?\n- Release sets c.conns=nil and closes the channel, but connReqs waiters are never signaled; their Get blocks forever. What disposition should represent that?\n- In Closed, Put calls c.Close(conn) but c.close has been set to nil, so Close returns nil without closing the conn; is the conn leaked and what disposition covers this?\n- In Closed, Ping calls c.ping which is nil after Release; is the resulting nil-pointer panic 'handle' or 'UNSPECIFIED'?\n- In Open_NoIdle_BelowCap, Close decrements openingConns and may push it below zero when no opening conns exist; how should this be classified?\n- Are the state names sufficient given that openingConns counts active conns but idle channel length counts idle conns; can both idle>0 and openingConns>=maxActive coexist after Put/Close combinations?\n",
+  "review_required": true
+}

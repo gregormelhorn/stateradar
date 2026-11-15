@@ -1,0 +1,27 @@
+stateDiagram-v2
+    [*] --> Open_IdleAvailable : NewChannelPool with 0 < InitialCap < MaxIdle (startup, documenting edge)
+    [*] --> Open_IdleFull : NewChannelPool with InitialCap = MaxIdle > 0 (startup, documenting edge)
+    [*] --> Open_NoIdle_BelowCap : NewChannelPool with InitialCap = 0 (startup, documenting edge)
+    Open_IdleAvailable --> Open_IdleFull : Put fills the idle channel (guard)
+    Open_IdleAvailable --> Open_NoIdle_BelowCap : Get takes the last idle connection (guard)
+    Open_IdleAvailable --> Closed : Release
+    Open_IdleFull --> Open_IdleAvailable : Get
+    Open_IdleFull --> Closed : Release
+    Open_NoIdle_BelowCap --> Open_NoIdle_AtCap : Get creates a connection and the count reaches maxActive (guard)
+    Open_NoIdle_BelowCap --> Open_IdleAvailable : Put
+    Open_NoIdle_BelowCap --> Closed : Release
+    Open_NoIdle_AtCap --> Open_Waiting_AtCap : Get queues a waiter
+    Open_NoIdle_AtCap --> Open_IdleAvailable : Put
+    Open_NoIdle_AtCap --> Open_NoIdle_BelowCap : Close
+    Open_NoIdle_AtCap --> Closed : Release
+    Open_NoIdle_AtCap --> Open_Waiting_IdleAvailable : Get overlapped by Put (pair P-04a, documenting edge)
+    Open_Waiting_AtCap --> Open_NoIdle_AtCap : Put serves the last waiter (guard)
+    Open_Waiting_AtCap --> Open_Waiting_BelowCap : Close
+    Open_Waiting_AtCap --> Closed : Release
+    Open_Waiting_BelowCap --> Open_Waiting_AtCap : Get creates a connection and the count reaches maxActive (guard)
+    Open_Waiting_BelowCap --> Open_NoIdle_BelowCap : Put serves the last waiter (guard)
+    Open_Waiting_BelowCap --> Closed : Release
+    Open_Waiting_IdleAvailable --> Open_Waiting_AtCap : Get takes the last idle connection (guard)
+    Open_Waiting_IdleAvailable --> Open_IdleAvailable : Put serves the last waiter (guard)
+    Open_Waiting_IdleAvailable --> Closed : Release
+    Closed --> [*] : terminal (waiters queued at Release stay blocked)

@@ -423,6 +423,7 @@ def mark_observed(text: str) -> str:
 
 # Asked for at the start of the behaviour cell; counted anywhere in the row.
 _AS_IS_ROW = re.compile(r"(?<![\w-])as-is:", re.I)
+_AS_IS_PROSE = re.compile(r"(?<![\w-])as-is(?![\w-])", re.I)
 
 
 _DOC_ROW = re.compile(r"^(?:[-*]|\d+\.|\|)\s*\**DOC-\d+")
@@ -599,6 +600,7 @@ def check(args: argparse.Namespace) -> int:
     situation_column = None
     missing_situation: set[str] = set()
     as_is = []
+    as_is_prose = []
     for ln in blind.split("\n"):
         s = ln.strip()
         if s.startswith("|"):
@@ -620,6 +622,8 @@ def check(args: argparse.Namespace) -> int:
                 situations.setdefault(keyed_id, []).append(situation)
             if _AS_IS_ROW.search(s):
                 as_is.append(key_cells[-1])
+            elif keyed_id is not None and _AS_IS_PROSE.search(s):
+                as_is_prose.append(key_cells[-1])
     checklist = re.findall(r"^\s*- \[x\] ([\w-]+)\s*$", blind, re.M)
     errors: list[str] = []
     for ident in events + pairs:
@@ -643,9 +647,13 @@ def check(args: argparse.Namespace) -> int:
     print(f"PART-B COVERAGE: OK ({len(events)} events, {len(pairs)} pair orderings)")
     # Rows the blind pass based on code-derived catalogue text (mark_observed):
     # agreement on them is not independent (rule 7). Information, not a failure.
-    if as_is:
-        print(f"PART-B INDEPENDENCE: {len(as_is)} rows marked as-is (not independent): "
-              + ", ".join(as_is))
+    print(f"PART-B INDEPENDENCE: {len(as_is)} rows marked as-is (not independent)"
+          + (": " + ", ".join(as_is) if as_is else
+             "; the mark can be missing, so the agent's reading stays the check"))
+    if as_is_prose:
+        rows = "row says" if len(as_is_prose) == 1 else "rows say"
+        print(f'PART-B INDEPENDENCE (prose): {len(as_is_prose)} more {rows} "as-is" '
+              "without the mark (read them, not counted): " + ", ".join(as_is_prose))
     return 0
 
 

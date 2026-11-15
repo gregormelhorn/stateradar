@@ -1,0 +1,73 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "f1ee56748fe3bf0567a05c4c5a284dfe752b952ae9c9cada76e7687d4dcdbfb2",
+  "input_tokens": 2228,
+  "cost_microdollars": 94,
+  "reservation_microdollars": 412,
+  "checks": {
+    "T-01": {
+      "kind": "ordering",
+      "statement": "A caller gets a connection from the pool, later puts it back, and a following Get is served with that connection from the pool.",
+      "source": "README.md",
+      "line": 52,
+      "fragment": "//Put the connection back into the connection pool, when the connection is no longer in use",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.11,
+        "contradicted": 0.0,
+        "unclear": 0.89
+      },
+      "confidence": 0.83,
+      "review_required": true,
+      "ordering_scope_probability": 0.04
+    },
+    "T-02": {
+      "kind": "ordering",
+      "statement": "A connection sits idle in the pool for longer than the configured maximum idle time, then a caller asks for a connection: the idle connection is closed and discarded and not handed out.",
+      "source": "README.md",
+      "line": 13,
+      "fragment": "the timeout connection will be closed and discarded",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.16,
+        "contradicted": 0.0,
+        "unclear": 0.84
+      },
+      "confidence": 0.76,
+      "review_required": true,
+      "ordering_scope_probability": 0.06
+    },
+    "T-03": {
+      "kind": "ordering",
+      "statement": "All allowed connections are in use, a caller asks for one and waits, then another caller puts a connection back: the waiting caller receives it.",
+      "source": "README.md",
+      "line": 15,
+      "fragment": "support for connection waiting (like the go db connection pool)",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.48,
+        "contradicted": 0.0,
+        "unclear": 0.52
+      },
+      "confidence": 0.28,
+      "review_required": true,
+      "ordering_scope_probability": 0.05
+    },
+    "T-05": {
+      "kind": "ordering",
+      "statement": "A pool holding idle connections is released: all idle connections are closed.",
+      "source": "README.md",
+      "line": 55,
+      "fragment": "//Release all connections in the connection pool, when resources need to be destroyed",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.28,
+        "contradicted": 0.0,
+        "unclear": 0.72
+      },
+      "confidence": 0.58,
+      "review_required": true,
+      "ordering_scope_probability": 0.14
+    }
+  }
+}

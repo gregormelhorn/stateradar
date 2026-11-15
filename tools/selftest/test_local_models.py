@@ -569,8 +569,8 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mark("## Remembrance ##\n- **Gate:** x\n- **upstream_guards**: y\n"),
                          f"## Remembrance {label} ##\n- **Gate (observed in code):** x\n"
                          "- **upstream_guards (observed in code)**: y\n")
-        # A catalogue without code-derived sections is left alone, and a blind
-        # table without marks prints no independence line.
+        # A catalogue without code-derived sections is left alone; an unmarked
+        # table still warns that the self-report can omit marks.
         plain = "<!-- event-ids: E01 -->\n## Events\n\n- payload: none\n- gateway: x\n"
         self.assertEqual(mark(plain), plain)
         with tempfile.TemporaryDirectory() as directory:
@@ -583,7 +583,9 @@ class ModelTest(unittest.TestCase):
             self.assertIn("start its behaviour cell with `as-is:`", package)
             reply = ("| Event | Expected |\n|---|---|\n| E01 | *as-is:* handle |\n| E02 | reject |\n"
                      "| E02 (closed) | AS-IS: ignore (accidental) |\n| E02 (open) | handle, as-is: queued |\n"
-                     "| E02 (full) | handle; not-as-is: x |\n\n- [x] E01\n- [x] E02\n")
+                     "| E02 (full) | handle; not-as-is: x |\n"
+                     "| E02 (late) | handle, as-is behavior |\n"
+                     "| E02 (wide) | handle (as-is-like) |\n\n- [x] E01\n- [x] E02\n")
             out, err = io.StringIO(), io.StringIO()
             with patch.object(local_models, "flash", return_value={"text": reply, "finish_reason": "stop"}), \
                     contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
@@ -591,6 +593,7 @@ class ModelTest(unittest.TestCase):
                                                     "key"), 0)
             self.assertIn("PART-B INDEPENDENCE: 3 rows marked as-is (not independent): E01, E02 (closed), E02 (open)",
                           err.getvalue())
+            self.assertIn('PART-B INDEPENDENCE (prose): 1 more row says "as-is" without the mark (read them, not counted): E02 (late)', err.getvalue())
             unmarked = "| Event | Expected |\n|---|---|\n| E01 | handle |\n| E02 | reject |\n\n- [x] E01\n- [x] E02\n"
             err = io.StringIO()
             with patch.object(local_models, "flash", return_value={"text": unmarked, "finish_reason": "stop"}), \
@@ -598,7 +601,20 @@ class ModelTest(unittest.TestCase):
                 self.assertEqual(local_models.blind(budget, Namespace(**{**vars(args), "package_only": False}),
                                                     "key"), 0)
             self.assertIn("PART-B COVERAGE: OK", err.getvalue())
-            self.assertNotIn("PART-B INDEPENDENCE", err.getvalue())
+            self.assertIn("PART-B INDEPENDENCE: 0 rows marked as-is (not independent); the mark can be missing", err.getvalue())
+            self.assertNotIn("PART-B INDEPENDENCE (prose)", err.getvalue())
+
+    def test_blind_unmarked_rows_warn_about_self_report_limit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            analysis = root / "analysis"
+            analysis.mkdir()
+            (analysis / "event-catalogue.md").write_text("<!-- event-ids: E01 -->\n")
+            (root / "blind.md").write_text("| Event | Expected |\n|---|---|\n| E01 | handle |\n\n- [x] E01\n")
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(local_models.part_b_pack.check(Namespace(repo=str(root), analysis_dir="analysis", check=str(root / "blind.md"))), 0)
+            self.assertIn("0 rows marked as-is (not independent); the mark can be missing", out.getvalue())
 
     def test_blind_refuses_a_package_with_a_leftover_fragment(self):
         # Method review round 7: an unescaped "|" inside a fragment on a table

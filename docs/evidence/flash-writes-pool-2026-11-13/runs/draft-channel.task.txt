@@ -1,0 +1,11 @@
+Step 1 (extraction) for the component channelPool in this Go file. Extract, each item citing one line:
+- states: the explicit ones and the implicit ones formed by nil or non-nil fields, counters and slices; the reachable combinations of those;
+- external events: every exported method and function with its arguments and the gate of each branch (argument content, or the component's own state);
+- internal events: anything the component delivers to itself or to a waiting caller;
+- transitions, guards and conditions, actions and side effects;
+- timeouts and timers, limits, retry or loop behaviour, release and shutdown paths, cancellation paths;
+- failure modes and returned errors, and for each user-supplied function field (callbacks): where it is invoked, which lock is held at that moment, and what the code assumes about the callback's failure behaviour;
+- every place a lock is acquired or released;
+- apparent invariants over the fields;
+- places where code, comments or configuration documentation describe different things, and behaviour you cannot determine from this file alone.
+Describe what the code does, not what it should do.
