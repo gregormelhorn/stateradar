@@ -1,0 +1,43 @@
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python -c import sys; from pathlib import Path; sys.path.insert(0,'tools'); import addrconn_f09 as f, addrconn_late as l; f.verify_harness(); l.verify_anchor(); f.verify_records(Path('/tmp/stateradar-addrconn-f09-check'))
+HARNESS ANCHOR: committed watched paths unchanged since 7248be61
+LATE HARNESS ANCHOR: 7248be617fa616591767051eae4936db4d52f3a4
+DECISIONS: 16 ANSWERED; DR-001 scoped implementation partial, 15 implementations pending
+exit 0
+
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python tools/dsc_check.py examples/grpc-addrconn/domain-analysis/addrConnBackoff --repo /tmp/stateradar-addrconn-f09-check --model as-is.machine.mmd
+DSC CHECK: OK (3 states x 2 events, 6 cells, 2 guard groups)
+exit 0
+
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python tools/check_reachability.py examples/grpc-addrconn/domain-analysis/addrConnBackoff
+REACHABILITY CHECK: OK (3/3 states reachable from 'BackoffWaiting', 1 terminal)
+exit 0
+
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python examples/grpc-addrconn/check_model.py /tmp/stateradar-addrconn-f09-check
+DECISIONS: 16 ANSWERED; DR-001 scoped implementation partial, 15 implementations pending
+GUARD RED: duplicate dispatch guard produces overlap and uncovered states
+GUARD GREEN: shutdown dispatch disjoint and exhaustive over all 3 scoped states
+QUESTION RED: actual validator rejects omitted Q-16
+SCOPED MODEL PASS: 16 attributed answers; 3 projected states; no broad conformance claim
+exit 0
+
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python tools/late_completion.py examples/grpc-addrconn/late-completion/profile.json docs/evidence/late-completion/runs/evaluation/observations.json --count 10
+CELL SUITE: 3 cells checked, 0 failed
+exit 0
+
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python docs/evidence/late-completion/scripts/audit_repeats.py docs/evidence/late-completion/runs
+state-canary: declared scenario fails in 5/5 repetitions
+publication-canary: declared scenario fails in 5/5 repetitions
+effect-canary: declared scenario fails in 5/5 repetitions
+resource-canary: declared scenario fails in 5/5 repetitions
+omit-publication-guard: declared scenario fails in 5/5 repetitions
+omit-terminal-guard: declared scenario fails in 5/5 repetitions
+exit 0
+
+$ /Users/gregormelhorn/workspace/domain-statechart/.venv/bin/python tools/check_pack_consistency.py
+RULES REGISTRY: OK (73 rules, 22 fault classes, 0 warnings)
+ODC table: OK
+PACK CONSISTENCY: OK (20 artifacts, registry, version 1.53)
+exit 0
+
+$ git diff --check
+exit 0

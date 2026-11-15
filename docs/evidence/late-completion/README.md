@@ -101,3 +101,8 @@ real-transport leak measurement, or coverage of active-stream drain and health
 monitoring. The prior F-09 feature has two independent real-component bindings;
 that evidence does not imply this new late-completion feature does too.
 No model API calls or new model-cost comparison are involved.
+
+Both harness manifests are reconciled to implementation commit `7248be61`.
+`anchor-red.txt` retains their observed stale-anchor rejections after that commit.
+Only manifest anchors and reconciliation evidence change afterwards; the
+executable implementation remains the one from the full successful gate run.
