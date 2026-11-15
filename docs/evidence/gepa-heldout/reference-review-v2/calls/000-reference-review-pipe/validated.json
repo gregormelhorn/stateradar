@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "id": "V01",
+      "verdict": "confirmed",
+      "reason": "The first close stores its error. The store skips subsequent errors, both closes return nil, and the open reader receives the stored writer error. The test checks both nil close results and exact error identity on the later read.",
+      "line": 24,
+      "fragment": "if a.err != nil {"
+    },
+    {
+      "id": "V02",
+      "verdict": "confirmed",
+      "reason": "The write adds the reader's acknowledged byte count before it can return on closure, so it returns two bytes and the stored reader error. The test verifies that the read returned two bytes containing \"ab\" with nil error, then checks the write count and exact error identity after closing the reader.",
+      "line": 92,
+      "fragment": "return n, p.writeCloseError()"
+    },
+    {
+      "id": "V03",
+      "verdict": "confirmed",
+      "reason": "The loop executes once even for an empty slice and waits for the reader's acknowledgment. A matching empty read acknowledges zero bytes, and both operations return zero and nil. The test checks those results with nil slices. Its timeout establishes only that no write result was observed before the timer fired. It does not establish that the writer was scheduled or had reached the handshake.",
+      "line": 85,
+      "fragment": "for once := true; once || len(b) > 0; once = false {"
+    }
+  ]
+}

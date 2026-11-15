@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "line-endings",
+      "text": "With a fresh default Scanner and input \"a\\r\\n\\nlast\", successive Scan calls return true with Text values \"a\", \"\", and \"last\", then false with Err nil. With input consisting of a single carriage return, Scan waits for EOF, then returns true with a non-nil empty Bytes slice before returning false with Err nil. The final-line branch strips a trailing carriage return even when there is no newline.",
+      "citation": {
+        "line": 368,
+        "fragment": "return len(data), dropCR(data), nil"
+      },
+      "question": "OPEN: Should a bare trailing carriage return be stripped when the documented end-of-line marker requires a newline?"
+    },
+    {
+      "id": "reader-and-split-error-order",
+      "text": "Start a fresh Scanner with a splitter that always returns a non-EOF error S. If the first Read returns one byte with a distinct non-EOF error R, Scanner buffers the byte, records R, calls the splitter with atEOF true, and returns false with Err equal to R. If the first Read returns the same byte with nil and would return R on its next call, Scanner calls the splitter with atEOF false and returns false with Err equal to S before that second Read occurs. If the first Read pairs the byte with io.EOF, the splitter sees atEOF true and S replaces io.EOF.",
+      "citation": {
+        "line": 258,
+        "fragment": "if s.err == nil || s.err == io.EOF {"
+      },
+      "question": "OPEN: Should the atEOF contract explicitly include non-EOF read errors, which set the flag even when the Reader could supply more data?"
+    },
+    {
+      "id": "final-token-sentinel",
+      "text": "When a splitter returns the exact ErrFinalToken sentinel, Scan saves the supplied token and sets done before returning. A non-nil zero-length token makes that call return true, while a nil token makes it return false. Either result bypasses advance validation, even for a negative advance. All later Scan calls return false without calling the splitter or Reader, and Bytes still returns the supplied slice. Err is nil if no non-EOF error was already recorded and preserves a previously recorded non-EOF read error. A wrapped ErrFinalToken or a separately created error with the same message takes the ordinary split-error path.",
+      "citation": {
+        "line": 152,
+        "fragment": "if err == ErrFinalToken {"
+      },
+      "question": "OPEN: Should the promise that ErrFinalToken stops scanning with no error explicitly exclude previously recorded non-EOF errors, and what equivalence to a custom error is intended?"
+    },
+    {
+      "id": "scan-after-false",
+      "text": "Start with an empty Reader and a custom splitter that returns (0, nil, nil) on its first atEOF call and (0, []byte(\"late\"), nil) on its second. The first Scan reads EOF, calls the splitter, clears the buffer indices, and returns false with Err nil. Calling Scan again invokes the splitter with empty data and atEOF true without another Read, then returns true with Text \"late\" and Err nil.",
+      "citation": {
+        "line": 149,
+        "fragment": "if s.end > s.start || s.err != nil {"
+      },
+      "question": "OPEN: Should the first false result permanently stop Scan, as the documented unrecoverable stop at EOF suggests?"
+    },
+    {
+      "id": "nonadvancing-tokens",
+      "text": "With unread buffered bytes, no recorded error, and a splitter that repeatedly returns (0, []byte(\"x\"), nil), each Scan returns true with the same text, resets the empty-token counter, and leaves the input position unchanged before the next call. If the Reader instead supplies those bytes together with io.EOF, the same splitter increments the counter on each call and Scan panics when the counter exceeds maxConsecutiveEmptyReads, even though the token contains a byte. A legal positive advance resets the counter.",
+      "citation": {
+        "line": 168,
+        "fragment": "if s.err == nil || advance > 0 {"
+      },
+      "question": "OPEN: Should the panic contract describe the recorded-error prerequisite and clarify that a non-advancing token can count even when it has nonzero length?"
+    },
+    {
+      "id": "buffer-capacity-and-reuse",
+      "text": "Before Scan, supply Buffer(make([]byte, 0, 2), 1) and leave ScanLines selected. If the Reader returns \"a\\n\" with nil and then \"b\\n\" with io.EOF, both scans succeed and reuse the caller's array. Bytes saved from the first scan then contains \"b\", while Text saved from that scan still contains \"a\". In a separate run with the same configuration, if Read fills the buffer with \"ab\" and returns nil, ScanLines asks for more data and Scan returns false with ErrTooLong before attempting the next Read. Any later calls to Buffer or Split panic after the first Scan, including when that Scan returned false.",
+      "citation": {
+        "line": 200,
+        "fragment": "if len(s.buf) >= s.maxTokenSize || len(s.buf) > maxInt/2 {"
+      },
+      "question": ""
+    }
+  ]
+}

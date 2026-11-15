@@ -1,0 +1,29 @@
+...FF
+======================================================================
+FAIL: test_tampered_prompt_fails (__main__.RealArchiveProbe.test_tampered_prompt_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 34, in test_tampered_prompt_fails
+    def test_tampered_prompt_fails(self):self.exercise('prompt')
+                                         ~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 30, in exercise
+    self.assertIn('final prompt mismatch: '+row['review'],verify(p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'final prompt mismatch: review-008.json' not found in []
+
+======================================================================
+FAIL: test_tampered_score_fails (__main__.RealArchiveProbe.test_tampered_score_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 35, in test_tampered_score_fails
+    def test_tampered_score_fails(self):self.exercise('score')
+                                        ~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/gregormelhorn/workspace/domain-statechart/tools/selftest/test_gepa_heldout_archive.py", line 33, in exercise
+    self.assertIn('score mismatch: '+row['review'],verify(p))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'score mismatch: review-008.json' not found in []
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.240s
+
+FAILED (failures=2)

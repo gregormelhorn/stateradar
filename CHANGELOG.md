@@ -4,6 +4,13 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **GEPA distinct-component experiment.** Trained on twelve reviewed cases,
+  selected on new Pipe cases, and tested on distinct Scanner and Value cases.
+  GEPA retained the fixed seed, so the primary final arms have identical prompts.
+  Preserve AI-reviewed references, grading uncertainty, raw metered runs,
+  separately declared candidate exploration, executable controls, and red/green
+  archive checks. This is not a full pilot, independent human review, or evidence
+  of an optimized-prompt benefit. See `docs/evidence/gepa-heldout/README.md`.
 
 - **Reviewed GEPA training catalog and baseline.** Twelve historical-miss and
   control cases on five components receive a separate AI source/test review;

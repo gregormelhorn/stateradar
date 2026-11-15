@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "id": "V01",
+      "verdict": "confirmed",
+      "reason": "The writer stores its error through onceError.Store, which preserves the first non-nil error, and closeWrite returns nil on both calls. With the reader still open, readCloseError returns the stored writer error. The test checks that both closes return nil and that the later read returns the exact first error. It discards the read count.",
+      "line": 24,
+      "fragment": "if a.err != nil {\n\t\treturn\n\t}"
+    },
+    {
+      "id": "V02",
+      "verdict": "confirmed",
+      "reason": "The writer receives the reader's count and adds it to the total before checking for closure on the next iteration. With only the reader closed, writeCloseError returns the reader's error. The test checks that the read returns two bytes containing \"ab\" with nil error and that the write returns count two and the exact reader error.",
+      "line": 88,
+      "fragment": "nw := <-p.rdCh\n\t\t\tb = b[nw:]\n\t\t\tn += nw\n\t\tcase <-p.done:\n\t\t\treturn n, p.writeCloseError()"
+    },
+    {
+      "id": "V03",
+      "verdict": "confirmed",
+      "reason": "The first loop iteration runs even with an empty slice. On the open pipe, the writer sends the slice and waits for the reader's acknowledgment. The reader copies zero bytes and acknowledges zero, so both return zero and nil. The test checks the read count and both errors, and discards the write count. Its 50 ms timeout shows only that write completion was not observed during that interval. It does not establish that the writer goroutine entered Write before the timeout.",
+      "line": 85,
+      "fragment": "for once := true; once || len(b) > 0; once = false {"
+    }
+  ]
+}

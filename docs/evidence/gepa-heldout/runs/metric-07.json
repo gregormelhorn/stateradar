@@ -1,0 +1,114 @@
+{
+  "candidate": {
+    "review": "Use the reviewed source and any pinned runtime evidence to trace ordinary success and failure, repetition, cancellation, abandonment, deferred work, and reuse. State the initial conditions and order the steps that determine the outcome. Compare both event orders and test intervening operations before treating an earlier event as decisive. Follow each completion from admission through reporting, state refresh, and effect. Check whether an obsolete report can be discarded even when cleanup or error propagation continues. Distinguish rebinding a caller's reference from replacing the value through the captured reference, and use an unchanged reference as a control. Check whether registration actually succeeds after a state observation, and keep notification, suspension, lock reacquisition, and return distinct. Compare notifications before and after registration, and distinguish when a lock is required to change the condition or begin waiting from when it is optional for notification. Preserve controls for copying before and after first use, cleanup after normal and abrupt exit, and valid reuse after earlier waiters return. Qualify exceptional behavior by the documented exclusions, compatibility mode, and whether a prior association is still present. Separate deadline calculation from dispatch and delivery. Compare repeated cancellation, expiry, and reactivation in order, checking the current state and whether earlier work has started, finished, or can overlap later work. For queued work, trace availability checks, enqueue, handoff, and shutdown through later callers and subsequent returns. Check who receives an available resource, what eventually releases the older waiter, and which validation runs on each path. Distinguish invoking cleanup from establishing its effect, and preserving error text from preserving error identity. Cite the branches, tests, and contract language that support each claim, and qualify conclusions by source coverage, version, configuration, and supported input range. Leave intent OPEN where the evidence does not settle transition timing, duplicate or abandoned completion, counter refresh and numeric limits, ownership or copying, exceptional exits, notification analogies, delivery guarantees, queue ordering, validation, or shutdown obligations. Where contract statements appear inconsistent, identify the event order and scope that expose the conflict and leave the intended wording OPEN."
+  },
+  "trace": {
+    "component": "gobreaker",
+    "Generated Outputs": {
+      "findings": [
+        {
+          "id": "execute_admission_and_result",
+          "text": "Start with a newly constructed breaker using default settings. An admitted Execute increments Requests before calling the function. A nil error counts as a success and resets the consecutive-failure count. A non-nil error counts as a failure, and the sixth consecutive failure opens the breaker and clears its counters. Each admitted call returns the original result and error, including the call that opens the breaker. A call that observes the breaker still open returns nil and ErrOpenState without invoking the function. With a custom IsSuccessful that returns true for a non-nil error, the error counts as a success and is returned unchanged.",
+          "citation": {
+            "line": 243,
+            "fragment": "cb.afterRequest(generation, cb.isSuccessful(err))"
+          },
+          "question": ""
+        },
+        {
+          "id": "expiry_refresh_and_obsolete_reports",
+          "text": "Start with a closed breaker, a positive Interval, and a request admitted before expiry. If completion samples a time at or before expiry, its report applies to that generation. A later refresh clears those counts. If completion samples a time strictly after expiry, it can clear the counters itself before discarding its own report. An intervening Counts call returns the stored counters without refreshing them. An intervening State call or admission after expiry can refresh first, with the same result for the old report. Execute still calls IsSuccessful and, if it returns normally, returns the request result and error. In the open state, passing Timeout alone invokes no callback. The first refresh that samples a time strictly after expiry changes the state to half-open. If that refresh is an admission, it also checks and can consume a half-open slot.",
+          "citation": {
+            "line": 298,
+            "fragment": "state, generation := cb.currentState(now)"
+          },
+          "question": "OPEN: Should the Interval and Timeout documentation say that refresh happens on observation and that Counts can still return the previous generation's counters after expiry?"
+        },
+        {
+          "id": "duplicate_and_abandoned_half_open_reports",
+          "text": "Start half-open with MaxRequests set to 2 and no admissions. One successful Allow increments Requests once. Calling its completion with true twice in the same generation reaches two consecutive successes and closes the breaker after only one admission. Calling it again after that transition has no effect on the new generation. As controls, two distinct admissions that each report success once close the breaker, while two admissions followed by one success and one abandoned completion leave it half-open. In the abandoned case, later Allow calls return ErrTooManyRequests even after Timeout elapses because half-open has no expiry. If the outstanding callback later reports failure, the breaker reopens, and an admission that observes the next open expiry can take a fresh half-open slot.",
+          "citation": {
+            "line": 316,
+            "fragment": "if cb.counts.ConsecutiveSuccesses >= cb.maxRequests {"
+          },
+          "question": "OPEN: Is each Allow callback required to be called exactly once, and what recovery is intended when a half-open completion is abandoned?"
+        },
+        {
+          "id": "completion_receiver_and_copying",
+          "text": "Create two fresh closed TwoStepCircuitBreakers with default settings so their generation numbers match. Admit a request through the first and keep its completion. Leaving the caller's pointer unchanged or rebinding that pointer to the second breaker both make the completion update the original breaker. If an alias instead overwrites the original wrapper value with a copy of the second wrapper before completion, the completion reads the replacement wrapper's cb and can give the second breaker one success with zero requests. Copying just the wrapper before or after first use shares its underlying breaker and counters. Copying CircuitBreaker itself by value copies its mutex and counters, and Go's sync.Mutex contract prohibits copying it after first use.",
+          "citation": {
+            "line": 272,
+            "fragment": "tscb.cb.afterRequest(generation, success)"
+          },
+          "question": "OPEN: What ownership and copying contract should apply to the exposed wrapper while an Allow callback is outstanding?"
+        },
+        {
+          "id": "abrupt_exit_and_panic_propagation",
+          "text": "Start with an admitted Execute whose request panics with a value that recover returns as non-nil. The deferred handler reports failure without using IsSuccessful and then re-panics with that value if reporting finishes normally. If the generation changed before the panic report, the report can be discarded and the panic still propagates. If reporting itself panics, for example when the failure opens the breaker and OnStateChange panics, the transition and counter reset have already happened, and the new panic can supersede the original. If the request calls runtime.Goexit, the defer runs with recover returning nil and records no outcome. A panic(nil) also bypasses the failure branch in runtimes or compatibility modes where recover returns nil for that panic.",
+          "citation": {
+            "line": 236,
+            "fragment": "if e != nil {"
+          },
+          "question": "OPEN: How should Execute's same-panic guarantee be scoped when a reporting hook panics or the runtime returns nil from recover?"
+        },
+        {
+          "id": "callback_order_and_locking",
+          "text": "Start closed with a ReadyToTrip hook that returns true for the next recorded failure and an OnStateChange hook installed. The breaker acquires its mutex, refreshes state, records the failure, and passes the updated counts by value to ReadyToTrip. It then sets the state to open, clears the counters, and calculates the deadline from the time sampled before the hooks ran. OnStateChange runs synchronously under the same mutex before Execute can return. If either hook synchronously calls State or Counts on that breaker, the nested call waits for the mutex held by the outer call, which is waiting for the hook to return.",
+          "citation": {
+            "line": 359,
+            "fragment": "cb.onStateChange(cb.name, prev, state)"
+          },
+          "question": "OPEN: Should ReadyToTrip and OnStateChange explicitly require callbacks to avoid reentering methods that acquire the breaker's mutex?"
+        }
+      ]
+    },
+    "Feedback": {
+      "summary": {
+        "found": 2,
+        "total": 2,
+        "false": 2,
+        "uncertain": 0,
+        "missing": [],
+        "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+      },
+      "reviewed_cases": [],
+      "finding_reviews": [
+        {
+          "id": "execute_admission_and_result",
+          "verdict": "false",
+          "reason": "Unqualified returned outcome accounting omits generation guard: a concurrent transition can discard an admitted outcome; gobreaker.go:293-301."
+        },
+        {
+          "id": "expiry_refresh_and_obsolete_reports",
+          "verdict": "false",
+          "reason": "The before-expiry report need not apply if another operation changed the generation before it; condition does not exclude that ordering (afterRequest:293-301). Other expiry behaviors are supported."
+        },
+        {
+          "id": "duplicate_and_abandoned_half_open_reports",
+          "verdict": "valid",
+          "reason": "Allow closure, generation check and onSuccess half-open threshold support duplicate, distinct and abandoned cases."
+        },
+        {
+          "id": "completion_receiver_and_copying",
+          "verdict": "valid",
+          "reason": "Captured wrapper dereferences cb on invocation; archived rebinding and reassignment probes pass; sync/mutex.go:20 prohibits copying Mutex after first use."
+        },
+        {
+          "id": "abrupt_exit_and_panic_propagation",
+          "verdict": "valid",
+          "reason": "Execute defer, recover and afterRequest generation gate support qualified panic/Goexit behavior; legacy panicnil case correctly scoped."
+        },
+        {
+          "id": "callback_order_and_locking",
+          "verdict": "valid",
+          "reason": "afterRequest locks and samples time, onFailure records counts and invokes hooks; setState resets and calls hook under mutex."
+        }
+      ]
+    },
+    "call_ids": [
+      2
+    ],
+    "mode": "fresh"
+  },
+  "score": 0.8
+}

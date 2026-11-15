@@ -1,0 +1,16 @@
+[
+  {
+    "id": "A01",
+    "kind": "claim",
+    "statement": "atomic.Value.Store accepts a typed nil pointer as a non-nil interface; Store(nil) panics, and the existing typed value remains.",
+    "line": 48,
+    "fragment": "if val == nil {"
+  },
+  {
+    "id": "A02",
+    "kind": "claim",
+    "statement": "On an empty atomic.Value, CompareAndSwap with non-nil old and new values of the same concrete string type returns false and leaves it empty; CompareAndSwap(nil, a non-nil string) initializes it and returns true.",
+    "line": 147,
+    "fragment": "if old != nil {"
+  }
+]

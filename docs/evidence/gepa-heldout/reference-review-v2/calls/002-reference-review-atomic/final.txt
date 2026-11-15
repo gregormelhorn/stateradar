@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "id": "A01",
+      "verdict": "confirmed",
+      "reason": "A nil *int boxed in an interface has a concrete type, so it passes the nil guard and Store publishes its type and nil data. Store(nil) panics before modifying the Value. TestValueTypedNilAndNil checks that Load returns a non-nil interface containing a nil *int, recovers a panic from Store(nil), and checks that Load still returns a nil *int afterward.",
+      "line": 48,
+      "fragment": "if val == nil {"
+    },
+    {
+      "id": "A02",
+      "verdict": "confirmed",
+      "reason": "The two string arguments pass the type check. When the Value is empty, the non-nil old argument returns false before any write. With nil old, the initialization path stores the new value and returns true. TestValueEmptyCompareAndSwap checks both return values and both resulting Load values in sequence on the same Value.",
+      "line": 147,
+      "fragment": "if old != nil {\n\t\t\t\treturn false"
+    }
+  ]
+}

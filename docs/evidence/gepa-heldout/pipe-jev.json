@@ -1,0 +1,54 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "75ef56f505592fcffb188bf7660c6ea6abede3f2701b500d6946fa519c37e233",
+  "input_tokens": 2296,
+  "cost_microdollars": 97,
+  "reservation_microdollars": 367,
+  "checks": {
+    "V01": {
+      "kind": "claim",
+      "statement": "After PipeWriter.CloseWithError(first), a second CloseWithError(second) returns nil without replacing the first error; a later reader receives first.",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "line": 174,
+      "fragment": "CloseWithError never overwrites the previous error",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.86,
+        "contradicted": 0.01,
+        "unclear": 0.13
+      },
+      "confidence": 0.79,
+      "review_required": true
+    },
+    "V02": {
+      "kind": "claim",
+      "statement": "If a six-byte Pipe write has delivered two bytes and the reader closes with an error, the writer returns the two consumed bytes together with that error.",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "line": 92,
+      "fragment": "return n, p.writeCloseError()",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.86,
+        "contradicted": 0.03,
+        "unclear": 0.11
+      },
+      "confidence": 0.79,
+      "review_required": true
+    },
+    "V03": {
+      "kind": "claim",
+      "statement": "A zero-length Pipe write still participates in a reader handshake; after a matching zero-length Read both return zero and nil.",
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "line": 85,
+      "fragment": "once || len(b) > 0",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.86,
+        "contradicted": 0.02,
+        "unclear": 0.12
+      },
+      "confidence": 0.79,
+      "review_required": true
+    }
+  }
+}

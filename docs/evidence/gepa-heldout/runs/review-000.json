@@ -1,0 +1,59 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "V01",
+      "finding_ids": [
+        "one-sided-close-and-repeat"
+      ],
+      "reason": "Writer first/second error, both nil and subsequent Read first error with peer open.",
+      "partial": false
+    },
+    {
+      "id": "V02",
+      "finding_ids": [],
+      "reason": "close-before-next-transfer establishes equivalent partial-write and error behavior for five bytes, not the frozen exact six-byte case; retained as partial, not scored.",
+      "partial": true
+    },
+    {
+      "id": "V03",
+      "finding_ids": [
+        "zero-length-operations"
+      ],
+      "reason": "Empty Write waits for Read rendezvous and both return (0,nil) on fresh open pipe.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "synchronous-transfer",
+      "verdict": "valid",
+      "reason": "pipe.write serializes via wrMu and repeats wrCh/rdCh acknowledgments; reads copy partial chunks."
+    },
+    {
+      "id": "one-sided-close-and-repeat",
+      "verdict": "valid",
+      "reason": "onceError stores only first error; close/read/write error branches distinguish own and peer close."
+    },
+    {
+      "id": "both-close-orders",
+      "verdict": "valid",
+      "reason": "readCloseError/writeCloseError return peer error only when own error nil; closeRead/closeWrite store independently."
+    },
+    {
+      "id": "close-before-next-transfer",
+      "verdict": "valid",
+      "reason": "partial n is accumulated before loop observes done; readCloseError/writeCloseError preserve peer error with own end open."
+    },
+    {
+      "id": "close-around-handoff",
+      "verdict": "valid",
+      "reason": "after wrCh handoff reader sends rdCh and writer waits without done select; if both cases ready select may choose either."
+    },
+    {
+      "id": "zero-length-operations",
+      "verdict": "valid",
+      "reason": "loop executes once even for len zero; handoff and zero acknowledgment are explicit in read/write code."
+    }
+  ]
+}

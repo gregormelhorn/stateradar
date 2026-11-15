@@ -1,0 +1,23 @@
+[
+  {
+    "id": "V01",
+    "kind": "claim",
+    "statement": "After PipeWriter.CloseWithError(first), a second CloseWithError(second) returns nil without replacing the first error; a later reader receives first.",
+    "line": 174,
+    "fragment": "CloseWithError never overwrites the previous error"
+  },
+  {
+    "id": "V02",
+    "kind": "claim",
+    "statement": "If a six-byte Pipe write has delivered two bytes and the reader closes with an error, the writer returns the two consumed bytes together with that error.",
+    "line": 92,
+    "fragment": "return n, p.writeCloseError()"
+  },
+  {
+    "id": "V03",
+    "kind": "claim",
+    "statement": "A zero-length Pipe write still participates in a reader handshake; after a matching zero-length Read both return zero and nil.",
+    "line": 85,
+    "fragment": "once || len(b) > 0"
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "model": "jev-1.14.0",
+  "source_sha256": "e87f0ad5c37b11b69effbb2c58b34b3fd7d4d4300b9e83a63847ff3b4835b8cc",
+  "input_tokens": 2351,
+  "cost_microdollars": 99,
+  "reservation_microdollars": 375,
+  "checks": {
+    "A01": {
+      "kind": "claim",
+      "statement": "atomic.Value.Store accepts a typed nil pointer as a non-nil interface; Store(nil) panics, and the existing typed value remains.",
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "line": 48,
+      "fragment": "if val == nil {",
+      "choice": "unclear",
+      "probabilities": {
+        "supported": 0.22,
+        "contradicted": 0.23,
+        "unclear": 0.55
+      },
+      "confidence": 0.33,
+      "review_required": true
+    },
+    "A02": {
+      "kind": "claim",
+      "statement": "On an empty atomic.Value, CompareAndSwap with non-nil old and new values of the same concrete string type returns false and leaves it empty; CompareAndSwap(nil, a non-nil string) initializes it and returns true.",
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "line": 147,
+      "fragment": "if old != nil {",
+      "choice": "supported",
+      "probabilities": {
+        "supported": 0.85,
+        "contradicted": 0.01,
+        "unclear": 0.14
+      },
+      "confidence": 0.77,
+      "review_required": true
+    }
+  }
+}

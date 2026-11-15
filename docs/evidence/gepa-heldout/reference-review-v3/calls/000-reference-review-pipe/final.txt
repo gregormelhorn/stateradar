@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "id": "V01",
+      "verdict": "confirmed",
+      "reason": "The close path stores the error once and returns nil on every call. With the reader still open, the subsequent read returns the stored writer error. The test checks both nil close results and exact identity with the first error for two distinct non-nil errors. It discards the read byte count.",
+      "line": 24,
+      "fragment": "if a.err != nil {\n\t\treturn\n\t}"
+    },
+    {
+      "id": "V02",
+      "verdict": "confirmed",
+      "reason": "The reader acknowledges two bytes before returning. The writer adds those two bytes to its count, then observes closure with four bytes still pending. The close path returns the accumulated count and the stored reader error. The test checks that the read returns two bytes containing \"ab\" with nil error, then closes the reader and checks that the writer returns two and the exact marker error.",
+      "line": 90,
+      "fragment": "n += nw\n\t\tcase <-p.done:\n\t\t\treturn n, p.writeCloseError()"
+    },
+    {
+      "id": "V03",
+      "verdict": "confirmed",
+      "reason": "The write loop runs once even with an empty slice. On an open pipe, the unbuffered send requires a reader, which copies zero bytes and acknowledges zero before both calls return zero and nil. The test checks both results using nil slices. Its 50 ms wait establishes only bounded nonreturn as observed through the result channel. It does not establish that the writer had started or reached the handshake.",
+      "line": 85,
+      "fragment": "for once := true; once || len(b) > 0; once = false"
+    }
+  ]
+}

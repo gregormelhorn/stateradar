@@ -253,6 +253,10 @@ uses source-backed open findings and held-out components. GEPA retained the fixe
 seed, so the final arms used identical prompts; no GEPA advantage is established.
 The subsequent [reviewed training catalog and fixed baseline](docs/evidence/gepa-training-catalog/README.md)
 records recurrent source-scope gaps and controls; it is not a new GEPA optimization.
+A [new component-split GEPA experiment](docs/evidence/gepa-heldout/README.md)
+trained on that catalog and again selected the unchanged prompt. Separate
+exploratory results and AI-review uncertainty are retained; no human review or
+GEPA improvement is claimed.
 
 ---
 

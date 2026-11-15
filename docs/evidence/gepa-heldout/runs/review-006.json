@@ -1,0 +1,52 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "P01",
+      "finding_ids": [],
+      "reason": "registration_order includes idle miss, buffering, queue, later Get and subsequent Put, but returns the same resource from the later caller rather than the frozen case's second held connection.",
+      "partial": true
+    },
+    {
+      "id": "P02",
+      "finding_ids": [
+        "registration_order",
+        "checkout_validation"
+      ],
+      "reason": "Reverse order explicitly hands the Put to first registered waiter; separate finding says waiter returns if timestamp survives, as in no-expiry case.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "construction",
+      "verdict": "valid",
+      "reason": "Config checks, NewChannelPool failure path, Release drain and fmt.Errorf %s preserve text rather than error identity; cleanup failure/throw scope explicit."
+    },
+    {
+      "id": "checkout_validation",
+      "verdict": "valid",
+      "reason": "Expiry, Ping and Close paths are ordered; Close only invoked, not assumed successful; Ping method reads c.ping directly after outer check."
+    },
+    {
+      "id": "registration_order",
+      "verdict": "valid",
+      "reason": "Get default then mutex/queue, Put buffer or first waiter, later Get/Put ordering matches source under specified schedule."
+    },
+    {
+      "id": "close_and_capacity",
+      "verdict": "valid",
+      "reason": "Close decrements before callback and does not service waiters; factory and ownership behavior source-backed."
+    },
+    {
+      "id": "shutdown_and_waiters",
+      "verdict": "valid",
+      "reason": "Release clears fields and drains idle without closing connReqs; late Put/Close and handoff order match source."
+    },
+    {
+      "id": "release_completion",
+      "verdict": "valid",
+      "reason": "Release snapshots fields and drains after unlocking; second call and callback panic/error behavior follow guarded paths."
+    }
+  ]
+}

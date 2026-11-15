@@ -1,0 +1,76 @@
+{
+  "train_catalog": "docs/evidence/gepa-training-catalog/catalog.json",
+  "train": [
+    "gobreaker",
+    "cond",
+    "waitgroup",
+    "timer",
+    "pool"
+  ],
+  "validation": [
+    "pipe"
+  ],
+  "test": [
+    "scanner",
+    "atomic"
+  ],
+  "components": {
+    "pipe": {
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "cases": [
+        {
+          "id": "V01",
+          "question_required": false,
+          "description": "After PipeWriter.CloseWithError(first), a second CloseWithError(second) returns nil without replacing the first error; a later reader receives first.",
+          "test": "TestPipeFirstWriterError"
+        },
+        {
+          "id": "V02",
+          "question_required": false,
+          "description": "If a six-byte Pipe write has delivered two bytes and the reader closes with an error, the writer returns the two consumed bytes together with that error.",
+          "test": "TestPipePartialWriteClose"
+        },
+        {
+          "id": "V03",
+          "question_required": false,
+          "description": "A zero-length Pipe write still participates in a reader handshake; after a matching zero-length Read both return zero and nil.",
+          "test": "TestPipeZeroWriteHandshake"
+        }
+      ]
+    },
+    "scanner": {
+      "source": "docs/evidence/gepa-heldout/upstream/scan.go",
+      "cases": [
+        {
+          "id": "S01",
+          "question_required": false,
+          "description": "With strings.NewReader(\"x\") and no prior non-EOF reader error, a split function returning ErrFinalToken with a non-nil empty token makes Scan return true once, then false with nil Err; with a nil token the first Scan is false with nil Err.",
+          "test": "TestScannerFinalTokenVariants"
+        },
+        {
+          "id": "S02",
+          "question_required": false,
+          "description": "Calling Scanner.Buffer or Scanner.Split after Scan was called panics even when the first Scan returned false for empty input.",
+          "test": "TestScannerLateConfiguration"
+        }
+      ]
+    },
+    "atomic": {
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "cases": [
+        {
+          "id": "A01",
+          "question_required": false,
+          "description": "atomic.Value.Store accepts a typed nil pointer as a non-nil interface; Store(nil) panics, and the existing typed value remains.",
+          "test": "TestValueTypedNilAndNil"
+        },
+        {
+          "id": "A02",
+          "question_required": false,
+          "description": "On an empty atomic.Value, CompareAndSwap with non-nil old and new values of the same concrete string type returns false and leaves it empty; CompareAndSwap(nil, a non-nil string) initializes it and returns true.",
+          "test": "TestValueEmptyCompareAndSwap"
+        }
+      ]
+    }
+  }
+}

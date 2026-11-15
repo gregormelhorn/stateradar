@@ -1,0 +1,51 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "A01",
+      "finding_ids": [],
+      "reason": "Typed nil and nil panic are covered on separate values; preservation of typed nil after nil Store is not stated.",
+      "partial": true
+    },
+    {
+      "id": "A02",
+      "finding_ids": [
+        "compare-and-swap-empty"
+      ],
+      "reason": "Equivalent same-type comparable payload sequence; the literal integer values are incidental.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "first-publication",
+      "verdict": "valid",
+      "reason": "Value method source supports the stated ordering and error conditions."
+    },
+    {
+      "id": "store-swap-type",
+      "verdict": "valid",
+      "reason": "Value method source supports the stated ordering and error conditions."
+    },
+    {
+      "id": "compare-and-swap-empty",
+      "verdict": "valid",
+      "reason": "Value method source supports the stated ordering and error conditions."
+    },
+    {
+      "id": "compare-and-swap-comparability",
+      "verdict": "valid",
+      "reason": "Value method source supports the stated ordering and error conditions."
+    },
+    {
+      "id": "compare-and-swap-interference",
+      "verdict": "valid",
+      "reason": "Value method source supports the stated ordering and error conditions."
+    },
+    {
+      "id": "copy-contract",
+      "verdict": "valid",
+      "reason": "Value method source supports the stated ordering and error conditions."
+    }
+  ]
+}

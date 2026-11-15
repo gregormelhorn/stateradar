@@ -1,0 +1,76 @@
+{
+  "train_catalog": "docs/evidence/gepa-training-catalog/catalog.json",
+  "train": [
+    "gobreaker",
+    "cond",
+    "waitgroup",
+    "timer",
+    "pool"
+  ],
+  "validation": [
+    "pipe"
+  ],
+  "test": [
+    "scanner",
+    "atomic"
+  ],
+  "components": {
+    "pipe": {
+      "source": "docs/evidence/gepa-heldout/upstream/pipe.go",
+      "cases": [
+        {
+          "id": "V01",
+          "question_required": false,
+          "description": "On a pipe whose reader stays open, PipeWriter.CloseWithError(first) followed by CloseWithError(second) returns nil both times without replacing first; a subsequent read receives first.",
+          "test": "TestPipeFirstWriterError"
+        },
+        {
+          "id": "V02",
+          "question_required": false,
+          "description": "With one reader and no other operations, after a six-byte Pipe write has delivered two bytes, the reader closes with an error; the writer returns the two consumed bytes together with that error.",
+          "test": "TestPipePartialWriteClose"
+        },
+        {
+          "id": "V03",
+          "question_required": false,
+          "description": "On a pipe kept open, a zero-length write still participates in a reader handshake; after a matching zero-length Read both calls return zero and nil.",
+          "test": "TestPipeZeroWriteHandshake"
+        }
+      ]
+    },
+    "scanner": {
+      "source": "docs/evidence/gepa-heldout/upstream/scan.go",
+      "cases": [
+        {
+          "id": "S01",
+          "question_required": false,
+          "description": "With strings.NewReader(\"x\") and no prior non-EOF reader error, a split function returning ErrFinalToken with a non-nil empty token makes Scan return true once, then false with nil Err; with a nil token the first Scan is false with nil Err.",
+          "test": "TestScannerFinalTokenVariants"
+        },
+        {
+          "id": "S02",
+          "question_required": false,
+          "description": "Calling Scanner.Buffer or Scanner.Split after Scan was called panics even when the first Scan returned false for empty input.",
+          "test": "TestScannerLateConfiguration"
+        }
+      ]
+    },
+    "atomic": {
+      "source": "docs/evidence/gepa-heldout/upstream/value.go",
+      "cases": [
+        {
+          "id": "A01",
+          "question_required": false,
+          "description": "On an otherwise unused atomic.Value with no concurrent operations, Store accepts a typed nil pointer as a non-nil interface; Store(nil) panics, and the existing typed nil remains.",
+          "test": "TestValueTypedNilAndNil"
+        },
+        {
+          "id": "A02",
+          "question_required": false,
+          "description": "On an empty atomic.Value with no concurrent operations, CompareAndSwap(\"old\", \"new\") returns false and leaves it empty; CompareAndSwap(nil, \"new\") initializes it and returns true.",
+          "test": "TestValueEmptyCompareAndSwap"
+        }
+      ]
+    }
+  }
+}

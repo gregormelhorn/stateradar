@@ -1,0 +1,53 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "S01",
+      "finding_ids": [
+        "final-token"
+      ],
+      "reason": "Both sentinel outcomes and prior error condition covered.",
+      "partial": false
+    },
+    {
+      "id": "S02",
+      "finding_ids": [
+        "buffer-and-token-aliasing"
+      ],
+      "reason": "Explicit false on empty input and both configuration panics.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "reader-error-order",
+      "verdict": "valid",
+      "reason": "Conditional ordering and outcomes follow from Scanner source."
+    },
+    {
+      "id": "final-token",
+      "verdict": "valid",
+      "reason": "Conditional ordering and outcomes follow from Scanner source."
+    },
+    {
+      "id": "buffer-limit-and-next-scan",
+      "verdict": "valid",
+      "reason": "Conditional ordering and outcomes follow from Scanner source."
+    },
+    {
+      "id": "zero-advance-tokens",
+      "verdict": "valid",
+      "reason": "Conditional ordering and outcomes follow from Scanner source."
+    },
+    {
+      "id": "buffer-and-token-aliasing",
+      "verdict": "valid",
+      "reason": "Conditional ordering and outcomes follow from Scanner source."
+    },
+    {
+      "id": "read-validation-and-retry-budget",
+      "verdict": "valid",
+      "reason": "Conditional ordering and outcomes follow from Scanner source."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "review": {
+    "cases": [
+      {
+        "id": "A01",
+        "verdict": "confirmed",
+        "reason": "A typed nil pointer has a dynamic type, so its interface bypasses the nil check. Store(nil) panics before modifying the Value. The test checks that the initial load is a non-nil interface containing a nil *int, that Store(nil) panics, and that the subsequent load still has type *int. It does not recheck that the pointer is nil after the panic.",
+        "line": 48,
+        "fragment": "if val == nil {"
+      },
+      {
+        "id": "A02",
+        "verdict": "refuted",
+        "reason": "The first claim is too broad. A non-nil old value whose dynamic type differs from new causes a panic before the empty-state check, and a nil new value also causes a panic. The test checks only that same-type string arguments return false and leave the Value empty, then that a nil old value and a non-nil string return true and store that string. Both tested outcomes follow from the source.",
+        "line": 141,
+        "fragment": "if op.typ != nil && np.typ != op.typ {"
+      }
+    ]
+  },
+  "call_ids": [
+    3
+  ]
+}

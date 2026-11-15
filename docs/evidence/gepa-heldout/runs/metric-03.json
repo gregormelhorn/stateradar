@@ -1,0 +1,132 @@
+{
+  "candidate": {
+    "review": "Examine ordinary success and failure as well as repeated operations, deferred work, cancellation and both event orderings. Trace state, object identity and effects across each lifecycle boundary. Compare contract language with behavior, including its exclusions and the possibility that a valid statement applies only to a narrower situation. Retain correct controls. Cite evidence and leave unanswered intent or contradictory requirements as OPEN questions.\n"
+  },
+  "trace": {
+    "component": "waitgroup",
+    "Generated Outputs": {
+      "findings": [
+        {
+          "id": "go-wait-order",
+          "text": "On a fresh WaitGroup, Go(f) increments the counter before launching f. If Wait observes the positive counter, it registers as a waiter. When f returns normally, the wrapper calls Done, which takes the counter to zero, clears the waiter count, and releases the waiter. If f finishes before Wait reads the counter, Wait returns immediately. If Wait instead runs to completion before the first Go call, it returns on the empty group and does not wait for f.",
+          "citation": {
+            "line": 237,
+            "fragment": "wg.Add(1)"
+          },
+          "question": ""
+        },
+        {
+          "id": "negative-counter",
+          "text": "On an ordinary WaitGroup with a zero counter and no waiters, an unmatched Done calls Add(-1). Add stores the decrement before checking for a negative count, then panics. If the caller recovers, the same WaitGroup still has a counter of -1. With no further counter changes, a subsequent Wait registers as a waiter and blocks.",
+          "citation": {
+            "line": 104,
+            "fragment": "state := wg.state.Add(uint64(delta) << 32)"
+          },
+          "question": ""
+        },
+        {
+          "id": "goexit-completion",
+          "text": "With one task registered by Go and a Wait already blocked, if f calls runtime.Goexit without a panic in its deferred functions, f's deferred functions run before the wrapper's deferred cleanup. The wrapper's recover returns nil, so it calls Done, releases the waiter, and the task goroutine exits without f returning normally.",
+          "citation": {
+            "line": 254,
+            "fragment": "// f completed normally, or abruptly using goexit."
+          },
+          "question": "OPEN: Should the Go contract explicitly cover task removal and synchronization when f exits through runtime.Goexit, given that its wording describes the return from f?"
+        },
+        {
+          "id": "escaping-task-panic",
+          "text": "With one task registered by Go and a Wait already blocked, if a panic escapes f and the wrapper's recover returns a non-nil value, the wrapper re-panics with that value before reaching Done. The counter stays at one, the waiter receives no release from this task, and the unrecovered panic terminates the process. This execution is excluded by Go's requirement that f must not panic.",
+          "citation": {
+            "line": 251,
+            "fragment": "panic(x)"
+          },
+          "question": ""
+        },
+        {
+          "id": "reuse-detection-window",
+          "text": "Outside synctest, start with a Wait blocked on one task. Its final Done clears the state and releases the waiter. If Add(1) starts a new batch before that Wait returns and the waiter reads the state while the new counter is positive, Wait panics. If the new batch also calls Done before the waiter reads the state, with no new waiters, the state is zero again and the old Wait returns normally. Both early reuse sequences violate the documented ordering. Starting the new batch after the old Wait returns follows it.",
+          "citation": {
+            "line": 207,
+            "fragment": "isReset := wg.state.Load() != 0"
+          },
+          "question": ""
+        },
+        {
+          "id": "delta-width",
+          "text": "On a platform with 64-bit int, outside synctest, call Add(1<<32) on a fresh WaitGroup and then call Wait. Shifting the converted delta left by 32 in uint64 arithmetic discards its only set bit. Add returns with the state still zero, and Wait returns immediately despite the positive delta. The Add documentation gives no counter-width restriction.",
+          "citation": {
+            "line": 104,
+            "fragment": "uint64(delta) << 32"
+          },
+          "question": "OPEN: What range of deltas and resulting counter values does Add promise to support?"
+        }
+      ]
+    },
+    "Feedback": {
+      "summary": {
+        "found": 1,
+        "total": 4,
+        "false": 1,
+        "uncertain": 0,
+        "missing": [
+          "W01",
+          "W03",
+          "W04"
+        ],
+        "limitation": "Semantic classifications are attributed reviewer judgments, not proof of entailment."
+      },
+      "reviewed_cases": [
+        {
+          "id": "W01",
+          "description": "Recover returns nil in this legacy mode and the wrapper continues to Done instead of re-panicking. Panicking f is outside the documented Go API contract.",
+          "kind": "historical_false_claim"
+        },
+        {
+          "id": "W03",
+          "description": "On pinned Go 1.27.3 the Wait follows the retained bubble flag and panics with a nil-pointer runtime error; whether the outside-bubble use is supported remains OPEN.",
+          "kind": "historical_false_claim"
+        },
+        {
+          "id": "W04",
+          "description": "Wait in the owning bubble can disassociate the group; distinguish that sequence from outside Wait while the association remains.",
+          "kind": "negative_control"
+        }
+      ],
+      "finding_reviews": [
+        {
+          "id": "go-wait-order",
+          "verdict": "false",
+          "reason": "Wait observing v>0 is not sufficient to register: if final Done changes state to zero before CompareAndSwap, that CAS fails and Wait loops and returns via zero fast-path (waitgroup.go:164-168,184-187)."
+        },
+        {
+          "id": "negative-counter",
+          "verdict": "valid",
+          "reason": "Done delegates Add(-1), atomic change precedes negative panic, and a subsequent no-intervention Wait attempts to register and acquire semaphore."
+        },
+        {
+          "id": "goexit-completion",
+          "verdict": "valid",
+          "reason": "Go wrapper defers recover and Done after f; source 236-258 and Goexit semantics support the qualified non-panicking deferred-function case."
+        },
+        {
+          "id": "escaping-task-panic",
+          "verdict": "valid",
+          "reason": "The explicit non-nil recovered-value qualification matches waitgroup.go:239-251; domain contract forbids panic."
+        },
+        {
+          "id": "reuse-detection-window",
+          "verdict": "valid",
+          "reason": "Add clears state and releases waiters at 123-142; Wait checks state after semaphore acquire at 205-215. Both state observations can occur under stated schedules."
+        },
+        {
+          "id": "delta-width",
+          "verdict": "valid",
+          "reason": "For 64-bit int, uint64(1<<32)<<32 is zero in Go 64-bit arithmetic; Add sees v=0,w=0 and returns, Wait zero path returns. Source comments do not state supported delta width."
+        }
+      ]
+    },
+    "call_ids": [],
+    "mode": "historical-seed"
+  },
+  "score": 0.15
+}

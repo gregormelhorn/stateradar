@@ -1,0 +1,16 @@
+{
+  "declared_after_selection_before_final_review": true,
+  "reason": "Selected seed tied with one altered candidate, so primary final arms are identical. Separately examine the unselected tied candidate, without changing selected prompt or optimizing further.",
+  "candidate_index": 1,
+  "candidate_sha256": "68517cff39bdd175785dd7453956a9f302e1a107af9fc14342eda57c4f72b81a",
+  "fixed_sha256": "fbfc1ee73ce35e18c58f8afafe7e71373aa6d93301309487f1b73e210340b0fa",
+  "cases": [
+    "scanner",
+    "atomic"
+  ],
+  "repetitions_per_component": 2,
+  "comparison": "Compare with already predeclared fixed final calls. This is post-selection exploratory, not the preregistered selected-prompt result, not a new holdout or promotion basis.",
+  "call_cap_including_primary": 25,
+  "new_calls_max": 4,
+  "note": "Final model call may be in flight; no final result or review had been inspected when declared."
+}

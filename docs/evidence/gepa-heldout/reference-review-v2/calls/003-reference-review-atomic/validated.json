@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "id": "A01",
+      "verdict": "confirmed",
+      "reason": "A nil *int retains its concrete type when boxed into an interface, so it passes the nil guard and Store publishes its type and nil data. Store(nil) panics before writing to the Value. TestValueTypedNilAndNil checks that Load returns a non-nil interface containing a nil *int, that Store(nil) panics, and that Load still returns a nil *int afterward.",
+      "line": 49,
+      "fragment": "panic(\"sync/atomic: store of nil value into Value\")"
+    },
+    {
+      "id": "A02",
+      "verdict": "confirmed",
+      "reason": "The two string arguments pass the type check. On an empty Value, a non-nil old argument causes an immediate false return before any write. A nil old argument allows the first-store path to publish the new string and return true. TestValueEmptyCompareAndSwap checks the false return and nil Load, then the true return and a Load equal to \"new\", in sequence on the same Value.",
+      "line": 147,
+      "fragment": "if old != nil {"
+    }
+  ]
+}

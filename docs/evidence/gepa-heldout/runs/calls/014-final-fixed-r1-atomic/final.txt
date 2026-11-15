@@ -1,0 +1,58 @@
+{
+  "findings": [
+    {
+      "id": "store-type-and-copy",
+      "text": "On a fresh Value, Load returns nil. Store(1) initializes it and Store(2) replaces the value. Store(\"2\") and Store(nil) each panic before writing, so after recovery Load still returns 2. On another fresh Value, Store((*int)(nil)) succeeds and Load returns an interface with concrete type *int and a nil pointer. The type established by the first successful write persists across Store, Swap, and CompareAndSwap.",
+      "citation": {
+        "line": 80,
+        "fragment": "StorePointer(&vp.data, vlp.data)"
+      },
+      "question": "OPEN: What counts as first use for the copy prohibition on line 15, particularly an initial Load or an unsuccessful CompareAndSwap, given that line 13 names Store?"
+    },
+    {
+      "id": "swap-and-load-contract",
+      "text": "On a fresh Value, Swap(10) returns nil and initializes the Value. Swap(20) then returns 10 and Load returns 20. Swap(nil) and Swap(\"20\") panic before replacing 20. CompareAndSwap(20, 30) then succeeds and Load returns 30, although Store has never been called.",
+      "citation": {
+        "line": 27,
+        "fragment": "It returns nil if there has been no call to Store for this Value."
+      },
+      "question": "OPEN: Should the Load contract describe the most recent successful write through Store, Swap, or CompareAndSwap?"
+    },
+    {
+      "id": "first-write-ordering",
+      "text": "Start with a fresh Value and race Store(7) against CompareAndSwap(7, 8). If CompareAndSwap reads the nil type before Store claims initialization, it returns false and Store can finish with 7. If it reads the in-progress marker after Store claims initialization, it spins until Store publishes the concrete type, then can replace 7 with 8 and return true. Load returns nil if its type read sees nil or the marker, even after the first data write. Once the concrete type is published, Load can see 7 or the subsequent 8. The first writer pins itself while claiming and publishing, and the waiter has no cancellation check.",
+      "citation": {
+        "line": 164,
+        "fragment": "if typ == unsafe.Pointer(&firstStoreInProgress) {"
+      },
+      "question": ""
+    },
+    {
+      "id": "cas-empty-and-nil",
+      "text": "On a fresh Value, CompareAndSwap(1, 2) returns false and leaves it empty. CompareAndSwap(1, \"2\") panics on the operand type mismatch while the Value is still empty, and CompareAndSwap(nil, nil) panics on the new argument. CompareAndSwap(nil, (*int)(nil)) then succeeds and initializes the Value. Repeating that call returns false because the stored interface has concrete type *int. Using (*int)(nil) as both operands then returns true in the absence of competing writes.",
+      "citation": {
+        "line": 141,
+        "fragment": "if op.typ != nil && np.typ != op.typ {"
+      },
+      "question": ""
+    },
+    {
+      "id": "cas-equality-and-panic",
+      "text": "With a comparable struct stored in a Value, CompareAndSwap using a same-type old struct with different fields returns false and leaves the Value intact. Using an independently constructed old struct with equal fields succeeds without a competing write. With a fresh Value, CompareAndSwap(nil, []int{1}) can initialize it, but a later CompareAndSwap with two []int operands panics at interface equality, even when old holds the very slice that was stored. The panic precedes the pointer update, so Load still returns the original slice.",
+      "citation": {
+        "line": 183,
+        "fragment": "if i != old {"
+      },
+      "question": "OPEN: Should the CompareAndSwap contract disclose that matching concrete types can still panic when interface equality encounters an uncomparable value?"
+    },
+    {
+      "id": "cas-intervening-writes",
+      "text": "Start with pointer A stored in a Value, with A, B, and C distinct pointers of the same concrete type. CompareAndSwap(A, C) reads A and passes the equality check. If another goroutine writes B before the final pointer CAS and B remains installed, CompareAndSwap returns false and B remains stored. If the other goroutine writes B and then restores A before the final pointer CAS, CompareAndSwap can return true and install C. If CompareAndSwap installs C first and the other goroutine then calls Swap(B), Swap returns C and B remains stored.",
+      "citation": {
+        "line": 178,
+        "fragment": "has not changed since LoadPointer."
+      },
+      "question": "OPEN: Is the comment meant to say that the data pointer equals the sampled pointer at the instant of the CAS, even if intervening writes changed and restored it?"
+    }
+  ]
+}

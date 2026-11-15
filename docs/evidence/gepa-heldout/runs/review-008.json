@@ -1,0 +1,51 @@
+{
+  "reviewer": "AI operator:source-reviewed",
+  "cases": [
+    {
+      "id": "S01",
+      "finding_ids": [
+        "final-token"
+      ],
+      "reason": "Sentinel behavior and prior-error condition cover S01.",
+      "partial": false
+    },
+    {
+      "id": "S02",
+      "finding_ids": [],
+      "reason": "Post-Scan Buffer/Split panic is not addressed.",
+      "partial": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "line-tokens-and-storage",
+      "verdict": "valid",
+      "reason": "Consistent with Scanner scan loop, split contracts and referenced source; question remains open."
+    },
+    {
+      "id": "read-error-order",
+      "verdict": "valid",
+      "reason": "Consistent with Scanner scan loop, split contracts and referenced source; question remains open."
+    },
+    {
+      "id": "final-token",
+      "verdict": "valid",
+      "reason": "Consistent with Scanner scan loop, split contracts and referenced source; question remains open."
+    },
+    {
+      "id": "full-buffer-order",
+      "verdict": "valid",
+      "reason": "Consistent with Scanner scan loop, split contracts and referenced source; question remains open."
+    },
+    {
+      "id": "split-after-exhaustion",
+      "verdict": "valid",
+      "reason": "Consistent with Scanner scan loop, split contracts and referenced source; question remains open."
+    },
+    {
+      "id": "no-progress-guards",
+      "verdict": "valid",
+      "reason": "Consistent with Scanner scan loop, split contracts and referenced source; question remains open."
+    }
+  ]
+}

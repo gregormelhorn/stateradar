@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "id": "V01",
+      "verdict": "confirmed",
+      "reason": "The error store preserves the first non-nil error, and both close calls return nil. With the reader still open, the subsequent read returns the stored writer error. The test checks both close results and the identity of the read error for two distinct non-nil errors. It discards the read byte count.",
+      "line": 24,
+      "fragment": "if a.err != nil {"
+    },
+    {
+      "id": "V02",
+      "verdict": "confirmed",
+      "reason": "The reader acknowledges two bytes before returning. The writer adds those bytes to its count and, with four bytes left and no further reads, returns the accumulated count and the reader's error when the pipe closes. The test checks that the read returns two bytes containing \"ab\" with nil error, then closes the reader and checks that the write returns two and the exact error passed to CloseWithError.",
+      "line": 92,
+      "fragment": "return n, p.writeCloseError()"
+    },
+    {
+      "id": "V03",
+      "verdict": "confirmed",
+      "reason": "The write loop enters even for an empty slice. On an open pipe, its unbuffered send requires a matching read, which copies and acknowledges zero bytes. Both calls then return zero and nil. The test checks both results with nil slices. Its 50 ms timeout establishes only bounded nonreturn as observed through the result channel. The test does not establish that the writer had started or reached the send before the read.",
+      "line": 85,
+      "fragment": "for once := true; once || len(b) > 0; once = false {"
+    }
+  ]
+}

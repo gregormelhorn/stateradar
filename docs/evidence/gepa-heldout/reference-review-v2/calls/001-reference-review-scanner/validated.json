@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "id": "S01",
+      "verdict": "confirmed",
+      "reason": "The ErrFinalToken branch stores the token, marks scanning done, and returns whether the token is non-nil. Later calls return false, and Err returns nil when the stored error is nil or EOF. TestScannerFinalTokenVariants checks the first Scan result for both token variants, then checks that the second Scan returns false and Err is nil. It does not read the stored token or check Err immediately after the first Scan.",
+      "line": 158,
+      "fragment": "return token != nil"
+    },
+    {
+      "id": "S02",
+      "verdict": "confirmed",
+      "reason": "The first Scan sets scanCalled before reading input. An empty-input return leaves that flag set, and both configuration methods panic when it is set. TestScannerLateConfiguration uses a fresh empty scanner for each method, requires its first Scan to return false, and checks that each configuration call panics. It does not check the panic values.",
+      "line": 143,
+      "fragment": "s.scanCalled = true"
+    }
+  ]
+}
