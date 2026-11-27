@@ -146,10 +146,6 @@ uv run --with-requirements tools/prompt-pack/tools/requirements-dev.txt \
   python3 tools/prompt-pack/tools/dsc_check.py domain-analysis/<component> --repo .
 ```
 
-If you copy `tools/templates/check_matrix.py` into a component, set
-`STATERADAR_PACK=$PWD/tools/prompt-pack` (run from the repository root); the
-wrapper does not search that path.
-
 ### Cost-aware model workflow
 
 The optional [local model workflow](docs/local-model-routing.md) uses DeepSeek
@@ -729,20 +725,6 @@ Per-tool detail is in [tools/README.md](tools/README.md#side-effects).
     `tests/<case>/domain-analysis/mini/analysis.json`.
   - Some pilot and routing runners write tracked files under
     `docs/evidence/`.
-
-## Known gaps
-
-These tool defects are documented rather than fixed:
-
-- ODC-table drift does not fail `check_pack_consistency.py`.
-- `dsc_stamp.py` cannot re-pin a stale manifest.
-- The `run_tool_tests.py` docstring advertises a `--case` flag that does not
-  exist.
-- The template wrapper does not search `tools/prompt-pack`.
-- `guard_proofs.py` reports a z3 `unknown` result as `proven`.
-- `run_selftest.py` leaves files under `$TMPDIR` after every run.
-
-Details and workarounds: [tools/README.md](tools/README.md#known-gaps).
 
 ## System Verification
 

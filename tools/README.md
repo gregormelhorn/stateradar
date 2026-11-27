@@ -116,12 +116,14 @@ largest checkers get their own sub-headings; the rest share
 - Usage:
 
   ```text
-  python3 tools/dsc_check.py <analysis-dir> [--repo ROOT] [--model FILE.mmd] [--allow-no-schema]
+  python3 tools/dsc_check.py <analysis-dir> [--repo ROOT] [--model FILE.mmd] [--allow-no-schema] [--no-staleness]
   ```
 
   - `--model` is resolved relative to `<analysis-dir>`; the Mermaid sync
     runs only when that file exists.
   - `--repo` turns on the fragment-citation and staleness checks.
+  - `--no-staleness` skips only the staleness diff; `dsc_stamp.py` uses it
+    to validate an analysis at HEAD before re-pinning.
 - Symbols: `main`, `VOCAB` (disposition vocabulary), `HOLES`,
   `GUARD_OUTCOMES`, `NF_REASONS`, `CATEGORIES` (undesired-variant
   categories, read from `formats/rules.toml`), `Q_STATUS`.
@@ -199,7 +201,8 @@ under [check_matrix.py](#check_matrixpy), are rule ids from
   - the keys `component`, `watchPaths` and `analyzedSha` are present;
   - a snake_case `watch_paths` key fails, and so does an empty
     `watchPaths`, because the staleness diff would run unfiltered;
-  - staleness, only with `--repo`: a git diff of `watchPaths` since
+  - staleness, only with `--repo` and without `--no-staleness`: a git diff
+    of `watchPaths` since
     `analyzedSha` must be empty. The diff is skipped while `analyzedSha` is
     [`WORKTREE`](../README.md#glossary), the placeholder for a manifest
     that is not yet pinned.
@@ -301,11 +304,10 @@ the event catalogue (`event-catalogue.md`).
         existing directory;
     - the [ODC](../README.md#glossary) trigger list in
       `prompts/02-pilot.md` equals `odc_triggers` in `formats/rules.toml`.
-  - Not gating (they run after the only exit gate):
-    - `gen_odc_table.py --check` prints its output, but a drift is
-      recorded too late to fail the script (see [Known gaps](#known-gaps));
-    - `git describe --tags --abbrev=0` is compared with the README
-      version, and a mismatch prints only a warning.
+    - `gen_odc_table.py --check`: the ODC table in
+      `tests/benchmarks/README.md` matches the benchmark sidecars.
+  - Not gating: `git describe --tags --abbrev=0` is compared with the README
+    version, and a mismatch prints only a warning.
 
 ### Generators and maintenance
 
@@ -381,8 +383,12 @@ the event catalogue (`event-catalogue.md`).
   - `CITE_RE` matches only `*.py`; Go and other citations are not remapped.
   - It tries a content anchor first and then a Python `def` offset. It lists
     unresolved citations and never drops them.
-- `dsc_stamp.py` — runs `dsc_check.py --repo` and, only if the check
-  passes, pins `analyzedSha` to HEAD and writes `date`.
+- `dsc_stamp.py` — runs `dsc_check.py --repo --no-staleness` and, only if
+  the check passes, pins `analyzedSha` to HEAD and writes `date`.
+  - The staleness diff is skipped because re-pinning after a
+    [reconcile](../README.md#glossary) is exactly the case where watched
+    paths changed since the old `analyzedSha`; every other check, including
+    the fragment citations at HEAD, must pass.
   - Usage:
 
     ```text
@@ -677,7 +683,8 @@ it.
 - Every guard group outcome from `guard_proofs.check_group` is `proven` or
   `violation`. Guards that cannot be formalized never reach the module;
   they are marked `not-formalizable: <category>` instead. A z3 `unknown`
-  result is also reported as `proven`; see [Known gaps](#known-gaps).
+  result is a `violation` with a "PA-1 unknown" or "PA-2 unknown" finding,
+  never `proven`.
 - `local_budget.Budget` rejects any reservation that would push the ledger
   total over its limit (`BudgetExceeded`).
   - A new ledger takes the requested limit, or 2,000,000 microdollars ($2)
@@ -837,32 +844,6 @@ to `tools/`.
     git, Go and pack-checker subprocesses, and writes evidence files;
   - `addrconn_late.py` — clones grpc-go unless `--checkout` is given,
     runs git, Go and pack-checker subprocesses, and writes evidence files.
-
-## Known gaps
-
-- ODC drift is not gated. `check_pack_consistency.py` appends the
-  `gen_odc_table.py --check` failure to its error list after its only exit
-  gate, so ODC table drift prints output but still ends in
-  "PACK CONSISTENCY: OK" with exit 0.
-- `dsc_stamp.py` cannot re-pin a stale manifest. It always runs
-  `dsc_check.py --repo`, whose staleness diff fails when watched paths
-  changed after `analyzedSha`, so it refuses to stamp. To re-pin after a
-  reconcile, run `python3 tools/dsc_check.py <analysis-dir>` without
-  `--repo` until it passes, then edit `analyzedSha` by hand.
-- `tools/selftest/run_selftest.py` leaves `reach-red/`, `reach-pair/` and
-  `ensemble-shuffled.json` under `$TMPDIR` after every run, because those
-  sections write into its temporary directory after it was removed; see
-  [selftest Side Effects](./selftest/README.md#side-effects).
-- The `run_tool_tests.py` module docstring advertises `--case NAME`, but
-  `main()` takes bare case names. `--case NAME` runs two cases, one named
-  `--case`, which fails, so the run exits 1.
-- The consumer wrapper `templates/check_matrix.py` does not search
-  `tools/prompt-pack`; see
-  [templates Known gaps](./templates/README.md#known-gaps).
-- `guard_proofs.check_group` treats only `z3.sat` as a finding. A solver
-  result of `unknown` (z3 could not decide, for example on nonlinear
-  arithmetic) adds no finding, so the group is reported `proven` although
-  nothing was proven.
 
 ## Verification
 

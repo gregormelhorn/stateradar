@@ -37,11 +37,13 @@ Prerequisites are listed under [Verification: Prerequisites](#prerequisites).
       (for example a snake_case `watch_paths` key) and the registry-backed
       `dsc_check.py` rules;
     - `check_matrix.py` and the consumer wrapper in
-      [templates](../templates/README.md);
+      [templates](../templates/README.md), including a pack vendored at
+      `tools/prompt-pack`;
     - `check_matrix_mutation.py`, `check_fault_mutants.py` and
       `gen_mutant_variants.py`;
     - `part_b_pack.py --check` row coverage of a blind table;
-    - `guard_proofs.py` (z3 disjointness, coverage and boundary probes);
+    - `guard_proofs.py` (z3 disjointness, coverage and boundary probes;
+      a z3 `unknown` result must not come back `proven`);
     - `check_reachability.py`;
     - `ensemble_convergence.py`;
     - `benchmark_evidence.classify` (the benchmark dating protocol);
@@ -49,7 +51,10 @@ Prerequisites are listed under [Verification: Prerequisites](#prerequisites).
       mutation keeps a cell's citation in every form the sidecar generator
       reads (backticked file names, escaped and typographic quotes, a
       provenance parenthesis);
-    - the timeout path of the two mutation runners.
+    - the timeout path of the two mutation runners;
+    - `dsc_stamp.py` re-pins a stale manifest at HEAD while `dsc_check.py
+      --repo` still reports it stale, and `check_pack_consistency.py`
+      fails on ODC-table drift.
 - `test_*.py` — the `unittest` files.
   - Most are named after the tool they test, for example
     `test_local_budget.py` for `local_budget.py`.
@@ -111,12 +116,11 @@ directory: they copy it into a temporary directory and mutate the copy.
 
 ## Side Effects
 
-- Temporary files: `run_selftest.py` works in a
-  `tempfile.TemporaryDirectory`. The directory is removed when its `with`
-  block ends, but the later reachability and ensemble sections write
-  `<tmp>/reach-red`, `<tmp>/reach-pair` and `<tmp>/ensemble-shuffled.json`
-  under the same path after that. They recreate it, and these files are left
-  behind under `$TMPDIR` after every run (a known gap). For the wrapper
+- Temporary files: `run_selftest.py` works in temporary directories that
+  are removed before it returns, so a run leaves nothing under `$TMPDIR`.
+  The stamp section creates a throwaway git repository there, and the pack
+  consistency section copies the repository (without `.git`, `.venv` and
+  `docs/evidence/`) there. For the wrapper
   template cases it creates symlinks there that point at the repository
   root. Many `test_*.py` files also use temporary directories.
 - Tracked file rewrite: on every run, `run_selftest.py` runs

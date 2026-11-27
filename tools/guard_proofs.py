@@ -35,7 +35,7 @@ from dataclasses import dataclass, field
 @dataclass
 class GroupResult:
     name: str
-    outcome: str                      # "proven" | "violation"
+    outcome: str                      # "proven" | "violation" (incl. z3 unknown)
     findings: list[str] = field(default_factory=list)
 
 
@@ -78,21 +78,31 @@ def check_group(name: str, guards, assumptions=(), has_else: bool = False) -> Gr
             s = z3.Solver()
             s.add(*assumptions)
             s.add(ga, gb)
-            if s.check() == z3.sat:
+            verdict = s.check()
+            if verdict == z3.sat:
                 findings.append(
                     f"PA-1 overlap: {la!r} and {lb!r} both fire "
                     f"(witness: {_witness(s.model(), None)}) — order decides")
+            elif verdict != z3.unsat:
+                findings.append(
+                    f"PA-1 unknown: z3 could not decide whether {la!r} and "
+                    f"{lb!r} overlap ({s.reason_unknown()}) — not proven")
 
     # PA-2: the disjunction covers the domain, or an explicit else exists
     if not has_else:
         s = z3.Solver()
         s.add(*assumptions)
         s.add(z3.Not(z3.Or(*[g for _, g in guards])))
-        if s.check() == z3.sat:
+        verdict = s.check()
+        if verdict == z3.sat:
             findings.append(
                 f"PA-2 gap: no guard fires "
                 f"(witness: {_witness(s.model(), None)}) — hole, or add an "
                 f"explicit else and pass has_else=True with a citation")
+        elif verdict != z3.unsat:
+            findings.append(
+                f"PA-2 unknown: z3 could not decide coverage "
+                f"({s.reason_unknown()}) — not proven")
 
     return GroupResult(name=name,
                        outcome="violation" if findings else "proven",

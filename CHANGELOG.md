@@ -4,6 +4,26 @@
 
 ## Unreleased — type checking and the fragment rule in the schema
 
+- **EGM contract READMEs and six tool fixes.** Contract READMEs for `tools/`,
+  `tools/selftest/`, `tools/templates/` and the examples tree, with an index
+  and glossary at the end of the root README. Fixes, each with a red probe in
+  `tools/selftest/run_selftest.py`:
+  - `check_pack_consistency.py` gated the ODC table check after its only exit,
+    so ODC drift passed; it now fails the run.
+  - `dsc_stamp.py` refused to re-pin any manifest whose watched paths had
+    changed, which is every reconcile. It now validates with the new
+    `dsc_check.py --no-staleness` (staleness diff only; all other checks
+    stay), while `dsc_check.py --repo` still reports staleness.
+  - `guard_proofs.check_group` reported a z3 `unknown` as `proven`; it is now
+    a violation with an explicit "unknown" finding.
+  - `templates/check_matrix.py` did not find a pack vendored at
+    `tools/prompt-pack` (the README's own submodule recipe); it now looks
+    there before sibling checkouts.
+  - `run_selftest.py` left `reach-*` and `ensemble-shuffled.json` under
+    `$TMPDIR` after every run; its late sections now use their own temporary
+    directory.
+  - The `run_tool_tests.py` docstring advertised a nonexistent `--case` flag.
+
 - **Blind independence pointers and flash-writes archive.** Always report the
   number of explicit `as-is:` marks, and separately flag keyed rows mentioning
   `as-is` in prose for inspection. The flags neither classify leaks nor establish

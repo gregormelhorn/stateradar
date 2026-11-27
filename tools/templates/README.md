@@ -10,9 +10,6 @@ checkers in the StateRadar pack. The files only delegate: each one locates
 the pack checkout and runs a pack tool as a subprocess. No checking logic
 lives here.
 
-The wrapper misses the recommended submodule layout; see
-[Known gaps](#known-gaps).
-
 ## Interface
 
 - `check_matrix.py` — a per-component wrapper script.
@@ -22,13 +19,17 @@ The wrapper misses the recommended submodule layout; see
     exit code through.
   - `ADIR` — the directory that holds the wrapper (the component analysis
     directory).
+  - `_REPO` — `ADIR.parents[1]`, the analyzed repository.
   - `_SIBLINGS` — `ADIR.parents[2]`, the parent of the analyzed repository.
     This assumes the wrapper sits at `<repo>/domain-analysis/<component>/`.
   - `_CANDIDATES` — where the wrapper looks for the pack:
     - if `STATERADAR_PACK` is set to a non-empty value, it looks only
       there; a set-but-empty `STATERADAR_PACK` counts as unset;
-    - otherwise it looks for the sibling checkouts `_SIBLINGS/stateradar`
-      and `_SIBLINGS/pack`, in that order.
+    - otherwise it looks for the vendored submodule
+      `<repo>/tools/prompt-pack` (the layout the root README recommends in
+      [What you actually run](../../README.md#what-you-actually-run)), then
+      for the sibling checkouts `_SIBLINGS/stateradar` and
+      `_SIBLINGS/pack`, in that order.
   - `PACK` — the first candidate's `tools/check_matrix.py` that exists,
     else the first candidate's path, which then fails the existence check.
 - `test_dsc_check.py` — a pytest template.
@@ -88,17 +89,6 @@ The wrapper misses the recommended submodule layout; see
     that checker runs `git diff` for the staleness check; see
     [tools Side Effects](../README.md#side-effects);
   - writes no files.
-
-## Known gaps
-
-- `check_matrix.py` never looks in `tools/prompt-pack`, the submodule path
-  that the root README recommends in
-  [What you actually run](../../README.md#what-you-actually-run).
-- `test_dsc_check.py` defaults to exactly that path, so the two templates
-  disagree about where the pack lives.
-- Workaround for the submodule layout: run the wrapper with
-  `STATERADAR_PACK=$PWD/tools/prompt-pack` set (run from the consumer repo
-  root), or edit `_CANDIDATES` in the copied file.
 
 ## Verification
 

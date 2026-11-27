@@ -3,8 +3,12 @@
 
 The reconcile manifest bump kept needing a second commit after every
 code change to a watched path (dobby session, 2026-08-05: six times).
-This tool runs the pack checker first — a stale bump is forbidden —
-and only then pins analyzedSha to HEAD with today's date.
+This tool runs the pack checker first — an analysis that fails its
+checks at HEAD is never stamped — and only then pins analyzedSha to HEAD
+with today's date. The staleness diff is skipped (--no-staleness): a
+re-pin after a reconcile is exactly the case where watched paths changed
+since the old analyzedSha, and the citation checks at HEAD are what
+validate it.
 
 Usage:
   python3 tools/dsc_stamp.py <analysis-dir> [--repo .] [--date YYYY-MM-DD]
@@ -34,7 +38,7 @@ def main() -> int:
     adir = repo / args.analysis_dir
     checker = Path(__file__).resolve().parent / "dsc_check.py"
 
-    cmd = [sys.executable, str(checker), str(adir), "--repo", str(repo)]
+    cmd = [sys.executable, str(checker), str(adir), "--repo", str(repo), "--no-staleness"]
     if (adir / args.model).is_file():
         cmd += ["--model", args.model]
     result = subprocess.run(cmd, capture_output=True, text=True)

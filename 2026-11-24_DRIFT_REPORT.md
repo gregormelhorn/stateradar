@@ -82,31 +82,29 @@ These were found during review:
 - the reuse count of addrConn invariant rows;
 - the `tests/run.py` exit codes.
 
-## Code defects documented, not fixed
+## Code defects (fixed in a follow-up commit)
 
-These are listed under Known gaps in [README.md](README.md#known-gaps) and
-[tools/README.md](tools/README.md#known-gaps):
+The six defects that round 5 listed as known gaps are fixed. Each has a red
+probe in `tools/selftest/run_selftest.py` that failed for the intended reason
+before its fix and passes after it:
 
-- `tools/check_pack_consistency.py` records `gen_odc_table.py --check` drift
-  after its exit gate, so ODC drift does not fail it.
-- `tools/dsc_stamp.py` cannot re-pin a stale manifest. Its own check includes
-  the staleness diff.
-- The `tools/run_tool_tests.py` docstring advertises `--case NAME`, but the
-  script takes bare case names.
-- `tools/templates/check_matrix.py` does not search `tools/prompt-pack`, the
-  path the root README recommends. The workaround is to set
-  `STATERADAR_PACK`.
-- `tools/guard_proofs.py` reports a z3 `unknown` result as `proven`.
-- `tools/selftest/run_selftest.py` writes into its temporary directory after
-  removing it, which leaves files under `$TMPDIR` after every run.
+- `tools/check_pack_consistency.py` now gates on ODC table drift.
+- `tools/dsc_stamp.py` re-pins a stale manifest. It validates with the new
+  `dsc_check.py --no-staleness`; `dsc_check.py --repo` still reports
+  staleness.
+- `tools/guard_proofs.py` reports a z3 `unknown` result as a violation,
+  never as `proven`.
+- `tools/templates/check_matrix.py` finds a pack vendored at
+  `tools/prompt-pack`.
+- `tools/selftest/run_selftest.py` leaves nothing under `$TMPDIR`.
+- The `tools/run_tool_tests.py` docstring shows the real CLI.
 
-Also documented:
+The READMEs no longer have "Known gaps" sections. Still documented as side
+effects:
 
-- Four tool modules execute work at import time: `check_pack_consistency`,
-  `fresh_pair_smoke`, `routing_label_review` and
-  `gepa_prospective_reference`.
-- Two first-run gates rewrite tracked files. They are byte-identical when
-  green.
+- Four tool modules execute work at import time.
+- Two first-run gates rewrite tracked files; the files are byte-identical
+  when the run is green.
 
 ## Open review findings (round 5, not addressed)
 

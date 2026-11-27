@@ -14,7 +14,7 @@ expected results:
 - `refresh_citations`: citations remap per `expected/refresh.txt`
   (`old -> new` line pairs)
 
-Usage: python3 tools/run_tool_tests.py [--case NAME]
+Usage: python3 tools/run_tool_tests.py [NAME ...]   (bare case names)
 """
 
 from __future__ import annotations
