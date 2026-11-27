@@ -106,28 +106,32 @@ effects:
 - Two first-run gates rewrite tracked files; the files are byte-identical
   when the run is green.
 
-## Open review findings (round 5, not addressed)
+## Round-5 review findings (addressed in a follow-up commit)
 
-These remain at Nit or Major-clarity level. None of them is a factual error.
+The open round-5 findings were addressed in the READMEs. No review round
+has scored these changes.
 
-- Glossary gaps: guard group (G-nn), hole cell, DOC-n, T-nn trace, red-mini
-  and MCP. "Discovery" is also used for both test discovery and bug
-  discovery.
-- Dense passages: the grpc-addrconn Interface and Side Effects sections, and
-  the weighted-semaphore cells overview.
-- One-owner duplication:
-  - the manifest list in grpc-addrconn;
-  - the watched-folder list, stated in two places in the root;
-  - the `STATERADAR_PACK` workaround, stated in four places.
-- Format nits:
-  - subdirectory items in a few files;
-  - a stale `two-manifests` anchor;
-  - `catalog` used in root prose;
-  - CLI-option styling that differs between files.
-- Missing details:
-  - a run command for the gobreaker readiness fixture;
-  - a cgo or C-toolchain note for `-race`;
-  - where the `/tmp/stateradar-lru-benchmark` clone comes from.
+- Glossary: added guard group (G-nn), hole cell, DOC-n, T-nn trace,
+  red-mini and MCP. Renamed "discovery" to "test discovery".
+- Dense passages: the grpc-addrconn Interface and Side Effects sections now
+  open with summaries, and the weighted-semaphore cells overview is split.
+- Duplication: the grpc-addrconn manifest facts are owned by its Interface,
+  and the repeated `verify.py` prerequisites and contract-limit cell facts
+  now link to their owner. The `STATERADAR_PACK` workaround is gone along
+  with the defect it worked around.
+- Format:
+  - subdirectory items use `name: [link] - summary` or
+    `name: (no contract) - summary`;
+  - stale explicit anchors are removed;
+  - "catalogue" is used in prose;
+  - CLI options are nested "Options:" lists.
+- Missing details now covered:
+  - the gobreaker readiness run command and its CI step;
+  - a cgo note for `-race`;
+  - the source of the `/tmp/stateradar-lru-benchmark` clone
+    (`github.com/hashicorp/golang-lru`);
+  - `check_reachability` exit 2;
+  - the `gen_rules` C1 path condition.
 
 ## Verification run
 

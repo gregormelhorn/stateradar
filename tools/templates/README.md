@@ -17,57 +17,63 @@ lives here.
   - Run it as `python3 domain-analysis/<component>/check_matrix.py`.
   - It runs `<pack>/tools/check_matrix.py <component-dir>` and passes the
     exit code through.
-  - `ADIR` — the directory that holds the wrapper (the component analysis
-    directory).
-  - `_REPO` — `ADIR.parents[1]`, the analyzed repository.
-  - `_SIBLINGS` — `ADIR.parents[2]`, the parent of the analyzed repository.
-    This assumes the wrapper sits at `<repo>/domain-analysis/<component>/`.
-  - `_CANDIDATES` — where the wrapper looks for the pack:
-    - if `STATERADAR_PACK` is set to a non-empty value, it looks only
-      there; a set-but-empty `STATERADAR_PACK` counts as unset;
-    - otherwise it looks for the vendored submodule
-      `<repo>/tools/prompt-pack` (the layout the root README recommends in
+  - Symbols:
+    - `ADIR` — the directory that holds the wrapper (the component analysis
+      directory).
+    - `_REPO` — `ADIR.parents[1]`, the analyzed repository.
+    - `_SIBLINGS` — `ADIR.parents[2]`, the parent of the analyzed
+      repository. This assumes the wrapper sits at
+      `<repo>/domain-analysis/<component>/`.
+    - `_CANDIDATES` — where the wrapper looks for the pack. If
+      `STATERADAR_PACK` is set to a non-empty value, it looks only there (a
+      set-but-empty `STATERADAR_PACK` counts as unset). Otherwise it looks
+      for the vendored submodule `<repo>/tools/prompt-pack` (the layout the
+      root README recommends in
       [What you actually run](../../README.md#what-you-actually-run)), then
       for the sibling checkouts `_SIBLINGS/stateradar` and
       `_SIBLINGS/pack`, in that order.
-  - `PACK` — the first candidate's `tools/check_matrix.py` that exists,
-    else the first candidate's path, which then fails the existence check.
+    - `PACK` — the first candidate's `tools/check_matrix.py` that exists,
+      else the first candidate's path, which then fails the existence
+      check.
 - `test_dsc_check.py` — a pytest template.
   - Copy it to `<repo>/tests/domain/test_dsc_check.py`.
   - Run it as `pytest tests/domain/test_dsc_check.py`. It requires
     `pytest`, which is not in `tools/requirements-dev.txt`.
-  - `ROOT` — three levels above the test file, that is the consuming
-    repository root.
-  - `PACK_CHECKER` — defaults to `ROOT/tools/prompt-pack/tools/dsc_check.py`
-    (the submodule layout). Adjust it for a vendored copy or a sibling
-    checkout.
-  - `COMPONENTS` — the sorted names of the directories under
-    `ROOT/domain-analysis/` that contain an `analysis.json`. Each one
-    becomes one parametrized test case. It is computed at import time, so
-    a missing `ROOT/domain-analysis/` raises `FileNotFoundError` during
-    pytest collection.
   - Each case runs `dsc_check.py` on `<ROOT>/domain-analysis/<component>`
     with `--repo ROOT` and working directory `ROOT`, and asserts exit
     code 0.
   - It adds `--model as-is.machine.mmd` when that file exists in the
     component directory and the component is not listed in
     `NO_MODEL_SYNC`.
-  - `NO_MODEL_SYNC` — a set of component names, empty by default, that
-    skip the Mermaid↔matrix sync check. Add a component to it when its
-    diagram uses flat leaf names while its matrix rows are compound.
-    - A compound row label is a lane family plus a leaf: the bold part
-      names the family and the plain word after it names the leaf. For
-      example, the row `| **Open** Idle |` declares the state `Open Idle`
-      (family `Open`, leaf `Idle`).
-    - `dsc_check.py` resolves a bare `Idle` drawn inside a
-      `state Open { ... }` container to `Open Idle`, so such a diagram
-      needs no entry. `NO_MODEL_SYNC` is for diagrams that draw the flat
-      leaf `Idle` without the enclosing container.
+  - Symbols:
+    - `ROOT` — three levels above the test file, that is the consuming
+      repository root.
+    - `PACK_CHECKER` — defaults to
+      `ROOT/tools/prompt-pack/tools/dsc_check.py` (the submodule layout).
+      Adjust it for a vendored copy or a sibling checkout.
+    - `COMPONENTS` — the sorted names of the directories under
+      `ROOT/domain-analysis/` that contain an `analysis.json`. Each one
+      becomes one parametrized test case. It is computed at import time,
+      so a missing `ROOT/domain-analysis/` raises `FileNotFoundError`
+      during pytest collection.
+    - `NO_MODEL_SYNC` — a set of component names, empty by default, that
+      skip the Mermaid↔matrix sync check. Add a component to it when its
+      diagram uses flat leaf names while its matrix rows are compound (see
+      below).
+
+A compound row label is a lane family plus a leaf: the bold part names the
+family and the plain word after it names the leaf. For example, the row
+`| **Open** Idle |` declares the state `Open Idle` (family `Open`, leaf
+`Idle`). `dsc_check.py` resolves a bare `Idle` drawn inside a
+`state Open { ... }` container to `Open Idle`, so such a diagram needs no
+`NO_MODEL_SYNC` entry. `NO_MODEL_SYNC` is for diagrams that draw the flat
+leaf `Idle` without the enclosing container.
 
 ## Invariants
 
-- `STATERADAR_PACK` is exclusive. When it is set to a non-empty value, the
-  sibling directories are never searched (`_CANDIDATES`).
+- `STATERADAR_PACK` is exclusive. When it is set to a non-empty value,
+  neither `<repo>/tools/prompt-pack` nor the sibling directories are
+  searched (`_CANDIDATES`).
 - The wrapper contains no matrix-checking logic. It forwards the exit
   status of the pack's `tools/check_matrix.py` unchanged.
 - If the pack checker is missing, the wrapper exits with code 2 and prints
@@ -92,8 +98,8 @@ lives here.
 
 ## Verification
 
-Commands below run from the StateRadar pack root (not the consuming
-repository) and assume the dev requirements are installed (see
+Commands run from the StateRadar pack root (not the consuming repository)
+and assume the dev requirements are installed (see
 [System Verification](../../README.md#system-verification)).
 
 The selftest copies `check_matrix.py` into a temporary
@@ -108,7 +114,9 @@ The selftest copies `check_matrix.py` into a temporary
 - "wrapper template, wrong STATERADAR_PACK beside a sibling": a wrong
   explicit path fails even though a sibling exists;
 - "wrapper template, STATERADAR_PACK": an explicit path is found and the
-  check passes.
+  check passes;
+- "wrapper template, pack vendored at tools/prompt-pack": a pack vendored
+  inside the analyzed repository is found and the check passes.
 
 No pack test exercises `test_dsc_check.py`, and
 `python3 tools/run_tool_tests.py` exercises neither template.

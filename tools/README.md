@@ -47,7 +47,8 @@ The selftests that need `gepa` are named in
 ## Interface
 
 For one component analysis in `<repo>/domain-analysis/<component>/`, run
-the core sequence in this order:
+the core sequence in this order. Run from the pack root; from a consumer
+repository, prefix `tools/prompt-pack/`.
 
 1. Check the matrix and the event catalogue
    ([check_matrix.py](#check_matrixpy)):
@@ -76,18 +77,18 @@ and in the root [System Verification](../README.md#system-verification).
 The tools are grouped into the sections below. The table doubles as the
 section index and shows which sections cost money or account quota:
 
-| Section | Needs API keys ($) | Needs Codex quota | Offline replay available |
-| --- | --- | --- | --- |
-| [Core checkers](#core-checkers) | No | No | Not needed (runs offline) |
-| [Generators and maintenance](#generators-and-maintenance) | No | No | Not needed (runs offline) |
-| [Blind pass (Part B), ensembles and cross-checks](#blind-pass-part-b-ensembles-and-cross-checks) | No | No | Not needed (runs offline) |
-| [Mutation and fault testing](#mutation-and-fault-testing) | No | No | Not needed (runs offline; needs Go) |
-| [Late-completion oracle and pinned references](#late-completion-oracle-and-pinned-references) | No | No | Not needed (needs Go; network unless `--checkout`) |
-| [Local model routing (Flash / Jev)](#local-model-routing-flash--jev) | Yes | No | No; the selftests patch the HTTP call |
-| [Pilot runners and accounting](#pilot-runners-and-accounting) | Yes: [routed arms](#pilot-runners-and-accounting), `run_flash_pilot.py`, `run_fresh_routing_pair.py` | Yes | Partly: `fresh_pair_smoke_check.py` |
-| [Benchmarks and regression runners](#benchmarks-and-regression-runners) | No | No | Not needed (`run_benchmark.py` clones repositories) |
-| [Routing evaluation (source-fragment labels)](#routing-evaluation-source-fragment-labels) | Yes, runners | Yes, runners | Yes: `verify_routing_*.py` |
-| [GEPA evaluation](#gepa-evaluation) | Yes, runners | Yes, runners | Yes: `verify_gepa_*.py` |
+| Section | Needs API keys ($) | Needs Codex quota | Needs Go / network | Offline replay |
+| --- | --- | --- | --- | --- |
+| [Core checkers](#core-checkers) | No | No | No | Not needed |
+| [Generators and maintenance](#generators-and-maintenance) | No | No | No | Not needed |
+| [Blind pass (Part B), ensembles and cross-checks](#blind-pass-part-b-ensembles-and-cross-checks) | No | No | No | Not needed |
+| [Mutation and fault testing](#mutation-and-fault-testing) | No | No | Go | Not needed |
+| [Late-completion oracle and pinned references](#late-completion-oracle-and-pinned-references) | No | No | Go; network unless `--checkout` | Not needed |
+| [Local model routing (Flash / Jev)](#local-model-routing-flash--jev) | Yes | No | Network (provider APIs) | No; the selftests patch the HTTP call |
+| [Pilot runners and accounting](#pilot-runners-and-accounting) | Yes: routed arms, `run_flash_pilot.py`, `run_fresh_routing_pair.py` | Yes | Go and network (`go mod download`) | Partly: `fresh_pair_smoke_check.py` |
+| [Benchmarks and regression runners](#benchmarks-and-regression-runners) | No | No | Network (`run_benchmark.py` clones repositories) | Not needed |
+| [Routing evaluation (source-fragment labels)](#routing-evaluation-source-fragment-labels) | Yes, runners | Yes, runners | Network, runners | Yes: `verify_routing_*.py` |
+| [GEPA evaluation](#gepa-evaluation) | Yes, runners | Yes, runners | Network, runners | Yes: `verify_gepa_*.py` |
 
 API calls go to DeepSeek and Typesafe with `DEEPSEEK_API_KEY` and
 `TYPESAFE_API_KEY`, metered in a ledger whose default cap is stated under
@@ -140,9 +141,8 @@ largest checkers get their own sub-headings; the rest share
 The complete rule list is `main()` in `tools/dsc_check.py`; the module
 docstring summarizes it. The registry rules in `formats/rules.toml` whose
 `checker_ref` names `tools/dsc_check.py` cover most, but not all, of these
-checks. The failure categories (ids such as PA-22 and R-GATE-TYPE, here and
-under [check_matrix.py](#check_matrixpy), are rule ids from
-`formats/rules.toml`):
+checks. Rule ids such as PA-22 and R-GATE-TYPE come from
+`formats/rules.toml`. The failure categories:
 
 - Schema: the sidecar is validated against `formats/analysis.schema.json`,
   and `cell_rationale.rationale_errors` validates rationale bindings.
@@ -151,7 +151,8 @@ under [check_matrix.py](#check_matrixpy), are rule ids from
   - every disposition is in `VOCAB`, and a `transition` target is a
     declared state.
 - Questions:
-  - every hole cell (`UNSPECIFIED` or `ignore (accidental)`), and every
+  - every [hole cell](../README.md#glossary) (`UNSPECIFIED` or
+    `ignore (accidental)`), and every
     other cell that names a [Q-nn](../README.md#glossary), must name a
     question in the sidecar `questions` register. For a non-hole cell the
     error text says "open-questions.md does not declare", but the lookup is
@@ -176,7 +177,8 @@ under [check_matrix.py](#check_matrixpy), are rule ids from
   example `count: 0` with a `reason`).
 - Pairs and guards:
   - every interaction pair has a `trace`;
-  - every guard group's outcome is in `GUARD_OUTCOMES`, and a
+  - every [guard group](../README.md#glossary)'s outcome is in
+    `GUARD_OUTCOMES`, and a
     `not-formalizable` reason starts with one of `NF_REASONS`
     (`external-call`, `dynamic-state`, `clock`, `unstructured-payload`).
 - Undesired-variant coverage:
@@ -187,8 +189,9 @@ under [check_matrix.py](#check_matrixpy), are rule ids from
   - every `UV-…` id named in a coverage entry is a known event.
 - Event annotations: every base event carries a `gate` (R-GATE-TYPE) and
   `upstream_guards` (R-UPSTREAM-GUARD); undesired variants inherit both.
-- Doctrine lines (`DOC-n`, the normative sentences extracted from the
-  requirements; see [AGENTS.md §2](../AGENTS.md#2-the-objects)), rule PA-22:
+- Doctrine lines ([`DOC-n`](../README.md#glossary), the normative sentences
+  extracted from the requirements; see
+  [AGENTS.md §2](../AGENTS.md#2-the-objects)), rule PA-22:
   when `invariants-and-lints.md` has a
   `<!-- doc-ids: ... -->` comment, each declared `DOC-n` maps in the
   sidecar `docLines` to a grid cell, a `SYS`/`NAT` id, a `G-nn` guard
@@ -275,7 +278,8 @@ the event catalogue (`event-catalogue.md`).
     `check_matrix.py` also splits on whitespace.
   - Symbols: `main`, `load_graph`, `reachable_from`, `pair_reachability`,
     `pair_edges`.
-  - Exit codes: 0 means OK, 1 means violations ("REACHABILITY CHECK: FAIL").
+  - Exit codes: 0 means OK, 1 means violations or an unreadable analysis
+    ("REACHABILITY CHECK: FAIL"), and 2 means a usage error (argparse).
 - `cell_rationale.py` — validates explicit rationale bindings against their
   sources.
   - Symbols: `rationale_errors`, `read_bindings`, `KINDS`.
@@ -335,8 +339,8 @@ the event catalogue (`event-catalogue.md`).
     `prompts/02-pilot.md`.
   - It also enforces the registry constraints C1..C5 named in the module
     docstring:
-    - C1: a checker rule has a `checker_ref` and a `selftest_ref`, and a
-      `selftest_ref` path exists;
+    - C1: a checker rule has a `checker_ref` and a `selftest_ref`; when the
+      first token of a `selftest_ref` contains `/`, that path must exist;
     - C2: a lint rule is rendered into the Step-5 block or anchored by
       `lint_ref`;
     - C3: a fault-model rule has at least one `detects` entry;
@@ -548,9 +552,14 @@ Jev.
       the cost recomputed from `model-preflight/usage-checkpoint.json`, its
       recorded server hash equals `fresh_pair_server.py`, and every file
       hash in `reference/freeze.json` matches;
-    - a local `golang-lru` clone exists at the hard-coded path
+    - a local clone of `github.com/hashicorp/golang-lru` that contains
+      `SOURCE_SHA` exists at the hard-coded path
       `/tmp/stateradar-lru-benchmark`; `prepare` fetches `SOURCE_SHA` from
-      it for each arm.
+      it for each arm. The script does not create it; clone it first:
+
+      ```text
+      git clone https://github.com/hashicorp/golang-lru /tmp/stateradar-lru-benchmark
+      ```
   - `CAP` is a soft cap of 5.0 USD-equivalent for the whole run: earlier
     restart-smoke costs plus both arms. The run stops as `BLOCKED` when the
     known total reaches it. Each arm also gets its own ledger at the
@@ -558,7 +567,8 @@ Jev.
 - `fresh_pair_gates.py` — the budget and blind-dispatch guards for the
   matched pilot (`allow_blind`, `route_policy`, `enforce_cap`,
   `live_budget`, `tally`).
-- `fresh_pair_server.py` — `run` is the MCP command server for the direct
+- `fresh_pair_server.py` — `run` is the Model Context Protocol
+  ([MCP](../README.md#glossary)) server that serves commands to the direct
   arm and the routed arm.
 - `fresh_pair_smoke.py` — meters a direct-arm MCP smoke run. It has no
   `__main__` guard (see [Side Effects](#side-effects)).
@@ -586,7 +596,8 @@ Jev.
   `tests/<case>/` (`run_case`, `main`).
   - Usage: `python3 tools/run_tool_tests.py [NAME ...]`; `main()` takes bare
     case names as positional arguments.
-  - Discovery that finds no cases is a hard failure.
+  - [Test discovery](../README.md#glossary) that finds no cases is a hard
+    failure.
   - Exit codes: 0 when every case passes, otherwise 1.
   - Each case runs `gen_analysis_sidecar.py --root tests/<case>`, which
     regenerates the tracked `tests/<case>/domain-analysis/mini/analysis.json`
@@ -734,7 +745,7 @@ to `tools/`.
 - `examples/grpc-addrconn/harness-manifest.json` watches `addrconn_f09.py`.
   - Checked by `addrconn_f09.py` (`verify_harness`) in CI step "pinned
     addrConn backoff slice and decisions".
-  - Owner: [grpc-addrconn](../examples/grpc-addrconn/README.md#analysis-and-harness-manifests).
+  - Owner: [grpc-addrconn](../examples/grpc-addrconn/README.md#interface).
 
 ## Side Effects
 
@@ -745,8 +756,6 @@ to `tools/`.
     - `local_models.py` reads `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY`.
     - `jev_local.py` reads only `TYPESAFE_API_KEY` and posts only to
       `JEV_URL`.
-  - `addrconn_late.py` and `addrconn_f09.py` clone grpc-go unless
-    `--checkout` is given; see the addrConn runner entries below.
   - `run_benchmark.py` clones the benchmark repositories.
   - `run_sol_pilot.py:prepare` runs `go mod download`.
   - When `uv` is on `PATH`, `run_tool_tests.py` runs each tool through
@@ -779,8 +788,6 @@ to `tools/`.
     only with `--repo` and a non-`WORKTREE` `analyzedSha`.
   - `dsc_stamp.py` and `pilot_artifacts.py` run `git rev-parse HEAD`.
   - `refresh_citations.py` runs `git show <sha>:<path>`.
-  - `addrconn_f09.py` and `addrconn_late.py` run read-only git commands;
-    see the addrConn runner entries below.
   - `check_pack_consistency.py` runs `git describe --tags --abbrev=0`.
   - `run_sol_pilot.py`:
     - `prepare` runs `git init`, `git fetch`, `git checkout` in a new
@@ -837,13 +844,9 @@ to `tools/`.
   - `dsc_stamp.py` runs `dsc_check.py`.
   - `check_pack_consistency.py` runs `gen_rules.py --check` and
     `gen_odc_table.py --check`.
-- addrConn runners (clone, git calls, Go runs and the pack tools they
-  start are documented in
-  [grpc-addrconn Side Effects](../examples/grpc-addrconn/README.md#side-effects)):
-  - `addrconn_f09.py` — clones grpc-go unless `--checkout` is given, runs
-    git, Go and pack-checker subprocesses, and writes evidence files;
-  - `addrconn_late.py` — clones grpc-go unless `--checkout` is given,
-    runs git, Go and pack-checker subprocesses, and writes evidence files.
+- `addrconn_f09.py`, `addrconn_late.py`: clone, git, Go runs and evidence
+  writes; see
+  [grpc-addrconn Side Effects](../examples/grpc-addrconn/README.md#side-effects).
 
 ## Verification
 
@@ -858,10 +861,8 @@ green. CI runs each of them in job `consistency`.
 - Run: `python3 tools/gen_rules.py --selftest`
 - Run: `python3 tools/check_pack_consistency.py`
 - Run: `python3 -m mypy`
-  - CI installs `tools/requirements-dev.txt` and
-    `docs/evidence/gepa-bounded/requirements.txt` before this step. Install
-    both to match CI's type resolution; `mypy.ini` only tells mypy to
-    ignore missing `gepa.*` imports.
+  - Needs both requirements files; see
+    [System Verification](../README.md#system-verification).
 
 The per-tool selftests, their CI steps and the per-job counts are in
 [selftest Verification](./selftest/README.md#verification). Two CI steps

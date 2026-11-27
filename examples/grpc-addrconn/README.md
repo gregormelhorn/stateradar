@@ -18,8 +18,8 @@ The benchmark measures suite strength, not an upstream bug. The local
 no-transport backoff path already meets its resource contract: the pristine
 baseline passes all six cells. The question is whether the six-cell suite
 detects two F-09 [canaries](../../README.md#glossary) and the F-09 fault
-[mutant](../../README.md#glossary) `omit-local-cancel`, and whether a deliberately weak,
-state-only suite lets all three survive.
+[mutant](../../README.md#glossary) `omit-local-cancel`, and whether a
+deliberately weak, state-only suite lets all three survive.
 
 The [`late-completion/`](#late-completion) fixture is a second, separate use of
 the same pinned checkout. It reproduces a real completion/shutdown race and
@@ -37,10 +37,13 @@ evaluates this component's DR-001 against it.
 ### The six-cell projection
 
 The benchmark checks a [projection](../../README.md#glossary) of the full
-model, that is, a reduced slice of it: three states × two events
-(`TearDown`, `ObserveWorker`), six cells in total. See
-[`scope.md`](domain-analysis/addrConnBackoff/scope.md).
+model, that is, a reduced slice of it: three states × two events, six cells
+in total. See [`scope.md`](domain-analysis/addrConnBackoff/scope.md).
 
+- `TearDown` calls the real local teardown method and then checks that the
+  worker and timer are released.
+- `ObserveWorker` is a test-seam action that inspects a waiting worker or
+  resumes a pending one; it is not an upstream API.
 - The three states are an already-waiting backoff worker (`BackoffWaiting`),
   local shutdown pending (`ShutdownPending`), and shutdown completed
   (`ShutdownStopped`).
@@ -64,58 +67,66 @@ The F-09 fault `omit-local-cancel` drops the local cleanup trigger.
 - The mutants run in a `requiresProjection` chain (see
   [Executed projection dependencies](../../docs/fault-mutants.md#executed-projection-dependencies)):
   `omit-backoff-stop` → `wait-for-parent` → `omit-local-cancel`.
-- `omit-backoff-stop` is self-proving: its `requiresProjection` names the
-  projection it proves itself (`timer_release`), so its own KILL bootstraps
-  that projection.
+- The first canary, `omit-backoff-stop`, has no prerequisite; it is declared
+  as requiring its own projection (`timer_release`) so the tool treats its
+  KILL as establishing that projection.
 - All three must fail the cell `BackoffWaiting x TearDown` in a fully
   completed suite.
 - The state-only weak suite deliberately survives all three.
 
-<a id="two-manifests"></a>
-
 ### Analysis and harness manifests
 
-The folder has three [manifests](../../README.md#glossary):
-
-- `domain-analysis/addrConnBackoff/manifest.json` (the analysis manifest)
-  pins the upstream grpc-go source.
-- `harness-manifest.json` independently watches the committed pack harness,
-  model and decision files.
-- `late-completion-manifest.json` watches the late-completion fixture; see
-  the [late-completion contract](#late-completion).
-
-`tools/addrconn_f09.py` checks the first two, plus the
-[sidecar](../../README.md#glossary) via `tools/dsc_check.py`, before any Go
-run.
+Three [manifests](../../README.md#glossary) guard this example: one pins the
+upstream grpc-go source, one watches the committed pack harness and one
+watches the late-completion fixture. Their contents and the checks that read
+them are described under [Interface](#interface).
 
 ## Interface
 
+In short:
+
+- Runs: two runners, `tools/addrconn_f09.py` (backoff benchmark) and
+  `tools/addrconn_late.py` (late-completion fixture).
+- Needs: a clean grpc-go checkout at the pin (cloned when not given), Go,
+  z3, and the committed files of this folder and its three manifests.
+- Writes: evidence files to `--output-dir` or a temporary directory (see
+  [Side Effects](#side-effects)).
+
 The two runners live in [`tools/`](../../tools/README.md), but this folder is
-their only input. This README owns the runners' behaviour; `tools/README.md`
-only lists them.
+their only component-specific input. They also use shared pack tools, such as
+`tools/late_completion.py` and `tools/check_fault_mutants.py`. This README
+owns the runners' behaviour; `tools/README.md` only lists them.
 
 - `tools/addrconn_f09.py` — the backoff benchmark runner. Without options it
   clones grpc-go into a temporary directory.
-  - `--checkout PATH` — use this clean, pinned checkout instead of cloning.
-  - `--output-dir PATH` — write evidence here instead of a temporary
-    directory.
-  - `--prepare-only DIR` — prepare the component in `DIR`, generate and check
-    the mutant variants, then stop without running Go.
-- `tools/addrconn_late.py` — the late-completion runner. It takes
-  `--checkout PATH` and `--output-dir PATH` with the same meaning. Its
-  fixture is documented under [late-completion](#late-completion).
+  - Options:
+    - `--checkout PATH` — use this clean, pinned checkout instead of
+      cloning.
+    - `--output-dir PATH` — write evidence here instead of a temporary
+      directory.
+    - `--prepare-only DIR` — prepare the component in `DIR`, generate and
+      check the mutant variants, then stop without running Go.
+- `tools/addrconn_late.py` — the late-completion runner. Its fixture is
+  documented under [late-completion](#late-completion).
+  - Options:
+    - `--checkout PATH` — as for `tools/addrconn_f09.py`.
+    - `--output-dir PATH` — as for `tools/addrconn_f09.py`.
 - `check_model.py` — a scoped z3 check of one dispatch guard and of the
   decision records.
-  - Its single positional argument is the pinned grpc-go checkout.
+  - Options:
+    - `checkout` (positional, required) — the pinned grpc-go checkout.
   - `tools/addrconn_f09.py` runs it with the same Python interpreter.
   - It reuses `verify_records` and `ANALYSIS` from that runner.
 - `tests/backoff_test.go.txt` — the Go probe, which defines `TestRadarCells`
   and the weak, state-only `TestRadarWeak`.
 - `tests/run.py` — runs the probe. Both runners copy `tests/` into the
   disposable checkout as `stateradar/`.
-  - Arguments: `--analysis DIR` (required), `--weak` (run `TestRadarWeak`
-    instead of `TestRadarCells`), `--count N` (default `1`) and
-    `--output FILE`.
+  - Options:
+    - `--analysis DIR` (required) — the analysis folder whose
+      `analysis.json` the probe reads.
+    - `--weak` — run `TestRadarWeak` instead of `TestRadarCells`.
+    - `--count N` — repeats (default `1`).
+    - `--output FILE` — write the raw `go test` output here.
   - Overlay: `stateradar/backoff_test.go.txt` is overlaid as
     `radar_backoff_test.go`, and `clientconn.go` is replaced by a patched
     copy that inserts scheduling hooks at three source anchors.
@@ -124,24 +135,37 @@ only lists them.
     `CELL SUITE: 6 cells checked, <n> failed` line per repeat. The weak
     suite prints `CELL SUITE: 1 cells checked, 0 failed` only when it passes.
   - Exit code: the `go test` exit code once
-    [discovery](../../README.md#glossary) is complete; 1 with a message for
-    the conditions under [Invariants](#testsrunpy).
-- `harness-manifest.json` — holds `analyzedSha` and the
-  [`watchPaths`](../../README.md#glossary) of the committed pack harness:
-  `tools/addrconn_f09.py`, `tests/`, `check_model.py` and, from
-  `domain-analysis/addrConnBackoff/`, `analysis.json`, `decisions/`,
-  `resolution.json`, `scope.md`, `fault-mutants.json`,
-  `mutant-generation.json`, `disposition-matrix.md` and `as-is.machine.mmd`.
-- `domain-analysis/addrConnBackoff/manifest.json` — pins the upstream source:
-  `analyzedSha` is the grpc-go commit and `watchPaths` is `clientconn.go`.
-  `tools/dsc_check.py` uses it to check source citations and staleness.
-- `late-completion-manifest.json` — holds `upstreamSha`, `analyzedSha` and
-  the `watchPaths` of the late-completion fixture (listed under
+    [test discovery](../../README.md#glossary) is complete; 1 with a message
+    for the conditions under [Invariants](#testsrunpy).
+- `harness-manifest.json` — the harness manifest. It holds `analyzedSha` (a
+  commit of this repository) and the
+  [`watchPaths`](../../README.md#glossary) of the committed pack harness,
+  independent of the upstream pin.
+  - Watched: `tools/addrconn_f09.py`, `tests/`, `check_model.py` and, from
+    `domain-analysis/addrConnBackoff/`, `analysis.json`, `decisions/`,
+    `resolution.json`, `scope.md`, `fault-mutants.json`,
+    `mutant-generation.json`, `disposition-matrix.md` and
+    `as-is.machine.mmd`.
+  - Checked by `verify_harness`, which both runners call (see
+    [Invariants](#toolsaddrconn_f09py)).
+- `domain-analysis/addrConnBackoff/manifest.json` — the analysis manifest. It
+  pins the upstream source: `analyzedSha` is the grpc-go commit and
+  `watchPaths` is `clientconn.go`.
+  - `tools/addrconn_f09.py` checks it, together with the
+    [sidecar](../../README.md#glossary) `analysis.json`, by running
+    `dsc_check --repo <checkout>` (`tools/dsc_check.py`): source citations
+    against the grpc-go checkout, and staleness of `clientconn.go` there.
+  - `tools/addrconn_late.py` does not run `dsc_check`.
+- `late-completion-manifest.json` — the late-completion manifest. It holds
+  `upstreamSha`, `analyzedSha` and the `watchPaths` of the late-completion
+  fixture (listed under
   [late-completion Invariants](#late-completion-invariants)).
+  - Checked by `verify_anchor` in `tools/addrconn_late.py`.
 - Subdirectories:
   - late-completion: [late-completion contract](#late-completion) - the
     DR-001 completion/shutdown fixture
-  - tests: (test-only) - six-cell backoff suite
+  - tests: (no contract) - the six-cell backoff suite; documented in this
+    Interface.
   - domain-analysis: (no contract) - analysis artifacts (scope, matrix,
     decisions, resolution, mutant configuration); no source code
 
@@ -229,17 +253,33 @@ The first six rows of the `tools/addrconn_f09.py` table (`verify_harness` and
 ## Side Effects
 
 This section is the single description of what the two runners do to the
-machine; `tools/README.md` links here.
+machine; `tools/README.md` links here. In short:
 
-- Network: without `--checkout`, both runners clone grpc-go:
-  `git clone --depth 1 --branch v1.18.0 https://github.com/grpc/grpc-go.git`
-  into their temporary directory. CI runs both this way.
+- Runs: `git` (clone and read-only checks), Python checkers and
+  `go test -race` in disposable copies of the grpc-go checkout.
+- Needs: network for the clone and for a cold Go module cache.
+- Writes: evidence to `--output-dir` or a temporary directory, plus the usual
+  Go build and module caches; committed files and the checkout stay
+  unchanged.
+
+Details:
+
+- Network: without `--checkout`, both runners clone grpc-go into their
+  temporary directory with this command (CI runs both this way):
+
+  ```sh
+  git clone --depth 1 --branch v1.18.0 https://github.com/grpc/grpc-go.git <dir>
+  ```
+
 - Other git calls (read-only):
   - `git rev-parse HEAD` and `git status --porcelain` in the checkout, to
     check the pin and a clean tree.
   - `git diff --name-only <analyzedSha>..HEAD -- <watchPaths>` in this
     repository, once per watching manifest (`verify_harness`, and for the
     late-completion runner also `verify_anchor`).
+  - `tools/addrconn_f09.py` only: `dsc_check --repo <checkout>` runs
+    `git -C <checkout> diff --name-only <analyzedSha>..HEAD -- clientconn.go`
+    in the grpc-go checkout, for the analysis manifest.
 - Subprocesses of `tools/addrconn_f09.py`:
   - `command(...)` runs `git`, `check_model.py`, `tools/dsc_check.py`,
     `tools/check_reachability.py`, `tools/gen_mutant_variants.py` and
@@ -300,7 +340,8 @@ Prerequisites for the runners:
 - A Go toolchain with `go test -race` support. This example has no `go.mod`
   of its own: `go test` runs inside the grpc-go checkout and uses its
   `go.mod`/`go.sum` with `-mod=readonly`. CI installs the Go version in
-  `examples/weighted-semaphore/go.mod` (1.24.0).
+  `examples/weighted-semaphore/go.mod` (1.24.0). On some hosts
+  `go test -race` needs cgo and a C toolchain.
 - `git`, for the clone and the read-only checks under
   [Side Effects](#side-effects).
 - For the `--checkout` pair, clone once; the checkout must stay clean and at
@@ -355,20 +396,14 @@ decision.
 
 ## Child contracts
 
-Two [manifests](../../README.md#glossary) watch folders of this example:
-`late-completion-manifest.json` watches `late-completion/`, and
-`harness-manifest.json` watches `tests/`, `check_model.py` and the committed
-analysis files. A file committed under a watch path makes its manifest stale,
-which fails `tools/addrconn_late.py` or `tools/addrconn_f09.py` respectively.
-Re-stamping a manifest only to admit a README would be
+`late-completion/` and `tests/` are watched by the manifests described under
+[Interface](#interface). A file committed there makes its manifest stale and
+fails its runner; re-stamping only to admit a README would be
 [reconcile-lite](../../README.md#glossary), which the root README forbids
 ([Adopting it in a brownfield repo](../../README.md#adopting-it-in-a-brownfield-repo)).
-The `late-completion/` contract therefore lives here. `tests/` is test-only
-and is documented under [Interface](#interface).
+So the `late-completion/` contract lives here.
 
 ### late-completion
-
-<a id="late-completion-overview"></a>
 
 #### Overview
 
@@ -409,19 +444,24 @@ The mutants run in a `requiresProjection` chain (see
 A mutant runs only after the canary that proves its required projection has
 been KILLED; a SURVIVED or BLOCKED canary BLOCKS all its dependents. Here the
 chain is `state-canary` → `publication-canary` → `effect-canary` →
-`resource-canary` → both guard-removal mutants. `state-canary` is
-self-proving: it requires `terminal`, the projection it proves itself.
+`resource-canary` → both guard-removal mutants. The first canary,
+`state-canary`, has no prerequisite; it is declared as requiring its own
+projection (`terminal`) so the tool treats its KILL as establishing that
+projection.
 
 As in the backoff benchmark, the parent ClientConn stays alive. An idle fake
 transport and controlled barriers expose real addrConn behaviour; this is not
 a full transport implementation test.
 
-<a id="late-completion-interface"></a>
-
 #### Interface
 
-- `run.py` — the adapter CLI. Its arguments are `--analysis <dir>`
-  (required), `--weak`, `--count <n>` (default `1`) and `--output-dir <dir>`.
+- `run.py` — the adapter CLI.
+  - Options:
+    - `--analysis DIR` (required) — the folder holding `profile.json`.
+    - `--weak` — use the weak, state-only suite (see below).
+    - `--count N` — repeats (default `1`).
+    - `--output-dir DIR` — write the evidence files listed under
+      [Side Effects](#late-completion-side-effects).
   - It imports `EvidenceError`, `report` and `validate_profile` from the
     copied `late_completion` module.
   - `--weak` is not passed to Go. It only switches the oracle call
@@ -554,9 +594,9 @@ any of them after `analyzedSha` stales the fixture and fails
 
 Commands run from the repository root and assume the dev requirements are
 installed (see [System Verification](../../README.md#system-verification)).
-The prerequisites are those of the parent [Verification](#verification).
+The prerequisites and the local `--checkout` command are those of the parent
+[Verification](#verification).
 
-- Run: `python3 tools/addrconn_late.py --checkout <dir> --output-dir <out>/late`
 - CI step "reusable late-completion oracle and addrConn reference" (job
   `consistency`):
   - Run: `python3 tools/selftest/test_late_adapter.py`

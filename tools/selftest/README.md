@@ -13,9 +13,8 @@ There are two kinds of test:
 - `run_selftest.py`, one script that drives the core checkers and
   generators as subprocesses against the fixtures in this directory and
   against [golden-mini](../../README.md#glossary);
-- the `test_*.py` files, each a `unittest` module. Most are named after
-  the tool they test; the others cover a feature, a workflow or an
-  evidence archive.
+- the `test_*.py` files, each a `unittest` module (naming and entry
+  points under [Interface](#interface)).
 
 Prerequisites are listed under [Verification: Prerequisites](#prerequisites).
 
@@ -95,7 +94,8 @@ directory: they copy it into a temporary directory and mutate the copy.
 
 - Most checker rules in `formats/rules.toml` name `run_selftest.py` or a
   `test_*.py` file here as their `selftest_ref`, the red case that proves
-  the rule can fail. The rest point at `tests/red-mini` or
+  the rule can fail. The rest point at
+  [`tests/red-mini`](../../README.md#glossary) or
   `gen_rules.py --selftest`. `gen_rules.py --check` requires every checker
   rule to have such a reference (see
   [tools Invariants](../README.md#invariants)).
@@ -181,11 +181,17 @@ job `gepa-evaluation`.
 | GEPA evaluator, search adapter and accounting red probes | `gepa-evaluation` | 18 |
 | routing label evaluation and red probes | `gepa-evaluation` | 9 |
 
-Every `test_*.py` file has a `__main__` entry and runs standalone. The
-first command runs one file; the second runs all of them in turn, stops
-at the first failing file and names it; it includes the seven
-`gepa`-dependent files, so install both requirements files first. The CI
-steps that follow use `run_selftest.py` and the module form.
+The first command runs one file. The second command runs every
+`test_*.py` file in turn, stops at the first failing file and names it.
+That loop includes the seven `gepa`-dependent files, so run it inside a
+virtualenv with both requirements files, or prefix the `python3` inside the
+loop with:
+
+```text
+uv run --with-requirements tools/requirements-dev.txt --with-requirements docs/evidence/gepa-bounded/requirements.txt
+```
+
+The CI steps that follow use `run_selftest.py` and the module form.
 
 - Run: `python3 tools/selftest/test_local_budget.py`
 - Run: `( for f in tools/selftest/test_*.py; do python3 "$f" || { echo "FAIL: $f"; exit 1; }; done )`

@@ -18,7 +18,8 @@ where the two disagree — and turns the answers into tests and CI gates.
 
 **Version 1.53.** Apache-2.0, prompts included. Runs inside your AI coding agent;
 no build step or StateRadar service. The optional local model workflow sends the
-supplied text to the configured model providers. Project terms are defined in
+supplied text to hosted model providers (see
+[Global Side Effects](#global-side-effects)). Project terms are defined in
 the [Glossary](#glossary) under System Overview, near the end.
 
 ---
@@ -157,7 +158,8 @@ citation verification and the blind Part B through these commands. Code checks
 citations and structure; a reviewing agent inspects every model judgment, and
 the human owner decides domain semantics. The blind Part B keeps its restricted
 inputs. A per-pilot ledger estimates the cost of calls made through the tools;
-it does not cover the calling agent or other providers.
+it does not cover the calling agent or other providers. Keys, metering
+and billing are listed under [Global Side Effects](#global-side-effects).
 
 The [model cascade plan](docs/plan-model-cascade.md) sets out the next steps:
 independently reviewed cases, a held-out quality and cost comparison, and only
@@ -257,10 +259,10 @@ full-pilot optimization. The standard routing is unchanged.
 A follow-up [supervised discovery experiment](docs/evidence/gepa-discovery/README.md)
 uses source-backed open findings and held-out components. GEPA retained the fixed
 seed, so the final arms used identical prompts; no GEPA advantage is established.
-The subsequent [reviewed training catalog and fixed baseline](docs/evidence/gepa-training-catalog/README.md)
+The subsequent [reviewed training catalogue and fixed baseline](docs/evidence/gepa-training-catalog/README.md)
 records recurrent source-scope gaps and controls; it is not a new GEPA optimization.
 A [new component-split GEPA experiment](docs/evidence/gepa-heldout/README.md)
-trained on that catalog and again selected the unchanged prompt. Separate
+trained on that catalogue and again selected the unchanged prompt. Separate
 exploratory results and AI-review uncertainty are retained; no human review or
 GEPA improvement is claimed. A subsequent [prospective comparison and tie audit](docs/evidence/gepa-prospective/README.md)
 reproduces GEPA's index-based exact-tie behaviour, reports ties without a winner,
@@ -512,7 +514,8 @@ repository's contract index for agents and developers.
 
 `tools/` and `examples/` have [contract](#glossary) READMEs. The other entries
 in [Subdirectories & System Boundaries](#subdirectories--system-boundaries) say
-where their documentation lives instead. An agent can learn what a directory
+where their documentation lives instead; `tests/README.md` and the skill's
+`SKILL.md` are documentation, not contracts. An agent can learn what a directory
 promises without reading its code.
 
 Some code has its contract in the parent README under "Child contracts":
@@ -590,6 +593,17 @@ The repository has two layers:
 - **UV event**: an undesired-variant event, such as loss, delay or
   duplication. Each is derived from the seven-category undesired-event
   checklist in `formats/rules.toml`.
+- **hole cell**: a matrix cell whose disposition is `UNSPECIFIED` or
+  `ignore (accidental)`. Every hole must link a question (`→ Q-nn`).
+- **guard group (`G-nn`)**: usually the branch conditions at one decision
+  point, which z3 checks for disjointness and coverage. A group can instead
+  hold other z3 proof obligations, or be recorded as `not-formalizable` with
+  a reason.
+- **DOC-n**: a doctrine line, one normative sentence extracted from the
+  requirements; each must map to a cell, an invariant or an explicit
+  rejection.
+- **T-nn trace**: an adversarial trace, a scripted event ordering in
+  `adversarial-traces.md` with its expected outcome.
 - **interaction pair (`P-nna/b`)**: two events from different sources on one
   entity, tested in both orders.
 - **public seam**: the interface that tests may assert through. It covers
@@ -598,9 +612,10 @@ The repository has two layers:
   state, publication, emitted effect or resource release. The word also names
   a reduced slice of a model, such as the six-cell addrConn projection or the
   semaphore's projected queue states.
-- **discovery**: confirmation that every expected test or subtest started and
-  finished the expected number of times. Incomplete discovery yields BLOCKED,
-  never a pass or a kill.
+- **test discovery**: confirmation that every expected test or subtest started
+  and finished the expected number of times. Incomplete test discovery yields
+  BLOCKED, never a pass or a kill. Elsewhere in this README, "discovery"
+  means finding bugs.
 - **red probe**: a deliberately broken input that a checker must reject. It
   proves the check can fail.
 - **canary / mutant / mutation binding**:
@@ -611,7 +626,7 @@ The repository has two layers:
   - A binding connects a component's suite to the mutation tools.
 - **KILLED / SURVIVED / BLOCKED**: mutation verdicts. KILLED means the suite
   detected the mutant. SURVIVED means it did not. BLOCKED means no verdict
-  could be reached, for example because discovery was incomplete or a
+  could be reached, for example because test discovery was incomplete or a
   required canary was not killed.
 - **weak suite**: a deliberately reduced test suite used as a control, for
   example one that asserts only state or only an API result. It must miss the
@@ -639,8 +654,11 @@ The repository has two layers:
   [Codex CLI](https://github.com/openai/codex) sessions on the signed-in
   account, which uses its quota or billing. Sol is the default Codex model
   `gpt-6.1-sol`.
-- **golden-mini**: `tests/golden-mini`, a 3-state fixture component and the
-  tools' golden regression case.
+- **golden-mini / red-mini**: `tests/golden-mini` is a 3-state fixture
+  component and the tools' golden regression case; `tests/red-mini` is a
+  deliberately drifted case that proves the gates catch drift.
+- **MCP**: Model Context Protocol, the protocol some pilot runners use to
+  expose commands to a Codex session.
 - **ODC**: Orthogonal Defect Classification (Chillarege et al., 1992). In
   this pack, ODC fields on findings are rule `R-ODC-FIELDS` in
   `formats/rules.toml`.
@@ -654,14 +672,16 @@ The repository has two layers:
 - examples: [`./examples/README.md`](./examples/README.md) - reference
   components and their analyses: device-connection, grpc-addrconn,
   weighted-semaphore and the gobreaker readiness fixture.
-- skills: [`./skills/claude-code/stateradar/SKILL.md`](./skills/claude-code/stateradar/SKILL.md) - the Claude Code skill packaging.
+- skills: [`./skills/claude-code/stateradar/SKILL.md`](./skills/claude-code/stateradar/SKILL.md) -
+  the Claude Code skill packaging.
 - tests: [`./tests/README.md`](./tests/README.md) - the golden-mini and
   red-mini tool fixtures, the Oracle benchmark evidence and the
   device-connection convergence baseline.
-- prompts, formats, commands, docs: [Repository layout](#repository-layout) -
-  Markdown, TOML and JSON-schema method files, not code packages.
-- .github: [System Verification](#system-verification) - the CI workflow
-  `pack-ci.yml`.
+- prompts, formats, commands, docs: (no contract) - Markdown, TOML and
+  JSON-schema method files, not code packages; see
+  [Repository layout](#repository-layout).
+- .github: (no contract) - the CI workflow `pack-ci.yml`; mapped under
+  [System Verification](#system-verification).
 - docs/evidence: (no contract) - frozen evidence archives, each documented by
   its own README. A few of their scripts are called by current gates, such as
   `docs/evidence/semaphore-pilot/resolution-q01/check_guards.py` and
@@ -697,7 +717,7 @@ Per-tool detail is in [tools/README.md](tools/README.md#side-effects).
 
 - Cost: Flash and Jev calls send the supplied text to DeepSeek and Typesafe.
   They read `DEEPSEEK_API_KEY` and `TYPESAFE_API_KEY` and are metered in a
-  SQLite ledger with a default cap per ledger. Codex runners use the
+  SQLite ledger, capped at $2 per ledger by default. Codex runners use the
   signed-in account, found through `CODEX_APP_RUNTIME_CLI_PATH` or `codex` on
   `PATH`.
 - Network:
@@ -728,8 +748,8 @@ Per-tool detail is in [tools/README.md](tools/README.md#side-effects).
 
 ## System Verification
 
-Python `Run:` commands in this repository's READMEs are written as
-`python3 ...` from the repository root. Go commands are written as
+Commands run from the repository root. Python `Run:` commands in this
+repository's READMEs are written as `python3 ...`. Go commands are written as
 `cd <module> && go test ...`.
 
 Python commands assume Python 3.12, as in CI, and `tools/requirements-dev.txt`.
@@ -740,7 +760,9 @@ macOS, install [uv](https://docs.astral.sh/uv/) and prefix each command with
 downloads the dependencies. Alternatively, install the files into a
 virtualenv.
 
-Run these first. They need no Go or API keys, and each exits 0 when green:
+Run these first. They need no Go or API keys, and each exits 0 when green.
+The first `uv run` needs network to download the dependencies, and
+`tools/run_tool_tests.py` may fetch `jsonschema` through `uv`.
 
 - Run: `python3 tools/selftest/run_selftest.py`
 - Run: `python3 tools/run_tool_tests.py`

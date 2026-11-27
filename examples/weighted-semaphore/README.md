@@ -53,14 +53,16 @@ in [Evidence notes](#evidence-notes).
 ## Interface
 
 - `verify_q01.py` — decision-acceptance driver for all thirteen decisions. It
-  began as the driver for Q-01 alone, hence the name. Its members:
-  - `--count N` — repeats of each decision and schedule test (default 50).
-  - `--output-dir PATH` — keeps the Go JSON streams.
-  - `--results PATH` — only validates a saved Go JSON stream. Pass the
-    `--count` used for the recording (default 50), because every expected
-    test must have passed exactly that many times.
-  - `validate_results(output, count)` — checks one Go JSON stream.
-  - `main()` — the entry point.
+  began as the driver for Q-01 alone, hence the name.
+  - Options:
+    - `--count N` — repeats of each decision and schedule test (default 50).
+    - `--output-dir PATH` — keeps the Go JSON streams.
+    - `--results PATH` — only validates a saved Go JSON stream. Pass the
+      `--count` used for the recording (default 50), because every expected
+      test must have passed exactly that many times.
+  - Symbols:
+    - `validate_results(output, count)` — checks one Go JSON stream.
+    - `main()` — the entry point.
 - `go.mod` — Go module `golang.org/x/sync` with the directive `go 1.24.0`.
 - [CONTRACT.md](CONTRACT.md) — the normative evaluation contract. It
   summarizes DR-001..DR-004 in its preamble and gives the clauses for
@@ -78,14 +80,9 @@ in [Evidence notes](#evidence-notes).
     [`./domain-analysis/README.md`](./domain-analysis/README.md) - the
     StateRadar model, [sidecar](../../README.md#glossary), DRs and checkers
     of the `weightedSemaphore` component.
-  - faults: `faults/weak_test.go.txt` - the weak suite, a deliberately weak
-    negative control that checks only the canceled `Acquire` result (no queue
-    or capacity assertion) and therefore must miss the fault.
-    `tools/semaphore_f09.py` overlays it as `semaphore/f09_weak_test.go` for
-    the weak/full comparison on [F-09](../../README.md#glossary) (cancellation
-    leak).
-  - mutants: `mutants/*.go.txt` - five source mutants consumed by
-    `tools/gen_mutant_variants.py` and `tools/check_fault_mutants.py`.
+  - faults: (no contract) - `weak_test.go.txt`, the weak F-09 negative
+    control overlaid by `tools/semaphore_f09.py`.
+  - mutants: (no contract) - five `*.go.txt` source mutants.
 
 ## Invariants
 
@@ -95,7 +92,7 @@ in [Evidence notes](#evidence-notes).
   `--count must be positive`.
 - Without `--results`, `verify_q01.py` first runs a
   [red probe](../../README.md#glossary): `validate_results('', count)` must
-  fail, showing that empty test [discovery](../../README.md#glossary) is
+  fail, showing that empty [test discovery](../../README.md#glossary) is
   rejected (`RED-PROBE: empty discovery rejected`); otherwise it raises
   `RuntimeError('empty discovery unexpectedly accepted')`. With `--results`,
   it only validates the given stream and skips this red probe and every
@@ -142,12 +139,8 @@ installed (see [System Verification](../../README.md#system-verification)).
 Prerequisites:
 
 - Go ≥ 1.24.0 (CI installs the `go.mod` version).
-- The current-model verifier
-  `domain-analysis/weightedSemaphore/verify.py` checks the analysis against
-  the code. The CI step that runs it also needs Git history back to the
-  manifest's `analyzedSha`, because its staleness check runs `git diff`; CI
-  checks out with `fetch-depth: 0`. `verify_q01.py` does not need Git
-  history.
+- `verify.py` has its own prerequisites; see
+  [weightedSemaphore Verification](./domain-analysis/weightedSemaphore/README.md#verification).
 
 Recommended first command, one repeat of every decision test:
 
@@ -174,11 +167,10 @@ CI steps in `.github/workflows/pack-ci.yml`:
 
 ### Decision acceptance (`verify_q01.py`)
 
-`verify_q01.py` checks guard and coverage obligations. It runs the decision
-tests and the scheduled-interleaving tests, each 50 times by default under
-`-race`, and
-rejects empty or incomplete discovery. It also runs the upstream plus decision
-regression suite once and four faulty overlays.
+`verify_q01.py` checks guard and coverage obligations, runs the decision tests
+and the scheduled-interleaving tests 50 times each under `-race` by default,
+and rejects empty or incomplete test discovery. It also runs the upstream plus
+decision regression suite once and the four faulty schedule overlays.
 
 The guard proof covers its stated integer assumptions; behaviour tests verify
 the actual notification path. Neither proves all scheduler interleavings or a
@@ -194,12 +186,10 @@ executable scenarios ten times under the race detector, demonstrates a
 deliberately wrong matrix verdict, checks artifact mutations, and verifies the
 retained historical artifact hashes.
 
-The four contract-limit cells are the `UV-Delay` and `UV-ContextFault`
-[UV events](../../README.md#glossary) in both states. They record what the
-contract does not promise: no fixed latency bound (DR-011) and no guarantee for
-a faulty custom Context (DR-009).
-They are recorded as limits with an `untestable-via-seam` reason, not as
-passing tests.
+The four contract-limit cells (defined in
+[weightedSemaphore](./domain-analysis/weightedSemaphore/README.md#state-model))
+record what the contract does not promise: no fixed latency bound (DR-011) and
+no guarantee for a faulty custom Context (DR-009).
 
 ### Mutation binding
 
@@ -224,6 +214,15 @@ interleaving. Structured rationale for every cell is bound in
 `domain-analysis/weightedSemaphore/cell-rationale.json`; see
 [the format](../../docs/cell-rationale.md).
 
+### Fault fixtures
+
+`faults/weak_test.go.txt` is a deliberately weak negative control. It checks
+only the canceled `Acquire` result, with no queue or capacity assertion, so it
+must miss the [F-09](../../README.md#glossary) fault (cancellation leak).
+`tools/semaphore_f09.py` overlays it as `semaphore/f09_weak_test.go` for the
+weak/full comparison. The five source mutants in `mutants/` are consumed by
+`tools/gen_mutant_variants.py` and `tools/check_fault_mutants.py`.
+
 ### Historical baseline
 
 The original pilot's as-is probes intentionally describe the old behaviour and
@@ -244,7 +243,8 @@ README, makes the manifest stale and fails `dsc_check --repo`. Re-pinning
 [root README](../../README.md#adopting-it-in-a-brownfield-repo) forbids. The
 contracts for the three code folders therefore live here. `mutants/` and
 `faults/` hold only `.go.txt` fixtures and have no contract of their own;
-they are described under [Interface](#interface).
+they are listed under [Interface](#interface) and described in
+[Fault fixtures](#fault-fixtures).
 
 ### semaphore
 
@@ -286,7 +286,7 @@ Runtime behaviour follows the accepted decisions DR-001..DR-013
   - `Release(n)` with `n > cur` unlocks and panics with
     `"semaphore: released more than held"`, without changing `cur` (DR-003).
   - Accounting is aggregate only: caller identity and duplicate releases are
-    not tracked (DR-007/008).
+    not tracked (DR-007, DR-008).
   - `Release(0)` still runs `notifyWaiters`, but in valid reachable states it
     changes no capacity, queue or grant (DR-013). Callers must not use it as
     a wakeup.
@@ -354,27 +354,37 @@ the 16 interaction-pair orderings. The states, events and cell count are
 defined in that README. The test file derives a cell's state through the
 public seam: `TryAcquire(0)` succeeds exactly when the waiter queue is empty.
 
-The suite needs the scheduling checkpoints of [schedule](#schedule), where
-`contractCheckpoint` is defined. Several pair orderings (for example `P-03a`,
-`P-04a` and `P-07b`) run the `TestSchedule*` tests, which pause the semaphore
-at those checkpoints to force one exact interleaving; the overlay also
-supplies helpers such as `contractTimeout`. Queued states themselves are set
-up by polling the waiter queue (`q01Enqueued`), not by checkpoints.
-`cells/run.py` therefore inserts the same `ANCHORS` into a temporary
-`semaphore.go`, and overlays two test files with `go test -overlay` so that
-they are never placed in the package:
+- Why `cells/run.py` patches `semaphore.go`: the suite needs the scheduling
+  checkpoints of [schedule](#schedule), so `cells/run.py` inserts the same
+  `ANCHORS` into a temporary `semaphore.go`.
+- Which pairs use checkpoints: several pair orderings (for example `P-03a`,
+  `P-04a` and `P-07b`) run the `TestSchedule*` tests, which pause the
+  semaphore at those checkpoints to force one exact interleaving.
+- How queued states are set up: by polling the waiter queue
+  (`q01Enqueued`), not by checkpoints.
+
+`cells/run.py` overlays two test files with `go test -overlay`, so that they
+are never placed in the package:
 
 - `cells/state_cells_test.go.txt` becomes `semaphore/state_cells_test.go`.
 - `schedule/checkpoints_test.go.txt` becomes
-  `semaphore/schedule_contract_test.go` and provides `contractCheckpoint`.
+  `semaphore/schedule_contract_test.go`. It defines `contractCheckpoint`,
+  `contractPause` and the `TestSchedule*` tests.
 
 #### Interface
 
-- `run.py` CLI — `--analysis PATH` (default
-  `domain-analysis/weightedSemaphore`), `--count N` (default 10),
-  `--output PATH`, `--red-probe`, `--mutation-check`.
-- `run(analysis, count, output, red_probe, mutation_check)` — the Python entry
-  point behind the CLI.
+- `run.py`:
+  - Options:
+    - `--analysis PATH` — analysis directory (default
+      `domain-analysis/weightedSemaphore`).
+    - `--count N` — repeats (default 10).
+    - `--output PATH` — keeps the raw Go output.
+    - `--red-probe` — runs the red probe described under Invariants.
+    - `--mutation-check` — runs the mutation-tool mode described under
+      Invariants.
+  - Symbols:
+    - `run(analysis, count, output, red_probe, mutation_check)` — the entry
+      point behind the CLI.
 - `state_cells_test.go.txt` — defines `TestStateCells` (it reads the sidecar
   path from `STATERADAR_CELL_ANALYSIS`) and `TestStatePairs`.
 
@@ -463,18 +473,22 @@ runs both; its commands are listed in
 
 #### Interface
 
-- `run.py` CLI — `--mode MODE` (default `baseline`), `--count N` (default
-  50), `--output PATH`. `MODE` is one of:
-  - `baseline`;
-  - `omit-grant-rollback`, `omit-selected-rollback`, `try-bypass`,
-    `zero-charges`.
-- `SOURCE` — path of `semaphore/semaphore.go`, the source to patch.
-- `SCHEDULE_TESTS` — the six `TestSchedule*` test names.
-- `ANCHORS` — checkpoint insertions `before-mutex`, `initial-checked`,
-  `cancel-selected`, `grant-received`, `queued-success`.
-- `MUTATIONS` — mode → source replacement and target test.
-- `replace_once(source, old, new)`, `run(mode, count, output)` — module
-  functions. `cells/run.py` reuses `replace_once`, `ANCHORS` and `SOURCE`.
+- `run.py`:
+  - Options:
+    - `--mode MODE` — `baseline` (default) or one of the fault modes
+      `omit-grant-rollback`, `omit-selected-rollback`, `try-bypass`,
+      `zero-charges`.
+    - `--count N` — repeats (default 50).
+    - `--output PATH` — keeps the raw Go output.
+  - Symbols:
+    - `SOURCE` — path of `semaphore/semaphore.go`, the source to patch.
+    - `SCHEDULE_TESTS` — the six `TestSchedule*` test names.
+    - `ANCHORS` — checkpoint insertions `before-mutex`, `initial-checked`,
+      `cancel-selected`, `grant-received`, `queued-success`.
+    - `MUTATIONS` — mode → source replacement and target test.
+    - `replace_once(source, old, new)`, `run(mode, count, output)` — module
+      functions. `cells/run.py` reuses `replace_once`, `ANCHORS` and
+      `SOURCE`.
 - `checkpoints_test.go.txt` — defines `contractCheckpoint`, `contractPause`
   and six tests:
   - `TestScheduleDR010FastLateCancel`, `TestScheduleDR010GrantedRollback`;

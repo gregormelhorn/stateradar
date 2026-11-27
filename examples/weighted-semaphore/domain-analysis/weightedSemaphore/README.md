@@ -25,18 +25,6 @@ evaluation contract is [CONTRACT.md](../../CONTRACT.md), and
   - 4 are contract limits: `UV-Delay` and `UV-ContextFault` in both states,
     recorded as `untestable-via-seam` rather than tested.
 
-### Contents
-
-The directory holds:
-
-- the reconciled model described above;
-- the [sidecar](../../../../README.md#glossary) `analysis.json` and
-  `manifest.json`;
-- the 13 [decision records (DRs)](../../../../README.md#glossary) in
-  `decisions/`;
-- three component checkers: `verify.py`, `check_matrix.py` and
-  `check_guards.py`.
-
 ### Sidecar is the source
 
 In the generic flow, `tools/gen_analysis_sidecar.py` parses
@@ -59,7 +47,7 @@ Two sidecar fields recur below:
   citation (`file`, `line`, `fragment`) and provenance labels. A provenance
   label says where a claim comes from; the allowed labels are
   `explicit-requirement`, `observed-in-code`, `observed-in-tests`, `inferred`
-  and `proposed` (AGENTS.md §2).
+  and `proposed` ([AGENTS.md §2](../../../../AGENTS.md#2-the-objects)).
 
 ## Interface
 
@@ -80,13 +68,16 @@ Two sidecar fields recur below:
   - `run(source=None)` — the entry point.
   - `--source PATH` — CLI flag that checks another source file; `verify.py`
     uses it for a red probe, which the digest pin rejects.
-- `analysis.json`, `matrix-coverage.json`, `scenario-coverage.json`,
-  `disposition-matrix.md`, `source-pins.json`, `decisions/DR-*.yaml` — data
-  artifacts read by the checkers.
-- `as-is.machine.mmd`, `event-catalogue.md`, `extraction.md`,
-  `adversarial-traces.md`, `invariants-and-lints.md`, `open-questions.md`,
-  `cell-rationale.json`, `fault-mutants.json`, `matrix-mutation.json`,
-  `mutant-generation.json` — other analysis artifacts.
+- `analysis.json` (the [sidecar](../../../../README.md#glossary)),
+  `manifest.json`, `matrix-coverage.json`, `scenario-coverage.json`,
+  `disposition-matrix.md`, `source-pins.json`, `decisions/DR-*.yaml` (the 13
+  [decision records (DRs)](../../../../README.md#glossary)) — data artifacts
+  read by the checkers.
+- `summary.md` (human-readable status), `as-is.machine.mmd`,
+  `event-catalogue.md`, `extraction.md`, `adversarial-traces.md`,
+  `invariants-and-lints.md`, `open-questions.md`, `cell-rationale.json`,
+  `fault-mutants.json`, `matrix-mutation.json`, `mutant-generation.json` —
+  other analysis artifacts.
 - Subdirectories:
   - archive/2026-11-14:
     [`./archive/2026-11-14/README.md`](./archive/2026-11-14/README.md) -
@@ -116,8 +107,10 @@ source fails CI. In `check_matrix.py`, each requirement below raises
     `untestable-via-seam` reason longer than 40 characters and no test;
   - every other cell names the test `TestStateCells/<state>/<event>`.
 - `check_matrix.py`, scenario traces:
-  - `scenario-coverage.json` holds exactly 30 traces (`P-01a`..`P-08b`,
-    `T-01`..`T-14`);
+  - `scenario-coverage.json` holds exactly 30 traces: the interaction-pair
+    orderings `P-01a`..`P-08b` and the adversarial traces `T-01`..`T-14`
+    ([T-nn traces](../../../../README.md#glossary), defined in
+    `adversarial-traces.md`);
   - `T-08` and `T-09` must be `untestable-via-seam` with a reason starting
     with `DR-009`;
   - every other trace names a test whose top-level name (the part before the
@@ -136,6 +129,15 @@ source fails CI. In `check_matrix.py`, each requirement below raises
 - `check_matrix.py`, citations: every `file:line ("fragment")` citation,
   including those in the coverage-table n/a prose, matches within 3 lines
   either side of the cited line.
+
+`check_guards.py` works on [guard groups](../../../../README.md#glossary)
+(G-nn), the entries of `analysis.json["guardGroups"]`. G-01..G-09 are sets of
+mutually exclusive branch conditions extracted from `semaphore.go`. G-10
+collects the inductive obligations: z3 formulas, each describing a forbidden
+situation at a mutex-release boundary. G-11 is the queued `select`, recorded
+as `not-formalizable`. A boundary probe evaluates a group at concrete values
+below, at and above each comparison limit.
+
 - `check_guards.py` checks the following, in order. Each failure exits with
   a message starting `GUARD FAIL:`:
   - the SHA-256 of `semaphore/semaphore.go` must equal
@@ -143,34 +145,37 @@ source fails CI. In `check_matrix.py`, each requirement below raises
     `GUARD FAIL: reviewed source digest changed; re-extract guard expressions`;
   - each boundary probe of G-01..G-09 must select exactly one guard;
     otherwise `GUARD FAIL: boundary not uniquely covered`;
-  - the G-10 inductive obligations must be `unsat`. They are seven z3
-    formulas, each describing a forbidden situation at a mutex-release
-    boundary, for example an admit, release or grant that moves `cur`
-    outside `0..size`, or a retained blocked head that would fit. `unsat`
-    means the situation cannot occur under the stated integer assumptions.
-    Otherwise `GUARD FAIL: <obligation> <model>`, with the obligation name
-    and the z3 counterexample;
+  - the seven G-10 inductive obligations must be `unsat`:
+    - examples are an admit, release or grant that moves `cur` outside
+      `0..size`, or a retained blocked head that would fit;
+    - `unsat` means the situation cannot occur under the stated integer
+      assumptions;
+    - otherwise `GUARD FAIL: <obligation> <model>`, with the obligation name
+      and the z3 counterexample;
   - guard groups G-01..G-09 must be pairwise disjoint and covering (outcome
     `proven`); otherwise `GUARD FAIL: partition`;
-  - the first ten `analysis.json["guardGroups"]` entries must equal, in
-    order, `{"id": "G-nn", "outcome": "proven"}` for G-01..G-10 exactly, so
-    any extra key in one of them fails, and the eleventh entry (G-11) must
-    have outcome `not-formalizable`; otherwise
-    `GUARD FAIL: recorded outcomes differ`.
+  - the recorded outcomes in `analysis.json["guardGroups"]`; otherwise
+    `GUARD FAIL: recorded outcomes differ`:
+    - the first ten entries must equal, in order,
+      `{"id": "G-nn", "outcome": "proven"}` for G-01..G-10;
+    - the comparison is exact, so any extra key in one of them fails;
+    - the eleventh entry (G-11) must have outcome `not-formalizable`.
 - `verify.py`, green steps (each must exit 0):
   - `check_matrix.py --selftest`, `tools/check_matrix.py`, `check_guards.py`;
   - `cells/run.py --red-probe --count 1` (the runner itself requires the
     expected cell to fail) and the `cells/run.py` baseline;
   - `tools/dsc_check.py` and `tools/check_reachability.py`.
+
+`verify.py` runs two guard red probes on a temporary copy of `semaphore.go` in
+which `if isFront {` is rewritten to `if isFront && s.size > s.cur {`. When a
+canceled waiter at the front of the queue is removed, the copy then calls
+`notifyWaiters` only if spare capacity remains. That is the DR-001
+regression: the added condition is the pinned upstream head guard that DR-001
+removed. At full capacity the copy skips `notifyWaiters`, so a zero-weight
+waiter that becomes the new head stays queued although it needs no capacity,
+which DR-001 forbids.
+
 - `verify.py`, guard red probes:
-  - What the rewrite does: they run on a temporary copy of `semaphore.go` in
-    which `if isFront {` is rewritten to `if isFront && s.size > s.cur {`.
-    When a canceled waiter at the front of the queue is removed, the copy
-    then calls `notifyWaiters` only if spare capacity remains.
-  - Why that is the DR-001 regression: the added condition is the pinned
-    upstream head guard that DR-001 removed. At full capacity the copy skips
-    `notifyWaiters`, so a zero-weight waiter that becomes the new head stays
-    queued although it needs no capacity, which DR-001 forbids;
   - `docs/evidence/semaphore-pilot/resolution-q01/check_guards.py --source`
     must exit non-zero and print `Counterexample:`;
   - `check_guards.py --source` must exit non-zero and print
