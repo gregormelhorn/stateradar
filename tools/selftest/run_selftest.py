@@ -785,6 +785,20 @@ def main() -> int:
                                    text=True, env=env)
                 expect("wrapper template, STATERADAR_PACK", False, r.returncode, (r.stdout + r.stderr).strip(),
                        "CHECK MATRIX: OK")
+        # A pack vendored inside the analysed repository at tools/prompt-pack
+        # (the README's submodule recipe) is found without STATERADAR_PACK.
+        vend_base = tmp / "tpl-vendored"
+        vend_dir = vend_base / "repo" / "domain-analysis" / "mini"
+        shutil.copytree(gm, vend_dir)
+        shutil.copy(ROOT / "tools" / "templates" / "check_matrix.py", vend_dir / "check_matrix.py")
+        (vend_base / "repo" / "tools").mkdir()
+        (vend_base / "repo" / "tools" / "prompt-pack").symlink_to(ROOT, target_is_directory=True)
+        env = dict(os.environ)
+        env.pop("STATERADAR_PACK", None)
+        r = subprocess.run([sys.executable, str(vend_dir / "check_matrix.py")], capture_output=True, text=True,
+                           env=env)
+        expect("wrapper template, pack vendored at tools/prompt-pack", False, r.returncode,
+               (r.stdout + r.stderr).strip(), "CHECK MATRIX: OK")
         d5 = tmp / "cm-green"
         shutil.copytree(gm, d5)
         expect("check_matrix green on golden-mini", False, *cmx(d5))
@@ -1343,6 +1357,12 @@ def main() -> int:
         else:
             print("  ok  blind dup grows and still fails only for M2 (passes)")
 
+    # The sections below run after the main TemporaryDirectory is gone; they
+    # get their own, removed before main() returns, so a run leaves nothing
+    # behind under $TMPDIR.
+    late_td = tempfile.TemporaryDirectory()
+    tmp = Path(late_td.name)
+
     print("guard proofs (z3, PA-1/PA-2)")
     sys.path.insert(0, str(ROOT / "tools"))
     import guard_proofs
@@ -1373,6 +1393,18 @@ def main() -> int:
     expect("has_else keeps disjointness red", True,
            1 if still.outcome == "violation" else 0,
            "\n".join(still.findings), needle="PA-1 overlap")
+    # z3 "unknown" is not a proof: an undecided query must never come back
+    # as "proven" (a solver timeout or nonlinear guard looked green).
+    real_check = z3.Solver.check
+    z3.Solver.check = lambda self, *args: z3.unknown
+    try:
+        und = guard_proofs.check_group(
+            "undecided", [("low", x < 5), ("high", x >= 5)], assumptions=nat)
+    finally:
+        z3.Solver.check = real_check
+    expect("z3 unknown is never proven", True,
+           1 if und.outcome != "proven" else 0,
+           "\n".join(und.findings), needle="unknown")
     probes = guard_proofs.boundary_probe(
         [("low", x < 5), ("high", x >= 5)], [{x: 4}, {x: 5}, {x: 6}])
     if [labels for _, labels in probes] != [["low"], ["high"], ["high"]]:
@@ -1608,6 +1640,72 @@ def main() -> int:
         else:
             print(f"  ok  {runner_name} reports a timeout with its partial output")
 
+    print("dsc_stamp re-pin and pack consistency gates")
+    with tempfile.TemporaryDirectory() as td_gates:
+        gates = Path(td_gates)
+        # dsc_stamp exists to re-pin after a reconcile (06-reconcile step 3), so a
+        # committed change under watchPaths must not block the stamp, while
+        # dsc_check --repo still reports the manifest as stale.
+        srepo = gates / "stamp-repo"
+        shutil.copytree(ROOT / "tests" / "golden-mini", srepo,
+                        ignore=shutil.ignore_patterns("__pycache__"))
+
+        def git(*args: str) -> str:
+            return subprocess.run(
+                ["git", "-C", str(srepo), "-c", "user.name=selftest",
+                 "-c", "user.email=selftest@invalid", *args],
+                capture_output=True, text=True, check=True).stdout.strip()
+
+        git("init", "-q")
+        git("add", "-A")
+        git("commit", "-qm", "base")
+        smf = srepo / "domain-analysis" / "mini" / "manifest.json"
+        sman = json.loads(smf.read_text())
+        sman["analyzedSha"] = git("rev-parse", "HEAD")
+        smf.write_text(json.dumps(sman, indent=2) + "\n")
+        git("commit", "-qam", "pin")
+        ssrc = srepo / "src" / "mini.py"
+        ssrc.write_text(ssrc.read_text() + "\n# watched change\n")
+        git("commit", "-qam", "watched change")
+        shead = git("rev-parse", "HEAD")
+        r = subprocess.run([sys.executable, str(ROOT / "tools" / "dsc_check.py"),
+                            str(srepo / "domain-analysis" / "mini"), "--repo", str(srepo)],
+                           capture_output=True, text=True)
+        expect("dsc_check still reports a watched change as stale", True, r.returncode,
+               r.stdout + r.stderr, needle="stale")
+        r = subprocess.run([sys.executable, str(ROOT / "tools" / "dsc_stamp.py"),
+                            "domain-analysis/mini", "--repo", str(srepo)],
+                           capture_output=True, text=True)
+        pinned = json.loads(smf.read_text())["analyzedSha"]
+        expect("dsc_stamp re-pins a stale manifest at HEAD", False,
+               r.returncode or (0 if pinned == shead else 1),
+               r.stdout + r.stderr + f"\nanalyzedSha={pinned} HEAD={shead}", needle="DSC STAMP")
+
+        # check_pack_consistency: ODC-table drift must fail the gate, not only
+        # print (it used to be appended after the exit gate).
+        pcc = gates / "pack"
+        skip = shutil.ignore_patterns("__pycache__", ".venv", ".git", "evidence")
+        for entry in ROOT.iterdir():
+            if entry.name in (".git", ".venv", "__pycache__"):
+                continue
+            if entry.is_dir():
+                shutil.copytree(entry, pcc / entry.name, ignore=skip)
+            else:
+                pcc.mkdir(exist_ok=True)
+                shutil.copy(entry, pcc / entry.name)
+        r = subprocess.run([sys.executable, str(pcc / "tools" / "check_pack_consistency.py")],
+                           capture_output=True, text=True, cwd=pcc)
+        expect("pack consistency green on a clean copy", False, r.returncode,
+               r.stdout + r.stderr, needle="PACK CONSISTENCY: OK")
+        bench = pcc / "tests" / "benchmarks" / "README.md"
+        bench.write_text(bench.read_text().replace(
+            "## Fault-class × detector coverage (ODC)", "## Fault-class coverage (drifted)"))
+        r = subprocess.run([sys.executable, str(pcc / "tools" / "check_pack_consistency.py")],
+                           capture_output=True, text=True, cwd=pcc)
+        expect("pack consistency fails on ODC table drift", True, r.returncode,
+               r.stdout + r.stderr, needle="ODC table drift")
+
+    late_td.cleanup()
     if failures:
         print("\nSELFTEST: FAIL")
         for failure in failures:

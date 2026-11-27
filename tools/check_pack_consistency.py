@@ -10,6 +10,8 @@ Verifies:
   2. Artifact filenames referenced across prompts are defined by the
      producing prompts (02 or 04).
   3. README version matches the newest (highest) CHANGELOG entry.
+  4. The ODC table in tests/benchmarks/README.md matches the benchmark
+     sidecars (tools/gen_odc_table.py --check).
 Exit code 0 = OK, 1 = violations (printed).
 """
 from pathlib import Path
@@ -115,12 +117,6 @@ else:
         errors.append("prompts/02-pilot.md ODC triggers differ from formats/rules.toml odc_triggers: "
                       f"prompt only {sorted(_named - _vocab)}, registry only {sorted(_vocab - _named)}")
 
-if errors:
-    print("PACK CONSISTENCY: FAIL")
-    for e in errors: print(" -", e)
-    sys.exit(1)
-assert rv is not None  # an unparseable README version failed above
-
 # ODC table sync
 odc_check = subprocess.run(
     [sys.executable, str(ROOT / "tools" / "gen_odc_table.py"), "--check"],
@@ -129,6 +125,12 @@ odc_check = subprocess.run(
 sys.stdout.write(odc_check.stdout)
 if odc_check.returncode != 0:
     errors.append("ODC table drift — run tools/gen_odc_table.py --write")
+
+if errors:
+    print("PACK CONSISTENCY: FAIL")
+    for e in errors: print(" -", e)
+    sys.exit(1)
+assert rv is not None  # an unparseable README version failed above
 
 # R3: version-tag consistency (warning only — CI checkouts may be shallow)
 import subprocess as _sp

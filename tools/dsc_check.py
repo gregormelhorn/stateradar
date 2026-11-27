@@ -4,6 +4,10 @@ the pack verifies it. Replaces the generic parts of per-run checkers.
 
 Usage:
   python3 tools/dsc_check.py <analysis-dir> [--repo ROOT] [--model FILE.mmd]
+                              [--no-staleness]
+
+--no-staleness skips only the manifest staleness diff; dsc_stamp.py uses it
+to validate an analysis at HEAD before re-pinning analyzedSha.
 
 Checks: grid totality, disposition vocabulary, hole->Q mapping, DR links,
 pair traces, guard outcomes, coverage-table totality, behavioural-DR
@@ -375,7 +379,8 @@ def main() -> int:
               "camelCase 'watchPaths'; rename it (empty lookups skip the path filter)")
         if "watchPaths" in manifest and not manifest["watchPaths"]:
             E("manifest: watchPaths is empty — the staleness diff would run unfiltered")
-    if repo and mf.exists() and manifest.get("watchPaths") and "watch_paths" not in manifest:
+    if (repo and mf.exists() and manifest.get("watchPaths") and "watch_paths" not in manifest
+            and "--no-staleness" not in args):
         sha = manifest.get("analyzedSha", "WORKTREE")
         if sha != "WORKTREE":
             try:
